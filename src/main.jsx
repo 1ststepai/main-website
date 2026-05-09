@@ -21,6 +21,8 @@ import {
 import "./styles.css";
 import logo from "../1ststep-ai-logo-official.png";
 
+const BOOKING_URL = "https://api.leadconnectorhq.com/widget/booking/Rb4aqLM1NdU5kvZcqNmj";
+
 const fadeUp = {
   hidden: { opacity: 0, y: 22 },
   visible: { opacity: 1, y: 0 },
@@ -37,7 +39,9 @@ function App() {
       <ReadinessSection />
       <Pillars />
       <BuildPath />
+      <ProductsSection />
       <Contact />
+      <Footer />
     </main>
   );
 }
@@ -70,7 +74,7 @@ function Header() {
           <a className="hover:text-white" href="#system">Builds</a>
           <a className="hover:text-white" href="#contact">Strategy Call</a>
         </nav>
-        <a href="#contact" className="btn btn-small btn-primary">
+        <a href={BOOKING_URL} target="_blank" rel="noreferrer" className="btn btn-small btn-primary">
           <ClipboardCheck className="h-4 w-4" />
           Book Strategy Call
         </a>
@@ -97,15 +101,16 @@ function Hero() {
             Build the right first version before you spend on the wrong one.
           </motion.h1>
           <motion.p variants={fadeUp} className="mt-6 max-w-2xl text-lg leading-8 text-steel sm:text-xl">
-            1stStep.ai helps founders, operators, and service businesses turn raw ideas into focused apps,
-            SaaS products, websites, automations, and MVPs that prove demand before scope gets expensive.
+            Apps, websites, MVPs, and automations built around the right first version.
+            1stStep.ai helps founders, operators, and service businesses turn raw ideas into focused builds
+            that prove demand before scope gets expensive.
           </motion.p>
           <motion.div variants={fadeUp} className="mt-8 flex flex-col gap-3 sm:flex-row">
             <a href="/app-idea-viability-checker.html" className="btn btn-primary">
               Check Your App Idea
               <ArrowRight className="h-5 w-5" />
             </a>
-            <a href="#contact" className="btn btn-secondary">
+            <a href={BOOKING_URL} target="_blank" rel="noreferrer" className="btn btn-secondary">
               <Play className="h-5 w-5" />
               Book a Build Strategy Call
             </a>
@@ -363,6 +368,50 @@ function BuildPath() {
   );
 }
 
+function ProductsSection() {
+  const items = [
+    {
+      title: "App Idea Viability Checker",
+      copy: "A free MVP Readiness Score for app, website, SaaS, automation, and digital product ideas.",
+      href: "/app-idea-viability-checker.html",
+      label: "Run the checker",
+    },
+    {
+      title: "AI Resume Builder",
+      copy: "A separate job-search product by 1stStep.ai. It is not the main services website.",
+      href: "https://resume.1ststep.ai/",
+      label: "Visit resume product",
+    },
+  ];
+
+  return (
+    <section className="px-4 py-16 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl">
+        <div className="mb-8 max-w-3xl">
+          <p className="section-kicker">Built by 1stStep.ai</p>
+          <h2 className="section-title mt-3">Products and builds stay in their lanes.</h2>
+          <p className="mt-5 text-lg leading-8 text-steel">
+            1ststep.ai is the parent site for build strategy, apps, MVPs, websites, SaaS, and automations.
+            The resume builder lives separately.
+          </p>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2">
+          {items.map((item) => (
+            <a key={item.title} href={item.href} className="bento-card block" target={item.href.startsWith("http") ? "_blank" : undefined} rel={item.href.startsWith("http") ? "noreferrer" : undefined}>
+              <h3 className="text-2xl font-semibold">{item.title}</h3>
+              <p className="mt-4 text-base leading-7 text-steel">{item.copy}</p>
+              <span className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-blue">
+                {item.label}
+                <ArrowRight className="h-4 w-4" />
+              </span>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function Contact() {
   return (
     <section id="contact" className="px-4 pb-20 pt-16 sm:px-6 lg:px-8">
@@ -415,6 +464,28 @@ function Contact() {
         </form>
       </div>
     </section>
+  );
+}
+
+function Footer() {
+  return (
+    <footer className="border-t border-line px-4 py-10 text-sm text-steel sm:px-6 lg:px-8">
+      <div className="mx-auto grid max-w-7xl gap-5 md:grid-cols-[1fr_auto] md:items-start">
+        <div>
+          <p className="font-semibold text-white">1stStep.ai</p>
+          <p className="mt-2 max-w-2xl leading-6">
+            1ststep.ai is the main app, MVP, website, SaaS, automation, and build strategy services site.
+            Resume products are separate: resume.1ststep.ai is the AI Resume Builder landing page,
+            and app.1ststep.ai is the resume builder app.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-4 md:justify-end">
+          <a className="hover:text-white" href="/app-idea-viability-checker.html">Idea Checker</a>
+          <a className="hover:text-white" href={BOOKING_URL} target="_blank" rel="noreferrer">Book Call</a>
+          <a className="hover:text-white" href="https://resume.1ststep.ai/" target="_blank" rel="noreferrer">AI Resume Builder</a>
+        </div>
+      </div>
+    </footer>
   );
 }
 
