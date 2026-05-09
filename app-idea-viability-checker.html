@@ -1,0 +1,1464 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>App Idea Viability Checker | 1stStep.ai</title>
+    <meta
+      name="description"
+      content="Before you spend thousands building the wrong thing, check if your app, SaaS, automation, or MVP idea has legs."
+    />
+    <style>
+      /*
+        1stStep.ai App Idea Viability Checker
+        Brand/colors/copy can be changed in the CSS variables and CONFIG object below.
+        All classes and IDs are prefixed with aivc- to avoid conflicts in GoHighLevel.
+      */
+      body.aivc-standalone-page {
+        margin: 0;
+        background: #05070d;
+      }
+
+      #aivc-root {
+        --aivc-bg: #05070d; /* Change main background color here */
+        --aivc-bg-2: #07111a;
+        --aivc-panel: rgba(12, 18, 31, 0.72);
+        --aivc-panel-strong: rgba(13, 24, 41, 0.9);
+        --aivc-line: rgba(203, 213, 225, 0.16);
+        --aivc-line-strong: rgba(125, 211, 252, 0.32);
+        --aivc-text: #f8fafc;
+        --aivc-muted: #aebccd;
+        --aivc-soft: #d9e7f7;
+        --aivc-blue: #2492ff; /* Change primary brand color here */
+        --aivc-cyan: #28d7ff; /* Change accent color here */
+        --aivc-purple: #8b5cf6; /* Change gradient accent here */
+        --aivc-green: #29f1a2;
+        --aivc-yellow: #f8c35b;
+        --aivc-red: #ff6b7a;
+        --aivc-shadow: 0 26px 90px rgba(0, 0, 0, 0.45);
+        --aivc-radius: 28px;
+        color: var(--aivc-text);
+        background:
+          radial-gradient(circle at 18% 8%, rgba(36, 146, 255, 0.2), transparent 28%),
+          radial-gradient(circle at 86% 18%, rgba(139, 92, 246, 0.22), transparent 28%),
+          radial-gradient(circle at 62% 75%, rgba(40, 215, 255, 0.12), transparent 32%),
+          linear-gradient(180deg, var(--aivc-bg), var(--aivc-bg-2));
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        line-height: 1.5;
+        min-height: 100vh;
+        overflow: hidden;
+      }
+
+      #aivc-root,
+      #aivc-root * {
+        box-sizing: border-box;
+      }
+
+      #aivc-root a {
+        color: inherit;
+      }
+
+      .aivc-shell {
+        position: relative;
+        isolation: isolate;
+        width: 100%;
+        padding: 28px 18px 64px;
+      }
+
+      .aivc-shell:before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: -2;
+        background:
+          linear-gradient(rgba(203, 213, 225, 0.028) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(203, 213, 225, 0.028) 1px, transparent 1px);
+        background-size: 54px 54px;
+        mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.95), transparent 78%);
+        pointer-events: none;
+      }
+
+      .aivc-shell:after {
+        content: "";
+        position: absolute;
+        inset: auto 0 0;
+        height: 36%;
+        z-index: -1;
+        background: linear-gradient(180deg, transparent, rgba(5, 7, 13, 0.82));
+        pointer-events: none;
+      }
+
+      .aivc-container {
+        width: min(1160px, 100%);
+        margin: 0 auto;
+      }
+
+      .aivc-nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        margin-bottom: 72px;
+      }
+
+      .aivc-brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        color: var(--aivc-text);
+        text-decoration: none;
+      }
+
+      .aivc-brand-mark {
+        display: grid;
+        place-items: center;
+        width: 42px;
+        height: 42px;
+        border: 1px solid rgba(125, 211, 252, 0.34);
+        border-radius: 14px;
+        background:
+          linear-gradient(135deg, rgba(36, 146, 255, 0.38), rgba(139, 92, 246, 0.24)),
+          rgba(255, 255, 255, 0.06);
+        box-shadow: 0 18px 50px rgba(36, 146, 255, 0.18);
+        font-weight: 900;
+        letter-spacing: 0;
+      }
+
+      .aivc-brand-copy strong {
+        display: block;
+        font-size: 16px;
+        line-height: 1.1;
+      }
+
+      .aivc-brand-copy span {
+        display: block;
+        color: var(--aivc-muted);
+        font-size: 12px;
+        margin-top: 2px;
+      }
+
+      .aivc-nav-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 42px;
+        padding: 0 16px;
+        border: 1px solid var(--aivc-line);
+        border-radius: 999px;
+        color: var(--aivc-soft);
+        text-decoration: none;
+        background: rgba(255, 255, 255, 0.035);
+        backdrop-filter: blur(14px);
+        transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+      }
+
+      .aivc-nav-link:hover {
+        transform: translateY(-1px);
+        border-color: var(--aivc-line-strong);
+        background: rgba(255, 255, 255, 0.07);
+      }
+
+      .aivc-hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+        align-items: center;
+        gap: 44px;
+        padding-bottom: 74px;
+      }
+
+      .aivc-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        width: fit-content;
+        margin: 0 0 18px;
+        padding: 8px 12px;
+        border: 1px solid rgba(125, 211, 252, 0.28);
+        border-radius: 999px;
+        color: #dff7ff;
+        background: rgba(8, 19, 34, 0.76);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .aivc-eyebrow-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: var(--aivc-green);
+        box-shadow: 0 0 22px var(--aivc-green);
+      }
+
+      .aivc-hero h1 {
+        max-width: 780px;
+        margin: 0;
+        color: var(--aivc-text);
+        font-size: clamp(46px, 7.2vw, 92px);
+        line-height: 0.94;
+        letter-spacing: 0;
+      }
+
+      .aivc-gradient-text {
+        background: linear-gradient(135deg, #ffffff 10%, var(--aivc-cyan), var(--aivc-purple));
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+
+      .aivc-hero-copy {
+        max-width: 690px;
+        margin: 24px 0 0;
+        color: var(--aivc-soft);
+        font-size: clamp(17px, 2vw, 21px);
+      }
+
+      .aivc-hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 14px;
+        margin-top: 34px;
+      }
+
+      .aivc-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        min-height: 52px;
+        padding: 0 22px;
+        border: 1px solid transparent;
+        border-radius: 999px;
+        color: var(--aivc-text);
+        cursor: pointer;
+        font: inherit;
+        font-weight: 800;
+        text-decoration: none;
+        transition:
+          transform 180ms ease,
+          box-shadow 180ms ease,
+          border-color 180ms ease,
+          background 180ms ease,
+          opacity 180ms ease;
+      }
+
+      .aivc-btn:hover {
+        transform: translateY(-2px);
+      }
+
+      .aivc-btn:focus-visible,
+      .aivc-option:focus-visible,
+      .aivc-input:focus-visible {
+        outline: 3px solid rgba(40, 215, 255, 0.42);
+        outline-offset: 3px;
+      }
+
+      .aivc-btn-primary {
+        background: linear-gradient(135deg, var(--aivc-blue), var(--aivc-cyan));
+        box-shadow: 0 20px 60px rgba(36, 146, 255, 0.34);
+      }
+
+      .aivc-btn-secondary {
+        border-color: var(--aivc-line);
+        background: rgba(255, 255, 255, 0.06);
+        backdrop-filter: blur(16px);
+      }
+
+      .aivc-btn-ghost {
+        border-color: rgba(203, 213, 225, 0.2);
+        background: rgba(255, 255, 255, 0.04);
+      }
+
+      .aivc-btn[disabled] {
+        cursor: not-allowed;
+        opacity: 0.42;
+        transform: none;
+        box-shadow: none;
+      }
+
+      .aivc-microcopy {
+        max-width: 470px;
+        color: var(--aivc-muted);
+        font-size: 13px;
+      }
+
+      .aivc-preview-card,
+      .aivc-panel {
+        border: 1px solid var(--aivc-line);
+        border-radius: var(--aivc-radius);
+        background:
+          linear-gradient(145deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.025)),
+          var(--aivc-panel);
+        box-shadow: var(--aivc-shadow);
+        backdrop-filter: blur(22px);
+      }
+
+      .aivc-preview-card {
+        position: relative;
+        overflow: hidden;
+        padding: 24px;
+      }
+
+      .aivc-preview-card:before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(circle at 20% 20%, rgba(40, 215, 255, 0.18), transparent 26%),
+          radial-gradient(circle at 80% 0%, rgba(139, 92, 246, 0.22), transparent 24%);
+        pointer-events: none;
+      }
+
+      .aivc-preview-inner {
+        position: relative;
+        display: grid;
+        gap: 18px;
+      }
+
+      .aivc-score-preview {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 18px;
+        align-items: center;
+      }
+
+      .aivc-score-ring {
+        display: grid;
+        place-items: center;
+        width: 128px;
+        height: 128px;
+        border-radius: 50%;
+        background:
+          conic-gradient(from 180deg, var(--aivc-cyan), var(--aivc-blue), var(--aivc-purple), rgba(255, 255, 255, 0.1) 74%),
+          rgba(255, 255, 255, 0.05);
+        box-shadow: 0 0 80px rgba(36, 146, 255, 0.24);
+      }
+
+      .aivc-score-ring span {
+        display: grid;
+        place-items: center;
+        width: 94px;
+        height: 94px;
+        border-radius: 50%;
+        background: rgba(5, 7, 13, 0.94);
+        font-size: 34px;
+        font-weight: 950;
+      }
+
+      .aivc-preview-kicker {
+        margin: 0 0 6px;
+        color: var(--aivc-muted);
+        font-size: 13px;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+
+      .aivc-preview-title {
+        margin: 0;
+        font-size: clamp(24px, 3vw, 34px);
+        line-height: 1.04;
+      }
+
+      .aivc-preview-list {
+        display: grid;
+        gap: 10px;
+        margin: 8px 0 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .aivc-preview-list li {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        color: var(--aivc-soft);
+        font-size: 14px;
+      }
+
+      .aivc-check {
+        flex: 0 0 auto;
+        display: grid;
+        place-items: center;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        color: #031018;
+        background: var(--aivc-cyan);
+        font-size: 13px;
+        font-weight: 950;
+      }
+
+      .aivc-pill-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 9px;
+        margin-top: 10px;
+      }
+
+      .aivc-pill {
+        display: inline-flex;
+        align-items: center;
+        min-height: 30px;
+        padding: 0 11px;
+        border: 1px solid rgba(203, 213, 225, 0.16);
+        border-radius: 999px;
+        color: #e9f5ff;
+        background: rgba(255, 255, 255, 0.055);
+        font-size: 12px;
+        font-weight: 750;
+      }
+
+      .aivc-assessment {
+        scroll-margin-top: 24px;
+      }
+
+      .aivc-panel {
+        overflow: hidden;
+      }
+
+      .aivc-panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        padding: 24px 24px 18px;
+        border-bottom: 1px solid var(--aivc-line);
+        background: rgba(255, 255, 255, 0.03);
+      }
+
+      .aivc-panel-header h2 {
+        margin: 0;
+        font-size: clamp(24px, 3.2vw, 36px);
+        line-height: 1.08;
+      }
+
+      .aivc-panel-header p {
+        margin: 8px 0 0;
+        color: var(--aivc-muted);
+      }
+
+      .aivc-step-count {
+        flex: 0 0 auto;
+        min-width: 108px;
+        padding: 10px 13px;
+        border: 1px solid var(--aivc-line);
+        border-radius: 999px;
+        color: var(--aivc-soft);
+        background: rgba(255, 255, 255, 0.045);
+        font-size: 13px;
+        font-weight: 850;
+        text-align: center;
+      }
+
+      .aivc-progress-wrap {
+        height: 9px;
+        background: rgba(255, 255, 255, 0.07);
+      }
+
+      .aivc-progress {
+        width: 0%;
+        height: 100%;
+        background: linear-gradient(90deg, var(--aivc-blue), var(--aivc-cyan), var(--aivc-purple));
+        transition: width 260ms ease;
+      }
+
+      .aivc-form-area {
+        padding: 28px 24px 24px;
+      }
+
+      .aivc-question-card {
+        min-height: 390px;
+        opacity: 1;
+        transform: translateY(0);
+        transition: opacity 180ms ease, transform 180ms ease;
+      }
+
+      .aivc-question-card.aivc-is-changing {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      .aivc-question-kicker {
+        margin: 0 0 10px;
+        color: var(--aivc-cyan);
+        font-size: 13px;
+        font-weight: 900;
+        text-transform: uppercase;
+      }
+
+      .aivc-question-title {
+        margin: 0;
+        max-width: 850px;
+        font-size: clamp(28px, 4vw, 46px);
+        line-height: 1.05;
+        letter-spacing: 0;
+      }
+
+      .aivc-options {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 28px;
+      }
+
+      .aivc-option {
+        width: 100%;
+        min-height: 72px;
+        padding: 16px 17px;
+        border: 1px solid rgba(203, 213, 225, 0.15);
+        border-radius: 18px;
+        color: var(--aivc-soft);
+        cursor: pointer;
+        background: rgba(255, 255, 255, 0.045);
+        font: inherit;
+        font-weight: 760;
+        text-align: left;
+        transition:
+          transform 160ms ease,
+          border-color 160ms ease,
+          background 160ms ease,
+          box-shadow 160ms ease;
+      }
+
+      .aivc-option:hover {
+        transform: translateY(-1px);
+        border-color: rgba(125, 211, 252, 0.42);
+        background: rgba(255, 255, 255, 0.07);
+      }
+
+      .aivc-option.aivc-selected {
+        color: #ffffff;
+        border-color: rgba(40, 215, 255, 0.78);
+        background:
+          linear-gradient(135deg, rgba(36, 146, 255, 0.24), rgba(139, 92, 246, 0.18)),
+          rgba(255, 255, 255, 0.08);
+        box-shadow: 0 16px 52px rgba(36, 146, 255, 0.18);
+      }
+
+      .aivc-controls {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        padding-top: 22px;
+        border-top: 1px solid var(--aivc-line);
+      }
+
+      .aivc-control-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .aivc-report {
+        display: none;
+        padding: 26px 24px 28px;
+      }
+
+      .aivc-report.aivc-visible {
+        display: block;
+        animation: aivc-rise 340ms ease both;
+      }
+
+      @keyframes aivc-rise {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .aivc-report-grid {
+        display: grid;
+        grid-template-columns: minmax(260px, 0.7fr) minmax(0, 1fr);
+        gap: 18px;
+      }
+
+      .aivc-result-card,
+      .aivc-metric,
+      .aivc-lead-card {
+        border: 1px solid var(--aivc-line);
+        border-radius: 22px;
+        background: rgba(255, 255, 255, 0.048);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+      }
+
+      .aivc-result-card {
+        padding: 22px;
+      }
+
+      .aivc-score-value {
+        margin: 6px 0 0;
+        font-size: clamp(72px, 11vw, 120px);
+        line-height: 0.9;
+        font-weight: 950;
+        letter-spacing: 0;
+      }
+
+      .aivc-score-value span {
+        color: var(--aivc-muted);
+        font-size: 24px;
+      }
+
+      .aivc-category {
+        display: inline-flex;
+        align-items: center;
+        width: fit-content;
+        min-height: 34px;
+        margin-top: 18px;
+        padding: 0 12px;
+        border: 1px solid rgba(40, 215, 255, 0.42);
+        border-radius: 999px;
+        color: #eaffff;
+        background: rgba(40, 215, 255, 0.1);
+        font-weight: 900;
+      }
+
+      .aivc-risk {
+        margin-top: 18px;
+        color: var(--aivc-soft);
+      }
+
+      .aivc-report-copy {
+        display: grid;
+        gap: 14px;
+      }
+
+      .aivc-report-copy h3,
+      .aivc-lead-card h3 {
+        margin: 0;
+        font-size: 20px;
+      }
+
+      .aivc-report-copy p {
+        margin: 8px 0 0;
+        color: var(--aivc-muted);
+      }
+
+      .aivc-copy-block {
+        padding: 18px;
+        border: 1px solid var(--aivc-line);
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.035);
+      }
+
+      .aivc-metrics {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 18px;
+      }
+
+      .aivc-metric {
+        padding: 16px;
+      }
+
+      .aivc-metric strong {
+        display: block;
+        font-size: 24px;
+        line-height: 1;
+      }
+
+      .aivc-metric span {
+        display: block;
+        margin-top: 8px;
+        color: var(--aivc-muted);
+        font-size: 13px;
+      }
+
+      .aivc-lead-card {
+        margin-top: 18px;
+        padding: 22px;
+        background:
+          linear-gradient(135deg, rgba(36, 146, 255, 0.12), rgba(139, 92, 246, 0.1)),
+          rgba(255, 255, 255, 0.048);
+      }
+
+      .aivc-lead-card p {
+        margin: 8px 0 0;
+        color: var(--aivc-muted);
+      }
+
+      .aivc-fields {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 18px;
+      }
+
+      .aivc-field label {
+        display: block;
+        margin-bottom: 7px;
+        color: var(--aivc-soft);
+        font-size: 13px;
+        font-weight: 850;
+      }
+
+      .aivc-input {
+        width: 100%;
+        min-height: 48px;
+        border: 1px solid rgba(203, 213, 225, 0.18);
+        border-radius: 14px;
+        color: var(--aivc-text);
+        background: rgba(5, 7, 13, 0.55);
+        font: inherit;
+        padding: 0 13px;
+      }
+
+      .aivc-input::placeholder {
+        color: rgba(174, 188, 205, 0.72);
+      }
+
+      .aivc-lead-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 12px;
+        margin-top: 18px;
+      }
+
+      .aivc-success {
+        display: none;
+        margin-top: 16px;
+        padding: 16px;
+        border: 1px solid rgba(41, 241, 162, 0.34);
+        border-radius: 18px;
+        color: #eafff6;
+        background: rgba(41, 241, 162, 0.08);
+      }
+
+      .aivc-success.aivc-visible {
+        display: block;
+      }
+
+      .aivc-fine-print {
+        margin: 16px 0 0;
+        color: var(--aivc-muted);
+        font-size: 13px;
+      }
+
+      @media (max-width: 900px) {
+        .aivc-shell {
+          padding-top: 20px;
+        }
+
+        .aivc-nav {
+          margin-bottom: 46px;
+        }
+
+        .aivc-hero {
+          grid-template-columns: 1fr;
+          gap: 28px;
+          padding-bottom: 46px;
+        }
+
+        .aivc-preview-card {
+          order: -1;
+        }
+
+        .aivc-report-grid,
+        .aivc-fields {
+          grid-template-columns: 1fr;
+        }
+
+        .aivc-metrics {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 640px) {
+        .aivc-shell {
+          padding-left: 12px;
+          padding-right: 12px;
+        }
+
+        .aivc-nav {
+          align-items: flex-start;
+        }
+
+        .aivc-brand-copy span,
+        .aivc-nav-link {
+          display: none;
+        }
+
+        .aivc-hero h1 {
+          font-size: clamp(42px, 14vw, 64px);
+        }
+
+        .aivc-hero-actions,
+        .aivc-control-group,
+        .aivc-controls,
+        .aivc-lead-actions {
+          align-items: stretch;
+          flex-direction: column;
+        }
+
+        .aivc-btn {
+          width: 100%;
+        }
+
+        .aivc-score-preview {
+          grid-template-columns: 1fr;
+        }
+
+        .aivc-panel-header {
+          align-items: flex-start;
+          flex-direction: column;
+          padding: 20px 16px 16px;
+        }
+
+        .aivc-step-count {
+          min-width: 0;
+        }
+
+        .aivc-form-area,
+        .aivc-report {
+          padding: 22px 16px 18px;
+        }
+
+        .aivc-question-card {
+          min-height: 0;
+        }
+
+        .aivc-options,
+        .aivc-metrics {
+          grid-template-columns: 1fr;
+        }
+
+        .aivc-option {
+          min-height: 62px;
+        }
+      }
+    </style>
+  </head>
+  <body class="aivc-standalone-page">
+    <section id="aivc-root" aria-label="App Idea Viability Checker">
+      <div class="aivc-shell">
+        <div class="aivc-container">
+          <header class="aivc-nav">
+            <a class="aivc-brand" href="#aivc-root" aria-label="1stStep.ai">
+              <span class="aivc-brand-mark">1st</span>
+              <span class="aivc-brand-copy">
+                <!-- Brand name: change this text if needed -->
+                <strong>1stStep.ai</strong>
+                <span>Strategic builds for serious first versions</span>
+              </span>
+            </a>
+            <a class="aivc-nav-link" href="#aivc-assessment">Start assessment</a>
+          </header>
+
+          <main>
+            <section class="aivc-hero">
+              <div>
+                <p class="aivc-eyebrow"><span class="aivc-eyebrow-dot"></span> MVP Readiness Score</p>
+                <h1>
+                  Before you spend thousands building the wrong thing,
+                  <span class="aivc-gradient-text">check if your idea has legs.</span>
+                </h1>
+                <p class="aivc-hero-copy">
+                  Answer a few sharp questions about your app, SaaS, website, automation, or digital product idea. You will get a practical viability score, risk readout, and the smartest first version to build.
+                </p>
+                <div class="aivc-hero-actions">
+                  <button class="aivc-btn aivc-btn-primary" type="button" data-aivc-start>
+                    Check My Idea
+                  </button>
+                  <span class="aivc-microcopy">
+                    No fluff. No generic agency pitch. Just a first-pass read on whether this should be validated, prototyped, or built.
+                  </span>
+                </div>
+              </div>
+
+              <aside class="aivc-preview-card" aria-label="Report preview">
+                <div class="aivc-preview-inner">
+                  <div class="aivc-score-preview">
+                    <div class="aivc-score-ring"><span>82</span></div>
+                    <div>
+                      <p class="aivc-preview-kicker">Sample output</p>
+                      <h2 class="aivc-preview-title">Strong MVP Candidate</h2>
+                      <div class="aivc-pill-row">
+                        <span class="aivc-pill">Demand</span>
+                        <span class="aivc-pill">Revenue</span>
+                        <span class="aivc-pill">Complexity</span>
+                        <span class="aivc-pill">Distribution</span>
+                      </div>
+                    </div>
+                  </div>
+                  <ul class="aivc-preview-list">
+                    <li><span class="aivc-check">+</span><span>See the smallest version worth building first.</span></li>
+                    <li><span class="aivc-check">+</span><span>Understand whether your budget fits the current stage.</span></li>
+                    <li><span class="aivc-check">+</span><span>Leave with a next step that protects you from overbuilding.</span></li>
+                  </ul>
+                </div>
+              </aside>
+            </section>
+
+            <section id="aivc-assessment" class="aivc-assessment">
+              <div class="aivc-panel">
+                <div class="aivc-panel-header">
+                  <div>
+                    <h2>App Idea Viability Checker</h2>
+                    <p>Ten practical questions. One clear read on what should happen next.</p>
+                  </div>
+                  <div class="aivc-step-count" id="aivc-step-count">Step 1 of 10</div>
+                </div>
+                <div class="aivc-progress-wrap" aria-hidden="true">
+                  <div class="aivc-progress" id="aivc-progress"></div>
+                </div>
+
+                <div class="aivc-form-area" id="aivc-form-area">
+                  <div class="aivc-question-card" id="aivc-question-card" aria-live="polite"></div>
+                  <div class="aivc-controls">
+                    <button class="aivc-btn aivc-btn-ghost" type="button" id="aivc-prev">Previous</button>
+                    <div class="aivc-control-group">
+                      <button class="aivc-btn aivc-btn-secondary" type="button" id="aivc-reset">Reset</button>
+                      <button class="aivc-btn aivc-btn-primary" type="button" id="aivc-next" disabled>Next</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="aivc-report" id="aivc-report" aria-live="polite"></div>
+              </div>
+            </section>
+          </main>
+        </div>
+      </div>
+    </section>
+
+    <script>
+      (function () {
+        "use strict";
+
+        var CONFIG = {
+          // Brand name: change this if the page is white-labeled.
+          brandName: "1stStep.ai",
+
+          // CTA link: change this calendar URL if your booking link changes.
+          bookingUrl: "https://api.leadconnectorhq.com/widget/booking/Rb4aqLM1NdU5kvZcqNmj",
+
+          // Copy: change labels and report language in this file as needed.
+          leadStorageKey: "aivc_leads",
+
+          // TODO GHL webhook URL: paste your GoHighLevel inbound webhook URL here.
+          // TODO Zapier webhook URL: paste your Zapier Catch Hook URL here.
+          // TODO Make.com webhook URL: paste your Make.com custom webhook URL here.
+          // TODO Custom API endpoint: paste your own endpoint URL here.
+          // Same-domain backend intake endpoint added in Phase 2.
+          // If this checker is pasted into a different domain, use the full deployed URL instead.
+          webhookUrl: "/api/app-idea-checker"
+        };
+
+        var QUESTIONS = [
+          {
+            id: "idea_type",
+            label: "What are you trying to build?",
+            options: [
+              { label: "Mobile app", value: "Mobile app", complexity: 8, buildPath: 8 },
+              { label: "Web app / SaaS", value: "Web app / SaaS", complexity: 10, buildPath: 10 },
+              { label: "Business website", value: "Business website", complexity: 14, buildPath: 12 },
+              { label: "Internal automation", value: "Internal automation", complexity: 12, buildPath: 12 },
+              { label: "AI tool", value: "AI tool", complexity: 7, buildPath: 8 },
+              { label: "Marketplace", value: "Marketplace", complexity: 4, buildPath: 5 },
+              { label: "Not sure yet", value: "Not sure yet", complexity: 5, buildPath: 4 }
+            ]
+          },
+          {
+            id: "audience",
+            label: "Who is this for?",
+            options: [
+              { label: "Consumers", value: "Consumers", customer: 9 },
+              { label: "Local businesses", value: "Local businesses", customer: 14 },
+              { label: "Real estate / home services", value: "Real estate / home services", customer: 15 },
+              { label: "Job seekers / professionals", value: "Job seekers / professionals", customer: 12 },
+              { label: "Coaches / consultants", value: "Coaches / consultants", customer: 13 },
+              { label: "Internal team", value: "Internal team", customer: 14 },
+              { label: "Other", value: "Other", customer: 8 }
+            ]
+          },
+          {
+            id: "problem_clarity",
+            label: "How clear is the problem?",
+            options: [
+              { label: "Very clear, people already complain about it", value: "Very clear", problem: 20, demand: 25 },
+              { label: "Somewhat clear", value: "Somewhat clear", problem: 14, demand: 18 },
+              { label: "It is more of an idea than a proven problem", value: "More idea than proven problem", problem: 7, demand: 10 },
+              { label: "Not sure", value: "Not sure", problem: 3, demand: 5 }
+            ]
+          },
+          {
+            id: "competitors",
+            label: "Do people already pay for a solution like this?",
+            options: [
+              { label: "Yes, there are competitors", value: "Yes, there are competitors", monetization: 8, demand: 25 },
+              { label: "Maybe, but I am not sure", value: "Maybe, not sure", monetization: 5, demand: 15 },
+              { label: "No, this feels new", value: "No, this feels new", monetization: 3, demand: 9 },
+              { label: "I have not researched it", value: "I have not researched it", monetization: 2, demand: 6 }
+            ]
+          },
+          {
+            id: "monetization",
+            label: "How would this make money?",
+            options: [
+              { label: "Monthly subscription", value: "Monthly subscription", monetization: 12, revenue: 25 },
+              { label: "One-time purchase", value: "One-time purchase", monetization: 10, revenue: 18 },
+              { label: "Service package", value: "Service package", monetization: 12, revenue: 22 },
+              { label: "Lead generation", value: "Lead generation", monetization: 11, revenue: 21 },
+              { label: "Ads / affiliate / marketplace", value: "Ads / affiliate / marketplace", monetization: 7, revenue: 14 },
+              { label: "Not sure yet", value: "Not sure yet", monetization: 2, revenue: 6 }
+            ]
+          },
+          {
+            id: "distribution",
+            label: "Do you already have an audience, customers, leads, or distribution?",
+            options: [
+              { label: "Yes, I have customers/leads/audience", value: "Yes, I have customers/leads/audience", distribution: 15 },
+              { label: "I have some warm contacts", value: "Some warm contacts", distribution: 10 },
+              { label: "I would need help getting users", value: "Need help getting users", distribution: 5 },
+              { label: "No audience yet", value: "No audience yet", distribution: 2 }
+            ]
+          },
+          {
+            id: "budget",
+            label: "What is your current budget range?",
+            options: [
+              { label: "Under $1,000", value: "Under $1,000", budgetFit: 3 },
+              { label: "$1,000-$3,000", value: "$1,000-$3,000", budgetFit: 8 },
+              { label: "$3,000-$10,000", value: "$3,000-$10,000", budgetFit: 13 },
+              { label: "$10,000+", value: "$10,000+", budgetFit: 15 },
+              { label: "I am not sure yet", value: "I am not sure yet", budgetFit: 6 }
+            ]
+          },
+          {
+            id: "launch_timeline",
+            label: "How soon do you want to launch something?",
+            options: [
+              { label: "ASAP / this month", value: "ASAP / this month", timelineFit: 8 },
+              { label: "1-3 months", value: "1-3 months", timelineFit: 15 },
+              { label: "3-6 months", value: "3-6 months", timelineFit: 13 },
+              { label: "Just exploring", value: "Just exploring", timelineFit: 7 }
+            ]
+          },
+          {
+            id: "first_need",
+            label: "What do you need first?",
+            options: [
+              { label: "Validate the idea", value: "Validate the idea", buildPath: 15 },
+              { label: "Landing page / waitlist", value: "Landing page / waitlist", buildPath: 14 },
+              { label: "Clickable prototype", value: "Clickable prototype", buildPath: 13 },
+              { label: "MVP build", value: "MVP build", buildPath: 12 },
+              { label: "Full app", value: "Full app", buildPath: 5 },
+              { label: "Automation / internal tool", value: "Automation / internal tool", buildPath: 14 }
+            ]
+          },
+          {
+            id: "biggest_risk",
+            label: "What is the biggest risk right now?",
+            options: [
+              { label: "I do not know if people want it", value: "Demand is unproven", risk: "Market demand" },
+              { label: "I do not know how to build it", value: "Build path is unclear", risk: "Execution" },
+              { label: "I do not know how to market it", value: "Marketing is unclear", risk: "Distribution" },
+              { label: "I do not know what it should cost", value: "Pricing is unclear", risk: "Revenue model" },
+              { label: "I need a technical partner", value: "Need technical partner", risk: "Technical strategy" }
+            ]
+          }
+        ];
+
+        var CATEGORY_COPY = [
+          {
+            min: 80,
+            label: "Strong MVP Candidate",
+            message: "This has enough clarity to start shaping a real MVP. The next move is not a massive build - it is a focused version that proves demand."
+          },
+          {
+            min: 60,
+            label: "Viable, Needs Validation",
+            message: "This has potential, but it needs sharper validation before a serious build budget is committed."
+          },
+          {
+            min: 40,
+            label: "Needs Repositioning",
+            message: "The idea may be useful, but the buyer, business model, or first version is not clear enough yet."
+          },
+          {
+            min: 0,
+            label: "Do Not Build Yet",
+            message: "This should not become a full build yet. Start with validation, a landing page, manual service delivery, or a prototype."
+          }
+        ];
+
+        var currentStep = 0;
+        var answers = {};
+        var latestReport = null;
+
+        var root = document.getElementById("aivc-root");
+        var questionCard = document.getElementById("aivc-question-card");
+        var progress = document.getElementById("aivc-progress");
+        var stepCount = document.getElementById("aivc-step-count");
+        var prevButton = document.getElementById("aivc-prev");
+        var nextButton = document.getElementById("aivc-next");
+        var resetButton = document.getElementById("aivc-reset");
+        var formArea = document.getElementById("aivc-form-area");
+        var reportArea = document.getElementById("aivc-report");
+
+        function escapeHtml(value) {
+          return String(value || "").replace(/[&<>"']/g, function (char) {
+            return {
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#039;"
+            }[char];
+          });
+        }
+
+        function getCategory(score) {
+          for (var i = 0; i < CATEGORY_COPY.length; i += 1) {
+            if (score >= CATEGORY_COPY[i].min) {
+              return CATEGORY_COPY[i];
+            }
+          }
+          return CATEGORY_COPY[CATEGORY_COPY.length - 1];
+        }
+
+        function getAnswer(questionId) {
+          return answers[questionId] || null;
+        }
+
+        function selectedOption(questionId) {
+          var question = QUESTIONS.filter(function (item) {
+            return item.id === questionId;
+          })[0];
+          var answer = getAnswer(questionId);
+          if (!question || !answer) return null;
+          return question.options.filter(function (option) {
+            return option.value === answer.value;
+          })[0] || answer;
+        }
+
+        function average(values) {
+          var filtered = values.filter(function (value) {
+            return typeof value === "number";
+          });
+          if (!filtered.length) return 0;
+          return Math.round(filtered.reduce(function (sum, value) {
+            return sum + value;
+          }, 0) / filtered.length);
+        }
+
+        function budgetRecommendation(budgetValue) {
+          if (budgetValue === "Under $1,000") {
+            return {
+              path: "Validation page, waitlist, offer test, or clickable mockup.",
+              budget: "Under $1,000 should stay focused on validation. Do not start with a full MVP.",
+              next: "Prove that the problem and offer are real before building product depth."
+            };
+          }
+          if (budgetValue === "$1,000-$3,000") {
+            return {
+              path: "Landing page + lightweight prototype + lead capture + workflow test.",
+              budget: "$1,000-$3,000 is best used to create proof, gather leads, and test the core flow.",
+              next: "Turn the idea into a visible offer and learn what real prospects respond to."
+            };
+          }
+          if (budgetValue === "$3,000-$10,000") {
+            return {
+              path: "Focused MVP with only the core workflow.",
+              budget: "$3,000-$10,000 can support a lean first version if scope stays disciplined.",
+              next: "Define the one workflow that must work before anything else gets built."
+            };
+          }
+          if (budgetValue === "$10,000+") {
+            return {
+              path: "MVP roadmap, technical architecture, phased build, and launch plan.",
+              budget: "$10,000+ can support a serious MVP, but it still needs a phased strategy.",
+              next: "Map the first release, technical architecture, and launch plan before development starts."
+            };
+          }
+          return {
+            path: "Strategy map, validation plan, and scope options before committing to a build.",
+            budget: "Budget is unclear, so the first move is to define the right stage and avoid guessing.",
+            next: "Clarify the build path and investment level that matches the business case."
+          };
+        }
+
+        function calculateReport() {
+          var ideaType = selectedOption("idea_type") || {};
+          var audience = selectedOption("audience") || {};
+          var problem = selectedOption("problem_clarity") || {};
+          var competitors = selectedOption("competitors") || {};
+          var monetization = selectedOption("monetization") || {};
+          var distribution = selectedOption("distribution") || {};
+          var budget = selectedOption("budget") || {};
+          var timeline = selectedOption("launch_timeline") || {};
+          var firstNeed = selectedOption("first_need") || {};
+          var risk = selectedOption("biggest_risk") || {};
+
+          var problemClarity = problem.problem || 0;
+          var customerClarity = audience.customer || 0;
+          var monetizationClarity = (competitors.monetization || 0) + (monetization.monetization || 0);
+          var distributionScore = distribution.distribution || 0;
+          var buildPathRealism = Math.round(((ideaType.buildPath || 0) + (firstNeed.buildPath || 0)) / 2);
+          var budgetTimelineFit = Math.round(((budget.budgetFit || 0) + (timeline.timelineFit || 0)) / 2);
+
+          var total = Math.max(0, Math.min(100, Math.round(
+            problemClarity +
+            customerClarity +
+            monetizationClarity +
+            distributionScore +
+            buildPathRealism +
+            budgetTimelineFit
+          )));
+
+          var demandScore = average([problem.demand, competitors.demand]);
+          var revenueScore = monetization.revenue || Math.min(100, monetizationClarity * 5);
+          var complexityScore = Math.max(0, Math.min(100, Math.round((ideaType.complexity || 0) * 6.6)));
+          var distributionMetric = Math.max(0, Math.min(100, Math.round(distributionScore * 6.6)));
+          var category = getCategory(total);
+          var budgetAdvice = budgetRecommendation(budget.value);
+          var riskLevel = total >= 80 ? "Moderate" : total >= 60 ? "Medium" : total >= 40 ? "High" : "Very high";
+          var recommendedFirstVersion = budgetAdvice.path;
+
+          if (firstNeed.value === "Full app" && total < 80) {
+            recommendedFirstVersion = "Do not start with the full app. Start with validation, a prototype, or one narrow MVP workflow.";
+          }
+
+          return {
+            score: total,
+            category: category.label,
+            categoryMessage: category.message,
+            marketDemandScore: demandScore,
+            revenuePotentialScore: revenueScore,
+            buildComplexityScore: complexityScore,
+            distributionScore: distributionMetric,
+            riskLevel: riskLevel,
+            recommendedPath: recommendedFirstVersion,
+            estimatedBudgetRange: budgetAdvice.budget,
+            nextBestStep: budgetAdvice.next,
+            biggestRisk: risk.risk || risk.value || "Clarity",
+            ideaType: ideaType.value || "",
+            audience: audience.value || "",
+            budget: budget.value || "",
+            launchTimeline: timeline.value || ""
+          };
+        }
+
+        function renderQuestion() {
+          var question = QUESTIONS[currentStep];
+          var selected = getAnswer(question.id);
+          stepCount.textContent = "Step " + (currentStep + 1) + " of " + QUESTIONS.length;
+          progress.style.width = Math.round(((currentStep + 1) / QUESTIONS.length) * 100) + "%";
+          prevButton.disabled = currentStep === 0;
+          nextButton.disabled = !selected;
+          nextButton.textContent = currentStep === QUESTIONS.length - 1 ? "Generate My Score" : "Next";
+
+          var optionsHtml = question.options.map(function (option, index) {
+            var isSelected = selected && selected.value === option.value;
+            return '<button class="aivc-option' + (isSelected ? " aivc-selected" : "") + '" type="button" data-aivc-option="' + index + '">' + escapeHtml(option.label) + "</button>";
+          }).join("");
+
+          questionCard.innerHTML =
+            '<p class="aivc-question-kicker">Question ' + (currentStep + 1) + "</p>" +
+            '<h3 class="aivc-question-title">' + escapeHtml(question.label) + "</h3>" +
+            '<div class="aivc-options">' + optionsHtml + "</div>";
+
+          Array.prototype.forEach.call(questionCard.querySelectorAll("[data-aivc-option]"), function (button) {
+            button.addEventListener("click", function () {
+              var option = question.options[Number(button.getAttribute("data-aivc-option"))];
+              answers[question.id] = option;
+              renderQuestion();
+            });
+          });
+        }
+
+        function transitionQuestion(direction) {
+          questionCard.classList.add("aivc-is-changing");
+          window.setTimeout(function () {
+            currentStep += direction;
+            currentStep = Math.max(0, Math.min(QUESTIONS.length - 1, currentStep));
+            renderQuestion();
+            questionCard.classList.remove("aivc-is-changing");
+          }, 150);
+        }
+
+        function renderReport() {
+          latestReport = calculateReport();
+          formArea.style.display = "none";
+          stepCount.textContent = "Report ready";
+          progress.style.width = "100%";
+
+          reportArea.innerHTML =
+            '<div class="aivc-report-grid">' +
+              '<div class="aivc-result-card">' +
+                '<p class="aivc-preview-kicker">MVP Readiness Score</p>' +
+                '<div class="aivc-score-value">' + latestReport.score + '<span>/100</span></div>' +
+                '<div class="aivc-category">' + escapeHtml(latestReport.category) + '</div>' +
+                '<div class="aivc-risk"><strong>Risk level:</strong> ' + escapeHtml(latestReport.riskLevel) + '</div>' +
+                '<p class="aivc-fine-print">This is not a guarantee. It is a practical first-pass assessment to help you avoid overbuilding.</p>' +
+              '</div>' +
+              '<div class="aivc-report-copy">' +
+                '<div class="aivc-copy-block"><h3>What this means</h3><p>' + escapeHtml(latestReport.categoryMessage) + '</p></div>' +
+                '<div class="aivc-copy-block"><h3>Recommended first version</h3><p>' + escapeHtml(latestReport.recommendedPath) + '</p></div>' +
+                '<div class="aivc-copy-block"><h3>Estimated build path</h3><p>' + escapeHtml(latestReport.estimatedBudgetRange) + '</p></div>' +
+                '<div class="aivc-copy-block"><h3>Biggest risk to solve</h3><p>' + escapeHtml(latestReport.biggestRisk) + '</p></div>' +
+                '<div class="aivc-copy-block"><h3>Next best step</h3><p>' + escapeHtml(latestReport.nextBestStep) + '</p></div>' +
+              '</div>' +
+            '</div>' +
+            '<div class="aivc-metrics" aria-label="Score breakdown">' +
+              '<div class="aivc-metric"><strong>' + latestReport.marketDemandScore + '</strong><span>Market Demand</span></div>' +
+              '<div class="aivc-metric"><strong>' + latestReport.revenuePotentialScore + '</strong><span>Revenue Potential</span></div>' +
+              '<div class="aivc-metric"><strong>' + latestReport.buildComplexityScore + '</strong><span>Build Complexity Fit</span></div>' +
+              '<div class="aivc-metric"><strong>' + latestReport.distributionScore + '</strong><span>Distribution</span></div>' +
+            '</div>' +
+            '<form class="aivc-lead-card" id="aivc-lead-form">' +
+              '<h3>Save your report and map the smallest build that can prove demand.</h3>' +
+              '<p>Enter your details to package this result as a lead record. Phone is optional.</p>' +
+              '<div class="aivc-fields">' +
+                '<div class="aivc-field"><label for="aivc-name">Name</label><input class="aivc-input" id="aivc-name" name="name" autocomplete="name" required placeholder="Your name" /></div>' +
+                '<div class="aivc-field"><label for="aivc-email">Email</label><input class="aivc-input" id="aivc-email" name="email" type="email" autocomplete="email" required placeholder="you@example.com" /></div>' +
+                '<div class="aivc-field"><label for="aivc-phone">Phone <span style="color: var(--aivc-muted); font-weight: 700;">optional</span></label><input class="aivc-input" id="aivc-phone" name="phone" autocomplete="tel" placeholder="(555) 000-0000" /></div>' +
+              '</div>' +
+              '<div class="aivc-lead-actions">' +
+                '<button class="aivc-btn aivc-btn-primary" type="submit">Send Me My MVP Readiness Report</button>' +
+                '<a class="aivc-btn aivc-btn-secondary" href="' + CONFIG.bookingUrl + '" target="_blank" rel="noopener">Book a Build Strategy Call</a>' +
+                '<button class="aivc-btn aivc-btn-ghost" type="button" id="aivc-start-over">Start Over</button>' +
+              '</div>' +
+              '<div class="aivc-success" id="aivc-success">Your report is ready. The smartest next step is to map the smallest version that can prove demand before you overspend on development.<br /><br /><a class="aivc-btn aivc-btn-primary" href="' + CONFIG.bookingUrl + '" target="_blank" rel="noopener">Book a Build Strategy Call</a></div>' +
+            '</form>';
+
+          reportArea.classList.add("aivc-visible");
+          var leadForm = document.getElementById("aivc-lead-form");
+          var startOver = document.getElementById("aivc-start-over");
+          leadForm.addEventListener("submit", handleLeadSubmit);
+          startOver.addEventListener("click", resetAssessment);
+          reportArea.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+
+        function buildLeadTags(report) {
+          var tags = ["app_idea_checker"];
+          if (report.score >= 80) {
+            tags.push("mvp_ready_high");
+          } else if (report.score >= 60) {
+            tags.push("mvp_ready_medium");
+            tags.push("needs_validation");
+          } else {
+            tags.push("needs_validation");
+          }
+          if (report.budget === "$3,000-$10,000") {
+            tags.push("budget_3k_10k");
+          }
+          if (report.budget === "$10,000+") {
+            tags.push("budget_10k_plus");
+          }
+          return tags;
+        }
+
+        function buildLeadPayload(form) {
+          var fields = form.elements;
+          return {
+            source: "app_idea_checker",
+            name: fields.name.value.trim(),
+            email: fields.email.value.trim(),
+            phone: fields.phone.value.trim(),
+            score: latestReport.score,
+            category: latestReport.category,
+            idea_type: latestReport.ideaType,
+            audience: latestReport.audience,
+            budget: latestReport.budget,
+            launch_timeline: latestReport.launchTimeline,
+            recommended_path: latestReport.recommendedPath,
+            tags: buildLeadTags(latestReport),
+            market_demand_score: latestReport.marketDemandScore,
+            revenue_potential_score: latestReport.revenuePotentialScore,
+            build_complexity_score: latestReport.buildComplexityScore,
+            distribution_score: latestReport.distributionScore,
+            risk_level: latestReport.riskLevel,
+            biggest_risk: latestReport.biggestRisk,
+            answers: Object.keys(answers).reduce(function (payload, key) {
+              payload[key] = answers[key].value;
+              return payload;
+            }, {}),
+            created_at: new Date().toISOString()
+          };
+        }
+
+        function saveLead(payload) {
+          var stored = [];
+          try {
+            stored = JSON.parse(window.localStorage.getItem(CONFIG.leadStorageKey) || "[]");
+            if (!Array.isArray(stored)) {
+              stored = [];
+            }
+            stored.push(payload);
+            window.localStorage.setItem(CONFIG.leadStorageKey, JSON.stringify(stored));
+          } catch (error) {
+            window.console.warn("AIVC localStorage unavailable; lead was still logged.", error);
+          }
+          window.console.log("AIVC lead payload:", payload);
+
+          if (CONFIG.webhookUrl) {
+            window.fetch(CONFIG.webhookUrl, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload),
+              keepalive: true
+            }).catch(function (error) {
+              window.console.warn("AIVC webhook failed:", error);
+            });
+          }
+        }
+
+        function handleLeadSubmit(event) {
+          event.preventDefault();
+          var form = event.currentTarget;
+          var payload = buildLeadPayload(form);
+          saveLead(payload);
+          var success = document.getElementById("aivc-success");
+          success.classList.add("aivc-visible");
+          success.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+
+        function resetAssessment() {
+          answers = {};
+          latestReport = null;
+          currentStep = 0;
+          reportArea.classList.remove("aivc-visible");
+          reportArea.innerHTML = "";
+          formArea.style.display = "";
+          renderQuestion();
+          document.getElementById("aivc-assessment").scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+
+        Array.prototype.forEach.call(root.querySelectorAll("[data-aivc-start]"), function (button) {
+          button.addEventListener("click", function () {
+            document.getElementById("aivc-assessment").scrollIntoView({ behavior: "smooth", block: "start" });
+          });
+        });
+
+        prevButton.addEventListener("click", function () {
+          if (currentStep > 0) {
+            transitionQuestion(-1);
+          }
+        });
+
+        nextButton.addEventListener("click", function () {
+          if (!getAnswer(QUESTIONS[currentStep].id)) return;
+          if (currentStep === QUESTIONS.length - 1) {
+            renderReport();
+            return;
+          }
+          transitionQuestion(1);
+        });
+
+        resetButton.addEventListener("click", resetAssessment);
+
+        renderQuestion();
+      })();
+    </script>
+  </body>
+</html>

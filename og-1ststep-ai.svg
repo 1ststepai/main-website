@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">1stStep.ai - Stop Losing Revenue to Manual Chaos</title>
+  <desc id="desc">Premium dark violet share image for 1stStep.ai automated business infrastructure.</desc>
+  <defs>
+    <radialGradient id="glow1" cx="30%" cy="20%" r="65%">
+      <stop offset="0%" stop-color="#8f2cff" stop-opacity="0.55"/>
+      <stop offset="62%" stop-color="#8f2cff" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glow2" cx="78%" cy="24%" r="50%">
+      <stop offset="0%" stop-color="#f4f0ff" stop-opacity="0.26"/>
+      <stop offset="64%" stop-color="#f4f0ff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="word" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#8f2cff"/>
+      <stop offset="100%" stop-color="#b78cff"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="#080811"/>
+  <rect width="1200" height="630" fill="url(#glow1)"/>
+  <rect width="1200" height="630" fill="url(#glow2)"/>
+  <path d="M0 72H1200M0 144H1200M0 216H1200M0 288H1200M0 360H1200M0 432H1200M0 504H1200M0 576H1200M80 0V630M160 0V630M240 0V630M320 0V630M400 0V630M480 0V630M560 0V630M640 0V630M720 0V630M800 0V630M880 0V630M960 0V630M1040 0V630M1120 0V630" stroke="#dbd6ff" stroke-opacity="0.055" stroke-width="1"/>
+  <rect x="64" y="64" width="1072" height="502" fill="#0d0d1c" fill-opacity="0.74" stroke="#dbd6ff" stroke-opacity="0.16"/>
+  <text x="96" y="142" font-family="Inter, Arial, sans-serif" font-size="56" font-weight="800" fill="#f4f0ff">
+    <tspan fill="url(#word)">1st</tspan><tspan>Step.ai</tspan>
+  </text>
+  <text x="96" y="242" font-family="Inter, Arial, sans-serif" font-size="74" font-weight="800" fill="#ffffff">
+    <tspan x="96" dy="0">Stop Losing Revenue</tspan>
+    <tspan x="96" dy="88">to Manual Chaos.</tspan>
+  </text>
+  <text x="96" y="445" font-family="Inter, Arial, sans-serif" font-size="30" fill="#c9c2f4">
+    AI agents and automated infrastructure for calls, booking,
+  </text>
+  <text x="96" y="488" font-family="Inter, Arial, sans-serif" font-size="30" fill="#c9c2f4">
+    reviews, follow-up, and business operations.
+  </text>
+  <text x="96" y="536" font-family="JetBrains Mono, Consolas, monospace" font-size="19" font-weight="700" letter-spacing="3" fill="#b78cff">
+    BOOK MY AUDIT · 1STSTEP.AI
+  </text>
+</svg>
