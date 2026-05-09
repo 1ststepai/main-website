@@ -10,11 +10,13 @@ The backend currently saves and returns the normalized lead/report data. Forward
 webhookUrl: "/api/app-idea-checker"
 ```
 
-If the checker is pasted into GoHighLevel on a different domain, replace this with the full deployed endpoint URL:
+The checker is hosted on the Vercel main website. If a separate GHL funnel or landing page ever embeds a copy of the checker on another domain, replace this with the full deployed Vercel endpoint URL:
 
 ```js
-webhookUrl: "https://your-domain.com/api/app-idea-checker"
+webhookUrl: "https://1ststep.ai/api/app-idea-checker"
 ```
+
+Do not move the primary main website or checker hosting to GoHighLevel. GHL should receive leads through webhook forwarding and automation only.
 
 ## Backend TODO Hooks
 

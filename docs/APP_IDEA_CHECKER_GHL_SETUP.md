@@ -1,14 +1,24 @@
 # App Idea Checker GHL Setup
 
-Use this guide to connect the App Idea Viability Checker to GoHighLevel after the deployed preview has passed browser QA.
+Use this guide to connect the Vercel-hosted App Idea Viability Checker to GoHighLevel after the deployed site has passed browser QA.
 
-Do not enable forwarding for production until the preview webhook test passes and no unexpected GHL costs or SMS actions are triggered.
+The main 1stStep.ai website is hosted on Vercel. GoHighLevel is used only for CRM, booking calendar, lead capture workflows, pipeline automation, and follow-up automation.
+
+Do not point the main `1ststep.ai` hostname at GoHighLevel.
+
+Do not enable forwarding for production until the webhook test passes and no unexpected GHL costs or SMS actions are triggered.
 
 ## Current Endpoints
 
 - Main deployment: `https://main-website-repo.vercel.app`
 - Checker: `https://main-website-repo.vercel.app/app-idea-viability-checker.html`
 - Intake endpoint: `https://main-website-repo.vercel.app/api/app-idea-checker`
+
+Expected final public URLs after domain mapping:
+
+- Main site: `https://1ststep.ai`
+- WWW alias: `https://www.1ststep.ai`
+- Checker: `https://1ststep.ai/app-idea-viability-checker.html`
 
 ## Custom Fields
 
@@ -196,7 +206,9 @@ Run this in preview only:
 
 ## Production Rule
 
-Do not connect or promote the real production domain until:
+The main website should remain on Vercel. GHL should not host `1ststep.ai` or `www.1ststep.ai`.
+
+Before enabling production forwarding, confirm:
 
 - Browser QA passes.
 - GHL webhook test passes.

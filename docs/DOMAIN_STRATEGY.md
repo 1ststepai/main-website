@@ -4,13 +4,15 @@
 
 `1ststep.ai` is the parent business and services website for app builds, MVP builds, websites, SaaS builds, AI automations, build strategy, and the App Idea Viability Checker / MVP Readiness Score.
 
+The main 1stStep.ai website is hosted on Vercel, not GoHighLevel.
+
 The AI Resume Builder is a separate product. It should not replace or reposition the parent 1stStep.ai website.
 
 ## Domain Map
 
 | Hostname | Purpose | Platform |
 | --- | --- | --- |
-| `1ststep.ai` | Main 1stStep.ai business/services website for apps, websites, MVPs, SaaS, AI automations, and build strategy | Vercel `main-website` project |
+| `1ststep.ai` | Main 1stStep.ai business/services website for apps, websites, MVPs, SaaS, AI automations, build strategy, and `/app-idea-viability-checker.html` | Vercel `main-website` project |
 | `www.1ststep.ai` | WWW alias for the main business/services website | Vercel `main-website` project |
 | `book.1ststep.ai` | Optional booking/calendar hostname if a branded calendar URL is needed later | GoHighLevel |
 | `go.1ststep.ai` | Optional funnels/landing pages hostname if needed later | GoHighLevel |
@@ -23,17 +25,21 @@ Vercel should host the main website at:
 
 - `1ststep.ai`
 - `www.1ststep.ai`
+- `1ststep.ai/app-idea-viability-checker.html`
 
 The current Vercel project should remain the source for the main website repo:
 
 - GitHub repo: `https://github.com/1ststepai/main-website`
 - Current deployment: `https://main-website-repo.vercel.app`
+- Current checker: `https://main-website-repo.vercel.app/app-idea-viability-checker.html`
 
 When ready for production DNS, add `1ststep.ai` and `www.1ststep.ai` to the Vercel main website project. Do not change DNS from code.
 
 ## GoHighLevel Role
 
-GoHighLevel should be used for CRM, calendar, workflows, and optional funnels only.
+GoHighLevel should be used for CRM, booking calendar, lead capture workflows, pipeline automations, and optional funnels only.
+
+GoHighLevel should not host the main `1ststep.ai` website.
 
 Recommended GHL hostnames:
 
@@ -54,7 +60,9 @@ Do not use `resume.1ststep.ai` or `app.1ststep.ai` as the parent business websit
 ## Safety Rules
 
 - Do not point multiple platforms at the same hostname.
+- Do not point the main `1ststep.ai` hostname at GoHighLevel.
 - Do not use `app.1ststep.ai` as the main website URL.
 - Do not use `resume.1ststep.ai` as the parent website URL.
+- Keep `/app-idea-viability-checker.html` available on the Vercel main website.
 - Keep the App Idea Checker backend forwarding disabled until the GHL inbound webhook is ready.
 - Keep repo creation locked until discovery is completed, proposal is accepted, deposit is paid, and Phase 1 Build has started.
