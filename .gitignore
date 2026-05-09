@@ -4,3 +4,5 @@
 node_modules
 dist
 generated-projects
+__pycache__/
+*.pyc
