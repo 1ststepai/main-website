@@ -1,10 +1,9 @@
-import React, { useMemo, useState } from "react";
+import React from "react";
 import { createRoot } from "react-dom/client";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
   BadgeCheck,
-  Bot,
   BriefcaseBusiness,
   Calculator,
   CheckCircle2,
@@ -22,12 +21,6 @@ import {
 import "./styles.css";
 import logo from "../1ststep-ai-logo-official.png";
 
-const money = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-  maximumFractionDigits: 0,
-});
-
 const fadeUp = {
   hidden: { opacity: 0, y: 22 },
   visible: { opacity: 1, y: 0 },
@@ -39,11 +32,11 @@ function App() {
       <IndustrialBackdrop />
       <Header />
       <Hero />
-      <TrustedBy />
-      <EngineerFlex />
-      <ProfitLeakCalculator />
+      <BuildTypes />
+      <StrategySection />
+      <ReadinessSection />
       <Pillars />
-      <SetupVideo />
+      <BuildPath />
       <Contact />
     </main>
   );
@@ -69,17 +62,17 @@ function Header() {
           <img src={logo} alt="1stStep.ai" className="h-9 w-9 rounded-sm object-cover" />
           <div>
             <p className="font-mono text-xs uppercase tracking-[0.18em] text-steel">1stStep.ai</p>
-            <p className="text-sm font-semibold text-white">Trade Systems Lab</p>
+            <p className="text-sm font-semibold text-white">Strategic Build Studio</p>
           </div>
         </a>
         <nav className="hidden items-center gap-8 text-sm text-steel md:flex">
-          <a className="hover:text-white" href="#calculator">Calculator</a>
-          <a className="hover:text-white" href="#system">System</a>
-          <a className="hover:text-white" href="#contact">Audit</a>
+          <a className="hover:text-white" href="/app-idea-viability-checker.html">Idea Checker</a>
+          <a className="hover:text-white" href="#system">Builds</a>
+          <a className="hover:text-white" href="#contact">Strategy Call</a>
         </nav>
         <a href="#contact" className="btn btn-small btn-primary">
           <ClipboardCheck className="h-4 w-4" />
-          System Audit
+          Book Strategy Call
         </a>
       </div>
     </header>
@@ -98,23 +91,23 @@ function Hero() {
         >
           <motion.div variants={fadeUp} className="status-chip mb-6">
             <span className="h-2 w-2 bg-go shadow-green" />
-            Systems are GO for plumbers, electricians, and HVAC teams
+            Apps, websites, MVPs, automations, and digital products
           </motion.div>
           <motion.h1 variants={fadeUp} className="text-balance text-5xl font-semibold leading-[0.96] sm:text-6xl lg:text-7xl">
-            Engineered Freedom for Trade Businesses.
+            Build the right first version before you spend on the wrong one.
           </motion.h1>
           <motion.p variants={fadeUp} className="mt-6 max-w-2xl text-lg leading-8 text-steel sm:text-xl">
-            We build the AI-powered systems that answer your phones, book your jobs, and chase your reviews.
-            You handle the tools; we handle the office.
+            1stStep.ai helps founders, operators, and service businesses turn raw ideas into focused apps,
+            SaaS products, websites, automations, and MVPs that prove demand before scope gets expensive.
           </motion.p>
           <motion.div variants={fadeUp} className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <a href="#contact" className="btn btn-primary">
-              System Audit
+            <a href="/app-idea-viability-checker.html" className="btn btn-primary">
+              Check Your App Idea
               <ArrowRight className="h-5 w-5" />
             </a>
-            <a href="#setup-video" className="btn btn-secondary">
+            <a href="#contact" className="btn btn-secondary">
               <Play className="h-5 w-5" />
-              Watch the 1stStep in Action
+              Book a Build Strategy Call
             </a>
           </motion.div>
         </motion.div>
@@ -133,25 +126,25 @@ function Hero() {
 
 function CommandPanel() {
   const rows = [
-    ["Missed call", "Text-back sent", "00:03"],
-    ["Estimate request", "Booked", "02:14"],
-    ["Completed job", "Review request queued", "Live"],
-    ["Dormant lead", "Reactivation SMS", "$1,850"],
+    ["App idea", "Scored for viability", "91/100"],
+    ["First workflow", "Scoped for MVP", "Core"],
+    ["Launch path", "Phased build plan", "Ready"],
+    ["Overbuild risk", "Reduced before dev", "-42%"],
   ];
 
   return (
     <div className="glass-panel p-4 sm:p-5">
       <div className="flex items-center justify-between border-b border-line pb-4">
         <div>
-          <p className="font-mono text-xs uppercase tracking-[0.18em] text-blue">Lead-to-Invoice OS</p>
-          <h2 className="mt-1 text-xl font-semibold">Office Automation Console</h2>
+          <p className="font-mono text-xs uppercase tracking-[0.18em] text-blue">MVP Readiness Console</p>
+          <h2 className="mt-1 text-xl font-semibold">Build Strategy Snapshot</h2>
         </div>
         <Gauge className="h-7 w-7 text-go" />
       </div>
       <div className="grid gap-3 py-5 sm:grid-cols-3">
-        <Metric label="Calls rescued" value="38" />
-        <Metric label="Jobs booked" value="17" />
-        <Metric label="Review asks" value="64" />
+        <Metric label="Demand" value="82" />
+        <Metric label="Revenue" value="76" />
+        <Metric label="Scope fit" value="88" />
       </div>
       <div className="space-y-3">
         {rows.map(([event, action, value]) => (
@@ -170,8 +163,8 @@ function CommandPanel() {
         ))}
       </div>
       <div className="mt-5 border border-blue/30 bg-blue/10 p-4">
-        <p className="font-mono text-xs uppercase tracking-[0.16em] text-blue">Current leak detected</p>
-        <p className="mt-2 text-2xl font-semibold">$127,400 recoverable pipeline</p>
+        <p className="font-mono text-xs uppercase tracking-[0.16em] text-blue">Recommended first build</p>
+        <p className="mt-2 text-2xl font-semibold">Focused MVP with one core workflow</p>
       </div>
     </div>
   );
@@ -186,13 +179,13 @@ function Metric({ label, value }) {
   );
 }
 
-function TrustedBy() {
+function BuildTypes() {
   return (
     <section className="border-y border-line bg-white/[0.025] px-4 py-5 sm:px-6 lg:px-8">
       <div className="mx-auto flex max-w-7xl flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <p className="font-mono text-xs uppercase tracking-[0.18em] text-steel">Compatible with</p>
+        <p className="font-mono text-xs uppercase tracking-[0.18em] text-steel">Built for</p>
         <div className="grid grid-cols-2 gap-3 text-sm font-semibold text-white sm:flex sm:flex-wrap sm:gap-5">
-          {["Housecall Pro", "ServiceTitan", "Jobber", "QuickBooks"].map((name) => (
+          {["Mobile Apps", "Web Apps / SaaS", "Business Websites", "AI Automations", "MVP Builds"].map((name) => (
             <span key={name} className="flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-go" />
               {name}
@@ -204,14 +197,14 @@ function TrustedBy() {
   );
 }
 
-function EngineerFlex() {
+function StrategySection() {
   return (
     <section className="px-4 py-16 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
         <div className="glass-panel grid gap-8 p-6 sm:p-8 lg:grid-cols-[0.92fr_1.08fr] lg:p-10">
           <div>
-            <p className="section-kicker">Engineer's flex</p>
-            <h2 className="section-title mt-3">Silicon Valley execution for the local trade.</h2>
+            <p className="section-kicker">Strategic builder</p>
+            <h2 className="section-title mt-3">Not every idea needs a full app first.</h2>
           </div>
           <div className="border-l-0 border-line lg:border-l lg:pl-8">
             <div className="flex items-start gap-4">
@@ -219,8 +212,9 @@ function EngineerFlex() {
                 <BriefcaseBusiness className="h-6 w-6 text-blue" />
               </div>
               <p className="text-lg leading-8 text-steel">
-                From the builders of <span className="font-semibold text-white">1stStep Resume AI</span>.
-                We don't just use tools; we build them. We bring Silicon Valley engineering to the local trade.
+                Evan helps you decide what should actually be built first: a validation page, prototype,
+                internal workflow, lean MVP, or phased product. The goal is momentum with evidence, not
+                an expensive pile of features nobody asked for.
               </p>
             </div>
           </div>
@@ -230,41 +224,47 @@ function EngineerFlex() {
   );
 }
 
-function ProfitLeakCalculator() {
-  const [monthlyLeads, setMonthlyLeads] = useState(120);
-  const [averageJobValue, setAverageJobValue] = useState(850);
-  const [missedCallRate, setMissedCallRate] = useState(24);
-
-  const annualLoss = useMemo(() => {
-    return monthlyLeads * averageJobValue * (missedCallRate / 100) * 12;
-  }, [monthlyLeads, averageJobValue, missedCallRate]);
-
+function ReadinessSection() {
   return (
-    <section id="calculator" className="px-4 py-16 sm:px-6 lg:px-8">
+    <section id="checker" className="px-4 py-16 sm:px-6 lg:px-8">
       <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.9fr_1.1fr]">
         <div>
-          <p className="section-kicker">Profit leak calculator</p>
-          <h2 className="section-title mt-3">Every unanswered call has a price tag.</h2>
+          <p className="section-kicker">Free MVP Readiness Score</p>
+          <h2 className="section-title mt-3">Not sure if your app is worth building?</h2>
           <p className="mt-5 max-w-xl text-lg leading-8 text-steel">
-            Trade owners don't lose money because they are bad at the work. They lose it in the gap between
-            a ringing phone and a booked job.
+            Run the App Idea Viability Checker before you spend thousands building the wrong thing.
+            You will get a practical score, risk readout, budget path, and recommended next step.
           </p>
+          <a href="/app-idea-viability-checker.html" className="btn btn-primary mt-8">
+            Check My Idea
+            <ArrowRight className="h-5 w-5" />
+          </a>
         </div>
         <div className="glass-panel p-5 sm:p-7">
           <div className="flex items-center gap-3 border-b border-line pb-5">
             <Calculator className="h-6 w-6 text-go" />
-            <p className="font-mono text-sm uppercase tracking-[0.16em] text-steel">Annual revenue lost to poor follow-up</p>
+            <p className="font-mono text-sm uppercase tracking-[0.16em] text-steel">What the checker gives you</p>
           </div>
-          <div className="grid gap-5 py-6">
-            <RangeControl label="Monthly Leads" min={10} max={500} step={5} value={monthlyLeads} onChange={setMonthlyLeads} />
-            <RangeControl label="Average Job Value" min={150} max={5000} step={50} value={averageJobValue} onChange={setAverageJobValue} prefix="$" />
-            <RangeControl label="Missed Call Rate" min={1} max={70} step={1} value={missedCallRate} onChange={setMissedCallRate} suffix="%" />
+          <div className="grid gap-3 py-6">
+            {[
+              "Viability score out of 100",
+              "Market demand, revenue, complexity, and distribution breakdown",
+              "Recommended first version and budget path",
+              "Context pack generated for scoping the MVP",
+            ].map((item) => (
+              <div className="data-row" key={item}>
+                <span className="flex items-center gap-3 text-sm font-semibold">
+                  <CheckCircle2 className="h-4 w-4 text-go" />
+                  {item}
+                </span>
+              </div>
+            ))}
           </div>
           <div className="border border-go/30 bg-go/10 p-5">
-            <p className="font-mono text-xs uppercase tracking-[0.18em] text-go">Burn rate</p>
-            <p className="mt-2 text-4xl font-semibold tracking-tight sm:text-5xl">{money.format(annualLoss)}</p>
+            <p className="font-mono text-xs uppercase tracking-[0.18em] text-go">Founder-friendly rule</p>
+            <p className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">Prove the workflow before you fund the platform.</p>
             <p className="mt-3 text-sm leading-6 text-steel">
-              This is the rough annual revenue exposed when calls, quotes, and follow-ups slip through the cracks.
+              The tool is not a guarantee. It is a practical first-pass assessment to avoid overbuilding.
             </p>
           </div>
         </div>
@@ -273,50 +273,30 @@ function ProfitLeakCalculator() {
   );
 }
 
-function RangeControl({ label, min, max, step, value, onChange, prefix = "", suffix = "" }) {
-  return (
-    <label className="block">
-      <span className="mb-3 flex items-center justify-between gap-4">
-        <span className="text-sm font-semibold text-white">{label}</span>
-        <span className="font-mono text-sm text-blue">{prefix}{value.toLocaleString()}{suffix}</span>
-      </span>
-      <input
-        className="w-full accent-blue"
-        type="range"
-        min={min}
-        max={max}
-        step={step}
-        value={value}
-        onChange={(event) => onChange(Number(event.target.value))}
-      />
-    </label>
-  );
-}
-
 function Pillars() {
   const pillars = [
     {
       icon: PhoneCall,
-      title: "24/7 AI Receptionist",
-      copy: "Missed-call text-back, voice AI, and booking paths that keep hot leads from cooling off.",
+      title: "Apps and SaaS MVPs",
+      copy: "Focused first versions with the core workflow, lead capture, auth, payments, dashboards, or admin tools only when they matter.",
       accent: "text-blue",
     },
     {
       icon: Star,
-      title: "The Reputation Engine",
-      copy: "Automated Google review requests after the job is done, while the customer still remembers the win.",
+      title: "Conversion Websites",
+      copy: "Service-business and product websites built to explain the offer, capture demand, and feed the sales pipeline.",
       accent: "text-go",
     },
     {
       icon: DatabaseZap,
-      title: "Database Reactivation",
-      copy: "Mine old leads, stale quotes, and past customers for fresh jobs without buying more ads.",
+      title: "Automation Systems",
+      copy: "Internal workflows, CRM automations, lead routing, report generation, and manual-process replacement.",
       accent: "text-blue",
     },
     {
       icon: MessageSquareText,
-      title: "Unified Command",
-      copy: "SMS, calls, GMB messages, follow-ups, and pipeline visibility in one operating system.",
+      title: "AI Tools",
+      copy: "Practical AI features wrapped in workflows people can use: intake, scoring, generation, routing, and decision support.",
       accent: "text-go",
     },
   ];
@@ -325,8 +305,8 @@ function Pillars() {
     <section id="system" className="px-4 py-16 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
         <div className="mb-8 max-w-3xl">
-          <p className="section-kicker">The 4-pillar system</p>
-          <h2 className="section-title mt-3">A lead-to-invoice machine built around the phone.</h2>
+          <p className="section-kicker">What we build</p>
+          <h2 className="section-title mt-3">Digital products with a clear first move.</h2>
         </div>
         <div className="grid gap-4 md:grid-cols-2">
           {pillars.map((pillar, index) => {
@@ -357,25 +337,25 @@ function Pillars() {
   );
 }
 
-function SetupVideo() {
+function BuildPath() {
   return (
-    <section id="setup-video" className="px-4 py-16 sm:px-6 lg:px-8">
+    <section id="build-path" className="px-4 py-16 sm:px-6 lg:px-8">
       <div className="mx-auto grid max-w-7xl gap-8 border-y border-line py-12 lg:grid-cols-[1fr_0.9fr] lg:items-center">
         <div>
-          <p className="section-kicker">Free 5-minute setup</p>
-          <h2 className="section-title mt-3">See the first automation that stops the bleeding.</h2>
+          <p className="section-kicker">Build path</p>
+          <h2 className="section-title mt-3">Start with the smallest version that can prove demand.</h2>
           <p className="mt-5 max-w-2xl text-lg leading-8 text-steel">
-            The fastest win is simple: when your team misses a call, the system answers with speed,
-            context, and a booking path before the lead calls a competitor.
+            The right first release might be a landing page, clickable prototype, internal tool,
+            workflow test, or focused MVP. The strategy call maps that path before development starts.
           </p>
         </div>
-        <a href="#contact" className="video-link">
+        <a href="/app-idea-viability-checker.html" className="video-link">
           <span className="grid h-14 w-14 place-items-center border border-blue/40 bg-blue/15">
             <Play className="h-7 w-7 fill-blue text-blue" />
           </span>
           <span>
-            <span className="block text-lg font-semibold text-white">Watch the 1stStep in Action</span>
-            <span className="mt-1 block text-sm text-steel">Then request the system audit.</span>
+            <span className="block text-lg font-semibold text-white">Run the MVP Readiness Score</span>
+            <span className="mt-1 block text-sm text-steel">Then book the strategy call with better context.</span>
           </span>
         </a>
       </div>
@@ -388,13 +368,13 @@ function Contact() {
     <section id="contact" className="px-4 pb-20 pt-16 sm:px-6 lg:px-8">
       <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.9fr_1.1fr]">
         <div>
-          <p className="section-kicker">Book the audit</p>
-          <h2 className="section-title mt-3">Find the cash leak before another phone rings.</h2>
+          <p className="section-kicker">Book the strategy call</p>
+          <h2 className="section-title mt-3">Map the version worth building first.</h2>
           <div className="mt-8 grid gap-3 text-sm text-steel">
             {[
-              ["No generic CRM tour", ShieldCheck],
-              ["Trade-specific call, quote, and job workflow map", Wrench],
-              ["Clear next step, even if we are not the right fit", BadgeCheck],
+              ["No generic agency pitch", ShieldCheck],
+              ["Scope, budget, and launch path before build", Wrench],
+              ["Clear next step, even if the answer is not to build yet", BadgeCheck],
             ].map(([text, Icon]) => (
               <p key={text} className="flex items-center gap-3">
                 <Icon className="h-5 w-5 text-go" />
@@ -407,30 +387,30 @@ function Contact() {
           <div className="grid gap-4 sm:grid-cols-2">
             <FormField label="Name" placeholder="Your name" />
             <FormField label="Phone" placeholder="Best number" type="tel" />
-            <FormField label="Company" placeholder="Trade business name" />
+            <FormField label="Project" placeholder="App, website, SaaS, automation..." />
             <FormField label="Email" placeholder="you@company.com" type="email" />
           </div>
           <label className="mt-5 block">
-            <span className="form-label">What's your biggest bottleneck?</span>
+            <span className="form-label">What do you need first?</span>
             <select className="form-input mt-2" defaultValue="">
               <option value="" disabled>Select one</option>
-              <option>Missed calls</option>
-              <option>No reviews</option>
-              <option>No time</option>
-              <option>Slow follow-up</option>
-              <option>Old leads sitting idle</option>
+              <option>Validate the idea</option>
+              <option>Landing page / waitlist</option>
+              <option>Clickable prototype</option>
+              <option>MVP build</option>
+              <option>Automation / internal tool</option>
             </select>
           </label>
           <label className="mt-5 block">
-            <span className="form-label">What is breaking right now?</span>
-            <textarea className="form-input mt-2 min-h-28 resize-y" placeholder="Calls, quotes, reviews, dispatch, follow-up..." />
+            <span className="form-label">What are you trying to build?</span>
+            <textarea className="form-input mt-2 min-h-28 resize-y" placeholder="Tell me the idea, audience, budget range, and what would make this a win." />
           </label>
           <button type="submit" className="btn btn-primary mt-6 w-full justify-center">
-            Request System Audit
+            Request Build Strategy Call
             <ArrowRight className="h-5 w-5" />
           </button>
           <p className="mt-4 text-center text-xs leading-5 text-steel">
-            GHL-ready form shell. Connect this form to your GoHighLevel workflow or embed script.
+            For the fastest path, run the App Idea Viability Checker first and bring your score to the call.
           </p>
         </form>
       </div>
