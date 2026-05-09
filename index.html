@@ -1,16 +1,743 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta
-      name="description"
-      content="Validate and build the right first version of your app, website, SaaS, MVP, or automation before overspending on the wrong build."
-    />
-    <title>1stStep.ai | Apps, Websites, MVPs, Automations</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>1stStep.ai | Apps, Websites, MVPs, Automations</title>
+  <meta name="description" content="Validate and build the right first version of your app, website, SaaS, MVP, or automation before overspending on the wrong build." />
+</head>
+<body style="margin:0;background:#050711;">
+<div class="fsai-site">
+  <style>
+    .fsai-site {
+      --bg: #050711;
+      --panel: rgba(12, 17, 34, 0.76);
+      --panel-2: rgba(17, 24, 47, 0.88);
+      --line: rgba(139, 164, 255, 0.18);
+      --text: #f7f8ff;
+      --muted: #aeb7d8;
+      --muted-2: #727da3;
+      --blue: #49b8ff;
+      --cyan: #7de8ff;
+      --violet: #7f6bff;
+      --purple: #d45bff;
+      --green: #43e58f;
+      --shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 18% 12%, rgba(65, 129, 255, 0.22), transparent 32%),
+        radial-gradient(circle at 78% 8%, rgba(154, 75, 255, 0.18), transparent 34%),
+        radial-gradient(circle at 55% 62%, rgba(53, 118, 255, 0.12), transparent 38%),
+        #050711;
+      color: var(--text);
+      overflow: hidden;
+      position: relative;
+      isolation: isolate;
+    }
+
+    .fsai-site * { box-sizing: border-box; }
+    .fsai-site a { color: inherit; text-decoration: none; }
+
+    .fsai-site::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+      background-size: 72px 72px;
+      mask-image: linear-gradient(to bottom, black 0%, rgba(0,0,0,0.75) 44%, transparent 92%);
+      pointer-events: none;
+      z-index: -2;
+    }
+
+    .fsai-site::after {
+      content: "";
+      position: absolute;
+      width: 720px;
+      height: 720px;
+      right: -220px;
+      top: 90px;
+      background: conic-gradient(from 180deg, rgba(57,168,255,0.05), rgba(138,92,255,0.26), rgba(178,68,255,0.08), rgba(57,168,255,0.05));
+      filter: blur(18px);
+      border-radius: 999px;
+      opacity: .85;
+      z-index: -1;
+      animation: fsai-spin 24s linear infinite;
+    }
+
+    @keyframes fsai-spin { to { transform: rotate(360deg); } }
+
+    .fsai-wrap { width: min(1180px, calc(100% - 40px)); margin: 0 auto; }
+
+    .fsai-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 22px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      position: relative;
+      z-index: 5;
+    }
+
+    .fsai-logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      font-size: 25px;
+      flex-shrink: 0;
+    }
+
+    .fsai-logo-img {
+      display: block;
+      width: auto;
+      height: 68px;
+      max-width: min(340px, 42vw);
+      object-fit: contain;
+      filter: drop-shadow(0 6px 18px rgba(80, 100, 255, 0.20));
+    }
+
+    .fsai-footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .fsai-footer-logo {
+      display: block;
+      height: 34px;
+      width: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 12px rgba(80, 100, 255, 0.14));
+    }
+
+    .fsai-logo-mark { width: 32px; height: 32px; display: grid; place-items: center; position: relative; }
+
+    .fsai-logo-mark::before,
+    .fsai-logo-mark::after {
+      content: "";
+      position: absolute;
+      width: 28px;
+      height: 8px;
+      border-radius: 12px 4px 12px 4px;
+      background: linear-gradient(135deg, var(--purple), var(--blue), var(--cyan));
+      transform: rotate(-27deg);
+      box-shadow: 0 0 22px rgba(77, 145, 255, 0.55);
+    }
+
+    .fsai-logo-mark::before { top: 8px; left: 1px; }
+    .fsai-logo-mark::after { top: 17px; left: 7px; opacity: .85; }
+
+    .fsai-logo span:last-child {
+      background: linear-gradient(135deg, #fff 35%, #83cfff 65%, #a65cff 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .fsai-nav-links { display: flex; gap: 28px; color: var(--muted); font-size: 14px; }
+    .fsai-nav-links a { transition: .2s ease; }
+    .fsai-nav-links a:hover { color: #fff; }
+
+    .fsai-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      border-radius: 14px;
+      padding: 14px 20px;
+      border: 1px solid rgba(255,255,255,0.12);
+      font-weight: 750;
+      color: #fff;
+      cursor: pointer;
+      transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .fsai-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 42px rgba(75, 105, 255, 0.26);
+      border-color: rgba(255,255,255,0.28);
+    }
+
+    .fsai-btn-primary {
+      background: linear-gradient(135deg, #47c7ff 0%, #4d8dff 42%, #b85dff 100%);
+      box-shadow: 0 16px 50px rgba(78, 100, 255, 0.34);
+    }
+
+    .fsai-btn-ghost { background: rgba(255,255,255,0.035); backdrop-filter: blur(18px); }
+
+    .fsai-hero {
+      padding: 78px 0 44px;
+      display: grid;
+      grid-template-columns: 0.9fr 1.1fr;
+      gap: 42px;
+      align-items: center;
+      position: relative;
+    }
+
+    .fsai-kicker {
+      width: fit-content;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #cbd6ff;
+      border: 1px solid rgba(139, 164, 255, 0.22);
+      background: rgba(255,255,255,0.035);
+      border-radius: 999px;
+      padding: 8px 13px;
+      font-size: 11px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      margin-bottom: 22px;
+      box-shadow: inset 0 0 30px rgba(99,129,255,0.07);
+    }
+
+    .fsai-kicker b { color: var(--cyan); }
+
+    .fsai-hero h1 {
+      font-size: clamp(48px, 6vw, 82px);
+      line-height: .96;
+      letter-spacing: -0.065em;
+      margin: 0 0 24px;
+    }
+
+    .fsai-gradient {
+      background: linear-gradient(135deg, #84ecff 0%, #60a0ff 46%, #d45bff 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .fsai-hero p { color: var(--muted); font-size: 18px; line-height: 1.65; max-width: 620px; margin: 0 0 30px; }
+    .fsai-hero-actions { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 28px; }
+    .fsai-mini-proof { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; max-width: 670px; }
+    .fsai-proof-item { display: flex; gap: 12px; align-items: flex-start; padding: 13px 10px; color: var(--muted); }
+
+    .fsai-proof-icon {
+      flex: 0 0 34px;
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(57,168,255,0.18), rgba(178,68,255,0.18));
+      border: 1px solid rgba(149, 169, 255, 0.2);
+      color: #fff;
+      box-shadow: 0 0 28px rgba(120, 72, 255, 0.18);
+    }
+
+    .fsai-proof-item strong { display: block; color: #fff; font-size: 13px; margin-bottom: 3px; }
+    .fsai-proof-item span { display: block; font-size: 12px; line-height: 1.35; }
+
+    .fsai-visual { min-height: 540px; position: relative; }
+
+    .fsai-orbit {
+      position: absolute;
+      inset: 8% 0 0 4%;
+      border: 1px solid rgba(93, 127, 255, 0.18);
+      border-radius: 50%;
+      transform: rotate(-15deg);
+      box-shadow: 0 0 80px rgba(68, 94, 255, 0.13);
+    }
+
+    .fsai-orbit:nth-child(2) { inset: 22% 12% 18% -2%; transform: rotate(17deg); border-color: rgba(178,68,255,0.16); }
+
+    .fsai-device {
+      position: absolute;
+      right: 0;
+      top: 66px;
+      width: min(620px, 100%);
+      border-radius: 28px;
+      padding: 22px;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.16), rgba(255,255,255,0.04)),
+        rgba(8,12,27,0.86);
+      border: 1px solid rgba(180,194,255,0.18);
+      box-shadow: var(--shadow), 0 0 80px rgba(72, 93, 255, 0.22);
+      transform: perspective(900px) rotateX(7deg) rotateY(-13deg) rotateZ(1deg);
+      backdrop-filter: blur(20px);
+    }
+
+    .fsai-device-top { display: flex; justify-content: space-between; align-items: center; color: var(--muted); margin-bottom: 18px; font-size: 13px; }
+    .fsai-dots { display: flex; gap: 7px; }
+    .fsai-dots i { width: 9px; height: 9px; border-radius: 50%; background: rgba(255,255,255,0.18); }
+    .fsai-dashboard-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 14px; }
+
+    .fsai-ui-card {
+      background: rgba(5, 9, 22, 0.68);
+      border: 1px solid rgba(139,164,255,0.15);
+      border-radius: 18px;
+      padding: 17px;
+      box-shadow: inset 0 1px rgba(255,255,255,0.06);
+    }
+
+    .fsai-ui-card h3 { margin: 0 0 10px; font-size: 13px; color: #fff; }
+    .fsai-stat { font-size: 30px; font-weight: 850; letter-spacing: -.04em; margin: 3px 0; }
+    .fsai-good { color: var(--green); font-size: 12px; font-weight: 700; }
+
+    .fsai-chart {
+      height: 105px;
+      margin-top: 12px;
+      border-radius: 14px;
+      background:
+        linear-gradient(to top, rgba(80, 255, 170, 0.12), transparent),
+        url("data:image/svg+xml,%3Csvg width='420' height='120' viewBox='0 0 420 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M4 92 C 55 85, 55 40, 102 52 S 168 92, 208 55 S 275 14, 314 43 S 366 83, 416 19' fill='none' stroke='%238A5CFF' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E") center/cover no-repeat;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .fsai-floating {
+      position: absolute;
+      border-radius: 18px;
+      padding: 16px;
+      background: rgba(10, 15, 32, 0.82);
+      border: 1px solid rgba(143, 166, 255, 0.18);
+      box-shadow: 0 18px 60px rgba(0,0,0,0.35), 0 0 42px rgba(96,89,255,0.15);
+      backdrop-filter: blur(16px);
+    }
+
+    .fsai-float-1 { left: 0; top: 245px; width: 255px; }
+    .fsai-float-2 { right: 24px; bottom: 54px; width: 240px; }
+    .fsai-float-3 { right: 14px; top: 18px; width: 170px; }
+    .fsai-row { display: flex; justify-content: space-between; gap: 16px; color: var(--muted); font-size: 12px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .fsai-row:last-child { border-bottom: 0; }
+    .fsai-pill-icons { display: flex; gap: 10px; margin-top: 10px; }
+    .fsai-app-icon { width: 42px; height: 42px; border-radius: 14px; display: grid; place-items: center; background: rgba(255,255,255,0.055); border: 1px solid rgba(255,255,255,0.08); color: #fff; font-weight: 900; }
+
+    .fsai-section { padding: 72px 0; position: relative; }
+    .fsai-section-head { display: flex; justify-content: space-between; align-items: end; gap: 20px; margin-bottom: 28px; }
+    .fsai-eyebrow { color: #8ea2ff; font-size: 12px; letter-spacing: .16em; text-transform: uppercase; font-weight: 800; margin-bottom: 10px; }
+    .fsai-section h2 { margin: 0; font-size: clamp(32px, 4vw, 54px); line-height: 1.02; letter-spacing: -.055em; }
+    .fsai-section-lede { max-width: 620px; color: var(--muted); font-size: 17px; line-height: 1.65; margin-top: 14px; }
+
+    .fsai-services { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+
+    .fsai-service-card {
+      min-height: 215px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.075), rgba(255,255,255,0.025)), rgba(9, 13, 28, 0.72);
+      border: 1px solid rgba(148, 170, 255, 0.16);
+      border-radius: 24px;
+      padding: 22px;
+      position: relative;
+      overflow: hidden;
+      transition: .25s ease;
+    }
+
+    .fsai-service-card:hover { transform: translateY(-6px); border-color: rgba(122, 154, 255, 0.42); box-shadow: 0 20px 60px rgba(35, 65, 255, 0.18); }
+    .fsai-service-card::after { content: ""; position: absolute; width: 140px; height: 140px; right: -70px; top: -70px; background: radial-gradient(circle, rgba(97,154,255,0.35), transparent 66%); opacity: .75; }
+
+    .fsai-service-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, rgba(73,184,255,0.18), rgba(212,91,255,0.16));
+      border: 1px solid rgba(160,180,255,0.18);
+      color: #fff;
+      margin-bottom: 34px;
+      box-shadow: inset 0 1px rgba(255,255,255,0.08), 0 8px 22px rgba(73,184,255,0.10);
+    }
+
+    .fsai-service-icon svg {
+      width: 24px;
+      height: 24px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .fsai-service-card h3 { margin: 0 0 10px; font-size: 19px; letter-spacing: -.02em; }
+    .fsai-service-card p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.55; }
+
+    .fsai-portfolio { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+
+    .fsai-project {
+      min-height: 520px;
+      display: flex;
+      flex-direction: column;
+      color: inherit;
+      background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.025)), rgba(8, 12, 26, 0.88);
+      border: 1px solid rgba(146, 167, 255, 0.18);
+      border-radius: 26px;
+      overflow: hidden;
+      box-shadow: 0 22px 70px rgba(0,0,0,0.25);
+      transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+    }
+
+    .fsai-project:hover { transform: translateY(-7px); border-color: rgba(102, 165, 255, 0.44); box-shadow: 0 30px 90px rgba(59, 94, 255, 0.20); }
+
+    .fsai-project-cover {
+      min-height: 214px;
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    .fsai-project-cover::before {
+      content: "";
+      position: absolute;
+      inset: -35%;
+      z-index: -1;
+      background: radial-gradient(circle at 20% 16%, rgba(255,255,255,0.24), transparent 28%), radial-gradient(circle at 82% 72%, rgba(255,255,255,0.13), transparent 32%);
+      opacity: .82;
+    }
+
+    .fsai-project-resume { background: linear-gradient(135deg, rgba(73,184,255,.28), rgba(127,107,255,.34) 48%, rgba(212,91,255,.22)), #071026; }
+    .fsai-project-trading { background: linear-gradient(135deg, rgba(67,229,143,.18), rgba(73,184,255,.12) 48%, rgba(12,17,34,.98)), #060b18; }
+    .fsai-project-rank { background: linear-gradient(135deg, rgba(245,247,255,.94), rgba(216,225,255,.80) 54%, rgba(73,184,255,.20)), #edf3ff; color: #101828; }
+
+    .fsai-project-art {
+      height: 142px;
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.11);
+      background: rgba(255,255,255,0.055);
+      box-shadow: inset 0 1px rgba(255,255,255,0.08), 0 24px 70px rgba(0,0,0,0.18);
+    }
+
+    .fsai-project-art img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+    }
+
+    .fsai-project-rank .fsai-project-art {
+      background: #06121b;
+      border-color: rgba(35,55,110,.16);
+      box-shadow: inset 0 1px rgba(255,255,255,.18), 0 24px 60px rgba(45,70,130,.12);
+    }
+
+    .fsai-project-name {
+      margin: 14px 0 18px;
+      color: rgba(255,255,255,.72);
+      font-size: 11px;
+      font-weight: 850;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+
+    .fsai-project-rank .fsai-project-name { color: #5b6682; }
+
+    .fsai-project-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .fsai-project-chips span {
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.10);
+      border: 1px solid rgba(255,255,255,0.14);
+      color: rgba(255,255,255,0.88);
+      font-size: 11px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .fsai-project-rank .fsai-project-chips span {
+      background: rgba(7, 17, 38, .07);
+      border-color: rgba(35, 55, 110, .14);
+      color: #26334f;
+    }
+
+    .fsai-project-content {
+      padding: 24px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .fsai-project h3 { margin: 0 0 8px; font-size: 23px; letter-spacing: -.035em; }
+    .fsai-project .fsai-label { color: #c9d2ff; font-size: 14px; margin-bottom: 14px; line-height: 1.45; }
+    .fsai-project p { color: var(--muted); font-size: 14px; line-height: 1.65; margin: 0; }
+    .fsai-project-link { margin-top: auto; padding-top: 22px; color: var(--cyan); font-size: 14px; font-weight: 850; }
+
+    .fsai-steps { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; counter-reset: step; }
+    .fsai-step { background: rgba(255,255,255,0.045); border: 1px solid rgba(148, 170, 255, 0.14); border-radius: 22px; padding: 20px; min-height: 180px; position: relative; }
+    .fsai-step::before { counter-increment: step; content: "0" counter(step); display: inline-grid; place-items: center; width: 38px; height: 38px; border-radius: 13px; background: linear-gradient(135deg, rgba(57,168,255,.24), rgba(178,68,255,.22)); border: 1px solid rgba(255,255,255,.11); color: #fff; font-weight: 900; margin-bottom: 25px; }
+    .fsai-step h3 { margin: 0 0 9px; font-size: 16px; }
+    .fsai-step p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.5; }
+
+    .fsai-split { display: grid; grid-template-columns: .9fr 1.1fr; gap: 24px; align-items: stretch; }
+
+    .fsai-about-card,
+    .fsai-audience-card,
+    .fsai-cta-card {
+      background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.025)), rgba(8, 12, 26, 0.82);
+      border: 1px solid rgba(148, 170, 255, 0.17);
+      border-radius: 28px;
+      padding: 28px;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.22);
+    }
+
+    .fsai-about-portrait {
+      height: 320px;
+      border-radius: 24px;
+      background: radial-gradient(circle at 50% 25%, rgba(95, 178, 255, .22), transparent 34%), linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.02)), #080d1d;
+      border: 1px solid rgba(255,255,255,.09);
+      display: block;
+      margin-bottom: 22px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 0 70px rgba(57,168,255,.13);
+    }
+
+    .fsai-about-photo {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+      object-position: center 35%;
+      filter: saturate(1.04) contrast(1.02);
+    }
+
+    .fsai-about-card h2 { margin: 0 0 14px; font-size: 38px; letter-spacing: -.05em; line-height: 1.05; }
+    .fsai-about-card p, .fsai-audience-card p { color: var(--muted); line-height: 1.65; font-size: 15px; }
+    .fsai-tags { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+    .fsai-tags span { border: 1px solid rgba(148, 170, 255, 0.18); background: rgba(255,255,255,0.045); border-radius: 999px; padding: 10px 13px; color: #d7deff; font-size: 13px; }
+
+    .fsai-audience-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 20px; }
+    .fsai-audience-grid div { border-radius: 18px; padding: 16px; background: rgba(255,255,255,0.045); border: 1px solid rgba(255,255,255,0.08); color: #dfe5ff; font-size: 14px; }
+
+    .fsai-cta-card {
+      text-align: center;
+      padding: 54px 28px;
+      background: radial-gradient(circle at 50% 0%, rgba(125, 232, 255, 0.24), transparent 34%), linear-gradient(135deg, rgba(73,184,255,0.24), rgba(212,91,255,0.18)), rgba(8, 12, 26, 0.82);
+    }
+
+    .fsai-cta-card h2 { font-size: clamp(36px, 5vw, 68px); max-width: 860px; margin: 0 auto 18px; }
+    .fsai-cta-card p { color: var(--muted); font-size: 18px; line-height: 1.65; max-width: 700px; margin: 0 auto 28px; }
+
+    .fsai-footer { padding: 26px 0; color: var(--muted-2); border-top: 1px solid rgba(255,255,255,0.07); display: flex; justify-content: space-between; gap: 20px; font-size: 13px; }
+
+    @media (max-width: 1040px) {
+      .fsai-hero, .fsai-split { grid-template-columns: 1fr; }
+      .fsai-visual { min-height: 620px; }
+      .fsai-device { left: 4%; right: auto; }
+      .fsai-services { grid-template-columns: repeat(2, 1fr); }
+      .fsai-portfolio { grid-template-columns: 1fr; }
+      .fsai-steps { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    @media (max-width: 720px) {
+      .fsai-wrap { width: min(100% - 28px, 1180px); }
+      .fsai-nav { gap: 18px; align-items: flex-start; }
+      .fsai-nav-links { display: none; }
+      .fsai-nav .fsai-btn { padding: 12px 14px; font-size: 13px; }
+      .fsai-hero { padding-top: 48px; }
+      .fsai-hero h1 { font-size: 48px; }
+      .fsai-mini-proof, .fsai-services, .fsai-steps, .fsai-audience-grid { grid-template-columns: 1fr; }
+      .fsai-visual { min-height: 500px; }
+      .fsai-device { width: 100%; left: 0; top: 30px; transform: none; }
+      .fsai-floating { display: none; }
+      .fsai-dashboard-grid { grid-template-columns: 1fr; }
+      .fsai-section-head { display: block; }
+      .fsai-rank-metrics { grid-template-columns: repeat(2, 1fr); }
+      .fsai-footer { flex-direction: column; }
+    }
+  </style>
+
+  <div class="fsai-wrap">
+    <header class="fsai-nav">
+      <a class="fsai-logo" href="#top" aria-label="1stStep.ai home">
+        <img class="fsai-logo-img" src="/assets/homepage-logo-640.jpg" alt="1stStep.ai">
+      </a>
+
+      <nav class="fsai-nav-links">
+        <a href="#services">Services</a>
+        <a href="#portfolio">Portfolio</a>
+        <a href="#process">Process</a>
+        <a href="#about">About</a>
+      </nav>
+
+      <a class="fsai-btn fsai-btn-primary" href="https://api.leadconnectorhq.com/widget/booking/Rb4aqLM1NdU5kvZcqNmj" target="_blank" rel="noopener">Book a Build Strategy Call &rarr;</a>
+    </header>
+
+    <section class="fsai-hero" id="top">
+      <div>
+        <div class="fsai-kicker">AI App Builder Service <b>|</b> Real Business Solutions</div>
+
+        <h1>
+          Your idea.<br>
+          Built into a<br>
+          <span class="fsai-gradient">working app.</span>
+        </h1>
+
+        <p>
+          1stStep.ai helps non-technical founders, small businesses, consultants, creators, and professionals turn everyday business ideas into working apps, software tools, websites, dashboards, automations, and AI-powered systems.
+        </p>
+
+        <div class="fsai-hero-actions">
+          <a class="fsai-btn fsai-btn-primary" href="/app-idea-viability-checker.html">Check Your App Idea &rarr;</a>
+          <a class="fsai-btn fsai-btn-ghost" href="#portfolio">View Live Portfolio</a>
+        </div>
+
+        <div class="fsai-mini-proof">
+          <div class="fsai-proof-item"><div class="fsai-proof-icon">01</div><div><strong>Business First</strong><span>Built around the outcome, not just the technology.</span></div></div>
+          <div class="fsai-proof-item"><div class="fsai-proof-icon">02</div><div><strong>End-to-End</strong><span>Workflow, build, testing, launch, and maintenance.</span></div></div>
+          <div class="fsai-proof-item"><div class="fsai-proof-icon">03</div><div><strong>AI-Powered</strong><span>Smarter systems, faster execution, better leverage.</span></div></div>
+        </div>
+      </div>
+
+      <div class="fsai-visual" aria-hidden="true">
+        <div class="fsai-orbit"></div>
+        <div class="fsai-orbit"></div>
+
+        <div class="fsai-device">
+          <div class="fsai-device-top"><span>Analytics Overview</span><div class="fsai-dots"><i></i><i></i><i></i></div></div>
+          <div class="fsai-dashboard-grid">
+            <div class="fsai-ui-card"><h3>Revenue Systems</h3><div class="fsai-stat">$128.6K</div><div class="fsai-good">Up 24.8% workflow lift</div><div class="fsai-chart"></div></div>
+            <div class="fsai-ui-card"><h3>Active Automations</h3><div class="fsai-stat">24</div><div class="fsai-good">Active</div><br><h3>Conversions</h3><div class="fsai-stat">3,892</div><div class="fsai-good">Up 18.2%</div></div>
+          </div>
+        </div>
+
+        <div class="fsai-floating fsai-float-1"><strong>Recent Activity</strong><div class="fsai-row"><span>Lead Enrichment</span><b class="fsai-good">Done</b></div><div class="fsai-row"><span>Data Sync</span><b class="fsai-good">Done</b></div><div class="fsai-row"><span>AI Content Tool</span><b class="fsai-good">Done</b></div></div>
+        <div class="fsai-floating fsai-float-2"><strong>System Integrations</strong><div class="fsai-pill-icons"><div class="fsai-app-icon">H</div><div class="fsai-app-icon">S</div><div class="fsai-app-icon">G</div><div class="fsai-app-icon">+</div></div></div>
+        <div class="fsai-floating fsai-float-3"><strong>AI Workflow</strong><div class="fsai-good">Active</div></div>
+      </div>
+    </section>
+
+    <section class="fsai-section" id="services">
+      <div class="fsai-section-head">
+        <div>
+          <div class="fsai-eyebrow">What I Build</div>
+          <h2>Solutions that <span class="fsai-gradient">power your business</span> forward.</h2>
+          <p class="fsai-section-lede">From rough idea to working product, 1stStep.ai handles the strategy, build, automation, launch, and support.</p>
+        </div>
+      </div>
+
+      <div class="fsai-services">
+        <div class="fsai-service-card"><div class="fsai-service-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"></rect><path d="M9 4v16M4 9h16"></path></svg></div><h3>Custom Apps</h3><p>Web applications, portals, internal tools, calculators, and MVPs built around your workflow.</p></div>
+        <div class="fsai-service-card"><div class="fsai-service-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="12" r="2"></circle><circle cx="12" cy="6" r="2"></circle><circle cx="18" cy="12" r="2"></circle><circle cx="12" cy="18" r="2"></circle><path d="M7.7 10.7l2.6-3.4M13.7 7.3l2.6 3.4M16.3 13.3l-2.6 3.4M10.3 16.7l-2.6-3.4"></path></svg></div><h3>AI Workflows</h3><p>AI-powered systems for intake, writing, summaries, qualification, research, and decision support.</p></div>
+        <div class="fsai-service-card"><div class="fsai-service-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"></path></svg></div><h3>Automations</h3><p>CRM, email, SMS, forms, reminders, reviews, lead routing, and repetitive task automation.</p></div>
+        <div class="fsai-service-card"><div class="fsai-service-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14l-2 2a3 3 0 104 4l2-2"></path><path d="M14 10l2-2a3 3 0 10-4-4L10 6"></path><path d="M8 12h8"></path></svg></div><h3>Integrations</h3><p>Connect the tools you already use so data moves without manual copy/paste or broken handoffs.</p></div>
+        <div class="fsai-service-card"><div class="fsai-service-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19h16"></path><rect x="5" y="11" width="3" height="6" rx="1"></rect><rect x="10.5" y="8" width="3" height="9" rx="1"></rect><rect x="16" y="5" width="3" height="12" rx="1"></rect></svg></div><h3>Dashboards</h3><p>Real-time dashboards that organize signals, KPIs, performance, client data, and operational metrics.</p></div>
+        <div class="fsai-service-card"><div class="fsai-service-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="14" rx="3"></rect><path d="M3 8h18"></path><path d="M9 12h6l-2.5 3v3l-1 1v-4L9 12z"></path></svg></div><h3>Websites & Funnels</h3><p>Premium landing pages, GHL sites, sales funnels, booking flows, and launch pages.</p></div>
+        <div class="fsai-service-card"><div class="fsai-service-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"></circle><path d="M12 12l4-4"></path><path d="M12 7h5v5"></path></svg></div><h3>Consulting</h3><p>Map the fastest path from messy process or idea to a practical system that works.</p></div>
+        <div class="fsai-service-card"><div class="fsai-service-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 6.5a4 4 0 01-5.2 5.2L4 17l3 3 5.3-5.3a4 4 0 005.2-5.2l-2.2 2.2-2.8-2.8 2-2.4z"></path></svg></div><h3>Maintenance</h3><p>Ongoing support, improvements, fixes, optimization, and feature expansion after launch.</p></div>
+      </div>
+    </section>
+
+    <section class="fsai-section" id="portfolio">
+      <div class="fsai-section-head">
+        <div>
+          <div class="fsai-eyebrow">Live Portfolio</div>
+          <h2>Live Builds & Product Systems</h2>
+          <p class="fsai-section-lede">Real products and dashboards built around practical workflows, launch speed, and measurable utility.</p>
+        </div>
+        <a class="fsai-btn fsai-btn-ghost" href="/app-idea-viability-checker.html">Check Your App Idea &rarr;</a>
+      </div>
+
+      <div class="fsai-portfolio">
+        <a class="fsai-project" href="https://app.1ststep.ai/" target="_blank" rel="noopener">
+          <div class="fsai-project-cover fsai-project-resume">
+            <div class="fsai-project-art">
+              <img src="/assets/portfolio-resume-cover.jpg" alt="1stStep.ai resume builder preview">
+            </div>
+            <div class="fsai-project-name">AI Resume Builder</div>
+            <div class="fsai-project-chips"><span>Resume Tailor</span><span>Job Tracker</span><span>Chrome Extension</span></div>
+          </div>
+          <div class="fsai-project-content"><h3>AI Resume Builder</h3><div class="fsai-label">AI resume tailoring and job-search platform</div><p>Resume tailoring, cover letters, job tracking, Chrome extension workflow</p><div class="fsai-project-link">View live project &rarr;</div></div>
+        </a>
+
+        <a class="fsai-project" href="https://dashboard.swingtradepros.com/" target="_blank" rel="noopener">
+          <div class="fsai-project-cover fsai-project-trading">
+            <div class="fsai-project-art">
+              <img src="/assets/portfolio-stp-cover.jpg" alt="Swing Trade Pros dashboard preview">
+            </div>
+            <div class="fsai-project-name">Subscriber Dashboard</div>
+            <div class="fsai-project-chips"><span>CALL/PUT Signals</span><span>Confidence</span><span>Live Status</span></div>
+          </div>
+          <div class="fsai-project-content"><h3>Swing Trade Pros Dashboard</h3><div class="fsai-label">Options signal dashboard</div><p>Subscriber dashboard for alerts, signal status, confidence tracking, and trading analytics</p><div class="fsai-project-link">View live project &rarr;</div></div>
+        </a>
+
+        <a class="fsai-project" href="https://real-rank-ai.vercel.app/" target="_blank" rel="noopener">
+          <div class="fsai-project-cover fsai-project-rank">
+            <div class="fsai-project-art">
+              <img src="/assets/portfolio-real-rank-cover.jpg" alt="Real Rank AI visibility platform preview">
+            </div>
+            <div class="fsai-project-name">Visibility Platform</div>
+            <div class="fsai-project-chips"><span>AI Mentions</span><span>Local Visibility</span><span>PDF Reports</span></div>
+          </div>
+          <div class="fsai-project-content"><h3>Real Rank AI</h3><div class="fsai-label">AI visibility and local authority platform</div><p>Local visibility reporting, AI mention tracking, movement reports, and client-ready audits</p><div class="fsai-project-link">View live project &rarr;</div></div>
+        </a>
+      </div>
+    </section>
+
+    <section class="fsai-section" id="process">
+      <div class="fsai-section-head"><div><div class="fsai-eyebrow">How It Works</div><h2>A simple path from <span class="fsai-gradient">idea to launch.</span></h2></div></div>
+      <div class="fsai-steps">
+        <div class="fsai-step"><h3>Share the Idea</h3><p>Tell me what you want to build, fix, automate, or launch.</p></div>
+        <div class="fsai-step"><h3>Map the Workflow</h3><p>We define the users, steps, screens, tools, and outcome.</p></div>
+        <div class="fsai-step"><h3>Design the System</h3><p>The idea becomes a clear build plan with structure and logic.</p></div>
+        <div class="fsai-step"><h3>Build Version One</h3><p>I create the app, site, dashboard, automation, or tool.</p></div>
+        <div class="fsai-step"><h3>Test & Launch</h3><p>We test the workflow, polish the experience, and go live.</p></div>
+        <div class="fsai-step"><h3>Improve</h3><p>Support, optimize, add features, and maintain the system.</p></div>
+      </div>
+    </section>
+
+    <section class="fsai-section" id="about">
+      <div class="fsai-split">
+        <div class="fsai-about-card">
+          <div class="fsai-about-portrait">
+            <img class="fsai-about-photo" src="/assets/homepage-evan-720.jpg" alt="Evan Pancis" />
+          </div>
+          <div class="fsai-eyebrow">About Evan</div>
+          <h2>Evan Pancis - <span class="fsai-gradient">Consultant, Builder, Problem Solver.</span></h2>
+          <p>I partner with businesses to turn ideas, bottlenecks, and manual workflows into practical digital solutions. From strategy to build to launch, I help create systems that are useful, scalable, and built for real-world results.</p>
+          <div class="fsai-tags"><span>AI Systems</span><span>Apps</span><span>Automations</span><span>GHL</span><span>Dashboards</span><span>Funnels</span></div>
+        </div>
+
+        <div class="fsai-audience-card">
+          <div class="fsai-eyebrow">Who This Is For</div>
+          <h2>Built for people with ideas, not technical teams.</h2>
+          <p>1stStep.ai is for founders, business owners, consultants, creators, professionals, and local service businesses that know what they want to accomplish but need help turning it into a working system.</p>
+          <div class="fsai-audience-grid"><div>Non-technical founders with app ideas</div><div>Small businesses with manual workflows</div><div>Consultants who need client-facing tools</div><div>Creators launching digital products</div><div>Service businesses that need automation</div><div>Professionals who need a website, funnel, or dashboard</div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="fsai-section" id="contact">
+      <div class="fsai-cta-card">
+        <div class="fsai-eyebrow">Ready to Build?</div>
+        <h2>Have an idea? <span class="fsai-gradient">Let's build the first version.</span></h2>
+        <p>Whether you need an app, software tool, website, dashboard, automation, AI workflow, or just help figuring out what to build first - 1stStep.ai can help you take the first step.</p>
+        <a class="fsai-btn fsai-btn-primary" href="https://api.leadconnectorhq.com/widget/booking/Rb4aqLM1NdU5kvZcqNmj" target="_blank" rel="noopener">Book a Strategy Call &rarr;</a>
+      </div>
+    </section>
+
+    <footer class="fsai-footer">
+      <div class="fsai-footer-brand"><img class="fsai-footer-logo" src="/assets/homepage-logo-640.jpg" alt="1stStep.ai"><span>Copyright 2026 1stStep.ai. Built by Evan Pancis.</span></div>
+      <div>Strategy | Automation | Apps | Websites | AI Systems</div>
+    </footer>
+  </div>
+
+  <script>
+    (function () {
+      const root = document.querySelector(".fsai-site");
+      if (!root) return;
+      root.querySelectorAll('a[href^="#"]').forEach(function (link) {
+        link.addEventListener("click", function (event) {
+          const target = root.querySelector(link.getAttribute("href"));
+          if (!target) return;
+          event.preventDefault();
+          target.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+      });
+    })();
+  </script>
+</div>
+</body>
 </html>
