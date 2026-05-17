@@ -93,17 +93,24 @@
     .fsai-logo {
       display: inline-flex;
       align-items: center;
-      gap: 13px;
+      gap: 12px;
       font-weight: 800;
-      letter-spacing: -0.035em;
-      font-size: 29px;
+      letter-spacing: -0.04em;
+      font-size: 25px;
       flex-shrink: 0;
       position: relative;
-      padding: 8px 12px 8px 9px;
-      border-radius: 19px;
-      border: 1px solid rgba(125, 211, 252, 0.18);
-      background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.025));
-      box-shadow: inset 0 1px rgba(255,255,255,0.08), 0 16px 42px rgba(0,0,0,0.18);
+      padding: 4px 8px;
+      border-radius: 20px;
+      background: radial-gradient(circle at 50% 50%, rgba(73,184,255,0.16), rgba(127,107,255,0.06) 52%, transparent 74%);
+    }
+
+    .fsai-logo-img {
+      display: block;
+      width: auto;
+      height: 86px;
+      max-width: min(300px, 34vw);
+      object-fit: contain;
+      filter: drop-shadow(0 16px 38px rgba(80, 100, 255, 0.30)) drop-shadow(0 0 20px rgba(125, 232, 255, 0.12));
     }
 
     .fsai-logo-emblem {
@@ -143,21 +150,11 @@
     }
 
     .fsai-footer-logo {
-      display: inline-flex;
-      align-items: center;
-      gap: 9px;
-      font-weight: 850;
-      letter-spacing: -0.03em;
-      font-size: 20px;
-      color: #fff;
-    }
-
-    .fsai-footer-logo .fsai-logo-emblem {
-      width: 30px;
-      height: 30px;
-      border-radius: 10px;
-      font-size: 18px;
-      box-shadow: 0 8px 20px rgba(43, 127, 255, 0.18), inset 0 1px rgba(255,255,255,0.22);
+      display: block;
+      height: 42px;
+      width: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 14px rgba(80, 100, 255, 0.16));
     }
 
     .fsai-logo-mark { width: 32px; height: 32px; display: grid; place-items: center; position: relative; }
@@ -794,8 +791,8 @@
     @media (max-width: 720px) {
       .fsai-wrap { width: min(100% - 28px, 1180px); }
       .fsai-nav { gap: 14px; align-items: center; margin-top: 10px; padding: 10px 12px; }
-      .fsai-logo { padding: 7px 9px 7px 7px; border-radius: 16px; font-size: 22px; gap: 9px; }
-      .fsai-logo-emblem { width: 38px; height: 38px; border-radius: 12px; font-size: 22px; }
+      .fsai-logo { padding: 2px; border-radius: 16px; }
+      .fsai-logo-img { height: 58px; max-width: min(210px, 48vw); }
       .fsai-nav-links { display: none; }
       .fsai-nav .fsai-btn { padding: 12px 14px; font-size: 13px; }
       .fsai-hero { padding-top: 48px; }
@@ -818,8 +815,7 @@
   <div class="fsai-wrap">
     <header class="fsai-nav">
       <a class="fsai-logo" href="#top" aria-label="1stStep.ai home">
-        <span class="fsai-logo-emblem" aria-hidden="true">1</span>
-        <span class="fsai-logo-word">1stStep.ai</span>
+        <img class="fsai-logo-img" src="/assets/firststep-logo-transparent-cleaned.png" alt="1stStep.ai">
       </a>
 
       <nav class="fsai-nav-links">
@@ -1049,7 +1045,7 @@
     </section>
 
     <footer class="fsai-footer">
-      <div class="fsai-footer-brand"><span class="fsai-footer-logo"><span class="fsai-logo-emblem" aria-hidden="true">1</span><span>1stStep.ai</span></span><span>Copyright 2026 1stStep.ai. Built by Evan Pancis.</span></div>
+      <div class="fsai-footer-brand"><img class="fsai-footer-logo" src="/assets/firststep-logo-transparent-cleaned.png" alt="1stStep.ai"><span>Copyright 2026 1stStep.ai. Built by Evan Pancis.</span></div>
       <div>Strategy | Automation | Apps | Websites | AI Systems</div>
     </footer>
   </div>
