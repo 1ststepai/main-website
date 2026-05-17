@@ -101,7 +101,6 @@
       position: relative;
       padding: 4px 8px;
       border-radius: 20px;
-      background: radial-gradient(circle at 50% 50%, rgba(73,184,255,0.16), rgba(127,107,255,0.06) 52%, transparent 74%);
     }
 
     .fsai-logo-img {
@@ -110,7 +109,6 @@
       height: 86px;
       max-width: min(300px, 34vw);
       object-fit: contain;
-      filter: drop-shadow(0 16px 38px rgba(80, 100, 255, 0.30)) drop-shadow(0 0 20px rgba(125, 232, 255, 0.12));
     }
 
     .fsai-logo-emblem {
@@ -154,7 +152,6 @@
       height: 42px;
       width: auto;
       object-fit: contain;
-      filter: drop-shadow(0 4px 14px rgba(80, 100, 255, 0.16));
     }
 
     .fsai-logo-mark { width: 32px; height: 32px; display: grid; place-items: center; position: relative; }
@@ -621,194 +618,153 @@
       display: flex;
       flex-direction: column;
     }
+    .fsai-project-content h3 { margin: 0 0 10px; font-size: 22px; letter-spacing: -.035em; }
+    .fsai-label { color: var(--cyan); font-size: 12px; font-weight: 850; text-transform: uppercase; letter-spacing: .12em; margin-bottom: 12px; }
+    .fsai-project-content p { color: var(--muted); line-height: 1.58; margin: 0; }
+    .fsai-project-link { margin-top: auto; padding-top: 22px; color: #fff; font-weight: 850; }
 
-    .fsai-project h3 { margin: 0 0 8px; font-size: 23px; letter-spacing: -.035em; }
-    .fsai-project .fsai-label { color: #c9d2ff; font-size: 14px; margin-bottom: 14px; line-height: 1.45; }
-    .fsai-project p { color: var(--muted); font-size: 14px; line-height: 1.65; margin: 0; }
-    .fsai-project-link { margin-top: auto; padding-top: 22px; color: var(--cyan); font-size: 14px; font-weight: 850; }
+    .fsai-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; counter-reset: steps; }
+    .fsai-step { counter-increment: steps; border-left: 1px solid rgba(125,232,255,0.28); padding: 8px 0 8px 18px; position: relative; }
+    .fsai-step::before { content: "0" counter(steps); display: block; color: var(--cyan); font-weight: 900; margin-bottom: 16px; }
+    .fsai-step h3 { margin: 0 0 8px; font-size: 18px; }
+    .fsai-step p { margin: 0; color: var(--muted); line-height: 1.55; }
 
-    .fsai-steps { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; counter-reset: step; }
-    .fsai-step { background: rgba(255,255,255,0.045); border: 1px solid rgba(148, 170, 255, 0.14); border-radius: 22px; padding: 20px; min-height: 180px; position: relative; }
-    .fsai-step::before { counter-increment: step; content: "0" counter(step); display: inline-grid; place-items: center; width: 38px; height: 38px; border-radius: 13px; background: linear-gradient(135deg, rgba(57,168,255,.24), rgba(178,68,255,.22)); border: 1px solid rgba(255,255,255,.11); color: #fff; font-weight: 900; margin-bottom: 25px; }
-    .fsai-step h3 { margin: 0 0 9px; font-size: 16px; }
-    .fsai-step p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.5; }
-
-    .fsai-split { display: grid; grid-template-columns: .9fr 1.1fr; gap: 24px; align-items: stretch; }
-
-    .fsai-about-card,
-    .fsai-audience-card,
-    .fsai-cta-card {
-      background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.025)), rgba(8, 12, 26, 0.82);
-      border: 1px solid rgba(148, 170, 255, 0.17);
+    .fsai-split { display: grid; grid-template-columns: .95fr 1.05fr; gap: 22px; align-items: stretch; }
+    .fsai-about-card, .fsai-audience-card, .fsai-cta-card, .fsai-reviews-card {
+      background: linear-gradient(145deg, rgba(255,255,255,0.085), rgba(255,255,255,0.025)), rgba(9, 13, 28, 0.82);
+      border: 1px solid rgba(148,170,255,0.18);
       border-radius: 28px;
-      padding: 28px;
+      padding: 30px;
       box-shadow: 0 24px 80px rgba(0,0,0,0.22);
     }
 
     .fsai-about-portrait {
-      height: 320px;
+      width: 118px;
+      height: 118px;
       border-radius: 24px;
-      background: radial-gradient(circle at 50% 25%, rgba(95, 178, 255, .22), transparent 34%), linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.02)), #080d1d;
-      border: 1px solid rgba(255,255,255,.09);
-      display: block;
-      margin-bottom: 22px;
-      overflow: hidden;
-      position: relative;
-      box-shadow: 0 0 70px rgba(57,168,255,.13);
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      padding: 3px;
+      box-shadow: 0 18px 50px rgba(78, 100, 255, 0.24);
     }
 
     .fsai-about-photo {
+      display: block;
       width: 100%;
       height: 100%;
-      display: block;
       object-fit: cover;
-      object-position: center 35%;
-      filter: saturate(1.04) contrast(1.02);
+      border-radius: 21px;
+      background: #101522;
     }
 
-    .fsai-about-card h2 { margin: 0 0 14px; font-size: 38px; letter-spacing: -.05em; line-height: 1.05; }
-    .fsai-about-card p, .fsai-audience-card p { color: var(--muted); line-height: 1.65; font-size: 15px; }
-    .fsai-tags { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
-    .fsai-tags span { border: 1px solid rgba(148, 170, 255, 0.18); background: rgba(255,255,255,0.045); border-radius: 999px; padding: 10px 13px; color: #d7deff; font-size: 13px; }
-
-    .fsai-audience-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 20px; }
-    .fsai-audience-grid div { border-radius: 18px; padding: 16px; background: rgba(255,255,255,0.045); border: 1px solid rgba(255,255,255,0.08); color: #dfe5ff; font-size: 14px; }
-
-    .fsai-cta-card {
-      text-align: center;
-      padding: 54px 28px;
-      background: radial-gradient(circle at 50% 0%, rgba(125, 232, 255, 0.24), transparent 34%), linear-gradient(135deg, rgba(73,184,255,0.24), rgba(212,91,255,0.18)), rgba(8, 12, 26, 0.82);
-    }
-
-    .fsai-cta-card h2 { font-size: clamp(36px, 5vw, 68px); max-width: 860px; margin: 0 auto 18px; }
-    .fsai-cta-card p { color: var(--muted); font-size: 18px; line-height: 1.65; max-width: 700px; margin: 0 auto 28px; }
-
-    .fsai-footer { padding: 26px 0; color: var(--muted-2); border-top: 1px solid rgba(255,255,255,0.07); display: flex; justify-content: space-between; gap: 20px; font-size: 13px; }
-
-    .fsai-reviews-card {
-      display: grid;
-      grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
-      gap: 18px;
-      align-items: stretch;
-    }
-
-    .fsai-review-score,
-    .fsai-review-note {
-      background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.025)), rgba(8, 12, 26, 0.82);
-      border: 1px solid rgba(148, 170, 255, 0.17);
-      border-radius: 28px;
-      padding: 28px;
-      box-shadow: 0 24px 80px rgba(0,0,0,0.22);
-    }
-
-    .fsai-review-score strong { display: block; font-size: 54px; letter-spacing: -.06em; line-height: 1; margin-bottom: 16px; }
-    .fsai-review-score p,
-    .fsai-review-note p { color: var(--muted); line-height: 1.65; margin: 0 0 18px; }
+    .fsai-about-card h2, .fsai-audience-card h2, .fsai-cta-card h2 { margin: 0 0 16px; font-size: clamp(30px, 4vw, 48px); line-height: 1.04; letter-spacing: -.055em; }
+    .fsai-about-card p, .fsai-audience-card p, .fsai-cta-card p { color: var(--muted); line-height: 1.65; margin: 0 0 20px; }
+    .fsai-tags { display: flex; flex-wrap: wrap; gap: 9px; }
+    .fsai-tags span, .fsai-audience-grid div { border: 1px solid rgba(148,170,255,0.17); background: rgba(255,255,255,0.035); border-radius: 999px; padding: 9px 11px; color: #dfe6ff; font-size: 12px; font-weight: 750; }
+    .fsai-audience-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 22px; }
+    .fsai-audience-grid div { border-radius: 14px; line-height: 1.35; }
+    .fsai-reviews-card { display: grid; grid-template-columns: .8fr 1.2fr; gap: 22px; align-items: stretch; }
+    .fsai-review-score, .fsai-review-note { border: 1px solid rgba(148,170,255,0.16); border-radius: 24px; padding: 24px; background: rgba(255,255,255,0.035); }
+    .fsai-review-score strong { display: block; font-size: 28px; letter-spacing: -.04em; margin-bottom: 12px; }
+    .fsai-review-score p, .fsai-review-note p { color: var(--muted); line-height: 1.65; margin: 0 0 18px; }
+    .fsai-cta-card { text-align: center; padding: 54px 30px; background: radial-gradient(circle at 50% 0%, rgba(73,184,255,0.22), transparent 34%), linear-gradient(135deg, rgba(73,184,255,0.14), rgba(212,91,255,0.12)), rgba(9, 13, 28, 0.86); }
+    .fsai-cta-card p { max-width: 680px; margin-left: auto; margin-right: auto; }
+    .fsai-footer { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 28px 0 42px; color: var(--muted-2); font-size: 13px; }
 
     .fsai-chat-launch {
       position: fixed;
-      right: 18px;
-      bottom: 18px;
-      z-index: 42;
-      min-height: 54px;
-      padding: 0 18px;
-      border: 1px solid rgba(125,232,255,0.36);
+      right: 22px;
+      bottom: 22px;
+      z-index: 45;
+      border: 1px solid rgba(125,232,255,0.30);
       border-radius: 999px;
+      background: linear-gradient(135deg, #47c7ff 0%, #4d8dff 42%, #b85dff 100%);
       color: #fff;
-      background: linear-gradient(135deg, rgba(73,184,255,0.96), rgba(127,107,255,0.96));
-      box-shadow: 0 20px 70px rgba(73,184,255,0.26);
-      font: inherit;
+      box-shadow: 0 18px 55px rgba(73,184,255,0.28);
+      padding: 14px 18px;
       font-weight: 900;
       cursor: pointer;
     }
 
     .fsai-chat-panel {
-      display: none;
       position: fixed;
-      right: 18px;
-      bottom: 88px;
-      z-index: 43;
-      width: min(420px, calc(100vw - 24px));
-      border: 1px solid rgba(148,170,255,0.22);
-      border-radius: 24px;
-      background: rgba(7, 11, 24, 0.96);
-      box-shadow: 0 30px 100px rgba(0,0,0,0.55);
-      backdrop-filter: blur(22px);
+      right: 22px;
+      bottom: 84px;
+      z-index: 46;
+      width: min(410px, calc(100vw - 28px));
+      max-height: min(720px, calc(100vh - 108px));
+      display: none;
+      flex-direction: column;
       overflow: hidden;
+      border: 1px solid rgba(148,170,255,0.24);
+      border-radius: 24px;
+      background: rgba(8, 12, 26, 0.94);
+      box-shadow: 0 24px 90px rgba(0,0,0,0.50);
+      backdrop-filter: blur(20px);
     }
 
-    .fsai-chat-panel.fsai-open { display: block; }
-    .fsai-chat-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.08); }
-    .fsai-chat-head strong { display: block; font-size: 15px; }
-    .fsai-chat-head span { display: block; color: var(--muted); font-size: 12px; margin-top: 2px; }
-    .fsai-chat-close { width: 34px; height: 34px; border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; background: rgba(255,255,255,0.05); color: #fff; cursor: pointer; }
-    .fsai-chat-body { padding: 16px; display: grid; gap: 12px; }
-    .fsai-chat-bubble { width: fit-content; max-width: 92%; border-radius: 16px; padding: 12px 13px; color: #dfe7ff; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); font-size: 14px; line-height: 1.45; }
-    .fsai-chat-bubble.fsai-user { justify-self: end; color: #fff; background: rgba(73,184,255,0.18); border-color: rgba(125,232,255,0.24); }
-    .fsai-chat-field { display: grid; gap: 8px; }
-    .fsai-chat-field label { color: #dfe7ff; font-size: 13px; font-weight: 800; }
-    .fsai-chat-input,
-    .fsai-chat-textarea,
-    .fsai-chat-select {
+    .fsai-chat-panel.fsai-open { display: flex; }
+    .fsai-chat-head { display: flex; justify-content: space-between; gap: 14px; align-items: flex-start; padding: 18px 18px 14px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .fsai-chat-head strong { display: block; color: #fff; font-size: 17px; margin-bottom: 4px; }
+    .fsai-chat-head span { display: block; color: var(--muted); font-size: 12px; line-height: 1.35; }
+    .fsai-chat-close { border: 0; background: rgba(255,255,255,0.08); color: #fff; width: 32px; height: 32px; border-radius: 999px; cursor: pointer; }
+    .fsai-chat-body { padding: 16px 18px 18px; overflow: auto; }
+    .fsai-chat-bubble { color: #dfe6ff; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 12px 14px; font-size: 13px; line-height: 1.45; margin-bottom: 14px; }
+    .fsai-chat-field { display: grid; gap: 7px; margin-bottom: 12px; }
+    .fsai-chat-field label { color: var(--muted); font-size: 12px; font-weight: 800; }
+    .fsai-chat-input, .fsai-chat-select, .fsai-chat-textarea {
       width: 100%;
-      border: 1px solid rgba(203,213,225,0.16);
+      border: 1px solid rgba(148,170,255,0.18);
       border-radius: 14px;
+      background: rgba(255,255,255,0.045);
       color: #fff;
-      background: #151927;
+      padding: 11px 12px;
       font: inherit;
-      padding: 12px;
-      color-scheme: dark;
+      outline: none;
     }
-    .fsai-chat-input::placeholder,
-    .fsai-chat-textarea::placeholder { color: rgba(223,231,255,0.46); }
-    .fsai-chat-select option {
-      color: #f7f9ff;
-      background: #151927;
-    }
-    .fsai-chat-select option:checked,
-    .fsai-chat-select option:hover {
-      color: #ffffff;
-      background: #2563eb;
-    }
-    .fsai-chat-textarea { min-height: 92px; resize: vertical; }
-    .fsai-chat-actions { display: flex; gap: 10px; flex-wrap: wrap; }
-    .fsai-chat-status { color: var(--muted); font-size: 13px; line-height: 1.45; min-height: 20px; }
+    .fsai-chat-select option { color: #101522; }
+    .fsai-chat-textarea { min-height: 96px; resize: vertical; }
+    .fsai-chat-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+    .fsai-chat-actions .fsai-btn { padding: 12px 15px; }
+    .fsai-chat-status { color: var(--muted); font-size: 12px; line-height: 1.45; min-height: 18px; margin-top: 12px; }
 
-    @media (max-width: 1040px) {
-      .fsai-hero, .fsai-split { grid-template-columns: 1fr; }
-      .fsai-visual { min-height: 620px; }
-      .fsai-device { left: 4%; right: auto; }
-      .fsai-services { grid-template-columns: 1fr; }
-      .fsai-portfolio { grid-template-columns: 1fr; }
-      .fsai-steps { grid-template-columns: repeat(3, 1fr); }
-      .fsai-checker-callout,
-      .fsai-pricing-grid,
-      .fsai-belief-grid,
-      .fsai-reviews-card { grid-template-columns: 1fr; }
-      .fsai-checker-callout { align-items: stretch; }
-    }
-
-    @media (max-width: 720px) {
-      .fsai-wrap { width: min(100% - 28px, 1180px); }
-      .fsai-nav { gap: 14px; align-items: center; margin-top: 10px; padding: 10px 12px; }
-      .fsai-logo { padding: 2px; border-radius: 16px; }
-      .fsai-logo-img { height: 58px; max-width: min(210px, 48vw); }
+    @media (max-width: 980px) {
+      .fsai-nav { align-items: flex-start; gap: 16px; }
+      .fsai-logo-img { height: 68px; max-width: 220px; }
       .fsai-nav-links { display: none; }
-      .fsai-nav .fsai-btn { padding: 12px 14px; font-size: 13px; }
-      .fsai-hero { padding-top: 48px; }
-      .fsai-hero h1 { font-size: 48px; }
-      .fsai-mini-proof, .fsai-services, .fsai-steps, .fsai-audience-grid { grid-template-columns: 1fr; }
-      .fsai-visual { min-height: 500px; }
-      .fsai-device { width: 100%; left: 0; top: 30px; transform: none; }
-      .fsai-floating { display: none; }
-      .fsai-dashboard-grid { grid-template-columns: 1fr; }
+      .fsai-hero { grid-template-columns: 1fr; padding-top: 56px; }
+      .fsai-visual { min-height: 520px; }
+      .fsai-device { left: 0; right: auto; width: 100%; }
+      .fsai-services, .fsai-pricing-grid, .fsai-portfolio, .fsai-steps { grid-template-columns: 1fr; }
+      .fsai-mini-proof { grid-template-columns: 1fr; }
+      .fsai-checker-callout, .fsai-split, .fsai-reviews-card, .fsai-belief-grid { grid-template-columns: 1fr; }
       .fsai-section-head { display: block; }
-      .fsai-rank-metrics { grid-template-columns: repeat(2, 1fr); }
+      .fsai-audience-grid { grid-template-columns: 1fr; }
       .fsai-footer { flex-direction: column; }
+      .fsai-project { min-height: auto; }
+    }
+
+    @media (max-width: 640px) {
+      .fsai-wrap { width: min(100% - 24px, 1180px); }
+      .fsai-nav { margin-top: 10px; padding: 10px; border-radius: 20px; }
+      .fsai-logo-img { height: 54px; max-width: 185px; }
+      .fsai-nav .fsai-btn { display: none; }
+      .fsai-hero { padding-top: 44px; gap: 34px; }
+      .fsai-hero h1 { font-size: clamp(42px, 13vw, 58px); }
+      .fsai-hero p { font-size: 16px; }
+      .fsai-hero-actions { display: grid; }
+      .fsai-hero-actions .fsai-btn { width: 100%; }
+      .fsai-visual { min-height: 520px; }
+      .fsai-device { top: 24px; transform: none; padding: 16px; }
+      .fsai-dashboard-grid { grid-template-columns: 1fr; }
+      .fsai-floating { position: relative; left: auto; right: auto; top: auto; bottom: auto; width: auto; margin-top: 14px; }
+      .fsai-orbit { display: none; }
+      .fsai-section { padding: 58px 0; }
+      .fsai-checker-callout, .fsai-pricing-card, .fsai-belief-card, .fsai-about-card, .fsai-audience-card, .fsai-cta-card, .fsai-reviews-card { padding: 22px; border-radius: 22px; }
       .fsai-sticky-cta { display: flex; }
-      .fsai-chat-launch { right: 12px; bottom: 76px; min-height: 46px; padding: 0 14px; font-size: 13px; }
-      .fsai-chat-panel { right: 12px; bottom: 132px; }
-      .fsai-site { padding-bottom: 96px; }
+      .fsai-footer { padding-bottom: 86px; text-align: center; }
+      .fsai-chat-launch { right: 12px; bottom: 76px; padding: 12px 14px; }
+      .fsai-chat-panel { right: 12px; bottom: 126px; }
     }
   </style>
 
@@ -817,37 +773,26 @@
       <a class="fsai-logo" href="#top" aria-label="1stStep.ai home">
         <img class="fsai-logo-img" src="/assets/firststep-logo-transparent-cleaned.png" alt="1stStep.ai">
       </a>
-
-      <nav class="fsai-nav-links">
+      <nav class="fsai-nav-links" aria-label="Primary navigation">
         <a href="#services">Services</a>
         <a href="#checker">Idea Checker</a>
         <a href="#pricing">Pricing</a>
         <a href="#portfolio">Portfolio</a>
         <a href="#process">Process</a>
       </nav>
-
       <a class="fsai-btn fsai-btn-primary" href="https://api.leadconnectorhq.com/widget/booking/Rb4aqLM1NdU5kvZcqNmj" target="_blank" rel="noopener">Book a Build Strategy Call &rarr;</a>
     </header>
 
     <section class="fsai-hero" id="top">
       <div>
         <div class="fsai-kicker">Apps, MVPs, Websites & Automations <b>|</b> Built Around the Right First Version</div>
-
-        <h1>
-          Turn your app idea or business workflow into a working first version.
-        </h1>
-
-        <p>
-          1stStep.ai builds practical apps, websites, dashboards, and automations for founders, small businesses, and professionals who need to launch faster without hiring a full dev team.
-        </p>
-
+        <h1>Turn your app idea or business workflow into a <span class="fsai-gradient">working first version.</span></h1>
+        <p>1stStep.ai builds practical apps, websites, dashboards, and automations for founders, small businesses, and professionals who need to launch faster without hiring a full dev team.</p>
         <div class="fsai-hero-actions">
           <a class="fsai-btn fsai-btn-primary" href="/app-idea-viability-checker.html">Check Your App Idea &rarr;</a>
           <a class="fsai-btn fsai-btn-ghost" href="https://api.leadconnectorhq.com/widget/booking/Rb4aqLM1NdU5kvZcqNmj" target="_blank" rel="noopener">Book a Build Strategy Call</a>
         </div>
-
         <div class="fsai-helper-line">Get an MVP readiness score, recommended first build path, and risk breakdown before spending money on development.</div>
-
         <div class="fsai-mini-proof">
           <div class="fsai-proof-item"><div class="fsai-proof-icon">01</div><div><strong>Right First Version</strong><span>Scope the smallest useful build before the expensive one.</span></div></div>
           <div class="fsai-proof-item"><div class="fsai-proof-icon">02</div><div><strong>Practical Builds</strong><span>Apps, websites, dashboards, and automations tied to real workflows.</span></div></div>
@@ -856,18 +801,16 @@
       </div>
 
       <div class="fsai-visual" aria-hidden="true">
-        <div class="fsai-orbit"></div>
-        <div class="fsai-orbit"></div>
-
+        <div class="fsai-orbit"></div><div class="fsai-orbit"></div>
         <div class="fsai-device">
           <div class="fsai-device-top"><span>MVP Readiness Studio</span><div class="fsai-dots"><i></i><i></i><i></i></div></div>
           <div class="fsai-dashboard-grid">
             <div class="fsai-ui-card"><h3>MVP Readiness</h3><div class="fsai-stat">82/100</div><div class="fsai-good">Recommended Build: Focused MVP</div><div class="fsai-chart"></div></div>
-            <div class="fsai-ui-card"><h3>Build Phase</h3><div class="fsai-stat">01</div><div class="fsai-good">Workflow Map</div><br><h3>Launch Checklist</h3><div class="fsai-stat">6/8</div><div class="fsai-good">Automation Status: Ready</div></div>
+            <div class="fsai-ui-card"><h3>Build Phase</h3><div class="fsai-stat">01</div><div style="color:var(--muted);font-size:12px;">Workflow Map</div></div>
+            <div class="fsai-ui-card"><h3>Launch Checklist</h3><div class="fsai-stat">6/8</div><div class="fsai-good">Automation Status: Ready</div></div>
           </div>
         </div>
-
-        <div class="fsai-floating fsai-float-1"><strong>Workflow Map</strong><div class="fsai-row"><span>Core user path</span><b class="fsai-good">Mapped</b></div><div class="fsai-row"><span>Risk check</span><b class="fsai-good">Done</b></div><div class="fsai-row"><span>First version</span><b class="fsai-good">Scoped</b></div></div>
+        <div class="fsai-floating fsai-float-1"><div class="fsai-row"><span>Workflow Map</span><strong>Mapped</strong></div><div class="fsai-row"><span>Core user path</span><strong>Mapped</strong></div><div class="fsai-row"><span>Risk check</span><strong>Done</strong></div><div class="fsai-row"><span>First version</span><strong>Scoped</strong></div></div>
         <div class="fsai-floating fsai-float-2"><strong>Recommended Build</strong><div class="fsai-pill-icons"><div class="fsai-app-icon">MVP</div><div class="fsai-app-icon">UX</div><div class="fsai-app-icon">API</div><div class="fsai-app-icon">+</div></div></div>
         <div class="fsai-floating fsai-float-3"><strong>Automation Status</strong><div class="fsai-good">Ready</div></div>
       </div>
