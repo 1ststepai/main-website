@@ -111,28 +111,45 @@
       .aivc-brand {
         display: inline-flex;
         align-items: center;
-        gap: 14px;
+        gap: 13px;
         color: var(--aivc-text);
         text-decoration: none;
         position: relative;
-        padding: 5px;
-        border-radius: 24px;
-        background: radial-gradient(circle at 50% 50%, rgba(36, 146, 255, 0.14), rgba(139, 92, 246, 0.06) 46%, transparent 72%);
+        padding: 8px 12px 8px 9px;
+        border-radius: 19px;
+        border: 1px solid rgba(125, 211, 252, 0.18);
+        background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.025));
+        box-shadow: inset 0 1px rgba(255,255,255,0.08), 0 16px 42px rgba(0,0,0,0.18);
       }
 
       .aivc-brand-mark {
-        display: block;
-        width: auto;
-        height: 88px;
-        max-width: min(340px, 40vw);
-        object-fit: contain;
-        filter: drop-shadow(0 16px 38px rgba(36, 146, 255, 0.38)) drop-shadow(0 0 22px rgba(125, 211, 252, 0.14));
+        display: grid;
+        place-items: center;
+        width: 48px;
+        height: 48px;
+        border-radius: 15px;
+        color: #fff;
+        font-size: 28px;
+        line-height: 1;
+        font-weight: 950;
+        letter-spacing: -0.08em;
+        background:
+          radial-gradient(circle at 28% 22%, rgba(125, 211, 252, 0.95), transparent 34%),
+          linear-gradient(145deg, #07101f 0%, #0b52ff 48%, #9b5cff 100%);
+        border: 1px solid rgba(255,255,255,0.22);
+        box-shadow: 0 0 0 1px rgba(125, 211, 252, 0.16), 0 14px 32px rgba(43, 127, 255, 0.30), inset 0 1px rgba(255,255,255,0.24);
+        text-shadow: 0 2px 12px rgba(0,0,0,0.38);
       }
 
       .aivc-brand-copy strong {
         display: block;
-        font-size: 18px;
+        font-size: 24px;
         line-height: 1.1;
+        letter-spacing: -0.04em;
+        background: linear-gradient(135deg, #fff 25%, #7dd3fc 56%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
       }
 
       .aivc-brand-copy span {
@@ -873,13 +890,19 @@
 
         .aivc-brand {
           gap: 10px;
-          padding: 3px;
-          border-radius: 18px;
+          padding: 7px 9px 7px 7px;
+          border-radius: 16px;
         }
 
         .aivc-brand-mark {
-          height: 66px;
-          max-width: min(240px, 52vw);
+          width: 38px;
+          height: 38px;
+          border-radius: 12px;
+          font-size: 22px;
+        }
+
+        .aivc-brand-copy strong {
+          font-size: 20px;
         }
 
         .aivc-nav-actions .aivc-nav-link[href="#aivc-assessment"] {
@@ -949,7 +972,7 @@
         <div class="aivc-container">
           <header class="aivc-nav">
             <a class="aivc-brand" href="#aivc-root" aria-label="1stStep.ai">
-              <img class="aivc-brand-mark" src="/assets/firststep-logo-transparent-official.png" alt="1stStep.ai" />
+              <span class="aivc-brand-mark" aria-hidden="true">1</span>
               <span class="aivc-brand-copy">
                 <!-- Brand name: change this text if needed -->
                 <strong>1stStep.ai</strong>
