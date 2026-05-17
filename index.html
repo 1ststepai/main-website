@@ -656,6 +656,83 @@
 
     .fsai-footer { padding: 26px 0; color: var(--muted-2); border-top: 1px solid rgba(255,255,255,0.07); display: flex; justify-content: space-between; gap: 20px; font-size: 13px; }
 
+    .fsai-reviews-card {
+      display: grid;
+      grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .fsai-review-score,
+    .fsai-review-note {
+      background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.025)), rgba(8, 12, 26, 0.82);
+      border: 1px solid rgba(148, 170, 255, 0.17);
+      border-radius: 28px;
+      padding: 28px;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.22);
+    }
+
+    .fsai-review-score strong { display: block; font-size: 54px; letter-spacing: -.06em; line-height: 1; margin-bottom: 16px; }
+    .fsai-review-score p,
+    .fsai-review-note p { color: var(--muted); line-height: 1.65; margin: 0 0 18px; }
+
+    .fsai-chat-launch {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 42;
+      min-height: 54px;
+      padding: 0 18px;
+      border: 1px solid rgba(125,232,255,0.36);
+      border-radius: 999px;
+      color: #fff;
+      background: linear-gradient(135deg, rgba(73,184,255,0.96), rgba(127,107,255,0.96));
+      box-shadow: 0 20px 70px rgba(73,184,255,0.26);
+      font: inherit;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .fsai-chat-panel {
+      display: none;
+      position: fixed;
+      right: 18px;
+      bottom: 88px;
+      z-index: 43;
+      width: min(420px, calc(100vw - 24px));
+      border: 1px solid rgba(148,170,255,0.22);
+      border-radius: 24px;
+      background: rgba(7, 11, 24, 0.96);
+      box-shadow: 0 30px 100px rgba(0,0,0,0.55);
+      backdrop-filter: blur(22px);
+      overflow: hidden;
+    }
+
+    .fsai-chat-panel.fsai-open { display: block; }
+    .fsai-chat-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .fsai-chat-head strong { display: block; font-size: 15px; }
+    .fsai-chat-head span { display: block; color: var(--muted); font-size: 12px; margin-top: 2px; }
+    .fsai-chat-close { width: 34px; height: 34px; border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; background: rgba(255,255,255,0.05); color: #fff; cursor: pointer; }
+    .fsai-chat-body { padding: 16px; display: grid; gap: 12px; }
+    .fsai-chat-bubble { width: fit-content; max-width: 92%; border-radius: 16px; padding: 12px 13px; color: #dfe7ff; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); font-size: 14px; line-height: 1.45; }
+    .fsai-chat-bubble.fsai-user { justify-self: end; color: #fff; background: rgba(73,184,255,0.18); border-color: rgba(125,232,255,0.24); }
+    .fsai-chat-field { display: grid; gap: 8px; }
+    .fsai-chat-field label { color: #dfe7ff; font-size: 13px; font-weight: 800; }
+    .fsai-chat-input,
+    .fsai-chat-textarea,
+    .fsai-chat-select {
+      width: 100%;
+      border: 1px solid rgba(203,213,225,0.16);
+      border-radius: 14px;
+      color: #fff;
+      background: rgba(255,255,255,0.055);
+      font: inherit;
+      padding: 12px;
+    }
+    .fsai-chat-textarea { min-height: 92px; resize: vertical; }
+    .fsai-chat-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .fsai-chat-status { color: var(--muted); font-size: 13px; line-height: 1.45; min-height: 20px; }
+
     @media (max-width: 1040px) {
       .fsai-hero, .fsai-split { grid-template-columns: 1fr; }
       .fsai-visual { min-height: 620px; }
@@ -665,7 +742,8 @@
       .fsai-steps { grid-template-columns: repeat(3, 1fr); }
       .fsai-checker-callout,
       .fsai-pricing-grid,
-      .fsai-belief-grid { grid-template-columns: 1fr; }
+      .fsai-belief-grid,
+      .fsai-reviews-card { grid-template-columns: 1fr; }
       .fsai-checker-callout { align-items: stretch; }
     }
 
@@ -687,6 +765,8 @@
       .fsai-rank-metrics { grid-template-columns: repeat(2, 1fr); }
       .fsai-footer { flex-direction: column; }
       .fsai-sticky-cta { display: flex; }
+      .fsai-chat-launch { right: 12px; bottom: 76px; min-height: 46px; padding: 0 14px; font-size: 13px; }
+      .fsai-chat-panel { right: 12px; bottom: 132px; }
       .fsai-site { padding-bottom: 96px; }
     }
   </style>
@@ -888,6 +968,29 @@
       </div>
     </section>
 
+    <section class="fsai-section" id="reviews">
+      <div class="fsai-section-head">
+        <div>
+          <div class="fsai-eyebrow">Google Reviews</div>
+          <h2>Public feedback will live here as the profile grows.</h2>
+          <p class="fsai-section-lede">1stStep.ai is set up to collect real Google reviews from clients and collaborators. This section is reserved for verified public feedback only.</p>
+        </div>
+      </div>
+      <div class="fsai-reviews-card">
+        <div class="fsai-review-score">
+          <strong>Google Reviews</strong>
+          <p>Once the Google Business Profile is verified and real reviews are posted, this section can display the live public profile or selected verified reviews.</p>
+          <a class="fsai-btn fsai-btn-ghost" href="https://www.google.com/search?q=1stStep.ai+reviews" target="_blank" rel="noopener">Search Google Reviews &rarr;</a>
+        </div>
+        <div class="fsai-review-note">
+          <div class="fsai-eyebrow">Trust Rule</div>
+          <h3 style="margin:0 0 12px;font-size:28px;letter-spacing:-.04em;">Real feedback only.</h3>
+          <p>The site will show Google reviews after the profile has public reviews from real people who have worked with 1stStep.ai. Until then, the portfolio and working App Idea Checker are the proof.</p>
+          <a class="fsai-btn fsai-btn-primary" href="/app-idea-viability-checker.html">Check Your App Idea &rarr;</a>
+        </div>
+      </div>
+    </section>
+
     <section class="fsai-section" id="contact">
       <div class="fsai-cta-card">
         <div class="fsai-eyebrow">Ready to Build?</div>
@@ -911,6 +1014,55 @@
     <a class="fsai-btn fsai-btn-primary" href="/app-idea-viability-checker.html">Check It</a>
   </div>
 
+  <button class="fsai-chat-launch" type="button" data-fsai-chat-open>Idea Concierge</button>
+  <div class="fsai-chat-panel" data-fsai-chat-panel aria-label="1stStep.ai idea concierge">
+    <div class="fsai-chat-head">
+      <div><strong>Idea Concierge</strong><span>Share the rough idea. I will package it for Evan.</span></div>
+      <button class="fsai-chat-close" type="button" data-fsai-chat-close aria-label="Close idea concierge">x</button>
+    </div>
+    <form class="fsai-chat-body" data-fsai-chat-form>
+      <div class="fsai-chat-bubble">Have an app, website, dashboard, or automation idea? Send the short version here.</div>
+      <div class="fsai-chat-field">
+        <label for="fsai-chat-idea">What are you trying to build?</label>
+        <textarea class="fsai-chat-textarea" id="fsai-chat-idea" name="idea" required minlength="12" placeholder="Example: I need a dashboard that tracks leads, quotes, and follow-ups for my service business."></textarea>
+      </div>
+      <div class="fsai-chat-field">
+        <label for="fsai-chat-type">Best guess</label>
+        <select class="fsai-chat-select" id="fsai-chat-type" name="type">
+          <option>App / MVP</option>
+          <option>Website + lead capture</option>
+          <option>Internal dashboard</option>
+          <option>Automation</option>
+          <option>AI workflow tool</option>
+          <option>Not sure yet</option>
+        </select>
+      </div>
+      <div class="fsai-chat-field">
+        <label for="fsai-chat-stage">Where are you at?</label>
+        <select class="fsai-chat-select" id="fsai-chat-stage" name="stage">
+          <option>Just an idea</option>
+          <option>I have notes or mockups</option>
+          <option>I already do this manually</option>
+          <option>Customers/users have asked for it</option>
+          <option>I need help figuring out the MVP</option>
+        </select>
+      </div>
+      <div class="fsai-chat-field">
+        <label for="fsai-chat-name">Name</label>
+        <input class="fsai-chat-input" id="fsai-chat-name" name="name" required placeholder="Your name" />
+      </div>
+      <div class="fsai-chat-field">
+        <label for="fsai-chat-email">Email</label>
+        <input class="fsai-chat-input" id="fsai-chat-email" name="email" type="email" required placeholder="you@example.com" />
+      </div>
+      <div class="fsai-chat-actions">
+        <button class="fsai-btn fsai-btn-primary" type="submit" data-fsai-chat-submit>Send Idea</button>
+        <a class="fsai-btn fsai-btn-ghost" href="/app-idea-viability-checker.html">Full Checker</a>
+      </div>
+      <div class="fsai-chat-status" data-fsai-chat-status></div>
+    </form>
+  </div>
+
   <script>
     (function () {
       const root = document.querySelector(".fsai-site");
@@ -923,6 +1075,117 @@
           target.scrollIntoView({ behavior: "smooth", block: "start" });
         });
       });
+
+      const chatPanel = document.querySelector("[data-fsai-chat-panel]");
+      const chatOpen = document.querySelector("[data-fsai-chat-open]");
+      const chatClose = document.querySelector("[data-fsai-chat-close]");
+      const chatForm = document.querySelector("[data-fsai-chat-form]");
+      const chatStatus = document.querySelector("[data-fsai-chat-status]");
+      const chatSubmit = document.querySelector("[data-fsai-chat-submit]");
+
+      function setChatStatus(message, isError) {
+        if (!chatStatus) return;
+        chatStatus.textContent = message || "";
+        chatStatus.style.color = isError ? "#ffb4bf" : "var(--muted)";
+      }
+
+      function scoreChatIdea(idea, stage) {
+        let score = 58;
+        if (idea.length > 80) score += 8;
+        if (/customer|client|lead|revenue|booking|quote|pay|manual|spreadsheet|workflow/i.test(idea)) score += 10;
+        if (/already do this manually|customers\/users have asked/i.test(stage)) score += 12;
+        if (/notes|mockups|mvp/i.test(stage)) score += 8;
+        return Math.max(35, Math.min(88, score));
+      }
+
+      function categoryForScore(score) {
+        if (score >= 80) return "Strong MVP Candidate";
+        if (score >= 60) return "Viable, Needs Validation";
+        if (score >= 40) return "Needs Repositioning";
+        return "Do Not Build Yet";
+      }
+
+      function mapIdeaType(type) {
+        if (/website/i.test(type)) return "Business website";
+        if (/dashboard/i.test(type)) return "Internal automation";
+        if (/automation/i.test(type)) return "Internal automation";
+        if (/AI/i.test(type)) return "AI tool";
+        if (/not sure/i.test(type)) return "Not sure yet";
+        return "Web app / SaaS";
+      }
+
+      if (chatOpen && chatPanel) {
+        chatOpen.addEventListener("click", function () {
+          chatPanel.classList.toggle("fsai-open");
+        });
+      }
+
+      if (chatClose && chatPanel) {
+        chatClose.addEventListener("click", function () {
+          chatPanel.classList.remove("fsai-open");
+        });
+      }
+
+      if (chatForm) {
+        chatForm.addEventListener("submit", function (event) {
+          event.preventDefault();
+          const form = event.currentTarget;
+          const idea = form.elements.idea.value.trim();
+          const type = form.elements.type.value;
+          const stage = form.elements.stage.value;
+          const score = scoreChatIdea(idea, stage);
+          const category = categoryForScore(score);
+          const payload = {
+            source: "app_idea_concierge",
+            name: form.elements.name.value.trim(),
+            email: form.elements.email.value.trim(),
+            phone: "",
+            score: score,
+            category: category,
+            idea_type: mapIdeaType(type),
+            audience: "Not provided",
+            budget: "Not provided",
+            launch_timeline: "Not provided",
+            recommended_path: type === "Website + lead capture" ? "Website + lead capture system" : "Focused MVP with only the core workflow",
+            tags: ["app_idea_checker", "idea_concierge", score >= 80 ? "mvp_ready_high" : "needs_validation", "repo_locked_until_paid"],
+            idea_text: idea,
+            answers: {
+              idea_description: idea,
+              review_mode: "idea_concierge",
+              first_version: type,
+              stage: stage
+            },
+            created_at: new Date().toISOString()
+          };
+
+          if (chatSubmit) {
+            chatSubmit.disabled = true;
+            chatSubmit.textContent = "Sending...";
+          }
+          setChatStatus("Saving your idea for Evan...", false);
+
+          fetch("/api/app-idea-checker", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          }).then(function (response) {
+            return response.json().then(function (data) {
+              if (!response.ok || data.ok !== true) throw new Error(data.error || "Request failed");
+              try {
+                window.localStorage.setItem("appIdeaCheckerLastResponse", JSON.stringify(data));
+              } catch (error) {}
+              setChatStatus("Saved. Evan will get the idea, score, and context. You can also book a build strategy call below.", false);
+            });
+          }).catch(function () {
+            setChatStatus("Something went wrong saving it. Please try the full checker or book a call.", true);
+          }).then(function () {
+            if (chatSubmit) {
+              chatSubmit.disabled = false;
+              chatSubmit.textContent = "Send Idea";
+            }
+          });
+        });
+      }
     })();
   </script>
 </div>
