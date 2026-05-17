@@ -725,9 +725,21 @@
       border: 1px solid rgba(203,213,225,0.16);
       border-radius: 14px;
       color: #fff;
-      background: rgba(255,255,255,0.055);
+      background: #151927;
       font: inherit;
       padding: 12px;
+      color-scheme: dark;
+    }
+    .fsai-chat-input::placeholder,
+    .fsai-chat-textarea::placeholder { color: rgba(223,231,255,0.46); }
+    .fsai-chat-select option {
+      color: #f7f9ff;
+      background: #151927;
+    }
+    .fsai-chat-select option:checked,
+    .fsai-chat-select option:hover {
+      color: #ffffff;
+      background: #2563eb;
     }
     .fsai-chat-textarea { min-height: 92px; resize: vertical; }
     .fsai-chat-actions { display: flex; gap: 10px; flex-wrap: wrap; }
