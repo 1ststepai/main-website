@@ -1,6 +1,7 @@
 import { generateMarkdownPack } from "../lib/appIdeaChecker/generateMarkdownPack.js";
 import { forwardLead, REPO_CREATION_STATUS } from "../lib/appIdeaChecker/forwardLead.js";
 import { normalizeLead } from "../lib/appIdeaChecker/normalizeLead.js";
+import { sendAdminReportEmail } from "../lib/appIdeaChecker/sendReportEmail.js";
 import { saveReportIntake } from "../lib/appIdeaChecker/storageAdapter.js";
 
 const MAX_PAYLOAD_BYTES = 100 * 1024;
@@ -73,11 +74,14 @@ export default async function handler(req, res) {
     const generatedFiles = generatedFileList(files, lead.project_slug);
     const storage = await saveReportIntake({ lead, files });
     const contextPackStatus = "generated";
-    const forwarding = await forwardLead({
-      lead,
-      contextPackStatus,
-      generatedFiles
-    });
+    const [forwarding, adminEmail] = await Promise.all([
+      forwardLead({
+        lead,
+        contextPackStatus,
+        generatedFiles
+      }),
+      sendAdminReportEmail({ lead, contextPackStatus, generatedFiles })
+    ]);
 
     return sendJson(res, 200, {
       ok: true,
@@ -97,6 +101,9 @@ export default async function handler(req, res) {
         preview_files: storage.preview_files
       },
       forwarding,
+      notifications: {
+        admin_email: adminEmail
+      },
       repo_creation_status: REPO_CREATION_STATUS
     });
   } catch (error) {

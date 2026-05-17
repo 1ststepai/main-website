@@ -251,7 +251,8 @@
 
       .aivc-btn:focus-visible,
       .aivc-option:focus-visible,
-      .aivc-input:focus-visible {
+      .aivc-input:focus-visible,
+      .aivc-textarea:focus-visible {
         outline: 3px solid rgba(40, 215, 255, 0.42);
         outline-offset: 3px;
       }
@@ -504,6 +505,62 @@
         margin-top: 28px;
       }
 
+      .aivc-idea-box {
+        display: grid;
+        gap: 18px;
+      }
+
+      .aivc-textarea {
+        width: 100%;
+        min-height: 180px;
+        resize: vertical;
+        border: 1px solid rgba(125, 211, 252, 0.24);
+        border-radius: 22px;
+        color: var(--aivc-text);
+        background: rgba(5, 7, 13, 0.58);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+        font: inherit;
+        line-height: 1.55;
+        padding: 18px;
+      }
+
+      .aivc-textarea::placeholder {
+        color: rgba(174, 188, 205, 0.72);
+      }
+
+      .aivc-snapshot-grid {
+        display: grid;
+        grid-template-columns: minmax(220px, 0.68fr) minmax(0, 1fr);
+        gap: 18px;
+        margin-top: 22px;
+      }
+
+      .aivc-insight-list {
+        display: grid;
+        gap: 10px;
+        margin: 10px 0 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .aivc-insight-list li {
+        display: flex;
+        gap: 10px;
+        color: var(--aivc-muted);
+      }
+
+      .aivc-link-button {
+        display: inline-flex;
+        width: fit-content;
+        border: 0;
+        padding: 0;
+        color: var(--aivc-cyan);
+        background: transparent;
+        font: inherit;
+        font-weight: 850;
+        cursor: pointer;
+      }
+
       .aivc-option {
         width: 100%;
         min-height: 72px;
@@ -733,8 +790,29 @@
         background: rgba(41, 241, 162, 0.08);
       }
 
+      .aivc-success.aivc-error {
+        border-color: rgba(255, 102, 132, 0.42);
+        color: #ffe8ee;
+        background: rgba(255, 75, 114, 0.1);
+      }
+
       .aivc-success.aivc-visible {
         display: block;
+      }
+
+      .aivc-status-note {
+        display: block;
+        margin-top: 10px;
+        color: var(--aivc-muted);
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      .aivc-btn[disabled],
+      .aivc-btn.aivc-is-loading {
+        cursor: wait;
+        opacity: 0.68;
+        pointer-events: none;
       }
 
       .aivc-fine-print {
@@ -827,6 +905,7 @@
         }
 
         .aivc-options,
+        .aivc-snapshot-grid,
         .aivc-metrics {
           grid-template-columns: 1fr;
         }
@@ -858,18 +937,18 @@
               <div>
                 <p class="aivc-eyebrow"><span class="aivc-eyebrow-dot"></span> MVP Readiness Score</p>
                 <h1>
-                  Before you spend thousands building the wrong thing,
-                  <span class="aivc-gradient-text">check if your idea has legs.</span>
+                  Is Your App Idea
+                  <span class="aivc-gradient-text">Worth Building?</span>
                 </h1>
                 <p class="aivc-hero-copy">
-                  Answer a few sharp questions about your app, SaaS, website, automation, or digital product idea. You will get a practical viability score, risk readout, and the smartest first version to build.
+                  Paste your idea, business problem, or workflow. Get an instant first-pass score and a recommended MVP path.
                 </p>
                 <div class="aivc-hero-actions">
                   <button class="aivc-btn aivc-btn-primary" type="button" data-aivc-start>
                     Check My Idea
                   </button>
                   <span class="aivc-microcopy">
-                    No fluff. No generic agency pitch. Just a first-pass read on whether this should be validated, prototyped, or built.
+                    No fluff. No generic agency pitch. Start with the idea you already have, then sharpen it only if the first-pass read looks useful.
                   </span>
                 </div>
               </div>
@@ -891,7 +970,7 @@
                   </div>
                   <ul class="aivc-preview-list">
                     <li><span class="aivc-check">+</span><span>See the smallest version worth building first.</span></li>
-                    <li><span class="aivc-check">+</span><span>Understand whether your budget fits the current stage.</span></li>
+                    <li><span class="aivc-check">+</span><span>Start with a rough idea and add details only if it is worth it.</span></li>
                     <li><span class="aivc-check">+</span><span>Leave with a next step that protects you from overbuilding.</span></li>
                   </ul>
                 </div>
@@ -903,9 +982,9 @@
                 <div class="aivc-panel-header">
                   <div>
                     <h2>App Idea Viability Checker</h2>
-                    <p>Ten practical questions. One clear read on what should happen next.</p>
+                    <p>Paste the idea first. Add four clarifiers only if you want a sharper report.</p>
                   </div>
-                  <div class="aivc-step-count" id="aivc-step-count">Step 1 of 10</div>
+                  <div class="aivc-step-count" id="aivc-step-count">Quick review</div>
                 </div>
                 <div class="aivc-progress-wrap" aria-hidden="true">
                   <div class="aivc-progress" id="aivc-progress"></div>
@@ -913,13 +992,6 @@
 
                 <div class="aivc-form-area" id="aivc-form-area">
                   <div class="aivc-question-card" id="aivc-question-card" aria-live="polite"></div>
-                  <div class="aivc-controls">
-                    <button class="aivc-btn aivc-btn-ghost" type="button" id="aivc-prev">Previous</button>
-                    <div class="aivc-control-group">
-                      <button class="aivc-btn aivc-btn-secondary" type="button" id="aivc-reset">Reset</button>
-                      <button class="aivc-btn aivc-btn-primary" type="button" id="aivc-next" disabled>Next</button>
-                    </div>
-                  </div>
                 </div>
 
                 <div class="aivc-report" id="aivc-report" aria-live="polite"></div>
@@ -943,6 +1015,7 @@
 
           // Copy: change labels and report language in this file as needed.
           leadStorageKey: "aivc_leads",
+          lastResponseStorageKey: "appIdeaCheckerLastResponse",
 
           // TODO GHL webhook URL: paste your GoHighLevel inbound webhook URL here.
           // TODO Zapier webhook URL: paste your Zapier Catch Hook URL here.
@@ -955,115 +1028,57 @@
 
         var QUESTIONS = [
           {
-            id: "idea_type",
-            label: "What are you trying to build?",
-            options: [
-              { label: "Mobile app", value: "Mobile app", complexity: 8, buildPath: 8 },
-              { label: "Web app / SaaS", value: "Web app / SaaS", complexity: 10, buildPath: 10 },
-              { label: "Business website", value: "Business website", complexity: 14, buildPath: 12 },
-              { label: "Internal automation", value: "Internal automation", complexity: 12, buildPath: 12 },
-              { label: "AI tool", value: "AI tool", complexity: 7, buildPath: 8 },
-              { label: "Marketplace", value: "Marketplace", complexity: 4, buildPath: 5 },
-              { label: "Not sure yet", value: "Not sure yet", complexity: 5, buildPath: 4 }
-            ]
-          },
-          {
             id: "audience",
             label: "Who is this for?",
             options: [
-              { label: "Consumers", value: "Consumers", customer: 9 },
-              { label: "Local businesses", value: "Local businesses", customer: 14 },
-              { label: "Real estate / home services", value: "Real estate / home services", customer: 15 },
-              { label: "Job seekers / professionals", value: "Job seekers / professionals", customer: 12 },
-              { label: "Coaches / consultants", value: "Coaches / consultants", customer: 13 },
-              { label: "Internal team", value: "Internal team", customer: 14 },
-              { label: "Other", value: "Other", customer: 8 }
+              { label: "Small business owners", value: "Small business owners", clarity: 22, demand: 20, revenue: 12 },
+              { label: "Internal team/company", value: "Internal team/company", clarity: 21, demand: 18, revenue: 8 },
+              { label: "Consumers", value: "Consumers", clarity: 14, demand: 12, revenue: 8 },
+              { label: "Agencies", value: "Agencies", clarity: 20, demand: 18, revenue: 12 },
+              { label: "Sales teams", value: "Sales teams", clarity: 21, demand: 20, revenue: 13 },
+              { label: "Contractors/home services", value: "Contractors/home services", clarity: 23, demand: 22, revenue: 13 },
+              { label: "Professional services", value: "Professional services", clarity: 22, demand: 20, revenue: 13 },
+              { label: "Not sure yet", value: "Not sure yet", clarity: 8, demand: 8, revenue: 5 }
             ]
           },
           {
-            id: "problem_clarity",
-            label: "How clear is the problem?",
+            id: "problem_type",
+            label: "What problem does it solve?",
             options: [
-              { label: "Very clear, people already complain about it", value: "Very clear", problem: 20, demand: 25 },
-              { label: "Somewhat clear", value: "Somewhat clear", problem: 14, demand: 18 },
-              { label: "It is more of an idea than a proven problem", value: "More idea than proven problem", problem: 7, demand: 10 },
-              { label: "Not sure", value: "Not sure", problem: 3, demand: 5 }
+              { label: "Saves time", value: "Saves time", clarity: 22, demand: 18, simplicity: 16 },
+              { label: "Gets more leads", value: "Gets more leads", clarity: 23, demand: 23, revenue: 15 },
+              { label: "Organizes information", value: "Organizes information", clarity: 18, demand: 15, simplicity: 17 },
+              { label: "Automates follow-up", value: "Automates follow-up", clarity: 23, demand: 20, simplicity: 15, revenue: 13 },
+              { label: "Replaces spreadsheets", value: "Replaces spreadsheets", clarity: 24, demand: 20, simplicity: 18 },
+              { label: "Helps customers book/pay", value: "Helps customers book/pay", clarity: 24, demand: 22, simplicity: 16, revenue: 15 },
+              { label: "Improves reporting", value: "Improves reporting", clarity: 20, demand: 17, simplicity: 15 },
+              { label: "Not sure yet", value: "Not sure yet", clarity: 8, demand: 7, simplicity: 10 }
             ]
           },
           {
-            id: "competitors",
-            label: "Do people already pay for a solution like this?",
+            id: "first_version",
+            label: "What do you think the first version should be?",
             options: [
-              { label: "Yes, there are competitors", value: "Yes, there are competitors", monetization: 8, demand: 25 },
-              { label: "Maybe, but I am not sure", value: "Maybe, not sure", monetization: 5, demand: 15 },
-              { label: "No, this feels new", value: "No, this feels new", monetization: 3, demand: 9 },
-              { label: "I have not researched it", value: "I have not researched it", monetization: 2, demand: 6 }
+              { label: "Website or landing page", value: "Website or landing page", ideaType: "Business website", simplicity: 20, path: "Landing page or offer test with lead capture." },
+              { label: "Internal dashboard", value: "Internal dashboard", ideaType: "Internal automation", simplicity: 18, path: "Internal dashboard around the one workflow that saves the most time." },
+              { label: "Client/customer portal", value: "Client/customer portal", ideaType: "Web app / SaaS", simplicity: 15, path: "Focused client portal with one clear customer workflow." },
+              { label: "Booking or quote tool", value: "Booking or quote tool", ideaType: "Business website", simplicity: 18, revenue: 14, path: "Booking or quote tool tied to lead capture and follow-up." },
+              { label: "SaaS app", value: "SaaS app", ideaType: "Web app / SaaS", simplicity: 12, revenue: 14, path: "Narrow SaaS MVP with only the core workflow." },
+              { label: "AI assistant/tool", value: "AI assistant/tool", ideaType: "AI tool", simplicity: 11, path: "AI-assisted workflow prototype before a large AI product build." },
+              { label: "Mobile-friendly web app", value: "Mobile-friendly web app", ideaType: "Web app / SaaS", simplicity: 15, path: "Mobile-friendly web MVP before native app development." },
+              { label: "Not sure yet", value: "Not sure yet", ideaType: "Not sure yet", simplicity: 8, path: "Strategy map, validation plan, and scope options before building." }
             ]
           },
           {
-            id: "monetization",
-            label: "How would this make money?",
+            id: "stage",
+            label: "What stage are you at?",
             options: [
-              { label: "Monthly subscription", value: "Monthly subscription", monetization: 12, revenue: 25 },
-              { label: "One-time purchase", value: "One-time purchase", monetization: 10, revenue: 18 },
-              { label: "Service package", value: "Service package", monetization: 12, revenue: 22 },
-              { label: "Lead generation", value: "Lead generation", monetization: 11, revenue: 21 },
-              { label: "Ads / affiliate / marketplace", value: "Ads / affiliate / marketplace", monetization: 7, revenue: 14 },
-              { label: "Not sure yet", value: "Not sure yet", monetization: 2, revenue: 6 }
-            ]
-          },
-          {
-            id: "distribution",
-            label: "Do you already have an audience, customers, leads, or distribution?",
-            options: [
-              { label: "Yes, I have customers/leads/audience", value: "Yes, I have customers/leads/audience", distribution: 15 },
-              { label: "I have some warm contacts", value: "Some warm contacts", distribution: 10 },
-              { label: "I would need help getting users", value: "Need help getting users", distribution: 5 },
-              { label: "No audience yet", value: "No audience yet", distribution: 2 }
-            ]
-          },
-          {
-            id: "budget",
-            label: "What is your current budget range?",
-            options: [
-              { label: "Under $1,000", value: "Under $1,000", budgetFit: 3 },
-              { label: "$1,000-$3,000", value: "$1,000-$3,000", budgetFit: 8 },
-              { label: "$3,000-$10,000", value: "$3,000-$10,000", budgetFit: 13 },
-              { label: "$10,000+", value: "$10,000+", budgetFit: 15 },
-              { label: "I am not sure yet", value: "I am not sure yet", budgetFit: 6 }
-            ]
-          },
-          {
-            id: "launch_timeline",
-            label: "How soon do you want to launch something?",
-            options: [
-              { label: "ASAP / this month", value: "ASAP / this month", timelineFit: 8 },
-              { label: "1-3 months", value: "1-3 months", timelineFit: 15 },
-              { label: "3-6 months", value: "3-6 months", timelineFit: 13 },
-              { label: "Just exploring", value: "Just exploring", timelineFit: 7 }
-            ]
-          },
-          {
-            id: "first_need",
-            label: "What do you need first?",
-            options: [
-              { label: "Validate the idea", value: "Validate the idea", buildPath: 15 },
-              { label: "Landing page / waitlist", value: "Landing page / waitlist", buildPath: 14 },
-              { label: "Clickable prototype", value: "Clickable prototype", buildPath: 13 },
-              { label: "MVP build", value: "MVP build", buildPath: 12 },
-              { label: "Full app", value: "Full app", buildPath: 5 },
-              { label: "Automation / internal tool", value: "Automation / internal tool", buildPath: 14 }
-            ]
-          },
-          {
-            id: "biggest_risk",
-            label: "What is the biggest risk right now?",
-            options: [
-              { label: "I do not know if people want it", value: "Demand is unproven", risk: "Market demand" },
-              { label: "I do not know how to build it", value: "Build path is unclear", risk: "Execution" },
-              { label: "I do not know how to market it", value: "Marketing is unclear", risk: "Distribution" },
-              { label: "I do not know what it should cost", value: "Pricing is unclear", risk: "Revenue model" },
-              { label: "I need a technical partner", value: "Need technical partner", risk: "Technical strategy" }
+              { label: "Just an idea", value: "Just an idea", demand: 8, readiness: 6, timeline: "Just exploring" },
+              { label: "I have notes or mockups", value: "I have notes or mockups", demand: 12, readiness: 10, timeline: "1-3 months" },
+              { label: "I already do this manually", value: "I already do this manually", demand: 22, readiness: 14, timeline: "1-3 months" },
+              { label: "Customers/users have asked for it", value: "Customers/users have asked for it", demand: 25, readiness: 15, timeline: "ASAP / this month" },
+              { label: "I tried building it before", value: "I tried building it before", demand: 15, readiness: 12, timeline: "1-3 months" },
+              { label: "I need help figuring out the MVP", value: "I need help figuring out the MVP", demand: 12, readiness: 9, timeline: "Just exploring" }
             ]
           }
         ];
@@ -1091,17 +1106,16 @@
           }
         ];
 
+        var ideaText = "";
         var currentStep = 0;
         var answers = {};
         var latestReport = null;
+        var reviewMode = "guided";
 
         var root = document.getElementById("aivc-root");
         var questionCard = document.getElementById("aivc-question-card");
         var progress = document.getElementById("aivc-progress");
         var stepCount = document.getElementById("aivc-step-count");
-        var prevButton = document.getElementById("aivc-prev");
-        var nextButton = document.getElementById("aivc-next");
-        var resetButton = document.getElementById("aivc-reset");
         var formArea = document.getElementById("aivc-form-area");
         var reportArea = document.getElementById("aivc-report");
 
@@ -1139,6 +1153,17 @@
           return question.options.filter(function (option) {
             return option.value === answer.value;
           })[0] || answer;
+        }
+
+        function hasAny(text, words) {
+          var normalized = String(text || "").toLowerCase();
+          return words.some(function (word) {
+            return normalized.indexOf(word) !== -1;
+          });
+        }
+
+        function clamp(value, min, max) {
+          return Math.max(min, Math.min(max, value));
         }
 
         function average(values) {
@@ -1187,75 +1212,191 @@
           };
         }
 
+        function inferBuildType(text) {
+          if (hasAny(text, ["automation", "automate", "workflow", "follow up", "spreadsheet", "internal"])) return "Internal automation";
+          if (hasAny(text, ["ai", "assistant", "chatbot", "gpt"])) return "AI tool";
+          if (hasAny(text, ["saas", "portal", "dashboard", "platform", "app"])) return "Web app / SaaS";
+          if (hasAny(text, ["website", "landing", "site", "page"])) return "Business website";
+          if (hasAny(text, ["mobile", "ios", "android"])) return "Mobile-friendly web app";
+          return "Not sure yet";
+        }
+
+        function baseScoresFromIdea(text) {
+          var length = String(text || "").trim().length;
+          var clarity = length > 180 ? 17 : length > 90 ? 13 : 9;
+          var demand = 10;
+          var simplicity = 12;
+          var revenue = 7;
+          var readiness = length > 120 ? 9 : 6;
+
+          if (hasAny(text, ["customer", "client", "user", "lead", "book", "pay", "quote", "job", "sale"])) demand += 6;
+          if (hasAny(text, ["already", "manual", "spreadsheet", "asked", "current", "existing"])) demand += 7;
+          if (hasAny(text, ["save time", "organize", "automate", "follow up", "report", "replace"])) clarity += 5;
+          if (hasAny(text, ["landing", "website", "dashboard", "quote", "booking", "portal"])) simplicity += 5;
+          if (hasAny(text, ["marketplace", "social network", "native app", "uber", "airbnb"])) simplicity -= 5;
+          if (hasAny(text, ["subscription", "monthly", "pay", "paid", "quote", "lead", "booking", "revenue"])) revenue += 6;
+          if (hasAny(text, ["mockup", "notes", "customers", "users", "manual"])) readiness += 4;
+
+          return {
+            clarity: clamp(clarity, 0, 25),
+            demand: clamp(demand, 0, 25),
+            simplicity: clamp(simplicity, 0, 20),
+            revenue: clamp(revenue, 0, 15),
+            readiness: clamp(readiness, 0, 15)
+          };
+        }
+
+        function reportInsights(text, report) {
+          var promising = [];
+          var clarify = [];
+          if (report.problemClarityScore >= 16) promising.push("The problem is described clearly enough to start shaping a first version.");
+          if (report.marketDemandScore >= 18) promising.push("There are signs this connects to an existing pain, workflow, or buyer behavior.");
+          if (report.buildSimplicityScore >= 15) promising.push("The first version can likely be kept focused instead of becoming a giant platform.");
+          if (!promising.length) promising.push("There is enough of a seed here to run a practical validation pass.");
+
+          if (!selectedOption("audience")) clarify.push("Who the first buyer or user is.");
+          if (!selectedOption("problem_type")) clarify.push("Which business outcome matters most.");
+          if (!selectedOption("stage")) clarify.push("Whether there is real demand evidence yet.");
+          if (!hasAny(text, ["pay", "revenue", "lead", "book", "quote", "subscription", "customer"])) clarify.push("How this creates revenue or measurable value.");
+          if (!clarify.length) clarify.push("The exact scope of the first release.");
+          return { promising: promising.slice(0, 3), clarify: clarify.slice(0, 3) };
+        }
+
         function calculateReport() {
-          var ideaType = selectedOption("idea_type") || {};
+          var base = baseScoresFromIdea(ideaText);
           var audience = selectedOption("audience") || {};
-          var problem = selectedOption("problem_clarity") || {};
-          var competitors = selectedOption("competitors") || {};
-          var monetization = selectedOption("monetization") || {};
-          var distribution = selectedOption("distribution") || {};
-          var budget = selectedOption("budget") || {};
-          var timeline = selectedOption("launch_timeline") || {};
-          var firstNeed = selectedOption("first_need") || {};
-          var risk = selectedOption("biggest_risk") || {};
+          var problem = selectedOption("problem_type") || {};
+          var firstVersion = selectedOption("first_version") || {};
+          var stage = selectedOption("stage") || {};
 
-          var problemClarity = problem.problem || 0;
-          var customerClarity = audience.customer || 0;
-          var monetizationClarity = (competitors.monetization || 0) + (monetization.monetization || 0);
-          var distributionScore = distribution.distribution || 0;
-          var buildPathRealism = Math.round(((ideaType.buildPath || 0) + (firstNeed.buildPath || 0)) / 2);
-          var budgetTimelineFit = Math.round(((budget.budgetFit || 0) + (timeline.timelineFit || 0)) / 2);
-
-          var total = Math.max(0, Math.min(100, Math.round(
-            problemClarity +
-            customerClarity +
-            monetizationClarity +
-            distributionScore +
-            buildPathRealism +
-            budgetTimelineFit
-          )));
-
-          var demandScore = average([problem.demand, competitors.demand]);
-          var revenueScore = monetization.revenue || Math.min(100, monetizationClarity * 5);
-          var complexityScore = Math.max(0, Math.min(100, Math.round((ideaType.complexity || 0) * 6.6)));
-          var distributionMetric = Math.max(0, Math.min(100, Math.round(distributionScore * 6.6)));
+          var problemScore = average([base.clarity, audience.clarity, problem.clarity]) || base.clarity;
+          var demandScore = average([base.demand, audience.demand, problem.demand, stage.demand]) || base.demand;
+          var simplicityScore = average([base.simplicity, problem.simplicity, firstVersion.simplicity]) || base.simplicity;
+          var revenueScore = average([base.revenue, audience.revenue, problem.revenue, firstVersion.revenue]) || base.revenue;
+          var readinessScore = average([base.readiness, stage.readiness]) || base.readiness;
+          var total = clamp(Math.round(problemScore + demandScore + simplicityScore + revenueScore + readinessScore), 0, 100);
           var category = getCategory(total);
-          var budgetAdvice = budgetRecommendation(budget.value);
+          var ideaType = firstVersion.ideaType || inferBuildType(ideaText);
+          var budgetAdvice = budgetRecommendation("Not provided");
+          var recommendedPath = firstVersion.path || buildPathForType(ideaType);
           var riskLevel = total >= 80 ? "Moderate" : total >= 60 ? "Medium" : total >= 40 ? "High" : "Very high";
-          var recommendedFirstVersion = budgetAdvice.path;
-
-          if (firstNeed.value === "Full app" && total < 80) {
-            recommendedFirstVersion = "Do not start with the full app. Start with validation, a prototype, or one narrow MVP workflow.";
-          }
+          var biggestRisk = demandScore < 15 ? "Demand evidence" : revenueScore < 9 ? "Revenue model" : simplicityScore < 12 ? "Scope control" : "First-version clarity";
+          var insights = reportInsights(ideaText, {
+            problemClarityScore: problemScore,
+            marketDemandScore: demandScore,
+            buildSimplicityScore: simplicityScore
+          });
 
           return {
             score: total,
             category: category.label,
             categoryMessage: category.message,
+            problemClarityScore: problemScore,
             marketDemandScore: demandScore,
+            buildSimplicityScore: simplicityScore,
             revenuePotentialScore: revenueScore,
-            buildComplexityScore: complexityScore,
-            distributionScore: distributionMetric,
+            launchReadinessScore: readinessScore,
+            buildComplexityScore: Math.round(simplicityScore * 5),
+            distributionScore: Math.round(readinessScore * 6.6),
             riskLevel: riskLevel,
-            recommendedPath: recommendedFirstVersion,
+            recommendedPath: recommendedPath,
             estimatedBudgetRange: budgetAdvice.budget,
-            nextBestStep: budgetAdvice.next,
-            biggestRisk: risk.risk || risk.value || "Clarity",
-            ideaType: ideaType.value || "",
-            audience: audience.value || "",
-            budget: budget.value || "",
-            launchTimeline: timeline.value || ""
+            nextBestStep: total >= 70 ? "Map the core workflow and build only the smallest version that can prove demand." : "Validate the audience, offer, and first workflow before committing to a full build.",
+            biggestRisk: biggestRisk,
+            ideaType: ideaType,
+            audience: audience.value || "Not sure yet",
+            problemType: problem.value || "Not sure yet",
+            firstVersion: firstVersion.value || "Not sure yet",
+            stage: stage.value || "Just an idea",
+            budget: "Not provided",
+            launchTimeline: stage.timeline || "Just exploring",
+            promising: insights.promising,
+            clarify: insights.clarify
           };
+        }
+
+        function buildPathForType(type) {
+          if (type === "Internal automation") return "Workflow map plus a lightweight internal dashboard or automation.";
+          if (type === "AI tool") return "AI-assisted prototype around one repeatable task before a full AI product.";
+          if (type === "Business website") return "Landing page or service workflow with lead capture and proof tracking.";
+          if (type === "Mobile-friendly web app") return "Mobile-friendly web MVP before native app development.";
+          if (type === "Web app / SaaS") return "Focused MVP with only the core workflow.";
+          return "Strategy map, validation plan, and scope options before committing to a build.";
+        }
+
+        function renderIdeaStart() {
+          stepCount.textContent = "Quick review";
+          progress.style.width = "12%";
+          reportArea.classList.remove("aivc-visible");
+          reportArea.innerHTML = "";
+          formArea.style.display = "";
+          questionCard.innerHTML =
+            '<div class="aivc-idea-box">' +
+              '<p class="aivc-question-kicker">Start here</p>' +
+              '<h3 class="aivc-question-title">Paste your app idea, business problem, or workflow you want to build.</h3>' +
+              '<textarea class="aivc-textarea" id="aivc-idea-text" placeholder="Example: I want to build an app that helps local service businesses track jobs, send quotes, and follow up with customers.">' + escapeHtml(ideaText) + '</textarea>' +
+              '<p class="aivc-fine-print">Not sure how to answer yet? Paste what you have and we\'ll review the idea as-is.</p>' +
+              '<div class="aivc-lead-actions">' +
+                '<button class="aivc-btn aivc-btn-primary" type="button" id="aivc-check-idea" disabled>Check My Idea</button>' +
+              '</div>' +
+            '</div>';
+
+          var textarea = document.getElementById("aivc-idea-text");
+          var checkButton = document.getElementById("aivc-check-idea");
+          function syncButton() {
+            checkButton.disabled = textarea.value.trim().length < 12;
+          }
+          textarea.addEventListener("input", syncButton);
+          checkButton.addEventListener("click", function () {
+            ideaText = textarea.value.trim();
+            latestReport = calculateReport();
+            renderSnapshot();
+          });
+          syncButton();
+        }
+
+        function renderSnapshot() {
+          latestReport = calculateReport();
+          stepCount.textContent = "First-pass score";
+          progress.style.width = "38%";
+          questionCard.innerHTML =
+            '<p class="aivc-question-kicker">Instant first-pass snapshot</p>' +
+            '<h3 class="aivc-question-title">Here is the rough read before we ask for your contact info.</h3>' +
+            '<div class="aivc-snapshot-grid">' +
+              '<div class="aivc-result-card">' +
+                '<p class="aivc-preview-kicker">Initial viability score</p>' +
+                '<div class="aivc-score-value">' + latestReport.score + '<span>/100</span></div>' +
+                '<div class="aivc-category">' + escapeHtml(latestReport.category) + '</div>' +
+                '<div class="aivc-risk"><strong>Best-fit build type:</strong> ' + escapeHtml(latestReport.ideaType) + '</div>' +
+              '</div>' +
+              '<div class="aivc-report-copy">' +
+                '<div class="aivc-copy-block"><h3>What looks promising</h3><ul class="aivc-insight-list">' + latestReport.promising.map(function (item) { return '<li><span class="aivc-check">+</span><span>' + escapeHtml(item) + '</span></li>'; }).join("") + '</ul></div>' +
+                '<div class="aivc-copy-block"><h3>What needs clarification</h3><ul class="aivc-insight-list">' + latestReport.clarify.map(function (item) { return '<li><span class="aivc-check">+</span><span>' + escapeHtml(item) + '</span></li>'; }).join("") + '</ul></div>' +
+              '</div>' +
+            '</div>' +
+            '<div class="aivc-lead-actions">' +
+              '<button class="aivc-btn aivc-btn-primary" type="button" id="aivc-clarify">Make My Report More Accurate</button>' +
+              '<button class="aivc-btn aivc-btn-secondary" type="button" id="aivc-review-idea">Review My Idea</button>' +
+            '</div>' +
+            '<p class="aivc-fine-print">Skip the questions &mdash; just review my idea.</p>';
+
+          document.getElementById("aivc-clarify").addEventListener("click", function () {
+            reviewMode = "guided";
+            currentStep = 0;
+            renderQuestion();
+          });
+          document.getElementById("aivc-review-idea").addEventListener("click", function () {
+            reviewMode = "idea_only";
+            latestReport = calculateReport();
+            renderReport();
+          });
         }
 
         function renderQuestion() {
           var question = QUESTIONS[currentStep];
           var selected = getAnswer(question.id);
-          stepCount.textContent = "Step " + (currentStep + 1) + " of " + QUESTIONS.length;
-          progress.style.width = Math.round(((currentStep + 1) / QUESTIONS.length) * 100) + "%";
-          prevButton.disabled = currentStep === 0;
-          nextButton.disabled = !selected;
-          nextButton.textContent = currentStep === QUESTIONS.length - 1 ? "Generate My Score" : "Next";
+          stepCount.textContent = "Question " + (currentStep + 1) + " of " + QUESTIONS.length;
+          progress.style.width = Math.round(42 + ((currentStep + 1) / QUESTIONS.length) * 34) + "%";
 
           var optionsHtml = question.options.map(function (option, index) {
             var isSelected = selected && selected.value === option.value;
@@ -1265,7 +1406,14 @@
           questionCard.innerHTML =
             '<p class="aivc-question-kicker">Question ' + (currentStep + 1) + "</p>" +
             '<h3 class="aivc-question-title">' + escapeHtml(question.label) + "</h3>" +
-            '<div class="aivc-options">' + optionsHtml + "</div>";
+            '<div class="aivc-options">' + optionsHtml + "</div>" +
+            '<div class="aivc-controls">' +
+              '<button class="aivc-btn aivc-btn-ghost" type="button" id="aivc-prev">' + (currentStep === 0 ? "Back to Snapshot" : "Previous") + '</button>' +
+              '<div class="aivc-control-group">' +
+                '<button class="aivc-btn aivc-btn-secondary" type="button" id="aivc-reset">Reset</button>' +
+                '<button class="aivc-btn aivc-btn-primary" type="button" id="aivc-next" ' + (!selected ? "disabled" : "") + '>' + (currentStep === QUESTIONS.length - 1 ? "Generate Report Preview" : "Next") + '</button>' +
+              '</div>' +
+            '</div>';
 
           Array.prototype.forEach.call(questionCard.querySelectorAll("[data-aivc-option]"), function (button) {
             button.addEventListener("click", function () {
@@ -1274,6 +1422,22 @@
               renderQuestion();
             });
           });
+          document.getElementById("aivc-prev").addEventListener("click", function () {
+            if (currentStep === 0) {
+              renderSnapshot();
+              return;
+            }
+            transitionQuestion(-1);
+          });
+          document.getElementById("aivc-next").addEventListener("click", function () {
+            if (!getAnswer(QUESTIONS[currentStep].id)) return;
+            if (currentStep === QUESTIONS.length - 1) {
+              renderReport();
+              return;
+            }
+            transitionQuestion(1);
+          });
+          document.getElementById("aivc-reset").addEventListener("click", resetAssessment);
         }
 
         function transitionQuestion(direction) {
@@ -1289,7 +1453,7 @@
         function renderReport() {
           latestReport = calculateReport();
           formArea.style.display = "none";
-          stepCount.textContent = "Report ready";
+          stepCount.textContent = "Report preview";
           progress.style.width = "100%";
 
           reportArea.innerHTML =
@@ -1304,16 +1468,17 @@
               '<div class="aivc-report-copy">' +
                 '<div class="aivc-copy-block"><h3>What this means</h3><p>' + escapeHtml(latestReport.categoryMessage) + '</p></div>' +
                 '<div class="aivc-copy-block"><h3>Recommended first version</h3><p>' + escapeHtml(latestReport.recommendedPath) + '</p></div>' +
-                '<div class="aivc-copy-block"><h3>Estimated build path</h3><p>' + escapeHtml(latestReport.estimatedBudgetRange) + '</p></div>' +
+                '<div class="aivc-copy-block"><h3>Estimated complexity</h3><p>' + escapeHtml(latestReport.buildSimplicityScore >= 15 ? "Lean first version if the scope stays narrow." : "Moderate to high unless the first release is reduced.") + '</p></div>' +
                 '<div class="aivc-copy-block"><h3>Biggest risk to solve</h3><p>' + escapeHtml(latestReport.biggestRisk) + '</p></div>' +
                 '<div class="aivc-copy-block"><h3>Next best step</h3><p>' + escapeHtml(latestReport.nextBestStep) + '</p></div>' +
               '</div>' +
             '</div>' +
             '<div class="aivc-metrics" aria-label="Score breakdown">' +
+              '<div class="aivc-metric"><strong>' + latestReport.problemClarityScore + '</strong><span>Problem Clarity</span></div>' +
               '<div class="aivc-metric"><strong>' + latestReport.marketDemandScore + '</strong><span>Market Demand</span></div>' +
               '<div class="aivc-metric"><strong>' + latestReport.revenuePotentialScore + '</strong><span>Revenue Potential</span></div>' +
-              '<div class="aivc-metric"><strong>' + latestReport.buildComplexityScore + '</strong><span>Build Complexity Fit</span></div>' +
-              '<div class="aivc-metric"><strong>' + latestReport.distributionScore + '</strong><span>Distribution</span></div>' +
+              '<div class="aivc-metric"><strong>' + latestReport.buildSimplicityScore + '</strong><span>Build Simplicity</span></div>' +
+              '<div class="aivc-metric"><strong>' + latestReport.launchReadinessScore + '</strong><span>Launch Readiness</span></div>' +
             '</div>' +
             '<form class="aivc-lead-card" id="aivc-lead-form">' +
               '<h3>Save your report and map the smallest build that can prove demand.</h3>' +
@@ -1324,11 +1489,11 @@
                 '<div class="aivc-field"><label for="aivc-phone">Phone <span style="color: var(--aivc-muted); font-weight: 700;">optional</span></label><input class="aivc-input" id="aivc-phone" name="phone" autocomplete="tel" placeholder="(555) 000-0000" /></div>' +
               '</div>' +
               '<div class="aivc-lead-actions">' +
-                '<button class="aivc-btn aivc-btn-primary" type="submit">Send Me My MVP Readiness Report</button>' +
-                '<a class="aivc-btn aivc-btn-secondary" href="' + CONFIG.bookingUrl + '" target="_blank" rel="noopener">Book a Build Strategy Call</a>' +
+                '<button class="aivc-btn aivc-btn-primary" type="submit" id="aivc-lead-submit">Save My MVP Readiness Report</button>' +
+                '<a class="aivc-btn aivc-btn-secondary" href="' + CONFIG.bookingUrl + '" target="_blank" rel="noopener">Book a Free MVP Strategy Call</a>' +
                 '<button class="aivc-btn aivc-btn-ghost" type="button" id="aivc-start-over">Start Over</button>' +
               '</div>' +
-              '<div class="aivc-success" id="aivc-success">Your report is ready. The smartest next step is to map the smallest version that can prove demand before you overspend on development.<br /><br /><a class="aivc-btn aivc-btn-primary" href="' + CONFIG.bookingUrl + '" target="_blank" rel="noopener">Book a Build Strategy Call</a></div>' +
+              '<div class="aivc-success" id="aivc-success" role="status" aria-live="polite"></div>' +
             '</form>';
 
           reportArea.classList.add("aivc-visible");
@@ -1355,11 +1520,25 @@
           if (report.budget === "$10,000+") {
             tags.push("budget_10k_plus");
           }
+          if (reviewMode === "idea_only") {
+            tags.push("idea_only_review");
+          }
           return tags;
         }
 
         function buildLeadPayload(form) {
           var fields = form.elements;
+          var answerPayload = {
+            idea_description: ideaText,
+            review_mode: reviewMode,
+            audience: latestReport.audience,
+            problem_type: latestReport.problemType,
+            first_version: latestReport.firstVersion,
+            stage: latestReport.stage
+          };
+          Object.keys(answers).forEach(function (key) {
+            answerPayload[key] = answers[key].value;
+          });
           return {
             source: "app_idea_checker",
             name: fields.name.value.trim(),
@@ -1373,16 +1552,15 @@
             launch_timeline: latestReport.launchTimeline,
             recommended_path: latestReport.recommendedPath,
             tags: buildLeadTags(latestReport),
+            idea_text: ideaText,
+            problem_clarity_score: latestReport.problemClarityScore,
             market_demand_score: latestReport.marketDemandScore,
             revenue_potential_score: latestReport.revenuePotentialScore,
             build_complexity_score: latestReport.buildComplexityScore,
             distribution_score: latestReport.distributionScore,
             risk_level: latestReport.riskLevel,
             biggest_risk: latestReport.biggestRisk,
-            answers: Object.keys(answers).reduce(function (payload, key) {
-              payload[key] = answers[key].value;
-              return payload;
-            }, {}),
+            answers: answerPayload,
             created_at: new Date().toISOString()
           };
         }
@@ -1399,38 +1577,136 @@
           } catch (error) {
             window.console.warn("AIVC localStorage unavailable; lead was still logged.", error);
           }
-          window.console.log("AIVC lead payload:", payload);
 
           if (CONFIG.webhookUrl) {
-            window.fetch(CONFIG.webhookUrl, {
+            return window.fetch(CONFIG.webhookUrl, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify(payload),
               keepalive: true
-            }).catch(function (error) {
-              window.console.warn("AIVC webhook failed:", error);
+            }).then(function (response) {
+              return response.text().then(function (text) {
+                var data = {};
+                if (text) {
+                  try {
+                    data = JSON.parse(text);
+                  } catch (error) {
+                    data = { raw_response: text };
+                  }
+                }
+                if (!response.ok || data.ok !== true) {
+                  var message = data && data.error ? data.error : "Request failed";
+                  var failure = new Error(message);
+                  failure.status = response.status;
+                  failure.response = data;
+                  throw failure;
+                }
+                persistLastResponse(data);
+                logSubmissionDebug(response.status, data);
+                return data;
+              });
             });
           }
+          return Promise.reject(new Error("Report endpoint is not configured."));
+        }
+
+        function persistLastResponse(data) {
+          try {
+            window.localStorage.setItem(CONFIG.lastResponseStorageKey, JSON.stringify(data));
+          } catch (error) {
+            window.console.warn("AIVC localStorage unavailable; API response was not persisted.", error);
+          }
+        }
+
+        function getForwardingStatus(data) {
+          if (data && data.forwarding && data.forwarding.ghl && data.forwarding.ghl.status) {
+            return data.forwarding.ghl.status;
+          }
+          return "";
+        }
+
+        function logSubmissionDebug(statusCode, data) {
+          window.console.log("AIVC submit result", {
+            status: statusCode,
+            ok: !!(data && data.ok),
+            lead_id: data && data.lead_id ? data.lead_id : null,
+            forwarding_ghl_status: getForwardingStatus(data) || null
+          });
+        }
+
+        function renderSubmitStatus(type, data) {
+          var status = document.getElementById("aivc-success");
+          if (!status) return;
+          status.classList.remove("aivc-error");
+          if (type === "success") {
+            var forwardingStatus = getForwardingStatus(data);
+            var helper = "";
+            if (!data || !data.forwarding || data.forwarding.enabled === false || forwardingStatus === "skipped_disabled") {
+              helper = '<span class="aivc-status-note">You can book a strategy call below. Email delivery will be added after CRM forwarding is connected.</span>';
+            }
+            status.innerHTML =
+              'Your report was saved. The smartest next step is to map the smallest version that can prove demand before you overspend on development.' +
+              helper +
+              '<br /><br /><a class="aivc-btn aivc-btn-primary" href="' + CONFIG.bookingUrl + '" target="_blank" rel="noopener">Book a Free MVP Strategy Call</a>';
+          } else {
+            status.classList.add("aivc-error");
+            status.innerHTML =
+              'Something went wrong saving your report. Your score is still shown above, but please book a call or try again.' +
+              '<br /><br /><a class="aivc-btn aivc-btn-primary" href="' + CONFIG.bookingUrl + '" target="_blank" rel="noopener">Book a Free MVP Strategy Call</a>';
+          }
+          status.classList.add("aivc-visible");
+          status.scrollIntoView({ behavior: "smooth", block: "nearest" });
         }
 
         function handleLeadSubmit(event) {
           event.preventDefault();
           var form = event.currentTarget;
-          var payload = buildLeadPayload(form);
-          saveLead(payload);
+          var submitButton = document.getElementById("aivc-lead-submit");
+          if (submitButton && submitButton.disabled) {
+            return;
+          }
+          var originalText = submitButton ? submitButton.textContent : "";
           var success = document.getElementById("aivc-success");
-          success.classList.add("aivc-visible");
-          success.scrollIntoView({ behavior: "smooth", block: "nearest" });
+          if (success) {
+            success.classList.remove("aivc-visible");
+            success.classList.remove("aivc-error");
+            success.innerHTML = "";
+          }
+          if (submitButton) {
+            submitButton.disabled = true;
+            submitButton.classList.add("aivc-is-loading");
+            submitButton.textContent = "Saving report...";
+          }
+          var payload = buildLeadPayload(form);
+          saveLead(payload).then(function (data) {
+            renderSubmitStatus("success", data);
+          }).catch(function (error) {
+            window.console.warn("AIVC submit failed", {
+              status: error && error.status ? error.status : null,
+              ok: false,
+              lead_id: error && error.response && error.response.lead_id ? error.response.lead_id : null,
+              forwarding_ghl_status: error && error.response ? getForwardingStatus(error.response) || null : null
+            });
+            renderSubmitStatus("error");
+          }).then(function () {
+            if (submitButton) {
+              submitButton.disabled = false;
+              submitButton.classList.remove("aivc-is-loading");
+              submitButton.textContent = originalText || "Save My MVP Readiness Report";
+            }
+          });
         }
 
         function resetAssessment() {
           answers = {};
           latestReport = null;
+          ideaText = "";
+          reviewMode = "guided";
           currentStep = 0;
           reportArea.classList.remove("aivc-visible");
           reportArea.innerHTML = "";
           formArea.style.display = "";
-          renderQuestion();
+          renderIdeaStart();
           document.getElementById("aivc-assessment").scrollIntoView({ behavior: "smooth", block: "start" });
         }
 
@@ -1440,24 +1716,7 @@
           });
         });
 
-        prevButton.addEventListener("click", function () {
-          if (currentStep > 0) {
-            transitionQuestion(-1);
-          }
-        });
-
-        nextButton.addEventListener("click", function () {
-          if (!getAnswer(QUESTIONS[currentStep].id)) return;
-          if (currentStep === QUESTIONS.length - 1) {
-            renderReport();
-            return;
-          }
-          transitionQuestion(1);
-        });
-
-        resetButton.addEventListener("click", resetAssessment);
-
-        renderQuestion();
+        renderIdeaStart();
       })();
     </script>
   </body>
