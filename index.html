@@ -215,6 +215,7 @@
 
     .fsai-hero p { color: var(--muted); font-size: 18px; line-height: 1.65; max-width: 620px; margin: 0 0 30px; }
     .fsai-hero-actions { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 28px; }
+    .fsai-helper-line { color: #d8e1ff; font-size: 15px; line-height: 1.55; max-width: 650px; margin: -8px 0 24px; }
     .fsai-mini-proof { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; max-width: 670px; }
     .fsai-proof-item { display: flex; gap: 12px; align-items: flex-start; padding: 13px 10px; color: var(--muted); }
 
@@ -314,7 +315,7 @@
     .fsai-section h2 { margin: 0; font-size: clamp(32px, 4vw, 54px); line-height: 1.02; letter-spacing: -.055em; }
     .fsai-section-lede { max-width: 620px; color: var(--muted); font-size: 17px; line-height: 1.65; margin-top: 14px; }
 
-    .fsai-services { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .fsai-services { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
 
     .fsai-service-card {
       min-height: 215px;
@@ -355,6 +356,70 @@
 
     .fsai-service-card h3 { margin: 0 0 10px; font-size: 19px; letter-spacing: -.02em; }
     .fsai-service-card p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.55; }
+
+    .fsai-checker-callout,
+    .fsai-pricing-card,
+    .fsai-belief-card {
+      background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.025)), rgba(8, 12, 26, 0.82);
+      border: 1px solid rgba(148, 170, 255, 0.17);
+      border-radius: 28px;
+      padding: 28px;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.22);
+    }
+
+    .fsai-checker-callout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 24px;
+      background: radial-gradient(circle at 8% 0%, rgba(125, 232, 255, 0.18), transparent 32%), linear-gradient(135deg, rgba(73,184,255,0.16), rgba(212,91,255,0.12)), rgba(8, 12, 26, 0.86);
+    }
+
+    .fsai-checker-callout h2,
+    .fsai-belief-card h2 {
+      margin: 0 0 12px;
+      font-size: clamp(30px, 4vw, 48px);
+      line-height: 1.04;
+      letter-spacing: -.055em;
+    }
+
+    .fsai-checker-callout p,
+    .fsai-belief-card p,
+    .fsai-pricing-card p {
+      color: var(--muted);
+      line-height: 1.65;
+      margin: 0;
+    }
+
+    .fsai-pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+
+    .fsai-pricing-card { min-height: 250px; display: flex; flex-direction: column; }
+    .fsai-pricing-card h3 { margin: 0 0 12px; font-size: 22px; letter-spacing: -.035em; }
+    .fsai-price { color: #fff; font-size: 28px; font-weight: 900; letter-spacing: -.045em; margin: 0 0 16px; }
+    .fsai-pricing-card .fsai-btn { width: fit-content; margin-top: auto; }
+
+    .fsai-belief-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+
+    .fsai-sticky-cta {
+      display: none;
+      position: fixed;
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      z-index: 30;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 12px;
+      border: 1px solid rgba(148, 170, 255, 0.24);
+      border-radius: 18px;
+      background: rgba(8, 12, 26, 0.9);
+      box-shadow: 0 18px 60px rgba(0,0,0,0.45);
+      backdrop-filter: blur(18px);
+    }
+
+    .fsai-sticky-cta span { color: #fff; font-size: 14px; font-weight: 800; }
+    .fsai-sticky-cta a { padding: 11px 14px; border-radius: 12px; font-size: 13px; }
 
     .fsai-portfolio { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
 
@@ -526,9 +591,13 @@
       .fsai-hero, .fsai-split { grid-template-columns: 1fr; }
       .fsai-visual { min-height: 620px; }
       .fsai-device { left: 4%; right: auto; }
-      .fsai-services { grid-template-columns: repeat(2, 1fr); }
+      .fsai-services { grid-template-columns: 1fr; }
       .fsai-portfolio { grid-template-columns: 1fr; }
       .fsai-steps { grid-template-columns: repeat(3, 1fr); }
+      .fsai-checker-callout,
+      .fsai-pricing-grid,
+      .fsai-belief-grid { grid-template-columns: 1fr; }
+      .fsai-checker-callout { align-items: stretch; }
     }
 
     @media (max-width: 720px) {
@@ -546,6 +615,8 @@
       .fsai-section-head { display: block; }
       .fsai-rank-metrics { grid-template-columns: repeat(2, 1fr); }
       .fsai-footer { flex-direction: column; }
+      .fsai-sticky-cta { display: flex; }
+      .fsai-site { padding-bottom: 78px; }
     }
   </style>
 
@@ -557,9 +628,10 @@
 
       <nav class="fsai-nav-links">
         <a href="#services">Services</a>
+        <a href="#checker">Idea Checker</a>
+        <a href="#pricing">Pricing</a>
         <a href="#portfolio">Portfolio</a>
         <a href="#process">Process</a>
-        <a href="#about">About</a>
       </nav>
 
       <a class="fsai-btn fsai-btn-primary" href="https://api.leadconnectorhq.com/widget/booking/Rb4aqLM1NdU5kvZcqNmj" target="_blank" rel="noopener">Book a Build Strategy Call &rarr;</a>
@@ -567,27 +639,27 @@
 
     <section class="fsai-hero" id="top">
       <div>
-        <div class="fsai-kicker">AI App Builder Service <b>|</b> Real Business Solutions</div>
+        <div class="fsai-kicker">Apps, MVPs, Websites & Automations <b>|</b> Built Around the Right First Version</div>
 
         <h1>
-          Your idea.<br>
-          Built into a<br>
-          <span class="fsai-gradient">working app.</span>
+          Turn your app idea or business workflow into a working first version.
         </h1>
 
         <p>
-          1stStep.ai helps non-technical founders, small businesses, consultants, creators, and professionals turn everyday business ideas into working apps, software tools, websites, dashboards, automations, and AI-powered systems.
+          1stStep.ai builds practical apps, websites, dashboards, and automations for founders, small businesses, and professionals who need to launch faster without hiring a full dev team.
         </p>
 
         <div class="fsai-hero-actions">
           <a class="fsai-btn fsai-btn-primary" href="/app-idea-viability-checker.html">Check Your App Idea &rarr;</a>
-          <a class="fsai-btn fsai-btn-ghost" href="#portfolio">View Live Portfolio</a>
+          <a class="fsai-btn fsai-btn-ghost" href="https://api.leadconnectorhq.com/widget/booking/Rb4aqLM1NdU5kvZcqNmj" target="_blank" rel="noopener">Book a Build Strategy Call</a>
         </div>
 
+        <div class="fsai-helper-line">Get an MVP readiness score, recommended first build path, and risk breakdown before spending money on development.</div>
+
         <div class="fsai-mini-proof">
-          <div class="fsai-proof-item"><div class="fsai-proof-icon">01</div><div><strong>Business First</strong><span>Built around the outcome, not just the technology.</span></div></div>
-          <div class="fsai-proof-item"><div class="fsai-proof-icon">02</div><div><strong>End-to-End</strong><span>Workflow, build, testing, launch, and maintenance.</span></div></div>
-          <div class="fsai-proof-item"><div class="fsai-proof-icon">03</div><div><strong>AI-Powered</strong><span>Smarter systems, faster execution, better leverage.</span></div></div>
+          <div class="fsai-proof-item"><div class="fsai-proof-icon">01</div><div><strong>Right First Version</strong><span>Scope the smallest useful build before the expensive one.</span></div></div>
+          <div class="fsai-proof-item"><div class="fsai-proof-icon">02</div><div><strong>Practical Builds</strong><span>Apps, websites, dashboards, and automations tied to real workflows.</span></div></div>
+          <div class="fsai-proof-item"><div class="fsai-proof-icon">03</div><div><strong>Lead to Call</strong><span>Checker, report, admin notification, and booking path are connected.</span></div></div>
         </div>
       </div>
 
@@ -609,24 +681,45 @@
       </div>
     </section>
 
+    <section class="fsai-section" id="checker">
+      <div class="fsai-checker-callout">
+        <div>
+          <div class="fsai-eyebrow">Free App Idea Checker</div>
+          <h2>Not sure if you need an app, website, dashboard, or automation?</h2>
+          <p>Paste your idea or business problem into the free App Idea Checker. It will show whether the idea is worth exploring, what the first version should include, and what risks to avoid before you spend money building.</p>
+        </div>
+        <a class="fsai-btn fsai-btn-primary" href="/app-idea-viability-checker.html">Run the Free App Idea Check &rarr;</a>
+      </div>
+    </section>
+
     <section class="fsai-section" id="services">
       <div class="fsai-section-head">
         <div>
           <div class="fsai-eyebrow">What I Build</div>
-          <h2>Solutions that <span class="fsai-gradient">power your business</span> forward.</h2>
-          <p class="fsai-section-lede">From rough idea to working product, 1stStep.ai handles the strategy, build, automation, launch, and support.</p>
+          <h2>Three ways to turn the idea into a useful first version.</h2>
+          <p class="fsai-section-lede">Start with the build type that matches the business problem, then keep scope tight enough to launch and learn.</p>
         </div>
       </div>
 
       <div class="fsai-services">
-        <div class="fsai-service-card"><div class="fsai-service-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"></rect><path d="M9 4v16M4 9h16"></path></svg></div><h3>Custom Apps</h3><p>Web applications, portals, internal tools, calculators, and MVPs built around your workflow.</p></div>
-        <div class="fsai-service-card"><div class="fsai-service-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="12" r="2"></circle><circle cx="12" cy="6" r="2"></circle><circle cx="18" cy="12" r="2"></circle><circle cx="12" cy="18" r="2"></circle><path d="M7.7 10.7l2.6-3.4M13.7 7.3l2.6 3.4M16.3 13.3l-2.6 3.4M10.3 16.7l-2.6-3.4"></path></svg></div><h3>AI Workflows</h3><p>AI-powered systems for intake, writing, summaries, qualification, research, and decision support.</p></div>
-        <div class="fsai-service-card"><div class="fsai-service-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"></path></svg></div><h3>Automations</h3><p>CRM, email, SMS, forms, reminders, reviews, lead routing, and repetitive task automation.</p></div>
-        <div class="fsai-service-card"><div class="fsai-service-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14l-2 2a3 3 0 104 4l2-2"></path><path d="M14 10l2-2a3 3 0 10-4-4L10 6"></path><path d="M8 12h8"></path></svg></div><h3>Integrations</h3><p>Connect the tools you already use so data moves without manual copy/paste or broken handoffs.</p></div>
-        <div class="fsai-service-card"><div class="fsai-service-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19h16"></path><rect x="5" y="11" width="3" height="6" rx="1"></rect><rect x="10.5" y="8" width="3" height="9" rx="1"></rect><rect x="16" y="5" width="3" height="12" rx="1"></rect></svg></div><h3>Dashboards</h3><p>Real-time dashboards that organize signals, KPIs, performance, client data, and operational metrics.</p></div>
-        <div class="fsai-service-card"><div class="fsai-service-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="14" rx="3"></rect><path d="M3 8h18"></path><path d="M9 12h6l-2.5 3v3l-1 1v-4L9 12z"></path></svg></div><h3>Websites & Funnels</h3><p>Premium landing pages, GHL sites, sales funnels, booking flows, and launch pages.</p></div>
-        <div class="fsai-service-card"><div class="fsai-service-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"></circle><path d="M12 12l4-4"></path><path d="M12 7h5v5"></path></svg></div><h3>Consulting</h3><p>Map the fastest path from messy process or idea to a practical system that works.</p></div>
-        <div class="fsai-service-card"><div class="fsai-service-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 6.5a4 4 0 01-5.2 5.2L4 17l3 3 5.3-5.3a4 4 0 005.2-5.2l-2.2 2.2-2.8-2.8 2-2.4z"></path></svg></div><h3>Maintenance</h3><p>Ongoing support, improvements, fixes, optimization, and feature expansion after launch.</p></div>
+        <div class="fsai-service-card"><div class="fsai-service-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"></rect><path d="M9 4v16M4 9h16"></path></svg></div><h3>Apps & MVPs</h3><p>Focused web apps, portals, calculators, SaaS MVPs, and first-version products built around one core workflow.</p></div>
+        <div class="fsai-service-card"><div class="fsai-service-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="14" rx="3"></rect><path d="M3 8h18"></path><path d="M9 12h6l-2.5 3v3l-1 1v-4L9 12z"></path></svg></div><h3>Websites & Lead Systems</h3><p>Premium service websites, landing pages, lead capture flows, quote forms, and booking paths designed to turn interest into conversations.</p></div>
+        <div class="fsai-service-card"><div class="fsai-service-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"></path></svg></div><h3>Automations & Internal Tools</h3><p>Dashboards, workflow tools, CRM automations, follow-up systems, and integrations that replace spreadsheets and manual handoffs.</p></div>
+      </div>
+    </section>
+
+    <section class="fsai-section" id="pricing">
+      <div class="fsai-section-head">
+        <div>
+          <div class="fsai-eyebrow">Pricing Anchors</div>
+          <h2>Start with the smallest useful build.</h2>
+          <p class="fsai-section-lede">These are starting points, not bloated packages. The checker helps decide which path fits before scope grows.</p>
+        </div>
+      </div>
+      <div class="fsai-pricing-grid">
+        <div class="fsai-pricing-card"><h3>Website + Lead Capture System</h3><div class="fsai-price">Starting at $1,500</div><p>For service businesses that need a sharper site, lead form, booking path, and conversion-focused first impression.</p><a class="fsai-btn fsai-btn-ghost" href="/app-idea-viability-checker.html">Check Fit &rarr;</a></div>
+        <div class="fsai-pricing-card"><h3>Internal Tool or Dashboard</h3><div class="fsai-price">Starting at $3,500</div><p>For teams replacing spreadsheets, text threads, manual reporting, or messy internal workflows with one practical tool.</p><a class="fsai-btn fsai-btn-ghost" href="/app-idea-viability-checker.html">Check Fit &rarr;</a></div>
+        <div class="fsai-pricing-card"><h3>MVP App Build</h3><div class="fsai-price">Starting at $5,000</div><p>For founders and operators who need a focused first version of an app, portal, SaaS workflow, or customer-facing product.</p><a class="fsai-btn fsai-btn-ghost" href="/app-idea-viability-checker.html">Check Fit &rarr;</a></div>
       </div>
     </section>
 
@@ -634,7 +727,7 @@
       <div class="fsai-section-head">
         <div>
           <div class="fsai-eyebrow">Live Portfolio</div>
-          <h2>Live Builds & Product Systems</h2>
+          <h2>Real Products Built From First Versions</h2>
           <p class="fsai-section-lede">Real products and dashboards built around practical workflows, launch speed, and measurable utility.</p>
         </div>
         <a class="fsai-btn fsai-btn-ghost" href="/app-idea-viability-checker.html">Check Your App Idea &rarr;</a>
@@ -676,6 +769,21 @@
       </div>
     </section>
 
+    <section class="fsai-section" id="principles">
+      <div class="fsai-belief-grid">
+        <div class="fsai-belief-card">
+          <div class="fsai-eyebrow">Scope Control</div>
+          <h2>Build the first version, not the fantasy version.</h2>
+          <p>Most app ideas get expensive when every future feature sneaks into version one. 1stStep.ai helps map the smallest version that can prove the workflow, demand, or business case before you overbuild.</p>
+        </div>
+        <div class="fsai-belief-card">
+          <div class="fsai-eyebrow">Start Messy</div>
+          <h2>You do not need a polished app idea.</h2>
+          <p>Bring the notes, rough workflow, spreadsheet, customer complaint, or half-formed idea. The first step is turning the messy version into a practical build path.</p>
+        </div>
+      </div>
+    </section>
+
     <section class="fsai-section" id="process">
       <div class="fsai-section-head"><div><div class="fsai-eyebrow">How It Works</div><h2>A simple path from <span class="fsai-gradient">idea to launch.</span></h2></div></div>
       <div class="fsai-steps">
@@ -712,9 +820,12 @@
     <section class="fsai-section" id="contact">
       <div class="fsai-cta-card">
         <div class="fsai-eyebrow">Ready to Build?</div>
-        <h2>Have an idea? <span class="fsai-gradient">Let's build the first version.</span></h2>
-        <p>Whether you need an app, software tool, website, dashboard, automation, AI workflow, or just help figuring out what to build first - 1stStep.ai can help you take the first step.</p>
-        <a class="fsai-btn fsai-btn-primary" href="https://api.leadconnectorhq.com/widget/booking/Rb4aqLM1NdU5kvZcqNmj" target="_blank" rel="noopener">Book a Strategy Call &rarr;</a>
+        <h2>Have an idea? <span class="fsai-gradient">Check the first version before you build.</span></h2>
+        <p>Paste the idea into the free checker or book a strategy call if you already know you need help scoping the build.</p>
+        <div class="fsai-hero-actions" style="justify-content:center;margin-bottom:0;">
+          <a class="fsai-btn fsai-btn-primary" href="/app-idea-viability-checker.html">Check Your App Idea &rarr;</a>
+          <a class="fsai-btn fsai-btn-ghost" href="https://api.leadconnectorhq.com/widget/booking/Rb4aqLM1NdU5kvZcqNmj" target="_blank" rel="noopener">Book a Build Strategy Call</a>
+        </div>
       </div>
     </section>
 
@@ -722,6 +833,11 @@
       <div class="fsai-footer-brand"><img class="fsai-footer-logo" src="/assets/homepage-logo-640.jpg" alt="1stStep.ai"><span>Copyright 2026 1stStep.ai. Built by Evan Pancis.</span></div>
       <div>Strategy | Automation | Apps | Websites | AI Systems</div>
     </footer>
+  </div>
+
+  <div class="fsai-sticky-cta" aria-label="Mobile app idea checker shortcut">
+    <span>Have an idea?</span>
+    <a class="fsai-btn fsai-btn-primary" href="/app-idea-viability-checker.html">Check It</a>
   </div>
 
   <script>
