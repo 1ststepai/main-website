@@ -1,0 +1,21 @@
+{
+  "name": "1stStep.ai",
+  "short_name": "1stStep.ai",
+  "description": "Apps, websites, MVPs, and automations built around the right first version.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050711",
+  "theme_color": "#050711",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

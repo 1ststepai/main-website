@@ -11,6 +11,8 @@ export default defineConfig({
       input: {
         main: "index.html",
         appIdeaViabilityChecker: "app-idea-viability-checker.html",
+        privacy: "privacy.html",
+        terms: "terms.html",
       },
     },
   },
