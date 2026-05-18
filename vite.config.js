@@ -11,6 +11,10 @@ export default defineConfig({
       input: {
         main: "index.html",
         appIdeaViabilityChecker: "app-idea-viability-checker.html",
+        appBuilds: "services/app-builds.html",
+        mvpBuilds: "services/mvp-builds.html",
+        websites: "services/websites.html",
+        internalTools: "services/internal-tools.html",
         privacy: "privacy.html",
         terms: "terms.html",
       },

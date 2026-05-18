@@ -3,13 +3,127 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>1stStep.ai | Apps, MVPs & Automations</title>
+  <title>1stStep.ai | Apps, Websites, MVPs, Automations</title>
   <meta name="description" content="Validate and build the right first version of your app, website, SaaS, MVP, or automation before overspending on the wrong build." />
+  <link rel="canonical" href="https://www.1ststep.ai/" />
+  <meta name="robots" content="index,follow,max-image-preview:large" />
+  <meta name="author" content="1stStep.ai" />
+  <meta name="keywords" content="app builds, MVP builds, website builds, business automation, internal dashboards, SaaS MVP, app idea validation" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="1stStep.ai" />
+  <meta property="og:title" content="1stStep.ai | Apps, Websites, MVPs, Automations" />
+  <meta property="og:description" content="Validate and build the right first version of your app, website, SaaS, MVP, or automation before overspending on the wrong build." />
+  <meta property="og:url" content="https://www.1ststep.ai/" />
+  <meta property="og:image" content="https://www.1ststep.ai/assets/firststep-logo-transparent-cleaned.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="1stStep.ai | Apps, Websites, MVPs, Automations" />
+  <meta name="twitter:description" content="Validate and build the right first version of your app, website, SaaS, MVP, or automation before overspending on the wrong build." />
+  <meta name="twitter:image" content="https://www.1ststep.ai/assets/firststep-logo-transparent-cleaned.png" />
   <meta name="theme-color" content="#050711" />
   <link rel="icon" href="/favicon.ico" sizes="any" />
   <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   <link rel="manifest" href="/site.webmanifest" />
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://www.1ststep.ai/#organization",
+          "name": "1stStep.ai",
+          "url": "https://www.1ststep.ai/",
+          "logo": "https://www.1ststep.ai/assets/firststep-logo-transparent-cleaned.png",
+          "founder": {
+            "@type": "Person",
+            "name": "Evan Pancis"
+          },
+          "sameAs": [
+            "https://github.com/1ststepai"
+          ]
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://www.1ststep.ai/#website",
+          "name": "1stStep.ai",
+          "url": "https://www.1ststep.ai/",
+          "publisher": {
+            "@id": "https://www.1ststep.ai/#organization"
+          },
+          "description": "1stStep.ai builds practical apps, websites, dashboards, MVPs, and automations around the right first version."
+        },
+        {
+          "@type": "ProfessionalService",
+          "@id": "https://www.1ststep.ai/#service",
+          "name": "1stStep.ai",
+          "url": "https://www.1ststep.ai/",
+          "image": "https://www.1ststep.ai/assets/firststep-logo-transparent-cleaned.png",
+          "description": "Apps, websites, MVPs, dashboards, internal tools, and workflow automations for founders, small businesses, and professionals.",
+          "areaServed": "United States",
+          "founder": {
+            "@type": "Person",
+            "name": "Evan Pancis"
+          },
+          "hasOfferCatalog": {
+            "@type": "OfferCatalog",
+            "name": "1stStep.ai Build Services",
+            "itemListElement": [
+              {
+                "@type": "Offer",
+                "name": "Website + Lead Capture System",
+                "url": "https://www.1ststep.ai/services/websites.html"
+              },
+              {
+                "@type": "Offer",
+                "name": "Internal Tool or Dashboard",
+                "url": "https://www.1ststep.ai/services/internal-tools.html"
+              },
+              {
+                "@type": "Offer",
+                "name": "MVP App Build",
+                "url": "https://www.1ststep.ai/services/mvp-builds.html"
+              },
+              {
+                "@type": "Offer",
+                "name": "App Builds",
+                "url": "https://www.1ststep.ai/services/app-builds.html"
+              }
+            ]
+          }
+        },
+        {
+          "@type": "FAQPage",
+          "@id": "https://www.1ststep.ai/#faq",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "What does 1stStep.ai build?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "1stStep.ai builds practical apps, websites, dashboards, MVPs, internal tools, and workflow automations around the right first version."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How should I start if I only have an idea?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Start with the free App Idea Checker to get an MVP readiness score, recommended first build path, risk breakdown, and a first-version mockup preview."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Does 1stStep.ai build full apps immediately?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "1stStep.ai focuses first on the smallest useful version that can prove the workflow, demand, or business case before expanding into a larger build."
+              }
+            }
+          ]
+        }
+      ]
+    }
+  </script>
 </head>
 <body style="margin:0;background:#050711;">
 <div class="fsai-site">
@@ -477,6 +591,18 @@
 
     .fsai-service-card h3 { margin: 0 0 10px; font-size: 19px; letter-spacing: -.02em; }
     .fsai-service-card p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.55; }
+    .fsai-service-links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+    .fsai-service-links a {
+      color: #dff6ff;
+      text-decoration: none;
+      border: 1px solid rgba(125,232,255,.20);
+      background: rgba(255,255,255,.045);
+      border-radius: 999px;
+      padding: 10px 13px;
+      font-size: 13px;
+      font-weight: 800;
+    }
+    .fsai-service-links a:hover { border-color: rgba(125,232,255,.42); background: rgba(125,232,255,.10); }
 
     .fsai-checker-callout,
     .fsai-pricing-card,
@@ -1049,6 +1175,12 @@
         <div class="fsai-service-card"><div class="fsai-service-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="14" rx="3"></rect><path d="M3 8h18"></path><path d="M9 12h6l-2.5 3v3l-1 1v-4L9 12z"></path></svg></div><h3>Websites & Lead Systems</h3><p>Premium service websites, landing pages, lead capture flows, quote forms, and booking paths designed to turn interest into conversations.</p></div>
         <div class="fsai-service-card"><div class="fsai-service-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"></path></svg></div><h3>Automations & Internal Tools</h3><p>Dashboards, workflow tools, CRM automations, follow-up systems, and integrations that replace spreadsheets and manual handoffs.</p></div>
       </div>
+      <div class="fsai-service-links" aria-label="Service pages">
+        <a href="/services/app-builds.html">App Builds</a>
+        <a href="/services/mvp-builds.html">MVP Builds</a>
+        <a href="/services/websites.html">Websites</a>
+        <a href="/services/internal-tools.html">Internal Tools</a>
+      </div>
     </section>
 
     <section class="fsai-section" id="pricing">
@@ -1232,7 +1364,7 @@
 
     <footer class="fsai-footer">
       <div class="fsai-footer-brand"><img class="fsai-footer-logo" src="/assets/firststep-logo-transparent-cleaned.png" alt="1stStep.ai"><span>Copyright 2026 1stStep.ai. Built by Evan Pancis.</span></div>
-      <div>Strategy | Automation | Apps | Websites | AI Systems</div>
+      <div><a href="/services/app-builds.html">Apps</a> | <a href="/services/mvp-builds.html">MVPs</a> | <a href="/services/websites.html">Websites</a> | <a href="/services/internal-tools.html">Internal Tools</a></div>
     </footer>
   </div>
 

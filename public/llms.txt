@@ -1,0 +1,33 @@
+# 1stStep.ai
+
+1stStep.ai builds practical apps, websites, MVPs, dashboards, internal tools, and workflow automations for founders, small businesses, and professionals.
+
+Primary positioning: turn an app idea or messy business workflow into the right first version before overspending on the wrong build.
+
+Primary conversion path:
+- Website: https://www.1ststep.ai/
+- Free App Idea Checker: https://www.1ststep.ai/app-idea-viability-checker.html
+- App builds: https://www.1ststep.ai/services/app-builds.html
+- MVP builds: https://www.1ststep.ai/services/mvp-builds.html
+- Websites and lead systems: https://www.1ststep.ai/services/websites.html
+- Internal tools and automations: https://www.1ststep.ai/services/internal-tools.html
+
+Core services:
+- App and MVP builds
+- Website and lead capture systems
+- Internal dashboards
+- Workflow automation
+- SaaS and customer portal first versions
+- Build strategy and MVP scope control
+
+Important product:
+- The App Idea Viability Checker gives prospects a first-pass MVP readiness score, recommended build path, risk breakdown, and next-step recommendation.
+
+Separate products:
+- https://resume.1ststep.ai/ is the AI Resume Builder landing page.
+- https://app.1ststep.ai/ is the AI Resume Builder web app.
+
+Business rules:
+- 1stStep.ai does not guarantee revenue, rankings, funding, or app success.
+- 1stStep.ai focuses on practical first versions, not bloated full builds.
+- GitHub repo creation for client projects is locked until proposal acceptance and deposit/payment.
