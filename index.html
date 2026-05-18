@@ -1290,12 +1290,12 @@
 
         googleReviews.innerHTML = "";
         if (!data.configured) {
-          renderReviewFallback("Live Google reviews are ready to connect. Add GOOGLE_PLACES_API_KEY and GOOGLE_PLACE_ID in Vercel to show public reviews here.");
+          googleReviews.innerHTML = "";
           return;
         }
 
         if (!data.reviews || !data.reviews.length) {
-          renderReviewFallback("The Google profile is connected, but no public review text was returned yet. Visitors can still open the Google profile.");
+          googleReviews.innerHTML = "";
           return;
         }
 
