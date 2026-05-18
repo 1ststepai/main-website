@@ -735,6 +735,80 @@
     .fsai-cta-card p { max-width: 680px; margin-left: auto; margin-right: auto; }
     .fsai-footer { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 28px 0 42px; color: var(--muted-2); font-size: 13px; }
 
+    .fsai-review-stars {
+      display: flex;
+      gap: 3px;
+      color: #ffd166;
+      font-size: 22px;
+      letter-spacing: 1px;
+      margin: 0 0 12px;
+      text-shadow: 0 0 24px rgba(255, 209, 102, 0.18);
+    }
+
+    .fsai-review-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 18px 0 0;
+      color: #dfe7ff;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .fsai-review-meta span {
+      border: 1px solid rgba(148, 170, 255, 0.16);
+      background: rgba(255,255,255,0.045);
+      border-radius: 999px;
+      padding: 9px 11px;
+    }
+
+    .fsai-review-live {
+      display: grid;
+      gap: 12px;
+    }
+
+    .fsai-review-card {
+      border: 1px solid rgba(148, 170, 255, 0.16);
+      border-radius: 20px;
+      padding: 18px;
+      background: rgba(255,255,255,0.045);
+    }
+
+    .fsai-review-card header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .fsai-review-card strong {
+      display: block;
+      color: #fff;
+      font-size: 15px;
+    }
+
+    .fsai-review-card small {
+      color: var(--muted-2);
+      font-size: 12px;
+    }
+
+    .fsai-review-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .fsai-review-empty {
+      border: 1px dashed rgba(148, 170, 255, 0.22);
+      border-radius: 20px;
+      padding: 22px;
+      color: var(--muted);
+      background: rgba(255,255,255,0.03);
+      line-height: 1.65;
+    }
+
     .fsai-chat-launch {
       position: fixed;
       right: 22px;
@@ -1026,20 +1100,29 @@
       <div class="fsai-section-head">
         <div>
           <div class="fsai-eyebrow">Google Reviews</div>
-          <h2>Public feedback will live here as the profile grows.</h2>
-          <p class="fsai-section-lede">1stStep.ai is set up to collect real Google reviews from clients and collaborators. This section is reserved for verified public feedback only.</p>
+          <h2>Real feedback from people who have worked with 1stStep.ai.</h2>
+          <p class="fsai-section-lede">Google reviews are pulled live when the Google Places connection is configured. If the feed is unavailable, visitors can still open the public review profile.</p>
         </div>
       </div>
       <div class="fsai-reviews-card">
         <div class="fsai-review-score">
-          <strong>Google Reviews</strong>
-          <p>Worked with 1stStep.ai or used the App Idea Checker? A short Google review helps future founders and business owners know what to expect.</p>
-          <a class="fsai-btn fsai-btn-ghost" href="https://g.page/r/CfdTIVLfW3goEBM/review" target="_blank" rel="noopener">Leave a Google Review &rarr;</a>
+          <div class="fsai-review-stars" aria-label="Google review rating">★★★★★</div>
+          <strong data-fsai-google-rating>Google Reviews</strong>
+          <p data-fsai-google-summary>Worked with 1stStep.ai or used the App Idea Checker? A short Google review helps future founders and business owners know what to expect.</p>
+          <div class="fsai-review-meta">
+            <span>Verified Google profile</span>
+            <span data-fsai-google-count>Live feed ready</span>
+          </div>
+          <br>
+          <a class="fsai-btn fsai-btn-ghost" href="https://g.page/r/CfdTIVLfW3goEBM/review" target="_blank" rel="noopener" data-fsai-google-link>Read or leave a Google review &rarr;</a>
         </div>
         <div class="fsai-review-note">
-          <div class="fsai-eyebrow">Trust Rule</div>
-          <h3 style="margin:0 0 12px;font-size:28px;letter-spacing:-.04em;">Real feedback only.</h3>
-          <p>The site will show Google reviews after the profile has public feedback from real people who have worked with 1stStep.ai. Until then, the portfolio and working App Idea Checker are the proof.</p>
+          <div class="fsai-eyebrow">Client Proof</div>
+          <h3 style="margin:0 0 12px;font-size:28px;letter-spacing:-.04em;">No fake testimonials.</h3>
+          <div class="fsai-review-live" data-fsai-google-reviews>
+            <div class="fsai-review-empty">Loading Google review status...</div>
+          </div>
+          <br>
           <a class="fsai-btn fsai-btn-primary" href="/app-idea-viability-checker.html">Check Your App Idea &rarr;</a>
         </div>
       </div>
@@ -1129,6 +1212,90 @@
           target.scrollIntoView({ behavior: "smooth", block: "start" });
         });
       });
+
+      const googleReviews = document.querySelector("[data-fsai-google-reviews]");
+      const googleRating = document.querySelector("[data-fsai-google-rating]");
+      const googleSummary = document.querySelector("[data-fsai-google-summary]");
+      const googleCount = document.querySelector("[data-fsai-google-count]");
+      const googleLink = document.querySelector("[data-fsai-google-link]");
+
+      function starText(rating) {
+        const rounded = Math.max(0, Math.min(5, Math.round(Number(rating || 0))));
+        return "★★★★★".slice(0, rounded) + "☆☆☆☆☆".slice(0, 5 - rounded);
+      }
+
+      function renderReviewFallback(message) {
+        if (!googleReviews) return;
+        googleReviews.innerHTML = "";
+        const fallback = document.createElement("div");
+        fallback.className = "fsai-review-empty";
+        fallback.textContent = message || "Google reviews will appear here after the live feed is connected.";
+        googleReviews.appendChild(fallback);
+      }
+
+      function renderGoogleReviews(data) {
+        if (!googleReviews) return;
+        if (data.google_url && googleLink) googleLink.href = data.google_url;
+
+        if (data.rating && googleRating) {
+          googleRating.textContent = Number(data.rating).toFixed(1) + " on Google";
+        }
+
+        if (data.review_count && googleCount) {
+          googleCount.textContent = data.review_count + " public reviews";
+        }
+
+        if (data.rating && googleSummary) {
+          googleSummary.textContent = "Visitors can read verified Google feedback before deciding whether to run the checker or book a build strategy call.";
+        }
+
+        googleReviews.innerHTML = "";
+        if (!data.configured) {
+          renderReviewFallback("Live Google reviews are ready to connect. Add GOOGLE_PLACES_API_KEY and GOOGLE_PLACE_ID in Vercel to show public reviews here.");
+          return;
+        }
+
+        if (!data.reviews || !data.reviews.length) {
+          renderReviewFallback("The Google profile is connected, but no public review text was returned yet. Visitors can still open the Google profile.");
+          return;
+        }
+
+        data.reviews.forEach(function (review) {
+          const card = document.createElement("article");
+          card.className = "fsai-review-card";
+
+          const header = document.createElement("header");
+          const nameWrap = document.createElement("div");
+          const name = document.createElement("strong");
+          name.textContent = review.author_name || "Google reviewer";
+          const date = document.createElement("small");
+          date.textContent = review.relative_time_description || "Google review";
+          nameWrap.appendChild(name);
+          nameWrap.appendChild(date);
+
+          const stars = document.createElement("small");
+          stars.textContent = starText(review.rating);
+          stars.style.color = "#ffd166";
+
+          const text = document.createElement("p");
+          text.textContent = review.text || "Review text available on Google.";
+
+          header.appendChild(nameWrap);
+          header.appendChild(stars);
+          card.appendChild(header);
+          card.appendChild(text);
+          googleReviews.appendChild(card);
+        });
+      }
+
+      if (googleReviews) {
+        fetch("/api/google-reviews", { headers: { "Accept": "application/json" } })
+          .then(function (response) { return response.json(); })
+          .then(function (data) { renderGoogleReviews(data || {}); })
+          .catch(function () {
+            renderReviewFallback("Google reviews could not load right now. Visitors can still open the public Google review profile.");
+          });
+      }
 
       const chatPanel = document.querySelector("[data-fsai-chat-panel]");
       const chatOpen = document.querySelector("[data-fsai-chat-open]");
