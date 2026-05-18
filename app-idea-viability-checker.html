@@ -714,6 +714,97 @@
         color: var(--aivc-muted);
       }
 
+      .aivc-mockup-card {
+        margin-top: 18px;
+        padding: 22px;
+        border: 1px solid rgba(125, 211, 252, 0.18);
+        border-radius: 24px;
+        background:
+          radial-gradient(circle at 12% 0%, rgba(125, 211, 252, 0.12), transparent 36%),
+          linear-gradient(135deg, rgba(255,255,255,0.07), rgba(255,255,255,0.025));
+      }
+
+      .aivc-mockup-grid {
+        display: grid;
+        grid-template-columns: minmax(260px, .9fr) minmax(0, 1.1fr);
+        gap: 20px;
+        align-items: stretch;
+      }
+
+      .aivc-wireframe {
+        min-height: 320px;
+        border: 1px solid rgba(148, 170, 255, 0.18);
+        border-radius: 22px;
+        overflow: hidden;
+        background: #0b1020;
+        box-shadow: 0 24px 80px rgba(0,0,0,0.26);
+      }
+
+      .aivc-wireframe-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 13px 15px;
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+        color: #dfe7ff;
+        font-size: 13px;
+        font-weight: 850;
+      }
+
+      .aivc-wireframe-dots { display: flex; gap: 5px; }
+      .aivc-wireframe-dots span { width: 8px; height: 8px; border-radius: 50%; background: rgba(125, 211, 252, 0.7); }
+
+      .aivc-wireframe-body {
+        display: grid;
+        grid-template-columns: 92px 1fr;
+        min-height: 270px;
+      }
+
+      .aivc-wireframe-nav {
+        padding: 14px 10px;
+        border-right: 1px solid rgba(255,255,255,0.08);
+        background: rgba(255,255,255,0.025);
+      }
+
+      .aivc-wireframe-pill,
+      .aivc-wireframe-line {
+        display: block;
+        border-radius: 999px;
+        background: rgba(203, 213, 225, 0.18);
+      }
+
+      .aivc-wireframe-pill { height: 10px; margin: 0 0 12px; }
+      .aivc-wireframe-pill:nth-child(1) { width: 70%; background: linear-gradient(135deg, var(--aivc-blue), var(--aivc-purple)); }
+      .aivc-wireframe-pill:nth-child(2) { width: 58%; }
+      .aivc-wireframe-pill:nth-child(3) { width: 76%; }
+      .aivc-wireframe-pill:nth-child(4) { width: 48%; }
+
+      .aivc-wireframe-main { padding: 16px; }
+      .aivc-wireframe-heading { width: 62%; height: 18px; margin-bottom: 12px; border-radius: 999px; background: rgba(255,255,255,0.18); }
+      .aivc-wireframe-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+      .aivc-wireframe-mini { min-height: 62px; border: 1px solid rgba(125, 211, 252, 0.14); border-radius: 14px; background: rgba(255,255,255,0.045); padding: 10px; }
+      .aivc-wireframe-line { height: 8px; margin-bottom: 8px; }
+      .aivc-wireframe-line.short { width: 54%; }
+      .aivc-wireframe-line.med { width: 76%; }
+      .aivc-wireframe-line.long { width: 92%; }
+
+      .aivc-wireframe-panel {
+        min-height: 96px;
+        border: 1px solid rgba(148, 170, 255, 0.14);
+        border-radius: 16px;
+        background:
+          linear-gradient(135deg, rgba(125,211,252,0.12), rgba(139,92,246,0.08)),
+          rgba(255,255,255,0.035);
+        padding: 14px;
+      }
+
+      .aivc-mockup-details { display: grid; gap: 14px; }
+      .aivc-mockup-details h3 { margin: 0; font-size: 26px; letter-spacing: -0.04em; }
+      .aivc-mockup-list { display: grid; gap: 9px; margin: 0; padding: 0; list-style: none; }
+      .aivc-mockup-list li { display: flex; gap: 9px; color: var(--aivc-muted); line-height: 1.5; }
+      .aivc-mockup-list span { color: var(--aivc-cyan); font-weight: 900; }
+
       .aivc-copy-block {
         padding: 18px;
         border: 1px solid var(--aivc-line);
@@ -857,6 +948,7 @@
         }
 
         .aivc-report-grid,
+        .aivc-mockup-grid,
         .aivc-fields {
           grid-template-columns: 1fr;
         }
@@ -1354,6 +1446,112 @@
           return "Strategy map, validation plan, and scope options before committing to a build.";
         }
 
+        function generateMockupPreview(report) {
+          var type = report.ideaType || inferBuildType(ideaText);
+          var problem = report.problemType || "core workflow";
+          var title = "First-Version " + (type === "Business website" ? "Lead System" : type === "Internal automation" ? "Workflow Dashboard" : type === "AI tool" ? "AI Tool" : "MVP");
+          var firstScreen = "Intake and status dashboard";
+          var screens = ["Intake", "Dashboard", "Details"];
+          var features = ["Capture the request", "Track status", "Show next action"];
+          var flow = ["New request", "Review details", "Take action", "Follow up"];
+          var buildFirst = ["One clear intake flow", "Simple dashboard/status view", "Manual admin controls"];
+          var skipForNow = ["Native mobile app", "Advanced analytics", "Complex billing"];
+
+          if (type === "Business website") {
+            title = "Website + Lead Capture Preview";
+            firstScreen = "Landing page with offer, proof, and lead form";
+            screens = ["Landing page", "Lead form", "Thank-you step"];
+            features = ["Clear offer", "Lead capture", "Booking path"];
+            flow = ["Visitor lands", "Reads offer", "Submits inquiry", "Books call"];
+            buildFirst = ["Homepage or landing page", "Lead form", "Calendar/CTA path"];
+            skipForNow = ["Huge multi-page site", "Blog library", "Custom portal"];
+          } else if (type === "Internal automation") {
+            title = "Internal Workflow Dashboard Preview";
+            firstScreen = "Team dashboard with records, status, and next actions";
+            screens = ["Dashboard", "Record detail", "Follow-up queue"];
+            features = ["Status tracking", "Task queue", "Follow-up reminders"];
+            flow = ["Work enters", "Status updates", "Owner assigned", "Follow-up triggered"];
+            buildFirst = ["Dashboard", "Status workflow", "Notification/reminder logic"];
+            skipForNow = ["Full ERP", "Every edge case", "Advanced permissions"];
+          } else if (type === "AI tool") {
+            title = "AI Tool Prototype Preview";
+            firstScreen = "Prompt input with structured result and review step";
+            screens = ["Input", "AI result", "Saved output"];
+            features = ["Guided input", "Generated draft", "Human review"];
+            flow = ["User submits context", "Tool drafts output", "User edits", "Result saved"];
+            buildFirst = ["Repeatable prompt flow", "Result editor", "Saved history"];
+            skipForNow = ["Autonomous agents", "Complex model routing", "Marketplace features"];
+          } else if (type === "Mobile-friendly web app" || type === "Web app / SaaS") {
+            title = "Focused MVP App Preview";
+            firstScreen = "Core workflow dashboard with one primary user action";
+            screens = ["Dashboard", "Core workflow", "User/account view"];
+            features = ["User intake", "Core workflow", "Progress/status"];
+            flow = ["User signs in", "Starts workflow", "Completes key action", "Sees result"];
+            buildFirst = ["Core user flow", "Simple auth", "Admin view"];
+            skipForNow = ["Native app stores", "Social features", "Enterprise settings"];
+          }
+
+          if (problem === "Gets more leads") {
+            features[0] = "Lead capture";
+            flow = ["Visitor arrives", "Offer is clear", "Lead submits", "Follow-up starts"];
+          }
+          if (problem === "Automates follow-up") {
+            features[2] = "Follow-up automation";
+            buildFirst[2] = "Reminder/follow-up rules";
+          }
+          if (problem === "Replaces spreadsheets") {
+            screens[0] = "Clean dashboard";
+            features[1] = "Spreadsheet replacement";
+          }
+
+          return {
+            title: title,
+            first_screen: firstScreen,
+            screens: screens,
+            core_features: features,
+            workflow: flow,
+            build_first: buildFirst,
+            skip_for_now: skipForNow
+          };
+        }
+
+        function renderMockupPreview(mockup) {
+          function list(items) {
+            return items.map(function (item) {
+              return '<li><span>+</span><span>' + escapeHtml(item) + '</span></li>';
+            }).join("");
+          }
+
+          return '' +
+            '<div class="aivc-mockup-card">' +
+              '<div class="aivc-mockup-grid">' +
+                '<div class="aivc-wireframe" aria-label="First-version wireframe mockup">' +
+                  '<div class="aivc-wireframe-top"><span>' + escapeHtml(mockup.title) + '</span><div class="aivc-wireframe-dots"><span></span><span></span><span></span></div></div>' +
+                  '<div class="aivc-wireframe-body">' +
+                    '<div class="aivc-wireframe-nav"><span class="aivc-wireframe-pill"></span><span class="aivc-wireframe-pill"></span><span class="aivc-wireframe-pill"></span><span class="aivc-wireframe-pill"></span></div>' +
+                    '<div class="aivc-wireframe-main">' +
+                      '<div class="aivc-wireframe-heading"></div>' +
+                      '<div class="aivc-wireframe-cards">' +
+                        '<div class="aivc-wireframe-mini"><span class="aivc-wireframe-line short"></span><span class="aivc-wireframe-line med"></span></div>' +
+                        '<div class="aivc-wireframe-mini"><span class="aivc-wireframe-line med"></span><span class="aivc-wireframe-line short"></span></div>' +
+                        '<div class="aivc-wireframe-mini"><span class="aivc-wireframe-line short"></span><span class="aivc-wireframe-line long"></span></div>' +
+                      '</div>' +
+                      '<div class="aivc-wireframe-panel"><span class="aivc-wireframe-line long"></span><span class="aivc-wireframe-line med"></span><span class="aivc-wireframe-line short"></span></div>' +
+                    '</div>' +
+                  '</div>' +
+                '</div>' +
+                '<div class="aivc-mockup-details">' +
+                  '<p class="aivc-preview-kicker">Zero-cost first-version mockup</p>' +
+                  '<h3>' + escapeHtml(mockup.title) + '</h3>' +
+                  '<div class="aivc-copy-block"><h3>Suggested first screen</h3><p>' + escapeHtml(mockup.first_screen) + '</p></div>' +
+                  '<div class="aivc-copy-block"><h3>Core features</h3><ul class="aivc-mockup-list">' + list(mockup.core_features) + '</ul></div>' +
+                  '<div class="aivc-copy-block"><h3>Build first</h3><ul class="aivc-mockup-list">' + list(mockup.build_first) + '</ul></div>' +
+                  '<div class="aivc-copy-block"><h3>Skip for now</h3><ul class="aivc-mockup-list">' + list(mockup.skip_for_now) + '</ul></div>' +
+                '</div>' +
+              '</div>' +
+            '</div>';
+        }
+
         function renderIdeaStart() {
           stepCount.textContent = "Quick review";
           progress.style.width = "12%";
@@ -1482,6 +1680,7 @@
 
         function renderReport() {
           latestReport = calculateReport();
+          latestReport.mockupPreview = generateMockupPreview(latestReport);
           formArea.style.display = "none";
           stepCount.textContent = "Report preview";
           progress.style.width = "100%";
@@ -1510,8 +1709,9 @@
               '<div class="aivc-metric"><strong>' + latestReport.buildSimplicityScore + '</strong><span>Build Simplicity</span></div>' +
               '<div class="aivc-metric"><strong>' + latestReport.launchReadinessScore + '</strong><span>Launch Readiness</span></div>' +
             '</div>' +
+            renderMockupPreview(latestReport.mockupPreview) +
             '<form class="aivc-lead-card" id="aivc-lead-form">' +
-              '<h3>Save your report and map the smallest build that can prove demand.</h3>' +
+              '<h3>Save your report, mockup, and first-version build path.</h3>' +
               '<p>Enter your details to package this result as a lead record. Phone is optional.</p>' +
               '<div class="aivc-fields">' +
                 '<div class="aivc-field"><label for="aivc-name">Name</label><input class="aivc-input" id="aivc-name" name="name" autocomplete="name" required placeholder="Your name" /></div>' +
@@ -1564,7 +1764,8 @@
             audience: latestReport.audience,
             problem_type: latestReport.problemType,
             first_version: latestReport.firstVersion,
-            stage: latestReport.stage
+            stage: latestReport.stage,
+            mockup_preview: latestReport.mockupPreview || generateMockupPreview(latestReport)
           };
           Object.keys(answers).forEach(function (key) {
             answerPayload[key] = answers[key].value;
