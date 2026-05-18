@@ -767,6 +767,12 @@
       gap: 12px;
     }
 
+    .fsai-featured-reviews {
+      display: grid;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
     .fsai-review-card {
       border: 1px solid rgba(148, 170, 255, 0.16);
       border-radius: 20px;
@@ -798,6 +804,13 @@
       color: var(--muted);
       line-height: 1.6;
       font-size: 14px;
+    }
+
+    .fsai-review-card.fsai-featured-review {
+      border-color: rgba(125, 211, 252, 0.22);
+      background:
+        radial-gradient(circle at 10% 0%, rgba(125, 211, 252, 0.12), transparent 38%),
+        rgba(255,255,255,0.05);
     }
 
     .fsai-review-empty {
@@ -1118,7 +1131,33 @@
         </div>
         <div class="fsai-review-note">
           <div class="fsai-eyebrow">Client Proof</div>
-          <h3 style="margin:0 0 12px;font-size:28px;letter-spacing:-.04em;">No fake testimonials.</h3>
+          <h3 style="margin:0 0 12px;font-size:28px;letter-spacing:-.04em;">Featured Google testimonials.</h3>
+          <div class="fsai-featured-reviews">
+            <article class="fsai-review-card fsai-featured-review">
+              <header>
+                <div>
+                  <strong>David William</strong>
+                  <small>Google Review · 5 stars</small>
+                </div>
+                <small style="color:#ffd166;">★★★★★</small>
+              </header>
+              <p>1stStep ai did an excellent job creating my business website. The design is clean, professional, and optimized perfectly for client inquiries and lead generation. Evan was very responsive, friendly, and easy to work with throughout the entire process. The final website exceeded my expectations, and I've already started getting positive feedback from visitors. Highly recommended!</p>
+              <br>
+              <a class="fsai-project-link" href="https://maps.app.goo.gl/Xe6z1vueaEDnTa6F8" target="_blank" rel="noopener">View on Google &rarr;</a>
+            </article>
+            <article class="fsai-review-card fsai-featured-review">
+              <header>
+                <div>
+                  <strong>Sara E Ford</strong>
+                  <small>Google Review · 5 stars</small>
+                </div>
+                <small style="color:#ffd166;">★★★★★</small>
+              </header>
+              <p>I used 1stStep ai to build my e-commerce website, and the experience was amazing. The website looks modern, fast, and very professional. Evan was incredibly helpful throughout the whole process and made everything simple and smooth. He really understands how to create websites that look great and help capture leads and customers. Highly recommended for anyone who wants a high-quality online store.</p>
+              <br>
+              <a class="fsai-project-link" href="https://maps.app.goo.gl/sAkN17AerGYeXzAX9" target="_blank" rel="noopener">View on Google &rarr;</a>
+            </article>
+          </div>
           <div class="fsai-review-live" data-fsai-google-reviews>
             <div class="fsai-review-empty">Loading Google review status...</div>
           </div>
