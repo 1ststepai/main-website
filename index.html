@@ -512,6 +512,24 @@
       margin: 0;
     }
 
+    .fsai-checker-proof {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .fsai-checker-proof span {
+      border: 1px solid rgba(125, 211, 252, 0.16);
+      border-radius: 16px;
+      padding: 12px;
+      color: #dfe7ff;
+      background: rgba(255,255,255,0.045);
+      font-size: 13px;
+      line-height: 1.35;
+      font-weight: 750;
+    }
+
     .fsai-pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
 
     .fsai-pricing-card {
@@ -685,6 +703,31 @@
     .fsai-project-content h3 { margin: 0 0 10px; font-size: 22px; letter-spacing: -.035em; }
     .fsai-label { color: var(--cyan); font-size: 12px; font-weight: 850; text-transform: uppercase; letter-spacing: .12em; margin-bottom: 12px; }
     .fsai-project-content p { color: var(--muted); line-height: 1.58; margin: 0; }
+    .fsai-outcome-list {
+      display: grid;
+      gap: 8px;
+      margin: 16px 0 0;
+      padding: 0;
+      list-style: none;
+      color: #dfe7ff;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    .fsai-outcome-list li {
+      position: relative;
+      padding-left: 18px;
+    }
+    .fsai-outcome-list li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: .55em;
+      width: 7px;
+      height: 7px;
+      border-radius: 99px;
+      background: linear-gradient(135deg, var(--cyan), var(--purple));
+      box-shadow: 0 0 16px rgba(125,232,255,0.35);
+    }
     .fsai-project-link { margin-top: auto; padding-top: 22px; color: #fff; font-weight: 850; }
 
     .fsai-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; counter-reset: steps; }
@@ -887,6 +930,7 @@
       .fsai-visual { min-height: auto; }
       .fsai-build-map { position: relative; top: auto; right: auto; width: 100%; }
       .fsai-services, .fsai-pricing-grid, .fsai-portfolio, .fsai-steps { grid-template-columns: 1fr; }
+      .fsai-checker-proof { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .fsai-mini-proof { grid-template-columns: 1fr; }
       .fsai-checker-callout, .fsai-split, .fsai-reviews-card, .fsai-belief-grid { grid-template-columns: 1fr; }
       .fsai-section-head { display: block; }
@@ -912,6 +956,7 @@
       .fsai-map-output { grid-column: 1 / -1; text-align: left; }
       .fsai-map-footer { grid-template-columns: 1fr; }
       .fsai-section { padding: 58px 0; }
+      .fsai-checker-proof { grid-template-columns: 1fr; }
       .fsai-checker-callout, .fsai-pricing-card, .fsai-belief-card, .fsai-about-card, .fsai-audience-card, .fsai-cta-card, .fsai-reviews-card { padding: 22px; border-radius: 22px; }
       .fsai-sticky-cta { display: flex; }
       .fsai-footer { padding-bottom: 86px; text-align: center; }
@@ -979,6 +1024,12 @@
           <div class="fsai-eyebrow">Free App Idea Checker</div>
           <h2>Not sure if you need an app, website, dashboard, or automation?</h2>
           <p>Paste your idea or business problem into the free App Idea Checker. It will show whether the idea is worth exploring, what the first version should include, and what risks to avoid before you spend money building.</p>
+          <div class="fsai-checker-proof" aria-label="What the checker gives you">
+            <span>MVP readiness score</span>
+            <span>Recommended first build path</span>
+            <span>Biggest risk to solve</span>
+            <span>Next step sent to Evan</span>
+          </div>
         </div>
         <a class="fsai-btn fsai-btn-primary" href="/app-idea-viability-checker.html">Run the Free App Idea Check &rarr;</a>
       </div>
@@ -1034,7 +1085,7 @@
             <div class="fsai-project-name">AI Resume Builder</div>
             <div class="fsai-project-chips"><span>Resume Tailor</span><span>Job Tracker</span><span>Chrome Extension</span></div>
           </div>
-          <div class="fsai-project-content"><h3>AI Resume Builder</h3><div class="fsai-label">AI resume tailoring and job-search platform</div><p>Resume tailoring, cover letters, job tracking, Chrome extension workflow</p><div class="fsai-project-link">View live project &rarr;</div></div>
+          <div class="fsai-project-content"><h3>AI Resume Builder</h3><div class="fsai-label">AI resume tailoring and job-search platform</div><p>Resume tailoring, cover letters, job tracking, Chrome extension workflow</p><ul class="fsai-outcome-list"><li>Turned a job-search workflow into a live product experience.</li><li>Connected resume tailoring, tracking, and extension-assisted workflow.</li></ul><div class="fsai-project-link">View live project &rarr;</div></div>
         </a>
 
         <a class="fsai-project" href="https://dashboard.swingtradepros.com/" target="_blank" rel="noopener">
@@ -1045,7 +1096,7 @@
             <div class="fsai-project-name">Subscriber Dashboard</div>
             <div class="fsai-project-chips"><span>CALL/PUT Signals</span><span>Confidence</span><span>Live Status</span></div>
           </div>
-          <div class="fsai-project-content"><h3>Swing Trade Pros Dashboard</h3><div class="fsai-label">Options signal dashboard</div><p>Subscriber dashboard for alerts, signal status, confidence tracking, and trading analytics</p><div class="fsai-project-link">View live project &rarr;</div></div>
+          <div class="fsai-project-content"><h3>Swing Trade Pros Dashboard</h3><div class="fsai-label">Options signal dashboard</div><p>Subscriber dashboard for alerts, signal status, confidence tracking, and trading analytics</p><ul class="fsai-outcome-list"><li>Moved member alerts into a structured dashboard workflow.</li><li>Made signal status, confidence, and watchlist context easier to scan.</li></ul><div class="fsai-project-link">View live project &rarr;</div></div>
         </a>
 
         <a class="fsai-project" href="https://real-rank-ai.vercel.app/" target="_blank" rel="noopener">
@@ -1056,7 +1107,7 @@
             <div class="fsai-project-name">Visibility Platform</div>
             <div class="fsai-project-chips"><span>AI Mentions</span><span>Local Visibility</span><span>PDF Reports</span></div>
           </div>
-          <div class="fsai-project-content"><h3>Real Rank AI</h3><div class="fsai-label">AI visibility and local authority platform</div><p>Local visibility reporting, AI mention tracking, movement reports, and client-ready audits</p><div class="fsai-project-link">View live project &rarr;</div></div>
+          <div class="fsai-project-content"><h3>Real Rank AI</h3><div class="fsai-label">AI visibility and local authority platform</div><p>Local visibility reporting, AI mention tracking, movement reports, and client-ready audits</p><ul class="fsai-outcome-list"><li>Packaged local visibility data into client-ready reporting.</li><li>Created a practical audit workflow for visibility, movement, and AI mentions.</li></ul><div class="fsai-project-link">View live project &rarr;</div></div>
         </a>
       </div>
     </section>
