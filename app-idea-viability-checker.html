@@ -240,9 +240,9 @@
 
       .aivc-hero {
         display: grid;
-        grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+        grid-template-columns: minmax(0, 1.05fr) minmax(430px, 0.95fr);
         align-items: center;
-        gap: 44px;
+        gap: 64px;
         padding-bottom: 74px;
       }
 
@@ -293,6 +293,56 @@
         font-size: clamp(17px, 2vw, 21px);
       }
 
+      .aivc-hero-benefits {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 18px;
+        max-width: 720px;
+        margin-top: 30px;
+      }
+
+      .aivc-benefit {
+        display: grid;
+        grid-template-columns: 54px 1fr;
+        gap: 12px;
+        align-items: start;
+      }
+
+      .aivc-benefit-icon,
+      .aivc-step-dot,
+      .aivc-area-icon {
+        display: grid;
+        place-items: center;
+        color: var(--aivc-cyan);
+        background:
+          radial-gradient(circle at 35% 22%, rgba(40, 215, 255, 0.25), transparent 45%),
+          linear-gradient(135deg, rgba(36,146,255,.16), rgba(139,92,246,.16)),
+          rgba(255,255,255,.045);
+        border: 1px solid rgba(125, 211, 252, 0.18);
+        box-shadow: inset 0 1px rgba(255,255,255,.08), 0 18px 46px rgba(36,146,255,.12);
+      }
+
+      .aivc-benefit-icon {
+        width: 54px;
+        height: 54px;
+        border-radius: 16px;
+        font-size: 24px;
+      }
+
+      .aivc-benefit strong {
+        display: block;
+        color: #fff;
+        font-size: 14px;
+        margin-bottom: 6px;
+      }
+
+      .aivc-benefit span {
+        display: block;
+        color: var(--aivc-muted);
+        font-size: 13px;
+        line-height: 1.45;
+      }
+
       .aivc-hero-actions {
         display: flex;
         flex-wrap: wrap;
@@ -336,7 +386,7 @@
       }
 
       .aivc-btn-primary {
-        background: linear-gradient(135deg, var(--aivc-blue), var(--aivc-cyan));
+        background: linear-gradient(135deg, var(--aivc-blue), #5a8cff 52%, #b833f4);
         box-shadow: 0 20px 60px rgba(36, 146, 255, 0.34);
       }
 
@@ -378,7 +428,9 @@
       .aivc-preview-card {
         position: relative;
         overflow: hidden;
-        padding: 24px;
+        padding: 34px;
+        border-color: rgba(139, 92, 246, 0.42);
+        box-shadow: 0 32px 110px rgba(36, 146, 255, 0.18), 0 0 80px rgba(139, 92, 246, 0.12);
       }
 
       .aivc-preview-card:before {
@@ -394,7 +446,7 @@
       .aivc-preview-inner {
         position: relative;
         display: grid;
-        gap: 18px;
+        gap: 24px;
       }
 
       .aivc-score-preview {
@@ -407,11 +459,11 @@
       .aivc-score-ring {
         display: grid;
         place-items: center;
-        width: 128px;
-        height: 128px;
+        width: 168px;
+        height: 168px;
         border-radius: 50%;
         background:
-          conic-gradient(from 180deg, var(--aivc-cyan), var(--aivc-blue), var(--aivc-purple), rgba(255, 255, 255, 0.1) 74%),
+          conic-gradient(from 0deg, var(--aivc-purple), #b833f4 20%, var(--aivc-blue) 58%, rgba(255, 255, 255, 0.08) 74%),
           rgba(255, 255, 255, 0.05);
         box-shadow: 0 0 80px rgba(36, 146, 255, 0.24);
       }
@@ -419,11 +471,11 @@
       .aivc-score-ring span {
         display: grid;
         place-items: center;
-        width: 94px;
-        height: 94px;
+        width: 118px;
+        height: 118px;
         border-radius: 50%;
         background: rgba(5, 7, 13, 0.94);
-        font-size: 34px;
+        font-size: 48px;
         font-weight: 950;
       }
 
@@ -433,6 +485,15 @@
         font-size: 13px;
         font-weight: 800;
         text-transform: uppercase;
+      }
+
+      .aivc-score-ring small {
+        display: block;
+        margin-top: 4px;
+        color: var(--aivc-green);
+        font-size: 11px;
+        font-weight: 900;
+        line-height: 1;
       }
 
       .aivc-preview-title {
@@ -490,12 +551,38 @@
         font-weight: 750;
       }
 
+      .aivc-pill.aivc-pill-green { color: #92ffd1; border-color: rgba(41,241,162,.25); background: rgba(41,241,162,.09); }
+      .aivc-pill.aivc-pill-blue { color: #9ed8ff; border-color: rgba(36,146,255,.28); background: rgba(36,146,255,.10); }
+      .aivc-pill.aivc-pill-yellow { color: #ffe2a2; border-color: rgba(248,195,91,.28); background: rgba(248,195,91,.10); }
+      .aivc-pill.aivc-pill-purple { color: #d8c8ff; border-color: rgba(139,92,246,.30); background: rgba(139,92,246,.12); }
+
+      .aivc-preview-meaning {
+        padding: 20px;
+        border: 1px solid rgba(203,213,225,.14);
+        border-radius: 18px;
+        background: rgba(255,255,255,.035);
+      }
+
+      .aivc-preview-meaning h3 {
+        margin: 0 0 14px;
+        color: #c8d3ff;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+      }
+
       .aivc-assessment {
         scroll-margin-top: 24px;
       }
 
       .aivc-panel {
         overflow: hidden;
+        border-color: rgba(148,170,255,.20);
+        background:
+          radial-gradient(circle at 5% 0%, rgba(73,184,255,.12), transparent 30%),
+          radial-gradient(circle at 92% 12%, rgba(139,92,246,.12), transparent 32%),
+          linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.025)),
+          var(--aivc-panel);
       }
 
       .aivc-panel-header {
@@ -503,9 +590,27 @@
         align-items: center;
         justify-content: space-between;
         gap: 18px;
-        padding: 24px 24px 18px;
+        padding: 24px;
         border-bottom: 1px solid var(--aivc-line);
         background: rgba(255, 255, 255, 0.03);
+      }
+
+      .aivc-panel-title {
+        display: grid;
+        grid-template-columns: 58px 1fr;
+        gap: 16px;
+        align-items: center;
+      }
+
+      .aivc-panel-logo {
+        width: 58px;
+        height: 58px;
+        object-fit: contain;
+        border: 1px solid rgba(125,211,252,.25);
+        border-radius: 16px;
+        background: radial-gradient(circle at 50% 0%, rgba(125,211,252,.14), transparent 50%), rgba(255,255,255,.045);
+        padding: 8px;
+        box-shadow: 0 18px 48px rgba(36,146,255,.16);
       }
 
       .aivc-panel-header h2 {
@@ -533,7 +638,7 @@
       }
 
       .aivc-progress-wrap {
-        height: 9px;
+        height: 4px;
         background: rgba(255, 255, 255, 0.07);
       }
 
@@ -548,8 +653,125 @@
         padding: 28px 24px 24px;
       }
 
+      .aivc-assessment-body {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 340px;
+        gap: 24px;
+        padding: 24px;
+      }
+
+      .aivc-assessment-main {
+        min-width: 0;
+      }
+
+      .aivc-stepper {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 18px;
+        padding: 18px 24px 0;
+        position: relative;
+      }
+
+      .aivc-stepper:before {
+        content: "";
+        position: absolute;
+        left: 44px;
+        right: 44px;
+        top: 39px;
+        height: 2px;
+        background: linear-gradient(90deg, var(--aivc-blue), var(--aivc-purple), rgba(255,255,255,.12));
+      }
+
+      .aivc-step-item {
+        position: relative;
+        z-index: 2;
+        display: grid;
+        justify-items: center;
+        gap: 8px;
+        text-align: center;
+        color: var(--aivc-muted);
+        font-size: 12px;
+      }
+
+      .aivc-step-dot {
+        width: 30px;
+        height: 30px;
+        border-radius: 999px;
+        color: #fff;
+        font-size: 13px;
+        font-weight: 900;
+      }
+
+      .aivc-step-item strong {
+        color: #fff;
+        font-size: 13px;
+      }
+
+      .aivc-side-panel {
+        align-self: start;
+        border: 1px solid rgba(148,170,255,.18);
+        border-radius: 22px;
+        background:
+          radial-gradient(circle at 0% 0%, rgba(40,215,255,.10), transparent 34%),
+          linear-gradient(145deg, rgba(255,255,255,.06), rgba(255,255,255,.02)),
+          rgba(7,13,27,.68);
+        padding: 24px;
+        box-shadow: inset 0 1px rgba(255,255,255,.06);
+      }
+
+      .aivc-side-panel h3 {
+        margin: 0 0 20px;
+        font-size: 17px;
+        letter-spacing: -.02em;
+      }
+
+      .aivc-area-list {
+        display: grid;
+        gap: 16px;
+      }
+
+      .aivc-area {
+        display: grid;
+        grid-template-columns: 42px 1fr;
+        gap: 12px;
+        align-items: center;
+        padding-bottom: 15px;
+        border-bottom: 1px solid rgba(255,255,255,.07);
+      }
+
+      .aivc-area:last-child {
+        padding-bottom: 0;
+        border-bottom: 0;
+      }
+
+      .aivc-area-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 14px;
+        font-size: 20px;
+      }
+
+      .aivc-area strong {
+        display: block;
+        color: #fff;
+        font-size: 14px;
+      }
+
+      .aivc-area span {
+        display: block;
+        color: var(--aivc-muted);
+        font-size: 12px;
+        line-height: 1.35;
+      }
+
       .aivc-question-card {
         min-height: 390px;
+        padding: 30px;
+        border: 1px solid rgba(125, 211, 252, 0.16);
+        border-radius: 22px;
+        background:
+          radial-gradient(circle at 0% 0%, rgba(36,146,255,.13), transparent 34%),
+          rgba(5, 13, 29, 0.48);
         opacity: 1;
         transform: translateY(0);
         transition: opacity 180ms ease, transform 180ms ease;
@@ -595,11 +817,25 @@
         border: 1px solid rgba(125, 211, 252, 0.24);
         border-radius: 22px;
         color: var(--aivc-text);
-        background: rgba(5, 7, 13, 0.58);
+        background: rgba(5, 7, 13, 0.62);
         box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
         font: inherit;
         line-height: 1.55;
         padding: 18px;
+      }
+
+      .aivc-tip-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        flex-wrap: wrap;
+        color: var(--aivc-muted);
+        font-size: 13px;
+      }
+
+      .aivc-tip-row span {
+        color: var(--aivc-cyan);
       }
 
       .aivc-textarea::placeholder {
@@ -949,6 +1185,39 @@
         margin-top: 18px;
       }
 
+      .aivc-trust-strip {
+        display: grid;
+        grid-template-columns: minmax(0, 1.2fr) repeat(3, minmax(0, 1fr));
+        gap: 0;
+        margin: 0 24px 24px;
+        border: 1px solid rgba(148,170,255,.18);
+        border-radius: 20px;
+        background: rgba(255,255,255,.035);
+        overflow: hidden;
+      }
+
+      .aivc-trust-item {
+        display: grid;
+        grid-template-columns: 44px 1fr;
+        gap: 12px;
+        align-items: center;
+        min-height: 72px;
+        padding: 14px 18px;
+        border-right: 1px solid rgba(255,255,255,.08);
+        color: #fff;
+        font-size: 13px;
+        font-weight: 850;
+      }
+
+      .aivc-trust-item:last-child {
+        border-right: 0;
+      }
+
+      .aivc-trust-item span {
+        color: var(--aivc-muted);
+        font-weight: 500;
+      }
+
       .aivc-success {
         display: none;
         margin-top: 16px;
@@ -1005,8 +1274,22 @@
           padding-bottom: 46px;
         }
 
+        .aivc-hero-benefits,
+        .aivc-assessment-body,
+        .aivc-trust-strip {
+          grid-template-columns: 1fr;
+        }
+
         .aivc-preview-card {
           order: -1;
+        }
+
+        .aivc-stepper {
+          grid-template-columns: repeat(2, 1fr);
+        }
+
+        .aivc-stepper:before {
+          display: none;
         }
 
         .aivc-report-grid,
@@ -1017,6 +1300,15 @@
 
         .aivc-metrics {
           grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .aivc-trust-item {
+          border-right: 0;
+          border-bottom: 1px solid rgba(255,255,255,.08);
+        }
+
+        .aivc-trust-item:last-child {
+          border-bottom: 0;
         }
       }
 
@@ -1071,6 +1363,29 @@
           grid-template-columns: 1fr;
         }
 
+        .aivc-preview-card {
+          padding: 22px;
+        }
+
+        .aivc-score-ring {
+          width: 142px;
+          height: 142px;
+        }
+
+        .aivc-score-ring span {
+          width: 102px;
+          height: 102px;
+        }
+
+        .aivc-panel-title {
+          grid-template-columns: 48px 1fr;
+        }
+
+        .aivc-panel-logo {
+          width: 48px;
+          height: 48px;
+        }
+
         .aivc-panel-header {
           align-items: flex-start;
           flex-direction: column;
@@ -1083,11 +1398,21 @@
 
         .aivc-form-area,
         .aivc-report {
-          padding: 22px 16px 18px;
+          padding: 0;
+        }
+
+        .aivc-assessment-body,
+        .aivc-stepper {
+          padding: 18px 16px;
+        }
+
+        .aivc-trust-strip {
+          margin: 0 16px 18px;
         }
 
         .aivc-question-card {
           min-height: 0;
+          padding: 20px;
         }
 
         .aivc-options,
@@ -1119,20 +1444,25 @@
           <main>
             <section class="aivc-hero">
               <div>
-                <p class="aivc-eyebrow"><span class="aivc-eyebrow-dot"></span> MVP Readiness Score</p>
+                <p class="aivc-eyebrow"><span class="aivc-eyebrow-dot"></span> AI-Powered MVP Readiness Score ✨</p>
                 <h1>
                   Is Your App Idea
                   <span class="aivc-gradient-text">Worth Building?</span>
                 </h1>
                 <p class="aivc-hero-copy">
-                  Paste your idea, business problem, or workflow. Get an instant first-pass score and a recommended MVP path.
+                  Get an instant, practical score for your app idea and a clear path to build the <strong>right first version.</strong>
                 </p>
+                <div class="aivc-hero-benefits" aria-label="Checker benefits">
+                  <div class="aivc-benefit"><div class="aivc-benefit-icon">⚡</div><div><strong>Instant score</strong><span>Get results in under 60 seconds.</span></div></div>
+                  <div class="aivc-benefit"><div class="aivc-benefit-icon">◎</div><div><strong>Actionable insights</strong><span>Know what to focus on before you build.</span></div></div>
+                  <div class="aivc-benefit"><div class="aivc-benefit-icon">◇</div><div><strong>Avoid costly mistakes</strong><span>Reduce risk from day one.</span></div></div>
+                </div>
                 <div class="aivc-hero-actions">
                   <button class="aivc-btn aivc-btn-primary" type="button" data-aivc-start>
-                    Check My Idea
+                    ✨ Check My Idea →
                   </button>
                   <span class="aivc-microcopy">
-                    No fluff. No generic agency pitch. Start with the idea you already have, then sharpen it only if the first-pass read looks useful.
+                    🔒 No fluff. No generic agency pitch. Just real feedback.
                   </span>
                 </div>
               </div>
@@ -1140,23 +1470,29 @@
               <aside class="aivc-preview-card" aria-label="Report preview">
                 <div class="aivc-preview-inner">
                   <div class="aivc-score-preview">
-                    <div class="aivc-score-ring"><span>82</span></div>
+                    <div class="aivc-score-ring"><span><strong>82</strong><small>Strong Score</small></span></div>
                     <div>
                       <p class="aivc-preview-kicker">Sample output</p>
                       <h2 class="aivc-preview-title">Strong MVP Candidate</h2>
+                      <p style="margin:10px 0 0;color:var(--aivc-soft);line-height:1.5;">High potential with a clear problem and a feasible path to launch.</p>
                       <div class="aivc-pill-row">
-                        <span class="aivc-pill">Demand</span>
-                        <span class="aivc-pill">Revenue</span>
-                        <span class="aivc-pill">Complexity</span>
-                        <span class="aivc-pill">Distribution</span>
+                        <span class="aivc-pill aivc-pill-green">Demand</span>
+                        <span class="aivc-pill aivc-pill-green">Revenue</span>
+                        <span class="aivc-pill aivc-pill-blue">Feasibility</span>
+                        <span class="aivc-pill aivc-pill-yellow">Complexity</span>
+                        <span class="aivc-pill aivc-pill-purple">Distribution</span>
                       </div>
                     </div>
                   </div>
-                  <ul class="aivc-preview-list">
-                    <li><span class="aivc-check">+</span><span>See the smallest version worth building first.</span></li>
-                    <li><span class="aivc-check">+</span><span>Start with a rough idea and add details only if it is worth it.</span></li>
-                    <li><span class="aivc-check">+</span><span>Leave with a next step that protects you from overbuilding.</span></li>
-                  </ul>
+                  <div class="aivc-preview-meaning">
+                    <h3>What this means</h3>
+                    <ul class="aivc-preview-list">
+                      <li><span class="aivc-check">+</span><span>Strong market demand and real user problem.</span></li>
+                      <li><span class="aivc-check">+</span><span>Clear opportunity to create value.</span></li>
+                      <li><span class="aivc-check">+</span><span>Feasible first version with limited resources.</span></li>
+                      <li><span class="aivc-check">i</span><span>Review the full analysis below to see what to build first.</span></li>
+                    </ul>
+                  </div>
                 </div>
               </aside>
             </section>
@@ -1164,21 +1500,49 @@
             <section id="aivc-assessment" class="aivc-assessment">
               <div class="aivc-panel">
                 <div class="aivc-panel-header">
-                  <div>
+                  <div class="aivc-panel-title">
+                    <img class="aivc-panel-logo" src="/assets/firststep-logo-transparent-cleaned.png" alt="" aria-hidden="true">
+                    <div>
                     <h2>App Idea Viability Checker</h2>
-                    <p>Paste the idea first. Add four clarifiers only if you want a sharper report.</p>
+                    <p>Paste your idea below. We will score it across 5 key areas and give you a clear path forward.</p>
+                    </div>
                   </div>
                   <div class="aivc-step-count" id="aivc-step-count">Quick review</div>
                 </div>
                 <div class="aivc-progress-wrap" aria-hidden="true">
                   <div class="aivc-progress" id="aivc-progress"></div>
                 </div>
-
-                <div class="aivc-form-area" id="aivc-form-area">
-                  <div class="aivc-question-card" id="aivc-question-card" aria-live="polite"></div>
+                <div class="aivc-stepper" aria-label="Assessment steps">
+                  <div class="aivc-step-item"><div class="aivc-step-dot">1</div><strong>Paste Your Idea</strong><span>Describe your app idea</span></div>
+                  <div class="aivc-step-item"><div class="aivc-step-dot">2</div><strong>AI Analysis</strong><span>We evaluate 5 key areas</span></div>
+                  <div class="aivc-step-item"><div class="aivc-step-dot">3</div><strong>Get Your Score</strong><span>Instant MVP readiness score</span></div>
+                  <div class="aivc-step-item"><div class="aivc-step-dot">4</div><strong>See Your Path</strong><span>Personalized next steps</span></div>
                 </div>
 
-                <div class="aivc-report" id="aivc-report" aria-live="polite"></div>
+                <div class="aivc-assessment-body">
+                  <div class="aivc-assessment-main">
+                    <div class="aivc-form-area" id="aivc-form-area">
+                      <div class="aivc-question-card" id="aivc-question-card" aria-live="polite"></div>
+                    </div>
+                    <div class="aivc-report" id="aivc-report" aria-live="polite"></div>
+                  </div>
+                  <aside class="aivc-side-panel" aria-label="Analysis areas">
+                    <h3>We'll analyze across 5 key areas</h3>
+                    <div class="aivc-area-list">
+                      <div class="aivc-area"><div class="aivc-area-icon">♙</div><div><strong>Problem & Demand</strong><span>Is this a real and urgent problem?</span></div></div>
+                      <div class="aivc-area"><div class="aivc-area-icon">↗</div><div><strong>Market Opportunity</strong><span>Is there strong market potential?</span></div></div>
+                      <div class="aivc-area"><div class="aivc-area-icon">✣</div><div><strong>Solution Fit</strong><span>Does your idea solve it the right way?</span></div></div>
+                      <div class="aivc-area"><div class="aivc-area-icon">&lt;/&gt;</div><div><strong>Feasibility</strong><span>Can it be built with available resources?</span></div></div>
+                      <div class="aivc-area"><div class="aivc-area-icon">☞</div><div><strong>Go-to-Market Potential</strong><span>Can you reach and acquire users?</span></div></div>
+                    </div>
+                  </aside>
+                </div>
+                <div class="aivc-trust-strip" aria-label="Trust notes">
+                  <div class="aivc-trust-item"><div class="aivc-benefit-icon">◇</div><div>Trusted by founders and operators<br><span>Make smarter decisions before you invest time and money.</span></div></div>
+                  <div class="aivc-trust-item"><div class="aivc-benefit-icon">▭</div><div>No credit card required</div></div>
+                  <div class="aivc-trust-item"><div class="aivc-benefit-icon">◴</div><div>Results in under 60 seconds</div></div>
+                  <div class="aivc-trust-item"><div class="aivc-benefit-icon">✣</div><div>Built by 1stStep.ai</div></div>
+                </div>
               </div>
             </section>
           </main>
@@ -1625,10 +1989,11 @@
               '<p class="aivc-question-kicker">Start here</p>' +
               '<h3 class="aivc-question-title">Paste your app idea, business problem, or workflow you want to build.</h3>' +
               '<textarea class="aivc-textarea" id="aivc-idea-text" placeholder="Example: I want to build an app that helps local service businesses track jobs, send quotes, and follow up with customers.">' + escapeHtml(ideaText) + '</textarea>' +
-              '<p class="aivc-fine-print">Not sure how to answer yet? Paste what you have and we\'ll review the idea as-is.</p>' +
-              '<div class="aivc-lead-actions">' +
-                '<button class="aivc-btn aivc-btn-primary" type="button" id="aivc-check-idea" disabled>Check My Idea</button>' +
+              '<div class="aivc-tip-row">' +
+                '<div><span>♧</span> Tip: The more detail you provide, the better the analysis.</div>' +
+                '<button class="aivc-btn aivc-btn-primary" type="button" id="aivc-check-idea" disabled>✨ Check My Idea →</button>' +
               '</div>' +
+              '<p class="aivc-fine-print">🔒 We keep your ideas private and secure.</p>' +
             '</div>';
 
           var textarea = document.getElementById("aivc-idea-text");
