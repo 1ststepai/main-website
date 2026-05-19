@@ -60,3 +60,15 @@ For all public website, landing page, homepage, hero, pricing, testimonial, port
 `.agents/skills/premium-web-design.md`
 
 The design reference is the source of truth. Do not improvise a generic layout. Implement, render, screenshot, compare, and iterate before reporting done.
+
+## Required Skill: Visual Asset Rendering
+
+For any request to create images, mockup pictures, hero graphics, pricing visuals, testimonial visuals, social banners, OG images, or marketing graphics, read and apply:
+
+`.agents/skills/visual-asset-rendering.md`
+
+Default method:
+
+Build the visual as an HTML/CSS composition, render it in browser, screenshot it with Playwright or the available browser screenshot workflow, and save the final PNG/WebP.
+
+Do not respond with only code or instructions. Produce the actual image file whenever possible.
