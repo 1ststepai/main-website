@@ -924,11 +924,94 @@
       padding: 28px;
       background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.026)), rgba(8,12,26,0.84);
       box-shadow: 0 22px 70px rgba(0,0,0,0.22);
+      position: relative;
+      overflow: hidden;
     }
-    .fsai-transform-card h3 { margin: 0 0 16px; font-size: 26px; letter-spacing: -.04em; }
+    .fsai-transform-card h3 { margin: 0 0 16px; font-size: 26px; letter-spacing: -.04em; position: relative; z-index: 2; }
     .fsai-transform-card ul { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; color: var(--muted); line-height: 1.45; }
-    .fsai-transform-card li { padding: 11px 13px; border-radius: 14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); }
+    .fsai-transform-card li { padding: 11px 13px; border-radius: 14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); position: relative; z-index: 2; }
     .fsai-transform-card.fsai-after { border-color: rgba(125,232,255,0.28); background: radial-gradient(circle at 100% 0%, rgba(125,232,255,0.16), transparent 34%), linear-gradient(145deg, rgba(255,255,255,0.09), rgba(255,255,255,0.026)), rgba(8,12,26,0.88); }
+    .fsai-transform-visual {
+      height: 170px;
+      margin: 0 0 22px;
+      border: 1px solid rgba(148,170,255,0.15);
+      border-radius: 22px;
+      background: rgba(255,255,255,0.035);
+      position: relative;
+      overflow: hidden;
+      z-index: 2;
+    }
+    .fsai-transform-visual::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.045) 1px, transparent 1px);
+      background-size: 28px 28px;
+      opacity: .52;
+    }
+    .fsai-chaos-node,
+    .fsai-flow-node {
+      position: absolute;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: linear-gradient(145deg, rgba(255,255,255,0.13), rgba(255,255,255,0.04));
+      box-shadow: 0 18px 46px rgba(0,0,0,0.22);
+    }
+    .fsai-chaos-node:nth-child(1) { width: 106px; height: 44px; left: 34px; top: 30px; transform: rotate(-7deg); }
+    .fsai-chaos-node:nth-child(2) { width: 128px; height: 48px; right: 44px; top: 44px; transform: rotate(5deg); }
+    .fsai-chaos-node:nth-child(3) { width: 94px; height: 42px; left: 168px; bottom: 34px; transform: rotate(8deg); }
+    .fsai-chaos-line,
+    .fsai-flow-line {
+      position: absolute;
+      height: 2px;
+      border-radius: 99px;
+      transform-origin: left center;
+    }
+    .fsai-chaos-line { background: rgba(255,109,146,0.52); box-shadow: 0 0 20px rgba(255,109,146,0.24); }
+    .fsai-chaos-line:nth-child(4) { width: 190px; left: 100px; top: 72px; transform: rotate(20deg); }
+    .fsai-chaos-line:nth-child(5) { width: 170px; left: 126px; top: 112px; transform: rotate(-23deg); }
+    .fsai-flow-node {
+      width: 96px;
+      height: 52px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      background: linear-gradient(145deg, rgba(73,184,255,0.24), rgba(127,107,255,0.14)), rgba(255,255,255,0.055);
+      border-color: rgba(125,232,255,0.24);
+    }
+    .fsai-flow-node:nth-child(1) { left: 28px; top: 58px; }
+    .fsai-flow-node:nth-child(2) { left: calc(50% - 48px); top: 58px; }
+    .fsai-flow-node:nth-child(3) { right: 28px; top: 58px; }
+    .fsai-flow-line {
+      width: calc(50% - 126px);
+      top: 84px;
+      background: linear-gradient(90deg, rgba(125,232,255,0.12), rgba(125,232,255,0.9));
+      box-shadow: 0 0 24px rgba(125,232,255,0.28);
+    }
+    .fsai-flow-line:nth-child(4) { left: 132px; }
+    .fsai-flow-line:nth-child(5) { right: 132px; }
+    .fsai-flow-check {
+      position: absolute;
+      left: 50%;
+      bottom: 16px;
+      transform: translateX(-50%);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 11px;
+      border-radius: 999px;
+      background: rgba(67,229,143,0.10);
+      border: 1px solid rgba(67,229,143,0.24);
+      color: #c9ffdf;
+      font-size: 12px;
+      font-weight: 850;
+    }
 
     .fsai-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; counter-reset: steps; }
     .fsai-step { counter-increment: steps; border-left: 1px solid rgba(125,232,255,0.28); padding: 8px 0 8px 18px; position: relative; }
@@ -1338,6 +1421,13 @@
       <div class="fsai-before-after">
         <div class="fsai-transform-card">
           <h3>Before</h3>
+          <div class="fsai-transform-visual" aria-hidden="true">
+            <span class="fsai-chaos-node"></span>
+            <span class="fsai-chaos-node"></span>
+            <span class="fsai-chaos-node"></span>
+            <span class="fsai-chaos-line"></span>
+            <span class="fsai-chaos-line"></span>
+          </div>
           <ul>
             <li>Messy ideas and unclear feature lists</li>
             <li>Scattered spreadsheets and manual follow-up</li>
@@ -1347,6 +1437,14 @@
         </div>
         <div class="fsai-transform-card fsai-after">
           <h3>After</h3>
+          <div class="fsai-transform-visual" aria-hidden="true">
+            <span class="fsai-flow-node">Idea</span>
+            <span class="fsai-flow-node">Scope</span>
+            <span class="fsai-flow-node">Launch</span>
+            <span class="fsai-flow-line"></span>
+            <span class="fsai-flow-line"></span>
+            <span class="fsai-flow-check">Version one ready</span>
+          </div>
           <ul>
             <li>Clear workflow and scoped first version</li>
             <li>Useful interface built around the real job</li>
