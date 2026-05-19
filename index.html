@@ -702,14 +702,22 @@
       font-weight: 750;
     }
 
-    .fsai-pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .fsai-pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; align-items: stretch; }
 
     .fsai-pricing-card {
-      min-height: 280px;
+      min-height: 560px;
       display: flex;
       flex-direction: column;
       position: relative;
       overflow: hidden;
+      padding: 30px;
+      border-radius: 28px;
+      background:
+        radial-gradient(circle at 14% 0%, rgba(73,184,255,0.11), transparent 30%),
+        linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.024)),
+        rgba(7, 11, 25, 0.9);
+      border: 1px solid rgba(148,170,255,0.22);
+      box-shadow: 0 24px 82px rgba(0,0,0,0.28);
       transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease;
     }
 
@@ -724,18 +732,38 @@
       pointer-events: none;
     }
 
-    .fsai-pricing-card:hover { transform: translateY(-5px); border-color: rgba(125,232,255,0.34); box-shadow: 0 28px 84px rgba(35, 65, 255, 0.18); }
+    .fsai-pricing-card:hover { transform: translateY(-5px); border-color: rgba(125,232,255,0.42); box-shadow: 0 30px 96px rgba(35, 65, 255, 0.22); }
     .fsai-pricing-card.fsai-featured {
-      border-color: rgba(125,232,255,0.40);
-      background: radial-gradient(circle at 50% 0%, rgba(125,232,255,0.20), transparent 32%), linear-gradient(145deg, rgba(255,255,255,0.11), rgba(255,255,255,0.028)), rgba(8,12,26,0.88);
-      box-shadow: 0 30px 90px rgba(73,184,255,0.16), inset 0 1px rgba(255,255,255,0.10);
+      border-color: rgba(73,184,255,0.72);
+      background:
+        radial-gradient(circle at 50% 0%, rgba(73,184,255,0.22), transparent 33%),
+        radial-gradient(circle at 100% 100%, rgba(212,91,255,0.18), transparent 36%),
+        linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0.03)),
+        rgba(7, 11, 25, 0.94);
+      box-shadow: 0 32px 110px rgba(73,184,255,0.18), inset 0 1px rgba(255,255,255,0.11);
     }
-    .fsai-pricing-card h3 { margin: 0 0 12px; font-size: 22px; letter-spacing: -.035em; }
-    .fsai-price { color: #fff; font-size: 28px; font-weight: 900; letter-spacing: -.045em; margin: 0 0 16px; }
-    .fsai-pricing-card .fsai-btn { width: fit-content; margin-top: auto; }
+    .fsai-pricing-top { display: grid; grid-template-columns: 76px 1fr; gap: 18px; align-items: center; padding-bottom: 26px; border-bottom: 1px solid rgba(255,255,255,0.09); position: relative; z-index: 2; }
+    .fsai-pricing-icon {
+      width: 76px;
+      height: 76px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      color: var(--cyan);
+      border: 1px solid rgba(73,184,255,0.34);
+      background: radial-gradient(circle at 34% 20%, rgba(125,232,255,0.20), transparent 34%), rgba(73,184,255,0.08);
+      box-shadow: inset 0 1px rgba(255,255,255,0.10), 0 18px 48px rgba(73,184,255,0.12);
+    }
+    .fsai-pricing-icon svg { width: 38px; height: 38px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+    .fsai-pricing-card.fsai-ops .fsai-pricing-icon { color: #b98cff; border-color: rgba(185,140,255,0.34); background: radial-gradient(circle at 34% 20%, rgba(185,140,255,0.24), transparent 34%), rgba(185,140,255,0.08); }
+    .fsai-pricing-card.fsai-featured .fsai-pricing-icon { color: #9eeeff; border-color: rgba(125,232,255,0.42); }
+    .fsai-pricing-card h3 { margin: 9px 0 0; font-size: 24px; line-height: 1.12; letter-spacing: -.04em; }
+    .fsai-pricing-meta { padding: 24px 0 22px; border-bottom: 1px solid rgba(255,255,255,0.09); position: relative; z-index: 2; }
+    .fsai-price-kicker { color: var(--muted); font-size: 12px; font-weight: 900; letter-spacing: .13em; text-transform: uppercase; margin-bottom: 5px; }
+    .fsai-price { color: #fff; font-size: 44px; line-height: 1; font-weight: 950; letter-spacing: -.055em; margin: 0 0 14px; }
+    .fsai-pricing-card .fsai-btn { width: 100%; margin-top: auto; }
     .fsai-package-badge {
       width: fit-content;
-      margin-bottom: 16px;
       padding: 7px 10px;
       border: 1px solid rgba(125,232,255,0.28);
       border-radius: 999px;
@@ -746,6 +774,69 @@
       letter-spacing: .12em;
       text-transform: uppercase;
     }
+    .fsai-ops .fsai-package-badge { color: #eadcff; border-color: rgba(185,140,255,0.34); background: rgba(185,140,255,0.10); }
+    .fsai-best-for { padding: 20px 0 24px; position: relative; z-index: 2; }
+    .fsai-best-for strong { display: block; color: var(--cyan); font-size: 12px; letter-spacing: .13em; text-transform: uppercase; margin-bottom: 12px; }
+    .fsai-ops .fsai-best-for strong { color: #b98cff; }
+    .fsai-best-for ul { display: grid; gap: 9px; margin: 0; padding: 0; list-style: none; color: #dfe7ff; font-size: 14px; }
+    .fsai-best-for li { display: grid; grid-template-columns: 19px 1fr; gap: 8px; align-items: start; }
+    .fsai-best-for li::before {
+      content: "✓";
+      display: grid;
+      place-items: center;
+      width: 17px;
+      height: 17px;
+      border-radius: 999px;
+      color: var(--cyan);
+      border: 1px solid rgba(125,232,255,0.50);
+      font-size: 11px;
+      line-height: 1;
+      margin-top: 1px;
+    }
+    .fsai-ops .fsai-best-for li::before { color: #b98cff; border-color: rgba(185,140,255,0.55); }
+    .fsai-featured-ribbon {
+      position: absolute;
+      top: -18px;
+      right: 24px;
+      z-index: 3;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 13px;
+      border-radius: 999px;
+      color: #e9fbff;
+      border: 1px solid rgba(125,232,255,0.34);
+      background: linear-gradient(135deg, rgba(73,184,255,0.28), rgba(127,107,255,0.18)), rgba(8,12,26,0.94);
+      box-shadow: 0 14px 44px rgba(73,184,255,0.20);
+      font-size: 11px;
+      font-weight: 950;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .fsai-pricing-proof {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      margin-top: 28px;
+      border: 1px solid rgba(148,170,255,0.18);
+      border-radius: 22px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.07), rgba(255,255,255,0.025)), rgba(8,12,26,0.78);
+      overflow: hidden;
+    }
+    .fsai-pricing-proof div {
+      display: grid;
+      grid-template-columns: 46px 1fr;
+      gap: 14px;
+      align-items: center;
+      padding: 18px 22px;
+      border-right: 1px solid rgba(255,255,255,0.09);
+    }
+    .fsai-pricing-proof div:last-child { border-right: 0; }
+    .fsai-pricing-proof svg { width: 34px; height: 34px; fill: none; stroke: var(--blue); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+    .fsai-pricing-proof strong { display: block; color: #fff; margin-bottom: 4px; }
+    .fsai-pricing-proof span { display: block; color: var(--muted); font-size: 13px; line-height: 1.35; }
+    .fsai-pricing-footnote { margin: 22px 0 0; text-align: center; color: var(--muted); }
+    .fsai-pricing-footnote a { color: var(--cyan); font-weight: 850; border-bottom: 1px solid rgba(125,232,255,0.45); }
 
     .fsai-belief-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
 
@@ -1556,10 +1647,42 @@
         </div>
       </div>
       <div class="fsai-pricing-grid">
-        <div class="fsai-pricing-card"><div class="fsai-package-badge">Lead System</div><h3>Website + Lead Capture System</h3><div class="fsai-price">Starting at $1,500</div><p>For service businesses that need a sharper site, lead form, booking path, and conversion-focused first impression.</p><a class="fsai-btn fsai-btn-ghost" href="/app-idea-viability-checker.html">Check Fit &rarr;</a></div>
-        <div class="fsai-pricing-card"><div class="fsai-package-badge">Operations</div><h3>Internal Tool or Dashboard</h3><div class="fsai-price">Starting at $3,500</div><p>For teams replacing spreadsheets, text threads, manual reporting, or messy internal workflows with one practical tool.</p><a class="fsai-btn fsai-btn-ghost" href="/app-idea-viability-checker.html">Check Fit &rarr;</a></div>
-        <div class="fsai-pricing-card fsai-featured"><div class="fsai-package-badge">Most Flexible</div><h3>MVP App Build</h3><div class="fsai-price">Starting at $5,000</div><p>For founders and operators who need a focused first version of an app, portal, SaaS workflow, or customer-facing product.</p><a class="fsai-btn fsai-btn-primary" href="/app-idea-viability-checker.html">Check Fit &rarr;</a></div>
+        <div class="fsai-pricing-card">
+          <div class="fsai-pricing-top">
+            <div class="fsai-pricing-icon"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="10" y="12" width="28" height="24" rx="3"/><path d="M10 19h28"/><path d="M16 26h10M16 31h7"/><path d="m31 29 5 5M31 29v7h7"/></svg></div>
+            <div><div class="fsai-package-badge">Lead System</div><h3>Website + Lead Capture System</h3></div>
+          </div>
+          <div class="fsai-pricing-meta"><div class="fsai-price-kicker">Starting at</div><div class="fsai-price">$1,500</div><p>Get a premium website with lead forms, booking, and conversion paths designed to turn visitors into conversations.</p></div>
+          <div class="fsai-best-for"><strong>Best for</strong><ul><li>Service businesses</li><li>Local businesses</li><li>Consultants and coaches</li><li>Anyone who needs more leads</li></ul></div>
+          <a class="fsai-btn fsai-btn-ghost" href="/app-idea-viability-checker.html">Check Fit &rarr;</a>
+        </div>
+        <div class="fsai-pricing-card fsai-ops">
+          <div class="fsai-pricing-top">
+            <div class="fsai-pricing-icon"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="11" y="11" width="10" height="10" rx="2"/><rect x="27" y="11" width="10" height="10" rx="2"/><rect x="11" y="27" width="10" height="10" rx="2"/><rect x="27" y="27" width="10" height="10" rx="2"/></svg></div>
+            <div><div class="fsai-package-badge">Operations</div><h3>Internal Tool or Dashboard</h3></div>
+          </div>
+          <div class="fsai-pricing-meta"><div class="fsai-price-kicker">Starting at</div><div class="fsai-price">$3,500</div><p>Replace spreadsheets and manual work with a custom dashboard or internal tool built around your real workflow.</p></div>
+          <div class="fsai-best-for"><strong>Best for</strong><ul><li>Teams and operators</li><li>Reporting and tracking</li><li>Process and workflow management</li><li>Replacing messy manual work</li></ul></div>
+          <a class="fsai-btn fsai-btn-ghost" href="/app-idea-viability-checker.html">Check Fit &rarr;</a>
+        </div>
+        <div class="fsai-pricing-card fsai-featured">
+          <div class="fsai-featured-ribbon">★ Most Flexible</div>
+          <div class="fsai-pricing-top">
+            <div class="fsai-pricing-icon"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="m24 8 16 9v14l-16 9-16-9V17l16-9Z"/><path d="M8 17l16 9 16-9M24 26v14"/></svg></div>
+            <div><div class="fsai-package-badge">MVP Build</div><h3>MVP App Build</h3></div>
+          </div>
+          <div class="fsai-pricing-meta"><div class="fsai-price-kicker">Starting at</div><div class="fsai-price">$5,000</div><p>A focused first version of your app, portal, or SaaS built to solve one core problem and get real-world feedback.</p></div>
+          <div class="fsai-best-for"><strong>Best for</strong><ul><li>Founders and startups</li><li>SaaS and web apps</li><li>Portals and membership sites</li><li>Customer-facing products</li></ul></div>
+          <a class="fsai-btn fsai-btn-primary" href="/app-idea-viability-checker.html">Check Fit &rarr;</a>
+        </div>
       </div>
+      <div class="fsai-pricing-proof" aria-label="Pricing principles">
+        <div><svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="15"/><circle cx="24" cy="24" r="8"/><path d="m31 17 6-6M34 11h3v3"/></svg><p><strong>Right-sized first version</strong><span>No overbuilding.</span></p></div>
+        <div><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M28 10c-8 4-13 11-15 22l7-3 4 4 3-7c11-2 18-7 22-15-7-1-14 1-21-1Z"/><path d="m15 33-5 5"/></svg><p><strong>Built for real workflows</strong><span>Not generic templates.</span></p></div>
+        <div><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="10" y="14" width="28" height="24" rx="3"/><path d="M17 31v-7M24 31V20M31 31v-4"/></svg><p><strong>Launch faster</strong><span>Test, learn, and improve.</span></p></div>
+        <div><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M36 19a13 13 0 0 0-22-5l-4 4"/><path d="M10 10v8h8"/><path d="M12 29a13 13 0 0 0 22 5l4-4"/><path d="M38 38v-8h-8"/></svg><p><strong>Iterate with confidence</strong><span>Better decisions, less waste.</span></p></div>
+      </div>
+      <p class="fsai-pricing-footnote">Not sure what you need? Run your idea through the App Idea Checker. <a href="/app-idea-viability-checker.html">It is free.</a></p>
     </section>
 
     <section class="fsai-section" id="process">
