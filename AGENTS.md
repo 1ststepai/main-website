@@ -52,3 +52,11 @@ When improving the site:
 4. Reduce friction.
 5. Route users to the checker.
 6. Keep the build simple and production-safe.
+
+## Required Skill: Premium Web Design
+
+For all public website, landing page, homepage, hero, pricing, testimonial, portfolio, case study, and screenshot-to-code tasks, read and apply:
+
+`.agents/skills/premium-web-design.md`
+
+The design reference is the source of truth. Do not improvise a generic layout. Implement, render, screenshot, compare, and iterate before reporting done.
