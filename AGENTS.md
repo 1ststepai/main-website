@@ -72,3 +72,22 @@ Default method:
 Build the visual as an HTML/CSS composition, render it in browser, screenshot it with Playwright or the available browser screenshot workflow, and save the final PNG/WebP.
 
 Do not respond with only code or instructions. Produce the actual image file whenever possible.
+
+## Optional Generic Methodology Layer: Superpowers
+
+For planning, debugging, implementation discipline, verification, and code review workflows, agents may read and apply:
+
+`.agents/skills/generic/superpowers-methodology.md`
+
+Superpowers is a lower-priority generic methodology layer. It must never override this file, project-specific 1stStep.ai skills, user instructions, brand/design/conversion rules, App Idea Checker constraints, route preservation, Resend behavior, GHL forwarding safeguards, or repo creation lock rules.
+
+Priority order:
+
+1. Current user request.
+2. Project-specific `AGENTS.md` / `CLAUDE.md` instructions.
+3. 1stStep.ai skills in `.agents/skills/firststep/`.
+4. Required design/rendering skills when applicable.
+5. Superpowers methodology.
+6. Default agent behavior.
+
+Do not use Superpowers to add secrets, credentials, paid APIs, new runtime behavior, GitHub repo creation, GHL forwarding, or app code changes unless the user explicitly asks for those changes.
