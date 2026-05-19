@@ -1243,9 +1243,76 @@
     .fsai-tags span, .fsai-audience-grid div { border: 1px solid rgba(148,170,255,0.17); background: rgba(255,255,255,0.035); border-radius: 999px; padding: 9px 11px; color: #dfe6ff; font-size: 12px; font-weight: 750; }
     .fsai-audience-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 22px; }
     .fsai-audience-grid div { border-radius: 14px; line-height: 1.35; }
-    .fsai-reviews-card { display: grid; grid-template-columns: .8fr 1.2fr; gap: 22px; align-items: stretch; }
-    .fsai-review-score, .fsai-review-note { border: 1px solid rgba(148,170,255,0.16); border-radius: 24px; padding: 24px; background: rgba(255,255,255,0.035); }
-    .fsai-review-score strong { display: block; font-size: 28px; letter-spacing: -.04em; margin-bottom: 12px; }
+    .fsai-review-heading {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 24px;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+    .fsai-review-heading h2 { max-width: 770px; }
+    .fsai-google-badge {
+      display: grid;
+      grid-template-columns: 72px 1fr;
+      gap: 18px;
+      align-items: center;
+      padding: 14px 18px;
+      border-radius: 24px;
+      border: 1px solid rgba(148,170,255,0.14);
+      background: rgba(255,255,255,0.035);
+    }
+    .fsai-google-g {
+      display: grid;
+      place-items: center;
+      width: 72px;
+      height: 72px;
+      border-radius: 999px;
+      background: conic-gradient(from 45deg, #4285f4, #34a853, #fbbc05, #ea4335, #4285f4);
+      color: #fff;
+      font-size: 46px;
+      font-weight: 950;
+      font-family: Arial, sans-serif;
+      box-shadow: 0 18px 52px rgba(66,133,244,0.18);
+    }
+    .fsai-google-badge strong { display: block; color: #fff; font-size: 24px; letter-spacing: -.03em; }
+    .fsai-google-rating { display: flex; gap: 10px; align-items: center; color: var(--muted); margin-top: 7px; white-space: nowrap; }
+    .fsai-google-rating .fsai-review-stars { margin: 0; font-size: 16px; line-height: 1; }
+    .fsai-reviews-card { display: grid; grid-template-columns: .85fr 1.65fr; gap: 22px; align-items: stretch; }
+    .fsai-review-score, .fsai-review-note {
+      border: 1px solid rgba(148,170,255,0.20);
+      border-radius: 28px;
+      padding: 34px;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(73,184,255,0.10), transparent 34%),
+        linear-gradient(145deg, rgba(255,255,255,0.07), rgba(255,255,255,0.024)),
+        rgba(8,12,26,0.86);
+      box-shadow: 0 24px 86px rgba(0,0,0,0.24);
+    }
+    .fsai-review-score { text-align: center; display: flex; flex-direction: column; justify-content: center; }
+    .fsai-review-icon {
+      width: 84px;
+      height: 84px;
+      display: grid;
+      place-items: center;
+      margin: 0 auto 22px;
+      border-radius: 999px;
+      color: #9aa7ff;
+      border: 1px solid rgba(125, 232, 255, 0.24);
+      background:
+        radial-gradient(circle at 35% 25%, rgba(125,232,255,0.22), transparent 42%),
+        linear-gradient(135deg, rgba(73,184,255,0.10), rgba(185,93,255,0.16));
+      box-shadow: 0 22px 58px rgba(73,184,255,0.14);
+    }
+    .fsai-review-icon svg {
+      width: 42px;
+      height: 42px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .fsai-review-score strong { display: block; font-size: 34px; letter-spacing: -.05em; margin-bottom: 16px; }
     .fsai-review-score p, .fsai-review-note p { color: var(--muted); line-height: 1.65; margin: 0 0 18px; }
     .fsai-cta-card { text-align: center; padding: 54px 30px; background: radial-gradient(circle at 50% 0%, rgba(73,184,255,0.22), transparent 34%), linear-gradient(135deg, rgba(73,184,255,0.14), rgba(212,91,255,0.12)), rgba(9, 13, 28, 0.86); }
     .fsai-cta-card p { max-width: 680px; margin-left: auto; margin-right: auto; }
@@ -1254,6 +1321,7 @@
 
     .fsai-review-stars {
       display: flex;
+      justify-content: center;
       gap: 3px;
       color: #ffd166;
       font-size: 22px;
@@ -1263,20 +1331,34 @@
     }
 
     .fsai-review-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin: 18px 0 0;
+      display: grid;
+      gap: 14px;
+      margin: 24px 0 0;
       color: #dfe7ff;
       font-size: 13px;
       font-weight: 800;
+      padding-top: 22px;
+      border-top: 1px solid rgba(255,255,255,0.09);
+      text-align: left;
     }
 
     .fsai-review-meta span {
-      border: 1px solid rgba(148, 170, 255, 0.16);
-      background: rgba(255,255,255,0.045);
+      position: relative;
+      padding-left: 28px;
+    }
+    .fsai-review-meta span::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      top: 1px;
+      display: grid;
+      place-items: center;
+      width: 18px;
+      height: 18px;
       border-radius: 999px;
-      padding: 9px 11px;
+      color: var(--cyan);
+      border: 1px solid rgba(125,232,255,0.46);
+      font-size: 11px;
     }
 
     .fsai-review-live {
@@ -1291,19 +1373,41 @@
     }
 
     .fsai-review-card {
-      border: 1px solid rgba(148, 170, 255, 0.16);
-      border-radius: 20px;
-      padding: 18px;
-      background: rgba(255,255,255,0.045);
+      border: 1px solid rgba(148, 170, 255, 0.20);
+      border-radius: 22px;
+      padding: 22px;
+      background: rgba(255,255,255,0.04);
     }
 
     .fsai-review-card header {
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       justify-content: space-between;
       gap: 12px;
-      margin-bottom: 10px;
+      margin-bottom: 14px;
     }
+
+    .fsai-review-person {
+      display: grid;
+      grid-template-columns: 58px 1fr;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .fsai-review-avatar {
+      width: 58px;
+      height: 58px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      color: #fff;
+      font-weight: 900;
+      background: linear-gradient(135deg, rgba(73,184,255,0.70), rgba(185,93,255,0.70));
+      border: 1px solid rgba(255,255,255,0.18);
+      box-shadow: 0 16px 42px rgba(73,184,255,0.16);
+    }
+
+    .fsai-review-person small { display: block; margin-top: 3px; }
 
     .fsai-review-card strong {
       display: block;
@@ -1324,10 +1428,31 @@
     }
 
     .fsai-review-card.fsai-featured-review {
-      border-color: rgba(125, 211, 252, 0.22);
+      border-color: rgba(125, 211, 252, 0.24);
       background:
         radial-gradient(circle at 10% 0%, rgba(125, 211, 252, 0.12), transparent 38%),
         rgba(255,255,255,0.05);
+    }
+    .fsai-review-note .fsai-btn { width: 100%; margin-top: 12px; }
+
+    .fsai-review-google-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: #8fb7ff;
+      font-weight: 850;
+      margin-top: 8px;
+    }
+    .fsai-review-google-link::before {
+      content: "G";
+      display: grid;
+      place-items: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      background: conic-gradient(from 45deg, #4285f4, #34a853, #fbbc05, #ea4335, #4285f4);
+      color: #fff;
+      font: 900 14px Arial, sans-serif;
     }
 
     .fsai-review-empty {
@@ -1407,6 +1532,8 @@
       .fsai-checker-proof { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .fsai-proof-strip { grid-template-columns: repeat(2, 1fr); }
       .fsai-mini-proof { grid-template-columns: 1fr; }
+      .fsai-review-heading { grid-template-columns: 1fr; align-items: start; }
+      .fsai-google-badge { width: 100%; }
       .fsai-checker-callout, .fsai-split, .fsai-reviews-card, .fsai-belief-grid { grid-template-columns: 1fr; }
       .fsai-section-head { display: block; }
       .fsai-audience-grid { grid-template-columns: 1fr; }
@@ -1611,7 +1738,7 @@
       <div class="fsai-before-after">
         <div class="fsai-transform-card">
           <div class="fsai-transform-head">
-            <div class="fsai-transform-mark">×</div>
+            <div class="fsai-transform-mark">&times;</div>
             <div><h3>Before</h3><p>Unclear, disconnected, and difficult to move forward.</p></div>
           </div>
           <ul class="fsai-transform-list">
@@ -1624,7 +1751,7 @@
         </div>
         <div class="fsai-transform-card fsai-after">
           <div class="fsai-transform-head">
-            <div class="fsai-transform-mark">✓</div>
+            <div class="fsai-transform-mark">&#10003;</div>
             <div><h3>After</h3><p>Clear, focused, and built for impact.</p></div>
           </div>
           <ul class="fsai-transform-list">
@@ -1666,7 +1793,7 @@
           <a class="fsai-btn fsai-btn-ghost" href="/app-idea-viability-checker.html">Check Fit &rarr;</a>
         </div>
         <div class="fsai-pricing-card fsai-featured">
-          <div class="fsai-featured-ribbon">★ Most Flexible</div>
+          <div class="fsai-featured-ribbon">&#9733; Most Flexible</div>
           <div class="fsai-pricing-top">
             <div class="fsai-pricing-icon"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="m24 8 16 9v14l-16 9-16-9V17l16-9Z"/><path d="M8 17l16 9 16-9M24 26v14"/></svg></div>
             <div><div class="fsai-package-badge">MVP Build</div><h3>MVP App Build</h3></div>
@@ -1719,58 +1846,74 @@
     </section>
 
     <section class="fsai-section" id="reviews">
-      <div class="fsai-section-head">
+      <div class="fsai-review-heading">
         <div>
           <div class="fsai-eyebrow">Google Reviews</div>
-          <h2>Real feedback from people who have worked with 1stStep.ai.</h2>
+          <h2>Real feedback from people who have worked with <span class="fsai-gradient">1stStep.ai.</span></h2>
           <p class="fsai-section-lede">Google reviews are pulled live when the Google Places connection is configured. If the feed is unavailable, visitors can still open the public review profile.</p>
+        </div>
+        <div class="fsai-google-badge" aria-label="Google Reviews 5.0 average rating">
+          <div class="fsai-google-g">G</div>
+          <div>
+            <strong>Google Reviews</strong>
+            <div class="fsai-google-rating">
+              <span class="fsai-review-stars" aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+              <span data-fsai-google-rating>5.0 average rating</span>
+            </div>
+          </div>
         </div>
       </div>
       <div class="fsai-reviews-card">
         <div class="fsai-review-score">
+          <div class="fsai-review-icon" aria-hidden="true">
+            <svg viewBox="0 0 48 48"><path d="M12 14h24a5 5 0 0 1 5 5v11a5 5 0 0 1-5 5H25l-8 6v-6h-5a5 5 0 0 1-5-5V19a5 5 0 0 1 5-5Z"/><path d="m20 25 3 3 7-8"/></svg>
+          </div>
           <div class="fsai-review-stars" aria-label="Google review rating">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-          <strong data-fsai-google-rating>Google Reviews</strong>
+          <strong>Google Reviews</strong>
           <p data-fsai-google-summary>Worked with 1stStep.ai or used the App Idea Checker? A short Google review helps future founders and business owners know what to expect.</p>
           <div class="fsai-review-meta">
             <span>Verified Google profile</span>
             <span data-fsai-google-count>Live feed ready</span>
+            <span>Real feedback from real clients</span>
           </div>
-          <br>
-          <a class="fsai-btn fsai-btn-ghost" href="https://g.page/r/CfdTIVLfW3goEBM/review" target="_blank" rel="noopener" data-fsai-google-link>Read or leave a Google review &rarr;</a>
+          <a class="fsai-btn fsai-btn-ghost" href="https://g.page/r/CfdTIVLfW3goEBM/review" target="_blank" rel="noopener" data-fsai-google-link>Read or leave a review &rarr;</a>
         </div>
         <div class="fsai-review-note">
           <div class="fsai-eyebrow">Client Proof</div>
-          <h3 style="margin:0 0 12px;font-size:28px;letter-spacing:-.04em;">Featured Google testimonials.</h3>
+          <h3 style="margin:0 0 16px;font-size:30px;letter-spacing:-.04em;">Featured Google testimonials.</h3>
           <div class="fsai-featured-reviews">
             <article class="fsai-review-card fsai-featured-review">
               <header>
-                <div>
-                  <strong>David William</strong>
-                  <small>Google Review &middot; 5 stars</small>
+                <div class="fsai-review-person">
+                  <div class="fsai-review-avatar">DW</div>
+                  <div>
+                    <strong>David William</strong>
+                    <small>Google Review &middot; 5 stars</small>
+                  </div>
                 </div>
                 <small style="color:#ffd166;">&#9733;&#9733;&#9733;&#9733;&#9733;</small>
               </header>
               <p>1stStep ai did an excellent job creating my business website. The design is clean, professional, and optimized perfectly for client inquiries and lead generation. Evan was very responsive, friendly, and easy to work with throughout the entire process. The final website exceeded my expectations, and I've already started getting positive feedback from visitors. Highly recommended!</p>
-              <br>
-              <a class="fsai-project-link" href="https://maps.app.goo.gl/Xe6z1vueaEDnTa6F8" target="_blank" rel="noopener">View on Google &rarr;</a>
+              <a class="fsai-review-google-link" href="https://maps.app.goo.gl/Xe6z1vueaEDnTa6F8" target="_blank" rel="noopener">View on Google</a>
             </article>
             <article class="fsai-review-card fsai-featured-review">
               <header>
-                <div>
-                  <strong>Sara E Ford</strong>
-                  <small>Google Review &middot; 5 stars</small>
+                <div class="fsai-review-person">
+                  <div class="fsai-review-avatar">SF</div>
+                  <div>
+                    <strong>Sara E Ford</strong>
+                    <small>Google Review &middot; 5 stars</small>
+                  </div>
                 </div>
                 <small style="color:#ffd166;">&#9733;&#9733;&#9733;&#9733;&#9733;</small>
               </header>
               <p>I used 1stStep ai to build my e-commerce website, and the experience was amazing. The website looks modern, fast, and very professional. Evan was incredibly helpful throughout the whole process and made everything simple and smooth. He really understands how to create websites that look great and help capture leads and customers. Highly recommended for anyone who wants a high-quality online store.</p>
-              <br>
-              <a class="fsai-project-link" href="https://maps.app.goo.gl/sAkN17AerGYeXzAX9" target="_blank" rel="noopener">View on Google &rarr;</a>
+              <a class="fsai-review-google-link" href="https://maps.app.goo.gl/sAkN17AerGYeXzAX9" target="_blank" rel="noopener">View on Google</a>
             </article>
           </div>
           <div class="fsai-review-live" data-fsai-google-reviews>
             <div class="fsai-review-empty">Loading Google review status...</div>
           </div>
-          <br>
           <a class="fsai-btn fsai-btn-primary" href="/app-idea-viability-checker.html">Check My App Idea Free &rarr;</a>
         </div>
       </div>
