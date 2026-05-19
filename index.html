@@ -854,10 +854,12 @@
       background: rgba(73,184,255,0.08);
     }
 
-    .fsai-services { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .fsai-services { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
 
     .fsai-service-card {
-      min-height: 215px;
+      min-height: 345px;
+      display: flex;
+      flex-direction: column;
       background: linear-gradient(145deg, rgba(255,255,255,0.085), rgba(255,255,255,0.025)), rgba(9, 13, 28, 0.76);
       border: 1px solid rgba(148, 170, 255, 0.18);
       border-radius: 24px;
@@ -894,8 +896,58 @@
       stroke-linejoin: round;
     }
 
-    .fsai-service-card h3 { margin: 0 0 10px; font-size: 19px; letter-spacing: -.02em; }
+    .fsai-service-kicker {
+      width: fit-content;
+      margin: -18px 0 16px;
+      padding: 7px 10px;
+      border: 1px solid rgba(125,232,255,.18);
+      border-radius: 999px;
+      background: rgba(125,232,255,.06);
+      color: #dff7ff;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .fsai-service-card h3 { margin: 0 0 10px; font-size: 22px; line-height: 1.12; letter-spacing: -.035em; }
     .fsai-service-card p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.55; }
+    .fsai-service-outcomes {
+      display: grid;
+      gap: 9px;
+      margin: 18px 0 0;
+      padding: 18px 0 0;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      list-style: none;
+      color: #dfe7ff;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+    .fsai-service-outcomes li {
+      display: grid;
+      grid-template-columns: 18px 1fr;
+      gap: 8px;
+      align-items: start;
+    }
+    .fsai-service-outcomes li::before {
+      content: "\2713";
+      width: 17px;
+      height: 17px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      border: 1px solid rgba(125,232,255,0.46);
+      color: var(--cyan);
+      font-size: 10px;
+      margin-top: 1px;
+    }
+    .fsai-service-card .fsai-mini-link {
+      margin-top: auto;
+      padding-top: 20px;
+      color: #fff;
+      font-weight: 850;
+      font-size: 14px;
+    }
     .fsai-service-links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
     .fsai-service-links a {
       color: #dff6ff;
@@ -921,7 +973,7 @@
 
     .fsai-checker-callout {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-columns: minmax(0, 1fr) 320px auto;
       align-items: center;
       gap: 24px;
       background: radial-gradient(circle at 8% 0%, rgba(125, 232, 255, 0.18), transparent 32%), linear-gradient(135deg, rgba(73,184,255,0.16), rgba(212,91,255,0.12)), rgba(8, 12, 26, 0.86);
@@ -961,6 +1013,87 @@
       font-size: 13px;
       line-height: 1.35;
       font-weight: 750;
+    }
+
+    .fsai-checker-visual {
+      position: relative;
+      min-height: 250px;
+      border: 1px solid rgba(125,232,255,0.22);
+      border-radius: 24px;
+      padding: 18px;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 24% 0%, rgba(125,232,255,0.18), transparent 34%),
+        linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.025)),
+        rgba(5,9,22,0.72);
+      box-shadow: inset 0 1px rgba(255,255,255,.08), 0 22px 70px rgba(0,0,0,.24);
+    }
+    .fsai-checker-visual::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.045) 1px, transparent 1px);
+      background-size: 28px 28px;
+      opacity: .35;
+    }
+    .fsai-mini-report {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      gap: 12px;
+    }
+    .fsai-mini-report-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      color: #fff;
+      font-weight: 900;
+    }
+    .fsai-mini-score {
+      width: 76px;
+      height: 76px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      background: conic-gradient(from 220deg, var(--cyan), var(--violet), var(--purple), rgba(255,255,255,.12) 78%);
+      color: #fff;
+      font-size: 24px;
+      font-weight: 950;
+      box-shadow: 0 18px 44px rgba(73,184,255,.22);
+    }
+    .fsai-mini-score span {
+      width: 58px;
+      height: 58px;
+      display: grid;
+      place-items: center;
+      border-radius: inherit;
+      background: #071026;
+    }
+    .fsai-mini-report-row {
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      gap: 10px;
+      align-items: center;
+      padding: 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.09);
+      background: rgba(255,255,255,.045);
+      color: #dfe7ff;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+    .fsai-mini-report-row b {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      color: var(--cyan);
+      border: 1px solid rgba(125,232,255,.24);
+      background: rgba(125,232,255,.08);
     }
 
     .fsai-pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; align-items: stretch; }
@@ -1466,9 +1599,34 @@
     }
 
     .fsai-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; counter-reset: steps; }
-    .fsai-step { counter-increment: steps; border-left: 1px solid rgba(125,232,255,0.28); padding: 8px 0 8px 18px; position: relative; }
-    .fsai-step::before { content: "0" counter(steps); display: block; color: var(--cyan); font-weight: 900; margin-bottom: 16px; }
-    .fsai-step h3 { margin: 0 0 8px; font-size: 18px; }
+    .fsai-step {
+      counter-increment: steps;
+      min-height: 210px;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(148,170,255,0.18);
+      border-radius: 24px;
+      background:
+        radial-gradient(circle at 100% 0%, rgba(73,184,255,0.12), transparent 34%),
+        linear-gradient(145deg, rgba(255,255,255,0.075), rgba(255,255,255,0.024)),
+        rgba(8,12,26,0.82);
+      box-shadow: 0 22px 72px rgba(0,0,0,0.22);
+    }
+    .fsai-step::before {
+      content: "0" counter(steps);
+      display: inline-grid;
+      place-items: center;
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      color: var(--cyan);
+      border: 1px solid rgba(125,232,255,0.28);
+      background: rgba(125,232,255,0.08);
+      font-weight: 950;
+      margin-bottom: 22px;
+    }
+    .fsai-step h3 { margin: 0 0 8px; font-size: 20px; letter-spacing: -.025em; }
     .fsai-step p { margin: 0; color: var(--muted); line-height: 1.55; }
 
     .fsai-split { display: grid; grid-template-columns: .95fr 1.05fr; gap: 22px; align-items: stretch; }
@@ -1501,6 +1659,32 @@
 
     .fsai-about-card h2, .fsai-audience-card h2, .fsai-cta-card h2 { margin: 0 0 16px; font-size: clamp(30px, 4vw, 48px); line-height: 1.04; letter-spacing: -.055em; }
     .fsai-about-card p, .fsai-audience-card p, .fsai-cta-card p { color: var(--muted); line-height: 1.65; margin: 0 0 20px; }
+    .fsai-founder-metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin: 22px 0;
+    }
+    .fsai-founder-metrics div {
+      min-height: 92px;
+      border: 1px solid rgba(148,170,255,0.18);
+      border-radius: 18px;
+      padding: 14px;
+      background: rgba(255,255,255,0.04);
+    }
+    .fsai-founder-metrics strong {
+      display: block;
+      color: #fff;
+      font-size: 20px;
+      letter-spacing: -.03em;
+      margin-bottom: 5px;
+    }
+    .fsai-founder-metrics span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
     .fsai-tags { display: flex; flex-wrap: wrap; gap: 9px; }
     .fsai-tags span, .fsai-audience-grid div { border: 1px solid rgba(148,170,255,0.17); background: rgba(255,255,255,0.035); border-radius: 999px; padding: 9px 11px; color: #dfe6ff; font-size: 12px; font-weight: 750; }
     .fsai-audience-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 22px; }
@@ -1575,6 +1759,24 @@
     .fsai-review-score p, .fsai-review-note p { color: var(--muted); line-height: 1.65; margin: 0 0 18px; }
     .fsai-cta-card { text-align: center; padding: 54px 30px; background: radial-gradient(circle at 50% 0%, rgba(73,184,255,0.22), transparent 34%), linear-gradient(135deg, rgba(73,184,255,0.14), rgba(212,91,255,0.12)), rgba(9, 13, 28, 0.86); }
     .fsai-cta-card p { max-width: 680px; margin-left: auto; margin-right: auto; }
+    .fsai-cta-path {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      max-width: 880px;
+      margin: 24px auto 28px;
+      text-align: left;
+    }
+    .fsai-cta-path div {
+      border: 1px solid rgba(148,170,255,0.18);
+      border-radius: 18px;
+      padding: 16px;
+      background: rgba(255,255,255,0.04);
+      color: #dfe7ff;
+      line-height: 1.4;
+      font-size: 13px;
+      font-weight: 750;
+    }
     .fsai-footer { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 28px 0 42px; color: var(--muted-2); font-size: 13px; }
     .fsai-footer-links { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 8px 12px; }
 
@@ -1808,6 +2010,9 @@
       .fsai-review-heading { grid-template-columns: 1fr; align-items: start; }
       .fsai-google-badge { width: 100%; }
       .fsai-checker-callout, .fsai-split, .fsai-reviews-card, .fsai-belief-grid { grid-template-columns: 1fr; }
+      .fsai-checker-visual { max-width: 520px; width: 100%; }
+      .fsai-service-card { min-height: auto; }
+      .fsai-founder-metrics, .fsai-cta-path { grid-template-columns: 1fr; }
       .fsai-section-head { display: block; }
       .fsai-audience-grid { grid-template-columns: 1fr; }
       .fsai-footer { flex-direction: column; }
@@ -1842,6 +2047,12 @@
       .fsai-section { padding: 58px 0; }
       .fsai-checker-proof { grid-template-columns: 1fr; }
       .fsai-checker-callout, .fsai-pricing-card, .fsai-belief-card, .fsai-about-card, .fsai-audience-card, .fsai-cta-card, .fsai-reviews-card { padding: 22px; border-radius: 22px; }
+      .fsai-checker-visual { min-height: auto; padding: 14px; }
+      .fsai-mini-report-row { grid-template-columns: 30px 1fr; padding: 10px; }
+      .fsai-transform-item { grid-template-columns: 1fr; }
+      .fsai-transform-icon { width: 58px; height: 58px; }
+      .fsai-transform-icon svg { width: 32px; height: 32px; }
+      .fsai-transform-visual { height: 150px; }
       .fsai-sticky-cta { display: flex; }
       .fsai-footer { padding-bottom: 86px; text-align: center; }
       .fsai-chat-launch { right: 12px; bottom: 76px; padding: 12px 14px; }
@@ -1948,6 +2159,17 @@
             <span>Next step recommendation</span>
           </div>
         </div>
+        <div class="fsai-checker-visual" aria-hidden="true">
+          <div class="fsai-mini-report">
+            <div class="fsai-mini-report-head">
+              <span>Readiness Snapshot</span>
+              <div class="fsai-mini-score"><span>87</span></div>
+            </div>
+            <div class="fsai-mini-report-row"><b>1</b><span>Best first version: focused MVP, not a full platform.</span></div>
+            <div class="fsai-mini-report-row"><b>2</b><span>Biggest risk: unclear first buyer and launch path.</span></div>
+            <div class="fsai-mini-report-row"><b>3</b><span>Next step: map the workflow before scope grows.</span></div>
+          </div>
+        </div>
         <a class="fsai-btn fsai-btn-primary" href="/app-idea-viability-checker.html">Run the Free App Idea Check &rarr;</a>
       </div>
     </section>
@@ -1962,9 +2184,9 @@
       </div>
 
       <div class="fsai-services">
-        <div class="fsai-service-card"><div class="fsai-service-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"></rect><path d="M9 4v16M4 9h16"></path></svg></div><h3>Apps & MVPs</h3><p>Focused web apps, portals, calculators, SaaS MVPs, and first-version products built around one core workflow.</p></div>
-        <div class="fsai-service-card"><div class="fsai-service-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="14" rx="3"></rect><path d="M3 8h18"></path><path d="M9 12h6l-2.5 3v3l-1 1v-4L9 12z"></path></svg></div><h3>Websites & Lead Systems</h3><p>Premium service websites, landing pages, lead capture flows, quote forms, and booking paths designed to turn interest into conversations.</p></div>
-        <div class="fsai-service-card"><div class="fsai-service-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"></path></svg></div><h3>Automations & Internal Tools</h3><p>Dashboards, workflow tools, CRM automations, follow-up systems, and integrations that replace spreadsheets and manual handoffs.</p></div>
+        <div class="fsai-service-card"><div class="fsai-service-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"></rect><path d="M9 4v16M4 9h16"></path></svg></div><div class="fsai-service-kicker">Product Build</div><h3>Apps & MVPs</h3><p>Focused web apps, portals, calculators, SaaS MVPs, and first-version products built around one core workflow.</p><ul class="fsai-service-outcomes"><li>Scope the smallest useful launch version</li><li>Design the screens around real user steps</li><li>Build a product that can be tested and improved</li></ul><a class="fsai-mini-link" href="/app-idea-viability-checker.html">Check the MVP path &rarr;</a></div>
+        <div class="fsai-service-card"><div class="fsai-service-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="14" rx="3"></rect><path d="M3 8h18"></path><path d="M9 12h6l-2.5 3v3l-1 1v-4L9 12z"></path></svg></div><div class="fsai-service-kicker">Lead System</div><h3>Websites & Lead Systems</h3><p>Premium service websites, landing pages, lead capture flows, quote forms, and booking paths designed to turn interest into conversations.</p><ul class="fsai-service-outcomes"><li>Sharper message and offer hierarchy</li><li>Lead forms, booking CTAs, and follow-up paths</li><li>Pages built to support outreach and referrals</li></ul><a class="fsai-mini-link" href="/app-idea-viability-checker.html">Check the website path &rarr;</a></div>
+        <div class="fsai-service-card"><div class="fsai-service-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"></path></svg></div><div class="fsai-service-kicker">Operations</div><h3>Automations & Internal Tools</h3><p>Dashboards, workflow tools, CRM automations, follow-up systems, and integrations that replace spreadsheets and manual handoffs.</p><ul class="fsai-service-outcomes"><li>Map the messy process into a clean workflow</li><li>Connect forms, dashboards, CRM, and reporting</li><li>Reduce manual follow-up and repeated admin work</li></ul><a class="fsai-mini-link" href="/app-idea-viability-checker.html">Check the workflow path &rarr;</a></div>
       </div>
       <div class="fsai-service-links" aria-label="Service pages">
         <a href="/services/app-builds.html">App Builds</a>
@@ -2045,6 +2267,13 @@
             <div class="fsai-transform-mark">&times;</div>
             <div><h3>Before</h3><p>Unclear, disconnected, and difficult to move forward.</p></div>
           </div>
+          <div class="fsai-transform-visual" aria-hidden="true">
+            <span class="fsai-chaos-node"></span>
+            <span class="fsai-chaos-node"></span>
+            <span class="fsai-chaos-node"></span>
+            <span class="fsai-chaos-line"></span>
+            <span class="fsai-chaos-line"></span>
+          </div>
           <ul class="fsai-transform-list">
             <li class="fsai-transform-item"><div class="fsai-transform-icon"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M12 24c7-15 28-11 24 2-4 13-27 12-24-3 3-15 27-13 25 3-2 16-28 10-27-2 1-12 24-17 27-1"/></svg></div><div class="fsai-transform-copy"><strong>Messy ideas and unclear features</strong><span>Big ideas, long feature lists, and no clear first step.</span></div></li>
             <li class="fsai-transform-item"><div class="fsai-transform-icon"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="10" y="10" width="10" height="10" rx="3"/><rect x="28" y="10" width="10" height="10" rx="3"/><rect x="10" y="28" width="10" height="10" rx="3"/><rect x="28" y="28" width="10" height="10" rx="3"/><path d="M20 15h8M15 20v8M33 20v8M20 33h8"/></svg></div><div class="fsai-transform-copy"><strong>Scattered tools and manual work</strong><span>Spreadsheets, emails, sticky notes, and handoffs create confusion.</span></div></li>
@@ -2057,6 +2286,14 @@
           <div class="fsai-transform-head">
             <div class="fsai-transform-mark">&#10003;</div>
             <div><h3>After</h3><p>Clear, focused, and built for impact.</p></div>
+          </div>
+          <div class="fsai-transform-visual" aria-hidden="true">
+            <span class="fsai-flow-node">Idea</span>
+            <span class="fsai-flow-node">Scope</span>
+            <span class="fsai-flow-node">Launch</span>
+            <span class="fsai-flow-line"></span>
+            <span class="fsai-flow-line"></span>
+            <span class="fsai-flow-check">Version one ready</span>
           </div>
           <ul class="fsai-transform-list">
             <li class="fsai-transform-item"><div class="fsai-transform-icon"><svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="15"/><circle cx="24" cy="24" r="8"/><circle cx="24" cy="24" r="2"/><path d="m31 17 6-6M34 11h3v3"/></svg></div><div class="fsai-transform-copy"><strong>Clear workflow and scoped first version</strong><span>Define the core purpose, map the workflow, and cut the noise.</span></div></li>
@@ -2137,6 +2374,11 @@
           <div class="fsai-eyebrow">Founder Trust</div>
           <h2>Built with Evan, <span class="fsai-gradient">not passed through a faceless dev shop.</span></h2>
           <p>Most projects get expensive when the first version tries to become the final version. I help founders and operators cut the idea down to the smallest useful system that can launch, prove the workflow, and improve from real feedback.</p>
+          <div class="fsai-founder-metrics" aria-label="How Evan supports builds">
+            <div><strong>Strategy</strong><span>Clarify the offer, user, workflow, and first version before code.</span></div>
+            <div><strong>Build</strong><span>Turn the plan into a working app, website, dashboard, or automation.</span></div>
+            <div><strong>Launch</strong><span>Connect lead capture, admin notifications, booking, and next-step paths.</span></div>
+          </div>
           <div class="fsai-tags"><span>Product Strategy</span><span>Workflow Design</span><span>Apps</span><span>Automations</span><span>Dashboards</span><span>Launch Support</span></div>
         </div>
 
@@ -2246,6 +2488,11 @@
         <div class="fsai-eyebrow">Ready to Build?</div>
         <h2>Have an idea? <span class="fsai-gradient">Check the first version before you build.</span></h2>
         <p>Paste the idea into the free checker or book a strategy call if you already know you need help scoping the build.</p>
+        <div class="fsai-cta-path" aria-label="Next steps">
+          <div><strong>1. Paste the rough idea</strong><br>Use plain English. No polished spec needed.</div>
+          <div><strong>2. Get the build path</strong><br>See the score, risk, scope warning, and first version.</div>
+          <div><strong>3. Book when ready</strong><br>Map the smallest useful build before spending more.</div>
+        </div>
         <div class="fsai-hero-actions" style="justify-content:center;margin-bottom:0;">
           <a class="fsai-btn fsai-btn-primary" href="/app-idea-viability-checker.html">Check My App Idea Free &rarr;</a>
           <a class="fsai-btn fsai-btn-ghost" href="https://api.leadconnectorhq.com/widget/booking/Rb4aqLM1NdU5kvZcqNmj" target="_blank" rel="noopener">Book a Build Strategy Call</a>
