@@ -1800,6 +1800,25 @@
       margin-bottom: 28px;
     }
     .fsai-review-heading h2 { max-width: 770px; }
+    .fsai-google-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .fsai-google-mini {
+      display: inline-grid;
+      place-items: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      background: #fff;
+      box-shadow: 0 10px 28px rgba(66,133,244,.20);
+      vertical-align: middle;
+    }
+    .fsai-google-mini svg {
+      width: 16px;
+      height: 16px;
+    }
     .fsai-google-badge {
       display: grid;
       grid-template-columns: 72px 1fr;
@@ -1897,7 +1916,7 @@
     .fsai-review-meta {
       display: grid;
       gap: 14px;
-      margin: 24px 0 0;
+      margin: 24px 0 18px;
       color: #dfe7ff;
       font-size: 13px;
       font-weight: 800;
@@ -1959,15 +1978,16 @@
     }
 
     .fsai-review-avatar {
-      width: 58px;
-      height: 58px;
+      width: 64px;
+      height: 64px;
       display: grid;
       place-items: center;
       border-radius: 999px;
       overflow: hidden;
-      border: 2px solid rgba(255,255,255,0.22);
-      box-shadow: 0 16px 42px rgba(73,184,255,0.18);
+      border: 2px solid rgba(255,255,255,0.32);
+      box-shadow: 0 16px 42px rgba(73,184,255,0.18), inset 0 1px rgba(255,255,255,.28);
       flex-shrink: 0;
+      position: relative;
     }
     .fsai-review-avatar img {
       width: 100%;
@@ -1977,8 +1997,33 @@
       display: block;
     }
     .fsai-review-avatar svg { width: 48px; height: 48px; }
-    .fsai-avatar-male   { background: linear-gradient(145deg, #1d6ff5 0%, #0d9e74 100%); }
-    .fsai-avatar-female { background: linear-gradient(145deg, #c026d3 0%, #7c3aed 100%); }
+    .fsai-review-avatar::after {
+      content: "";
+      position: absolute;
+      inset: 5px;
+      border-radius: inherit;
+      border: 1px solid rgba(255,255,255,.18);
+      pointer-events: none;
+    }
+    .fsai-review-avatar-photo {
+      color: #fff;
+      font-size: 18px;
+      font-weight: 950;
+      letter-spacing: -.03em;
+      text-shadow: 0 2px 18px rgba(0,0,0,.26);
+    }
+    .fsai-avatar-male {
+      background:
+        radial-gradient(circle at 50% 28%, rgba(255,255,255,.96) 0 16%, transparent 17%),
+        radial-gradient(circle at 50% 82%, rgba(255,255,255,.88) 0 28%, transparent 29%),
+        linear-gradient(145deg, #1d6ff5 0%, #0d9e74 100%);
+    }
+    .fsai-avatar-female {
+      background:
+        radial-gradient(circle at 50% 28%, rgba(255,255,255,.96) 0 16%, transparent 17%),
+        radial-gradient(circle at 50% 82%, rgba(255,255,255,.88) 0 28%, transparent 29%),
+        linear-gradient(145deg, #c026d3 0%, #7c3aed 100%);
+    }
 
     .fsai-review-person small { display: block; margin-top: 3px; }
 
@@ -2011,21 +2056,24 @@
     .fsai-review-google-link {
       display: inline-flex;
       align-items: center;
-      gap: 10px;
+      gap: 9px;
       color: #8fb7ff;
       font-weight: 850;
-      margin-top: 8px;
+      margin-top: 10px;
     }
-    .fsai-review-google-link::before {
-      content: "G";
+    .fsai-review-google-icon {
       display: grid;
       place-items: center;
       width: 22px;
       height: 22px;
       border-radius: 999px;
-      background: conic-gradient(from 45deg, #4285f4, #34a853, #fbbc05, #ea4335, #4285f4);
-      color: #fff;
-      font: 900 14px Arial, sans-serif;
+      background: #fff;
+      box-shadow: 0 8px 22px rgba(66,133,244,.18);
+      flex: 0 0 auto;
+    }
+    .fsai-review-google-icon svg {
+      width: 14px;
+      height: 14px;
     }
 
     .fsai-review-empty {
@@ -2518,7 +2566,7 @@
     <section class="fsai-section" id="reviews">
       <div class="fsai-review-heading">
         <div>
-          <div class="fsai-eyebrow">Google Reviews</div>
+          <div class="fsai-eyebrow fsai-google-eyebrow"><span class="fsai-google-mini" aria-hidden="true"><svg viewBox="0 0 533.5 544.3" xmlns="http://www.w3.org/2000/svg"><path d="M533.5 278.4c0-18.5-1.5-37.1-4.7-55.3H272.1v104.8h147c-6.1 33.8-25.7 63.7-54.4 82.7v68h87.7c51.5-47.4 81.1-117.4 81.1-200.2z" fill="#4285f4"/><path d="M272.1 544.3c73.4 0 135.3-24.1 180.4-65.7l-87.7-68c-24.4 16.6-55.9 26-92.6 26-71 0-131.2-47.9-152.8-112.3H28.9v70.1c46.2 91.9 140.3 149.9 243.2 149.9z" fill="#34a853"/><path d="M119.3 324.3c-11.4-33.8-11.4-70.4 0-104.2V150H28.9c-38.6 76.9-38.6 167.5 0 244.4l90.4-70.1z" fill="#fbbc04"/><path d="M272.1 107.7c38.8-.6 76.3 14 104.4 40.8l77.7-77.7C405 24.6 339.7-.8 272.1 0 169.2 0 75.1 58 28.9 150l90.4 70.1c21.5-64.5 81.8-112.4 152.8-112.4z" fill="#ea4335"/></svg></span>Google Reviews</div>
           <h2>Real feedback from people who have worked with <span class="fsai-gradient">1stStep.ai.</span></h2>
           <p class="fsai-section-lede">Google reviews are pulled live when the Google Places connection is configured. If the feed is unavailable, visitors can still open the public review profile.</p>
         </div>
@@ -2563,10 +2611,7 @@
               <header>
                 <div class="fsai-review-person">
                   <div class="fsai-review-avatar fsai-avatar-male">
-                    <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                      <circle cx="20" cy="13" r="9" fill="rgba(255,255,255,0.92)"/>
-                      <path d="M3 39c0-9.39 7.61-17 17-17s17 7.61 17 17" fill="rgba(255,255,255,0.92)"/>
-                    </svg>
+                    <span class="fsai-review-avatar-photo">DW</span>
                   </div>
                   <div>
                     <strong>David William</strong>
@@ -2576,17 +2621,13 @@
                 <small style="color:#ffd166;">&#9733;&#9733;&#9733;&#9733;&#9733;</small>
               </header>
               <p>1stStep ai did an excellent job creating my business website. The design is clean, professional, and optimized perfectly for client inquiries and lead generation. Evan was very responsive, friendly, and easy to work with throughout the entire process. The final website exceeded my expectations, and I've already started getting positive feedback from visitors. Highly recommended!</p>
-              <a class="fsai-review-google-link" href="https://maps.app.goo.gl/Xe6z1vueaEDnTa6F8" target="_blank" rel="noopener">View on Google</a>
+              <a class="fsai-review-google-link" href="https://maps.app.goo.gl/Xe6z1vueaEDnTa6F8" target="_blank" rel="noopener"><span class="fsai-review-google-icon" aria-hidden="true"><svg viewBox="0 0 533.5 544.3" xmlns="http://www.w3.org/2000/svg"><path d="M533.5 278.4c0-18.5-1.5-37.1-4.7-55.3H272.1v104.8h147c-6.1 33.8-25.7 63.7-54.4 82.7v68h87.7c51.5-47.4 81.1-117.4 81.1-200.2z" fill="#4285f4"/><path d="M272.1 544.3c73.4 0 135.3-24.1 180.4-65.7l-87.7-68c-24.4 16.6-55.9 26-92.6 26-71 0-131.2-47.9-152.8-112.3H28.9v70.1c46.2 91.9 140.3 149.9 243.2 149.9z" fill="#34a853"/><path d="M119.3 324.3c-11.4-33.8-11.4-70.4 0-104.2V150H28.9c-38.6 76.9-38.6 167.5 0 244.4l90.4-70.1z" fill="#fbbc04"/><path d="M272.1 107.7c38.8-.6 76.3 14 104.4 40.8l77.7-77.7C405 24.6 339.7-.8 272.1 0 169.2 0 75.1 58 28.9 150l90.4 70.1c21.5-64.5 81.8-112.4 152.8-112.4z" fill="#ea4335"/></svg></span>View on Google</a>
             </article>
             <article class="fsai-review-card fsai-featured-review">
               <header>
                 <div class="fsai-review-person">
                   <div class="fsai-review-avatar fsai-avatar-female">
-                    <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                      <circle cx="20" cy="13" r="9" fill="rgba(255,255,255,0.92)"/>
-                      <path d="M3 39c0-9.39 7.61-17 17-17s17 7.61 17 17" fill="rgba(255,255,255,0.92)"/>
-                      <path d="M11 13 Q11 4 20 4 Q29 4 29 13" fill="rgba(255,255,255,0.5)"/>
-                    </svg>
+                    <span class="fsai-review-avatar-photo">SF</span>
                   </div>
                   <div>
                     <strong>Sara E Ford</strong>
@@ -2596,7 +2637,7 @@
                 <small style="color:#ffd166;">&#9733;&#9733;&#9733;&#9733;&#9733;</small>
               </header>
               <p>I used 1stStep ai to build my e-commerce website, and the experience was amazing. The website looks modern, fast, and very professional. Evan was incredibly helpful throughout the whole process and made everything simple and smooth. He really understands how to create websites that look great and help capture leads and customers. Highly recommended for anyone who wants a high-quality online store.</p>
-              <a class="fsai-review-google-link" href="https://maps.app.goo.gl/sAkN17AerGYeXzAX9" target="_blank" rel="noopener">View on Google</a>
+              <a class="fsai-review-google-link" href="https://maps.app.goo.gl/sAkN17AerGYeXzAX9" target="_blank" rel="noopener"><span class="fsai-review-google-icon" aria-hidden="true"><svg viewBox="0 0 533.5 544.3" xmlns="http://www.w3.org/2000/svg"><path d="M533.5 278.4c0-18.5-1.5-37.1-4.7-55.3H272.1v104.8h147c-6.1 33.8-25.7 63.7-54.4 82.7v68h87.7c51.5-47.4 81.1-117.4 81.1-200.2z" fill="#4285f4"/><path d="M272.1 544.3c73.4 0 135.3-24.1 180.4-65.7l-87.7-68c-24.4 16.6-55.9 26-92.6 26-71 0-131.2-47.9-152.8-112.3H28.9v70.1c46.2 91.9 140.3 149.9 243.2 149.9z" fill="#34a853"/><path d="M119.3 324.3c-11.4-33.8-11.4-70.4 0-104.2V150H28.9c-38.6 76.9-38.6 167.5 0 244.4l90.4-70.1z" fill="#fbbc04"/><path d="M272.1 107.7c38.8-.6 76.3 14 104.4 40.8l77.7-77.7C405 24.6 339.7-.8 272.1 0 169.2 0 75.1 58 28.9 150l90.4 70.1c21.5-64.5 81.8-112.4 152.8-112.4z" fill="#ea4335"/></svg></span>View on Google</a>
             </article>
           </div>
           <div class="fsai-review-live" data-fsai-google-reviews>
