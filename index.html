@@ -916,21 +916,120 @@
     .fsai-before-after {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 18px;
+      gap: 24px;
     }
     .fsai-transform-card {
       border: 1px solid rgba(148,170,255,0.18);
-      border-radius: 26px;
-      padding: 28px;
-      background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.026)), rgba(8,12,26,0.84);
-      box-shadow: 0 22px 70px rgba(0,0,0,0.22);
+      border-radius: 30px;
+      padding: 30px;
+      background:
+        radial-gradient(circle at 0% 0%, rgba(125,232,255,0.08), transparent 32%),
+        linear-gradient(145deg, rgba(255,255,255,0.09), rgba(255,255,255,0.026)),
+        rgba(8,12,26,0.86);
+      box-shadow: 0 26px 88px rgba(0,0,0,0.28);
       position: relative;
       overflow: hidden;
     }
-    .fsai-transform-card h3 { margin: 0 0 16px; font-size: 26px; letter-spacing: -.04em; position: relative; z-index: 2; }
-    .fsai-transform-card ul { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; color: var(--muted); line-height: 1.45; }
-    .fsai-transform-card li { padding: 11px 13px; border-radius: 14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); position: relative; z-index: 2; }
-    .fsai-transform-card.fsai-after { border-color: rgba(125,232,255,0.28); background: radial-gradient(circle at 100% 0%, rgba(125,232,255,0.16), transparent 34%), linear-gradient(145deg, rgba(255,255,255,0.09), rgba(255,255,255,0.026)), rgba(8,12,26,0.88); }
+    .fsai-transform-card.fsai-after {
+      border-color: rgba(73,184,255,0.62);
+      background:
+        radial-gradient(circle at 100% 0%, rgba(73,184,255,0.24), transparent 34%),
+        radial-gradient(circle at 16% 100%, rgba(127,107,255,0.18), transparent 42%),
+        linear-gradient(145deg, rgba(255,255,255,0.10), rgba(255,255,255,0.03)),
+        rgba(8,12,26,0.9);
+      box-shadow: 0 30px 110px rgba(73,184,255,0.14), 0 26px 88px rgba(0,0,0,0.28);
+    }
+    .fsai-transform-head {
+      display: grid;
+      grid-template-columns: 56px 1fr;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 24px;
+      position: relative;
+      z-index: 2;
+    }
+    .fsai-transform-mark {
+      width: 56px;
+      height: 56px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.16);
+      color: #cfd8f8;
+      background: linear-gradient(145deg, rgba(255,255,255,0.10), rgba(255,255,255,0.035));
+      font-size: 28px;
+      font-weight: 900;
+    }
+    .fsai-after .fsai-transform-mark {
+      color: #fff;
+      border-color: rgba(125,232,255,0.38);
+      background: linear-gradient(135deg, #49b8ff, #6c63ff 58%, #b85dff);
+      box-shadow: 0 16px 46px rgba(73,184,255,0.32);
+    }
+    .fsai-transform-card h3 { margin: 0 0 4px; font-size: 30px; letter-spacing: -.045em; }
+    .fsai-transform-card p { margin: 0; color: var(--muted); line-height: 1.5; }
+    .fsai-transform-list { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; position: relative; z-index: 2; }
+    .fsai-transform-item {
+      display: grid;
+      grid-template-columns: 76px 1fr;
+      gap: 18px;
+      align-items: center;
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.045);
+      border: 1px solid rgba(255,255,255,0.09);
+      box-shadow: inset 0 1px rgba(255,255,255,0.05);
+    }
+    .fsai-after .fsai-transform-item {
+      border-color: rgba(125,232,255,0.24);
+      background: linear-gradient(135deg, rgba(73,184,255,0.08), rgba(255,255,255,0.035));
+    }
+    .fsai-transform-icon {
+      width: 76px;
+      height: 76px;
+      display: grid;
+      place-items: center;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: linear-gradient(145deg, rgba(255,255,255,0.10), rgba(255,255,255,0.025));
+      color: #dfe7ff;
+    }
+    .fsai-after .fsai-transform-icon {
+      color: var(--cyan);
+      border-color: rgba(125,232,255,0.20);
+      background: linear-gradient(145deg, rgba(73,184,255,0.18), rgba(127,107,255,0.09));
+    }
+    .fsai-transform-icon svg {
+      width: 42px;
+      height: 42px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2.1;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .fsai-transform-copy strong { display: block; color: #fff; font-size: 16px; margin-bottom: 5px; }
+    .fsai-transform-copy span { display: block; color: var(--muted); line-height: 1.5; font-size: 14px; }
+    .fsai-transform-note {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 18px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.045);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #dfe7ff;
+      font-size: 13px;
+      line-height: 1.45;
+      position: relative;
+      z-index: 2;
+    }
+    .fsai-after .fsai-transform-note {
+      color: #dffcff;
+      border-color: rgba(125,232,255,0.20);
+      background: rgba(73,184,255,0.08);
+    }
     .fsai-transform-visual {
       height: 170px;
       margin: 0 0 22px;
@@ -1420,37 +1519,30 @@
       </div>
       <div class="fsai-before-after">
         <div class="fsai-transform-card">
-          <h3>Before</h3>
-          <div class="fsai-transform-visual" aria-hidden="true">
-            <span class="fsai-chaos-node"></span>
-            <span class="fsai-chaos-node"></span>
-            <span class="fsai-chaos-node"></span>
-            <span class="fsai-chaos-line"></span>
-            <span class="fsai-chaos-line"></span>
+          <div class="fsai-transform-head">
+            <div class="fsai-transform-mark">×</div>
+            <div><h3>Before</h3><p>Unclear, disconnected, and difficult to move forward.</p></div>
           </div>
-          <ul>
-            <li>Messy ideas and unclear feature lists</li>
-            <li>Scattered spreadsheets and manual follow-up</li>
-            <li>Disconnected tools with no clear launch path</li>
-            <li>Unclear scope that keeps getting bigger</li>
+          <ul class="fsai-transform-list">
+            <li class="fsai-transform-item"><div class="fsai-transform-icon"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M12 24c7-15 28-11 24 2-4 13-27 12-24-3 3-15 27-13 25 3-2 16-28 10-27-2 1-12 24-17 27-1"/></svg></div><div class="fsai-transform-copy"><strong>Messy ideas and unclear features</strong><span>Big ideas, long feature lists, and no clear first step.</span></div></li>
+            <li class="fsai-transform-item"><div class="fsai-transform-icon"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="10" y="10" width="10" height="10" rx="3"/><rect x="28" y="10" width="10" height="10" rx="3"/><rect x="10" y="28" width="10" height="10" rx="3"/><rect x="28" y="28" width="10" height="10" rx="3"/><path d="M20 15h8M15 20v8M33 20v8M20 33h8"/></svg></div><div class="fsai-transform-copy"><strong>Scattered tools and manual work</strong><span>Spreadsheets, emails, sticky notes, and handoffs create confusion.</span></div></li>
+            <li class="fsai-transform-item"><div class="fsai-transform-icon"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M11 33c2-8 8-11 16-8s9-9 1-10"/><path d="M34 12h1"/><circle cx="34" cy="16" r="7"/><path d="M34 13v4M34 22h.01"/></svg></div><div class="fsai-transform-copy"><strong>No clear path to launch or results</strong><span>Visitors do not convert, users get lost, and nothing moves forward.</span></div></li>
+            <li class="fsai-transform-item"><div class="fsai-transform-icon"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M16 32V16h16"/><path d="M25 16h7v7"/><path d="M32 16 18 30"/><path d="M14 38h20a4 4 0 0 0 4-4V14"/></svg></div><div class="fsai-transform-copy"><strong>Scope keeps growing, nothing ships</strong><span>Overbuilding leads to delays, burnout, and wasted budget.</span></div></li>
           </ul>
+          <div class="fsai-transform-note">Big ideas without structure lead to wasted time and missed opportunities.</div>
         </div>
         <div class="fsai-transform-card fsai-after">
-          <h3>After</h3>
-          <div class="fsai-transform-visual" aria-hidden="true">
-            <span class="fsai-flow-node">Idea</span>
-            <span class="fsai-flow-node">Scope</span>
-            <span class="fsai-flow-node">Launch</span>
-            <span class="fsai-flow-line"></span>
-            <span class="fsai-flow-line"></span>
-            <span class="fsai-flow-check">Version one ready</span>
+          <div class="fsai-transform-head">
+            <div class="fsai-transform-mark">✓</div>
+            <div><h3>After</h3><p>Clear, focused, and built for impact.</p></div>
           </div>
-          <ul>
-            <li>Clear workflow and scoped first version</li>
-            <li>Useful interface built around the real job</li>
-            <li>Connected lead path, automation, or dashboard</li>
-            <li>Testable launch and improvement roadmap</li>
+          <ul class="fsai-transform-list">
+            <li class="fsai-transform-item"><div class="fsai-transform-icon"><svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="15"/><circle cx="24" cy="24" r="8"/><circle cx="24" cy="24" r="2"/><path d="m31 17 6-6M34 11h3v3"/></svg></div><div class="fsai-transform-copy"><strong>Clear workflow and scoped first version</strong><span>Define the core purpose, map the workflow, and cut the noise.</span></div></li>
+            <li class="fsai-transform-item"><div class="fsai-transform-icon"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="9" y="12" width="30" height="24" rx="4"/><path d="M9 19h30"/><path d="M15 26h12M15 31h8M31 29h4"/></svg></div><div class="fsai-transform-copy"><strong>Useful interface built around the real job</strong><span>A clean, intuitive system that solves the right problem for users.</span></div></li>
+            <li class="fsai-transform-item"><div class="fsai-transform-icon"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M10 34 20 24l7 7 12-16"/><path d="M32 15h7v7"/></svg></div><div class="fsai-transform-copy"><strong>Connected lead path and automation</strong><span>Forms, follow-ups, dashboards, and automations that turn interest into action.</span></div></li>
+            <li class="fsai-transform-item"><div class="fsai-transform-icon"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M28 10c-8 4-13 11-15 22l7-3 4 4 3-7c11-2 18-7 22-15-7-1-14 1-21-1Z"/><path d="m15 33-5 5M20 28l-4 4"/></svg></div><div class="fsai-transform-copy"><strong>Testable launch and improvement roadmap</strong><span>Launch faster, learn from real data, and scale with confidence.</span></div></li>
           </ul>
+          <div class="fsai-transform-note">A focused first version that launches, converts, and improves with you.</div>
         </div>
       </div>
     </section>
