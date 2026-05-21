@@ -91,3 +91,7 @@ Priority order:
 6. Default agent behavior.
 
 Do not use Superpowers to add secrets, credentials, paid APIs, new runtime behavior, GitHub repo creation, GHL forwarding, or app code changes unless the user explicitly asks for those changes.
+
+## UI/UX Guardrails
+
+See [AI_UI_UX_GUARDRAILS.md](./AI_UI_UX_GUARDRAILS.md) for UI/UX Pro Max design rules and project-specific brand constraints.
