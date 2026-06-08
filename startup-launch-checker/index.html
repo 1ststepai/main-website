@@ -1,0 +1,1086 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Startup Launch Readiness Checker | 1stStep.ai</title>
+    <meta
+      name="description"
+      content="Turn a startup idea into a launch plan with a readiness score, prioritized checklist, weekly actions, and founder-friendly risk flags."
+    />
+    <link rel="canonical" href="https://1ststep.ai/startup-launch-checker/" />
+    <meta property="og:title" content="Startup Launch Readiness Checker | 1stStep.ai" />
+    <meta
+      property="og:description"
+      content="A founder-facing planning tool for turning a vague startup idea into a clear launch plan."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://1ststep.ai/startup-launch-checker/" />
+    <meta property="og:image" content="https://1ststep.ai/og-1ststep-ai.png" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #050811;
+        --panel: rgba(10, 18, 34, 0.78);
+        --panel-strong: rgba(16, 26, 48, 0.94);
+        --line: rgba(148, 163, 184, 0.22);
+        --line-bright: rgba(96, 165, 250, 0.42);
+        --text: #f8fbff;
+        --muted: #a8b3c7;
+        --subtle: #748199;
+        --blue: #5ee7ff;
+        --indigo: #7c8cff;
+        --green: #61f3b9;
+        --amber: #ffd166;
+        --rose: #ff7a90;
+        --shadow: 0 28px 80px rgba(0, 0, 0, 0.42);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background:
+          radial-gradient(circle at 14% 12%, rgba(94, 231, 255, 0.18), transparent 28rem),
+          radial-gradient(circle at 88% 2%, rgba(124, 140, 255, 0.16), transparent 30rem),
+          linear-gradient(180deg, #050811 0%, #07101e 42%, #050811 100%);
+        color: var(--text);
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        line-height: 1.5;
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        background-image:
+          linear-gradient(rgba(148, 163, 184, 0.055) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(148, 163, 184, 0.055) 1px, transparent 1px);
+        background-size: 42px 42px;
+        mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.82), transparent 72%);
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      button,
+      input,
+      select,
+      textarea {
+        font: inherit;
+      }
+
+      .shell {
+        position: relative;
+        z-index: 1;
+        width: min(1240px, calc(100% - 40px));
+        margin: 0 auto;
+      }
+
+      .nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        padding: 22px 0;
+      }
+
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 800;
+        letter-spacing: 0;
+      }
+
+      .brand-mark {
+        display: grid;
+        width: 38px;
+        height: 38px;
+        place-items: center;
+        border: 1px solid var(--line-bright);
+        border-radius: 12px;
+        background: linear-gradient(135deg, rgba(94, 231, 255, 0.18), rgba(124, 140, 255, 0.14));
+        box-shadow: 0 16px 40px rgba(94, 231, 255, 0.12);
+      }
+
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .nav-link {
+        min-height: 40px;
+        padding: 9px 12px;
+        border-radius: 12px;
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+
+      .nav-link:hover {
+        color: var(--text);
+        background: rgba(255, 255, 255, 0.055);
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1.02fr) minmax(380px, 0.98fr);
+        gap: 42px;
+        align-items: center;
+        min-height: calc(100vh - 86px);
+        padding: 24px 0 58px;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        width: fit-content;
+        align-items: center;
+        gap: 9px;
+        padding: 8px 12px;
+        border: 1px solid rgba(94, 231, 255, 0.24);
+        border-radius: 999px;
+        background: rgba(94, 231, 255, 0.08);
+        color: #c7f8ff;
+        font-size: 0.82rem;
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+
+      .hero h1 {
+        max-width: 760px;
+        margin: 22px 0 18px;
+        font-size: clamp(3.1rem, 7vw, 5.7rem);
+        line-height: 0.96;
+        letter-spacing: 0;
+      }
+
+      .hero h1 span {
+        color: transparent;
+        background: linear-gradient(90deg, var(--blue), #c7d2fe 48%, var(--green));
+        -webkit-background-clip: text;
+        background-clip: text;
+      }
+
+      .hero-copy {
+        max-width: 680px;
+        margin: 0 0 24px;
+        color: var(--muted);
+        font-size: clamp(1.08rem, 2vw, 1.28rem);
+      }
+
+      .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .button {
+        display: inline-flex;
+        min-height: 50px;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        border: 0;
+        border-radius: 15px;
+        cursor: pointer;
+        font-weight: 800;
+      }
+
+      .button.primary {
+        padding: 0 20px;
+        background: linear-gradient(135deg, var(--blue), var(--indigo));
+        color: #03101d;
+        box-shadow: 0 18px 50px rgba(94, 231, 255, 0.22);
+      }
+
+      .button.secondary {
+        padding: 0 18px;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text);
+      }
+
+      .trust-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 24px;
+        color: var(--muted);
+      }
+
+      .trust-row span {
+        padding: 8px 10px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.045);
+        font-size: 0.9rem;
+      }
+
+      .product-shell {
+        border: 1px solid var(--line-bright);
+        border-radius: 28px;
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.035)),
+          rgba(6, 13, 28, 0.86);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+
+      .product-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 16px 18px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .window-dots {
+        display: flex;
+        gap: 7px;
+      }
+
+      .window-dots i {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.28);
+      }
+
+      .product-body {
+        padding: 20px;
+      }
+
+      .score-preview {
+        display: grid;
+        grid-template-columns: 142px minmax(0, 1fr);
+        gap: 18px;
+        align-items: center;
+        padding: 18px;
+        border: 1px solid var(--line);
+        border-radius: 22px;
+        background: rgba(255, 255, 255, 0.05);
+      }
+
+      .ring {
+        display: grid;
+        width: 132px;
+        height: 132px;
+        place-items: center;
+        border-radius: 50%;
+        background:
+          radial-gradient(circle at center, #07101e 0 54%, transparent 55%),
+          conic-gradient(var(--green) 0 68%, rgba(255, 255, 255, 0.12) 68% 100%);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+      }
+
+      .ring strong {
+        font-size: 2.3rem;
+        line-height: 1;
+      }
+
+      .preview-list {
+        display: grid;
+        gap: 10px;
+        margin-top: 18px;
+      }
+
+      .preview-item {
+        display: grid;
+        grid-template-columns: 28px minmax(0, 1fr);
+        gap: 10px;
+        align-items: start;
+        padding: 13px;
+        border: 1px solid rgba(148, 163, 184, 0.16);
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.04);
+      }
+
+      .check {
+        display: grid;
+        width: 28px;
+        height: 28px;
+        place-items: center;
+        border-radius: 9px;
+        background: rgba(97, 243, 185, 0.12);
+        color: var(--green);
+        font-weight: 900;
+      }
+
+      .section {
+        padding: 54px 0;
+      }
+
+      .tool-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 0.94fr) minmax(390px, 1.06fr);
+        gap: 22px;
+        align-items: start;
+      }
+
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        background: var(--panel);
+        box-shadow: 0 22px 54px rgba(0, 0, 0, 0.22);
+        backdrop-filter: blur(18px);
+      }
+
+      .panel-header {
+        padding: 22px 22px 0;
+      }
+
+      .panel-header h2,
+      .section-heading h2 {
+        margin: 0;
+        font-size: clamp(1.8rem, 3.3vw, 2.7rem);
+        line-height: 1.06;
+        letter-spacing: 0;
+      }
+
+      .panel-header p,
+      .section-heading p {
+        margin: 10px 0 0;
+        color: var(--muted);
+      }
+
+      form {
+        display: grid;
+        gap: 18px;
+        padding: 22px;
+      }
+
+      label,
+      legend {
+        color: #e4ecfb;
+        font-weight: 800;
+      }
+
+      .field {
+        display: grid;
+        gap: 8px;
+      }
+
+      textarea,
+      select {
+        width: 100%;
+        border: 1px solid rgba(148, 163, 184, 0.28);
+        border-radius: 15px;
+        background: rgba(3, 8, 18, 0.72);
+        color: var(--text);
+        outline: none;
+      }
+
+      textarea:focus,
+      select:focus {
+        border-color: rgba(94, 231, 255, 0.72);
+        box-shadow: 0 0 0 4px rgba(94, 231, 255, 0.12);
+      }
+
+      textarea {
+        min-height: 116px;
+        resize: vertical;
+        padding: 14px;
+      }
+
+      select {
+        min-height: 48px;
+        padding: 0 13px;
+      }
+
+      fieldset {
+        margin: 0;
+        padding: 0;
+        border: 0;
+      }
+
+      .checkbox-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 10px;
+      }
+
+      .check-option {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        min-height: 44px;
+        padding: 10px;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 13px;
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--muted);
+        font-weight: 650;
+      }
+
+      .check-option input {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--blue);
+      }
+
+      .results {
+        position: sticky;
+        top: 18px;
+        overflow: hidden;
+      }
+
+      .results-body {
+        display: grid;
+        gap: 18px;
+        padding: 22px;
+      }
+
+      .result-hero {
+        display: grid;
+        grid-template-columns: 148px minmax(0, 1fr);
+        gap: 18px;
+        align-items: center;
+        padding: 18px;
+        border: 1px solid var(--line-bright);
+        border-radius: 22px;
+        background:
+          radial-gradient(circle at top left, rgba(94, 231, 255, 0.16), transparent 20rem),
+          var(--panel-strong);
+      }
+
+      .score-ring {
+        --score-angle: 20%;
+        display: grid;
+        width: 138px;
+        height: 138px;
+        place-items: center;
+        border-radius: 50%;
+        background:
+          radial-gradient(circle at center, #08111f 0 56%, transparent 57%),
+          conic-gradient(var(--score-color, var(--amber)) 0 var(--score-angle), rgba(255, 255, 255, 0.1) var(--score-angle) 100%);
+      }
+
+      .score-ring span {
+        color: var(--subtle);
+        font-size: 0.82rem;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+
+      .score-ring strong {
+        display: block;
+        font-size: 2.45rem;
+        line-height: 1;
+        color: var(--text);
+      }
+
+      .status-pill {
+        display: inline-flex;
+        width: fit-content;
+        padding: 7px 10px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+        color: #dcfce7;
+        font-size: 0.82rem;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+
+      .result-hero h3 {
+        margin: 10px 0 8px;
+        font-size: clamp(1.5rem, 3vw, 2rem);
+        line-height: 1.08;
+      }
+
+      .muted {
+        color: var(--muted);
+      }
+
+      .result-block {
+        padding: 18px;
+        border: 1px solid rgba(148, 163, 184, 0.17);
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.045);
+      }
+
+      .result-block h4 {
+        margin: 0 0 12px;
+        font-size: 1rem;
+      }
+
+      .result-list {
+        display: grid;
+        gap: 9px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .result-list li {
+        display: grid;
+        grid-template-columns: 26px minmax(0, 1fr);
+        gap: 9px;
+        align-items: start;
+        color: var(--muted);
+      }
+
+      .num,
+      .flag-dot {
+        display: grid;
+        width: 26px;
+        height: 26px;
+        place-items: center;
+        border-radius: 8px;
+        background: rgba(94, 231, 255, 0.1);
+        color: var(--blue);
+        font-size: 0.78rem;
+        font-weight: 900;
+      }
+
+      .flag-dot {
+        background: rgba(255, 122, 144, 0.12);
+        color: var(--rose);
+      }
+
+      .empty-state {
+        color: var(--subtle);
+      }
+
+      .metrics-grid,
+      .notes-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .metric,
+      .note {
+        min-height: 132px;
+        padding: 18px;
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.045);
+      }
+
+      .metric strong,
+      .note strong {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--text);
+        font-size: 1.02rem;
+      }
+
+      .metric p,
+      .note p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.96rem;
+      }
+
+      .section-heading {
+        max-width: 760px;
+        margin-bottom: 22px;
+      }
+
+      .disclaimer {
+        margin: 28px 0 0;
+        color: var(--subtle);
+        font-size: 0.92rem;
+      }
+
+      .footer {
+        padding: 30px 0 46px;
+        color: var(--subtle);
+        font-size: 0.94rem;
+      }
+
+      @media (max-width: 980px) {
+        .hero,
+        .tool-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .hero {
+          min-height: auto;
+          padding-top: 18px;
+        }
+
+        .product-shell,
+        .results {
+          position: static;
+        }
+
+        .metrics-grid,
+        .notes-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 680px) {
+        .shell {
+          width: min(100% - 28px, 1240px);
+        }
+
+        .nav {
+          align-items: flex-start;
+        }
+
+        .nav-links {
+          display: none;
+        }
+
+        .hero h1 {
+          font-size: clamp(2.7rem, 15vw, 4rem);
+        }
+
+        .hero-actions,
+        .button {
+          width: 100%;
+        }
+
+        .score-preview,
+        .result-hero {
+          grid-template-columns: 1fr;
+        }
+
+        .ring,
+        .score-ring {
+          width: 124px;
+          height: 124px;
+        }
+
+        .checkbox-grid,
+        .metrics-grid,
+        .notes-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .panel-header,
+        form,
+        .results-body {
+          padding: 18px;
+        }
+
+        .section {
+          padding: 42px 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <nav class="nav" aria-label="Primary navigation">
+        <a class="brand" href="/">
+          <span class="brand-mark">1</span>
+          <span>1stStep.ai</span>
+        </a>
+        <div class="nav-links">
+          <a class="nav-link" href="/app-idea-viability-checker.html">App Idea Checker</a>
+          <a class="nav-link" href="/#work">Work</a>
+          <a class="nav-link" href="/#contact">Contact</a>
+        </div>
+      </nav>
+
+      <header class="hero">
+        <div>
+          <div class="eyebrow">Independent product prototype</div>
+          <h1>Turn a startup idea into a <span>launch plan.</span></h1>
+          <p class="hero-copy">
+            Answer a few questions and get a readiness score, prioritized setup checklist, and the
+            three highest-leverage actions to take this week.
+          </p>
+          <div class="hero-actions">
+            <a class="button primary" href="#checker">Generate my launch plan</a>
+            <a class="button secondary" href="#case-study">View case study notes</a>
+          </div>
+          <div class="trust-row" aria-label="Tool highlights">
+            <span>No backend required</span>
+            <span>Deterministic scoring</span>
+            <span>Founder-first next steps</span>
+          </div>
+          <p class="disclaimer">
+            This is an independent product prototype and planning tool. It is not legal, tax,
+            financial, or investment advice.
+          </p>
+        </div>
+
+        <aside class="product-shell" aria-label="Launch plan preview">
+          <div class="product-topbar">
+            <div class="window-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+            <span class="muted">Launch Readiness</span>
+          </div>
+          <div class="product-body">
+            <div class="score-preview">
+              <div class="ring"><strong>68</strong></div>
+              <div>
+                <div class="status-pill">Launchable with gaps</div>
+                <h2>Prototype a clear next week before building everything.</h2>
+                <p class="muted">
+                  The product translates setup gaps into a launch sequence founders can act on
+                  immediately.
+                </p>
+              </div>
+            </div>
+            <div class="preview-list">
+              <div class="preview-item">
+                <span class="check">1</span>
+                <div><strong>Define first offer/pricing</strong><br /><span class="muted">Make the first transaction concrete.</span></div>
+              </div>
+              <div class="preview-item">
+                <span class="check">2</span>
+                <div><strong>Add payments</strong><br /><span class="muted">Give early customers a simple path to pay.</span></div>
+              </div>
+              <div class="preview-item">
+                <span class="check">3</span>
+                <div><strong>Talk to 5-10 target customers</strong><br /><span class="muted">Turn assumptions into launch evidence.</span></div>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </header>
+    </div>
+
+    <main>
+      <section class="section" id="checker">
+        <div class="shell tool-grid">
+          <section class="panel" aria-labelledby="checker-title">
+            <div class="panel-header">
+              <h2 id="checker-title">Startup Launch Readiness Checker</h2>
+              <p>Fill in the current state of your startup idea. The plan updates on submit.</p>
+            </div>
+            <form id="launch-form">
+              <div class="field">
+                <label for="idea">Startup idea</label>
+                <textarea
+                  id="idea"
+                  name="idea"
+                  placeholder="Example: A workflow dashboard for solo accountants to collect client docs and send payment links."
+                  required
+                ></textarea>
+              </div>
+
+              <div class="field">
+                <label for="business-model">Business model</label>
+                <select id="business-model" name="businessModel">
+                  <option value="saas">SaaS</option>
+                  <option value="marketplace">Marketplace</option>
+                  <option value="ecommerce">Ecommerce</option>
+                  <option value="service">Service business</option>
+                  <option value="creator">Creator/media</option>
+                  <option value="agency">Agency</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="stage">Stage</label>
+                <select id="stage" name="stage">
+                  <option value="idea">Idea</option>
+                  <option value="validating">Validating</option>
+                  <option value="incorporated">Incorporated</option>
+                  <option value="building-mvp">Building MVP</option>
+                  <option value="launched">Launched</option>
+                  <option value="first-customers">First customers</option>
+                </select>
+              </div>
+
+              <fieldset>
+                <legend>Founder setup status</legend>
+                <div class="checkbox-grid">
+                  <label class="check-option"><input type="checkbox" name="setup" value="company" />Company formed</label>
+                  <label class="check-option"><input type="checkbox" name="setup" value="bank" />Bank account</label>
+                  <label class="check-option"><input type="checkbox" name="setup" value="payments" />Payment processor</label>
+                  <label class="check-option"><input type="checkbox" name="setup" value="website" />Website/landing page</label>
+                  <label class="check-option"><input type="checkbox" name="setup" value="discovery" />Customer discovery</label>
+                  <label class="check-option"><input type="checkbox" name="setup" value="pricing" />First offer/pricing</label>
+                  <label class="check-option"><input type="checkbox" name="setup" value="legal" />Legal agreements</label>
+                  <label class="check-option"><input type="checkbox" name="setup" value="analytics" />Analytics</label>
+                  <label class="check-option"><input type="checkbox" name="setup" value="support" />Support/contact channel</label>
+                </div>
+              </fieldset>
+
+              <div class="field">
+                <label for="blocker">Biggest blocker</label>
+                <select id="blocker" name="blocker">
+                  <option value="legal">Legal/setup</option>
+                  <option value="payments">Payments</option>
+                  <option value="customers">Customers</option>
+                  <option value="product">Product</option>
+                  <option value="pricing">Pricing</option>
+                  <option value="operations">Operations</option>
+                  <option value="fundraising">Fundraising</option>
+                  <option value="not-sure">Not sure</option>
+                </select>
+              </div>
+
+              <button class="button primary" type="submit">Generate my launch plan</button>
+            </form>
+          </section>
+
+          <aside class="panel results" aria-live="polite" aria-labelledby="results-title">
+            <div class="panel-header">
+              <h2 id="results-title">Your launch plan</h2>
+              <p>Start with the highest-signal gaps, then move toward first customers.</p>
+            </div>
+            <div class="results-body">
+              <div class="result-hero">
+                <div class="score-ring" id="score-ring">
+                  <div><span>Score</span><strong id="score">15</strong></div>
+                </div>
+                <div>
+                  <span class="status-pill" id="status">Needs foundation</span>
+                  <h3 id="result-title">Answer the intake to generate a focused plan.</h3>
+                  <p class="muted" id="explanation">
+                    The checker will score setup readiness, find missing launch basics, and convert
+                    them into three practical actions for this week.
+                  </p>
+                </div>
+              </div>
+
+              <div class="result-block">
+                <h4>Top 3 actions this week</h4>
+                <ol class="result-list" id="actions"></ol>
+              </div>
+
+              <div class="result-block">
+                <h4>Prioritized checklist</h4>
+                <ol class="result-list" id="checklist"></ol>
+              </div>
+
+              <div class="result-block">
+                <h4>Risk/confusion flags</h4>
+                <ul class="result-list" id="flags"></ul>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section" id="metrics">
+        <div class="shell">
+          <div class="section-heading">
+            <h2>Product Metrics</h2>
+            <p>How this type of product would be measured after launch.</p>
+          </div>
+          <div class="metrics-grid">
+            <article class="metric"><strong>Activation</strong><p>Completed intake and received launch plan.</p></article>
+            <article class="metric"><strong>Time-to-clarity</strong><p>User gets top 3 next actions in under 5 minutes.</p></article>
+            <article class="metric"><strong>Checklist completion</strong><p>Percentage completing first 3 setup items.</p></article>
+            <article class="metric"><strong>Conversion</strong><p>Percentage connecting payments, legal, company formation, or tooling.</p></article>
+            <article class="metric"><strong>Support deflection</strong><p>Reduction in repeated "what do I do next?" questions.</p></article>
+            <article class="metric"><strong>Founder confidence delta</strong><p>Self-reported before/after confidence.</p></article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="case-study">
+        <div class="shell">
+          <div class="section-heading">
+            <h2>Case Study Notes</h2>
+            <p>A compact product-thinking brief behind the prototype.</p>
+          </div>
+          <div class="notes-grid">
+            <article class="note"><strong>Problem</strong><p>Early-stage founders are overwhelmed by company setup, payments, legal, tools, and next steps.</p></article>
+            <article class="note"><strong>Target user</strong><p>First-time founders and solo operators trying to get from idea to first customers.</p></article>
+            <article class="note"><strong>Product hypothesis</strong><p>A guided AI-assisted launch plan improves founder clarity and increases completion of setup actions.</p></article>
+            <article class="note"><strong>MVP scope</strong><p>Intake, readiness score, prioritized checklist, weekly action plan, and risk flags.</p></article>
+            <article class="note"><strong>What I would test next</strong><p>Onboarding completion, checklist conversion, repeated blocker patterns, and founder confidence.</p></article>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="shell footer">
+      <span>1stStep.ai product prototype. Independent planning tool, not legal, tax, financial, or investment advice.</span>
+    </footer>
+
+    <script>
+      const setupItems = {
+        company: { label: "Form company / legal foundation", points: 10, priority: 4 },
+        bank: { label: "Set up business bank account", points: 8, priority: 5 },
+        payments: { label: "Add payments", points: 10, priority: 6 },
+        website: { label: "Create landing page", points: 8, priority: 3 },
+        discovery: { label: "Clarify customer and painful use case", points: 12, priority: 1 },
+        pricing: { label: "Define first offer/pricing", points: 12, priority: 2 },
+        legal: { label: "Draft lightweight legal agreements", points: 8, priority: 9 },
+        analytics: { label: "Add basic analytics", points: 6, priority: 7 },
+        support: { label: "Add support/contact workflow", points: 6, priority: 8 },
+      };
+
+      const stageAdjustments = {
+        idea: -5,
+        validating: 0,
+        incorporated: 5,
+        "building-mvp": 8,
+        launched: 12,
+        "first-customers": 18,
+      };
+
+      const stageLabels = {
+        idea: "idea",
+        validating: "validation",
+        incorporated: "incorporated",
+        "building-mvp": "MVP build",
+        launched: "launched",
+        "first-customers": "first customers",
+      };
+
+      const blockerGuidance = {
+        legal: "Keep setup lightweight, but make ownership, terms, and basic operating boundaries explicit.",
+        payments: "A launch plan is stronger when a real customer has a simple payment path.",
+        customers: "Prioritize customer conversations before polishing the product surface.",
+        product: "Shrink the MVP around the first paid or committed customer workflow.",
+        pricing: "Define a first offer even if the price changes after early conversations.",
+        operations: "Write down the handoff, support, and fulfillment steps before volume arrives.",
+        fundraising: "Use customer evidence and a clear offer to strengthen the fundraising story.",
+        "not-sure": "The fastest path is to remove ambiguity from customer, offer, and first action.",
+      };
+
+      const fallbackChecklist = [
+        "Talk to 5-10 target customers",
+      ];
+
+      const form = document.querySelector("#launch-form");
+      const scoreEl = document.querySelector("#score");
+      const scoreRing = document.querySelector("#score-ring");
+      const statusEl = document.querySelector("#status");
+      const titleEl = document.querySelector("#result-title");
+      const explanationEl = document.querySelector("#explanation");
+      const actionsEl = document.querySelector("#actions");
+      const checklistEl = document.querySelector("#checklist");
+      const flagsEl = document.querySelector("#flags");
+
+      function clamp(value, min, max) {
+        return Math.min(Math.max(value, min), max);
+      }
+
+      function getStatus(score) {
+        if (score < 45) return "Needs foundation";
+        if (score < 70) return "Launchable with gaps";
+        if (score < 86) return "Ready for first customers";
+        return "Ready to scale early traction";
+      }
+
+      function scoreColor(score) {
+        if (score < 45) return "var(--rose)";
+        if (score < 70) return "var(--amber)";
+        if (score < 86) return "var(--blue)";
+        return "var(--green)";
+      }
+
+      function renderNumberedList(target, items) {
+        target.innerHTML = "";
+        items.forEach((item, index) => {
+          const li = document.createElement("li");
+          const num = document.createElement("span");
+          const text = document.createElement("span");
+          num.className = "num";
+          num.textContent = String(index + 1);
+          text.textContent = item;
+          li.append(num, text);
+          target.append(li);
+        });
+      }
+
+      function renderFlags(flags) {
+        flagsEl.innerHTML = "";
+        if (!flags.length) {
+          const li = document.createElement("li");
+          li.className = "empty-state";
+          li.textContent = "No major readiness flags based on this intake.";
+          flagsEl.append(li);
+          return;
+        }
+        flags.forEach((flag) => {
+          const li = document.createElement("li");
+          const dot = document.createElement("span");
+          const text = document.createElement("span");
+          dot.className = "flag-dot";
+          dot.textContent = "!";
+          text.textContent = flag;
+          li.append(dot, text);
+          flagsEl.append(li);
+        });
+      }
+
+      function generatePlan(data) {
+        const completed = new Set(data.getAll("setup"));
+        const stage = data.get("stage");
+        const blocker = data.get("blocker");
+        const businessModel = data.get("businessModel");
+        const idea = String(data.get("idea") || "").trim();
+
+        let score = 20 + (stageAdjustments[stage] || 0);
+        completed.forEach((key) => {
+          score += setupItems[key]?.points || 0;
+        });
+        score = clamp(score, 0, 100);
+
+        const missing = Object.entries(setupItems)
+          .filter(([key]) => !completed.has(key))
+          .sort((a, b) => a[1].priority - b[1].priority)
+          .map(([, item]) => item.label);
+
+        const checklist = [...missing];
+        if (!completed.has("discovery")) {
+          checklist.push(fallbackChecklist[0]);
+        }
+
+        const actions = checklist.slice(0, 3);
+        const flags = [];
+        if (!completed.has("discovery")) flags.push("No customer discovery");
+        if (!completed.has("pricing")) flags.push("No clear offer/pricing");
+        if (!completed.has("payments")) flags.push("No payment path");
+        if (!completed.has("company") || !completed.has("legal")) flags.push("No company/legal foundation");
+        if (!completed.has("analytics")) flags.push("No analytics");
+        if (!completed.has("support")) flags.push("No support channel");
+        if ((stage === "launched" || stage === "first-customers") && missing.length >= 4) {
+          flags.push("Stage too advanced for missing basics");
+        }
+
+        return {
+          score,
+          status: getStatus(score),
+          actions: actions.length ? actions : ["Interview recent users about the next bottleneck", "Tighten activation around the first useful outcome", "Review payment, support, and analytics handoffs"],
+          checklist: checklist.length ? checklist : ["Review customer activation data", "Improve onboarding around the first customer outcome", "Document the next operational bottleneck"],
+          flags,
+          title: idea ? `Plan for: ${idea.slice(0, 92)}${idea.length > 92 ? "..." : ""}` : "Your founder launch plan is ready.",
+          explanation: `For a ${businessModel.replace("-", " ")} business at the ${stageLabels[stage]} stage, the next move is to turn setup gaps into a short launch sequence. ${blockerGuidance[blocker]}`,
+        };
+      }
+
+      function renderPlan(plan) {
+        scoreEl.textContent = String(plan.score);
+        scoreRing.style.setProperty("--score-angle", `${plan.score}%`);
+        scoreRing.style.setProperty("--score-color", scoreColor(plan.score));
+        statusEl.textContent = plan.status;
+        titleEl.textContent = plan.title;
+        explanationEl.textContent = plan.explanation;
+        renderNumberedList(actionsEl, plan.actions);
+        renderNumberedList(checklistEl, plan.checklist);
+        renderFlags(plan.flags);
+      }
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const plan = generatePlan(new FormData(form));
+        renderPlan(plan);
+      });
+
+      renderPlan(generatePlan(new FormData(form)));
+    </script>
+  </body>
+</html>
