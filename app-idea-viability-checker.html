@@ -26,7 +26,7 @@
     <meta name="twitter:description" content="Get a free MVP readiness score, recommended first build path, risk readout, and mockup preview before building." />
     <meta name="twitter:image" content="https://www.1ststep.ai/assets/firststep-checker-social-preview-v1.jpg" />
     <meta name="twitter:image:alt" content="Free 1stStep.ai App Idea Checker with MVP readiness score and recommended build path." />
-    <meta name="theme-color" content="#05070d" />
+    <meta name="theme-color" content="#ffffff" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -83,26 +83,26 @@
       */
       body.aivc-standalone-page {
         margin: 0;
-        background: #05070d;
+        background: #ffffff;
       }
 
       #aivc-root {
-        --aivc-bg: #05070d; /* Change main background color here */
-        --aivc-bg-2: #07111a;
-        --aivc-panel: rgba(12, 18, 31, 0.72);
-        --aivc-panel-strong: rgba(13, 24, 41, 0.9);
-        --aivc-line: rgba(203, 213, 225, 0.16);
-        --aivc-line-strong: rgba(125, 211, 252, 0.32);
-        --aivc-text: #f8fafc;
-        --aivc-muted: #aebccd;
-        --aivc-soft: #d9e7f7;
-        --aivc-blue: #2492ff; /* Change primary brand color here */
-        --aivc-cyan: #28d7ff; /* Change accent color here */
-        --aivc-purple: #8b5cf6; /* Change gradient accent here */
-        --aivc-green: #29f1a2;
-        --aivc-yellow: #f8c35b;
-        --aivc-red: #ff6b7a;
-        --aivc-shadow: 0 26px 90px rgba(0, 0, 0, 0.45);
+        --aivc-bg: #ffffff; /* Change main background color here */
+        --aivc-bg-2: #f6f7fb;
+        --aivc-panel: #ffffff;
+        --aivc-panel-strong: #ffffff;
+        --aivc-line: rgba(16,20,45,0.10);
+        --aivc-line-strong: rgba(109,94,252,0.30);
+        --aivc-text: #0b1020;
+        --aivc-muted: #565d75;
+        --aivc-soft: #1c2236;
+        --aivc-blue: #6d5efc; /* Change primary brand color here */
+        --aivc-cyan: #4d7cff; /* Change accent color here */
+        --aivc-purple: #8f6bff; /* Change gradient accent here */
+        --aivc-green: #12b981;
+        --aivc-yellow: #d99a1a;
+        --aivc-red: #ef4d68;
+        --aivc-shadow: 0 26px 60px -30px rgba(38,34,90,0.22);
         --aivc-radius: 28px;
         color: var(--aivc-text);
         background:
@@ -140,8 +140,8 @@
         inset: 0;
         z-index: -2;
         background:
-          linear-gradient(rgba(203, 213, 225, 0.028) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(203, 213, 225, 0.028) 1px, transparent 1px);
+          linear-gradient(rgba(16, 20, 45, 0.028) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(16, 20, 45, 0.028) 1px, transparent 1px);
         background-size: 54px 54px;
         mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.95), transparent 78%);
         pointer-events: none;
@@ -153,7 +153,7 @@
         inset: auto 0 0;
         height: 36%;
         z-index: -1;
-        background: linear-gradient(180deg, transparent, rgba(5, 7, 13, 0.82));
+        background: linear-gradient(180deg, transparent, rgba(255,255,255,0));
         pointer-events: none;
       }
 
@@ -196,7 +196,7 @@
         font-size: 24px;
         line-height: 1.1;
         letter-spacing: -0.04em;
-        background: linear-gradient(135deg, #fff 25%, #7dd3fc 56%, #a78bfa 100%);
+        background: linear-gradient(135deg, #6d5efc 10%, #4d7cff 55%, #8f6bff 100%);
         -webkit-background-clip: text;
         background-clip: text;
         color: transparent;
@@ -219,7 +219,7 @@
         border-radius: 999px;
         color: var(--aivc-soft);
         text-decoration: none;
-        background: rgba(255, 255, 255, 0.035);
+        background: rgba(16, 20, 45, 0.035);
         backdrop-filter: blur(14px);
         transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
       }
@@ -227,7 +227,7 @@
       .aivc-nav-link:hover {
         transform: translateY(-1px);
         border-color: var(--aivc-line-strong);
-        background: rgba(255, 255, 255, 0.07);
+        background: rgba(16, 20, 45, 0.07);
       }
 
       .aivc-nav-actions {
@@ -255,9 +255,9 @@
         padding: 8px 12px;
         border: 1px solid rgba(125, 211, 252, 0.28);
         border-radius: 999px;
-        color: #dff7ff;
-        background: rgba(8, 19, 34, 0.76);
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        color: #0e7490;
+        background: rgba(255,255,255,0.92);
+        box-shadow: inset 0 1px 0 rgba(16, 20, 45, 0.08);
         font-size: 13px;
         font-weight: 700;
       }
@@ -280,7 +280,7 @@
       }
 
       .aivc-gradient-text {
-        background: linear-gradient(135deg, #ffffff 10%, var(--aivc-cyan), var(--aivc-purple));
+        background: linear-gradient(135deg, var(--aivc-blue), var(--aivc-cyan) 55%, var(--aivc-purple));
         -webkit-background-clip: text;
         background-clip: text;
         color: transparent;
@@ -317,9 +317,9 @@
         background:
           radial-gradient(circle at 35% 22%, rgba(40, 215, 255, 0.25), transparent 45%),
           linear-gradient(135deg, rgba(36,146,255,.16), rgba(139,92,246,.16)),
-          rgba(255,255,255,.045);
+          rgba(16, 20, 45,.045);
         border: 1px solid rgba(125, 211, 252, 0.18);
-        box-shadow: inset 0 1px rgba(255,255,255,.08), 0 18px 46px rgba(36,146,255,.12);
+        box-shadow: inset 0 1px rgba(16, 20, 45,.08), 0 18px 46px rgba(36,146,255,.12);
       }
 
       .aivc-benefit-icon {
@@ -368,7 +368,7 @@
 
       .aivc-benefit strong {
         display: block;
-        color: #fff;
+        color: #0b1020;
         font-size: 14px;
         margin-bottom: 6px;
       }
@@ -424,18 +424,19 @@
 
       .aivc-btn-primary {
         background: linear-gradient(135deg, var(--aivc-blue), #5a8cff 52%, #b833f4);
+        color: #fff;
         box-shadow: 0 20px 60px rgba(36, 146, 255, 0.34);
       }
 
       .aivc-btn-secondary {
         border-color: var(--aivc-line);
-        background: rgba(255, 255, 255, 0.06);
+        background: rgba(16, 20, 45, 0.06);
         backdrop-filter: blur(16px);
       }
 
       .aivc-btn-ghost {
-        border-color: rgba(203, 213, 225, 0.2);
-        background: rgba(255, 255, 255, 0.04);
+        border-color: rgba(16, 20, 45, 0.2);
+        background: rgba(16, 20, 45, 0.04);
       }
 
       .aivc-btn[disabled] {
@@ -456,7 +457,7 @@
         border: 1px solid var(--aivc-line);
         border-radius: var(--aivc-radius);
         background:
-          linear-gradient(145deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.025)),
+          linear-gradient(145deg, rgba(16, 20, 45, 0.09), rgba(16, 20, 45, 0.025)),
           var(--aivc-panel);
         box-shadow: var(--aivc-shadow);
         backdrop-filter: blur(22px);
@@ -500,8 +501,8 @@
         height: 168px;
         border-radius: 50%;
         background:
-          conic-gradient(from 0deg, var(--aivc-purple), #b833f4 20%, var(--aivc-blue) 58%, rgba(255, 255, 255, 0.08) 74%),
-          rgba(255, 255, 255, 0.05);
+          conic-gradient(from 0deg, var(--aivc-purple), #b833f4 20%, var(--aivc-blue) 58%, rgba(16, 20, 45, 0.08) 74%),
+          rgba(16, 20, 45, 0.05);
         box-shadow: 0 0 80px rgba(36, 146, 255, 0.24);
       }
 
@@ -511,7 +512,7 @@
         width: 118px;
         height: 118px;
         border-radius: 50%;
-        background: rgba(5, 7, 13, 0.94);
+        background: rgba(255,255,255,0);
         font-size: 48px;
         font-weight: 950;
       }
@@ -562,7 +563,7 @@
         width: 20px;
         height: 20px;
         border-radius: 50%;
-        color: #031018;
+        color: #eef1f8;
         background: var(--aivc-cyan);
         font-size: 13px;
         font-weight: 950;
@@ -580,29 +581,29 @@
         align-items: center;
         min-height: 30px;
         padding: 0 11px;
-        border: 1px solid rgba(203, 213, 225, 0.16);
+        border: 1px solid rgba(16, 20, 45, 0.16);
         border-radius: 999px;
-        color: #e9f5ff;
-        background: rgba(255, 255, 255, 0.055);
+        color: #1c2236;
+        background: rgba(16, 20, 45, 0.055);
         font-size: 12px;
         font-weight: 750;
       }
 
-      .aivc-pill.aivc-pill-green { color: #92ffd1; border-color: rgba(41,241,162,.25); background: rgba(41,241,162,.09); }
-      .aivc-pill.aivc-pill-blue { color: #9ed8ff; border-color: rgba(36,146,255,.28); background: rgba(36,146,255,.10); }
-      .aivc-pill.aivc-pill-yellow { color: #ffe2a2; border-color: rgba(248,195,91,.28); background: rgba(248,195,91,.10); }
-      .aivc-pill.aivc-pill-purple { color: #d8c8ff; border-color: rgba(139,92,246,.30); background: rgba(139,92,246,.12); }
+      .aivc-pill.aivc-pill-green { color: #0f9d6e; border-color: rgba(41,241,162,.25); background: rgba(41,241,162,.09); }
+      .aivc-pill.aivc-pill-blue { color: #2563eb; border-color: rgba(36,146,255,.28); background: rgba(36,146,255,.10); }
+      .aivc-pill.aivc-pill-yellow { color: #a86a10; border-color: rgba(248,195,91,.28); background: rgba(248,195,91,.10); }
+      .aivc-pill.aivc-pill-purple { color: #6d5efc; border-color: rgba(139,92,246,.30); background: rgba(139,92,246,.12); }
 
       .aivc-preview-meaning {
         padding: 20px;
-        border: 1px solid rgba(203,213,225,.14);
+        border: 1px solid rgba(16, 20, 45,.14);
         border-radius: 18px;
-        background: rgba(255,255,255,.035);
+        background: rgba(16, 20, 45,.035);
       }
 
       .aivc-preview-meaning h3 {
         margin: 0 0 14px;
-        color: #c8d3ff;
+        color: #4d7cff;
         font-size: 13px;
         text-transform: uppercase;
         letter-spacing: .08em;
@@ -618,7 +619,7 @@
         background:
           radial-gradient(circle at 5% 0%, rgba(73,184,255,.12), transparent 30%),
           radial-gradient(circle at 92% 12%, rgba(139,92,246,.12), transparent 32%),
-          linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.025)),
+          linear-gradient(145deg, rgba(16, 20, 45,0.08), rgba(16, 20, 45,0.025)),
           var(--aivc-panel);
       }
 
@@ -629,7 +630,7 @@
         gap: 18px;
         padding: 24px;
         border-bottom: 1px solid var(--aivc-line);
-        background: rgba(255, 255, 255, 0.03);
+        background: rgba(16, 20, 45, 0.03);
       }
 
       .aivc-panel-title {
@@ -645,7 +646,7 @@
         object-fit: contain;
         border: 1px solid rgba(125,211,252,.25);
         border-radius: 16px;
-        background: radial-gradient(circle at 50% 0%, rgba(125,211,252,.14), transparent 50%), rgba(255,255,255,.045);
+        background: radial-gradient(circle at 50% 0%, rgba(125,211,252,.14), transparent 50%), rgba(16, 20, 45,.045);
         padding: 8px;
         box-shadow: 0 18px 48px rgba(36,146,255,.16);
       }
@@ -668,7 +669,7 @@
         border: 1px solid var(--aivc-line);
         border-radius: 999px;
         color: var(--aivc-soft);
-        background: rgba(255, 255, 255, 0.045);
+        background: rgba(16, 20, 45, 0.045);
         font-size: 13px;
         font-weight: 850;
         text-align: center;
@@ -676,7 +677,7 @@
 
       .aivc-progress-wrap {
         height: 4px;
-        background: rgba(255, 255, 255, 0.07);
+        background: rgba(16, 20, 45, 0.07);
       }
 
       .aivc-progress {
@@ -716,7 +717,7 @@
         right: 44px;
         top: 39px;
         height: 2px;
-        background: linear-gradient(90deg, var(--aivc-blue), var(--aivc-purple), rgba(255,255,255,.12));
+        background: linear-gradient(90deg, var(--aivc-blue), var(--aivc-purple), rgba(16, 20, 45,.12));
       }
 
       .aivc-step-item {
@@ -740,7 +741,7 @@
       }
 
       .aivc-step-item strong {
-        color: #fff;
+        color: #0b1020;
         font-size: 13px;
       }
 
@@ -750,10 +751,10 @@
         border-radius: 22px;
         background:
           radial-gradient(circle at 0% 0%, rgba(40,215,255,.10), transparent 34%),
-          linear-gradient(145deg, rgba(255,255,255,.06), rgba(255,255,255,.02)),
-          rgba(7,13,27,.68);
+          linear-gradient(145deg, rgba(16, 20, 45,.06), rgba(16, 20, 45,.02)),
+          rgba(255,255,255,0.92);
         padding: 24px;
-        box-shadow: inset 0 1px rgba(255,255,255,.06);
+        box-shadow: inset 0 1px rgba(16, 20, 45,.06);
       }
 
       .aivc-side-panel h3 {
@@ -773,7 +774,7 @@
         gap: 12px;
         align-items: center;
         padding-bottom: 15px;
-        border-bottom: 1px solid rgba(255,255,255,.07);
+        border-bottom: 1px solid rgba(16, 20, 45,.07);
       }
 
       .aivc-area:last-child {
@@ -790,7 +791,7 @@
 
       .aivc-area strong {
         display: block;
-        color: #fff;
+        color: #0b1020;
         font-size: 14px;
       }
 
@@ -808,7 +809,7 @@
         border-radius: 22px;
         background:
           radial-gradient(circle at 0% 0%, rgba(36,146,255,.13), transparent 34%),
-          rgba(5, 13, 29, 0.48);
+          rgba(255,255,255,0.85);
         opacity: 1;
         transform: translateY(0);
         transition: opacity 180ms ease, transform 180ms ease;
@@ -854,8 +855,8 @@
         border: 1px solid rgba(125, 211, 252, 0.24);
         border-radius: 22px;
         color: var(--aivc-text);
-        background: rgba(5, 7, 13, 0.62);
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+        background: rgba(255,255,255,0);
+        box-shadow: inset 0 1px 0 rgba(16, 20, 45, 0.06);
         font: inherit;
         line-height: 1.55;
         padding: 18px;
@@ -916,11 +917,11 @@
         width: 100%;
         min-height: 72px;
         padding: 16px 17px;
-        border: 1px solid rgba(203, 213, 225, 0.15);
+        border: 1px solid rgba(16, 20, 45, 0.15);
         border-radius: 18px;
         color: var(--aivc-soft);
         cursor: pointer;
-        background: rgba(255, 255, 255, 0.045);
+        background: rgba(16, 20, 45, 0.045);
         font: inherit;
         font-weight: 760;
         text-align: left;
@@ -934,15 +935,15 @@
       .aivc-option:hover {
         transform: translateY(-1px);
         border-color: rgba(125, 211, 252, 0.42);
-        background: rgba(255, 255, 255, 0.07);
+        background: rgba(16, 20, 45, 0.07);
       }
 
       .aivc-option.aivc-selected {
-        color: #ffffff;
+        color: #1c2236;
         border-color: rgba(40, 215, 255, 0.78);
         background:
           linear-gradient(135deg, rgba(36, 146, 255, 0.24), rgba(139, 92, 246, 0.18)),
-          rgba(255, 255, 255, 0.08);
+          rgba(16, 20, 45, 0.08);
         box-shadow: 0 16px 52px rgba(36, 146, 255, 0.18);
       }
 
@@ -993,8 +994,8 @@
       .aivc-lead-card {
         border: 1px solid var(--aivc-line);
         border-radius: 22px;
-        background: rgba(255, 255, 255, 0.048);
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+        background: rgba(16, 20, 45, 0.048);
+        box-shadow: inset 0 1px 0 rgba(16, 20, 45, 0.06);
       }
 
       .aivc-result-card {
@@ -1023,7 +1024,7 @@
         padding: 0 12px;
         border: 1px solid rgba(40, 215, 255, 0.42);
         border-radius: 999px;
-        color: #eaffff;
+        color: #0e7490;
         background: rgba(40, 215, 255, 0.1);
         font-weight: 900;
       }
@@ -1056,7 +1057,7 @@
         border-radius: 24px;
         background:
           radial-gradient(circle at 12% 0%, rgba(125, 211, 252, 0.12), transparent 36%),
-          linear-gradient(135deg, rgba(255,255,255,0.07), rgba(255,255,255,0.025));
+          linear-gradient(135deg, rgba(16, 20, 45,0.07), rgba(16, 20, 45,0.025));
       }
 
       .aivc-mockup-grid {
@@ -1081,8 +1082,8 @@
         justify-content: space-between;
         gap: 12px;
         padding: 13px 15px;
-        border-bottom: 1px solid rgba(255,255,255,0.08);
-        color: #dfe7ff;
+        border-bottom: 1px solid rgba(16, 20, 45,0.08);
+        color: #1c2236;
         font-size: 13px;
         font-weight: 850;
       }
@@ -1098,15 +1099,15 @@
 
       .aivc-wireframe-nav {
         padding: 14px 10px;
-        border-right: 1px solid rgba(255,255,255,0.08);
-        background: rgba(255,255,255,0.025);
+        border-right: 1px solid rgba(16, 20, 45,0.08);
+        background: rgba(16, 20, 45,0.025);
       }
 
       .aivc-wireframe-pill,
       .aivc-wireframe-line {
         display: block;
         border-radius: 999px;
-        background: rgba(203, 213, 225, 0.18);
+        background: rgba(16, 20, 45, 0.18);
       }
 
       .aivc-wireframe-pill { height: 10px; margin: 0 0 12px; }
@@ -1116,9 +1117,9 @@
       .aivc-wireframe-pill:nth-child(4) { width: 48%; }
 
       .aivc-wireframe-main { padding: 16px; }
-      .aivc-wireframe-heading { width: 62%; height: 18px; margin-bottom: 12px; border-radius: 999px; background: rgba(255,255,255,0.18); }
+      .aivc-wireframe-heading { width: 62%; height: 18px; margin-bottom: 12px; border-radius: 999px; background: rgba(16, 20, 45,0.18); }
       .aivc-wireframe-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
-      .aivc-wireframe-mini { min-height: 62px; border: 1px solid rgba(125, 211, 252, 0.14); border-radius: 14px; background: rgba(255,255,255,0.045); padding: 10px; }
+      .aivc-wireframe-mini { min-height: 62px; border: 1px solid rgba(125, 211, 252, 0.14); border-radius: 14px; background: rgba(16, 20, 45,0.045); padding: 10px; }
       .aivc-wireframe-line { height: 8px; margin-bottom: 8px; }
       .aivc-wireframe-line.short { width: 54%; }
       .aivc-wireframe-line.med { width: 76%; }
@@ -1130,7 +1131,7 @@
         border-radius: 16px;
         background:
           linear-gradient(135deg, rgba(125,211,252,0.12), rgba(139,92,246,0.08)),
-          rgba(255,255,255,0.035);
+          rgba(16, 20, 45,0.035);
         padding: 14px;
       }
 
@@ -1144,7 +1145,7 @@
         padding: 18px;
         border: 1px solid var(--aivc-line);
         border-radius: 20px;
-        background: rgba(255, 255, 255, 0.035);
+        background: rgba(16, 20, 45, 0.035);
       }
 
       .aivc-metrics {
@@ -1176,7 +1177,7 @@
         padding: 22px;
         background:
           linear-gradient(135deg, rgba(36, 146, 255, 0.12), rgba(139, 92, 246, 0.1)),
-          rgba(255, 255, 255, 0.048);
+          rgba(16, 20, 45, 0.048);
       }
 
       .aivc-lead-card p {
@@ -1202,10 +1203,10 @@
       .aivc-input {
         width: 100%;
         min-height: 48px;
-        border: 1px solid rgba(203, 213, 225, 0.18);
+        border: 1px solid rgba(16, 20, 45, 0.18);
         border-radius: 14px;
         color: var(--aivc-text);
-        background: rgba(5, 7, 13, 0.55);
+        background: rgba(255,255,255,0);
         font: inherit;
         padding: 0 13px;
       }
@@ -1229,7 +1230,7 @@
         margin: 0 24px 24px;
         border: 1px solid rgba(148,170,255,.18);
         border-radius: 20px;
-        background: rgba(255,255,255,.035);
+        background: rgba(16, 20, 45,.035);
         overflow: hidden;
       }
 
@@ -1240,8 +1241,8 @@
         align-items: center;
         min-height: 72px;
         padding: 14px 18px;
-        border-right: 1px solid rgba(255,255,255,.08);
-        color: #fff;
+        border-right: 1px solid rgba(16, 20, 45,.08);
+        color: #0b1020;
         font-size: 13px;
         font-weight: 850;
       }
@@ -1261,7 +1262,7 @@
         padding: 16px;
         border: 1px solid rgba(41, 241, 162, 0.34);
         border-radius: 18px;
-        color: #eafff6;
+        color: #0f9d6e;
         background: rgba(41, 241, 162, 0.08);
       }
 
@@ -1341,7 +1342,7 @@
 
         .aivc-trust-item {
           border-right: 0;
-          border-bottom: 1px solid rgba(255,255,255,.08);
+          border-bottom: 1px solid rgba(16, 20, 45,.08);
         }
 
         .aivc-trust-item:last-child {
