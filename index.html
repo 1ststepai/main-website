@@ -439,6 +439,28 @@
     .fsai-transform-copy span{display:block;font-size:0.82rem;color:var(--muted);line-height:1.5}
     .fsai-transform-note{margin-top:22px;padding-top:18px;border-top:1px solid var(--line);font-size:0.84rem;color:var(--muted-2)}
 
+    .fsai-example-tag{display:inline-flex;align-items:center;gap:10px;margin:-8px 0 26px;padding:9px 16px;border:1px solid var(--line);border-radius:999px;font-size:0.86rem;color:var(--ink);background:var(--bg-2)}
+    .fsai-example-tag b{color:var(--brand);font-weight:600}
+    .fsai-timeline{list-style:none;margin:0 0 20px;padding:0;display:flex;flex-direction:column}
+    .fsai-timeline-step{display:grid;grid-template-columns:74px 1fr;column-gap:14px;position:relative;padding-bottom:22px}
+    .fsai-timeline-step.fsai-timeline-last{padding-bottom:0}
+    .fsai-timeline-step::before{content:"";position:absolute;left:81px;top:20px;bottom:0;width:2px;background:var(--line)}
+    .fsai-timeline-step.fsai-timeline-last::before{display:none}
+    .fsai-timeline-dot{position:absolute;left:76px;top:3px;width:12px;height:12px;border-radius:50%;background:var(--line-2);border:2px solid #fff;box-shadow:0 0 0 2px var(--line)}
+    .fsai-timeline-dot-bad{background:var(--rose,#ef4d68)}
+    .fsai-timeline-dot-good{background:var(--brand)}
+    .fsai-timeline-time{font-family:var(--mono);font-size:0.74rem;font-weight:600;color:var(--muted-2);padding-top:2px}
+    .fsai-timeline-time.fsai-timeline-slow{color:#ef4d68}
+    .fsai-timeline-time.fsai-timeline-fast{color:#0f9d6e}
+    .fsai-timeline-body strong{display:block;font-size:0.9rem;font-weight:600;color:var(--ink);margin-bottom:2px}
+    .fsai-timeline-body span{display:block;font-size:0.82rem;color:var(--muted);line-height:1.45}
+    .fsai-timeline-stat{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:16px 18px;border-radius:14px;margin-top:4px;background:#fdeef1}
+    .fsai-timeline-stat-good-bg{background:#eafbf4}
+    .fsai-timeline-stat span{font-size:0.78rem;color:var(--muted);font-weight:500}
+    .fsai-timeline-stat strong{font-family:var(--mono);font-size:1.3rem;font-weight:700}
+    .fsai-timeline-stat-bad{color:#ef4d68}
+    .fsai-timeline-stat-good{color:#0f9d6e}
+
     /* Urgency */
     .fsai-urgency-card{display:grid;grid-template-columns:1.4fr auto;align-items:center;gap:40px;padding:clamp(30px,4vw,52px);border-radius:calc(var(--radius) + 6px);background:linear-gradient(120deg,#efe9ff,#e6efff);border:1px solid var(--line)}
     .fsai-urgency-card h2{margin:14px 0 14px}.fsai-urgency-card p{max-width:60ch}
@@ -895,52 +917,38 @@
     <section class="fsai-section" id="principles">
       <div class="fsai-section-head">
         <div>
-          <div class="fsai-eyebrow">Before vs After</div>
-          <h2>From revenue leakage to operational control.</h2>
-          <p class="fsai-section-lede">The work is not just connecting tools. It is making the path from lead capture to follow-up, reporting, and ownership clear enough to operate.</p>
+          <div class="fsai-eyebrow">One Real Example</div>
+          <h2>What revenue leakage actually looks like on a Tuesday morning.</h2>
+          <p class="fsai-section-lede">Same lead. Same business. Two different systems behind it.</p>
         </div>
       </div>
+      <div class="fsai-example-tag"><span aria-hidden="true">&#128203;</span> Scenario: <b>A service business gets a lead from a Google Ads form.</b></div>
       <div class="fsai-before-after">
         <div class="fsai-transform-card">
           <div class="fsai-transform-head">
             <div class="fsai-transform-mark">&times;</div>
-            <div><h3>Before</h3><p>Unclear, disconnected, and difficult to move forward.</p></div>
+            <div><h3>Before</h3><p>No system &mdash; just people and inboxes.</p></div>
           </div>
-          <div class="fsai-transform-visual" aria-hidden="true">
-            <span class="fsai-chaos-node"></span>
-            <span class="fsai-chaos-node"></span>
-            <span class="fsai-chaos-node"></span>
-            <span class="fsai-chaos-line"></span>
-            <span class="fsai-chaos-line"></span>
-          </div>
-          <ul class="fsai-transform-list">
-            <li class="fsai-transform-item"><div class="fsai-transform-icon"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M12 24c7-15 28-11 24 2-4 13-27 12-24-3 3-15 27-13 25 3-2 16-28 10-27-2 1-12 24-17 27-1"/></svg></div><div class="fsai-transform-copy"><strong>Lead sources with no clean owner</strong><span>Forms, DMs, calls, ads, referrals, and outbound all enter differently.</span></div></li>
-            <li class="fsai-transform-item"><div class="fsai-transform-icon"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="10" y="10" width="10" height="10" rx="3"/><rect x="28" y="10" width="10" height="10" rx="3"/><rect x="10" y="28" width="10" height="10" rx="3"/><rect x="28" y="28" width="10" height="10" rx="3"/><path d="M20 15h8M15 20v8M33 20v8M20 33h8"/></svg></div><div class="fsai-transform-copy"><strong>Scattered tools and manual work</strong><span>Spreadsheets, emails, sticky notes, and handoffs create confusion.</span></div></li>
-            <li class="fsai-transform-item"><div class="fsai-transform-icon"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M11 33c2-8 8-11 16-8s9-9 1-10"/><path d="M34 12h1"/><circle cx="34" cy="16" r="7"/><path d="M34 13v4M34 22h.01"/></svg></div><div class="fsai-transform-copy"><strong>Follow-up depends on memory</strong><span>Speed-to-lead, nurture, reminders, and handoffs vary by person.</span></div></li>
-            <li class="fsai-transform-item"><div class="fsai-transform-icon"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M16 32V16h16"/><path d="M25 16h7v7"/><path d="M32 16 18 30"/><path d="M14 38h20a4 4 0 0 0 4-4V14"/></svg></div><div class="fsai-transform-copy"><strong>Reporting cannot explain revenue</strong><span>Source, quality, stage movement, and close path are unclear.</span></div></li>
+          <ul class="fsai-timeline">
+            <li class="fsai-timeline-step"><span class="fsai-timeline-dot"></span><div class="fsai-timeline-time">9:14 AM</div><div class="fsai-timeline-body"><strong>Form submitted</strong><span>Lands in a shared Gmail inbox with 40 unread emails.</span></div></li>
+            <li class="fsai-timeline-step fsai-timeline-bad"><span class="fsai-timeline-dot fsai-timeline-dot-bad"></span><div class="fsai-timeline-time fsai-timeline-slow">11:40 AM</div><div class="fsai-timeline-body"><strong>Someone finally sees it</strong><span>Between calls. No idea if anyone already replied.</span></div></li>
+            <li class="fsai-timeline-step fsai-timeline-bad"><span class="fsai-timeline-dot fsai-timeline-dot-bad"></span><div class="fsai-timeline-time fsai-timeline-slow">2:15 PM</div><div class="fsai-timeline-body"><strong>Manual text sent</strong><span>No response &mdash; they already booked a competitor at 10 AM.</span></div></li>
+            <li class="fsai-timeline-step fsai-timeline-bad fsai-timeline-last"><span class="fsai-timeline-dot fsai-timeline-dot-bad"></span><div class="fsai-timeline-time fsai-timeline-slow">Never</div><div class="fsai-timeline-body"><strong>Nothing gets logged</strong><span>No record of source, response time, or outcome for reporting.</span></div></li>
           </ul>
-          <div class="fsai-transform-note">Demand without a clean operating path creates hidden revenue leakage.</div>
+          <div class="fsai-timeline-stat"><span>Time to first response</span><strong class="fsai-timeline-stat-bad">4h 26m</strong></div>
         </div>
         <div class="fsai-transform-card fsai-after">
           <div class="fsai-transform-head">
             <div class="fsai-transform-mark">&#10003;</div>
-            <div><h3>After</h3><p>Clear, focused, and built for impact.</p></div>
+            <div><h3>After</h3><p>Capture &rarr; route &rarr; follow-up &rarr; report, automatically.</p></div>
           </div>
-          <div class="fsai-transform-visual" aria-hidden="true">
-            <span class="fsai-flow-node">Capture</span>
-            <span class="fsai-flow-node">Route</span>
-            <span class="fsai-flow-node">Report</span>
-            <span class="fsai-flow-line"></span>
-            <span class="fsai-flow-line"></span>
-            <span class="fsai-flow-check">Operating layer ready</span>
-          </div>
-          <ul class="fsai-transform-list">
-            <li class="fsai-transform-item"><div class="fsai-transform-icon"><svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="15"/><circle cx="24" cy="24" r="8"/><circle cx="24" cy="24" r="2"/><path d="m31 17 6-6M34 11h3v3"/></svg></div><div class="fsai-transform-copy"><strong>Clear capture and routing logic</strong><span>Every source has fields, ownership, stages, and next actions.</span></div></li>
-            <li class="fsai-transform-item"><div class="fsai-transform-icon"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="9" y="12" width="30" height="24" rx="4"/><path d="M9 19h30"/><path d="M15 26h12M15 31h8M31 29h4"/></svg></div><div class="fsai-transform-copy"><strong>CRM and follow-up system</strong><span>Qualified leads move through defined handoffs instead of scattered reminders.</span></div></li>
-            <li class="fsai-transform-item"><div class="fsai-transform-icon"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M10 34 20 24l7 7 12-16"/><path d="M32 15h7v7"/></svg></div><div class="fsai-transform-copy"><strong>Attribution and reporting loop</strong><span>See what entered, what moved, what stalled, and what created revenue.</span></div></li>
-            <li class="fsai-transform-item"><div class="fsai-transform-icon"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M28 10c-8 4-13 11-15 22l7-3 4 4 3-7c11-2 18-7 22-15-7-1-14 1-21-1Z"/><path d="m15 33-5 5M20 28l-4 4"/></svg></div><div class="fsai-transform-copy"><strong>90-day improvement path</strong><span>Build the highest-leverage systems first, then harden what works.</span></div></li>
+          <ul class="fsai-timeline">
+            <li class="fsai-timeline-step"><span class="fsai-timeline-dot fsai-timeline-dot-good"></span><div class="fsai-timeline-time fsai-timeline-fast">9:14:00</div><div class="fsai-timeline-body"><strong>Form submitted</strong><span>Hits the CRM directly &mdash; no inbox in between.</span></div></li>
+            <li class="fsai-timeline-step"><span class="fsai-timeline-dot fsai-timeline-dot-good"></span><div class="fsai-timeline-time fsai-timeline-fast">9:14:03</div><div class="fsai-timeline-body"><strong>Auto-tagged &amp; routed</strong><span>Tagged "Repair &mdash; Local," assigned to nearest available tech.</span></div></li>
+            <li class="fsai-timeline-step"><span class="fsai-timeline-dot fsai-timeline-dot-good"></span><div class="fsai-timeline-time fsai-timeline-fast">9:14:45</div><div class="fsai-timeline-body"><strong>Instant text sent</strong><span>"Hi Sarah &mdash; got your request, Mike will call in the next few minutes."</span></div></li>
+            <li class="fsai-timeline-step fsai-timeline-last"><span class="fsai-timeline-dot fsai-timeline-dot-good"></span><div class="fsai-timeline-time fsai-timeline-fast">9:19 AM</div><div class="fsai-timeline-body"><strong>Booked</strong><span>Logged automatically: source, response time, and outcome &mdash; visible on the dashboard.</span></div></li>
           </ul>
-          <div class="fsai-transform-note">A revenue path your team can operate, measure, and improve.</div>
+          <div class="fsai-timeline-stat fsai-timeline-stat-good-bg"><span>Time to first response</span><strong class="fsai-timeline-stat-good">4m 45s</strong></div>
         </div>
       </div>
     </section>
