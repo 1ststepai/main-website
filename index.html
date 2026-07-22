@@ -236,9 +236,9 @@
     .fsai-hero-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2;pointer-events:none}
     .fsai-hero-scrim{position:absolute;inset:0;z-index:-1;pointer-events:none;
       background:
-        linear-gradient(90deg,rgba(255,255,255,.96) 0%,rgba(255,255,255,.88) 34%,rgba(255,255,255,.6) 64%,rgba(255,255,255,.42) 100%),
-        linear-gradient(0deg,rgba(255,255,255,.5),transparent 30%)}
-    .fsai-hero>div:first-child{display:flex;flex-direction:column;align-items:flex-start}
+        linear-gradient(90deg,rgba(255,255,255,.82) 0%,rgba(255,255,255,.62) 22%,rgba(255,255,255,.24) 44%,rgba(255,255,255,.06) 60%,transparent 76%)}
+    .fsai-hero-copy{display:flex;flex-direction:column;align-items:flex-start}
+    .fsai-hero-copy h1,.fsai-hero-copy p,.fsai-hero-copy .fsai-kicker strong{text-shadow:0 1px 24px rgba(255,255,255,.8)}
     .fsai-kicker{display:inline-flex;align-items:center;gap:10px;padding:7px 14px;border:1px solid var(--line-2);border-radius:999px;background:#fff;box-shadow:var(--shadow-sm);margin-bottom:26px}
     .fsai-kicker strong{color:var(--brand);font-weight:600;font-size:.8rem}
     .fsai-kicker span{color:var(--muted-2);font-size:.78rem;padding-left:10px;border-left:1px solid var(--line-2)}
@@ -645,7 +645,6 @@
     @media (prefers-reduced-motion:reduce){
       .fsai-site *{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important}
       .fsai-reveal{opacity:1;transform:none}
-      .fsai-hero::before,.fsai-hero::after{animation:none}
     }
   </style>
 
@@ -670,7 +669,7 @@
         <source src="/assets/hero-bg.mp4" type="video/mp4">
       </video>
       <div class="fsai-hero-scrim" aria-hidden="true"></div>
-      <div>
+      <div class="fsai-hero-copy">
         <div class="fsai-kicker"><strong>Revenue Systems Architecture</strong><span>Lead Flow, CRM, Follow-Up & Reporting</span></div>
         <h1>The problem isn't your leads. It's what happens <span class="fsai-gradient">after they come in.</span></h1>
         <p>1stStep.ai finds exactly where leads get stuck &mdash; a shared inbox, a spreadsheet, a CRM nobody updates &mdash; and builds the system that moves them all the way to a booked call.</p>
@@ -1466,15 +1465,14 @@
       var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches;
       var fine = window.matchMedia && matchMedia('(hover:hover) and (pointer:fine)').matches;
 
-      // hero background video: skip autoplay motion for reduced-motion users
+      // hero background video: slow, ambient, low-intensity motion -- always play
+      // (all other motion on the site still respects prefers-reduced-motion)
       var heroVideo = document.getElementById('fsai-hero-video');
       if (heroVideo) {
-        if (reduce) {
-          heroVideo.removeAttribute('autoplay');
-          heroVideo.pause();
-        } else {
-          heroVideo.play().catch(function () {});
-        }
+        var tryPlay = function () { heroVideo.play().catch(function () {}); };
+        if (heroVideo.readyState >= 2) tryPlay();
+        heroVideo.addEventListener('loadeddata', tryPlay);
+        heroVideo.addEventListener('canplay', tryPlay);
       }
 
       // scroll progress bar
@@ -1491,7 +1489,7 @@
 
       // scroll reveal
       if (!reduce && 'IntersectionObserver' in window) {
-        var sel = '.fsai-hero>div,.fsai-section-head,.fsai-proof-strip,.fsai-build-strip,.fsai-checker-callout,.fsai-service-card,.fsai-ai-operator,.fsai-project,.fsai-transform-card,.fsai-urgency-card,.fsai-pricing-card,.fsai-pricing-proof,.fsai-step,.fsai-about-card,.fsai-audience-card,.fsai-reviews-card,.fsai-cta-card';
+        var sel = '.fsai-hero-copy,.fsai-hero>.fsai-visual,.fsai-section-head,.fsai-proof-strip,.fsai-build-strip,.fsai-checker-callout,.fsai-service-card,.fsai-ai-operator,.fsai-project,.fsai-transform-card,.fsai-urgency-card,.fsai-pricing-card,.fsai-pricing-proof,.fsai-step,.fsai-about-card,.fsai-audience-card,.fsai-reviews-card,.fsai-cta-card';
         var io = new IntersectionObserver(function (es) {
           es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); } });
         }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
