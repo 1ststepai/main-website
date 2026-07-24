@@ -1,3 +1,6 @@
+import { applyCors } from "../lib/http/cors.js";
+import { fetchWithTimeout } from "../lib/http/fetchWithTimeout.js";
+
 const GOOGLE_PLACE_DETAILS_URL = "https://maps.googleapis.com/maps/api/place/details/json";
 const CACHE_TTL_MS = 12 * 60 * 60 * 1000;
 const FALLBACK_REVIEW_URL = "https://g.page/r/CfdTIVLfW3goEBM/review";
@@ -17,17 +20,21 @@ function sendJson(res, statusCode, payload) {
   res.end(JSON.stringify(payload));
 }
 
-function setCorsHeaders(res) {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+function safeGoogleUrl(value) {
+  try {
+    const url = new URL(value);
+    const hostname = url.hostname.toLowerCase();
+    const allowed = hostname === "g.page" || hostname === "google.com" || hostname.endsWith(".google.com");
+    return url.protocol === "https:" && allowed ? url.toString() : FALLBACK_REVIEW_URL;
+  } catch (error) {
+    return FALLBACK_REVIEW_URL;
+  }
 }
 
 function safeReview(review) {
   return {
     author_name: String(review.author_name || "Google reviewer").slice(0, 80),
-    author_url: review.author_url || "",
-    rating: Number(review.rating || 0),
+    rating: Math.max(0, Math.min(5, Number(review.rating || 0))),
     relative_time_description: String(review.relative_time_description || "").slice(0, 80),
     text: String(review.text || "").slice(0, 700)
   };
@@ -74,7 +81,9 @@ function setCachedData(cacheKey, payload) {
 }
 
 export default async function handler(req, res) {
-  setCorsHeaders(res);
+  if (!applyCors(req, res, { methods: ["GET", "OPTIONS"] })) {
+    return sendJson(res, 403, { ok: false, error: "Origin not allowed" });
+  }
 
   if (req.method === "OPTIONS") {
     return sendJson(res, 200, { ok: true });
@@ -103,7 +112,7 @@ export default async function handler(req, res) {
       key: apiKey
     });
 
-    const response = await fetch(`${GOOGLE_PLACE_DETAILS_URL}?${params.toString()}`);
+    const response = await fetchWithTimeout(`${GOOGLE_PLACE_DETAILS_URL}?${params.toString()}`, {}, 5000);
     const data = await response.json();
 
     if (!response.ok || data.status !== "OK") {
@@ -122,7 +131,7 @@ export default async function handler(req, res) {
       name: result.name || "1stStep.ai",
       rating: result.rating || null,
       review_count: result.user_ratings_total || null,
-      google_url: result.url || FALLBACK_REVIEW_URL,
+      google_url: safeGoogleUrl(result.url),
       reviews: Array.isArray(result.reviews) ? result.reviews.slice(0, 3).map(safeReview) : []
     };
 

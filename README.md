@@ -96,6 +96,19 @@ Build:
 npm run build
 ```
 
+Run the server and API tests:
+
+```bash
+npm test
+```
+
+Run the complete local verification set:
+
+```bash
+npm run check
+npm audit --audit-level=high
+```
+
 Run Vercel functions locally:
 
 ```bash
@@ -103,6 +116,36 @@ npx vercel dev
 ```
 
 The Vite dev server alone does not run `/api/app-idea-checker`.
+
+### Private 1stStep Studio
+
+The owner workspace is available at `/admin/`. It is intentionally absent from
+public navigation and requires the server-backed admin session before loading
+client records.
+
+For a non-persistent local design preview:
+
+```text
+http://127.0.0.1:5173/admin/?preview=1
+```
+
+The preview flag is compiled out of production behavior. Production requires:
+
+- `FIRSTSTEP_ADMIN_PASSWORD` (at least 12 characters)
+- `FIRSTSTEP_ADMIN_SESSION_SECRET` (at least 32 random characters)
+- `KV_REST_API_URL`
+- `KV_REST_API_TOKEN`
+
+Quotes can be previewed and printed or saved as PDF. Agreement structures are
+editable drafting starters and should be reviewed by qualified counsel before
+client use.
+
+Saved quotes can also be sent through the authenticated backend using the
+existing `RESEND_API_KEY`. The sender and Reply-To are fixed to
+`Evan at 1stStep.ai <evan@1ststep.ai>`; recipients come only from the saved
+client attached to the quote. Production delivery requires `1ststep.ai` to be
+verified in Resend. Resend idempotency keys prevent duplicate delivery during
+safe retries.
 
 ## Deployment
 
@@ -121,3 +164,13 @@ Do not commit:
 - `.vercel/`
 - `node_modules/`
 - `dist/`
+
+## Intake Safety
+
+- The checker accepts JSON only, validates a bounded allowlist, rate-limits requests, and restricts browser origins.
+- The browser keeps only a minimized result summary under `appIdeaCheckerLastResponse`; contact details and idea text are not stored in browser storage.
+- A `200` response means at least one delivery path succeeded: KV persistence, Resend notification, or an explicitly enabled webhook.
+- Without a successful delivery path, the endpoint returns `503` and the UI tells the visitor to retry or book directly.
+- `repo_creation_status` remains `locked_until_signed_and_paid`.
+
+See `docs/APP_IDEA_CHECKER_OPERATIONS.md` before changing production environment values.

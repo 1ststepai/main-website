@@ -1,62 +1,32 @@
 # App Idea Checker Webhooks
 
-The backend currently saves and returns the normalized lead/report data. Forwarding hooks are intentionally TODOs so the first production test can prove intake and context-pack generation before adding automations.
-
-## Front-End Hook
-
-`app-idea-viability-checker.html` sends to:
+The checker posts to the same-domain route:
 
 ```js
 webhookUrl: "/api/app-idea-checker"
 ```
 
-The checker is hosted on the Vercel main website. If a separate GHL funnel or landing page ever embeds a copy of the checker on another domain, replace this with the full deployed Vercel endpoint URL:
+The primary site remains on Vercel. If an approved external funnel uses the endpoint, use the full HTTPS URL and add that exact browser origin to `APP_ALLOWED_ORIGINS`.
 
-```js
-webhookUrl: "https://1ststep.ai/api/app-idea-checker"
+## Available destinations
+
+- GoHighLevel
+- Zapier
+- Make.com
+- an owner-approved custom webhook
+- Resend admin notification
+
+Webhook forwarding is disabled unless:
+
+```text
+APP_IDEA_FORWARDING_ENABLED=true
 ```
 
-Do not move the primary main website or checker hosting to GoHighLevel. GHL should receive leads through webhook forwarding and automation only.
+Keep it disabled until the destination, least-privilege access, retention, failure path, and synthetic preview test are approved. Non-HTTPS webhook URLs are rejected outside local development.
 
-## Backend TODO Hooks
+## Safety boundary
 
-The TODO hook block lives in `api/app-idea-checker.js`.
-
-Planned forwarding targets:
-
-- GoHighLevel webhook forwarding
-- Zapier webhook forwarding
-- Make.com webhook forwarding
-- Custom API endpoint forwarding
-- GitHub repo creation later, preferably admin-triggered
-- PDF report generation
-- Admin email notification
-
-## Recommended GHL Fields
-
-- `lead_id`
-- `project_slug`
-- `score`
-- `category`
-- `lead_quality`
-- `idea_type`
-- `audience`
-- `budget`
-- `launch_timeline`
-- `recommended_path`
-
-## Recommended Tags
-
-- `app_idea_checker`
-- `mvp_ready_high`
-- `mvp_ready_medium`
-- `needs_validation`
-- `budget_3k_10k`
-- `budget_10k_plus`
-
-## Security Notes
-
-- Do not log secrets.
-- Do not store API keys in code.
-- Use environment variables for forwarding endpoints.
-- Keep GitHub repo creation out of the default lead-submit path until the intake has been proven.
+- Do not put API keys or webhook URLs in source, logs, screenshots, fixtures, or test output.
+- Never trust a webhook response as proof of downstream CRM persistence without checking the destination.
+- Do not create GitHub repositories from this route. Repo creation remains `locked_until_signed_and_paid`.
+- Do not enable forwarding or send production test communications without explicit approval.

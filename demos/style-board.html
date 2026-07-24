@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>1stStep — Style Lanes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..600&family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;700&family=Archivo:wght@400;600;800;900&display=swap" />
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#101012;color:#e9e7e2;font-family:"Inter",system-ui,sans-serif;padding:34px}
+  .head{max-width:1200px;margin:0 auto 26px}
+  .head h1{font-family:"Inter";font-weight:700;font-size:1.5rem;letter-spacing:-.02em}
+  .head p{color:#9a968f;margin-top:8px;font-size:.95rem;max-width:70ch}
+  .grid{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:22px}
+  .tile{border-radius:16px;overflow:hidden;position:relative;min-height:420px;display:flex;flex-direction:column;
+    box-shadow:0 30px 70px -40px rgba(0,0,0,.8);border:1px solid rgba(255,255,255,.08)}
+  .num{position:absolute;top:14px;right:16px;z-index:5;font-family:"Space Grotesk",monospace;font-size:.8rem;
+    background:rgba(0,0,0,.55);color:#fff;padding:4px 10px;border-radius:999px;letter-spacing:.1em}
+  .cap{padding:14px 18px;background:#17171a;border-top:1px solid rgba(255,255,255,.07)}
+  .cap b{font-size:.95rem}.cap span{display:block;color:#9a968f;font-size:.8rem;margin-top:2px}
+  .pane{flex:1;padding:26px 26px 30px;display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden}
+  .bar{display:flex;align-items:center;gap:14px;position:absolute;top:18px;left:26px;right:26px}
+  .bar .logo{font-weight:700}.bar nav{display:flex;gap:14px;margin-left:auto;font-size:.72rem;opacity:.7}
+  .g{margin-top:16px}
+
+  /* 01 Light Minimal (Apple/Mercury) */
+  .s1{background:#fbfbfd;color:#1d1d1f}
+  .s1 .logo{color:#1d1d1f}.s1 nav{color:#1d1d1f}
+  .s1 h2{font-weight:600;font-size:2.1rem;letter-spacing:-.03em;line-height:1.05;margin-top:34px}
+  .s1 p{color:#6e6e73;margin-top:12px;font-size:.9rem;max-width:34ch}
+  .s1 .btn{margin-top:18px;align-self:flex-start;background:#1d1d1f;color:#fff;padding:11px 20px;border-radius:999px;font-size:.82rem;font-weight:500}
+  .s1 .shot{margin-top:20px;height:70px;border-radius:12px;background:linear-gradient(120deg,#f2f2f4,#e8e8ec);border:1px solid #e2e2e6}
+
+  /* 02 Gradient SaaS (Stripe/Framer) */
+  .s2{background:#ffffff;color:#0a0a23;position:relative}
+  .s2::before{content:"";position:absolute;inset:0;background:
+    radial-gradient(60% 80% at 85% 0%,rgba(120,90,255,.28),transparent 60%),
+    radial-gradient(50% 70% at 10% 100%,rgba(255,120,180,.22),transparent 60%)}
+  .s2 .pane{position:relative;z-index:1}
+  .s2 .logo,.s2 nav{color:#0a0a23}
+  .s2 h2{font-weight:700;font-size:2.05rem;letter-spacing:-.03em;line-height:1.05;margin-top:34px}
+  .s2 h2 em{font-style:normal;background:linear-gradient(90deg,#7a5aff,#ff78b4);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .s2 p{color:#4a4a68;margin-top:12px;font-size:.9rem;max-width:34ch}
+  .s2 .btn{margin-top:18px;align-self:flex-start;background:linear-gradient(90deg,#7a5aff,#5a7bff);color:#fff;padding:12px 22px;border-radius:10px;font-size:.82rem;font-weight:600;box-shadow:0 12px 30px -8px rgba(120,90,255,.6)}
+  .s2 .shot{margin-top:20px;height:64px;border-radius:12px;background:#fff;border:1px solid #ece9ff;box-shadow:0 20px 40px -20px rgba(120,90,255,.4)}
+
+  /* 03 Bold Pop Color (Gumroad/brutalist) */
+  .s3{background:#ffd23f;color:#111}
+  .s3 .logo{font-family:"Archivo";font-weight:900}.s3 nav{color:#111;font-weight:600}
+  .s3 h2{font-family:"Archivo";font-weight:900;font-size:2.2rem;line-height:.98;letter-spacing:-.02em;margin-top:36px;text-transform:uppercase}
+  .s3 p{margin-top:12px;font-size:.9rem;max-width:32ch;font-weight:500}
+  .s3 .btn{margin-top:18px;align-self:flex-start;background:#111;color:#ffd23f;padding:12px 22px;font-weight:800;border:3px solid #111;box-shadow:5px 5px 0 #111;font-family:"Archivo"}
+  .s3 .chips{display:flex;gap:8px;margin-top:18px;flex-wrap:wrap}
+  .s3 .chips span{border:2px solid #111;padding:5px 10px;font-weight:700;font-size:.72rem;background:#fff}
+
+  /* 04 Playful Bento (modern colorful SaaS) */
+  .s4{background:#f4f5f7;color:#141414}
+  .s4 .logo,.s4 nav{color:#141414}
+  .s4 h2{font-family:"Space Grotesk";font-weight:700;font-size:1.9rem;letter-spacing:-.02em;margin-top:34px}
+  .s4 p{color:#5a5a5a;margin-top:10px;font-size:.86rem;max-width:32ch}
+  .s4 .bento{margin-top:18px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .s4 .bento div{height:44px;border-radius:12px}
+  .s4 .b1{background:#c7f0d8}.s4 .b2{background:#d9d2ff}.s4 .b3{background:#ffe0c2}
+  .s4 .b4{background:#cfe6ff}.s4 .b5{background:#ffd6e7}.s4 .b6{background:#e6f0a3}
+  .s4 .btn{margin-top:16px;align-self:flex-start;background:#141414;color:#fff;padding:11px 20px;border-radius:12px;font-weight:600;font-size:.82rem}
+
+  /* 05 Swiss Grid Monochrome */
+  .s5{background:#fff;color:#0d0d0d;background-image:linear-gradient(#eee 1px,transparent 1px),linear-gradient(90deg,#eee 1px,transparent 1px);background-size:40px 40px}
+  .s5 .logo{font-weight:700}.s5 nav{color:#0d0d0d;font-family:"Space Grotesk"}
+  .s5 h2{font-weight:800;font-size:2.2rem;line-height:.98;letter-spacing:-.04em;margin-top:36px;text-transform:uppercase}
+  .s5 .idx{font-family:"Space Grotesk";font-size:.7rem;letter-spacing:.14em;color:#d1442e;margin-top:14px}
+  .s5 p{margin-top:10px;font-size:.86rem;max-width:34ch;color:#333;border-top:2px solid #0d0d0d;padding-top:10px}
+  .s5 .btn{margin-top:16px;align-self:flex-start;background:#0d0d0d;color:#fff;padding:11px 22px;font-weight:600;font-size:.8rem;font-family:"Space Grotesk"}
+
+  /* 06 Warm Editorial (Aesop/luxury) */
+  .s6{background:#efe8db;color:#211d18}
+  .s6 .logo{font-family:"Fraunces";font-weight:600}.s6 nav{color:#6a6156}
+  .s6 h2{font-family:"Fraunces";font-weight:400;font-size:2.2rem;line-height:1.02;letter-spacing:-.01em;margin-top:34px}
+  .s6 h2 em{font-style:italic;color:#b0552f}
+  .s6 p{color:#6a6156;margin-top:12px;font-size:.88rem;max-width:34ch}
+  .s6 .btn{margin-top:18px;align-self:flex-start;border:1px solid #211d18;color:#211d18;padding:11px 22px;font-size:.82rem;letter-spacing:.02em}
+  .s6 .rule{margin-top:18px;height:1px;background:#211d18;opacity:.2}
+
+  @media(max-width:820px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="head">
+  <h1>Pick a lane — which of these feels like <em>your</em> site?</h1>
+  <p>Six completely different directions, all using your real copy. Ignore the exact text/graphics — react to the overall look and personality. Tell me the number(s) you like and the number(s) you hate, and I'll build the real site in that lane.</p>
+</div>
+
+<div class="grid">
+  <!-- 01 -->
+  <div class="tile"><div class="num">01</div>
+    <div class="pane s1">
+      <div class="bar"><span class="logo">1stStep</span><nav><span>Work</span><span>Pricing</span></nav></div>
+      <h2>Build the first useful version of your idea.</h2>
+      <p>Apps, websites, dashboards and automations — scoped small, built to launch.</p>
+      <span class="btn">Check my idea free</span>
+      <div class="shot"></div>
+    </div>
+    <div class="cap"><b>Light Minimal</b><span>Apple / Mercury — white space, clean sans, calm and premium</span></div>
+  </div>
+
+  <!-- 02 -->
+  <div class="tile"><div class="num">02</div>
+    <div class="pane s2">
+      <div class="bar"><span class="logo">1stStep</span><nav><span>Work</span><span>Pricing</span></nav></div>
+      <h2>Build your <em>first useful</em> version.</h2>
+      <p>From rough idea to launched product, without overbuilding.</p>
+      <span class="btn">Check my idea free</span>
+      <div class="shot"></div>
+    </div>
+    <div class="cap"><b>Gradient SaaS</b><span>Stripe / Framer — light with soft color gradients, modern and techy</span></div>
+  </div>
+
+  <!-- 03 -->
+  <div class="tile"><div class="num">03</div>
+    <div class="pane s3">
+      <div class="bar"><span class="logo">1stStep</span><nav><span>WORK</span><span>PRICING</span></nav></div>
+      <h2>Ship the right<br>first version.</h2>
+      <p>Apps, MVPs, websites & automations built to launch fast.</p>
+      <span class="btn">CHECK MY IDEA</span>
+      <div class="chips"><span>Apps</span><span>MVPs</span><span>Websites</span></div>
+    </div>
+    <div class="cap"><b>Bold Pop Color</b><span>Gumroad / brutalist — bright, chunky, confident, high-energy</span></div>
+  </div>
+
+  <!-- 04 -->
+  <div class="tile"><div class="num">04</div>
+    <div class="pane s4">
+      <div class="bar"><span class="logo">1stStep</span><nav><span>Work</span><span>Pricing</span></nav></div>
+      <h2>Build the first useful version.</h2>
+      <p>Practical software for founders and operators.</p>
+      <div class="bento"><div class="b1"></div><div class="b2"></div><div class="b3"></div><div class="b4"></div><div class="b5"></div><div class="b6"></div></div>
+      <span class="btn">Check my idea free</span>
+    </div>
+    <div class="cap"><b>Playful Bento</b><span>Modern colorful SaaS — friendly rounded cards, soft pastels</span></div>
+  </div>
+
+  <!-- 05 -->
+  <div class="tile"><div class="num">05</div>
+    <div class="pane s5">
+      <div class="bar"><span class="logo">1stStep</span><nav><span>Work</span><span>Pricing</span></nav></div>
+      <div class="idx">01 — PRODUCT STUDIO</div>
+      <h2>The right first version.</h2>
+      <p>Apps, MVPs, websites and automations, engineered to launch.</p>
+      <span class="btn">Check my idea</span>
+    </div>
+    <div class="cap"><b>Swiss Grid</b><span>Editorial-technical — grid lines, big type, one sharp accent</span></div>
+  </div>
+
+  <!-- 06 -->
+  <div class="tile"><div class="num">06</div>
+    <div class="pane s6">
+      <div class="bar"><span class="logo">1stStep</span><nav><span>Work</span><span>Pricing</span></nav></div>
+      <h2>The right <em>first version</em> of your idea.</h2>
+      <p>Rough ideas, engineered into software that launches and improves.</p>
+      <span class="btn">Check my idea free</span>
+      <div class="rule"></div>
+    </div>
+    <div class="cap"><b>Warm Editorial</b><span>Aesop / luxury — cream tones, serif, refined and human</span></div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Request a Website Fit Check | 1stStep.ai</title>
+  <meta name="description" content="Share your website, timeline, and budget range for a quick project-fit review before booking a full Website Strategy Call." />
+  <link rel="canonical" href="https://www.1ststep.ai/fit-check/" />
+  <meta name="robots" content="index,follow,max-image-preview:large" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="1stStep.ai" />
+  <meta property="og:title" content="Request a Website Fit Check | 1stStep.ai" />
+  <meta property="og:description" content="A lighter first step for established businesses considering a custom website rebuild." />
+  <meta property="og:url" content="https://www.1ststep.ai/fit-check/" />
+  <meta property="og:image" content="https://www.1ststep.ai/assets/banner-1ststep-og.png" />
+  <meta name="theme-color" content="#070912" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" />
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <style>
+    :root{
+      color-scheme:dark;--bg:#070912;--panel:#0e1120;--ink:#f7f8ff;--muted:#aeb4c9;
+      --line:rgba(255,255,255,.11);--violet:#8b7cff;--blue:#4f8cff;--cyan:#56ddff;
+      --grad:linear-gradient(100deg,#8b7cff 0%,#4f8cff 52%,#56ddff 100%);
+      font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+    }
+    *{box-sizing:border-box}
+    body{
+      min-width:320px;min-height:100vh;margin:0;color:var(--ink);background:
+        radial-gradient(48% 36% at 91% 3%,rgba(103,84,255,.2),transparent 67%),
+        radial-gradient(38% 31% at 3% 12%,rgba(54,175,255,.12),transparent 72%),
+        linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px),var(--bg);
+      background-size:auto,auto,48px 48px,48px 48px,auto;-webkit-font-smoothing:antialiased;
+    }
+    a{color:inherit}.wrap{width:min(1120px,calc(100% - 48px));margin:0 auto}
+    .nav{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:18px 0;border-bottom:1px solid var(--line)}
+    .brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none;font:700 18px "Space Grotesk",sans-serif}
+    .brand img{width:28px;height:28px;object-fit:contain}.back{color:var(--muted);text-decoration:none;font-size:14px;font-weight:600}
+    .layout{display:grid;grid-template-columns:minmax(0,.92fr) minmax(420px,.78fr);gap:52px;align-items:center;padding:78px 0 86px}
+    .eyebrow{margin:0 0 17px;color:#9d91ff;font:700 11px/1.2 "Space Grotesk",sans-serif;letter-spacing:.15em;text-transform:uppercase}
+    h1{max-width:10ch;margin:0 0 23px;font:700 clamp(48px,6.5vw,82px)/.95 "Space Grotesk",sans-serif;letter-spacing:-.06em}
+    .gradient{background:linear-gradient(100deg,#b39cff,#79a7ff 54%,#65e7ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+    .lede{max-width:590px;margin:0;color:#bdc3d7;font-size:18px;line-height:1.72}
+    .signal{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:34px}
+    .signal div{padding:16px;border:1px solid var(--line);border-radius:15px;background:rgba(255,255,255,.03)}
+    .signal strong{display:block;margin-bottom:5px;color:#fff;font-size:13px}.signal span{color:#8992aa;font-size:11px;line-height:1.45}
+    .form-card{position:relative;padding:34px;border:1px solid rgba(255,255,255,.15);border-radius:28px;background:linear-gradient(155deg,rgba(18,22,39,.98),rgba(9,12,22,.98));box-shadow:0 48px 110px -58px rgba(79,140,255,.75)}
+    .form-card::before{content:"";position:absolute;inset:-1px;border-radius:inherit;padding:1px;background:linear-gradient(135deg,rgba(139,124,255,.65),transparent 42%,rgba(86,221,255,.34));-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;pointer-events:none}
+    h2{margin:0 0 8px;font:700 28px "Space Grotesk",sans-serif;letter-spacing:-.04em}.form-intro{margin:0 0 25px;color:var(--muted);font-size:14px;line-height:1.6}
+    form{display:grid;gap:17px}.field{display:grid;gap:8px}.field label{font-size:12px;font-weight:700;color:#e5e8f5}
+    input,select{width:100%;min-height:50px;border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:0 14px;background:#0a0d18;color:#fff;font:500 15px Inter,sans-serif;outline:none}
+    input:focus,select:focus{border-color:#69baff;box-shadow:0 0 0 3px rgba(79,140,255,.15)}
+    select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,#8d96ad 50%),linear-gradient(135deg,#8d96ad 50%,transparent 50%);background-position:calc(100% - 19px) 21px,calc(100% - 14px) 21px;background-size:5px 5px;background-repeat:no-repeat}
+    .submit{min-height:52px;border:0;border-radius:999px;background:var(--grad);color:#fff;font:700 14px Inter,sans-serif;cursor:pointer;box-shadow:0 20px 42px -21px rgba(79,140,255,.9)}
+    .submit:disabled{cursor:wait;opacity:.65}.privacy{margin:0;color:#747e97;font-size:11px;line-height:1.5;text-align:center}
+    .status{display:none;margin:0;padding:13px 14px;border-radius:12px;font-size:13px;line-height:1.5}.status[data-state="error"]{display:block;border:1px solid rgba(255,93,118,.28);background:rgba(255,93,118,.08);color:#ffb8c3}.status[data-state="success"]{display:block;border:1px solid rgba(86,221,255,.26);background:rgba(86,221,255,.07);color:#bcf4ff}
+    .or{margin:20px 0 0;text-align:center;color:#747e97;font-size:12px}.or a{color:#b7c8ff;font-weight:700;text-decoration:none}.legal{display:flex;justify-content:space-between;gap:20px;padding:24px 0 32px;border-top:1px solid var(--line);color:#747e97;font-size:12px}.legal nav{display:flex;gap:18px}
+    :where(a,button,input,select):focus-visible{outline:3px solid var(--cyan);outline-offset:3px}
+    @media(max-width:860px){.layout{grid-template-columns:1fr;gap:34px;padding:48px 0 62px}.copy{text-align:center}.copy h1,.lede{margin-left:auto;margin-right:auto}}
+    @media(max-width:600px){.wrap{width:calc(100% - 28px)}.nav{padding:14px 0}.layout{padding:32px 0 44px}.back{font-size:12px}h1{font-size:clamp(46px,15vw,65px)}.signal{grid-template-columns:1fr}.form-card{padding:26px 19px;border-radius:22px}.legal{align-items:flex-start;flex-direction:column}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}
+  </style>
+</head>
+<body data-fsai-page-event="fit_check_view" data-fsai-audience="website_rebuild">
+  <header class="wrap nav">
+    <a class="brand" href="/" aria-label="1stStep.ai home"><img src="/assets/firststep-logo-transparent-cleaned.png" alt=""><span>1stStep.ai</span></a>
+    <a class="back" href="/#portfolio">&larr; View website work</a>
+  </header>
+
+  <main class="wrap layout">
+    <section class="copy" aria-labelledby="fit-title">
+      <p class="eyebrow">A lighter first step</p>
+      <h1 id="fit-title">Is your website a <span class="gradient">strong fit?</span></h1>
+      <p class="lede">Share four details and I&rsquo;ll review the gap between the website you have and the business you&rsquo;re building. If the project looks aligned, I&rsquo;ll reply with the clearest next step.</p>
+      <div class="signal" aria-label="What the fit check covers">
+        <div><strong>Positioning</strong><span>Does the site match the quality of your business?</span></div>
+        <div><strong>Opportunity</strong><span>Where is the clearest experience or trust gap?</span></div>
+        <div><strong>Fit</strong><span>Do scope, timing, and investment align?</span></div>
+      </div>
+    </section>
+
+    <section class="form-card" aria-labelledby="form-title">
+      <h2 id="form-title">Request a Fit Check</h2>
+      <p class="form-intro">No long questionnaire. No obligation. Just enough context for a useful first look.</p>
+      <form id="fit-check-form">
+        <div class="field">
+          <label for="website-url">Current website URL</label>
+          <input id="website-url" name="website_url" type="text" inputmode="url" autocomplete="url" placeholder="yourwebsite.com" maxlength="500" required>
+        </div>
+        <div class="field">
+          <label for="email">Your email</label>
+          <input id="email" name="email" type="email" autocomplete="email" placeholder="you@company.com" maxlength="254" required>
+        </div>
+        <div class="field">
+          <label for="timeline">Ideal timeline</label>
+          <select id="timeline" name="timeline" required>
+            <option value="" selected disabled>Select a timeline</option>
+            <option value="asap">As soon as possible</option>
+            <option value="1-2-months">Within 1–2 months</option>
+            <option value="3-6-months">Within 3–6 months</option>
+            <option value="flexible">Flexible / exploring</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="budget-range">Working budget range</label>
+          <select id="budget-range" name="budget_range" required>
+            <option value="" selected disabled>Select a range</option>
+            <option value="under-5k">Under $5,000</option>
+            <option value="5k-10k">$5,000–$10,000</option>
+            <option value="10k-25k">$10,000–$25,000</option>
+            <option value="25k-plus">$25,000+</option>
+            <option value="not-sure">Not sure yet</option>
+          </select>
+        </div>
+        <p class="status" id="form-status" role="status" aria-live="polite"></p>
+        <button class="submit" type="submit">Request My Fit Check &rarr;</button>
+        <p class="privacy">Your details are used only to respond to this request. No newsletter signup.</p>
+      </form>
+      <p class="or">Already ready to talk? <a href="/book/" data-fsai-placement="fit_check">Book a Website Strategy Call</a></p>
+    </section>
+  </main>
+
+  <footer class="wrap legal">
+    <span>&copy; 2026 1stStep.ai. Built by Evan Pancis.</span>
+    <nav aria-label="Legal links"><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></nav>
+  </footer>
+
+  <script type="module" src="/src/site-analytics.js"></script>
+  <script type="module">
+    const form = document.querySelector("#fit-check-form");
+    const status = document.querySelector("#form-status");
+    const button = form.querySelector("button[type='submit']");
+    let started = false;
+
+    form.addEventListener("input", () => {
+      if (!started) {
+        started = true;
+        window.fsaiTrack?.("fit_check_start");
+      }
+    });
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      status.removeAttribute("data-state");
+      status.textContent = "";
+      button.disabled = true;
+      button.textContent = "Sending…";
+
+      const data = new FormData(form);
+      const payload = {
+        website_url: data.get("website_url"),
+        email: data.get("email"),
+        timeline: data.get("timeline"),
+        budget_range: data.get("budget_range"),
+        attribution: window.fsaiAttribution?.get?.() || {},
+      };
+
+      try {
+        const response = await fetch("/api/fit-check", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Idempotency-Key": `fit:${crypto.randomUUID()}`,
+          },
+          body: JSON.stringify(payload),
+        });
+        const result = await response.json();
+        if (!response.ok || !result.ok) throw new Error(result.message || "Please try again.");
+
+        form.reset();
+        status.dataset.state = "success";
+        status.textContent = "Request received. I’ll review your website and reply by email with the clearest next step.";
+        window.fsaiTrack?.("fit_check_submitted", { timeline: payload.timeline, budget: payload.budget_range });
+      } catch (error) {
+        status.dataset.state = "error";
+        status.textContent = error.message || "Your request could not be sent. Please try again or book a call.";
+        window.fsaiTrack?.("fit_check_error");
+      } finally {
+        button.disabled = false;
+        button.textContent = "Request My Fit Check →";
+      }
+    });
+  </script>
+</body>
+</html>

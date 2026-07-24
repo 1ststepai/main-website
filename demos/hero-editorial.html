@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Concept B — Kinetic Editorial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" />
+<style>
+  :root{
+    --paper:#f2ede3; --paper-2:#eae3d5; --ink:#171412; --muted:#6f665a; --line:#171412;
+    --accent:#cf4a24; --accent-soft:#e9d9c8;
+    --sans:"Inter",system-ui,sans-serif; --serif:"Fraunces",Georgia,serif; --mono:"JetBrains Mono",monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans);overflow-x:hidden;
+    background-image:radial-gradient(rgba(23,20,18,.035) 1px,transparent 1px);background-size:26px 26px}
+  .noise{position:fixed;inset:0;pointer-events:none;opacity:.35;mix-blend-mode:multiply;z-index:1;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E")}
+  .wrap{position:relative;z-index:2;width:min(1240px,calc(100% - 56px));margin:0 auto}
+  .top{display:flex;align-items:center;justify-content:space-between;padding:26px 0;
+    border-bottom:1px solid rgba(23,20,18,.16)}
+  .brand{font-family:var(--serif);font-size:1.2rem;font-weight:500}
+  .brand b{color:var(--accent)}
+  .navlinks{display:flex;gap:28px;font-size:.82rem;letter-spacing:.02em}
+  .navlinks a{color:var(--ink);text-decoration:none;position:relative}
+  .navlinks a::after{content:"";position:absolute;left:0;bottom:-4px;width:100%;height:1px;background:var(--accent);
+    transform:scaleX(0);transform-origin:left;transition:transform .35s cubic-bezier(.2,.7,.2,1)}
+  .navlinks a:hover::after{transform:scaleX(1)}
+  .book{font-family:var(--mono);font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;
+    border:1px solid var(--ink);padding:9px 16px;text-decoration:none;color:var(--ink);transition:.3s}
+  .book:hover{background:var(--ink);color:var(--paper)}
+  .hero{display:grid;grid-template-columns:1.02fr .98fr;gap:40px;align-items:center;
+    padding:clamp(30px,6vw,74px) 0 40px;min-height:calc(100vh - 90px)}
+  .eyebrow{font-family:var(--mono);font-size:.72rem;letter-spacing:.28em;text-transform:uppercase;color:var(--accent);
+    display:flex;align-items:center;gap:12px;margin-bottom:26px}
+  .eyebrow span{width:34px;height:1px;background:var(--accent)}
+  h1{font-family:var(--serif);font-weight:300;font-size:clamp(2.9rem,6.4vw,5.6rem);line-height:.96;
+    letter-spacing:-.025em}
+  h1 .r{overflow:hidden;display:block}
+  h1 .r>span{display:block;transform:translateY(106%);animation:rv 1s cubic-bezier(.2,.75,.2,1) forwards}
+  h1 .r2>span{animation-delay:.1s}h1 .r3>span{animation-delay:.2s}
+  h1 em{font-style:italic;color:var(--accent);font-weight:400}
+  .sub{margin-top:28px;max-width:42ch;color:var(--muted);font-size:clamp(1.02rem,1.4vw,1.16rem);line-height:1.6;
+    opacity:0;animation:fade 1s .55s forwards}
+  .cta{display:flex;gap:14px;margin-top:34px;flex-wrap:wrap;opacity:0;animation:fade 1s .7s forwards}
+  .btn{position:relative;display:inline-flex;align-items:center;gap:9px;padding:15px 26px;font-size:.92rem;
+    font-weight:500;text-decoration:none;cursor:pointer;border:1px solid var(--ink);
+    transition:transform .25s cubic-bezier(.2,.7,.2,1),background .3s,color .3s;will-change:transform}
+  .btn-primary{background:var(--ink);color:var(--paper)}
+  .btn-primary:hover{background:var(--accent);border-color:var(--accent)}
+  .btn-ghost{background:transparent;color:var(--ink)}
+  .btn-ghost:hover{background:var(--ink);color:var(--paper)}
+  .figure{position:relative;aspect-ratio:1/1;opacity:0;animation:fade 1.2s .3s forwards}
+  .figure svg{width:100%;height:100%;overflow:visible}
+  .idx{position:absolute;left:0;bottom:26px;font-family:var(--mono);font-size:.66rem;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--muted)}
+  .idx b{color:var(--accent)}
+  .marquee{position:relative;z-index:2;border-top:1px solid rgba(23,20,18,.16);border-bottom:1px solid rgba(23,20,18,.16);
+    overflow:hidden;white-space:nowrap;padding:16px 0;margin-top:8px}
+  .marquee div{display:inline-block;animation:scroll 26s linear infinite;font-family:var(--serif);
+    font-size:1.5rem;font-style:italic}
+  .marquee span{padding:0 30px;color:var(--ink)}
+  .marquee b{color:var(--accent);font-style:normal;font-family:var(--mono);font-size:.9rem;letter-spacing:.1em}
+  .path{fill:none;stroke:var(--ink);stroke-width:1.5;stroke-dasharray:var(--len);stroke-dashoffset:var(--len);
+    animation:draw 1.6s .4s cubic-bezier(.4,0,.2,1) forwards}
+  .node{opacity:0;animation:pop .5s forwards}
+  .node rect{fill:var(--paper);stroke:var(--ink);stroke-width:1.5}
+  .node .accentbar{fill:var(--accent)}
+  .node text{font-family:var(--mono);font-size:11px;fill:var(--ink);letter-spacing:.06em}
+  .node small{font-family:var(--mono)}
+  .pulse{fill:var(--accent)}
+  @keyframes rv{to{transform:none}}
+  @keyframes fade{to{opacity:1}}
+  @keyframes draw{to{stroke-dashoffset:0}}
+  @keyframes pop{to{opacity:1}}
+  @keyframes scroll{to{transform:translateX(-50%)}}
+  @media(max-width:860px){.hero{grid-template-columns:1fr}.figure{max-width:440px;margin:10px auto 0}.navlinks{display:none}}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important}h1 .r>span,.sub,.cta,.figure{opacity:1;transform:none}.path{stroke-dashoffset:0}.node{opacity:1}}
+</style>
+</head>
+<body>
+<div class="noise"></div>
+<div class="wrap">
+  <div class="top">
+    <div class="brand">1st<b>Step</b></div>
+    <nav class="navlinks">
+      <a href="#">Services</a><a href="#">Work</a><a href="#">Process</a><a href="#">Pricing</a>
+    </nav>
+    <a class="book" href="#">Book a call</a>
+  </div>
+
+  <section class="hero">
+    <div class="copy">
+      <div class="eyebrow"><span></span>Product Studio · Built by hand</div>
+      <h1>
+        <span class="r r1"><span>The right</span></span>
+        <span class="r r2"><span><em>first version</em></span></span>
+        <span class="r r3"><span>of your idea.</span></span>
+      </h1>
+      <p class="sub">We turn rough ideas and manual workflows into practical apps, websites, dashboards, and automations — scoped small, built to launch, designed to improve.</p>
+      <div class="cta">
+        <a class="btn btn-primary" href="#">Check My Idea Free →</a>
+        <a class="btn btn-ghost" href="#">See the Work</a>
+      </div>
+    </div>
+
+    <div class="figure" id="fig">
+      <svg id="diagram" viewBox="0 0 460 460" aria-hidden="true">
+        <g id="wires"></g>
+        <g id="nodes"></g>
+        <g id="pulses"></g>
+      </svg>
+      <div class="idx">Concept B — <b>Living Wiring Diagram</b> · watch the signals</div>
+    </div>
+  </section>
+</div>
+
+<div class="marquee">
+  <div>
+    <span>Apps</span><b>/</b><span>MVPs</span><b>/</b><span>Websites</span><b>/</b><span>Dashboards</span><b>/</b><span>Automations</span><b>/</b><span>Internal Tools</span><b>/</b>
+    <span>Apps</span><b>/</b><span>MVPs</span><b>/</b><span>Websites</span><b>/</b><span>Dashboards</span><b>/</b><span>Automations</span><b>/</b><span>Internal Tools</span><b>/</b>
+  </div>
+</div>
+
+<script>
+(function(){
+  var svgNS='http://www.w3.org/2000/svg';
+  var wires=document.getElementById('wires'),nodes=document.getElementById('nodes'),pulses=document.getElementById('pulses');
+  var reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+  // node definitions: label, x, y (top-left of 120x54 module)
+  var defs=[
+    {id:'idea', l:'IDEA',    s:'rough input', x:20,  y:40},
+    {id:'scope',l:'SCOPE',   s:'cut to core', x:270, y:20},
+    {id:'build',l:'BUILD',   s:'ship v1',     x:280, y:210},
+    {id:'launch',l:'LAUNCH', s:'measure',     x:40,  y:250},
+    {id:'loop', l:'IMPROVE', s:'iterate',     x:160, y:390}
+  ];
+  var NW=140,NH=56;
+  function center(d){return {x:d.x+NW/2,y:d.y+NH/2};}
+  // wires connect sequential + loop back
+  var links=[['idea','scope'],['scope','build'],['build','launch'],['launch','loop'],['loop','idea']];
+
+  // draw nodes
+  defs.forEach(function(d,i){
+    var g=document.createElementNS(svgNS,'g');g.setAttribute('class','node');
+    g.style.animationDelay=(0.5+i*0.12)+'s';
+    var r=document.createElementNS(svgNS,'rect');
+    r.setAttribute('x',d.x);r.setAttribute('y',d.y);r.setAttribute('width',NW);r.setAttribute('height',NH);r.setAttribute('rx',3);
+    var bar=document.createElementNS(svgNS,'rect');bar.setAttribute('class','accentbar');
+    bar.setAttribute('x',d.x);bar.setAttribute('y',d.y);bar.setAttribute('width',5);bar.setAttribute('height',NH);
+    var num=document.createElementNS(svgNS,'text');num.setAttribute('x',d.x+NW-14);num.setAttribute('y',d.y+18);
+    num.setAttribute('text-anchor','end');num.setAttribute('fill','#cf4a24');num.textContent='0'+(i+1);
+    var t1=document.createElementNS(svgNS,'text');t1.setAttribute('x',d.x+16);t1.setAttribute('y',d.y+26);
+    t1.setAttribute('font-size','13');t1.textContent=d.l;
+    var t2=document.createElementNS(svgNS,'text');t2.setAttribute('x',d.x+16);t2.setAttribute('y',d.y+43);
+    t2.setAttribute('fill','#6f665a');t2.setAttribute('font-size','9.5');t2.textContent=d.s;
+    g.appendChild(r);g.appendChild(bar);g.appendChild(num);g.appendChild(t1);g.appendChild(t2);
+    nodes.appendChild(g);
+  });
+
+  function nodeById(id){return defs.filter(function(d){return d.id===id;})[0];}
+  // orthogonal-ish path between node centers (curved elbow)
+  var pathEls=[];
+  links.forEach(function(lk,i){
+    var a=center(nodeById(lk[0])),b=center(nodeById(lk[1]));
+    var mx=(a.x+b.x)/2;
+    var dd='M '+a.x+' '+a.y+' C '+mx+' '+a.y+' '+mx+' '+b.y+' '+b.x+' '+b.y;
+    var p=document.createElementNS(svgNS,'path');p.setAttribute('d',dd);p.setAttribute('class','path');
+    wires.appendChild(p);
+    var len=p.getTotalLength();p.style.setProperty('--len',len);
+    p.style.animationDelay=(0.4+i*0.12)+'s';
+    pathEls.push({el:p,len:len});
+  });
+
+  // traveling pulses
+  if(!reduce){
+    var dots=[];
+    pathEls.forEach(function(pp,i){
+      for(var k=0;k<2;k++){
+        var c=document.createElementNS(svgNS,'circle');c.setAttribute('r',3.4);c.setAttribute('class','pulse');
+        pulses.appendChild(c);
+        dots.push({el:c,path:pp,prog:Math.random(),speed:0.0016+Math.random()*0.0012});
+      }
+    });
+    var start=null;
+    function anim(ts){
+      if(!start)start=ts;
+      dots.forEach(function(dt){
+        dt.prog+=dt.speed;if(dt.prog>1)dt.prog-=1;
+        var pt=dt.path.el.getPointAtLength(dt.prog*dt.path.len);
+        dt.el.setAttribute('cx',pt.x);dt.el.setAttribute('cy',pt.y);
+        dt.el.setAttribute('opacity',0.35+0.65*Math.sin(dt.prog*Math.PI));
+      });
+      requestAnimationFrame(anim);
+    }
+    // delay pulses until wires drawn
+    setTimeout(function(){requestAnimationFrame(anim);},1600);
+  }
+
+  // parallax on cursor
+  var fig=document.getElementById('fig'),dia=document.getElementById('diagram');
+  if(!reduce)window.addEventListener('mousemove',function(e){
+    var r=fig.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;
+    var rx=(e.clientY-cy)/r.height*-6,ry=(e.clientX-cx)/r.width*6;
+    dia.style.transform='perspective(900px) rotateX('+rx+'deg) rotateY('+ry+'deg)';
+  });
+
+  // magnetic buttons
+  document.querySelectorAll('.btn').forEach(function(b){
+    b.addEventListener('mousemove',function(e){var r=b.getBoundingClientRect();
+      b.style.transform='translate('+((e.clientX-r.left-r.width/2)*0.25)+'px,'+((e.clientY-r.top-r.height/2)*0.4)+'px)';});
+    b.addEventListener('mouseleave',function(){b.style.transform='';});
+  });
+})();
+</script>
+</body>
+</html>

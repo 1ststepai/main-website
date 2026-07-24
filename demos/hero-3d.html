@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Concept C — WebGL Showpiece</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..500&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" />
+<style>
+  :root{
+    --bg:#060708; --ink:#f1efe8; --muted:#8f8b82; --gold:#e0b25c; --cyan:#69c7d6;
+    --sans:"Inter",system-ui,sans-serif; --serif:"Fraunces",Georgia,serif; --mono:"JetBrains Mono",monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);overflow:hidden}
+  #gl{position:fixed;inset:0;display:block;z-index:0;cursor:grab}
+  #gl.grabbing{cursor:grabbing}
+  .vignette{position:fixed;inset:0;pointer-events:none;z-index:1;
+    background:radial-gradient(130% 100% at 50% 45%,transparent 42%,rgba(0,0,0,.72) 100%)}
+  .grain{position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.045;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+  .wrap{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;
+    width:min(1220px,calc(100% - 56px));margin:0 auto;pointer-events:none}
+  .top{display:flex;align-items:center;justify-content:space-between;padding:28px 0}
+  .brand{font-family:var(--serif);font-size:1.15rem}.brand b{color:var(--gold);font-weight:500}
+  .navlinks{display:flex;gap:26px;font-size:.86rem;color:var(--muted);pointer-events:auto}
+  .navlinks a{color:inherit;text-decoration:none;transition:.3s}.navlinks a:hover{color:var(--ink)}
+  .center{flex:1;display:flex;flex-direction:column;justify-content:center}
+  .eyebrow{font-family:var(--mono);font-size:.72rem;letter-spacing:.34em;text-transform:uppercase;color:var(--gold);
+    display:flex;align-items:center;gap:12px;margin-bottom:24px;opacity:0;transform:translateY(14px);animation:rise .9s .1s forwards}
+  .eyebrow::before{content:"";width:34px;height:1px;background:var(--gold);opacity:.6}
+  h1{font-family:var(--serif);font-weight:300;font-size:clamp(2.7rem,7vw,6rem);line-height:.98;letter-spacing:-.03em;max-width:15ch}
+  h1 .line{display:block;overflow:hidden}
+  h1 .line>span{display:block;transform:translateY(106%);animation:reveal 1s cubic-bezier(.2,.75,.2,1) forwards}
+  h1 .l2>span{animation-delay:.1s}
+  .rot{color:var(--gold);font-style:italic}
+  .rot em{font-style:italic;transition:opacity .5s}
+  p.sub{margin-top:26px;max-width:44ch;color:var(--muted);font-size:clamp(1rem,1.4vw,1.16rem);line-height:1.6;
+    opacity:0;transform:translateY(14px);animation:rise .9s .5s forwards;text-shadow:0 2px 30px rgba(0,0,0,.6)}
+  .cta{display:flex;gap:14px;margin-top:34px;pointer-events:auto;flex-wrap:wrap;opacity:0;transform:translateY(14px);animation:rise .9s .65s forwards}
+  .btn{position:relative;display:inline-flex;align-items:center;gap:9px;padding:15px 26px;border-radius:2px;font-size:.92rem;
+    font-weight:500;text-decoration:none;color:inherit;cursor:pointer;
+    transition:transform .25s cubic-bezier(.2,.7,.2,1),background .3s,border-color .3s;will-change:transform}
+  .btn-primary{background:var(--ink);color:#0a0a0b;border:1px solid var(--ink)}.btn-primary:hover{background:#fff}
+  .btn-ghost{border:1px solid rgba(241,239,232,.22)}.btn-ghost:hover{border-color:var(--gold)}
+  .foot{display:flex;justify-content:space-between;align-items:flex-end;padding:24px 0 30px;
+    font-family:var(--mono);font-size:.66rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);opacity:0;animation:rise 1s 1s forwards}
+  .foot b{color:var(--gold);font-weight:500}
+  .hint{display:flex;align-items:center;gap:10px}
+  .hint i{width:26px;height:26px;border:1px solid rgba(241,239,232,.25);border-radius:50%;display:grid;place-items:center;color:var(--gold)}
+  #loading{position:fixed;inset:0;z-index:5;display:grid;place-items:center;background:var(--bg);
+    font-family:var(--mono);font-size:.72rem;letter-spacing:.3em;text-transform:uppercase;color:var(--muted);transition:opacity .6s}
+  #loading.hide{opacity:0;pointer-events:none}
+  #fallback{position:fixed;inset:0;z-index:4;display:none;place-items:center;text-align:center;padding:40px;
+    font-family:var(--mono);color:var(--muted);font-size:.85rem;line-height:1.8}
+  @keyframes reveal{to{transform:none}}@keyframes rise{to{opacity:1;transform:none}}
+  @media(max-width:640px){.navlinks,.foot .hint{display:none}}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important}h1 .line>span,.eyebrow,p.sub,.cta,.foot{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<canvas id="gl"></canvas>
+<div class="vignette"></div><div class="grain"></div>
+<div id="loading">Compiling shaders</div>
+<div id="fallback">WebGL isn’t available in this browser.<br>The interactive graphic needs hardware acceleration.</div>
+<div class="wrap">
+  <div class="top">
+    <div class="brand">1st<b>Step</b></div>
+    <nav class="navlinks"><a href="#">Services</a><a href="#">Work</a><a href="#">Process</a><a href="#">Pricing</a></nav>
+  </div>
+  <div class="center">
+    <div class="eyebrow">Product Studio — Real-time WebGL</div>
+    <h1>
+      <span class="line l1"><span>Build the first</span></span>
+      <span class="line l2"><span>useful <span class="rot"><em id="rot">system.</em></span></span></span>
+    </h1>
+    <p class="sub">Rough ideas and manual workflows, engineered into practical software that launches, converts, and improves. This whole scene is running live in your browser — that’s the kind of build you get.</p>
+    <div class="cta">
+      <a class="btn btn-primary" href="#">Check My Idea Free →</a>
+      <a class="btn btn-ghost" href="#">Book a Build Call</a>
+    </div>
+  </div>
+  <div class="foot">
+    <div class="hint"><i>✦</i> Drag to rotate · move cursor · click to pulse</div>
+    <div>Concept C — <b>Interactive WebGL Particle Field</b></div>
+  </div>
+</div>
+
+<script type="module">
+import * as THREE from 'three';
+
+const canvas = document.getElementById('gl');
+const loading = document.getElementById('loading');
+const fallback = document.getElementById('fallback');
+const reduce = matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+let renderer;
+try {
+  renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true, powerPreference:'high-performance' });
+} catch(e){ loading.classList.add('hide'); fallback.style.display='grid'; }
+
+if (renderer) {
+  const DPR = Math.min(window.devicePixelRatio||1, 2);
+  renderer.setPixelRatio(DPR);
+  renderer.setSize(innerWidth, innerHeight);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(45, innerWidth/innerHeight, 0.1, 100);
+  camera.position.set(0, 0, 8.4);
+
+  // ---- particle sphere (fibonacci) ----
+  const COUNT = Math.min(26000, Math.floor((innerWidth*innerHeight)/70));
+  const positions = new Float32Array(COUNT*3);
+  const rnd = new Float32Array(COUNT);
+  const R = 2.55;
+  for (let i=0;i<COUNT;i++){
+    const t = i/COUNT;
+    const inc = Math.acos(1 - 2*t);
+    const az = Math.PI * (1 + Math.sqrt(5)) * i;
+    positions[i*3]   = R*Math.sin(inc)*Math.cos(az);
+    positions[i*3+1] = R*Math.sin(inc)*Math.sin(az);
+    positions[i*3+2] = R*Math.cos(inc);
+    rnd[i] = Math.random();
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(positions,3));
+  geo.setAttribute('aRnd', new THREE.BufferAttribute(rnd,1));
+
+  const uniforms = {
+    uTime:{value:0}, uPixel:{value:DPR}, uSize:{value:15.0},
+    uMouse:{value:new THREE.Vector3(0,0,0)}, uBurst:{value:0},
+    uColA:{value:new THREE.Color('#f4efe6')}, uColB:{value:new THREE.Color('#e0b25c')}, uColC:{value:new THREE.Color('#69c7d6')}
+  };
+
+  const snoise = `
+  vec3 mod289(vec3 x){return x-floor(x*(1.0/289.0))*289.0;}
+  vec4 mod289(vec4 x){return x-floor(x*(1.0/289.0))*289.0;}
+  vec4 permute(vec4 x){return mod289(((x*34.0)+1.0)*x);}
+  vec4 taylorInvSqrt(vec4 r){return 1.79284291400159-0.85373472095314*r;}
+  float snoise(vec3 v){
+    const vec2 C=vec2(1.0/6.0,1.0/3.0);const vec4 D=vec4(0.0,0.5,1.0,2.0);
+    vec3 i=floor(v+dot(v,C.yyy));vec3 x0=v-i+dot(i,C.xxx);
+    vec3 g=step(x0.yzx,x0.xyz);vec3 l=1.0-g;vec3 i1=min(g.xyz,l.zxy);vec3 i2=max(g.xyz,l.zxy);
+    vec3 x1=x0-i1+C.xxx;vec3 x2=x0-i2+C.yyy;vec3 x3=x0-D.yyy;
+    i=mod289(i);
+    vec4 p=permute(permute(permute(i.z+vec4(0.0,i1.z,i2.z,1.0))+i.y+vec4(0.0,i1.y,i2.y,1.0))+i.x+vec4(0.0,i1.x,i2.x,1.0));
+    float n_=0.142857142857;vec3 ns=n_*D.wyz-D.xzx;
+    vec4 j=p-49.0*floor(p*ns.z*ns.z);
+    vec4 x_=floor(j*ns.z);vec4 y_=floor(j-7.0*x_);
+    vec4 x=x_*ns.x+ns.yyyy;vec4 y=y_*ns.x+ns.yyyy;vec4 h=1.0-abs(x)-abs(y);
+    vec4 b0=vec4(x.xy,y.xy);vec4 b1=vec4(x.zw,y.zw);
+    vec4 s0=floor(b0)*2.0+1.0;vec4 s1=floor(b1)*2.0+1.0;vec4 sh=-step(h,vec4(0.0));
+    vec4 a0=b0.xzyw+s0.xzyw*sh.xxyy;vec4 a1=b1.xzyw+s1.xzyw*sh.zzww;
+    vec3 p0=vec3(a0.xy,h.x);vec3 p1=vec3(a0.zw,h.y);vec3 p2=vec3(a1.xy,h.z);vec3 p3=vec3(a1.zw,h.w);
+    vec4 norm=taylorInvSqrt(vec4(dot(p0,p0),dot(p1,p1),dot(p2,p2),dot(p3,p3)));
+    p0*=norm.x;p1*=norm.y;p2*=norm.z;p3*=norm.w;
+    vec4 m=max(0.6-vec4(dot(x0,x0),dot(x1,x1),dot(x2,x2),dot(x3,x3)),0.0);m=m*m;
+    return 42.0*dot(m*m,vec4(dot(p0,x0),dot(p1,x1),dot(p2,x2),dot(p3,x3)));
+  }`;
+
+  const mat = new THREE.ShaderMaterial({
+    uniforms, transparent:true, depthWrite:false, blending:THREE.AdditiveBlending,
+    vertexShader:`
+      uniform float uTime,uSize,uPixel,uBurst;uniform vec3 uMouse;
+      attribute float aRnd;varying float vMix;varying float vGlow;
+      ${snoise}
+      void main(){
+        vec3 p=position;
+        vec3 dir=normalize(p);
+        float n=snoise(p*0.9+vec3(0.0,0.0,uTime*0.25));
+        float n2=snoise(p*2.1-vec3(uTime*0.15));
+        float disp=n*0.55+n2*0.18;
+        // cursor swell
+        float md=distance(dir,normalize(uMouse+vec3(0.0001)));
+        float swell=smoothstep(1.1,0.0,md)*0.6;
+        disp += swell;
+        disp += uBurst*(0.5+0.5*n);
+        p += dir*disp;
+        // gentle swirl
+        float ang=disp*0.6;
+        p.xz = mat2(cos(ang),-sin(ang),sin(ang),cos(ang))*p.xz;
+        vMix=disp; vGlow=swell+uBurst;
+        vec4 mv=modelViewMatrix*vec4(p,1.0);
+        gl_PointSize=uSize*uPixel*(0.5+aRnd)*(1.0/-mv.z);
+        gl_Position=projectionMatrix*mv;
+      }`,
+    fragmentShader:`
+      precision highp float;uniform vec3 uColA,uColB,uColC;varying float vMix;varying float vGlow;
+      void main(){
+        vec2 uv=gl_PointCoord-0.5;float d=length(uv);
+        if(d>0.5)discard;
+        float a=smoothstep(0.5,0.0,d);
+        vec3 col=mix(uColA,uColB,smoothstep(-0.3,0.7,vMix));
+        col=mix(col,uColC,clamp(vGlow,0.0,1.0)*0.7);
+        gl_FragColor=vec4(col,a*(0.65+0.35*vGlow));
+      }`
+  });
+
+  const points = new THREE.Points(geo, mat);
+  const group = new THREE.Group(); group.add(points); scene.add(group);
+
+  // faint wire halo for depth
+  const halo = new THREE.Points(
+    new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute((()=>{
+      const n=1200,a=new Float32Array(n*3);
+      for(let i=0;i<n;i++){const th=Math.random()*Math.PI*2,ph=Math.acos(2*Math.random()-1),r=4.2+Math.random()*2.5;
+        a[i*3]=r*Math.sin(ph)*Math.cos(th);a[i*3+1]=r*Math.sin(ph)*Math.sin(th);a[i*3+2]=r*Math.cos(ph);}
+      return a;})(),3)),
+    new THREE.PointsMaterial({color:0x8a8578,size:0.02,transparent:true,opacity:0.5,depthWrite:false})
+  );
+  scene.add(halo);
+
+  // ---- interaction ----
+  const pointer = new THREE.Vector2(0,0);
+  let targetRotX=0,targetRotY=0, dragging=false, lastX=0,lastY=0, velX=0,velY=0;
+  const raycaster = new THREE.Raycaster();
+  const mouseWorld = new THREE.Vector3();
+
+  function setMouse(x,y){
+    pointer.x=(x/innerWidth)*2-1; pointer.y=-(y/innerHeight)*2+1;
+    // project onto sphere-ish direction for uMouse
+    raycaster.setFromCamera(pointer,camera);
+    mouseWorld.copy(raycaster.ray.direction);
+    uniforms.uMouse.value.copy(mouseWorld);
+    if(!dragging){ targetRotY = pointer.x*0.5; targetRotX = -pointer.y*0.35; }
+  }
+  window.addEventListener('mousemove', e=>setMouse(e.clientX,e.clientY));
+  canvas.addEventListener('pointerdown', e=>{dragging=true;lastX=e.clientX;lastY=e.clientY;canvas.classList.add('grabbing');});
+  window.addEventListener('pointerup', ()=>{dragging=false;canvas.classList.remove('grabbing');});
+  window.addEventListener('pointermove', e=>{
+    if(!dragging)return;
+    velY=(e.clientX-lastX)*0.005; velX=(e.clientY-lastY)*0.005;
+    group.rotation.y+=velY; group.rotation.x+=velX; lastX=e.clientX;lastY=e.clientY;
+  });
+  window.addEventListener('touchmove', e=>{const t=e.touches[0];if(t)setMouse(t.clientX,t.clientY);},{passive:true});
+  let burstT=0;
+  window.addEventListener('click', ()=>{ burstT=1; });
+
+  function resize(){
+    renderer.setSize(innerWidth,innerHeight);
+    camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();
+  }
+  window.addEventListener('resize',resize);
+
+  const clock = new THREE.Clock();
+  loading.classList.add('hide');
+
+  function frame(){
+    const dt=clock.getDelta(), t=clock.elapsedTime;
+    uniforms.uTime.value=t;
+    burstT*=0.94; uniforms.uBurst.value=burstT;
+    if(!dragging){
+      group.rotation.y += 0.02*dt*10 * 0.02 + (targetRotY-group.rotation.y)*0.04 + velY;
+      group.rotation.x += (targetRotX-group.rotation.x)*0.04 + velX;
+    }
+    velX*=0.92; velY*=0.92;
+    group.rotation.y += 0.0009; // idle auto-spin
+    halo.rotation.y -= 0.0004; halo.rotation.x += 0.0002;
+    camera.position.x += (pointer.x*0.6 - camera.position.x)*0.03;
+    camera.position.y += (pointer.y*0.4 - camera.position.y)*0.03;
+    camera.lookAt(0,0,0);
+    renderer.render(scene,camera);
+    if(!reduce) requestAnimationFrame(frame);
+  }
+  if(reduce){ uniforms.uTime.value=2.0; renderer.render(scene,camera); }
+  else requestAnimationFrame(frame);
+
+  // rotator + magnetic buttons
+  const words=['system.','app.','website.','dashboard.','MVP.'];let ri=0;const rotEl=document.getElementById('rot');
+  if(!reduce)setInterval(()=>{rotEl.style.opacity=0;setTimeout(()=>{ri=(ri+1)%words.length;rotEl.textContent=words[ri];rotEl.style.opacity=1;},260);},2100);
+  document.querySelectorAll('.btn').forEach(b=>{
+    b.addEventListener('mousemove',e=>{const r=b.getBoundingClientRect();b.style.transform='translate('+((e.clientX-r.left-r.width/2)*0.25)+'px,'+((e.clientY-r.top-r.height/2)*0.4)+'px)';});
+    b.addEventListener('mouseleave',()=>b.style.transform='');
+  });
+}
+</script>
+</body>
+</html>

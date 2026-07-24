@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Book a Website Strategy Call | 1stStep.ai</title>
+  <meta name="description" content="Book a 30-minute Website Strategy Call with Evan to review your current website, business goals, audience, timeline, budget, and project fit." />
+  <link rel="canonical" href="https://www.1ststep.ai/book/" />
+  <meta name="robots" content="index,follow,max-image-preview:large" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="1stStep.ai" />
+  <meta property="og:title" content="Book a Website Strategy Call | 1stStep.ai" />
+  <meta property="og:description" content="A focused 30-minute conversation about your current website, what needs to change, and whether the project is a strong fit." />
+  <meta property="og:url" content="https://www.1ststep.ai/book/" />
+  <meta property="og:image" content="https://www.1ststep.ai/assets/banner-1ststep-og.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="theme-color" content="#070912" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://api.leadconnectorhq.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" />
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <style>
+    :root{
+      color-scheme:dark;
+      --bg:#070912;--panel:#0e1120;--panel-2:#13172a;--ink:#f7f8ff;
+      --muted:#aeb4c9;--muted-2:#7d869e;--line:rgba(255,255,255,.1);
+      --line-2:rgba(255,255,255,.17);--violet:#8b7cff;--blue:#4f8cff;--cyan:#56ddff;
+      --grad:linear-gradient(100deg,#8b7cff 0%,#4f8cff 52%,#56ddff 100%);
+      --grad-text:linear-gradient(100deg,#b39cff 5%,#79a7ff 52%,#65e7ff 100%);
+      font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      min-width:320px;margin:0;color:var(--ink);background:
+        radial-gradient(48% 32% at 88% 0%,rgba(103,84,255,.18),transparent 68%),
+        radial-gradient(38% 28% at 4% 8%,rgba(54,175,255,.11),transparent 72%),
+        linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px),
+        var(--bg);
+      background-size:auto,auto,48px 48px,48px 48px,auto;
+      -webkit-font-smoothing:antialiased;
+    }
+    a{color:inherit}
+    img{display:block;max-width:100%}
+    .skip{position:fixed;left:16px;top:12px;z-index:100;transform:translateY(-140%);padding:10px 14px;border-radius:10px;background:#fff;color:#070912;font-weight:700}
+    .skip:focus{transform:none}
+    .wrap{width:min(1240px,calc(100% - 48px));margin:0 auto}
+    .nav{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:18px 0;border-bottom:1px solid var(--line)}
+    .brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none;font-family:"Space Grotesk",sans-serif;font-weight:700}
+    .brand img{width:28px;height:28px;object-fit:contain}
+    .brand span{font-size:18px}
+    .back{color:var(--muted);text-decoration:none;font-size:14px;font-weight:600;transition:color .2s}
+    .back:hover{color:#fff}
+    .book-layout{display:grid;grid-template-columns:minmax(330px,.82fr) minmax(560px,1.18fr);gap:28px;align-items:start;padding:52px 0 70px}
+    .intro{position:sticky;top:24px;padding:clamp(28px,4vw,46px);border:1px solid var(--line);border-radius:28px;background:linear-gradient(155deg,rgba(18,22,39,.96),rgba(8,11,20,.97));box-shadow:0 46px 110px -60px rgba(92,92,255,.7);overflow:hidden}
+    .intro::before{content:"";position:absolute;right:-120px;top:-150px;width:320px;height:320px;border-radius:50%;background:rgba(111,89,255,.18);filter:blur(24px);pointer-events:none}
+    .eyebrow{position:relative;margin:0 0 16px;color:#9d91ff;font:700 11px/1.2 "Space Grotesk",sans-serif;letter-spacing:.14em;text-transform:uppercase}
+    h1,h2,h3,p{position:relative}
+    h1{max-width:11ch;margin:0 0 20px;font-family:"Space Grotesk",sans-serif;font-size:clamp(40px,5vw,64px);line-height:.98;letter-spacing:-.05em}
+    .gradient{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent}
+    .lede{margin:0;color:#bdc3d7;font-size:17px;line-height:1.7}
+    .review-list{display:grid;gap:10px;margin:28px 0 0;padding:0;list-style:none}
+    .review-list li{position:relative;padding:13px 14px 13px 38px;border:1px solid var(--line);border-radius:13px;background:rgba(255,255,255,.035);color:#e8eafe;font-size:14px;line-height:1.45}
+    .review-list li::before{content:"✓";position:absolute;left:14px;top:12px;color:var(--cyan);font-weight:800}
+    .after{margin-top:16px;padding:20px;border:1px solid rgba(121,167,255,.18);border-radius:17px;background:rgba(79,140,255,.07)}
+    .after strong{display:block;margin-bottom:7px;color:#fff;font-size:14px}
+    .after p{margin:0;color:var(--muted);font-size:13px;line-height:1.6}
+    .quote{margin:16px 0 0;padding:18px 20px;border-left:2px solid var(--violet);background:rgba(255,255,255,.025);color:#dfe3f3;font-size:14px;line-height:1.65}
+    .quote footer{margin-top:9px;color:var(--muted-2);font-size:12px}
+    .quote a{color:#83dfff;text-decoration:none}
+    .fit-option{margin:16px 0 0;color:var(--muted-2);font-size:12px;line-height:1.6}
+    .fit-option a{color:#b8c9ff;font-weight:700;text-decoration:none}
+    .calendar-card{border:1px solid var(--line-2);border-radius:28px;background:rgba(13,16,29,.94);box-shadow:0 50px 120px -62px rgba(79,140,255,.62);overflow:hidden}
+    .calendar-head{padding:28px 30px 22px;border-bottom:1px solid var(--line);background:linear-gradient(120deg,rgba(139,124,255,.09),rgba(86,221,255,.035))}
+    .calendar-head span{display:block;margin-bottom:7px;color:#8f83ff;font:700 10px/1 "Space Grotesk",sans-serif;letter-spacing:.14em;text-transform:uppercase}
+    .calendar-head h2{margin:0 0 7px;font-family:"Space Grotesk",sans-serif;font-size:27px;letter-spacing:-.035em}
+    .calendar-head p{margin:0;color:var(--muted);font-size:13px;line-height:1.55}
+    .calendar-frame{width:100%;height:850px;display:block;border:0;background:#fff}
+    .calendar-fallback{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:18px 22px;border-top:1px solid var(--line);background:#0a0d18}
+    .calendar-fallback p{margin:0;color:var(--muted-2);font-size:12px;line-height:1.5}
+    .button{display:inline-flex;flex:none;align-items:center;justify-content:center;min-height:44px;padding:11px 18px;border-radius:999px;background:var(--grad);color:#fff;text-decoration:none;font-size:13px;font-weight:700;box-shadow:0 18px 38px -18px rgba(79,140,255,.72);transition:filter .2s,box-shadow .2s}
+    .button:hover{filter:brightness(1.08);box-shadow:0 22px 46px -18px rgba(79,140,255,.88)}
+    .legal{display:flex;justify-content:space-between;gap:22px;padding:24px 0 32px;border-top:1px solid var(--line);color:var(--muted-2);font-size:12px}
+    .legal nav{display:flex;gap:18px}
+    .legal a:hover{color:#fff}
+    :where(a,iframe):focus-visible{outline:3px solid var(--cyan);outline-offset:4px}
+    @media(max-width:960px){
+      .wrap{width:min(720px,calc(100% - 36px))}
+      .book-layout{grid-template-columns:1fr;padding-top:28px}
+      .intro{position:relative;top:auto}
+      .calendar-frame{height:880px}
+    }
+    @media(max-width:560px){
+      .wrap{width:calc(100% - 28px)}
+      .nav{padding:14px 0}
+      .book-layout{gap:18px;padding:18px 0 38px}
+      .intro,.calendar-card{border-radius:22px}
+      .intro{padding:28px 20px}
+      h1{font-size:clamp(38px,12vw,52px)}
+      .calendar-head{padding:24px 20px 18px}
+      .calendar-head h2{font-size:24px}
+      .calendar-frame{height:920px}
+      .calendar-fallback{align-items:flex-start;flex-direction:column;padding:18px}
+      .button{width:100%}
+      .legal{align-items:flex-start;flex-direction:column}
+    }
+    @media(prefers-reduced-motion:reduce){
+      html{scroll-behavior:auto}
+      *,*::before,*::after{scroll-behavior:auto!important;transition-duration:.001ms!important;animation-duration:.001ms!important;animation-iteration-count:1!important}
+    }
+  </style>
+</head>
+<body data-fsai-page-event="booking_page_view" data-fsai-audience="website_strategy_call">
+  <a class="skip" href="#calendar">Skip to calendar</a>
+  <header class="wrap nav">
+    <a class="brand" href="/" aria-label="1stStep.ai home"><img src="/assets/firststep-logo-transparent-cleaned.png" alt=""><span>1stStep.ai</span></a>
+    <a class="back" href="/#portfolio">&larr; Back to website work</a>
+  </header>
+
+  <main class="wrap book-layout">
+    <section class="intro" aria-labelledby="booking-title">
+      <p class="eyebrow">30-Minute Website Strategy Call</p>
+      <h1 id="booking-title">Let&rsquo;s look at what your website <span class="gradient">needs next.</span></h1>
+      <p class="lede">This is a focused conversation with Evan about the website you have now, what no longer feels right, and whether a custom rebuild is the right next move.</p>
+      <ul class="review-list" aria-label="What we will review">
+        <li>Your current website and online presence</li>
+        <li>Your business, audience, and strongest proof</li>
+        <li>What feels outdated, unclear, or off-brand</li>
+        <li>The outcome you want the next website to support</li>
+        <li>Your timeline, budget, and overall project fit</li>
+      </ul>
+      <div class="after">
+        <strong>What happens after the call?</strong>
+        <p>If the project is a strong fit, the next step is a scoped recommendation and proposal. A custom build begins only after the scope is approved, an agreement is signed, and the agreed project deposit is paid.</p>
+      </div>
+      <p class="fit-option">Not ready to book? <a href="/fit-check/" data-fsai-placement="booking_page">Request a four-field Website Fit Check instead.</a></p>
+      <blockquote class="quote">&ldquo;The design is clean, professional, and optimized perfectly for client inquiries and lead generation.&rdquo;<footer>David William &middot; Verified Google Review &middot; <a href="https://maps.app.goo.gl/Xe6z1vueaEDnTa6F8" target="_blank" rel="noopener">View on Google</a></footer></blockquote>
+    </section>
+
+    <section class="calendar-card" id="calendar" aria-labelledby="calendar-title">
+      <div class="calendar-head">
+        <span>Select a time</span>
+        <h2 id="calendar-title">Website Strategy Call</h2>
+        <p>The calendar is securely hosted by LeadConnector. 1stStep.ai does not store or intercept information entered inside it.</p>
+      </div>
+      <iframe class="calendar-frame" data-fsai-calendar src="https://api.leadconnectorhq.com/widget/booking/Rb4aqLM1NdU5kvZcqNmj" title="LeadConnector calendar for the 1stStep.ai Website Strategy Call" loading="eager" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+      <div class="calendar-fallback">
+        <p>If the embedded calendar does not load, open the same verified booking calendar in a new tab.</p>
+        <a class="button" data-fsai-calendar-fallback data-fsai-event="booking_fallback_click" data-fsai-placement="calendar_fallback" href="https://api.leadconnectorhq.com/widget/booking/Rb4aqLM1NdU5kvZcqNmj" target="_blank" rel="noopener">Open booking calendar &rarr;</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="wrap legal">
+    <span>&copy; 2026 1stStep.ai. Built by Evan Pancis.</span>
+    <nav aria-label="Legal links"><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></nav>
+  </footer>
+
+  <script src="/commercial-config.js"></script>
+  <script type="module" src="/src/site-analytics.js"></script>
+  <script type="module">
+    import { appendAttribution } from "/src/site-analytics.js";
+
+    const config = window.FSAI_COMMERCIAL_CONFIG;
+    const url = config?.booking?.calendarUrl;
+    if (url && /^https:\/\/api\.leadconnectorhq\.com\/widget\/booking\//.test(url)) {
+      const attributedUrl = appendAttribution(url);
+      const frame = document.querySelector("[data-fsai-calendar]");
+      const fallback = document.querySelector("[data-fsai-calendar-fallback]");
+      if (frame) frame.src = attributedUrl;
+      if (fallback) fallback.href = attributedUrl;
+    }
+  </script>
+</body>
+</html>

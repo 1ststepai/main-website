@@ -1,16 +1,14 @@
 # App Idea Checker Context Pack
 
-Every valid App Idea Checker submission generates a deterministic markdown context pack.
-
-## Generated Paths
-
-The pack is generated under:
+Every valid App Idea Checker submission generates a deterministic 16-file markdown context pack under:
 
 ```text
 generated-projects/{project_slug}/
 ```
 
-Files:
+The project slug uses the idea type plus a random identifier and does not include the submitter's name.
+
+## Files
 
 - `README.md`
 - `PROJECT_BRIEF.md`
@@ -29,29 +27,12 @@ Files:
 - `tasks/phase-2-mvp.md`
 - `tasks/phase-3-polish.md`
 
-## Runtime Behavior
+## Runtime behavior
 
-If files can be written locally, the adapter writes the pack under `generated-projects/`.
+Local development can write the pack under `generated-projects/`. Vercel uses configured KV-compatible storage or reports `persisted: false`.
 
-If running in a read-only runtime, the endpoint still returns success with:
+The route returns success only when storage or another delivery path succeeds. It returns the stable relative filename list and a path/byte manifest, but never returns generated content previews to the browser.
 
-- `generated_files`
-- `generated_file_manifest`
-- `context_pack_status`
-- `storage.mode`
-- `storage.persisted`
-- `storage.preview_files`
+## Scope rule
 
-This prevents lead intake from failing just because the runtime cannot persist files.
-
-`generated_files` is the stable relative filename list. `generated_file_manifest` is the detailed storage-aware manifest.
-
-## Prompt Usage
-
-Use `CLAUDE_PROMPT.md` for strategy, discovery, positioning, and build-scope planning.
-
-Use `CODEX_PROMPT.md` for implementation planning and scoped engineering work.
-
-## Scope Rule
-
-The generated context pack is designed to prevent overbuilding. It should keep the next step focused on validation, a prototype, or one narrow MVP workflow depending on lead quality, budget, and recommended path.
+The pack supports validation and scoped planning. It does not authorize repository creation, deployment, payment, legal action, or any other high-impact automation. `repo_creation_status` remains `locked_until_signed_and_paid`.

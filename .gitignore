@@ -6,3 +6,7 @@ dist
 generated-projects
 __pycache__/
 *.pyc
+*.bak
+output/
+.playwright-cli/
+test-results/

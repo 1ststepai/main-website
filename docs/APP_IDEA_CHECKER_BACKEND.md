@@ -1,12 +1,14 @@
 # App Idea Checker Backend
 
-Phase 2 adds a lightweight intake endpoint for the App Idea Viability Checker.
+The App Idea Checker uses a lightweight Vercel function for bounded lead intake and deterministic context-pack generation.
 
 ## Endpoint
 
 `POST /api/app-idea-checker`
 
-## Required Fields
+The request must use `Content-Type: application/json` and remain below 100 KiB.
+
+## Required fields
 
 - `name`
 - `email`
@@ -15,106 +17,73 @@ Phase 2 adds a lightweight intake endpoint for the App Idea Viability Checker.
 - `idea_type`
 - `budget`
 
-## Accepted Payload Fields
+## Accepted fields
 
-- `source`
-- `name`
-- `email`
-- `phone`
-- `score`
-- `category`
-- `idea_type`
-- `audience`
-- `budget`
-- `launch_timeline`
-- `recommended_path`
-- `tags`
-- `answers`
-- `created_at`
+- `source`, `name`, `email`, `phone`
+- `score`, `category`, `idea_type`, `audience`, `budget`, `launch_timeline`, `recommended_path`
+- `tags`, `answers`, `created_at`
+- `idea_text`, bounded score-detail fields, `risk_level`, and `biggest_risk`
+
+Unknown top-level fields are rejected. Strings, tags, answers, timestamps, and 0-100 scores have explicit type and length limits.
 
 ## Normalization
 
 The backend:
 
-- trims string fields
-- lowercases email
-- lightly validates email format
-- validates score as a 0-100 number
-- generates `lead_id`
-- generates a sanitized `project_slug`
+- trims strings and lowercases email
+- validates email, score ranges, timestamps, tags, and answer values
+- generates a random `lead_id`
+- generates a sanitized `project_slug` from idea type plus a random identifier, without the person's name
 - adds `server_created_at`
-- preserves original answers
-- preserves computed tags
 - classifies `lead_quality`
+- converts bounded structured answer values to strings before forwarding or context generation
 
-## Lead Quality
+The client-computed score is a first-pass triage value. It is not an entitlement, payment, or automated high-impact decision.
 
-- `high`: score >= 80 and budget is $3,000+
-- `medium`: score >= 60
-- `low`: score < 60
-
-## Storage Behavior
+## Storage and delivery
 
 The storage adapter tries, in order:
 
-1. Vercel KV when `KV_REST_API_URL` and `KV_REST_API_TOKEN` are available.
-2. Local JSON/markdown files under `generated-projects/`.
-3. Safe no-op storage that returns success and includes a file manifest plus preview metadata.
+1. Vercel KV-compatible REST storage when `KV_REST_API_URL` and `KV_REST_API_TOKEN` exist.
+2. Local JSON/markdown files under `generated-projects/` outside Vercel.
+3. No-op storage with `persisted: false`.
 
-On Vercel without KV configured, the adapter skips deployment filesystem writes and uses safe no-op storage.
+KV records use `APP_IDEA_RETENTION_SECONDS` and default to 90 days. Local development files require manual cleanup.
 
-No paid API is required.
+A `200` response requires at least one successful delivery path:
 
-## Response Shape
+- storage persisted the intake, or
+- Resend sent the admin notification, or
+- an explicitly enabled webhook accepted the lead.
 
-`generated_files` always returns the deterministic 16-file context pack list, even if the runtime cannot physically write files.
+If none succeeds, the route returns `503 intake_unavailable`. No-op storage alone is never reported as success.
 
-`generated_file_manifest` includes path, byte size, and write status details.
+## Response and privacy
 
-Example:
+Successful responses include the deterministic file list, a non-content manifest, delivery states, and `repo_creation_status`.
 
-```json
-{
-  "ok": true,
-  "lead_id": "lead_...",
-  "project_slug": "test-founder-web-app-saas-...",
-  "score": 76,
-  "category": "Viable, Needs Validation",
-  "lead_quality": "medium",
-  "recommended_path": "Focused MVP with only the core workflow",
-  "tags": ["app_idea_checker", "mvp_ready_medium", "budget_3k_10k"],
-  "context_pack_status": "generated",
-  "generated_files": [
-    "README.md",
-    "PROJECT_BRIEF.md",
-    "MVP_SCOPE.md",
-    "USER_STORIES.md",
-    "TECHNICAL_PLAN.md",
-    "BUILD_PHASES.md",
-    "RISKS_AND_ASSUMPTIONS.md",
-    "CLAUDE_PROMPT.md",
-    "CODEX_PROMPT.md",
-    "skills/brand-voice.md",
-    "skills/mvp-scope-control.md",
-    "skills/token-usage-rules.md",
-    "skills/discovery-to-build.md",
-    "tasks/phase-1-validation.md",
-    "tasks/phase-2-mvp.md",
-    "tasks/phase-3-polish.md"
-  ]
-}
-```
+Generated file previews are not returned because they can contain contact and project information. Responses use `Cache-Control: no-store` and include `request_id` plus `X-Request-ID` for support correlation.
 
-## Local Test
+## Request controls
+
+- Browser CORS is same-origin by default; extra exact origins require `APP_ALLOWED_ORIGINS`.
+- The default best-effort function-instance limit is 12 requests per 10 minutes per hashed network identifier.
+- A valid `Idempotency-Key` prevents duplicate delivery within a warm function instance.
+- Durable platform rate limiting and cross-instance idempotency remain deployment-layer controls.
+- External delivery calls use bounded timeouts; non-HTTPS webhooks are rejected outside local development.
+
+## Local testing
+
+Use `npx vercel dev`; the Vite server alone does not execute `/api` functions.
 
 ```bash
 curl -X POST http://localhost:3000/api/app-idea-checker \
   -H "Content-Type: application/json" \
+  -H "Idempotency-Key: local-test-2026-07-22" \
   -d '{
     "source":"app_idea_checker",
-    "name":"Test Founder",
-    "email":"test@example.com",
-    "phone":"555-555-5555",
+    "name":"Synthetic Test",
+    "email":"synthetic@example.com",
     "score":76,
     "category":"Viable, Needs Validation",
     "idea_type":"Web app / SaaS",
@@ -122,20 +91,10 @@ curl -X POST http://localhost:3000/api/app-idea-checker \
     "budget":"$3,000-$10,000",
     "launch_timeline":"1-3 months",
     "recommended_path":"Focused MVP with only the core workflow",
-    "tags":["app_idea_checker","mvp_ready_medium","budget_3k_10k"],
-    "answers":{
-      "problem_clarity":"Somewhat clear",
-      "monetization":"Monthly subscription",
-      "distribution":"I have some warm contacts"
-    },
-    "created_at":"2026-05-08T12:00:00.000Z"
+    "tags":["app_idea_checker"],
+    "answers":{"problem_clarity":"Somewhat clear"},
+    "created_at":"2026-07-22T12:00:00.000Z"
   }'
 ```
 
-For local Vercel testing, use:
-
-```bash
-npx vercel dev
-```
-
-The Vite dev server alone does not run Vercel serverless functions.
+Use synthetic data only. Configured email or webhook destinations can create a real external notification.

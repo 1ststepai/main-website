@@ -1,16 +1,16 @@
 # 1stStep.ai
 
-1stStep.ai builds practical apps, websites, MVPs, dashboards, internal tools, and workflow automations for founders, small businesses, and professionals.
+1stStep.ai designs and builds premium websites, cinematic digital experiences, custom web products, dashboards, and native iOS prototypes for founders, businesses, and professionals.
 
-Primary positioning: turn an app idea or messy business workflow into the right first version before overspending on the wrong build.
+Primary positioning: high-end websites and apps with clear creative direction, thoughtful motion, and production-ready development.
 
 Primary conversion path:
 - Website: https://www.1ststep.ai/
 - Free App Idea Checker: https://www.1ststep.ai/app-idea-viability-checker.html
 - App builds: https://www.1ststep.ai/services/app-builds.html
 - MVP builds: https://www.1ststep.ai/services/mvp-builds.html
-- Websites and lead systems: https://www.1ststep.ai/services/websites.html
-- Internal tools and automations: https://www.1ststep.ai/services/internal-tools.html
+- Premium websites: https://www.1ststep.ai/services/websites.html
+- Internal tools and integrations: https://www.1ststep.ai/services/internal-tools.html
 
 Official profiles:
 - LinkedIn: https://www.linkedin.com/company/1ststep-ai/
@@ -19,15 +19,18 @@ Official profiles:
 - YouTube: https://www.youtube.com/channel/UCynvog-XB0oFBigcrBvmxOg
 
 Core services:
-- App and MVP builds
-- Website and lead capture systems
-- Internal dashboards
-- Workflow automation
-- SaaS and customer portal first versions
-- Build strategy and MVP scope control
+- Premium website design and development
+- Cinematic motion and interaction design
+- Custom web apps, dashboards, and SaaS first versions
+- High-fidelity iOS product prototypes and SwiftUI direction
+- Product integrations when the experience requires them
+- Build strategy and first-version scope control
 
 Important product:
 - The App Idea Viability Checker gives prospects a first-pass MVP readiness score, recommended build path, risk breakdown, and next-step recommendation.
+
+Portfolio accuracy:
+- The Spot Cafe iOS work is a high-fidelity prototype and SwiftUI direction, not a claimed App Store release.
 
 Separate products:
 - https://resume.1ststep.ai/ is the AI Resume Builder landing page.
