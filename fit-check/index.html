@@ -49,7 +49,7 @@
     .form-card{position:relative;padding:34px;border:1px solid rgba(255,255,255,.15);border-radius:28px;background:linear-gradient(155deg,rgba(18,22,39,.98),rgba(9,12,22,.98));box-shadow:0 48px 110px -58px rgba(79,140,255,.75)}
     .form-card::before{content:"";position:absolute;inset:-1px;border-radius:inherit;padding:1px;background:linear-gradient(135deg,rgba(139,124,255,.65),transparent 42%,rgba(86,221,255,.34));-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;pointer-events:none}
     h2{margin:0 0 8px;font:700 28px "Space Grotesk",sans-serif;letter-spacing:-.04em}.form-intro{margin:0 0 25px;color:var(--muted);font-size:14px;line-height:1.6}
-    form{display:grid;gap:17px}.field{display:grid;gap:8px}.field label{font-size:12px;font-weight:700;color:#e5e8f5}
+    form{display:grid;gap:17px}.field{display:grid;gap:8px}.field label{font-size:12px;font-weight:700;color:#e5e8f5}.field-hint{margin:0;color:#7f899f;font-size:11px;line-height:1.5}
     input,select{width:100%;min-height:50px;border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:0 14px;background:#0a0d18;color:#fff;font:500 15px Inter,sans-serif;outline:none}
     input:focus,select:focus{border-color:#69baff;box-shadow:0 0 0 3px rgba(79,140,255,.15)}
     select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,#8d96ad 50%),linear-gradient(135deg,#8d96ad 50%,transparent 50%);background-position:calc(100% - 19px) 21px,calc(100% - 14px) 21px;background-size:5px 5px;background-repeat:no-repeat}
@@ -113,10 +113,11 @@
             <option value="25k-plus">$25,000+</option>
             <option value="not-sure">Not sure yet</option>
           </select>
+          <p class="field-hint">Choose the full project range. Flexible milestone payment schedules are available on approved scopes.</p>
         </div>
         <p class="status" id="form-status" role="status" aria-live="polite"></p>
         <button class="submit" type="submit">Request My Fit Check &rarr;</button>
-        <p class="privacy">Your details are used only to respond to this request. No newsletter signup.</p>
+        <p class="privacy">Private. Reviewed personally by Evan. Your details are used only to respond to this request&mdash;no newsletter signup.</p>
       </form>
       <p class="or">Already ready to talk? <a href="/book/" data-fsai-placement="fit_check">Book a Website Strategy Call</a></p>
     </section>

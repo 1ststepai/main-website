@@ -51,6 +51,7 @@
             "https://github.com/1ststepai",
             "https://www.linkedin.com/company/1ststep-ai/",
             "https://www.facebook.com/profile.php?id=61566833623507",
+            "https://www.instagram.com/1ststepdotai/",
             "https://maps.app.goo.gl/x7XKauoXUwi2qfNdA",
             "https://www.youtube.com/channel/UCynvog-XB0oFBigcrBvmxOg"
           ]
@@ -237,7 +238,7 @@
     .fsai-hero-scrim{position:absolute;inset:0;z-index:-1;pointer-events:none;
       background:
         linear-gradient(90deg,rgba(255,255,255,.82) 0%,rgba(255,255,255,.62) 22%,rgba(255,255,255,.24) 44%,rgba(255,255,255,.06) 60%,transparent 76%)}
-    .fsai-hero-copy{display:flex;flex-direction:column;align-items:flex-start}
+    .fsai-hero-copy{display:flex;flex-direction:column;align-items:flex-start;min-width:0}
     .fsai-hero-copy h1,.fsai-hero-copy p,.fsai-hero-copy .fsai-kicker strong{text-shadow:0 1px 24px rgba(255,255,255,.8)}
     .fsai-kicker{display:inline-flex;align-items:center;gap:10px;padding:7px 14px;border:1px solid var(--line-2);border-radius:999px;background:#fff;box-shadow:var(--shadow-sm);margin-bottom:26px}
     .fsai-kicker strong{color:var(--brand);font-weight:600;font-size:.8rem}
@@ -580,6 +581,18 @@
 
     /* Footer */
     .fsai-footer{display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;padding:40px 0;border-top:1px solid var(--line);margin-top:40px}
+    .fsai-footer-offer{width:100%;display:grid;grid-template-columns:minmax(220px,320px) minmax(0,1fr) auto;align-items:center;gap:24px;padding:16px;border:1px solid rgba(139,124,255,.28);border-radius:24px;background:linear-gradient(115deg,rgba(139,124,255,.12),rgba(61,214,255,.06) 62%,rgba(255,255,255,.03));color:var(--ink);box-shadow:0 18px 50px -34px rgba(61,214,255,.55);cursor:pointer;transition:transform .25s,border-color .25s,box-shadow .25s,background .25s}
+    .fsai-footer-offer:hover{transform:translateY(-2px);border-color:rgba(61,214,255,.55);background:linear-gradient(115deg,rgba(139,124,255,.17),rgba(61,214,255,.09) 62%,rgba(255,255,255,.05));box-shadow:0 22px 56px -30px rgba(61,214,255,.65)}
+    .fsai-footer-offer:focus-visible{outline:2px solid var(--brand);outline-offset:4px}
+    .fsai-footer-offer-thumb{aspect-ratio:1200/630;overflow:hidden;border:1px solid rgba(255,255,255,.12);border-radius:15px;background:#09111e}
+    .fsai-footer-offer-thumb img{display:block;width:100%;height:100%;object-fit:cover}
+    .fsai-footer-offer-copy{min-width:0}
+    .fsai-footer-offer-copy small{display:block;margin-bottom:7px;color:var(--brand-2);font-size:.68rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+    .fsai-footer-offer-copy strong{display:block;color:#fff;font-family:var(--display);font-size:clamp(1.15rem,2vw,1.55rem);line-height:1.1}
+    .fsai-footer-offer-copy span{display:block;margin-top:7px;color:var(--muted);font-size:.84rem;line-height:1.5}
+    .fsai-footer-offer-action{display:inline-flex;align-items:center;gap:8px;padding:11px 15px;border:1px solid rgba(61,214,255,.3);border-radius:999px;background:rgba(61,214,255,.08);color:#fff;font-size:.78rem;font-weight:700;white-space:nowrap}
+    .fsai-footer-offer-action svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;transition:transform .25s}
+    .fsai-footer-offer:hover .fsai-footer-offer-action svg{transform:translateX(3px)}
     .fsai-footer-brand{display:flex;align-items:center;gap:14px}
     .fsai-footer-logo{height:30px;width:auto}
     .fsai-footer-brand span{font-size:0.8rem;color:var(--muted-2)}
@@ -587,6 +600,11 @@
     .fsai-footer-links a{font-size:0.82rem;color:var(--muted);transition:color .3s}
     .fsai-footer-links a:hover{color:var(--brand)}
     .fsai-footer-links span{color:var(--muted-2);opacity:.4}
+    .fsai-footer-socials{display:flex;align-items:center;gap:9px}
+    .fsai-footer-socials a{display:grid;place-items:center;width:38px;height:38px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.04);color:var(--muted);transition:transform .25s,border-color .25s,color .25s,background .25s}
+    .fsai-footer-socials a:hover{transform:translateY(-2px);border-color:rgba(139,124,255,.55);background:rgba(139,124,255,.12);color:#fff}
+    .fsai-footer-socials a:focus-visible{outline:2px solid var(--brand);outline-offset:3px}
+    .fsai-footer-socials svg{width:17px;height:17px;fill:currentColor}
 
     /* Sticky mobile CTA */
     .fsai-sticky-cta{position:fixed;left:16px;right:16px;bottom:16px;z-index:70;display:none;align-items:center;justify-content:space-between;gap:12px;padding:12px 12px 12px 20px;background:#fff;border:1px solid var(--line);border-radius:999px;box-shadow:var(--shadow)}
@@ -768,17 +786,11 @@
       box-shadow:0 28px 80px -48px rgba(79,140,255,.78)
     }
     .fsai-why-digital::before{content:"";position:absolute;inset:0 auto 0 0;width:3px;background:var(--grad)}
-    .fsai-why-message{position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,440px);gap:34px;align-items:end}
+    .fsai-why-message{position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,1fr);gap:34px;align-items:end}
+    .fsai-why-copy{max-width:860px}
     .fsai-why-message h2{max-width:24ch;margin:10px 0 12px;font-size:clamp(1.9rem,3.25vw,3.25rem);line-height:.98;letter-spacing:-.05em;color:#f8f9ff}
     .fsai-why-message p{max-width:68ch;margin:0;color:#aeb5ca;font-size:.92rem;line-height:1.65}
-    .fsai-why-shortcuts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0}
-    .fsai-why-shortcut{display:grid;grid-template-columns:1fr auto;gap:4px 10px;padding:13px 14px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.035);transition:background-color .2s ease,border-color .2s ease}
-    .fsai-why-shortcut:hover{background:rgba(255,255,255,.065);border-color:rgba(121,167,255,.34)}
-    .fsai-why-shortcut span{color:#f7f8ff;font-size:.78rem;font-weight:750}
-    .fsai-why-shortcut small{color:#8f97ae;font-size:.65rem}
-    .fsai-why-shortcut b{grid-column:2;grid-row:1/3;align-self:center;color:#79dfff;font-size:.95rem;transition:transform .2s ease}
-    .fsai-why-shortcut:hover b{transform:translateX(3px)}
-
+    .fsai-transform-mobile{display:none}
     .fsai-transform-wrap{position:relative;z-index:1;min-width:0}
     .fsai-transform-stage{position:relative;overflow:hidden;scroll-margin-top:88px;border:1px solid rgba(149,160,201,.24);border-radius:22px;background:#070912;box-shadow:0 36px 80px -42px #000,inset 0 1px rgba(255,255,255,.07)}
     .fsai-transform-bar{height:48px;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;padding:0 16px;background:rgba(7,9,16,.97);border-bottom:1px solid rgba(255,255,255,.08);color:#8790a8}
@@ -1020,6 +1032,14 @@
     .fsai-project-content h3{color:#f7f8ff}
     .fsai-project-content p,.fsai-outcome-list li{color:#aeb4c9}
     .fsai-project-link{color:#83dfff}
+    .fsai-work-toolbar{display:flex;align-items:center;justify-content:space-between;gap:22px;margin:-6px 0 24px;padding:10px 12px 10px 14px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.025)}
+    .fsai-work-filter-label{color:#8f98b0;font:700 .66rem/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
+    .fsai-work-filters{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+    .fsai-work-filter{min-height:38px;padding:0 14px;border:1px solid transparent;border-radius:11px;background:transparent;color:#9da5bb;font:700 .75rem/1 var(--sans);white-space:nowrap;cursor:pointer;transition:background .2s ease,border-color .2s ease,color .2s ease,box-shadow .2s ease}
+    .fsai-work-filter:hover{color:#fff;border-color:var(--line-2)}
+    .fsai-work-filter[aria-pressed="true"]{border-color:rgba(121,223,255,.24);background:linear-gradient(135deg,rgba(139,124,255,.18),rgba(79,184,255,.11));box-shadow:inset 0 0 0 1px rgba(255,255,255,.025);color:#fff}
+    .fsai-work-filter-status{margin:0;color:#7f889f;font-size:.72rem;white-space:nowrap}
+    .fsai-project[hidden]{display:none!important}
 
     .fsai-case-status{display:inline-flex;align-items:center;gap:8px;margin-top:18px;color:#aeb4c9;font-size:.76rem;font-weight:700;letter-spacing:.02em}
     .fsai-case-status::before{content:"";width:7px;height:7px;border-radius:50%;background:#8b7cff;box-shadow:0 0 14px rgba(139,124,255,.8)}
@@ -1035,25 +1055,6 @@
     .fsai-offer-detail span{display:block;margin-bottom:8px;color:#8f83ff;font:700 .69rem/1 var(--mono);letter-spacing:.12em;text-transform:uppercase}
     .fsai-offer-detail strong{display:block;margin-bottom:7px;color:#fff;font-size:1rem}
     .fsai-offer-detail p{margin:0;color:#aeb4c9;font-size:.86rem;line-height:1.6}
-    .fsai-platform-support{margin-top:18px;padding:clamp(24px,4vw,42px);border:1px solid var(--line);border-radius:26px;background:linear-gradient(145deg,rgba(15,18,32,.96),rgba(9,12,22,.96));box-shadow:var(--shadow-sm)}
-    .fsai-platform-support-head{display:grid;grid-template-columns:minmax(0,.86fr) minmax(0,1.14fr);gap:32px;align-items:start}
-    .fsai-platform-support h3{max-width:13ch;margin:8px 0 12px;color:#fff;font-size:clamp(1.75rem,3vw,2.65rem);line-height:1.02;letter-spacing:-.045em}
-    .fsai-platform-support-copy>p{margin:0;color:#aeb4c9;line-height:1.7}
-    .fsai-platform-services{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
-    .fsai-platform-services span,.fsai-platform-featured span{padding:8px 11px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.035);color:#c9cee0;font-size:.72rem;font-weight:600}
-    .fsai-platform-featured{display:flex;flex-wrap:wrap;gap:8px;padding:20px;border:1px solid rgba(121,167,255,.16);border-radius:18px;background:rgba(79,140,255,.045)}
-    .fsai-platform-featured strong{width:100%;margin-bottom:2px;color:#8f83ff;font:700 .67rem/1 var(--mono);letter-spacing:.12em;text-transform:uppercase}
-    .fsai-platform-featured span{background:rgba(7,9,18,.55)}
-    .fsai-platform-details{margin-top:18px;border-top:1px solid var(--line)}
-    .fsai-platform-details summary{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:18px 2px 0;color:#e9ecfa;font-size:.82rem;font-weight:700;cursor:pointer;list-style:none}
-    .fsai-platform-details summary::-webkit-details-marker{display:none}
-    .fsai-platform-details summary::after{content:"+";display:grid;place-items:center;flex:none;width:26px;height:26px;border:1px solid var(--line-2);border-radius:50%;color:#79dfff;font-size:1rem;transition:transform .2s ease}
-    .fsai-platform-details[open] summary::after{transform:rotate(45deg)}
-    .fsai-platform-groups{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:18px}
-    .fsai-platform-group{padding:17px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.025)}
-    .fsai-platform-group strong{display:block;margin-bottom:9px;color:#fff;font-size:.76rem}
-    .fsai-platform-group p{margin:0;color:#8f98b0;font-size:.72rem;line-height:1.65}
-    .fsai-platform-note{margin:14px 2px 0;color:#788097;font-size:.72rem;line-height:1.55}
     #website-offer>.fsai-services,#website-offer>.fsai-service-links{display:none}
 
     .fsai-capabilities{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
@@ -1085,7 +1086,6 @@
     .fsai-steps{grid-template-columns:repeat(4,1fr)}
     .fsai-step{background:rgba(14,17,31,.88);border-color:var(--line);box-shadow:var(--shadow-sm)}
     .fsai-step p{color:#aeb4c9}
-
     .fsai-about-card,.fsai-audience-card{background:rgba(14,17,31,.9);border-color:var(--line);box-shadow:var(--shadow-sm)}
     .fsai-about-card>p,.fsai-audience-card>p,.fsai-founder-metrics span{color:#aeb4c9}
     .fsai-tags span,.fsai-audience-grid>div{background:rgba(255,255,255,.035);border-color:var(--line);color:#aeb4c9}
@@ -1142,6 +1142,14 @@
     .fsai-blueprint-actions>a:not(.fsai-btn){color:#9ca5bd;font-size:.72rem;text-decoration:underline;text-underline-offset:3px}
     .fsai-blueprint-checkout[hidden]{display:none!important}
     .fsai-investment-note{grid-column:1/-1;margin:0;color:#788097;font-size:.72rem;line-height:1.5}
+.fsai-investment-range{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:28px;align-items:center;margin-top:18px;scroll-margin-top:88px;padding:clamp(24px,4vw,38px);border:1px solid rgba(121,223,255,.2);border-radius:24px;background:radial-gradient(circle at 100% 0,rgba(79,184,255,.14),transparent 42%),linear-gradient(145deg,rgba(18,22,39,.98),rgba(8,11,20,.98));box-shadow:var(--shadow-sm)}
+    .fsai-investment-range h3{margin:9px 0;color:#fff;font-size:clamp(1.65rem,3vw,2.55rem);letter-spacing:-.04em}
+    .fsai-investment-range p{max-width:68ch;margin:0;color:#aeb4c9;font-size:.86rem;line-height:1.65}
+    .fsai-investment-range .fsai-investment-label{color:#79dfff}
+    .fsai-investment-fit{max-width:330px;padding:19px 20px;border-left:1px solid var(--line-2)}
+    .fsai-investment-fit span{display:block;margin-bottom:8px;color:#79dfff;font:700 .64rem/1 var(--mono);letter-spacing:.12em;text-transform:uppercase}
+    .fsai-investment-fit strong{display:block;color:#fff;font-size:.92rem;line-height:1.4}
+    .fsai-investment-fit p{margin-top:7px;font-size:.76rem}
 
     .fsai-capability-card{min-height:235px;padding:24px}
     .fsai-capability-number{margin-bottom:20px}
@@ -1150,6 +1158,12 @@
     .fsai-process-head{margin-bottom:22px}
     .fsai-step{padding:19px}
     .fsai-process-context{display:grid;grid-template-columns:.9fr 1.1fr;gap:16px;margin-top:18px}
+    .fsai-process-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin:0;padding:0;border-block:1px solid var(--line);list-style:none}
+    .fsai-process-summary li{min-width:0;padding:24px 22px;border-left:1px solid var(--line)}
+    .fsai-process-summary li:first-child{border-left:0}
+    .fsai-process-summary span{display:block;margin-bottom:18px;color:#79dfff;font:800 .68rem/1 var(--mono);letter-spacing:.12em}
+    .fsai-process-summary strong{display:block;margin-bottom:8px;color:#fff;font-size:.95rem}
+    .fsai-process-summary p{margin:0;color:#939bb1;font-size:.76rem;line-height:1.55}
     .fsai-founder-compact,.fsai-fit-compact{padding:24px;border:1px solid var(--line);border-radius:20px;background:rgba(14,17,31,.9);box-shadow:var(--shadow-sm)}
     .fsai-founder-compact{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center}
     .fsai-founder-compact img{width:72px;height:72px;border:3px solid rgba(139,124,255,.7);border-radius:50%;object-fit:cover}
@@ -1179,23 +1193,27 @@
       .fsai-why-digital{grid-template-columns:1fr}
       .fsai-why-message{grid-template-columns:1fr;gap:20px}
       .fsai-why-message h2{max-width:22ch}
-      .fsai-why-shortcuts{max-width:480px}
       .fsai-transform-edge-controls{display:none}
       .fsai-transform-viewport{aspect-ratio:1.85}
       .fsai-poster-viewport{aspect-ratio:1344/853}
       .fsai-live-benefit{min-height:48px}
       .fsai-visual.fsai-studio-visual{min-height:500px;margin-top:12px}
       .fsai-portfolio{grid-template-columns:1fr}
+      .fsai-work-toolbar{align-items:flex-start;flex-direction:column}
+      .fsai-work-filter-status{white-space:normal}
       .fsai-offer-shell{grid-template-columns:1fr}
-      .fsai-platform-support-head{grid-template-columns:1fr}
-      .fsai-platform-groups{grid-template-columns:1fr 1fr}
       .fsai-capabilities{grid-template-columns:1fr}
       .fsai-steps{grid-template-columns:1fr 1fr}
       .fsai-build-strip{grid-template-columns:1fr;text-align:left}
       .fsai-proof-source{text-align:left}
       .fsai-investment,.fsai-process-context{grid-template-columns:1fr}
+      .fsai-investment-range{grid-template-columns:1fr}
+      .fsai-investment-fit{max-width:none;padding:19px 0 0;border-top:1px solid var(--line-2);border-left:0}
       .fsai-investment-note{grid-column:auto}
       .fsai-sticky-cta{display:flex}
+    }
+    @media (max-width:700px){
+      .fsai-kicker span{display:none}
     }
     @media (max-width:560px){
       .fsai-wrap{width:calc(100% - 28px)}
@@ -1204,13 +1222,25 @@
       .fsai-logo::after{font-size:.92rem;margin-left:8px}
       .fsai-hero{padding:40px 22px 28px;border-radius:24px}
       .fsai-hero h1{font-size:clamp(2.65rem,13vw,3.75rem)}
-      .fsai-platform-support{padding:23px 18px;border-radius:21px}
-      .fsai-platform-groups{grid-template-columns:1fr}
       .fsai-kicker span{display:none}
       .fsai-why-digital{padding:24px 20px}
       .fsai-why-message h2{font-size:clamp(1.85rem,9vw,2.45rem)}
-      .fsai-why-shortcuts{gap:7px}
-      .fsai-why-shortcut{padding:11px 10px}
+      .fsai-transform-wrap{display:none}
+      .fsai-transform-mobile{position:relative;z-index:1;display:grid;gap:12px}
+      .fsai-mobile-state{padding:20px;border:1px solid rgba(255,255,255,.1);border-radius:18px;background:rgba(255,255,255,.035)}
+      .fsai-mobile-state-label{display:flex;align-items:center;gap:8px;margin-bottom:11px;font:800 .62rem/1 var(--mono);letter-spacing:.12em;text-transform:uppercase}
+      .fsai-mobile-state-label::before{content:"";width:7px;height:7px;border-radius:50%;background:#df7280;box-shadow:0 0 12px rgba(223,114,128,.55)}
+      .fsai-mobile-state h3{margin:0 0 14px;color:#f7f8ff;font-size:1.15rem;line-height:1.18}
+      .fsai-mobile-state ul{display:grid;gap:9px;margin:0;padding:0;list-style:none}
+      .fsai-mobile-state li{position:relative;padding-left:18px;color:#aeb5ca;font-size:.82rem;line-height:1.45}
+      .fsai-mobile-state li::before{content:"";position:absolute;left:0;top:.55em;width:7px;height:7px;border-radius:50%;background:#70798f}
+      .fsai-mobile-state-after{border-color:rgba(121,223,255,.2);background:linear-gradient(145deg,rgba(83,94,255,.13),rgba(44,187,255,.06))}
+      .fsai-mobile-state-after .fsai-mobile-state-label{color:#79dfff}
+      .fsai-mobile-state-after .fsai-mobile-state-label::before,.fsai-mobile-state-after li::before{background:#79dfff;box-shadow:0 0 12px rgba(121,223,255,.55)}
+      .fsai-mobile-shift{display:flex;align-items:center;gap:10px;padding:2px 4px;color:#9199b0;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+      .fsai-mobile-shift::before,.fsai-mobile-shift::after{content:"";height:1px;flex:1;background:linear-gradient(90deg,transparent,rgba(121,223,255,.45))}
+      .fsai-mobile-shift::after{transform:scaleX(-1)}
+      .fsai-transform-mobile>a{justify-content:center;margin-top:2px}
       .fsai-transform-bar{height:46px;grid-template-columns:1fr auto;padding:0 12px}
       .fsai-transform-bar-title{display:none}
       .fsai-transform-bar-proof{font-size:.52rem}
@@ -1257,8 +1287,22 @@
       .fsai-browser-copy strong{font-size:2rem}
       .fsai-studio-float{display:none}
       .fsai-chat-launch{display:none}
+      .fsai-footer{justify-content:center;text-align:center}
+      .fsai-footer-offer{grid-template-columns:112px minmax(0,1fr);gap:14px;padding:12px;text-align:left}
+      .fsai-footer-offer-copy strong{font-size:1rem}
+      .fsai-footer-offer-copy span{font-size:.76rem}
+      .fsai-footer-offer-action{display:none}
+      .fsai-footer-brand{width:100%;justify-content:center}
+      .fsai-footer-links{width:100%;justify-content:center}
+      .fsai-footer-socials{width:100%;justify-content:center}
       .fsai-project-cover{min-height:220px}
+      .fsai-work-toolbar{padding:12px}
+      .fsai-work-filters{width:100%}
+      .fsai-work-filter{flex:1;padding:0 10px}
       .fsai-steps{grid-template-columns:1fr}
+      .fsai-process-summary{grid-template-columns:1fr;border-block:0;border-left:1px solid var(--line)}
+      .fsai-process-summary li,.fsai-process-summary li:first-child{padding:18px 0 18px 20px;border-left:0;border-bottom:1px solid var(--line)}
+      .fsai-process-summary span{margin-bottom:10px}
       .fsai-proof-strip{grid-template-columns:1fr 1fr}
       .fsai-offer-includes{grid-template-columns:1fr}
       .fsai-app-path{align-items:flex-start;flex-direction:column}
@@ -1310,13 +1354,6 @@
       <a class="fsai-logo" href="#top" aria-label="1stStep.ai home">
         <img class="fsai-logo-img" src="/assets/firststep-logo-transparent-cleaned.png" alt="1stStep.ai">
       </a>
-      <nav class="fsai-nav-links" aria-label="Primary navigation">
-        <a href="#portfolio">Work</a>
-        <a href="#website-offer">Website Offer</a>
-        <a href="#services">Capabilities</a>
-        <a href="#process">Process</a>
-        <a href="#reviews">Reviews</a>
-      </nav>
       <a class="fsai-btn fsai-btn-primary" href="/book/">Book a Website Strategy Call &rarr;</a>
     </header>
 
@@ -1331,9 +1368,7 @@
         <p>I design and build custom websites for established businesses that need their online presence to communicate the same credibility, value, and ambition they bring to the real world.</p>
         <div class="fsai-hero-actions">
           <a class="fsai-btn fsai-btn-primary" href="/book/">Book a Website Strategy Call &rarr;</a>
-          <a class="fsai-btn fsai-btn-ghost" href="#portfolio">View Website Work &rarr;</a>
         </div>
-        <p class="fsai-cta-note">Not ready to book? <a href="/fit-check/" data-fsai-placement="homepage_hero">Request a Fit Check</a> with your website, timeline, and budget range.</p>
         <div class="fsai-mini-proof">
           <div class="fsai-proof-item"><div class="fsai-proof-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg></div><div><strong>Verified client reviews</strong><span>Five-star Google feedback</span></div></div>
           <div class="fsai-proof-item"><div class="fsai-proof-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg></div><div><strong>Built directly with Evan</strong><span>One accountable partner</span></div></div>
@@ -1362,10 +1397,27 @@
           <h2 id="fsai-why-digital-title">Why your business needs a website&mdash;<span class="fsai-gradient">and when an app earns its place.</span></h2>
           <p>A strong website makes the first experience clear and credible. A useful app can make repeat actions faster. The animated story below keeps the people and transformation from your original concept, then rebuilds the message in the current 1stStep.ai visual system.</p>
         </div>
-        <div class="fsai-why-shortcuts">
-          <a class="fsai-why-shortcut" href="#website-offer"><span>Better website</span><small>Trust + clarity</small><b aria-hidden="true">&rarr;</b></a>
-          <a class="fsai-why-shortcut" href="/services/app-builds.html"><span>Purpose-built app</span><small>Useful on repeat</small><b aria-hidden="true">&rarr;</b></a>
-        </div>
+      </div>
+      <div class="fsai-transform-mobile" aria-label="Website transformation summary">
+        <article class="fsai-mobile-state fsai-mobile-state-before">
+          <div class="fsai-mobile-state-label">Before</div>
+          <h3>A website that undersells the business.</h3>
+          <ul>
+            <li>The value is difficult to understand.</li>
+            <li>The design feels generic or dated.</li>
+            <li>Visitors do not know what to do next.</li>
+          </ul>
+        </article>
+        <div class="fsai-mobile-shift">Rebuilt around the real business</div>
+        <article class="fsai-mobile-state fsai-mobile-state-after">
+          <div class="fsai-mobile-state-label">After</div>
+          <h3>A digital presence built to earn trust.</h3>
+          <ul>
+            <li>A distinct visual direction people remember.</li>
+            <li>A clear path from interest to inquiry.</li>
+            <li>An app only when repeat use makes it worthwhile.</li>
+          </ul>
+        </article>
       </div>
       <div class="fsai-transform-wrap">
         <div class="fsai-transform-stage is-before" data-fsai-transform-stage data-transform-state="before" role="region" aria-label="Interactive before-and-after website and app transformation">
@@ -1490,8 +1542,18 @@
         </div>
       </div>
 
+      <div class="fsai-work-toolbar">
+        <span class="fsai-work-filter-label">Explore by project type</span>
+        <div class="fsai-work-filters" role="group" aria-label="Filter selected work by project type">
+          <button class="fsai-work-filter" type="button" data-fsai-work-filter="all" aria-pressed="true">All work</button>
+          <button class="fsai-work-filter" type="button" data-fsai-work-filter="website" aria-pressed="false">Websites</button>
+          <button class="fsai-work-filter" type="button" data-fsai-work-filter="product" aria-pressed="false">Apps + products</button>
+        </div>
+        <p class="fsai-work-filter-status" data-fsai-work-status aria-live="polite">Showing 5 selected projects</p>
+      </div>
+
       <div class="fsai-portfolio">
-        <a class="fsai-project fsai-project-live" href="https://unveilingrarities.com" target="_blank" rel="noopener" data-fsai-case-study="unveiling_rarities">
+        <a class="fsai-project fsai-project-live" href="https://unveilingrarities.com" target="_blank" rel="noopener" data-fsai-case-study="unveiling_rarities" data-fsai-work-types="website">
           <div class="fsai-project-cover">
             <div class="fsai-project-art">
               <img src="/assets/portfolio-unveiling-cover.png" alt="Unveiling Rarities author and book website">
@@ -1512,7 +1574,7 @@
           </div>
         </a>
 
-        <a class="fsai-project fsai-project-live" href="https://app.1ststep.ai/" target="_blank" rel="noopener" data-fsai-case-study="ai_resume_builder">
+        <a class="fsai-project fsai-project-live" href="https://app.1ststep.ai/" target="_blank" rel="noopener" data-fsai-case-study="ai_resume_builder" data-fsai-work-types="product">
           <div class="fsai-project-cover">
             <div class="fsai-project-art">
               <img src="/assets/portfolio-resume-cover.jpg" alt="AI Resume Builder live product interface">
@@ -1533,7 +1595,7 @@
           </div>
         </a>
 
-        <a class="fsai-project fsai-project-live" href="https://real-rank-ai.vercel.app/" target="_blank" rel="noopener" data-fsai-case-study="real_rank_ai">
+        <a class="fsai-project fsai-project-live" href="https://real-rank-ai.vercel.app/" target="_blank" rel="noopener" data-fsai-case-study="real_rank_ai" data-fsai-work-types="product">
           <div class="fsai-project-cover">
             <div class="fsai-project-art">
               <img src="/assets/portfolio-real-rank-cover.jpg" alt="Real Rank AI live Google visibility product">
@@ -1554,7 +1616,7 @@
           </div>
         </a>
 
-        <article class="fsai-project fsai-project-live" id="case-study-swing-trade-pros-nova">
+        <article class="fsai-project fsai-project-live" id="case-study-swing-trade-pros-nova" data-fsai-work-types="website product">
           <div class="fsai-project-cover">
             <div class="fsai-project-art">
               <img src="/assets/portfolio-nova-cover.webp" alt="Illustrative Nova AI Market Assistant product interface">
@@ -1579,7 +1641,7 @@
           </div>
         </article>
 
-        <article class="fsai-project fsai-project-the-spot">
+        <article class="fsai-project fsai-project-the-spot" data-fsai-work-types="website product">
           <div class="fsai-project-cover">
             <div class="fsai-project-art">
               <img src="/generated/the-spot-hero-coffee.jpeg" alt="The Spot Cafe premium website direction">
@@ -1624,65 +1686,17 @@
         </div>
       </div>
 
-      <section class="fsai-platform-support" aria-labelledby="platform-support-title">
-        <div class="fsai-platform-support-head">
-          <div class="fsai-platform-support-copy">
-            <div class="fsai-eyebrow">Work With What You Already Have</div>
-            <h3 id="platform-support-title">Your current setup is not a dealbreaker.</h3>
-            <p>Any business owner can start with the website they have today. I can audit it, repair what is broken, improve the design and conversion path, add integrations, modernize it in place, or migrate it when a new platform is the better long-term move.</p>
-            <div class="fsai-platform-services" aria-label="Ways 1stStep.ai can help an existing website">
-              <span>Audit + improve</span><span>Redesign in place</span><span>Repair + troubleshoot</span><span>Platform migration</span><span>Integrations + automation</span><span>Ongoing support</span>
-            </div>
-          </div>
-          <div class="fsai-platform-featured" aria-label="Popular supported website platforms">
-            <strong>Popular platforms</strong>
-            <span>WordPress</span><span>Wix</span><span>Wix Studio</span><span>Squarespace</span><span>Webflow</span><span>Shopify</span><span>GoDaddy</span><span>Duda</span><span>Framer</span><span>HighLevel / GHL</span><span>Elementor</span><span>WooCommerce</span>
-          </div>
+      <div class="fsai-investment-range" id="investment" aria-label="Typical website project investment">
+        <div>
+          <div class="fsai-investment-label">Typical Project Investment</div>
+          <h3>$3,250&ndash;$12,000 for custom website work.</h3>
+          <p>Focused website repairs may start at $750, and polished single-page builds at $1,250. Every project receives an exact written scope and total before anything is signed. Flexible milestone payment plans are available on approved projects.</p>
         </div>
-        <details class="fsai-platform-details">
-          <summary>View the full platform and technology list</summary>
-          <div class="fsai-platform-groups">
-            <div class="fsai-platform-group"><strong>Hosted website builders</strong><p>Wix, Wix Studio, Squarespace, Webflow, Framer, Showit, Duda, GoDaddy Websites + Marketing, Weebly, Square Online, Hostinger Website Builder, IONOS, Jimdo, Strikingly, SITE123, Webnode, Tilda, Ucraft, Dorik, Carrd, Typedream, Durable, 10Web, B12, Universe, Google Sites, Adobe Express, and Canva Websites.</p></div>
-            <div class="fsai-platform-group"><strong>WordPress + page builders</strong><p>WordPress, WordPress.com, WooCommerce, Gutenberg, Elementor, Divi, Bricks, Oxygen, Breakdance, Beaver Builder, WPBakery, Thrive Architect, Kadence, GeneratePress, Avada, and custom WordPress themes or plugins.</p></div>
-            <div class="fsai-platform-group"><strong>Commerce platforms</strong><p>Shopify, Shopify Plus, WooCommerce, BigCommerce, Adobe Commerce / Magento, Squarespace Commerce, Wix Stores, Webflow Ecommerce, Ecwid, Shopline, Shift4Shop, PrestaShop, OpenCart, and Salesforce Commerce Cloud.</p></div>
-            <div class="fsai-platform-group"><strong>Funnels, memberships + courses</strong><p>HighLevel / LeadConnector, ClickFunnels, HubSpot CMS, Kajabi, Kartra, Systeme.io, Leadpages, Unbounce, Instapage, Landingi, Podia, Teachable, Thinkific, Mighty Networks, Stan Store, and Gumroad.</p></div>
-            <div class="fsai-platform-group"><strong>CMS + content platforms</strong><p>Drupal, Joomla, Ghost, Craft CMS, Contentful, Sanity, Strapi, Prismic, Storyblok, Builder.io, Plasmic, Umbraco, Kentico, Sitecore, Notion with Super, and other headless CMS setups.</p></div>
-            <div class="fsai-platform-group"><strong>No-code, specialist + custom stacks</strong><p>Bubble, Softr, Glide, FlutterFlow, Adalo, Webstudio, Zenfolio, SmugMug, Pixpa, Format, Bandzoogle, custom HTML / CSS / JavaScript, React, Next.js, Vite, Vue, Nuxt, SvelteKit, Angular, Astro, Laravel, Django, Rails, ASP.NET, and PHP.</p></div>
-          </div>
-          <p class="fsai-platform-note">This list covers the major hosted, self-hosted, no-code, commerce, funnel, CMS, and custom-development ecosystems. If your platform is not named, send the URL anyway&mdash;unusual and legacy setups are welcome.</p>
-        </details>
-      </section>
-
-      <div class="fsai-investment" aria-label="Website investment paths">
-        <article class="fsai-investment-card" id="investment">
-          <div class="fsai-investment-label">Custom Website Build</div>
-          <h3>Scoped around the approved website.</h3>
-          <p>Final scope and price follow the Website Strategy Call. Work begins only after the proposal is approved, the agreement is signed, and the agreed project deposit is paid.</p>
-          <div class="fsai-commercial-flow" aria-label="Custom website commercial path"><span>Strategy call</span><i>&rarr;</i><span>Scoped proposal</span><i>&rarr;</i><span>Agreement + deposit</span><i>&rarr;</i><span>Build begins</span></div>
-        </article>
-        <article class="fsai-investment-card">
-          <div class="fsai-investment-label">Website Blueprint</div>
-          <h3>A fixed-scope strategy product.</h3>
-          <p>For businesses that need a clear website direction before committing to a full custom build.</p>
-          <ul class="fsai-blueprint-list">
-            <li>Current-site review</li>
-            <li>Homepage message hierarchy</li>
-            <li>Conversion-path recommendations</li>
-            <li>Visual-direction recommendations</li>
-            <li>Recommended website scope</li>
-            <li>Recorded strategy session</li>
-            <li>Written project roadmap</li>
-          </ul>
-          <div class="fsai-blueprint-checkout" data-fsai-blueprint-checkout hidden>
-            <strong data-fsai-blueprint-price></strong>
-            <div class="fsai-blueprint-actions">
-              <a class="fsai-btn fsai-btn-primary" data-fsai-blueprint-link href="">Buy the Website Blueprint &rarr;</a>
-              <a data-fsai-blueprint-terms href="">Terms</a>
-              <a href="/privacy.html">Privacy</a>
-            </div>
-          </div>
-        </article>
-        <p class="fsai-investment-note">Blueprint purchase details appear only after the fixed price, checkout destination, terms, fulfillment workflow, and any build-credit policy are approved. No public custom-project deposit is collected before an approved proposal and agreement.</p>
+        <aside class="fsai-investment-fit">
+          <span>Best fit</span>
+          <strong>Established businesses ready to invest in a custom result.</strong>
+          <p>If the range is outside your current budget, the Fit Check in the footer is the lighter place to start.</p>
+        </aside>
       </div>
 
       <div class="fsai-services">
@@ -1750,80 +1764,6 @@
           <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 12l2 2 4-5"/><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg><span>QA and automation checks</span></div>
           <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4z"/><path d="M16 3v4M8 3v4M4 9h16"/><path d="M8 13h3M13 13h3M8 17h3"/></svg><span>weekly operating rhythm</span></div>
         </div>
-      </div>
-    </section>
-
-    <section class="fsai-section" id="services">
-      <div class="fsai-section-head">
-        <div>
-          <div class="fsai-eyebrow">Supporting Capabilities</div>
-          <h2>When the project needs more than a website.</h2>
-          <p class="fsai-section-lede">Web products, dashboards, integrations, and iOS direction are available when they support the broader customer experience or business goal.</p>
-        </div>
-      </div>
-
-      <div class="fsai-capabilities">
-        <article class="fsai-capability-card"><div class="fsai-capability-number">01</div><h3>Web Apps &amp; Dashboards</h3><p>Focused digital products that turn a customer journey or difficult workflow into a clear, useful experience.</p><a href="/services/mvp-builds.html">Explore product builds &rarr;</a></article>
-        <article class="fsai-capability-card"><div class="fsai-capability-number">02</div><h3>iOS Apps &amp; Prototypes</h3><p>High-fidelity iPhone experiences shaped around the core user journey, with a practical path toward SwiftUI development.</p><a href="/services/app-builds.html">Explore iOS work &rarr;</a></article>
-        <article class="fsai-capability-card"><div class="fsai-capability-number">03</div><h3>Integrations</h3><p>Forms, calendars, content, commerce, notifications, and internal tools that support the experience without taking over the story.</p><a href="/services/internal-tools.html">Explore integrations &rarr;</a></article>
-      </div>
-      <div class="fsai-app-path"><span><strong>Building a product instead?</strong> Use the focused idea pathway when an app&mdash;not a company website&mdash;is the project.</span><a href="/app-idea-viability-checker.html">Check Your App Idea &rarr;</a></div>
-
-      <div class="fsai-portfolio">
-        <a class="fsai-project" href="https://app.1ststep.ai/" target="_blank" rel="noopener">
-          <div class="fsai-project-cover fsai-project-resume">
-            <div class="fsai-project-art">
-              <img src="/assets/portfolio-resume-cover.jpg" alt="1stStep.ai resume builder preview">
-            </div>
-            <div class="fsai-project-name">AI Resume Builder</div>
-            <div class="fsai-project-chips"><span>Resume Tailor</span><span>Job Tracker</span><span>Chrome Extension</span></div>
-          </div>
-          <div class="fsai-project-content"><h3>AI Resume Builder</h3><div class="fsai-label">Featured product by 1stStep.ai</div><p><strong>Problem:</strong> Job seekers needed a faster way to tailor materials and track applications.</p><ul class="fsai-outcome-list"><li><strong>Built:</strong> Resume tailoring, cover letters, job tracking, and Chrome extension workflow.</li><li><strong>Tags:</strong> SaaS app, AI workflow, Chrome extension.</li></ul><div class="fsai-project-link">View live project &rarr;</div></div>
-        </a>
-
-        <a class="fsai-project" href="https://dashboard.swingtradepros.com/" target="_blank" rel="noopener">
-          <div class="fsai-project-cover fsai-project-trading">
-            <div class="fsai-project-art">
-              <img src="/assets/portfolio-stp-cover.jpg" alt="Swing Trade Pros dashboard preview">
-            </div>
-            <div class="fsai-project-name">Subscriber Dashboard</div>
-            <div class="fsai-project-chips"><span>CALL/PUT Signals</span><span>Confidence</span><span>Live Status</span></div>
-          </div>
-          <div class="fsai-project-content"><h3>Swing Trade Pros Dashboard</h3><div class="fsai-label">Options signal dashboard</div><p><strong>Problem:</strong> Subscribers needed a clearer way to scan alerts and signal context.</p><ul class="fsai-outcome-list"><li><strong>Built:</strong> Member dashboard for alerts, status, confidence tracking, and analytics.</li><li><strong>Tags:</strong> Dashboard, membership tool, live status.</li></ul><div class="fsai-project-link">View live project &rarr;</div></div>
-        </a>
-
-        <a class="fsai-project" href="https://real-rank-ai.vercel.app/" target="_blank" rel="noopener">
-          <div class="fsai-project-cover fsai-project-rank">
-            <div class="fsai-project-art">
-              <img src="/assets/portfolio-real-rank-cover.jpg" alt="Real Rank AI visibility platform preview">
-            </div>
-            <div class="fsai-project-name">Visibility Platform</div>
-            <div class="fsai-project-chips"><span>AI Mentions</span><span>Local Visibility</span><span>PDF Reports</span></div>
-          </div>
-          <div class="fsai-project-content"><h3>Real Rank AI</h3><div class="fsai-label">AI visibility and local authority platform</div><p><strong>Problem:</strong> Local businesses needed clearer visibility reporting and audit packaging.</p><ul class="fsai-outcome-list"><li><strong>Built:</strong> AI mention tracking, movement reports, and client-ready audits.</li><li><strong>Tags:</strong> Reporting, AI visibility, audits.</li></ul><div class="fsai-project-link">View live project &rarr;</div></div>
-        </a>
-
-        <article class="fsai-project fsai-project-the-spot">
-          <div class="fsai-project-cover">
-            <div class="fsai-project-art">
-              <img src="/generated/the-spot-ios-showcase.png" alt="The Spot Cafe iOS product concept screens">
-            </div>
-            <div class="fsai-project-name">The Spot Cafe</div>
-            <div class="fsai-project-chips"><span>Cinematic Website</span><span>Motion System</span><span>iOS Prototype</span></div>
-          </div>
-          <div class="fsai-project-content"><h3>The Spot Cafe</h3><div class="fsai-label">Website and native iOS product direction</div><p><strong>Direction:</strong> Turn a neighborhood cafe into a warm, editorial digital brand without losing the familiarity of the real place.</p><ul class="fsai-outcome-list"><li><strong>Built:</strong> Cinematic website system, layered coffee motion, responsive interactions, and a four-tab iOS prototype.</li><li><strong>Status:</strong> Website and interactive prototype; the iOS concept is not presented as an App Store release.</li></ul><div class="fsai-project-link">Website + iOS concept</div></div>
-        </article>
-
-        <a class="fsai-project" href="https://unveilingrarities.com" target="_blank" rel="noopener">
-          <div class="fsai-project-cover">
-            <div class="fsai-project-art">
-              <img src="/assets/portfolio-unveiling-cover.png" alt="Unveiling Rarities book cover">
-            </div>
-            <div class="fsai-project-name">Author &amp; Book Website</div>
-            <div class="fsai-project-chips"><span>Media Kit</span><span>Newsletter</span><span>Speaking Requests</span></div>
-          </div>
-          <div class="fsai-project-content"><h3>Unveiling Rarities</h3><div class="fsai-label">Author brand &amp; book launch website</div><p><strong>Problem:</strong> A 50-year diamond dealer launching a memoir needed a credible online home for readers, press, and event organizers.</p><ul class="fsai-outcome-list"><li><strong>Built:</strong> Book overview, media and press kit, newsletter capture, speaking-engagement requests, and Amazon purchase links.</li><li><strong>Tags:</strong> Website, lead capture, author brand.</li></ul><div class="fsai-project-link">View live project &rarr;</div></div>
-        </a>
       </div>
     </section>
 
@@ -1932,24 +1872,12 @@
           <p class="fsai-process-copy">A focused four-part process keeps business strategy, creative direction, design, development, and launch connected.</p>
         </div>
       </div>
-      <div class="fsai-steps">
-        <div class="fsai-step"><div class="fsai-step-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v8Z"/><path d="M8 9h8M8 13h5"/></svg></div><h3>1. Strategy</h3><p>Review the current site, audience, business goals, proof, and the most important action for qualified visitors.</p></div>
-        <div class="fsai-step"><div class="fsai-step-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="m16.5 7.5 3-3M18.5 4.5h1v1"/></svg></div><h3>2. Creative Direction</h3><p>Establish a distinct visual language for type, color, imagery, composition, and motion around the brand.</p></div>
-        <div class="fsai-step"><div class="fsai-step-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="3"/><path d="M4 10h16"/><path d="M8 15h5M16 15h1"/></svg></div><h3>3. Design &amp; Build</h3><p>Turn the approved direction into a responsive, polished website with content hierarchy and conversion paths intact.</p></div>
-        <div class="fsai-step"><div class="fsai-step-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 10-13h-7l0-7Z"/></svg></div><h3>4. QA &amp; Launch</h3><p>Test responsive behavior, accessibility, performance, motion, links, and the real inquiry path before handoff.</p></div>
-      </div>
-      <div class="fsai-process-context">
-        <div class="fsai-founder-compact">
-          <img src="/assets/homepage-evan-720.jpg" alt="Evan Pancis" />
-          <div><div class="fsai-eyebrow">Independent Studio</div><h3>Strategy, design, and development stay with Evan.</h3><p>One accountable partner keeps the business story, visual direction, motion, and technical build connected from the first call through launch.</p></div>
-        </div>
-        <div class="fsai-fit-compact">
-          <div class="fsai-eyebrow">A Strong Fit When</div>
-          <h3>The quality of the business has moved ahead of the website.</h3>
-          <p>You have a real track record, the current site feels dated or unclear, and you value a custom result over a bargain template or guaranteed-result promise.</p>
-          <div class="fsai-fit-chips"><span>Established business</span><span>Clear owner</span><span>High bar for design</span><span>Ready to collaborate</span></div>
-        </div>
-      </div>
+      <ol class="fsai-process-summary" aria-label="Four stages of a website build">
+        <li><span>01</span><strong>Strategy</strong><p>Audience, message, strongest proof, and the primary action.</p></li>
+        <li><span>02</span><strong>Creative Direction</strong><p>Visual world, tone, responsive behavior, and motion approach.</p></li>
+        <li><span>03</span><strong>Design &amp; Build</strong><p>The approved direction becomes a working, responsive website.</p></li>
+        <li><span>04</span><strong>QA &amp; Launch</strong><p>Cross-device testing, conversion checks, polish, and handoff.</p></li>
+      </ol>
     </section>
 
     <section class="fsai-section" id="about">
@@ -1987,7 +1915,7 @@
         <div>
           <div class="fsai-eyebrow fsai-google-eyebrow"><span class="fsai-google-mini" aria-hidden="true"><svg viewBox="0 0 533.5 544.3" xmlns="http://www.w3.org/2000/svg"><path d="M533.5 278.4c0-18.5-1.5-37.1-4.7-55.3H272.1v104.8h147c-6.1 33.8-25.7 63.7-54.4 82.7v68h87.7c51.5-47.4 81.1-117.4 81.1-200.2z" fill="#4285f4"/><path d="M272.1 544.3c73.4 0 135.3-24.1 180.4-65.7l-87.7-68c-24.4 16.6-55.9 26-92.6 26-71 0-131.2-47.9-152.8-112.3H28.9v70.1c46.2 91.9 140.3 149.9 243.2 149.9z" fill="#34a853"/><path d="M119.3 324.3c-11.4-33.8-11.4-70.4 0-104.2V150H28.9c-38.6 76.9-38.6 167.5 0 244.4l90.4-70.1z" fill="#fbbc04"/><path d="M272.1 107.7c38.8-.6 76.3 14 104.4 40.8l77.7-77.7C405 24.6 339.7-.8 272.1 0 169.2 0 75.1 58 28.9 150l90.4 70.1c21.5-64.5 81.8-112.4 152.8-112.4z" fill="#ea4335"/></svg></span>Google Reviews</div>
           <h2>A second perspective on the <span class="fsai-gradient">website experience.</span></h2>
-          <p class="fsai-section-lede">One focused, verified review about the finished site and the process behind it.</p>
+          <p class="fsai-section-lede">Two focused, verified reviews about finished websites and the process behind them.</p>
         </div>
         <div class="fsai-google-badge" aria-label="Google Reviews">
           <div class="fsai-google-g" aria-hidden="true">
@@ -2075,30 +2003,61 @@
         </div>
         <div class="fsai-hero-actions" style="justify-content:center;margin-bottom:0;">
           <a class="fsai-btn fsai-btn-primary" href="/book/">Book a Website Strategy Call &rarr;</a>
-          <a class="fsai-btn fsai-btn-ghost" href="#portfolio">View Website Work</a>
         </div>
       </div>
     </section>
 
     <footer class="fsai-footer">
+      <a class="fsai-footer-offer" href="/campaigns/morris-county-free-website/" aria-label="View the free custom website offer for Morris County businesses">
+        <span class="fsai-footer-offer-thumb">
+          <img src="/generated/morris-county-free-website-og.png" width="1200" height="630" loading="lazy" decoding="async" alt="Free custom website offer for Morris County businesses">
+        </span>
+        <span class="fsai-footer-offer-copy">
+          <small>Morris County Local Business Offer</small>
+          <strong>A custom website. Built for $0.</strong>
+          <span>First 10 qualified Morris County businesses · Applications open</span>
+        </span>
+        <span class="fsai-footer-offer-action">View the offer <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
       <div class="fsai-footer-brand"><img class="fsai-footer-logo" src="/assets/firststep-logo-transparent-cleaned.png" alt="1stStep.ai"><span>Copyright 2026 1stStep.ai. Built by Evan Pancis.</span></div>
       <div class="fsai-footer-links">
+        <a href="#portfolio">Work</a>
+        <span>|</span>
+        <a href="#process">Process</a>
+        <span>|</span>
+        <a href="#reviews">Reviews</a>
+        <span>|</span>
         <a href="/services/websites.html">Websites</a>
+        <span>|</span>
+        <a href="/services/websites.html#process">Website Process</a>
+        <span>|</span>
+        <a href="/services/websites.html#platform-support">Platforms</a>
         <span>|</span>
         <a href="/services/mvp-builds.html">Web Apps</a>
         <span>|</span>
         <a href="/services/app-builds.html">iOS</a>
         <span>|</span>
-        <a href="/services/internal-tools.html">Integrations</a>
-        <span>|</span>
-        <a href="/startup-launch-checker/">Launch Checker</a>
-        <span>|</span>
-        <a href="https://www.linkedin.com/company/1ststep-ai/" target="_blank" rel="noopener">LinkedIn</a>
-        <span>|</span>
-        <a href="https://www.facebook.com/profile.php?id=61566833623507" target="_blank" rel="noopener">Facebook</a>
+        <a href="/fit-check/">Request a Fit Check</a>
         <span>|</span>
         <a href="https://maps.app.goo.gl/x7XKauoXUwi2qfNdA" target="_blank" rel="noopener">Google</a>
       </div>
+      <nav class="fsai-footer-socials" aria-label="Follow 1stStep.ai">
+        <a href="https://www.linkedin.com/company/1ststep-ai/" target="_blank" rel="noopener noreferrer" aria-label="1stStep.ai on LinkedIn" title="LinkedIn">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.2 3.5A2.2 2.2 0 1 1 5.2 8a2.2 2.2 0 0 1 0-4.5ZM3.3 9.7h3.8V21H3.3V9.7Zm6.2 0h3.6v1.5h.1c.5-.9 1.7-1.9 3.5-1.9 3.8 0 4.5 2.5 4.5 5.8V21h-3.8v-5.2c0-1.2 0-2.9-1.8-2.9s-2 1.4-2 2.8V21H9.5V9.7Z"/></svg>
+        </a>
+        <a href="https://www.facebook.com/profile.php?id=61566833623507" target="_blank" rel="noopener noreferrer" aria-label="1stStep.ai on Facebook" title="Facebook">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.7 21v-8h2.7l.4-3.1h-3.1v-2c0-.9.3-1.5 1.6-1.5H17V3.6c-.3 0-1.3-.1-2.5-.1-2.5 0-4.2 1.5-4.2 4.3v2.1H7.5V13h2.8v8h3.4Z"/></svg>
+        </a>
+        <a href="https://www.instagram.com/1ststepdotai/" target="_blank" rel="noopener noreferrer" aria-label="1stStep.ai on Instagram" title="Instagram">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.2c3.2 0 3.6 0 4.8.1 3.2.1 4.8 1.7 4.9 4.9.1 1.2.1 1.6.1 4.8s0 3.6-.1 4.8c-.1 3.2-1.7 4.8-4.9 4.9-1.2.1-1.6.1-4.8.1s-3.6 0-4.8-.1c-3.2-.1-4.8-1.7-4.9-4.9-.1-1.2-.1-1.6-.1-4.8s0-3.6.1-4.8c.1-3.2 1.7-4.8 4.9-4.9 1.2-.1 1.6-.1 4.8-.1Zm0 1.7c-3.1 0-3.5 0-4.7.1-2.3.1-3.5 1.2-3.6 3.6-.1 1.2-.1 1.6-.1 4.7s0 3.5.1 4.7c.1 2.3 1.2 3.5 3.6 3.6 1.2.1 1.6.1 4.7.1s3.5 0 4.7-.1c2.3-.1 3.5-1.2 3.6-3.6.1-1.2.1-1.6.1-4.7s0-3.5-.1-4.7c-.1-2.3-1.2-3.5-3.6-3.6-1.2-.1-1.6-.1-4.7-.1Zm0 3.6a4.8 4.8 0 1 1 0 9.6 4.8 4.8 0 0 1 0-9.6Zm0 1.7a3.1 3.1 0 1 0 0 6.2 3.1 3.1 0 0 0 0-6.2Zm5-3a1.1 1.1 0 1 1 0 2.2 1.1 1.1 0 0 1 0-2.2Z"/></svg>
+        </a>
+        <a href="https://www.youtube.com/channel/UCynvog-XB0oFBigcrBvmxOg" target="_blank" rel="noopener noreferrer" aria-label="1stStep.ai on YouTube" title="YouTube">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 12s0-3.2-.4-4.7a2.8 2.8 0 0 0-2-2C18.1 5 12 5 12 5s-6.1 0-7.6.4a2.8 2.8 0 0 0-2 2C2 8.8 2 12 2 12s0 3.2.4 4.7a2.8 2.8 0 0 0 2 2C5.9 19 12 19 12 19s6.1 0 7.6-.4a2.8 2.8 0 0 0 2-2C22 15.2 22 12 22 12Zm-12 3.1V8.9l5.2 3.1-5.2 3.1Z"/></svg>
+        </a>
+        <a href="https://github.com/1ststepai" target="_blank" rel="noopener noreferrer" aria-label="1stStep.ai on GitHub" title="GitHub">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-3.2 19.5c.5.1.7-.2.7-.5v-1.9c-2.8.6-3.4-1.2-3.4-1.2-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 0 1.6 1.1 1.6 1.1.9 1.6 2.4 1.1 3 .9.1-.7.4-1.1.7-1.3-2.3-.3-4.7-1.1-4.7-5a4 4 0 0 1 1-2.7c-.1-.3-.4-1.3.1-2.7 0 0 .9-.3 2.8 1a9.8 9.8 0 0 1 5.1 0c2-1.3 2.8-1 2.8-1 .6 1.4.2 2.4.1 2.7a4 4 0 0 1 1.1 2.7c0 3.9-2.4 4.7-4.7 5 .4.3.7.9.7 1.8V21c0 .3.2.6.7.5A10 10 0 0 0 12 2Z"/></svg>
+        </a>
+      </nav>
     </footer>
   </div>
 
@@ -2184,6 +2143,7 @@
       if (blueprintCheckout && blueprintPrice && blueprintLink && blueprintTerms && blueprintReady) {
         blueprintPrice.textContent = blueprint.priceDisplay.trim();
         blueprintLink.href = blueprint.checkoutUrl;
+        blueprintLink.textContent = "Buy the Website Blueprint →";
         blueprintTerms.href = blueprint.termsUrl;
         blueprintCheckout.hidden = false;
       }
@@ -2318,6 +2278,33 @@
         button.addEventListener("click", function () {
           transformationManuallyControlled = true;
           setTransformationState(button.dataset.fsaiTransformState, true);
+        });
+      });
+
+      const workFilterButtons = document.querySelectorAll("[data-fsai-work-filter]");
+      const workProjects = document.querySelectorAll("#portfolio [data-fsai-work-types]");
+      const workStatus = document.querySelector("[data-fsai-work-status]");
+
+      workFilterButtons.forEach(function (button) {
+        button.addEventListener("click", function () {
+          const filter = button.dataset.fsaiWorkFilter;
+          let visibleCount = 0;
+
+          workFilterButtons.forEach(function (item) {
+            item.setAttribute("aria-pressed", item === button ? "true" : "false");
+          });
+
+          workProjects.forEach(function (project) {
+            const types = (project.dataset.fsaiWorkTypes || "").split(/\s+/);
+            const visible = filter === "all" || types.indexOf(filter) !== -1;
+            project.hidden = !visible;
+            if (visible) visibleCount += 1;
+          });
+
+          if (workStatus) {
+            const label = filter === "website" ? "website projects" : filter === "product" ? "app and product projects" : "selected projects";
+            workStatus.textContent = "Showing " + visibleCount + " " + label;
+          }
         });
       });
 

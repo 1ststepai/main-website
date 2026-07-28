@@ -25,18 +25,25 @@ main::before{content:"";position:absolute;width:420px;height:420px;right:-180px;
 h1{font-size:clamp(44px,6.2vw,76px);max-width:13ch;color:#f7f8ff;position:relative}
 p,li{color:#aeb4c9}
 .lede{font-size:clamp(17px,2vw,20px);max-width:720px;position:relative}
+.hero-actions,.cta-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.hero-actions{margin-top:28px}
+.assurance{margin:13px 0 0;color:#7f899f;font-size:12px;line-height:1.55}
 .grid{gap:18px;margin:42px 0}
 .card{min-height:210px;border:1px solid rgba(255,255,255,.09);border-radius:22px;padding:26px;background:linear-gradient(160deg,rgba(24,28,48,.9),rgba(13,16,29,.94));box-shadow:0 28px 70px -42px #000}
 .card:hover{box-shadow:0 38px 90px -48px rgba(79,140,255,.65)}
 .card h2{color:#f7f8ff}
 .cta{padding:clamp(28px,4vw,42px);border:1px solid rgba(139,124,255,.26);background:radial-gradient(circle at 100% 0%,rgba(86,221,255,.16),transparent 48%),linear-gradient(135deg,#201b47,#11182d 58%,#101b2d);box-shadow:0 38px 90px -54px rgba(93,101,255,.8)}
-.cta .btn{background:#fff;color:#7163ff}
+.cta-actions{margin-top:18px}
+.cta .btn{margin-top:0;background:#fff;color:#7163ff}
+.cta .btn.ghost{background:rgba(255,255,255,.06);color:#fff;border-color:rgba(255,255,255,.2)}
 footer{border-top-color:rgba(255,255,255,.08);color:#788097}
 a:focus-visible{outline:2px solid #65e7ff;outline-offset:4px}
 @media(max-width:760px){
   .wrap{width:calc(100% - 28px)}
   .nav{align-items:center;flex-direction:row}
   .nav .btn{font-size:13px;padding:10px 14px}
+  .hero-actions,.cta-actions{align-items:stretch;flex-direction:column}
+  .hero-actions .btn,.cta-actions .btn{width:100%}
   main{margin-top:18px;padding:34px 22px;border-radius:24px}
   h1{font-size:clamp(40px,12vw,58px)}
   .grid{grid-template-columns:1fr}

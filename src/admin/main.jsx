@@ -6,6 +6,9 @@ import {
   ChevronDown,
   CircleDollarSign,
   Copy,
+  CreditCard,
+  Download,
+  ExternalLink,
   Eye,
   FileText,
   GripVertical,
@@ -21,42 +24,36 @@ import {
   Search,
   Settings,
   ShieldCheck,
+  Sparkles,
   Trash2,
   Users,
   X,
 } from "lucide-react";
+import {
+  DEFAULT_CONTRACT_TEMPLATES,
+  DEFAULT_PRICING_SETTINGS,
+  DEFAULT_PRICING_STRUCTURES,
+  assignClientToQuote,
+  recordQuoteDelivery,
+} from "../../lib/admin/workspaceModel.js";
+import {
+  AGREEMENT_CATEGORIES,
+  AGREEMENT_DEPTHS,
+  AGREEMENT_SECTION_LIBRARY,
+  MAX_AGREEMENT_SECTIONS,
+  agreementCoverage,
+  sectionFromLibrary,
+  sectionsForDepth,
+} from "../../lib/admin/agreementLibrary.js";
+import {
+  PAYMENT_PLANS,
+  paymentPlanLabel,
+  paymentScheduleForQuote,
+} from "../../lib/admin/paymentPlans.js";
+import { draftQuoteFromBrief } from "../../lib/admin/quoteBriefAssistant.js";
 import "./admin.css";
 
-const DEFAULT_TEMPLATES = [
-  {
-    id: "website-build",
-    name: "Website build agreement",
-    sections: [
-      { id: "scope", title: "Scope", body: "The studio will provide the deliverables listed in the accepted quote. Work outside that scope requires written approval and may be quoted separately.", enabled: true },
-      { id: "timeline", title: "Timeline", body: "Target dates begin after the deposit, required content, and account access are received. Client delays may move the delivery schedule.", enabled: true },
-      { id: "payment", title: "Payment schedule", body: "A 50% deposit reserves the project. The remaining balance is due before launch or final file transfer unless the quote states otherwise.", enabled: true },
-      { id: "revisions", title: "Revisions", body: "Two reasonable revision rounds are included for each approved design stage. New direction or added scope may require a change order.", enabled: true },
-      { id: "ownership", title: "Ownership", body: "After payment in full, the client receives rights to the final custom deliverables. The studio retains its pre-existing tools, reusable components, and know-how.", enabled: true },
-      { id: "third-party", title: "Third-party services", body: "The client is responsible for approved domain, hosting, plugin, font, stock media, and other third-party fees unless they are included in the quote.", enabled: true },
-      { id: "cancellation", title: "Cancellation", body: "Either party may end the project in writing. Completed work and committed third-party costs remain payable; the deposit is applied to work already reserved or performed.", enabled: true },
-      { id: "outcomes", title: "Outcomes and acceptance", body: "The studio will perform the services with reasonable care but does not guarantee revenue, rankings, traffic, funding, platform approval, or other business results.", enabled: true },
-    ],
-  },
-  {
-    id: "ios-app-build",
-    name: "iOS app build agreement",
-    sections: [
-      { id: "scope", title: "Scope", body: "The studio will build the features and delivery stages listed in the accepted quote. Additional platforms, integrations, or features require a written change order.", enabled: true },
-      { id: "timeline", title: "Timeline", body: "Milestones begin after the deposit, product decisions, content, test accounts, and required access are received. Review and App Store timelines are estimates.", enabled: true },
-      { id: "payment", title: "Payment schedule", body: "A 50% deposit reserves the build. Remaining milestone payments are due as listed in the quote and before production release or source transfer.", enabled: true },
-      { id: "revisions", title: "Revisions and testing", body: "Two revision rounds are included for approved interface stages. The client will test milestone builds and report reproducible issues within the agreed review window.", enabled: true },
-      { id: "ownership", title: "Code and ownership", body: "After payment in full, the client receives the final custom project code and deliverables. The studio retains pre-existing libraries, reusable components, and general know-how.", enabled: true },
-      { id: "accounts", title: "Developer accounts and services", body: "The client owns and pays for Apple Developer membership, hosting, APIs, subscriptions, and third-party services unless the quote specifically includes them.", enabled: true },
-      { id: "store-review", title: "Platform review", body: "The studio will prepare the agreed submission materials but cannot guarantee App Store acceptance, review timing, search position, downloads, or revenue.", enabled: true },
-      { id: "cancellation", title: "Cancellation", body: "Either party may end the project in writing. Completed milestones, reserved work, and committed third-party costs remain payable.", enabled: true },
-    ],
-  },
-];
+const DEFAULT_TEMPLATES = DEFAULT_CONTRACT_TEMPLATES;
 
 const EMPTY_WORKSPACE = {
   revision: 0,
@@ -64,12 +61,15 @@ const EMPTY_WORKSPACE = {
   clients: [],
   quotes: [],
   templates: DEFAULT_TEMPLATES,
+  pricing_structures: DEFAULT_PRICING_STRUCTURES,
+  pricing_settings: DEFAULT_PRICING_SETTINGS,
 };
 
 const NAVIGATION = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
   { id: "clients", label: "Clients", icon: Users },
   { id: "quotes", label: "Quotes", icon: FileText },
+  { id: "pricing", label: "Pricing", icon: CircleDollarSign },
   { id: "contracts", label: "Contracts", icon: ScrollText },
   { id: "settings", label: "Settings", icon: Settings },
 ];
@@ -100,6 +100,39 @@ function currency(value) {
 
 function quoteTotal(quote) {
   return quote.line_items.reduce((sum, item) => sum + (Number(item.quantity) || 0) * (Number(item.rate) || 0), 0);
+}
+
+function validEmail(value) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || "").trim());
+}
+
+function quoteNextStep(quote) {
+  if (quote.status !== "sent") return `Valid ${formatDate(quote.valid_until)}`;
+  if (!quote.follow_up_due) return "Follow-up not set";
+  const today = new Date().toISOString().slice(0, 10);
+  if (quote.follow_up_due < today) return `Overdue · ${formatDate(quote.follow_up_due)}`;
+  if (quote.follow_up_due === today) return "Follow up today";
+  return `Follow up ${formatDate(quote.follow_up_due)}`;
+}
+
+function pricingFloor(structure, settings) {
+  const labor = (Number(structure.estimated_hours) || 0) * (Number(settings.target_hourly_rate) || 0);
+  return labor * (1 + (Number(settings.contingency_percent) || 0) / 100);
+}
+
+function createPricingStructure() {
+  return {
+    id: recordId("pricing"),
+    name: "New service",
+    category: "website",
+    billing_type: "project",
+    starting_price: 0,
+    typical_high: 0,
+    estimated_hours: 1,
+    summary: "",
+    ideal_for: "",
+    inclusions: "",
+  };
 }
 
 function createClient(overrides = {}) {
@@ -133,9 +166,16 @@ function createQuote(client, template, sequence = 1, overrides = {}) {
       { id: recordId("item"), name: "Design & build", description: "Custom product design and implementation", quantity: 1, rate: 0 },
       { id: recordId("item"), name: "Launch", description: "Testing, handoff, and production launch", quantity: 1, rate: 0 },
     ],
-    deposit_percent: 50,
+    deposit_percent: 40,
+    payment_plan: "three_payments",
+    card_payments_enabled: true,
+    payment_links: [],
+    last_contacted_at: null,
+    follow_up_due: "",
+    follow_up_count: 0,
     notes: "Quote valid for 30 days. Third-party services are billed separately unless listed above.",
     contract_template_id: template.id,
+    document_depth: template.document_depth || "standard",
     contract_sections: structuredClone(template.sections),
     ...overrides,
   };
@@ -150,7 +190,8 @@ function previewWorkspace() {
     website: "https://northstar.example",
     billing_address: "24 Market Street\nMorristown, NJ 07960",
   });
-  const quote = createQuote(client, DEFAULT_TEMPLATES[0], 24, {
+  const template = DEFAULT_TEMPLATES.find((item) => item.id === "website-build") || DEFAULT_TEMPLATES[0];
+  const quote = createQuote(client, template, 24, {
     project_title: "Premium website transformation",
     summary: "A high-end, conversion-focused website with custom motion, a streamlined service journey, and a simple content editing system.",
     line_items: [
@@ -188,26 +229,43 @@ function Logo() {
   );
 }
 
-function Login({ onAuthenticated }) {
+function Login({ onAuthenticated, mfaRequired, mobileTotpLoginAllowed }) {
   const [password, setPassword] = useState("");
+  const [otp, setOtp] = useState("");
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
+  const [useMobileTotpOnly, setUseMobileTotpOnly] = useState(false);
+
+  useEffect(() => {
+    setUseMobileTotpOnly(Boolean(mobileTotpLoginAllowed && mfaRequired));
+  }, [mobileTotpLoginAllowed, mfaRequired]);
 
   async function submit(event) {
     event.preventDefault();
     setBusy(true);
     setMessage("");
+    const useTotpOnly = Boolean(useMobileTotpOnly && mfaRequired);
+    let requestBody = JSON.stringify({
+      password: useTotpOnly ? "" : password,
+      otp,
+      mobile_totp_login: useTotpOnly,
+    });
+    setPassword("");
+    setOtp("");
     try {
       await api("/api/admin-session", {
         method: "POST",
-        body: JSON.stringify({ password }),
+        body: requestBody,
       });
       onAuthenticated();
     } catch (error) {
       setMessage(error.code === "invalid_credentials"
-        ? "That password was not accepted."
+        ? (useTotpOnly
+          ? "That authenticator code was not accepted."
+          : "That password or authenticator code was not accepted.")
         : error.message);
     } finally {
+      requestBody = "";
       setBusy(false);
     }
   }
@@ -221,23 +279,59 @@ function Login({ onAuthenticated }) {
           <p>Create polished quotes, shape agreement terms, and keep every project decision organized.</p>
         </div>
         <form onSubmit={submit}>
-          <label htmlFor="studio-password">Owner password</label>
-          <input
-            id="studio-password"
-            type="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            autoComplete="current-password"
-            required
-            autoFocus
-          />
+          {mobileTotpLoginAllowed && mfaRequired && (
+            <div className="login-mode-note">
+              <strong>{useMobileTotpOnly ? "Mobile 2FA-only access" : "Owner password mode"}</strong>
+              <span>{useMobileTotpOnly
+                ? "Use your authenticator code on mobile. Desktop still requires the owner password plus 2FA."
+                : "Password mode is still available if you want the full desktop-style sign-in."}</span>
+              <button
+                type="button"
+                className="login-mode-switch"
+                onClick={() => setUseMobileTotpOnly((current) => !current)}
+              >
+                {useMobileTotpOnly ? "Use owner password instead" : "Use mobile 2FA only"}
+              </button>
+            </div>
+          )}
+          {!useMobileTotpOnly && (
+            <>
+              <label htmlFor="studio-password">Owner password</label>
+              <input
+                id="studio-password"
+                type="password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                autoComplete="current-password"
+                required
+                autoFocus
+              />
+            </>
+          )}
+          {mfaRequired && (
+            <>
+              <label htmlFor="studio-otp">Authenticator code</label>
+              <input
+                id="studio-otp"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]{6}"
+                maxLength={6}
+                value={otp}
+                onChange={(event) => setOtp(event.target.value.replace(/\D/g, "").slice(0, 6))}
+                autoComplete="one-time-code"
+                required
+                autoFocus={useMobileTotpOnly}
+              />
+            </>
+          )}
           {message && <p className="form-error" role="alert">{message}</p>}
           <button className="button primary full" type="submit" disabled={busy}>
             <ShieldCheck size={18} />
-            {busy ? "Checking…" : "Enter 1stStep Studio"}
+            {busy ? "Checking…" : (useMobileTotpOnly ? "Enter with 2FA code" : "Enter 1stStep Studio")}
           </button>
         </form>
-        <p className="login-security"><ShieldCheck size={14} /> Owner-only access. Your client records stay behind a signed session.</p>
+        <p className="login-security"><ShieldCheck size={14} /> Owner-only access with signed sessions, encrypted client storage, and two-factor authentication.</p>
       </section>
     </main>
   );
@@ -297,6 +391,10 @@ function EmptyState({ icon: Icon, title, body, action, actionLabel }) {
 function Overview({ workspace, onEditQuote, onNewQuote }) {
   const activeQuotes = workspace.quotes.filter((quote) => !["archived", "declined"].includes(quote.status));
   const totals = activeQuotes.reduce((sum, quote) => sum + quoteTotal(quote), 0);
+  const today = new Date().toISOString().slice(0, 10);
+  const followUpsDue = workspace.quotes.filter(
+    (quote) => quote.status === "sent" && quote.follow_up_due && quote.follow_up_due <= today
+  ).length;
   const recent = [...workspace.quotes].sort((a, b) => String(b.updated_at).localeCompare(String(a.updated_at))).slice(0, 5);
   return (
     <div className="page-content">
@@ -308,7 +406,7 @@ function Overview({ workspace, onEditQuote, onNewQuote }) {
         <div><span>Active quotes</span><strong>{activeQuotes.length}</strong></div>
         <div><span>Quoted value</span><strong>{currency(totals)}</strong></div>
         <div><span>Clients</span><strong>{workspace.clients.length}</strong></div>
-        <div><span>Agreement templates</span><strong>{workspace.templates.length}</strong></div>
+        <div><span>Follow-ups due</span><strong>{followUpsDue}</strong></div>
       </section>
       <section className="data-section">
         <div className="section-heading"><div><h2>Recent quotes</h2><p>The latest client documents in your workspace.</p></div></div>
@@ -321,7 +419,7 @@ function Overview({ workspace, onEditQuote, onNewQuote }) {
                   <div><strong>{quote.project_title || "Untitled project"}</strong><span>{client?.company || "Client details needed"}</span></div>
                   <span className={`status ${quote.status}`}>{quote.status}</span>
                   <strong>{currency(quoteTotal(quote))}</strong>
-                  <span>{formatDate(quote.valid_until)}</span>
+                  <span className={quote.status === "sent" && quote.follow_up_due && quote.follow_up_due < today ? "follow-up-overdue" : ""}>{quoteNextStep(quote)}</span>
                 </button>
               );
             })}
@@ -334,7 +432,14 @@ function Overview({ workspace, onEditQuote, onNewQuote }) {
 
 function ClientsPage({ workspace, updateWorkspace }) {
   const [selectedId, setSelectedId] = useState(workspace.clients[0]?.id || null);
+  const [query, setQuery] = useState("");
   const selected = workspace.clients.find((client) => client.id === selectedId);
+  const normalizedQuery = query.trim().toLowerCase();
+  const filteredClients = workspace.clients.filter((client) => (
+    !normalizedQuery
+    || [client.company, client.contact_name, client.email, client.phone, client.website]
+      .some((value) => String(value || "").toLowerCase().includes(normalizedQuery))
+  ));
 
   function addClient() {
     const client = createClient();
@@ -353,14 +458,17 @@ function ClientsPage({ workspace, updateWorkspace }) {
     <div className="page-content split-page">
       <section className="list-panel">
         <div className="section-heading"><div><h2>Clients</h2><p>Contact and billing details used in quotes.</p></div><button className="button compact" onClick={addClient}><Plus size={16} />Add client</button></div>
-        <div className="search-field"><Search size={16} /><input aria-label="Search clients" placeholder="Search clients" /></div>
+        <div className="search-field"><Search size={16} /><input aria-label="Search clients" placeholder="Search clients" value={query} onChange={(event) => setQuery(event.target.value)} /></div>
         <div className="record-list">
-          {workspace.clients.map((client) => (
+          {filteredClients.map((client) => (
             <button key={client.id} className={client.id === selectedId ? "selected" : ""} onClick={() => setSelectedId(client.id)}>
               <span className="client-monogram">{(client.company || client.contact_name || "?").slice(0, 1).toUpperCase()}</span>
               <span><strong>{client.company || "New client"}</strong><small>{client.contact_name || "Contact details needed"}</small></span>
             </button>
           ))}
+          {workspace.clients.length > 0 && filteredClients.length === 0 && (
+            <p className="list-empty">No clients match “{query.trim()}”.</p>
+          )}
         </div>
       </section>
       <section className="editor-panel">
@@ -370,7 +478,7 @@ function ClientsPage({ workspace, updateWorkspace }) {
             <div className="form-grid two">
               <Field label="Company" value={selected.company} onChange={(value) => updateClient("company", value)} />
               <Field label="Contact name" value={selected.contact_name} onChange={(value) => updateClient("contact_name", value)} />
-              <Field label="Email" type="email" value={selected.email} onChange={(value) => updateClient("email", value)} />
+              <Field label="Email" type="email" value={selected.email} help={selected.email && !validEmail(selected.email) ? "Enter a complete email before sending a quote." : ""} onChange={(value) => updateClient("email", value)} />
               <Field label="Phone" value={selected.phone} onChange={(value) => updateClient("phone", value)} />
               <Field label="Website" type="url" value={selected.website} onChange={(value) => updateClient("website", value)} />
               <Field label="Billing address" multiline value={selected.billing_address} onChange={(value) => updateClient("billing_address", value)} />
@@ -391,7 +499,7 @@ function QuotesPage({ workspace, onEditQuote, onNewQuote }) {
       </div>
       {workspace.quotes.length ? (
         <div className="quote-table headed">
-          <div className="table-head"><span>Project</span><span>Status</span><span>Value</span><span>Valid until</span></div>
+          <div className="table-head"><span>Project</span><span>Status</span><span>Value</span><span>Next step</span></div>
           {[...workspace.quotes].reverse().map((quote) => {
             const client = workspace.clients.find((item) => item.id === quote.client_id);
             return (
@@ -399,7 +507,7 @@ function QuotesPage({ workspace, onEditQuote, onNewQuote }) {
                 <div><strong>{quote.project_title || "Untitled project"}</strong><span>{client?.company || "Client details needed"} · {quote.quote_number}</span></div>
                 <span className={`status ${quote.status}`}>{quote.status}</span>
                 <strong>{currency(quoteTotal(quote))}</strong>
-                <span>{formatDate(quote.valid_until)}</span>
+                <span className={quote.status === "sent" && quote.follow_up_due && quote.follow_up_due < new Date().toISOString().slice(0, 10) ? "follow-up-overdue" : ""}>{quoteNextStep(quote)}</span>
               </button>
             );
           })}
@@ -409,8 +517,252 @@ function QuotesPage({ workspace, onEditQuote, onNewQuote }) {
   );
 }
 
+function PricingPage({ workspace, updateWorkspace, onStartQuote }) {
+  const structures = workspace.pricing_structures || DEFAULT_PRICING_STRUCTURES;
+  const settings = workspace.pricing_settings || DEFAULT_PRICING_SETTINGS;
+  const [selectedId, setSelectedId] = useState(structures[0]?.id || null);
+  const selected = structures.find((structure) => structure.id === selectedId) || structures[0];
+
+  function updateStructure(patch) {
+    if (!selected) return;
+    updateWorkspace((current) => ({
+      ...current,
+      pricing_structures: (current.pricing_structures || DEFAULT_PRICING_STRUCTURES).map((structure) => {
+        if (structure.id !== selected.id) return structure;
+        const next = { ...structure, ...patch };
+        if ("starting_price" in patch && Number(next.typical_high) < Number(next.starting_price)) {
+          next.typical_high = next.starting_price;
+        }
+        if ("typical_high" in patch && Number(next.typical_high) < Number(next.starting_price)) {
+          next.typical_high = next.starting_price;
+        }
+        return next;
+      }),
+    }));
+  }
+
+  function updateSettings(field, value) {
+    updateWorkspace((current) => ({
+      ...current,
+      pricing_settings: {
+        ...(current.pricing_settings || DEFAULT_PRICING_SETTINGS),
+        [field]: value,
+      },
+    }));
+  }
+
+  function addStructure() {
+    const structure = createPricingStructure();
+    updateWorkspace((current) => ({
+      ...current,
+      pricing_structures: [...(current.pricing_structures || DEFAULT_PRICING_STRUCTURES), structure],
+    }));
+    setSelectedId(structure.id);
+  }
+
+  function removeStructure() {
+    if (!selected || structures.length <= 1) return;
+    const next = structures.filter((structure) => structure.id !== selected.id);
+    updateWorkspace((current) => ({ ...current, pricing_structures: next }));
+    setSelectedId(next[0]?.id || null);
+  }
+
+  const floor = selected ? pricingFloor(selected, settings) : 0;
+  const discountedPrice = selected
+    ? Number(selected.starting_price || 0) * (1 - Number(settings.max_discount_percent || 0) / 100)
+    : 0;
+  const effectiveRate = selected
+    ? discountedPrice / Math.max(Number(selected.estimated_hours) || 1, 1)
+    : 0;
+  const healthy = discountedPrice >= floor;
+
+  return (
+    <div className="page-content pricing-page">
+      <div className="section-heading page-heading">
+        <div><h2>Pricing structures</h2><p>Introductory solo-studio pricing that stays approachable while protecting a minimum delivery floor.</p></div>
+        <button className="button" onClick={addStructure}><Plus size={16} />Add service</button>
+      </div>
+
+      <section className="pricing-guidance">
+        <CircleDollarSign size={30} />
+        <div>
+          <strong>Founding-client prices. Raise them as proof grows.</strong>
+          <p>Use these rates to win your first 3–5 verified launches. Keep the free offer to a fit check—not the implementation—then review pricing as your case-study proof and demand grow.</p>
+        </div>
+        <div className="pricing-principles">
+          <span><b>Entry</b> Low-risk sprint</span>
+          <span><b>Core</b> Custom build</span>
+          <span><b>Premium</b> Motion or app</span>
+        </div>
+      </section>
+
+      <div className="pricing-layout">
+        <aside className="pricing-book">
+          <div className="rail-title"><h2>Price book</h2><span>{structures.length}</span></div>
+          <div className="pricing-records">
+            {structures.map((structure) => (
+              <button
+                key={structure.id}
+                className={structure.id === selected?.id ? "selected" : ""}
+                onClick={() => setSelectedId(structure.id)}
+              >
+                <span><strong>{structure.name}</strong><small>{structure.category} · {structure.billing_type}</small></span>
+                <b>{currency(structure.starting_price)}{structure.billing_type === "monthly" ? "/mo" : "+"}</b>
+              </button>
+            ))}
+          </div>
+        </aside>
+
+        <section className="pricing-editor">
+          {selected ? (
+            <>
+              <div className="pricing-editor-head">
+                <div>
+                  <span>{selected.category} · {selected.billing_type}</span>
+                  <h2>{selected.name}</h2>
+                  <p>{selected.summary || "Add a concise description for this offer."}</p>
+                </div>
+                <div className={`price-health ${healthy ? "healthy" : "warning"}`}>
+                  {healthy ? <Check size={16} /> : <X size={16} />}
+                  {healthy ? "Floor protected" : "Below your floor"}
+                </div>
+              </div>
+
+              <div className="pricing-form-grid">
+                <Field label="Service name" value={selected.name} onChange={(value) => updateStructure({ name: value })} />
+                <label className="field">Category
+                  <select value={selected.category} onChange={(event) => updateStructure({ category: event.target.value })}>
+                    <option value="website">Website</option>
+                    <option value="app">App</option>
+                    <option value="recurring">Recurring</option>
+                  </select>
+                </label>
+                <label className="field">Billing
+                  <select value={selected.billing_type} onChange={(event) => updateStructure({ billing_type: event.target.value })}>
+                    <option value="project">One-time project</option>
+                    <option value="monthly">Monthly</option>
+                  </select>
+                </label>
+                <Field label="Starting price" type="number" min="0" step="50" value={selected.starting_price} onChange={(value) => updateStructure({ starting_price: Number(value) })} />
+                <Field label="Typical high" type="number" min={selected.starting_price} step="50" value={selected.typical_high} onChange={(value) => updateStructure({ typical_high: Number(value) })} />
+                <Field label="Estimated delivery hours" type="number" min="0.25" step="0.25" value={selected.estimated_hours} onChange={(value) => updateStructure({ estimated_hours: Number(value) })} />
+              </div>
+
+              <div className="pricing-copy-grid">
+                <Field label="Summary" multiline value={selected.summary} onChange={(value) => updateStructure({ summary: value })} />
+                <Field label="Best fit" multiline value={selected.ideal_for} onChange={(value) => updateStructure({ ideal_for: value })} />
+                <Field label="Included scope — one item per line" multiline value={selected.inclusions} onChange={(value) => updateStructure({ inclusions: value })} />
+              </div>
+
+              <section className="pricing-calculator">
+                <div className="calculator-copy">
+                  <h3>Profitability guardrail</h3>
+                  <p>This stays internal. It checks the lowest advertised price after your maximum discount against time and delivery risk.</p>
+                </div>
+                <div className="calculator-settings">
+                  <Field label="Target hourly floor" type="number" min="25" step="5" value={settings.target_hourly_rate} onChange={(value) => updateSettings("target_hourly_rate", Number(value))} />
+                  <Field label="Contingency" type="number" min="0" max="100" step="1" value={settings.contingency_percent} onChange={(value) => updateSettings("contingency_percent", Number(value))} help="Percent" />
+                  <Field label="Maximum discount" type="number" min="0" max="50" step="1" value={settings.max_discount_percent} onChange={(value) => updateSettings("max_discount_percent", Number(value))} help="Percent" />
+                  <Field label="Default deposit" type="number" min="0" max="100" step="5" value={settings.default_deposit_percent} onChange={(value) => updateSettings("default_deposit_percent", Number(value))} help="Percent" />
+                </div>
+                <div className="calculator-results">
+                  <div><span>Minimum healthy price</span><strong>{currency(floor)}</strong></div>
+                  <div><span>After max discount</span><strong>{currency(discountedPrice)}</strong></div>
+                  <div><span>Effective hourly rate</span><strong>{currency(effectiveRate)}</strong></div>
+                  <div className={healthy ? "positive" : "negative"}><span>Room above floor</span><strong>{currency(discountedPrice - floor)}</strong></div>
+                </div>
+              </section>
+
+              <div className="pricing-actions">
+                <button className="button danger-button" onClick={removeStructure} disabled={structures.length <= 1}><Trash2 size={15} />Delete structure</button>
+                <button className="button primary" onClick={() => onStartQuote(selected)}><FileText size={16} />Create quote from this</button>
+              </div>
+            </>
+          ) : <EmptyState icon={CircleDollarSign} title="Build your price book" body="Add a service structure, define your internal floor, and turn it into a quote." action={addStructure} actionLabel="Add a service" />}
+        </section>
+      </div>
+    </div>
+  );
+}
+
+function AgreementCoveragePanel({ sections }) {
+  const coverage = agreementCoverage(sections);
+  const percent = Math.round((coverage.completed / coverage.total) * 100);
+  return (
+    <div className={coverage.missing.length ? "agreement-coverage incomplete" : "agreement-coverage complete"}>
+      <div className="agreement-coverage-heading">
+        <span>Core agreement coverage</span>
+        <strong>{coverage.completed}/{coverage.total}</strong>
+      </div>
+      <progress className="agreement-coverage-track" value={percent} max="100" aria-label="Agreement coverage" />
+      {coverage.missing.length ? (
+        <p>Still review: {coverage.missing.map((item) => item.label).join(", ")}.</p>
+      ) : (
+        <p><Check size={13} /> Scope, payment, ownership, approvals, and exit terms are represented.</p>
+      )}
+    </div>
+  );
+}
+
+function AgreementDepthControl({ depth, serviceType, onApply }) {
+  const [selectedDepth, setSelectedDepth] = useState(depth || "standard");
+  useEffect(() => setSelectedDepth(depth || "standard"), [depth]);
+  const selected = AGREEMENT_DEPTHS.find((item) => item.id === selectedDepth) || AGREEMENT_DEPTHS[1];
+  const sectionCount = sectionsForDepth(selected.id, serviceType).length;
+  return (
+    <div className="agreement-depth-control">
+      <label className="select-field">
+        <span>Document detail</span>
+        <select value={selectedDepth} onChange={(event) => setSelectedDepth(event.target.value)}>
+          {AGREEMENT_DEPTHS.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
+        </select>
+        <ChevronDown size={15} />
+      </label>
+      <p>{selected.description} <strong>{sectionCount} clauses</strong></p>
+      <button className="button compact" type="button" onClick={() => onApply(selectedDepth)}>
+        <ScrollText size={14} />Build this clause set
+      </button>
+      <small>Replaces the current clauses. You can edit or remove any clause afterward.</small>
+    </div>
+  );
+}
+
+function ClauseLibraryPicker({ sections, serviceType, onAdd }) {
+  const available = sections.length >= MAX_AGREEMENT_SECTIONS ? [] : AGREEMENT_SECTION_LIBRARY.filter((section) => (
+    !sections.some((item) => item.id === section.id)
+    && (section.appliesTo.includes("all") || section.appliesTo.includes(serviceType))
+  ));
+  const [selectedId, setSelectedId] = useState(available[0]?.id || "");
+  useEffect(() => {
+    if (!available.some((section) => section.id === selectedId)) setSelectedId(available[0]?.id || "");
+  }, [available, selectedId]);
+
+  return (
+    <div className="clause-library-picker">
+      <div><strong>Add from clause library</strong><span>{available.length} available</span></div>
+      <div>
+        <select aria-label="Clause library" value={selectedId} onChange={(event) => setSelectedId(event.target.value)} disabled={!available.length}>
+          {Object.entries(AGREEMENT_CATEGORIES).map(([category, label]) => {
+            const items = available.filter((section) => section.category === category);
+            return items.length ? (
+              <optgroup key={category} label={label}>
+                {items.map((section) => <option key={section.id} value={section.id}>{section.title}</option>)}
+              </optgroup>
+            ) : null;
+          })}
+        </select>
+        <button className="button compact" type="button" disabled={!selectedId} onClick={() => {
+          const section = sectionFromLibrary(selectedId);
+          if (section) onAdd(section);
+        }}><Plus size={14} />Add</button>
+      </div>
+    </div>
+  );
+}
+
 function ContractsPage({ workspace, updateWorkspace }) {
   const [selectedId, setSelectedId] = useState(workspace.templates[0]?.id || null);
+  const [presetId, setPresetId] = useState(DEFAULT_CONTRACT_TEMPLATES[0].id);
   const selected = workspace.templates.find((template) => template.id === selectedId);
 
   function updateTemplate(updater) {
@@ -424,33 +776,80 @@ function ContractsPage({ workspace, updateWorkspace }) {
     const template = {
       id: recordId("template"),
       name: "New agreement structure",
-      sections: [{ id: recordId("section"), title: "Scope", body: "", enabled: true }],
+      document_depth: "essential",
+      service_type: "website",
+      description: "Custom agreement structure.",
+      sections: sectionsForDepth("essential", "website"),
     };
     updateWorkspace((current) => ({ ...current, templates: [...current.templates, template] }));
     setSelectedId(template.id);
   }
 
+  function addPreset() {
+    const existing = workspace.templates.find((template) => template.id === presetId);
+    if (existing) {
+      setSelectedId(existing.id);
+      return;
+    }
+    const preset = DEFAULT_CONTRACT_TEMPLATES.find((template) => template.id === presetId);
+    if (!preset) return;
+    updateWorkspace((current) => ({ ...current, templates: [...current.templates, structuredClone(preset)] }));
+    setSelectedId(preset.id);
+  }
+
   return (
     <div className="page-content split-page contracts-page">
       <section className="list-panel">
-        <div className="section-heading"><div><h2>Agreement structures</h2><p>Reusable starting terms for each kind of project.</p></div></div>
+        <div className="section-heading"><div><h2>Agreement library</h2><p>From a quick approval to a detailed services agreement.</p></div></div>
+        <div className="preset-import">
+          <label>Studio presets</label>
+          <select value={presetId} onChange={(event) => setPresetId(event.target.value)}>
+            {DEFAULT_CONTRACT_TEMPLATES.map((template) => <option key={template.id} value={template.id}>{template.name}</option>)}
+          </select>
+          <button className="button compact full" type="button" onClick={addPreset}><Plus size={15} />Add or open preset</button>
+        </div>
         <div className="record-list template-list">
           {workspace.templates.map((template) => (
             <button key={template.id} className={template.id === selectedId ? "selected" : ""} onClick={() => setSelectedId(template.id)}>
               <span className="client-monogram"><ScrollText size={16} /></span>
-              <span><strong>{template.name}</strong><small>{template.sections.length} sections</small></span>
+              <span><strong>{template.name}</strong><small>{AGREEMENT_DEPTHS.find((item) => item.id === template.document_depth)?.label || "Professional"} · {template.sections.length} clauses</small></span>
             </button>
           ))}
         </div>
-        <button className="button compact full" onClick={addTemplate}><Plus size={16} />New structure</button>
+        <button className="button compact full" onClick={addTemplate}><Plus size={16} />New custom structure</button>
       </section>
       <section className="editor-panel">
         {selected && (
           <>
             <div className="section-heading">
-              <div><h2>{selected.name}</h2><p>Starter language only—have your attorney review it before client use.</p></div>
+              <div><h2>{selected.name}</h2><p>Practical drafting language only—have your attorney review final terms before client use.</p></div>
             </div>
-            <Field label="Structure name" value={selected.name} onChange={(value) => updateTemplate((template) => ({ ...template, name: value }))} />
+            <div className="template-meta-grid">
+              <Field label="Structure name" value={selected.name} onChange={(value) => updateTemplate((template) => ({ ...template, name: value }))} />
+              <label className="field"><span>Service type</span><select value={selected.service_type || "website"} onChange={(event) => updateTemplate((template) => ({ ...template, service_type: event.target.value }))}>
+                <option value="website">Website / web app</option>
+                <option value="app">iOS / mobile app</option>
+                <option value="retainer">Care plan / retainer</option>
+              </select></label>
+            </div>
+            <Field label="Internal description" value={selected.description || ""} onChange={(value) => updateTemplate((template) => ({ ...template, description: value }))} />
+            <div className="agreement-builder-tools">
+              <AgreementDepthControl
+                depth={selected.document_depth}
+                serviceType={selected.service_type || "website"}
+                onApply={(documentDepth) => updateTemplate((template) => ({
+                  ...template,
+                  document_depth: documentDepth,
+                  sections: sectionsForDepth(documentDepth, template.service_type || "website"),
+                }))}
+              />
+              <AgreementCoveragePanel sections={selected.sections} />
+              <ClauseLibraryPicker
+                sections={selected.sections}
+                serviceType={selected.service_type || "website"}
+                onAdd={(section) => updateTemplate((template) => ({ ...template, sections: [...template.sections, section] }))}
+              />
+            </div>
             <div className="template-sections">
               {selected.sections.map((section, index) => (
                 <article key={section.id} className="template-section">
@@ -465,15 +864,31 @@ function ContractsPage({ workspace, updateWorkspace }) {
                       sections: template.sections.filter((item) => item.id !== section.id),
                     }))}><Trash2 size={16} /></button>
                   </div>
-                  <textarea aria-label={`${section.title} language`} value={section.body} rows={4} onChange={(event) => updateTemplate((template) => ({
+                  <div className="template-section-meta">
+                    <select aria-label={`${section.title} category`} value={section.category || "scope"} onChange={(event) => updateTemplate((template) => ({
+                      ...template,
+                      sections: template.sections.map((item) => item.id === section.id ? { ...item, category: event.target.value } : item),
+                    }))}>
+                      {Object.entries(AGREEMENT_CATEGORIES).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                    </select>
+                    <label className="toggle"><input type="checkbox" checked={section.enabled !== false} onChange={(event) => updateTemplate((template) => ({
+                      ...template,
+                      sections: template.sections.map((item) => item.id === section.id ? { ...item, enabled: event.target.checked } : item),
+                    }))} /><span />Enabled by default</label>
+                  </div>
+                  <textarea aria-label={`${section.title} language`} value={section.body} rows={5} onChange={(event) => updateTemplate((template) => ({
                     ...template,
                     sections: template.sections.map((item) => item.id === section.id ? { ...item, body: event.target.value } : item),
                   }))} />
+                  <label className="internal-guidance"><span>Internal drafting note</span><textarea value={section.guidance || ""} rows={2} onChange={(event) => updateTemplate((template) => ({
+                    ...template,
+                    sections: template.sections.map((item) => item.id === section.id ? { ...item, guidance: event.target.value } : item),
+                  }))} /></label>
                 </article>
               ))}
-              <button className="button compact" onClick={() => updateTemplate((template) => ({
+              <button className="button compact" disabled={selected.sections.length >= MAX_AGREEMENT_SECTIONS} onClick={() => updateTemplate((template) => ({
                 ...template,
-                sections: [...template.sections, { id: recordId("section"), title: "New section", body: "", enabled: true }],
+                sections: [...template.sections, { id: recordId("section"), title: "New section", body: "", category: "scope", guidance: "", enabled: true }],
               }))}><Plus size={16} />Add section</button>
             </div>
           </>
@@ -489,13 +904,18 @@ function SettingsPage({ workspace, previewMode }) {
       <div className="section-heading page-heading"><div><h2>Studio settings</h2><p>Security and storage status for this owner workspace.</p></div></div>
       <section className="settings-band">
         <ShieldCheck />
-        <div><strong>Owner-only access</strong><p>Production access uses a signed, HTTP-only, same-site session. The admin route is not linked from the public website and is marked noindex.</p></div>
+        <div><strong>Owner-only access</strong><p>Production requires a hashed owner password plus an authenticator code. The signed HTTP-only session expires after two hours, and the admin cannot be framed or indexed.</p></div>
         <span className="health">{previewMode ? "Local preview" : "Protected"}</span>
       </section>
       <section className="settings-band">
         <Save />
-        <div><strong>Workspace storage</strong><p>Clients, quotes, and agreement structures save to the existing private Vercel KV connection with revision checks to prevent silent overwrites.</p></div>
+        <div><strong>Encrypted workspace storage</strong><p>Client records, quotes, and agreement terms are sealed with AES-256-GCM before they reach private Vercel KV. Revision checks also prevent silent overwrites.</p></div>
         <span>{workspace.updated_at ? `Saved ${new Date(workspace.updated_at).toLocaleString()}` : "Not saved yet"}</span>
+      </section>
+      <section className="settings-band">
+        <CreditCard />
+        <div><strong>Stripe card payments</strong><p>Each quote installment can receive a single-use Stripe-hosted payment link. Stripe handles card details, receipts, wallets, and any eligible financing methods.</p></div>
+        <span>{previewMode ? "Production connection required" : "Fail-closed until connected"}</span>
       </section>
       <section className="settings-band caution">
         <ScrollText />
@@ -505,7 +925,18 @@ function SettingsPage({ workspace, previewMode }) {
   );
 }
 
-function Field({ label, value, onChange, type = "text", multiline = false, min, max, step, help }) {
+function Field({
+  label,
+  value,
+  onChange,
+  type = "text",
+  multiline = false,
+  min,
+  max,
+  step,
+  help,
+  disabled = false,
+}) {
   const Control = multiline ? "textarea" : "input";
   return (
     <label className="field">
@@ -516,6 +947,7 @@ function Field({ label, value, onChange, type = "text", multiline = false, min, 
         min={min}
         max={max}
         step={step}
+        disabled={disabled}
         rows={multiline ? 3 : undefined}
         onChange={(event) => onChange(event.target.value)}
       />
@@ -544,7 +976,7 @@ function RecentQuoteRail({ workspace, selectedId, onSelect }) {
   );
 }
 
-function LineItems({ quote, updateQuote }) {
+function LineItems({ quote, updateQuote, pricingLocked }) {
   function updateItem(id, field, value) {
     updateQuote({
       line_items: quote.line_items.map((item) => item.id === id ? {
@@ -555,7 +987,7 @@ function LineItems({ quote, updateQuote }) {
   }
   return (
     <section className="document-section">
-      <div className="document-section-heading"><h2>Scope & pricing</h2><button className="button compact" onClick={() => updateQuote({
+      <div className="document-section-heading"><h2>Scope & pricing</h2><button className="button compact" disabled={pricingLocked} onClick={() => updateQuote({
         line_items: [...quote.line_items, { id: recordId("item"), name: "", description: "", quantity: 1, rate: 0 }],
       })}><Plus size={15} />Add line item</button></div>
       <div className="line-items">
@@ -563,12 +995,12 @@ function LineItems({ quote, updateQuote }) {
         {quote.line_items.map((item, index) => (
           <div className="line-row" key={item.id}>
             <GripVertical size={15} />
-            <input aria-label={`Line item ${index + 1} name`} value={item.name} onChange={(event) => updateItem(item.id, "name", event.target.value)} />
-            <input aria-label={`Line item ${index + 1} description`} value={item.description} onChange={(event) => updateItem(item.id, "description", event.target.value)} />
-            <input aria-label={`Line item ${index + 1} quantity`} type="number" min="0" step="0.25" value={item.quantity} onChange={(event) => updateItem(item.id, "quantity", event.target.value)} />
-            <input aria-label={`Line item ${index + 1} rate`} type="number" min="0" step="50" value={item.rate} onChange={(event) => updateItem(item.id, "rate", event.target.value)} />
+            <input aria-label={`Line item ${index + 1} name`} value={item.name} disabled={pricingLocked} onChange={(event) => updateItem(item.id, "name", event.target.value)} />
+            <input aria-label={`Line item ${index + 1} description`} value={item.description} disabled={pricingLocked} onChange={(event) => updateItem(item.id, "description", event.target.value)} />
+            <input aria-label={`Line item ${index + 1} quantity`} type="number" min="0" step="0.25" value={item.quantity} disabled={pricingLocked} onChange={(event) => updateItem(item.id, "quantity", event.target.value)} />
+            <input aria-label={`Line item ${index + 1} rate`} type="number" min="0" step="50" value={item.rate} disabled={pricingLocked} onChange={(event) => updateItem(item.id, "rate", event.target.value)} />
             <strong>{currency(item.quantity * item.rate)}</strong>
-            <button className="icon-button danger" aria-label={`Delete ${item.name || "line item"}`} onClick={() => updateQuote({
+            <button className="icon-button danger" disabled={pricingLocked} aria-label={`Delete ${item.name || "line item"}`} onClick={() => updateQuote({
               line_items: quote.line_items.filter((candidate) => candidate.id !== item.id),
             })}><Trash2 size={15} /></button>
           </div>
@@ -580,15 +1012,24 @@ function LineItems({ quote, updateQuote }) {
 
 function ContractInspector({ quote, templates, updateQuote }) {
   const [openSection, setOpenSection] = useState(quote.contract_sections[0]?.id || null);
+  const selectedTemplate = templates.find((item) => item.id === quote.contract_template_id);
+  const serviceType = selectedTemplate?.service_type || "website";
 
   function selectTemplate(templateId) {
     const template = templates.find((item) => item.id === templateId);
     if (!template) return;
     updateQuote({
       contract_template_id: template.id,
+      document_depth: template.document_depth || "standard",
       contract_sections: structuredClone(template.sections),
     });
     setOpenSection(template.sections[0]?.id || null);
+  }
+
+  function applyDepth(documentDepth) {
+    const sections = sectionsForDepth(documentDepth, serviceType);
+    updateQuote({ document_depth: documentDepth, contract_sections: sections });
+    setOpenSection(sections[0]?.id || null);
   }
 
   function updateSection(sectionId, patch) {
@@ -608,6 +1049,12 @@ function ContractInspector({ quote, templates, updateQuote }) {
         <ChevronDown size={15} />
       </label>
       <div className="legal-note"><ShieldCheck size={15} /><span>Drafting starter—not legal advice. Review final terms with counsel.</span></div>
+      <AgreementDepthControl
+        depth={quote.document_depth}
+        serviceType={serviceType}
+        onApply={applyDepth}
+      />
+      <AgreementCoveragePanel sections={quote.contract_sections} />
       <div className="contract-sections">
         {quote.contract_sections.map((section) => {
           const open = openSection === section.id;
@@ -615,7 +1062,7 @@ function ContractInspector({ quote, templates, updateQuote }) {
             <article key={section.id} className={open ? "open" : ""}>
               <button className="contract-section-toggle" onClick={() => setOpenSection(open ? null : section.id)}>
                 <span className="section-symbol">{section.title.slice(0, 1)}</span>
-                <span><strong>{section.title}</strong><small>{section.enabled ? "Included" : "Excluded"}</small></span>
+                <span><strong>{section.title}</strong><small>{AGREEMENT_CATEGORIES[section.category] || "Custom"} · {section.enabled ? "Included" : "Excluded"}</small></span>
                 <ChevronDown size={16} />
               </button>
               {open && (
@@ -623,14 +1070,27 @@ function ContractInspector({ quote, templates, updateQuote }) {
                   <label className="toggle"><input type="checkbox" checked={section.enabled} onChange={(event) => updateSection(section.id, { enabled: event.target.checked })} /><span />Include in quote</label>
                   <input aria-label={`${section.title} title`} value={section.title} onChange={(event) => updateSection(section.id, { title: event.target.value })} />
                   <textarea aria-label={`${section.title} terms`} value={section.body} rows={6} onChange={(event) => updateSection(section.id, { body: event.target.value })} />
+                  {section.guidance && <p className="drafting-guidance"><strong>Internal note</strong>{section.guidance}</p>}
+                  <button className="button compact danger-button" type="button" onClick={() => {
+                    updateQuote({ contract_sections: quote.contract_sections.filter((item) => item.id !== section.id) });
+                    setOpenSection(null);
+                  }}><Trash2 size={14} />Remove clause</button>
                 </div>
               )}
             </article>
           );
         })}
       </div>
-      <button className="button compact full" onClick={() => {
-        const section = { id: recordId("section"), title: "New section", body: "", enabled: true };
+      <ClauseLibraryPicker
+        sections={quote.contract_sections}
+        serviceType={serviceType}
+        onAdd={(section) => {
+          updateQuote({ contract_sections: [...quote.contract_sections, section] });
+          setOpenSection(section.id);
+        }}
+      />
+      <button className="button compact full" disabled={quote.contract_sections.length >= MAX_AGREEMENT_SECTIONS} onClick={() => {
+        const section = { id: recordId("section"), title: "New section", body: "", category: "scope", guidance: "", enabled: true };
         updateQuote({ contract_sections: [...quote.contract_sections, section] });
         setOpenSection(section.id);
       }}><Plus size={15} />Add section</button>
@@ -638,12 +1098,238 @@ function ContractInspector({ quote, templates, updateQuote }) {
   );
 }
 
-function QuoteEditor({ workspace, quoteId, onSelectQuote, updateWorkspace }) {
+function PaymentPlanEditor({
+  quote,
+  updateQuote,
+  onCreatePaymentLink,
+  onDeactivatePaymentLinks,
+  previewMode,
+}) {
+  const schedule = paymentScheduleForQuote(quote);
+  const pricingLocked = (quote.payment_links || []).length > 0;
+  const [creatingInstallment, setCreatingInstallment] = useState(null);
+  const [deactivating, setDeactivating] = useState(false);
+  const [paymentMessage, setPaymentMessage] = useState("");
+
+  async function createLink(installmentNumber) {
+    setCreatingInstallment(installmentNumber);
+    setPaymentMessage("");
+    try {
+      await onCreatePaymentLink(
+        quote.id,
+        installmentNumber,
+        `payment-link/${quote.id}/${installmentNumber}/${crypto.randomUUID()}`
+      );
+      setPaymentMessage("Secure Stripe link created and added to this quote.");
+    } catch (error) {
+      setPaymentMessage(error.message);
+    } finally {
+      setCreatingInstallment(null);
+    }
+  }
+
+  function selectPlan(paymentPlan) {
+    const depositByPlan = {
+      full: 100,
+      two_payments: 50,
+      three_payments: 40,
+      four_monthly: 25,
+    };
+    updateQuote({
+      payment_plan: paymentPlan,
+      deposit_percent: depositByPlan[paymentPlan],
+    });
+    setPaymentMessage("");
+  }
+
+  async function deactivateLinks() {
+    setDeactivating(true);
+    setPaymentMessage("");
+    try {
+      const result = await onDeactivatePaymentLinks(quote.id);
+      setPaymentMessage(`${result.deactivated} card link${result.deactivated === 1 ? "" : "s"} deactivated. Pricing can now be edited safely.`);
+    } catch (error) {
+      setPaymentMessage(error.message);
+    } finally {
+      setDeactivating(false);
+    }
+  }
+
+  return (
+    <section className="document-section payment-plan-section">
+      <div className="document-section-heading">
+        <div><h2>Payment options</h2><p>Credit card is the preferred option. Offer flexibility without lowering the project price.</p></div>
+        <CreditCard size={19} />
+      </div>
+      <div className="payment-plan-controls">
+        <label className="select-field">Payment plan
+          <select
+            aria-label="Payment plan"
+            value={quote.payment_plan || "three_payments"}
+            disabled={pricingLocked}
+            onChange={(event) => selectPlan(event.target.value)}
+          >
+            {PAYMENT_PLANS.map((plan) => <option key={plan.id} value={plan.id}>{plan.label}</option>)}
+          </select>
+          <ChevronDown size={14} />
+        </label>
+        <div className="card-payment-note">
+          <CreditCard size={20} />
+          <div><strong>Secure card checkout</strong><span>Stripe can show credit/debit cards, Apple Pay, Google Pay, and eligible financing methods. Card details never touch this website.</span></div>
+        </div>
+      </div>
+      {pricingLocked && (
+        <div className="payment-lock-warning" role="status">
+          <ShieldCheck size={18} />
+          <div>
+            <strong>Pricing is locked while card links are active.</strong>
+            <span>Deactivate the existing Stripe links before changing totals, the project title, or the payment schedule.</span>
+          </div>
+          <button className="button compact danger-button" type="button" disabled={deactivating} onClick={deactivateLinks}>
+            {deactivating ? "Deactivating…" : "Deactivate card links"}
+          </button>
+        </div>
+      )}
+      <div className="payment-schedule">
+        {schedule.map((installment) => {
+          const paymentLink = (quote.payment_links || []).find(
+            (link) => Number(link.installment_number) === installment.installment_number
+          );
+          return (
+            <article key={installment.installment_number}>
+              <span>{installment.installment_number}</span>
+              <div><strong>{installment.label}</strong><small>{installment.due}</small></div>
+              <b>{currency(installment.amount)}</b>
+              {paymentLink ? (
+                <a className="button payment-link-button" href={paymentLink.url} target="_blank" rel="noreferrer">
+                  Open link <ExternalLink size={13} />
+                </a>
+              ) : (
+                <button
+                  className="button payment-link-button"
+                  disabled={previewMode || creatingInstallment === installment.installment_number}
+                  onClick={() => createLink(installment.installment_number)}
+                >
+                  <CreditCard size={14} />
+                  {creatingInstallment === installment.installment_number ? "Creating…" : "Create card link"}
+                </button>
+              )}
+            </article>
+          );
+        })}
+      </div>
+      {previewMode && <p className="payment-feedback">Local preview shows the full workflow. Real Stripe links are created only inside the protected production admin.</p>}
+      {paymentMessage && <p className="payment-feedback" role="status">{paymentMessage}</p>}
+    </section>
+  );
+}
+
+function QuoteBriefAssistant({ workspace, quote, updateQuote, pricingLocked }) {
+  const [brief, setBrief] = useState("");
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState("");
+
+  function populateQuote() {
+    if (pricingLocked) {
+      setError("Deactivate the active card links before replacing this quote.");
+      return;
+    }
+    try {
+      const draft = draftQuoteFromBrief(brief, workspace.pricing_structures);
+      const exactTemplate = workspace.templates.find((template) => template.id === draft.template_id);
+      const compatibleTemplate = workspace.templates.find((template) => (
+        template.service_type === draft.service_type
+        && template.document_depth === draft.document_depth
+      ));
+      const currentTemplate = workspace.templates.find((template) => template.id === quote.contract_template_id);
+      const template = exactTemplate || compatibleTemplate || currentTemplate || workspace.templates[0];
+      if (!template) throw new Error("Add an agreement structure before building this quote.");
+
+      updateQuote({
+        project_title: draft.project_title,
+        summary: draft.summary,
+        line_items: draft.line_items.map((item) => ({ ...item, id: recordId("item") })),
+        payment_plan: draft.payment_plan,
+        deposit_percent: draft.deposit_percent,
+        payment_links: [],
+        contract_template_id: template.id,
+        document_depth: draft.document_depth,
+        contract_sections: exactTemplate
+          ? structuredClone(exactTemplate.sections)
+          : sectionsForDepth(draft.document_depth, draft.service_type),
+      });
+      setResult(draft);
+      setError("");
+    } catch (nextError) {
+      setResult(null);
+      setError(nextError.message);
+    }
+  }
+
+  return (
+    <section className="brief-assistant">
+      <div className="brief-assistant-heading">
+        <span><Sparkles size={18} /></span>
+        <div>
+          <h2>Turn a project brief into a quote</h2>
+          <p>Paste a client message or describe what you are building. The assistant uses your saved price book and agreement library.</p>
+        </div>
+        <small>Private · no AI credits</small>
+      </div>
+      <div className="brief-assistant-input">
+        <textarea
+          aria-label="Project brief"
+          maxLength={8000}
+          rows={5}
+          value={brief}
+          placeholder="Example: Build a premium six-page website with custom animations, a booking flow, CMS, analytics, and launch support…"
+          onChange={(event) => {
+            setBrief(event.target.value);
+            setError("");
+          }}
+        />
+        <div>
+          <span>{brief.length.toLocaleString()} / 8,000</span>
+          <button className="button primary" type="button" disabled={pricingLocked} onClick={populateQuote}>
+            <Sparkles size={16} />Populate quote
+          </button>
+        </div>
+      </div>
+      {error && <p className="brief-assistant-error" role="alert"><X size={14} />{error}</p>}
+      {result && (
+        <div className="brief-assistant-result" role="status">
+          <Check size={16} />
+          <div>
+            <strong>{result.structure_name} · {currency(result.line_items.reduce((sum, item) => sum + item.rate, 0))} starting quote</strong>
+            <span>{result.recommendation} Review the scope and pricing before sending.</span>
+            {result.detected_features.length > 0 && (
+              <div>{result.detected_features.map((feature) => <i key={feature}>{feature}</i>)}</div>
+            )}
+          </div>
+          <small>{result.pricing_source}</small>
+        </div>
+      )}
+    </section>
+  );
+}
+
+function QuoteEditor({
+  workspace,
+  quoteId,
+  onSelectQuote,
+  updateWorkspace,
+  onCreatePaymentLink,
+  onDeactivatePaymentLinks,
+  previewMode,
+}) {
   const quote = workspace.quotes.find((item) => item.id === quoteId);
   const client = workspace.clients.find((item) => item.id === quote?.client_id);
   if (!quote || !client) return null;
+  const pricingLocked = (quote.payment_links || []).length > 0;
 
   function updateQuote(patch) {
+    if (pricingLocked && ["line_items", "project_title", "payment_plan", "deposit_percent"]
+      .some((field) => Object.prototype.hasOwnProperty.call(patch, field))) return;
     updateWorkspace((current) => ({
       ...current,
       quotes: current.quotes.map((item) => item.id === quote.id ? { ...item, ...patch, updated_at: new Date().toISOString() } : item),
@@ -655,36 +1341,96 @@ function QuoteEditor({ workspace, quoteId, onSelectQuote, updateWorkspace }) {
       clients: current.clients.map((item) => item.id === client.id ? { ...item, ...patch } : item),
     }));
   }
+  function selectClient(clientId) {
+    const selectedClient = workspace.clients.find((item) => item.id === clientId);
+    if (!selectedClient) return;
+    updateWorkspace((current) => assignClientToQuote(current, quote.id, selectedClient));
+  }
+  function addClient() {
+    const newClient = createClient();
+    updateWorkspace((current) => assignClientToQuote(current, quote.id, newClient));
+  }
 
   const total = quoteTotal(quote);
-  const deposit = total * quote.deposit_percent / 100;
+  const schedule = paymentScheduleForQuote(quote);
 
   return (
     <div className="quote-workspace">
       <RecentQuoteRail workspace={workspace} selectedId={quote.id} onSelect={onSelectQuote} />
       <main className="quote-document">
-        <section className="document-section">
-          <div className="document-section-heading"><h2>Client</h2><span>{quote.quote_number}</span></div>
+        <QuoteBriefAssistant workspace={workspace} quote={quote} updateQuote={updateQuote} pricingLocked={pricingLocked} />
+        <section className="document-section client-details-section">
+          <div className="document-section-heading client-section-heading">
+            <div>
+              <h2>Client & contact details</h2>
+              <p>Create or choose a client here. These details populate the quote and agreement.</p>
+            </div>
+            <span>{quote.quote_number}</span>
+          </div>
+          <div className="client-picker">
+            <label className="select-field">
+              Client record
+              <select value={client.id} onChange={(event) => selectClient(event.target.value)}>
+                {workspace.clients.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.company || item.contact_name || item.email || "Unnamed client"}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown size={14} />
+            </label>
+            <button type="button" className="button compact" onClick={addClient}>
+              <Plus size={15} />New client
+            </button>
+          </div>
           <div className="client-grid">
             <Field label="Company" value={client.company} onChange={(value) => updateClient({ company: value })} />
-            <Field label="Contact person" value={client.contact_name} onChange={(value) => updateClient({ contact_name: value })} />
-            <Field label="Email" type="email" value={client.email} onChange={(value) => updateClient({ email: value })} />
+            <Field label="Full name" value={client.contact_name} onChange={(value) => updateClient({ contact_name: value })} />
+            <Field label="Email" type="email" value={client.email} help={client.email && !validEmail(client.email) ? "Enter a complete email before sending a quote." : ""} onChange={(value) => updateClient({ email: value })} />
             <Field label="Phone" value={client.phone} onChange={(value) => updateClient({ phone: value })} />
+            <Field label="Website" type="url" value={client.website} onChange={(value) => updateClient({ website: value })} />
+            <Field label="Billing address" multiline value={client.billing_address} onChange={(value) => updateClient({ billing_address: value })} />
           </div>
+          <p className="client-security-note"><ShieldCheck size={13} />Stored in the protected client record. Do not enter passwords, Social Security numbers, bank details, or card numbers.</p>
         </section>
         <section className="document-section">
-          <div className="document-section-heading"><h2>Project</h2><label className="date-inline"><span>Valid until</span><input type="date" value={quote.valid_until} onChange={(event) => updateQuote({ valid_until: event.target.value })} /></label></div>
-          <Field label="Project title" value={quote.project_title} onChange={(value) => updateQuote({ project_title: value })} />
+          <div className="document-section-heading">
+            <h2>Project</h2>
+            <div className="project-dates">
+              <label className="date-inline"><span>Valid until</span><input type="date" value={quote.valid_until} onChange={(event) => updateQuote({ valid_until: event.target.value })} /></label>
+              {quote.status === "sent" && <label className="date-inline"><span>Follow up</span><input type="date" value={quote.follow_up_due || ""} onChange={(event) => updateQuote({ follow_up_due: event.target.value })} /></label>}
+            </div>
+          </div>
+          <div className="project-status-row">
+            <label className="select-field">Quote status
+              <select aria-label="Quote status" value={quote.status} disabled={pricingLocked} onChange={(event) => updateQuote({ status: event.target.value })}>
+                <option value="draft">Draft</option>
+                <option value="sent">Sent</option>
+                <option value="approved">Approved</option>
+                <option value="declined">Declined</option>
+                <option value="archived">Archived</option>
+              </select>
+              <ChevronDown size={14} />
+            </label>
+            {quote.last_contacted_at && <p><Mail size={14} />Last emailed {formatDate(quote.last_contacted_at.slice(0, 10))}{quote.follow_up_count ? ` · ${quote.follow_up_count} follow-up${quote.follow_up_count === 1 ? "" : "s"}` : ""}</p>}
+          </div>
+          <Field label="Project title" value={quote.project_title} disabled={pricingLocked} onChange={(value) => updateQuote({ project_title: value })} />
           <Field label="Project summary" multiline value={quote.summary} onChange={(value) => updateQuote({ summary: value })} />
         </section>
-        <LineItems quote={quote} updateQuote={updateQuote} />
+        <LineItems quote={quote} updateQuote={updateQuote} pricingLocked={pricingLocked} />
+        <PaymentPlanEditor
+          quote={quote}
+          updateQuote={updateQuote}
+          onCreatePaymentLink={onCreatePaymentLink}
+          onDeactivatePaymentLinks={onDeactivatePaymentLinks}
+          previewMode={previewMode}
+        />
         <section className="document-section totals-section">
           <Field label="Notes" multiline value={quote.notes} onChange={(value) => updateQuote({ notes: value })} />
           <div className="totals">
             <div><span>Subtotal</span><strong>{currency(total)}</strong></div>
-            <label><span>Deposit</span><span className="percentage"><input aria-label="Deposit percent" type="number" min="0" max="100" value={quote.deposit_percent} onChange={(event) => updateQuote({ deposit_percent: Number(event.target.value) })} />%</span><strong>{currency(deposit)}</strong></label>
-            <small>Due on approval</small>
-            <div className="balance"><span>Balance</span><strong>{currency(total - deposit)}</strong></div>
+            <div><span>{paymentPlanLabel(quote.payment_plan)}</span><strong>{schedule.length} payment{schedule.length === 1 ? "" : "s"}</strong></div>
+            <div className="balance"><span>Due on approval</span><strong>{currency(schedule[0]?.amount || 0)}</strong></div>
           </div>
         </section>
       </main>
@@ -695,31 +1441,56 @@ function QuoteEditor({ workspace, quoteId, onSelectQuote, updateWorkspace }) {
 
 function QuotePreview({ quote, client, onClose, onSend, previewMode }) {
   const total = quoteTotal(quote);
-  const deposit = total * quote.deposit_percent / 100;
+  const schedule = paymentScheduleForQuote(quote);
+  const [deliveryKind] = useState(quote.status === "sent" ? "follow_up" : "initial");
+  const recipientValid = validEmail(client.email);
+  const deliveryLabel = deliveryKind === "follow_up" ? "Send follow-up" : "Email quote";
   const [emailPanelOpen, setEmailPanelOpen] = useState(false);
-  const [emailNote, setEmailNote] = useState(`Here is the quote we discussed for ${quote.project_title || "your project"}. Please reply directly with any questions or requested changes.`);
-  const [emailState, setEmailState] = useState({ busy: false, message: "", error: false });
-  const idempotencyKey = useRef(`quote-send/${quote.id}/${crypto.randomUUID()}`);
+  const [emailNote, setEmailNote] = useState(deliveryKind === "follow_up"
+    ? `Just following up on the quote for ${quote.project_title || "your project"}. Please let me know if you have any questions or would like to adjust the scope.`
+    : `Here is the quote we discussed for ${quote.project_title || "your project"}. Please reply directly with any questions or requested changes.`);
+  const [emailState, setEmailState] = useState({
+    busy: false,
+    message: "",
+    error: false,
+    delivered: false,
+  });
+  const idempotencyKey = useRef(`quote-${deliveryKind}/${quote.id}/${crypto.randomUUID()}`);
+  const documentLabel = quote.document_depth === "essential"
+    ? "ESTIMATE"
+    : quote.document_depth === "comprehensive"
+      ? "DETAILED PROPOSAL & AGREEMENT"
+      : "PROPOSAL & AGREEMENT";
 
   async function submitEmail(event) {
     event.preventDefault();
-    setEmailState({ busy: true, message: "", error: false });
+    setEmailState({ busy: true, message: "", error: false, delivered: false });
     try {
-      const result = await onSend(quote.id, emailNote, idempotencyKey.current);
-      setEmailState({ busy: false, message: result.message, error: false });
+      const result = await onSend(quote.id, emailNote, idempotencyKey.current, deliveryKind);
+      setEmailState({ busy: false, message: result.message, error: false, delivered: true });
     } catch (error) {
-      setEmailState({ busy: false, message: error.message, error: true });
+      setEmailState({ busy: false, message: error.message, error: true, delivered: false });
     }
   }
 
   return (
     <div className={`preview-overlay ${emailPanelOpen ? "sending" : ""}`} role="dialog" aria-modal="true" aria-labelledby="preview-title">
       <div className="preview-toolbar">
-        <div><strong id="preview-title">Quote preview</strong><span>Review the final document before printing or saving as PDF.</span></div>
+        <div><strong id="preview-title">Quote preview</strong><span>Review the document, then download the fillable PDF or email it to the client.</span></div>
         <div>
           <button className="button" onClick={onClose}><X size={16} />Close</button>
-          <button className="button" onClick={() => window.print()}><Printer size={17} />Print / Save PDF</button>
-          <button className="button primary" onClick={() => setEmailPanelOpen(true)} disabled={!client.email}><Mail size={17} />Email quote</button>
+          {previewMode ? (
+            <button className="button" onClick={() => window.print()}><Printer size={17} />Print preview</button>
+          ) : (
+            <a
+              className="button"
+              href={`/api/admin-quote-pdf?quote_id=${encodeURIComponent(quote.id)}`}
+              download
+            >
+              <Download size={17} />Download fillable PDF
+            </a>
+          )}
+          <button className="button primary" onClick={() => setEmailPanelOpen(true)} disabled={!recipientValid}><Mail size={17} />{deliveryLabel}</button>
         </div>
       </div>
       {emailPanelOpen && (
@@ -727,13 +1498,13 @@ function QuotePreview({ quote, client, onClose, onSend, previewMode }) {
           <form className="send-dialog" onSubmit={submitEmail}>
             <div className="send-dialog-heading">
               <div className="send-dialog-icon"><Send size={19} /></div>
-              <div><h2>Send this quote</h2><p>Resend will deliver the saved quote and agreement terms directly from your backend.</p></div>
+              <div><h2>{deliveryKind === "follow_up" ? "Follow up on this quote" : "Send this quote"}</h2><p>Resend will deliver the saved quote and agreement with a fillable electronic-signature PDF attached.</p></div>
               <button type="button" className="icon-button" onClick={() => setEmailPanelOpen(false)} aria-label="Close email panel"><X size={17} /></button>
             </div>
             <dl>
               <div><dt>From</dt><dd>Evan at 1stStep.ai &lt;evan@1ststep.ai&gt;</dd></div>
               <div><dt>To</dt><dd>{client.contact_name || client.company} &lt;{client.email || "Add a client email first"}&gt;</dd></div>
-              <div><dt>Subject</dt><dd>Quote {quote.quote_number}: {quote.project_title || "Project quote"} from 1stStep.ai</dd></div>
+              <div><dt>Subject</dt><dd>{deliveryKind === "follow_up" ? "Follow-up: " : ""}Quote {quote.quote_number}: {quote.project_title || "Project quote"} from 1stStep.ai</dd></div>
             </dl>
             <label>
               <span>Personal note</span>
@@ -743,10 +1514,11 @@ function QuotePreview({ quote, client, onClose, onSend, previewMode }) {
               {emailState.error ? <X size={15} /> : <Check size={15} />}{emailState.message}
             </p>}
             {previewMode && <p className="send-preview-note"><Eye size={14} />Local preview mode will simulate delivery and will not send an email.</p>}
+            {!recipientValid && <p className="send-feedback error"><X size={15} />Add a valid client email before sending.</p>}
             <div className="send-dialog-actions">
               <button type="button" className="button" onClick={() => setEmailPanelOpen(false)}>Cancel</button>
-              <button type="submit" className="button primary" disabled={emailState.busy || !client.email}>
-                <Send size={16} />{emailState.busy ? "Sending…" : `Send to ${client.email || "client"}`}
+              <button type="submit" className="button primary" disabled={emailState.busy || emailState.delivered || !recipientValid}>
+                <Send size={16} />{emailState.busy ? "Sending…" : emailState.delivered ? "Sent" : `${deliveryLabel} to ${client.email || "client"}`}
               </button>
             </div>
           </form>
@@ -755,7 +1527,7 @@ function QuotePreview({ quote, client, onClose, onSend, previewMode }) {
       <article className="quote-preview">
         <header className="print-header">
           <Logo />
-          <div><strong>QUOTE</strong><span>{quote.quote_number}</span></div>
+          <div><strong>{documentLabel}</strong><span>{quote.quote_number}</span></div>
         </header>
         <section className="print-meta">
           <div><small>Prepared for</small><strong>{client.company || client.contact_name || "Client"}</strong><span>{client.contact_name}</span><span>{client.email}</span><span>{client.billing_address}</span></div>
@@ -768,18 +1540,34 @@ function QuotePreview({ quote, client, onClose, onSend, previewMode }) {
         </table>
         <section className="print-totals">
           <div><span>Subtotal</span><strong>{currency(total)}</strong></div>
-          <div><span>{quote.deposit_percent}% deposit · due on approval</span><strong>{currency(deposit)}</strong></div>
-          <div><span>Remaining balance</span><strong>{currency(total - deposit)}</strong></div>
+          <div><span>Payment plan</span><strong>{paymentPlanLabel(quote.payment_plan)}</strong></div>
+          {schedule.map((installment) => {
+            const paymentLink = (quote.payment_links || []).find(
+              (link) => Number(link.installment_number) === installment.installment_number
+            );
+            return (
+              <div key={installment.installment_number}>
+                <span>{installment.label} · {installment.due}</span>
+                <strong>{currency(installment.amount)}</strong>
+                {paymentLink && <a href={paymentLink.url}>Pay securely by card</a>}
+              </div>
+            );
+          })}
         </section>
+        <p className="print-payment-note">Preferred payment method: credit or debit card through secure Stripe checkout. Eligible wallets and financing options may also appear.</p>
         {quote.notes && <section className="print-notes"><h2>Notes</h2><p>{quote.notes}</p></section>}
         <section className="print-contract">
-          <h1>Agreement structure</h1>
+          <h1>Agreement terms</h1>
           {quote.contract_sections.filter((section) => section.enabled).map((section, index) => (
             <div key={section.id}><h2>{index + 1}. {section.title}</h2><p>{section.body}</p></div>
           ))}
         </section>
+        <section className="print-esign-note">
+          <h2>Electronic acceptance</h2>
+          <p>The attached fillable PDF includes fields for the client’s full legal name, title, typed signature, date, and acceptance confirmation. Save and return the completed PDF to evan@1ststep.ai.</p>
+        </section>
         <section className="signature-grid">
-          <div><span>Client signature</span><i /><small>Name and date</small></div>
+          <div><span>Client electronic signature</span><i /><small>Full legal name and date signed</small></div>
           <div><span>1stStep.ai</span><i /><small>Authorized signature and date</small></div>
         </section>
       </article>
@@ -789,6 +1577,7 @@ function QuotePreview({ quote, client, onClose, onSend, previewMode }) {
 
 function StudioApp({ previewMode = false }) {
   const [workspace, setWorkspace] = useState(previewMode ? previewWorkspace() : EMPTY_WORKSPACE);
+  const [workspaceLoading, setWorkspaceLoading] = useState(!previewMode);
   const [page, setPage] = useState(previewMode ? "quote-editor" : "overview");
   const [selectedQuoteId, setSelectedQuoteId] = useState(previewMode ? workspace.quotes[0]?.id : null);
   const [previewQuoteId, setPreviewQuoteId] = useState(null);
@@ -796,24 +1585,60 @@ function StudioApp({ previewMode = false }) {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [mobileOpen, setMobileOpen] = useState(false);
+  const changeVersion = useRef(0);
 
   useEffect(() => {
     if (previewMode) return;
     api("/api/admin-workspace")
       .then((data) => setWorkspace(data.workspace))
-      .catch((error) => setMessage(error.message));
+      .catch((error) => setMessage(error.message))
+      .finally(() => setWorkspaceLoading(false));
   }, [previewMode]);
+
+  useEffect(() => {
+    if (!dirty) return undefined;
+    function warnBeforeUnload(event) {
+      event.preventDefault();
+      event.returnValue = "";
+    }
+    window.addEventListener("beforeunload", warnBeforeUnload);
+    return () => window.removeEventListener("beforeunload", warnBeforeUnload);
+  }, [dirty]);
 
   function updateWorkspace(updater) {
     setWorkspace((current) => updater(current));
+    changeVersion.current += 1;
     setDirty(true);
     setMessage("");
   }
 
-  function newQuote() {
-    const template = workspace.templates[0] || DEFAULT_TEMPLATES[0];
+  function newQuote(pricingStructure = null) {
+    const structure = pricingStructure?.starting_price !== undefined ? pricingStructure : null;
+    const preferredTemplateId = structure?.category === "app" ? "ios-app-build" : "website-build";
+    const template = workspace.templates.find((item) => item.id === preferredTemplateId)
+      || workspace.templates[0]
+      || DEFAULT_TEMPLATES[0];
     const client = createClient();
-    const quote = createQuote(client, template, workspace.quotes.length + 1);
+    const quote = createQuote(client, template, workspace.quotes.length + 1, structure ? {
+      project_title: structure.name,
+      summary: structure.summary,
+      line_items: [{
+        id: recordId("item"),
+        name: structure.name,
+        description: structure.inclusions.split("\n").filter(Boolean).join(" · ").slice(0, 500),
+        quantity: 1,
+        rate: structure.starting_price,
+      }],
+      deposit_percent: structure.billing_type === "monthly"
+        ? 100
+        : workspace.pricing_settings?.default_deposit_percent ?? 40,
+      payment_plan: structure.billing_type === "monthly" ? "full" : "three_payments",
+      card_payments_enabled: true,
+      payment_links: [],
+      notes: structure.billing_type === "monthly"
+        ? "Monthly service billed in advance. Final scope, response times, and third-party costs are confirmed before work begins."
+        : "Quote valid for 30 days. Final scope and third-party costs are confirmed before work begins.",
+    } : {});
     updateWorkspace((current) => ({
       ...current,
       clients: [...current.clients, client],
@@ -829,6 +1654,8 @@ function StudioApp({ previewMode = false }) {
   }
 
   async function save() {
+    const savingVersion = changeVersion.current;
+    const savingWorkspace = workspace;
     setSaving(true);
     setMessage("");
     if (previewMode) {
@@ -836,27 +1663,60 @@ function StudioApp({ previewMode = false }) {
       setDirty(false);
       setMessage("Preview changes saved for this session.");
       setSaving(false);
-      return;
+      return true;
     }
     try {
       const data = await api("/api/admin-workspace", {
         method: "PUT",
-        body: JSON.stringify({ expected_revision: workspace.revision, workspace }),
+        body: JSON.stringify({
+          expected_revision: savingWorkspace.revision,
+          workspace: savingWorkspace,
+        }),
       });
-      setWorkspace(data.workspace);
-      setDirty(false);
-      setMessage("Workspace saved.");
+      if (changeVersion.current === savingVersion) {
+        setWorkspace(data.workspace);
+        setDirty(false);
+        setMessage("Workspace saved.");
+        return true;
+      }
+      setWorkspace((current) => ({
+        ...current,
+        revision: data.workspace.revision,
+        updated_at: data.workspace.updated_at,
+      }));
+      setMessage("Newer edits appeared while saving. Save once more before previewing.");
+      return false;
     } catch (error) {
       setMessage(error.message);
+      return false;
     } finally {
       setSaving(false);
     }
   }
 
-  async function sendQuote(quoteId, note, idempotencyKey) {
+  async function openPreview(quoteId) {
+    if (saving) return;
+    if (dirty && !(await save())) return;
+    setPreviewQuoteId(quoteId);
+  }
+
+  async function sendQuote(quoteId, note, idempotencyKey, deliveryKind) {
+    if (dirty) {
+      throw new Error("Save the latest quote changes before sending.");
+    }
     if (previewMode) {
       await new Promise((resolve) => setTimeout(resolve, 450));
-      return { message: "Preview delivery simulated. No email was sent." };
+      const sentAt = new Date().toISOString();
+      setWorkspace((current) => recordQuoteDelivery(current, quoteId, {
+        deliveryId: `preview_${crypto.randomUUID()}`,
+        sentAt,
+        deliveryKind,
+      }));
+      return {
+        message: deliveryKind === "follow_up"
+          ? "Preview follow-up simulated. No email was sent."
+          : "Preview delivery simulated. No email was sent.",
+      };
     }
     const data = await api("/api/admin-send-quote", {
       method: "POST",
@@ -864,6 +1724,7 @@ function StudioApp({ previewMode = false }) {
         quote_id: quoteId,
         note,
         idempotency_key: idempotencyKey,
+        delivery_kind: deliveryKind,
       }),
     });
     if (data.workspace) {
@@ -872,14 +1733,64 @@ function StudioApp({ previewMode = false }) {
     }
     return {
       message: data.status_saved
-        ? "Quote sent from evan@1ststep.ai and marked as sent."
+        ? deliveryKind === "follow_up"
+          ? "Follow-up sent from evan@1ststep.ai and the next follow-up date was scheduled."
+          : "Quote sent from evan@1ststep.ai and marked as sent."
         : data.message || "Quote sent from evan@1ststep.ai.",
     };
+  }
+
+  async function createPaymentLink(quoteId, installmentNumber, idempotencyKey) {
+    if (previewMode) {
+      throw new Error("Open the protected production admin to create a real Stripe link.");
+    }
+    if (dirty) {
+      throw new Error("Save the latest quote changes before creating a card link.");
+    }
+    const data = await api("/api/admin-create-payment-link", {
+      method: "POST",
+      body: JSON.stringify({
+        quote_id: quoteId,
+        installment_number: installmentNumber,
+        idempotency_key: idempotencyKey,
+      }),
+    });
+    setWorkspace(data.workspace);
+    setDirty(false);
+    setMessage("Secure card link created.");
+    return data.payment_link;
+  }
+
+  async function deactivatePaymentLinks(quoteId) {
+    if (dirty) {
+      throw new Error("Save or discard the latest changes before deactivating card links.");
+    }
+    if (previewMode) {
+      setWorkspace((current) => ({
+        ...current,
+        quotes: current.quotes.map((quote) => quote.id === quoteId
+          ? { ...quote, payment_links: [] }
+          : quote),
+      }));
+      return { deactivated: 0 };
+    }
+    const data = await api("/api/admin-deactivate-payment-links", {
+      method: "POST",
+      body: JSON.stringify({ quote_id: quoteId }),
+    });
+    setWorkspace(data.workspace);
+    setDirty(false);
+    setMessage("Old card links deactivated. Pricing is unlocked.");
+    return data;
   }
 
   async function logout() {
     if (!previewMode) await api("/api/admin-session", { method: "DELETE", body: "{}" }).catch(() => {});
     window.location.reload();
+  }
+
+  if (workspaceLoading) {
+    return <div className="loading-screen"><Logo /><span>Loading protected client records…</span></div>;
   }
 
   const selectedQuote = workspace.quotes.find((quote) => quote.id === selectedQuoteId);
@@ -891,10 +1802,19 @@ function StudioApp({ previewMode = false }) {
   if (page === "overview") pageContent = <Overview workspace={workspace} onEditQuote={editQuote} onNewQuote={newQuote} />;
   if (page === "clients") pageContent = <ClientsPage workspace={workspace} updateWorkspace={updateWorkspace} />;
   if (page === "quotes") pageContent = <QuotesPage workspace={workspace} onEditQuote={editQuote} onNewQuote={newQuote} />;
+  if (page === "pricing") pageContent = <PricingPage workspace={workspace} updateWorkspace={updateWorkspace} onStartQuote={newQuote} />;
   if (page === "contracts") pageContent = <ContractsPage workspace={workspace} updateWorkspace={updateWorkspace} />;
   if (page === "settings") pageContent = <SettingsPage workspace={workspace} previewMode={previewMode} />;
   if (page === "quote-editor") pageContent = selectedQuote
-    ? <QuoteEditor workspace={workspace} quoteId={selectedQuote.id} onSelectQuote={setSelectedQuoteId} updateWorkspace={updateWorkspace} />
+    ? <QuoteEditor
+        workspace={workspace}
+        quoteId={selectedQuote.id}
+        onSelectQuote={setSelectedQuoteId}
+        updateWorkspace={updateWorkspace}
+        onCreatePaymentLink={createPaymentLink}
+        onDeactivatePaymentLinks={deactivatePaymentLinks}
+        previewMode={previewMode}
+      />
     : <EmptyState icon={FileText} title="Quote not found" body="Return to Quotes and choose another document." />;
 
   const editorActions = page === "quote-editor" && selectedQuote;
@@ -911,7 +1831,7 @@ function StudioApp({ previewMode = false }) {
               {message && <span className="save-message" role="status">{message}</span>}
               {page === "quote-editor" && <button className="button ghost" onClick={() => setPage("quotes")}><ArrowLeft size={16} />All quotes</button>}
               <button className="button" onClick={save} disabled={saving || (!dirty && !previewMode)}><Save size={16} />{saving ? "Saving…" : dirty ? "Save draft" : "Saved"}</button>
-              {editorActions && <button className="button primary" onClick={() => setPreviewQuoteId(selectedQuote.id)}><Eye size={17} />Preview & send</button>}
+              {editorActions && <button className="button primary" disabled={saving} onClick={() => openPreview(selectedQuote.id)}><Eye size={17} />{dirty ? "Save, preview & send" : "Preview & send"}</button>}
             </>
           )}
         />
@@ -935,14 +1855,21 @@ function Root() {
   const previewMode = import.meta.env.DEV && new URLSearchParams(window.location.search).get("preview") === "1";
   const [loading, setLoading] = useState(!previewMode);
   const [authenticated, setAuthenticated] = useState(previewMode);
+  const [mfaRequired, setMfaRequired] = useState(import.meta.env.PROD);
+  const [mobileTotpLoginAllowed, setMobileTotpLoginAllowed] = useState(false);
 
   async function checkSession() {
     setLoading(true);
     try {
       const data = await api("/api/admin-session");
       setAuthenticated(data.authenticated);
+      if (typeof data.mfa_required === "boolean") {
+        setMfaRequired(data.mfa_required);
+      }
+      setMobileTotpLoginAllowed(Boolean(data.mobile_totp_login_allowed));
     } catch {
       setAuthenticated(false);
+      setMobileTotpLoginAllowed(false);
     } finally {
       setLoading(false);
     }
@@ -950,7 +1877,9 @@ function Root() {
 
   useEffect(() => { if (!previewMode) checkSession(); }, [previewMode]);
   if (loading) return <div className="loading-screen"><Logo /><span>Opening your studio…</span></div>;
-  return authenticated ? <StudioApp previewMode={previewMode} /> : <Login onAuthenticated={checkSession} />;
+  return authenticated
+    ? <StudioApp previewMode={previewMode} />
+    : <Login onAuthenticated={checkSession} mfaRequired={mfaRequired} mobileTotpLoginAllowed={mobileTotpLoginAllowed} />;
 }
 
 const studioRoot = window.__firststepStudioRoot || createRoot(document.getElementById("root"));

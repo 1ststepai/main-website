@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=1200,initial-scale=1">
+  <title>Morris County Website Offer Social Preview</title>
+  <style>
+    *{box-sizing:border-box}
+    html,body{width:1200px;height:630px;margin:0;overflow:hidden}
+    body{
+      position:relative;
+      color:#f8f9ff;
+      background:
+        radial-gradient(580px 430px at 88% 11%,rgba(118,79,255,.31),transparent 67%),
+        radial-gradient(500px 390px at 4% 88%,rgba(31,174,255,.19),transparent 70%),
+        linear-gradient(rgba(255,255,255,.026) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(255,255,255,.026) 1px,transparent 1px),
+        #070912;
+      background-size:auto,auto,44px 44px,44px 44px,auto;
+      font-family:Inter,"Segoe UI",Arial,sans-serif;
+      -webkit-font-smoothing:antialiased;
+    }
+    body::after{
+      position:absolute;
+      inset:0;
+      border:1px solid rgba(255,255,255,.08);
+      pointer-events:none;
+      content:"";
+    }
+    .top{
+      position:absolute;
+      top:42px;
+      left:56px;
+      right:56px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+    }
+    .brand{display:flex;align-items:center;gap:13px;font-weight:800;font-size:23px;letter-spacing:-.03em}
+    .brand img{width:43px;height:43px;object-fit:contain}
+    .badge{
+      display:flex;
+      align-items:center;
+      gap:9px;
+      padding:11px 16px;
+      border:1px solid rgba(111,230,255,.24);
+      border-radius:999px;
+      background:rgba(12,18,33,.64);
+      color:#c9f7ff;
+      font-size:12px;
+      font-weight:800;
+      letter-spacing:.1em;
+    }
+    .badge::before{width:8px;height:8px;border-radius:50%;background:#72edbb;box-shadow:0 0 18px #72edbb;content:""}
+    .content{
+      position:absolute;
+      top:126px;
+      left:56px;
+      width:696px;
+    }
+    .eyebrow{margin:0 0 17px;color:#9d91ff;font-size:13px;font-weight:800;letter-spacing:.15em;text-transform:uppercase}
+    h1{margin:0;font-size:79px;line-height:.92;letter-spacing:-.068em}
+    .gradient{
+      display:inline-block;
+      background:linear-gradient(95deg,#b59fff 3%,#7aa9ff 52%,#64e6ff);
+      -webkit-background-clip:text;
+      background-clip:text;
+      color:transparent;
+    }
+    .lede{width:620px;margin:24px 0 0;color:#bbc3d8;font-size:22px;line-height:1.48;letter-spacing:-.018em}
+    .chips{display:flex;gap:10px;margin-top:25px}
+    .chip{
+      padding:10px 13px;
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:11px;
+      background:rgba(255,255,255,.035);
+      color:#d6dbea;
+      font-size:12px;
+      font-weight:700;
+    }
+    .offer{
+      position:absolute;
+      top:153px;
+      right:56px;
+      width:330px;
+      height:339px;
+      padding:29px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.15);
+      border-radius:27px;
+      background:linear-gradient(155deg,rgba(20,24,43,.98),rgba(8,11,20,.98));
+      box-shadow:0 45px 105px -45px rgba(79,140,255,.78);
+    }
+    .offer::before{
+      position:absolute;
+      right:-80px;
+      bottom:-110px;
+      width:260px;
+      height:260px;
+      border-radius:50%;
+      background:rgba(86,221,255,.08);
+      filter:blur(5px);
+      content:"";
+    }
+    .offer-label{color:#8f83ff;font-size:10px;font-weight:800;letter-spacing:.15em;text-transform:uppercase}
+    .price{margin:21px 0 3px;font-size:103px;line-height:.8;font-weight:800;letter-spacing:-.09em}
+    .fee{color:#a8b1c8;font-size:15px;line-height:1.4}
+    .rule{height:1px;margin:24px 0 19px;background:rgba(255,255,255,.1)}
+    .stat{display:grid;grid-template-columns:43px 1fr;gap:13px;align-items:center}
+    .stat b{display:grid;place-items:center;width:43px;height:43px;border-radius:12px;background:rgba(79,140,255,.13);color:#78e0ff;font-size:16px}
+    .stat strong{display:block;font-size:14px}
+    .stat span{display:block;margin-top:4px;color:#818ba3;font-size:11px;line-height:1.4}
+    .bottom{
+      position:absolute;
+      left:56px;
+      right:56px;
+      bottom:34px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding-top:19px;
+      border-top:1px solid rgba(255,255,255,.09);
+      color:#7f899f;
+      font-size:12px;
+    }
+    .url{color:#c3cbe0;font-weight:800;letter-spacing:.02em}
+  </style>
+</head>
+<body>
+  <div class="top">
+    <div class="brand">
+      <img src="/assets/firststep-logo-transparent-cleaned.png" alt="">
+      <span>1stStep.ai</span>
+    </div>
+    <div class="badge">APPLICATIONS OPEN</div>
+  </div>
+
+  <div class="content">
+    <p class="eyebrow">Morris County Local Business Offer</p>
+    <h1>A custom website.<br><span class="gradient">Built for $0.</span></h1>
+    <p class="lede">For the first 10 qualified Morris County businesses.</p>
+    <div class="chips">
+      <span class="chip">Custom five-page website</span>
+      <span class="chip">Responsive design</span>
+      <span class="chip">Launch included</span>
+    </div>
+  </div>
+
+  <aside class="offer">
+    <div class="offer-label">Design + build fee</div>
+    <div class="price">$0</div>
+    <div class="fee">A focused local website build with a clearly defined scope.</div>
+    <div class="rule"></div>
+    <div class="stat">
+      <b>39</b>
+      <div><strong>Morris County municipalities</strong><span>Local eligibility required</span></div>
+    </div>
+  </aside>
+
+  <div class="bottom">
+    <span>Applications reviewed in received order. Selection required.</span>
+    <span class="url">1stStep.ai</span>
+  </div>
+</body>
+</html>

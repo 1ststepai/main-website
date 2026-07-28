@@ -15,8 +15,10 @@ Primary conversion path:
 Official profiles:
 - LinkedIn: https://www.linkedin.com/company/1ststep-ai/
 - Facebook: https://www.facebook.com/profile.php?id=61566833623507
+- Instagram: https://www.instagram.com/1ststepdotai/
 - Google Business Profile: https://maps.app.goo.gl/x7XKauoXUwi2qfNdA
 - YouTube: https://www.youtube.com/channel/UCynvog-XB0oFBigcrBvmxOg
+- GitHub: https://github.com/1ststepai
 
 Core services:
 - Premium website design and development

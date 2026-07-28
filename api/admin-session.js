@@ -3,8 +3,11 @@ import {
   createAdminCookie,
   createAdminSessionToken,
   isAdminAuthenticated,
+  isAdminMfaRequired,
+  isMobileAdminTotpLoginAllowed,
   isSameOriginRequest,
   verifyAdminPassword,
+  verifyAdminTotp,
 } from "../lib/admin/auth.js";
 import { checkRateLimit, setRateLimitHeaders } from "../lib/http/rateLimit.js";
 
@@ -31,7 +34,20 @@ function parseBody(req) {
 
 export default async function handler(req, res) {
   if (req.method === "GET") {
-    return sendJson(res, 200, { ok: true, authenticated: isAdminAuthenticated(req) });
+    try {
+      return sendJson(res, 200, {
+        ok: true,
+        authenticated: isAdminAuthenticated(req),
+        mfa_required: isAdminMfaRequired(),
+        mobile_totp_login_allowed: isMobileAdminTotpLoginAllowed(req),
+      });
+    } catch (error) {
+      return sendJson(res, Number(error.statusCode) || 503, {
+        ok: false,
+        code: error.code || "admin_not_configured",
+        message: "Admin access is not configured.",
+      });
+    }
   }
 
   if (!["POST", "DELETE"].includes(req.method)) {
@@ -55,8 +71,19 @@ export default async function handler(req, res) {
   if (!limit.allowed) return sendJson(res, 429, { ok: false, code: "rate_limited" });
 
   try {
-    const { password } = parseBody(req);
-    if (!verifyAdminPassword(String(password || ""))) {
+    const { password, otp, mobile_totp_login } = parseBody(req);
+    const otpValid = verifyAdminTotp(String(otp || ""));
+    const mobileTotpOnlyValid = mobile_totp_login === true
+      && isMobileAdminTotpLoginAllowed(req)
+      && otpValid;
+
+    if (mobileTotpOnlyValid) {
+      res.setHeader("Set-Cookie", createAdminCookie(createAdminSessionToken()));
+      return sendJson(res, 200, { ok: true, authenticated: true, auth_mode: "mobile_totp" });
+    }
+
+    const passwordValid = verifyAdminPassword(String(password || ""));
+    if (!mobileTotpOnlyValid && (!passwordValid || !otpValid)) {
       return sendJson(res, 401, { ok: false, code: "invalid_credentials" });
     }
     res.setHeader("Set-Cookie", createAdminCookie(createAdminSessionToken()));

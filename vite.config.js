@@ -4,6 +4,7 @@ import react from "@vitejs/plugin-react";
 const siteAnalytics = {
   name: "firststep-site-analytics",
   transformIndexHtml(html) {
+    if (html.includes('name="firststep-no-site-analytics"')) return html;
     if (html.includes('src="/src/site-analytics.js"')) return html;
     return html.replace(
       "</body>",
@@ -25,6 +26,7 @@ export default defineConfig({
         bookingConfirmed: "book/confirmed/index.html",
         fitCheck: "fit-check/index.html",
         outgrownWebsiteCampaign: "campaigns/outgrown-website/index.html",
+        morrisCountyFreeWebsiteCampaign: "campaigns/morris-county-free-website/index.html",
         appIdeaViabilityChecker: "app-idea-viability-checker.html",
         adminStudio: "admin/index.html",
         startupLaunchChecker: "startup-launch-checker/index.html",

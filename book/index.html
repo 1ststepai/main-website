@@ -80,7 +80,14 @@
     .calendar-head span{display:block;margin-bottom:7px;color:#8f83ff;font:700 10px/1 "Space Grotesk",sans-serif;letter-spacing:.14em;text-transform:uppercase}
     .calendar-head h2{margin:0 0 7px;font-family:"Space Grotesk",sans-serif;font-size:27px;letter-spacing:-.035em}
     .calendar-head p{margin:0;color:var(--muted);font-size:13px;line-height:1.55}
+    .calendar-shell{position:relative;min-height:850px;background:#fff}
     .calendar-frame{width:100%;height:850px;display:block;border:0;background:#fff}
+    .calendar-loading{position:absolute;z-index:2;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px;padding:28px;background:linear-gradient(145deg,#f7f8fc,#eef2fa);color:#1b2340;text-align:center}
+    .calendar-shell.is-loading .calendar-loading{display:flex}
+    .calendar-loading-spinner{width:34px;height:34px;border:3px solid rgba(79,140,255,.18);border-top-color:#5d73f6;border-radius:50%;animation:calendar-spin .8s linear infinite}
+    .calendar-loading strong{font-family:"Space Grotesk",sans-serif;font-size:16px}.calendar-loading span{max-width:34ch;color:#68718a;font-size:12px;line-height:1.55}
+    .calendar-reassurance{padding:13px 30px;border-bottom:1px solid var(--line);background:rgba(79,140,255,.055);color:#b9c1d7;font-size:12px;line-height:1.55}
+    @keyframes calendar-spin{to{transform:rotate(360deg)}}
     .calendar-fallback{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:18px 22px;border-top:1px solid var(--line);background:#0a0d18}
     .calendar-fallback p{margin:0;color:var(--muted-2);font-size:12px;line-height:1.5}
     .button{display:inline-flex;flex:none;align-items:center;justify-content:center;min-height:44px;padding:11px 18px;border-radius:999px;background:var(--grad);color:#fff;text-decoration:none;font-size:13px;font-weight:700;box-shadow:0 18px 38px -18px rgba(79,140,255,.72);transition:filter .2s,box-shadow .2s}
@@ -136,7 +143,7 @@
       </ul>
       <div class="after">
         <strong>What happens after the call?</strong>
-        <p>If the project is a strong fit, the next step is a scoped recommendation and proposal. A custom build begins only after the scope is approved, an agreement is signed, and the agreed project deposit is paid.</p>
+        <p>If the project is a strong fit, the next step is a scoped recommendation and proposal. Approved proposals can include a clear milestone payment schedule. A custom build begins only after the scope is approved, an agreement is signed, and the agreed project deposit is paid.</p>
       </div>
       <p class="fit-option">Not ready to book? <a href="/fit-check/" data-fsai-placement="booking_page">Request a four-field Website Fit Check instead.</a></p>
       <blockquote class="quote">&ldquo;The design is clean, professional, and optimized perfectly for client inquiries and lead generation.&rdquo;<footer>David William &middot; Verified Google Review &middot; <a href="https://maps.app.goo.gl/Xe6z1vueaEDnTa6F8" target="_blank" rel="noopener">View on Google</a></footer></blockquote>
@@ -148,7 +155,15 @@
         <h2 id="calendar-title">Website Strategy Call</h2>
         <p>The calendar is securely hosted by LeadConnector. 1stStep.ai does not store or intercept information entered inside it.</p>
       </div>
-      <iframe class="calendar-frame" data-fsai-calendar src="https://api.leadconnectorhq.com/widget/booking/Rb4aqLM1NdU5kvZcqNmj" title="LeadConnector calendar for the 1stStep.ai Website Strategy Call" loading="eager" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+      <div class="calendar-reassurance"><strong>No pressure.</strong> Choose any available time that works for you; the call is 30 minutes and there is no obligation to move forward.</div>
+      <div class="calendar-shell">
+        <iframe class="calendar-frame" data-fsai-calendar src="https://api.leadconnectorhq.com/widget/booking/Rb4aqLM1NdU5kvZcqNmj" title="LeadConnector calendar for the 1stStep.ai Website Strategy Call" loading="eager" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+        <div class="calendar-loading" role="status" aria-live="polite">
+          <span class="calendar-loading-spinner" aria-hidden="true"></span>
+          <strong>Loading secure Website Strategy Call calendar&hellip;</strong>
+          <span>This usually takes only a moment. A direct booking link is also available below.</span>
+        </div>
+      </div>
       <div class="calendar-fallback">
         <p>If the embedded calendar does not load, open the same verified booking calendar in a new tab.</p>
         <a class="button" data-fsai-calendar-fallback data-fsai-event="booking_fallback_click" data-fsai-placement="calendar_fallback" href="https://api.leadconnectorhq.com/widget/booking/Rb4aqLM1NdU5kvZcqNmj" target="_blank" rel="noopener">Open booking calendar &rarr;</a>
@@ -168,10 +183,19 @@
 
     const config = window.FSAI_COMMERCIAL_CONFIG;
     const url = config?.booking?.calendarUrl;
+    const frame = document.querySelector("[data-fsai-calendar]");
+    const fallback = document.querySelector("[data-fsai-calendar-fallback]");
+    const shell = frame?.closest(".calendar-shell");
+
+    if (frame && shell) {
+      shell.classList.add("is-loading");
+      const markReady = () => shell.classList.remove("is-loading");
+      frame.addEventListener("load", markReady, { once: true });
+      window.setTimeout(markReady, 8000);
+    }
+
     if (url && /^https:\/\/api\.leadconnectorhq\.com\/widget\/booking\//.test(url)) {
       const attributedUrl = appendAttribution(url);
-      const frame = document.querySelector("[data-fsai-calendar]");
-      const fallback = document.querySelector("[data-fsai-calendar-fallback]");
       if (frame) frame.src = attributedUrl;
       if (fallback) fallback.href = attributedUrl;
     }
