@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import {
+  Activity,
+  AlertTriangle,
   ArrowLeft,
   Check,
   ChevronDown,
@@ -18,6 +20,7 @@ import {
   Menu,
   Plus,
   Printer,
+  RefreshCw,
   Save,
   Send,
   ScrollText,
@@ -67,6 +70,7 @@ const EMPTY_WORKSPACE = {
 
 const NAVIGATION = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
+  { id: "job-agent", label: "Job Agent", icon: Activity },
   { id: "clients", label: "Clients", icon: Users },
   { id: "quotes", label: "Quotes", icon: FileText },
   { id: "pricing", label: "Pricing", icon: CircleDollarSign },
@@ -921,6 +925,116 @@ function SettingsPage({ workspace, previewMode }) {
         <ScrollText />
         <div><strong>Contract language review</strong><p>The included structures are practical drafting starters, not legal advice. Have qualified counsel review your final terms for your business and jurisdiction.</p></div>
       </section>
+    </div>
+  );
+}
+
+function moneyFromCents(value) {
+  if (value === null || value === undefined) return "Unknown";
+  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(Number(value) / 100);
+}
+
+function operationsStatusClass(status) {
+  if (["healthy", "ready", "running", "idle", "succeeded", "enabled"].includes(status)) return "healthy";
+  if (["disabled", "blocked"].includes(status)) return "guarded";
+  if (["failed", "degraded"].includes(status)) return "attention";
+  return "unknown";
+}
+
+function JobAgentOperationsPage({ previewMode }) {
+  const [operations, setOperations] = useState(null);
+  const [loading, setLoading] = useState(!previewMode);
+  const [error, setError] = useState(previewMode ? "Live operations appear only in the protected production admin." : "");
+
+  async function loadOperations() {
+    if (previewMode) return;
+    setLoading(true);
+    setError("");
+    try {
+      const data = await api("/api/admin-job-agent-operations");
+      setOperations(data.operations);
+    } catch (requestError) {
+      setOperations(null);
+      setError(requestError.message || "Live Job Agent operations are temporarily unavailable.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadOperations();
+    if (previewMode) return undefined;
+    const timer = window.setInterval(loadOperations, 60_000);
+    return () => window.clearInterval(timer);
+  }, [previewMode]);
+
+  return (
+    <div className="page-content operations-page">
+      <div className="section-heading page-heading operations-heading">
+        <div>
+          <h2>Job Agent operations</h2>
+          <p>Live costs, queues, safeguards, and outage reporting. Aggregate operational data only.</p>
+        </div>
+        <button className="button" type="button" onClick={loadOperations} disabled={loading || previewMode}>
+          <RefreshCw size={16} className={loading ? "spin" : ""} />
+          {loading ? "Checking…" : "Refresh"}
+        </button>
+      </div>
+
+      {error && (
+        <section className="operations-unavailable" role="status">
+          <AlertTriangle size={20} />
+          <div><strong>Live operations unavailable</strong><p>{error} No healthy status is assumed while data is unavailable.</p></div>
+        </section>
+      )}
+
+      {operations && (
+        <>
+          <section className="operations-summary" aria-label="Job Agent cost and health summary">
+            <article><span>Spent today</span><strong>{moneyFromCents(operations.spend.settledCents)}</strong><small>{operations.spend.ledgerDate || "Current UTC day"}</small></article>
+            <article><span>Reserved</span><strong>{moneyFromCents(operations.spend.reservedCents)}</strong><small>Work started, not settled</small></article>
+            <article><span>Budget remaining</span><strong>{moneyFromCents(operations.spend.remainingCents)}</strong><small>Daily ceiling {moneyFromCents(operations.spend.dailyCapCents)}</small></article>
+            <article><span>Background worker</span><strong className={operationsStatusClass(operations.worker.status)}>{operations.worker.status}</strong><small>{operations.worker.lastSeenAt ? `Last seen ${new Date(operations.worker.lastSeenAt).toLocaleString()}` : "Last heartbeat unknown"}</small></article>
+          </section>
+
+          <section className="operations-columns">
+            <div className="operations-panel">
+              <div className="operations-panel-title"><div><h3>Cost by capability</h3><p>Ledger totals and hard ceilings.</p></div><CircleDollarSign size={20} /></div>
+              <div className="operations-list">
+                {operations.spend.categories.map((category) => (
+                  <article key={category.key}>
+                    <div><strong>{category.label}</strong><small>{category.guarded ? `Guarded · ${moneyFromCents(category.dailyCapCents)} daily cap` : "Inactive or no approved ceiling"}</small></div>
+                    <span>{moneyFromCents(category.settledCents + category.reservedCents)}</span>
+                  </article>
+                ))}
+              </div>
+              <p className="operations-evidence">{operations.spend.evidenceNote}</p>
+            </div>
+
+            <div className="operations-panel">
+              <div className="operations-panel-title"><div><h3>Work queues</h3><p>Pending and overdue background work.</p></div><Activity size={20} /></div>
+              <div className="operations-list queue-list">
+                {operations.queues.map((queue) => (
+                  <article key={queue.key}>
+                    <div><strong>{queue.label}</strong><small>Pending {queue.pending ?? "unknown"} · Overdue {queue.overdue ?? "unknown"}</small></div>
+                    <span className={`operations-chip ${operationsStatusClass(queue.status)}`}>{queue.status}</span>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          <section className="operations-panel safeguards-panel">
+            <div className="operations-panel-title"><div><h3>Safety controls</h3><p>Capabilities remain unavailable unless every required control is satisfied.</p></div><ShieldCheck size={20} /></div>
+            <div className="safeguard-grid">
+              <div><span>Employer browser</span><strong className={operationsStatusClass(operations.safeguards.employerBrowser)}>{operations.safeguards.employerBrowser}</strong></div>
+              <div><span>Final submission</span><strong className={operationsStatusClass(operations.safeguards.finalSubmission)}>{operations.safeguards.finalSubmission}</strong></div>
+              <div><span>Application preparation</span><strong className={operationsStatusClass(operations.safeguards.packagePreparation)}>{operations.safeguards.packagePreparation}</strong></div>
+              <div><span>Discord alerts</span><strong className={operations.alerts.discordReady ? "healthy" : "attention"}>{operations.alerts.destination}</strong></div>
+            </div>
+          </section>
+        </>
+      )}
     </div>
   );
 }
@@ -1800,6 +1914,7 @@ function StudioApp({ previewMode = false }) {
 
   let pageContent;
   if (page === "overview") pageContent = <Overview workspace={workspace} onEditQuote={editQuote} onNewQuote={newQuote} />;
+  if (page === "job-agent") pageContent = <JobAgentOperationsPage previewMode={previewMode} />;
   if (page === "clients") pageContent = <ClientsPage workspace={workspace} updateWorkspace={updateWorkspace} />;
   if (page === "quotes") pageContent = <QuotesPage workspace={workspace} onEditQuote={editQuote} onNewQuote={newQuote} />;
   if (page === "pricing") pageContent = <PricingPage workspace={workspace} updateWorkspace={updateWorkspace} onStartQuote={newQuote} />;
@@ -1830,7 +1945,7 @@ function StudioApp({ previewMode = false }) {
             <>
               {message && <span className="save-message" role="status">{message}</span>}
               {page === "quote-editor" && <button className="button ghost" onClick={() => setPage("quotes")}><ArrowLeft size={16} />All quotes</button>}
-              <button className="button" onClick={save} disabled={saving || (!dirty && !previewMode)}><Save size={16} />{saving ? "Saving…" : dirty ? "Save draft" : "Saved"}</button>
+              {page !== "job-agent" && <button className="button" onClick={save} disabled={saving || (!dirty && !previewMode)}><Save size={16} />{saving ? "Saving…" : dirty ? "Save draft" : "Saved"}</button>}
               {editorActions && <button className="button primary" disabled={saving} onClick={() => openPreview(selectedQuote.id)}><Eye size={17} />{dirty ? "Save, preview & send" : "Preview & send"}</button>}
             </>
           )}
