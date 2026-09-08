@@ -57,6 +57,7 @@ import { draftQuoteFromBrief } from "../../lib/admin/quoteBriefAssistant.js";
 import "./admin.css";
 
 const DEFAULT_TEMPLATES = DEFAULT_CONTRACT_TEMPLATES;
+const ADMIN_SESSION_EXPIRED_EVENT = "firststep:admin-session-expired";
 
 const EMPTY_WORKSPACE = {
   revision: 0,
@@ -216,6 +217,9 @@ async function api(path, options = {}) {
   });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
+    if (response.status === 401 && path !== "/api/admin-session") {
+      window.dispatchEvent(new Event(ADMIN_SESSION_EXPIRED_EVENT));
+    }
     const error = new Error(data.message || "The request could not be completed.");
     error.code = data.code;
     error.status = response.status;
@@ -1991,6 +1995,15 @@ function Root() {
   }
 
   useEffect(() => { if (!previewMode) checkSession(); }, [previewMode]);
+  useEffect(() => {
+    if (previewMode) return undefined;
+    const handleSessionExpired = () => {
+      setAuthenticated(false);
+      setMobileTotpLoginAllowed(false);
+    };
+    window.addEventListener(ADMIN_SESSION_EXPIRED_EVENT, handleSessionExpired);
+    return () => window.removeEventListener(ADMIN_SESSION_EXPIRED_EVENT, handleSessionExpired);
+  }, [previewMode]);
   if (loading) return <div className="loading-screen"><Logo /><span>Opening your studio…</span></div>;
   return authenticated
     ? <StudioApp previewMode={previewMode} />
