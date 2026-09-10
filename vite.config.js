@@ -33,6 +33,7 @@ export default defineConfig({
         appBuilds: "services/app-builds.html",
         mvpBuilds: "services/mvp-builds.html",
         websites: "services/websites.html",
+        revenueSystems: "services/revenue-systems.html",
         internalTools: "services/internal-tools.html",
         privacy: "privacy.html",
         terms: "terms.html",
