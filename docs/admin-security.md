@@ -16,6 +16,7 @@ The production admin is designed to fail closed. A hidden URL is not treated as 
 - Production preview mode is disabled at build time.
 - Application logs use request or record IDs and do not contain client names, emails, phone numbers, addresses, quote text, or agreement text.
 - Stripe hosts all card entry. Card numbers never enter this application.
+- Job Agent operations are read through an authenticated server-to-server bridge. The browser never receives the bridge secret, and the proxy rejects any upstream response that is not explicitly aggregate-only and content-free.
 
 ## Initial production setup
 
@@ -28,6 +29,8 @@ npm run security:generate-secrets
 Save the generated owner password in a password manager. Add the generated hash, session secret, authenticator secret, and data-encryption key to Vercel Production environment variables. Add the authenticator URI to a TOTP-compatible authenticator, then delete the terminal output.
 
 Never configure `FIRSTSTEP_ADMIN_PASSWORD` in production. It exists only for local compatibility.
+
+To enable the Job Agent operations view, configure the same 32-character-or-longer `JOB_AGENT_OPERATOR_BRIDGE_SECRET` as a Sensitive Production variable in both the main website and Job Agent Vercel projects. This secret grants read-only access to aggregate operational metrics; it does not authorize applicant records, employer actions, or submissions.
 
 If the original terminal output is lost after saving the owner password and TOTP secret, run:
 
