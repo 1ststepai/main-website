@@ -3,13 +3,16 @@ import react from "@vitejs/plugin-react";
 
 const siteAnalytics = {
   name: "firststep-site-analytics",
-  transformIndexHtml(html) {
-    if (html.includes('name="firststep-no-site-analytics"')) return html;
-    if (html.includes('src="/src/site-analytics.js"')) return html;
-    return html.replace(
-      "</body>",
-      '  <script type="module" src="/src/site-analytics.js"></script>\n</body>'
-    );
+  transformIndexHtml: {
+    order: "pre",
+    handler(html) {
+      if (html.includes('name="firststep-no-site-analytics"')) return html;
+      if (html.includes('src="/src/site-analytics.js"')) return html;
+      return html.replace(
+        "</body>",
+        '  <script type="module" src="/src/site-analytics.js"></script>\n</body>'
+      );
+    },
   },
 };
 
