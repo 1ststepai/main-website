@@ -1,4 +1,4 @@
-import { capabilityNames, deriveCapabilities, deriveGenome, flowForBusiness, getRecommendations, interpretGoal, modes, questions, suggestMode } from './onboarding-state.js';
+import { capabilityNames, deriveCapabilities, deriveGenome, flowForBusiness, getRecommendations, interpretGoal, modes, normalizeAuditTarget, questions, suggestMode } from './onboarding-state.js';
 
 const conversation = document.querySelector('#conversation-content');
 const system = document.querySelector('#system-content');
@@ -11,7 +11,7 @@ const stageNumber = document.querySelector('#stage-number');
 const systemStatus = document.querySelector('#system-status');
 const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
 const track = (name, detail = {}) => window.fsaiTrack?.(name, detail);
-let state = { stage: 'choose', mode: null, goal: '', goalConfirmed: false, answers: {}, qIndex: 0, acceptedRecommendations: [], openRecommendations: [], recommendationChanges: {}, editingRecommendation: null, originUnsure: false };
+let state = { stage: 'choose', mode: null, goal: '', auditTarget: null, goalConfirmed: false, answers: {}, qIndex: 0, acceptedRecommendations: [], openRecommendations: [], recommendationChanges: {}, editingRecommendation: null, originUnsure: false };
 function clearDownstreamDecisions() {
   state.acceptedRecommendations = [];
   state.openRecommendations = [];
@@ -36,13 +36,14 @@ function go(stage, patch = {}) {
 }
 
 window.addEventListener('popstate', (event) => {
-  state = structuredClone(snapshots.get(event.state?.osPreviewKey) || { stage: 'choose', mode: null, goal: '', goalConfirmed: false, answers: {}, qIndex: 0, acceptedRecommendations: [], openRecommendations: [], recommendationChanges: {}, editingRecommendation: null, originUnsure: false });
+  state = structuredClone(snapshots.get(event.state?.osPreviewKey) || { stage: 'choose', mode: null, goal: '', auditTarget: null, goalConfirmed: false, answers: {}, qIndex: 0, acceptedRecommendations: [], openRecommendations: [], recommendationChanges: {}, editingRecommendation: null, originUnsure: false });
   render(true);
 });
 
 const btn = (label, action, kind = 'primary', extra = '') => `<button type="button" class="action-button ${kind}" data-action="${action}" ${extra}>${label}</button>`;
 function narrativeNumber() {
   if (state.stage === 'choose') return 1;
+  if (state.stage === 'audit-request') return 2;
   if (state.stage === 'describe') return 2;
   if (state.stage === 'route') return 3;
   if (state.stage === 'interpret') return state.originUnsure ? 4 : 3;
@@ -59,9 +60,21 @@ const heading = (_number, eyebrow, title, lede) => `<p class="stage-kicker">${St
 const stateTag = (status) => `<span class="state-tag state-${status.toLowerCase().replace(/[^a-z]+/g, '-')}">${escapeHtml(status)}</span>`;
 
 function renderChoose() {
-  return `${heading('01', 'CHOOSE YOUR PATH', 'Where are you starting from?', 'A different starting point changes the questions, system view, and next steps.')}
-    <div class="path-options" role="group" aria-label="Choose a starting path">${Object.entries(modes).map(([key, mode], i) => `<button type="button" class="path-option" data-action="select-mode" data-mode="${key}"><span class="path-index">0${i + 1}</span><span><strong>${escapeHtml(mode.title)}</strong><small>${escapeHtml(mode.description)}</small></span><b aria-hidden="true">↗</b></button>`).join('')}</div>
-    <p class="stage-disclaimer">No signup. No code connection. Your answers stay in this tab.</p>`;
+  return `${heading('01', 'START WITH ONE LINK', 'What should we look at?', 'Enter a public website or GitHub repository. Start a free first-look request without a long questionnaire.')}
+    <form id="audit-target-form" class="audit-target-form"><label class="field-label" for="audit-target-input">Website or GitHub repository</label><div class="audit-target-row"><input id="audit-target-input" name="target" type="text" inputmode="url" autocomplete="url" required spellcheck="false" placeholder="yourwebsite.com or github.com/you/project" aria-describedby="audit-target-help" /><button type="submit" class="action-button primary">Start here ↗</button></div><p id="audit-target-help">Public links only. We do not scan or connect to anything when you enter a link.</p></form>
+    <details class="other-paths"><summary>Starting without a link? Choose a different path</summary><div class="path-options" role="group" aria-label="Choose a starting path">${Object.entries(modes).map(([key, mode], i) => `<button type="button" class="path-option" data-action="select-mode" data-mode="${key}"><span class="path-index">0${i + 1}</span><span><strong>${escapeHtml(mode.title)}</strong><small>${escapeHtml(mode.description)}</small></span><b aria-hidden="true">↗</b></button>`).join('')}</div></details>
+    <p class="stage-disclaimer">Your link stays in this tab until you choose to open an email draft. No account or OS project is created.</p>`;
+}
+
+function renderAuditRequest() {
+  const target = state.auditTarget;
+  const label = target.kind === 'github' ? 'GitHub repository' : 'Website';
+  const body = `I would like a free first look at this public ${label.toLowerCase()}:\n${target.url}\n\nWhat I most want to understand: `;
+  const href = `mailto:evan@1ststep.ai?subject=${encodeURIComponent('1stStep OS first-look request')}&body=${encodeURIComponent(body)}`;
+  return `${heading('02', 'FIRST LOOK / REQUEST', 'One link is enough to begin.', 'We can review a public page or repository and respond with a bounded first look. This preview has not inspected it.')}
+    <div class="interpretation-card"><span>YOUR ${label.toUpperCase()} / USER PROVIDED</span><strong class="audit-target-value">${escapeHtml(target.url)}</strong><p>${target.kind === 'github' ? 'A public repository can be reviewed manually. A private repository needs a future read-only connection; this link alone grants no access.' : 'A first look can cover public-facing clarity, experience, and visible technical signals. It cannot verify private systems from a URL.'}</p></div>
+    <div class="stage-actions"><a class="action-button primary" href="${href}" data-fsai-event="os_first_look_email_opened" data-fsai-placement="audit_request">Open email request ↗</a></div>
+    <p class="stage-disclaimer">The email button opens a draft in your email app. No request is sent until you send it. This is a human first-look request, not an instant automated audit or a confirmed booking.</p>`;
 }
 
 function renderDescribe() {
@@ -147,6 +160,7 @@ function renderContinue() {
 function renderConversation() {
   switch (state.stage) {
     case 'choose': return renderChoose();
+    case 'audit-request': return renderAuditRequest();
     case 'describe': return renderDescribe();
     case 'route': return renderRoute();
     case 'interpret': return renderInterpret();
@@ -161,7 +175,8 @@ function renderConversation() {
 }
 
 function renderSystem() {
-  if (state.stage === 'choose') return `<div class="system-intro"><div class="signal-route"><span class="signal-node is-active">STARTING POINT</span><i></i><span class="signal-node">INTELLIGENT ROUTE</span><i></i><span class="signal-node">NEXT STEP</span></div><h2 id="system-title">One goal.<br /><em>A path that responds.</em></h2><p>Choose a starting point. Then watch the project profile, active capabilities, and next questions change with your answers.</p><div class="system-empty">PROJECT STATE <b>WAITING FOR YOUR CHOICE</b></div></div>`;
+  if (state.stage === 'choose') return `<div class="system-intro"><div class="signal-route"><span class="signal-node is-active">STARTING POINT</span><i></i><span class="signal-node">INTELLIGENT ROUTE</span><i></i><span class="signal-node">NEXT STEP</span></div><h2 id="system-title">One link.<br /><em>A clearer path.</em></h2><p>Share a public link for a human first look, or choose a starting path to explore how the Project OS could take shape.</p><div class="system-empty">PROJECT STATE <b>WAITING FOR YOUR CHOICE</b></div></div>`;
+  if (state.stage === 'audit-request') return `<div class="system-intro"><div class="signal-route"><span class="signal-node is-active">YOUR LINK</span><i></i><span class="signal-node">HUMAN REVIEW</span><i></i><span class="signal-node">NEXT STEP</span></div><h2 id="system-title">A useful first look.<br /><em>No invented score.</em></h2><p>We can start from the public material you share. A verified technical audit would need a real baseline, permission, and evidence.</p><div class="system-empty">AUDIT STATE <b>NOT STARTED</b></div></div>`;
   const genome = deriveGenome(state);
   const active = deriveCapabilities(state);
   const filled = Object.values(genome).filter((signal) => signal.state !== 'UNKNOWN').length;
@@ -188,7 +203,7 @@ function renderSystem() {
 }
 
 function progressValue() {
-  const map = { choose: 0, describe: 12, route: 18, interpret: 23, connect: 31, questions: 35, baseline: 70, recommend: 76, reveal: 90, continue: 100 };
+  const map = { choose: 0, 'audit-request': 10, describe: 12, route: 18, interpret: 23, connect: 31, questions: 35, baseline: 70, recommend: 76, reveal: 90, continue: 100 };
   if (state.stage === 'questions') return 35 + Math.round(((state.qIndex + (state.answers[questions[state.mode][state.qIndex].key] ? 1 : 0)) / questions[state.mode].length) * 34);
   return map[state.stage] ?? 0;
 }
@@ -214,6 +229,7 @@ function render(focus = false) {
 }
 
 conversation.addEventListener('input', (event) => {
+  if (event.target.id === 'audit-target-input') event.target.setCustomValidity('');
   if (event.target.id === 'goal-input') {
     const count = document.querySelector('#char-count');
     if (count) count.textContent = `${event.target.value.length} / 800`;
@@ -221,6 +237,15 @@ conversation.addEventListener('input', (event) => {
 });
 
 conversation.addEventListener('submit', (event) => {
+  if (event.target.id === 'audit-target-form') {
+    event.preventDefault();
+    const input = event.target.elements.target;
+    const auditTarget = normalizeAuditTarget(input.value);
+    if (!auditTarget) { input.setCustomValidity('Enter a public website or GitHub repository URL.'); input.reportValidity(); return; }
+    track('os_first_look_target_entered', { kind: auditTarget.kind });
+    go('audit-request', { auditTarget });
+    return;
+  }
   if (event.target.id !== 'goal-form') return;
   event.preventDefault();
   const goal = event.target.goal.value.trim();
@@ -245,7 +270,7 @@ document.querySelector('.stage-layout').addEventListener('click', (event) => {
   if (action === 'select-mode') {
     const mode = target.dataset.mode;
     if (!modes[mode]) return;
-    state = { stage: 'choose', mode, goal: '', goalConfirmed: false, answers: {}, qIndex: 0, acceptedRecommendations: [], openRecommendations: [], recommendationChanges: {}, editingRecommendation: null, originUnsure: mode === 'unsure' };
+    state = { stage: 'choose', mode, goal: '', auditTarget: null, goalConfirmed: false, answers: {}, qIndex: 0, acceptedRecommendations: [], openRecommendations: [], recommendationChanges: {}, editingRecommendation: null, originUnsure: mode === 'unsure' };
     track('os_onboarding_started', { mode });
     track('os_start_mode_selected', { mode });
     if (mode === 'business') track('os_business_flow_started', { mode });

@@ -8,6 +8,24 @@ export const modes = {
 
 export const capabilityNames = ['Research', 'Product', 'Design', 'Engineering', 'AI', 'Security', 'Business', 'Pricing', 'Media', 'Discovery', 'Growth', 'Sales', 'Automation', 'Operations', 'Recovery', 'Learning'];
 
+export function normalizeAuditTarget(input) {
+  const raw = String(input || '').trim();
+  if (!raw) return null;
+  let url;
+  try { url = new URL(/^https?:\/\//i.test(raw) ? raw : `https://${raw}`); } catch { return null; }
+  if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password) return null;
+  const host = url.hostname.toLowerCase();
+  if (!/^[a-z0-9-]+(?:\.[a-z0-9-]+)+$/.test(host) || /^\d+(?:\.\d+){3}$/.test(host) || host.endsWith('.local') || host.endsWith('.internal')) return null;
+  if (host === 'github.com' || host === 'www.github.com') {
+    const parts = url.pathname.split('/').filter(Boolean);
+    if (parts.length < 2 || !/^[\w.-]+$/.test(parts[0]) || !/^[\w.-]+$/.test(parts[1])) return null;
+    return { kind: 'github', url: `https://github.com/${parts[0]}/${parts[1].replace(/\.git$/i, '')}` };
+  }
+  url.search = '';
+  url.hash = '';
+  return { kind: 'website', url: url.toString() };
+}
+
 export const questions = {
   idea: [
     { key: 'audience', title: 'Who is this for?', detail: 'Start with a real person or group. You can refine this later.', options: ['Consumers', 'Business teams', 'My own team', 'Not sure yet'] },

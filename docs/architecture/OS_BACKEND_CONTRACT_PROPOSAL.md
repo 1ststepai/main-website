@@ -1,6 +1,6 @@
 # 1stStep OS: owned backend contract and execution architecture
 
-**Status:** proposed for Evan and the eventual OS backend owner; **G1 CLOSED** pending the [owner decision package](OS_G1_OWNER_DECISION_PACKAGE.md). No backend, GitHub App, account, billing, or production change is authorized by this document. **Source baseline:** local `/os/start/` commit `cefa5c8c1be9f0039aec83c0e87a6795400b1d5e`. **Contract version:** `os.contract/1.0-draft`. The [versioned entity schema](os-contract.v1.schema.json) is a wire/storage-shape proposal, not a migration or claim of a live service.
+**Status:** separate OS backend direction approved; contract and **G1 implementation gate remain CLOSED** pending the [owner decision package](OS_G1_OWNER_DECISION_PACKAGE.md). No backend, GitHub App, account, billing, or production change is authorized by this document. **Source baseline:** local `/os/start/` commit `cefa5c8c1be9f0039aec83c0e87a6795400b1d5e`. **Contract version:** `os.contract/1.0-draft`. The [versioned entity schema](os-contract.v1.schema.json) is a wire/storage-shape proposal, not a migration or claim of a live service.
 
 ## Decision and ownership
 
@@ -81,6 +81,26 @@ A question is eligible only if its possible answers can materially change a name
 Each recommendation cites input revisions and relevant claims, distinguishes its evidence class, names the decision it affects, offers an uncertainty statement, and has an expiry/invalidation rule. A cross-project pattern can recommend a **hypothesis** only when its scope matches this Project and its sanitized evidence is authorized; it cannot certify this project's health. No research claim is emitted by the deterministic preview. User-provided answers may justify preliminary guidance but not external-research language. Fetching external pages requires source allowlists/SSRF controls, provenance, terms/privacy review, and a declared budget.
 
 ## GitHub read-only connection and immutable baseline
+
+### One-link first-look handoff for the appointed OS backend owner
+
+The public `/os/start/` entry now accepts a website or GitHub URL and opens a **visitor-initiated email draft** for a human first look. Entering a URL never fetches, scans, saves, or grants access. This keeps the first action short while the separate OS backend remains unbuilt. The future automated version needs two distinct contracts:
+
+| Contract field | Public website first look | GitHub repository first look |
+| --- | --- | --- |
+| Capability | Inspect publicly accessible pages and report a bounded, evidence-linked first look. | Inspect one explicitly selected repository at a pinned commit and report a bounded, evidence-linked first look. |
+| Input | Canonical public URL and visitor consent; optional goal. | Repository locator plus authenticated project ownership, selected-repo installation/authorization, branch, and consent. A pasted URL alone is never permission. |
+| Output | Dated report with checked URLs, method, observations, unknowns, and next steps; no theatrical score. | Baseline identity and dated report with file/commit evidence, unknowns, findings, and next steps; no fabricated readiness percentage. |
+| Authority | Appointed OS backend owner; public site owns only entry, result presentation, and attribution. | Appointed OS backend owner; GitHub App credentials and workers stay in OS service, never public Vite or Job Agent. |
+| Security | Server-side URL validation, DNS/IP checks on every redirect, response-size/time limits, robots/terms review, no login crawling, rate limits, and no private-network fetches. | Least-privilege selected-repository read scope, signed installation intent, server-held token, per-project authorization, untrusted repository text handling, and no write scope. |
+| Truth requirement | Only observed public pages become findings; report fetch failures and inaccessible pages as unknown. | Only exact-commit inspected evidence becomes findings; no repository claim from a URL preview. |
+| Failure model | Explicit unavailable/partial result; no completed label on timeout, block, or empty fetch. | Explicit disconnected/permission denied/partial baseline; no sealed audit from a partial scan. |
+| Idempotency | Stable request key and target/version window; retry must not duplicate a charged or customer-visible run. | Stable project/repository/commit/request key; retry cannot duplicate baseline or finding records. |
+| Persistence | Authenticated project report only after approved retention/consent; anonymous requests are not silently stored. | Project-scoped baseline, evidence, and report only after approved retention/consent. |
+| Auditability | Capture requested target, normalized redirects, fetch status/time, method version, evidence digests, actor, and result state. | Capture project actor, installation/repo/commit IDs, permission snapshot, inspected manifest, evidence digests, and result state. |
+| Release gate | Privacy/terms review, SSRF and redirect tests, abuse/rate limits, report accuracy review, cost ceiling, and explicit production approval. | G1 decisions, GitHub App registration approval, callback/tenant isolation tests, immutable baseline and finding tests, cost ceiling, and explicit production approval. |
+
+Do not call the future automated report a free instant roast until scope, unit cost, abuse controls, response time, and customer promise are approved and measured. The current email request can be described as a **free first-look request**, not a completed audit or guaranteed response. Prefer useful, candid findings over mocking the customer.
 
 Evaluate a GitHub App with selected-repository installation and server-side installation tokens. Proposed initial repository permissions: **Metadata: read** and **Contents: read**. Do not ask for Issues, Pull requests, Actions, Checks, Workflows, Administration, or organization permissions by default. GitHub documents that app permissions start empty and should be minimal; installation tokens can be restricted to specified repository IDs and expire after one hour. Reading workflow files through the Contents API must be verified endpoint by endpoint; a permission expansion, if genuinely necessary, requires a new review. [GitHub permissions](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/choosing-permissions-for-a-github-app), [installation authentication](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/authenticating-as-a-github-app-installation), [App practices](https://docs.github.com/en/apps/creating-github-apps/about-creating-github-apps/best-practices-for-creating-a-github-app).
 

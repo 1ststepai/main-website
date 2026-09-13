@@ -1,6 +1,6 @@
 # 1stStep OS G1 owner decision package
 
-**Status:** recommendation for Evan; **G1 remains CLOSED**. Prepared against public-site OS contract commit `70c1de4d32033ec835f3b02a663d0aeedcc88001`. This document makes G1-A and G1-B reviewable and covers only the **visible** G1-C brief. The attached G1-C text ends mid-sentence after “A `PatternDefinition` should have provenance such as: source”; no unseen continuation is inferred. No repository, service, database, identity integration, import, or production change is authorized here.
+**Status:** Evan approved G1-A **Option A's separate OS backend direction** in the current conversation. **G1 remains CLOSED for implementation** until an actual OS backend owner and platform/identity authority are recorded and remaining G1-B/C and privacy/retention decisions are resolved. Prepared against public-site OS contract commit `70c1de4d32033ec835f3b02a663d0aeedcc88001`. This document makes G1-A and G1-B reviewable and covers only the **visible** G1-C brief. The attached G1-C text ends mid-sentence after “A `PatternDefinition` should have provenance such as: source”; no unseen continuation is inferred. No repository, service, database, identity integration, import, or production change is authorized here.
 
 ## G1-A — backend ownership
 
@@ -27,7 +27,7 @@ Putting the domain in `main-website` was also evaluated and rejected: the inspec
 | `app.1ststep.ai` | Remains Job Agent authority. It need not own/share OS backend. If a user navigates across products, use an explicit identity subject-mapping or service API/event contract, scoped consent, signed opaque IDs, no shared tables, no direct OS DB access, no implicit Job Agent access to repo content. App-owned changes are implemented by its Engineering Orchestrator. |
 | Engineering authority | Evan appoints one 1stStep OS Engineering Orchestrator for backend implementation and release. This public-site agent owns `/os` client/interface contract; the existing app orchestrator owns Job Agent. No two agents may independently mutate the OS backend. |
 
-**Decision required from Evan:** “Approve Option A: a separate OS backend repository/service and dedicated PostgreSQL authority under an appointed 1stStep OS Engineering Orchestrator?” **Yes / No.** If yes, the actual agent/person and implementation platform/provider must be recorded before work begins. If no, choose Option B explicitly and assign app-orchestrator ownership and a migration/isolation review before any app work. This package does not itself open G1.
+**Recorded owner decision:** Evan answered yes to the proposed separate-backend direction and requested a simpler website-or-GitHub first-look entry. Option A is the chosen ownership boundary; the actual OS Engineering Orchestrator, implementation platform/provider, datastore instance, and identity boundary remain undecided. This approval does not itself open G1 or authorize backend scaffolding. Option B is no longer the preferred path.
 
 ## G1-B — first-party and customer portfolio placement
 
