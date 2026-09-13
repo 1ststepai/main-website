@@ -20,6 +20,8 @@ function serveOsAtExactPath(server) {
   server.middlewares.use((request, _response, next) => {
     if (request.url === "/os" || request.url?.startsWith("/os?")) {
       request.url = request.url.replace(/^\/os/, "/os/index.html");
+    } else if (request.url === "/os/start" || request.url === "/os/start/" || request.url?.startsWith("/os/start?")) {
+      request.url = request.url.replace(/^\/os\/start\/?/, "/os/start/index.html");
     }
     next();
   });
@@ -39,6 +41,7 @@ export default defineConfig({
       input: {
         main: "index.html",
         os: "os/index.html",
+        osStart: "os/start/index.html",
         journey: "journey/index.html",
         book: "book/index.html",
         bookingConfirmed: "book/confirmed/index.html",

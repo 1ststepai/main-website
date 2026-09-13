@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#070912" />
+  <meta name="description" content="Preview how 1stStep OS shapes a project from your goal, answers, and next decisions. Browser-local concept; no project is created." />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Start with your goal — 1stStep OS preview</title>
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/os/os.css" />
+  <link rel="stylesheet" href="/os/start/onboarding.css" />
+  <script type="module" src="/os/start/onboarding.js"></script>
+</head>
+<body data-fsai-page-event="os_onboarding_preview_page_view" data-fsai-audience="product">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="/" aria-label="1stStep.ai home"><img src="/assets/firststep-logo-transparent-cleaned.png" alt="" width="41" height="34" /><span>1stStep.ai</span></a>
+      <nav class="desktop-nav" aria-label="Primary"><a href="/os">1stStep OS</a><a href="/os#genome">Project Genome</a><a href="/os#audit">Audit method</a></nav>
+      <a class="header-cta" href="/os">Explore the OS <span aria-hidden="true">↗</span></a>
+    </div>
+  </header>
+  <main id="main" class="onboarding-main">
+    <div class="onboarding-top container">
+      <div><p class="eyebrow">1STSTEP OS / INTERACTIVE PREVIEW</p><h1>Start with your goal.<br /><em>See the path take shape.</em></h1></div>
+      <p>This browser-local preview shows how a Project OS could respond to your answers. It does not use AI, analyze a repository, or save a project.</p>
+    </div>
+    <div class="progress-wrap"><div class="container progress-inner"><span id="progress-label">01 / CHOOSE YOUR PATH</span><div class="progress-track" role="progressbar" aria-label="Onboarding progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progress-track"><i id="progress-fill"></i></div><span class="preview-pill">PREVIEW ONLY</span></div></div>
+    <div class="container stage-layout">
+      <section class="conversation-panel" aria-labelledby="stage-title">
+        <div class="panel-topline"><span id="stage-number">01 / ARRIVE</span><span>YOU BRING THE GOAL</span></div>
+        <div id="conversation-content"></div>
+      </section>
+      <aside class="system-panel" aria-labelledby="system-title">
+        <div class="panel-topline"><span>THE SYSTEM RESPONDS</span><span id="system-status">WAITING FOR A START</span></div>
+        <div id="system-content"></div>
+      </aside>
+    </div>
+    <div class="container lower-nav"><button id="back-button" class="back-button" type="button" hidden>← Previous step</button><p id="privacy-note">Your answers stay in this tab and disappear on reload. No account or project is created.</p></div>
+    <div id="announcement" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+    <noscript><p class="container no-script-note">This interactive preview requires JavaScript. You can still explore the <a href="/os">1stStep OS concept page</a>.</p></noscript>
+  </main>
+  <footer class="site-footer"><div class="container footer-inner"><a class="brand" href="/" aria-label="1stStep.ai home"><img src="/assets/firststep-logo-transparent-cleaned.png" alt="" width="36" height="30" /><span>1stStep.ai</span></a><span>Goal → route → next step.</span><div><a href="/os">Explore OS</a><a href="/">1stStep.ai</a></div></div></footer>
+</body>
+</html>

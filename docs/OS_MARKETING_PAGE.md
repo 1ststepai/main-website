@@ -1,6 +1,6 @@
 # 1stStep OS public page: design and information architecture
 
-Status: implemented locally at `/os` as a public concept page. The current opening positions it as an **AI Engineering Operating System**: context → authority → isolated work → evidence → release decision. The broader product, business, and discovery concepts below remain visibly labeled as future or illustrative. This document covers presentation only; application architecture remains open.
+Status: `/os` is a public concept page. `/os/start/` now has a separate browser-local interactive onboarding preview; it does not create an account, inspect code, or compile a Project OS. The current opening positions the OS as an **AI Engineering Operating System**: context → authority → isolated work → evidence → release decision. The broader product, business, and discovery concepts below remain visibly labeled as future or illustrative. Connected application architecture remains open.
 
 ## Existing 1stStep.ai design language (observed in `index.html` and `public/service-pages.css`)
 
@@ -33,7 +33,7 @@ Status: implemented locally at `/os` as a public concept page. The current openi
 - State each starting condition in the visitor's language, then show a concrete direction: a researched first-product plan, a mapped recovery plan, or a bounded automation opportunity. These are illustrative marketing paths, not live generated results.
 - Animate the hero as one directional signal from Context → Authority → Evidence → Release. Use small staggered motion and scroll emphasis to explain sequence. All content remains present without JavaScript, and `prefers-reduced-motion` removes movement.
 - The journey demo uses a 20-second CSS loop started only when visible, with Pause and Replay controls. It is explicitly illustrative, sends no request, and defaults to the final product preview without JavaScript or under reduced motion. The visual has a complete text alternative; the animation itself is hidden from assistive technology to avoid repeated announcements. Hero, genome, memory, and provider motion pause offscreen.
-- Keep the page's primary CTA as an in-page move to the local starting-path preview. Do not imply that the unfinished G1 application is accepting submissions.
+- The hero's primary CTA now opens `/os/start/`, an interactive local preview with five starting paths. The lower-page four-intent prompt remains an illustrative marketing widget. Neither creates or submits an OS project.
 
 ## Reuse and boundaries
 
@@ -43,6 +43,10 @@ Status: implemented locally at `/os` as a public concept page. The current openi
 - The prompt has no asynchronous state today. A future connected version needs explicit loading, success, and error feedback before accepting submissions; that behavior belongs to the later architecture work.
 - Reuse the site's existing `site-analytics.js` for a page view and sparse intent interactions. Never track prompt text. No onboarding conversion event exists until an approved onboarding flow exists.
 - Metadata includes a canonical URL, OG fields, and `WebPage` JSON-LD. It describes the public concept, not a live software application. Core copy and diagram labels remain in HTML for crawlability and AI/search answerability.
-- Current: public page and local interactive visualizations. In development: onboarding, audit, adapters, routing, and capability workflows. Designed for/coming: media factory, discovery intelligence, resumability, opportunity engine, and command center. None of the conceptual scores represent a real project.
+- Current: public page, browser-local onboarding preview, and interactive marketing visualizations. In development: connected onboarding, audit, adapters, routing, and capability workflows. Designed for/coming: media factory, discovery intelligence, resumability, opportunity engine, and command center. None of the conceptual scores represent a real project.
 - The expanded brief's `FACT`, `ESTIMATED`, and `STALE` labels appear only in a future Truth OS concept. They do not replace the canonical Project OS evidence vocabulary in `AGENTS.md` (`CONFIRMED`, `OBSERVED`, `INFERRED`, `ASSUMED`, `UNVERIFIED`, `BLOCKED`). The marketing page makes no schema decision.
 - No auth, data architecture, Project OS generation, production deployment, or external action.
+
+## `/os/start/` preview boundary
+
+The new Vite entry uses the existing OS palette, typography, logo, and analytics. It starts with five user decisions (idea, existing build, business, growth, unsure), then uses internal stages and an in-memory state projection to show an interpretation, changing Genome signals, active/dormant capability lenses, preliminary recommendations, and a proposed Project OS. Existing-build, business, and growth paths show respectively an unverified repository baseline, a draft process hypothesis, and an unmeasured Discovery Genome. No freeform answer, repository URL, or recommendation change is sent to analytics; only enumerated events are tracked. Reload discards all answers. GitHub and other connectors, scans, real audit scores, generated files, downloads, saved projects, automation, and Discovery measurements are visibly planned. The detailed gap analysis, architecture, and product-truth review are in `docs/design/OS_ONBOARDING_RECONCILIATION.md`.

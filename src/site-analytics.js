@@ -170,7 +170,7 @@ function handleTrackedClick(event) {
 }
 
 captureAttribution();
-inject();
+inject(["127.0.0.1", "localhost"].includes(window.location.hostname) ? { mode: "development" } : undefined);
 decorateAttributionLinks();
 document.addEventListener("click", handleTrackedClick);
 
