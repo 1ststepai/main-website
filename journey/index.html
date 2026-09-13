@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#070912" />
+  <title>Begin Your Journey | 1stStep.ai</title>
+  <meta name="description" content="Map your business goal, current tools, bottleneck, and 90-day outcome. Leave with a useful first systems diagnosis and next action." />
+  <link rel="canonical" href="https://www.1ststep.ai/journey/" />
+  <meta name="robots" content="index,follow" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Begin Your Journey | 1stStep.ai" />
+  <meta property="og:description" content="Map your business goal, tools, bottleneck, and 90-day outcome. Leave with a practical first-pass diagnosis." />
+  <meta property="og:url" content="https://www.1ststep.ai/journey/" />
+  <meta property="og:image" content="https://www.1ststep.ai/assets/og-home.png" />
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" />
+  <link rel="stylesheet" href="/journey/journey.css" />
+  <script type="module" src="/journey/journey.js"></script>
+</head>
+<body data-fsai-page-event="journey_view" data-fsai-audience="systems_architecture">
+  <a class="skip-link" href="#main">Skip to questions</a>
+  <header class="site-header"><div class="wrap header-inner"><a class="brand" href="/" aria-label="1stStep.ai home"><img src="/assets/firststep-logo-transparent-cleaned.png" width="1147" height="946" alt="" /><span>1stStep.ai</span></a><a class="back-link" href="/">← Back to 1stStep.ai</a></div></header>
+  <main id="main" class="wrap layout">
+    <div class="intro"><p class="eyebrow">Begin Your Journey / Systems diagnosis</p><h1>Start with the <em>actual bottleneck.</em></h1><p>Answer six focused questions. You’ll get a short first-pass diagnosis and a next action based on what you tell us.</p><div class="journey-flow" aria-label="Business, goal, stack, bottleneck, outcome, team, diagnosis"><span>Business</span><i></i><span>Goal</span><i></i><span>Stack</span><i></i><span>Bottleneck</span><i></i><span>Outcome</span><i></i><span>Team</span><i></i><span>Diagnosis</span></div><p class="privacy-note">Your answers stay in this browser unless you choose to open a prefilled email to Evan. No account or AI request is created.</p></div>
+    <div class="wizard-shell">
+      <div class="wizard-top"><span id="step-label">QUESTION 01 / 06</span><span>1STSTEP / DIAGNOSIS</span></div>
+      <div class="progress" aria-hidden="true"><span id="progress-fill"></span></div>
+      <form id="journey-form" novalidate>
+        <fieldset class="step" data-step="0"><legend>What does your business sell?</legend><p>Give us the offer and tell us whether customers or leads are already coming in.</p><label for="business">Your offer</label><textarea id="business" name="business" rows="3" maxlength="300" placeholder="For example: commercial moving services for businesses" required></textarea><label for="demand">Current demand</label><select id="demand" name="demand" required><option value="">Select one</option><option value="existing">We have customers or inbound leads</option><option value="early">Some early interest, still validating</option><option value="none">No demand yet</option></select></fieldset>
+        <fieldset class="step" data-step="1" hidden><legend>What goal are you working toward?</legend><p>A directional business objective is enough. You do not need to share confidential numbers.</p><label for="goal">Revenue or operating goal</label><textarea id="goal" name="goal" rows="3" maxlength="300" placeholder="For example: respond to qualified inquiries faster and understand where they came from" required></textarea></fieldset>
+        <fieldset class="step" data-step="2" hidden><legend>What tools are in the current stack?</legend><p>Include the systems that touch a lead, customer, or handoff. “Not sure” is a useful answer.</p><label for="stack">Current tools and channels</label><textarea id="stack" name="stack" rows="3" maxlength="300" placeholder="For example: website forms, GoHighLevel, Apollo, Gmail, spreadsheets" required></textarea></fieldset>
+        <fieldset class="step" data-step="3" hidden><legend>Where does the work break?</legend><p>Choose the most costly bottleneck right now.</p><label for="bottleneck">Primary bottleneck</label><select id="bottleneck" name="bottleneck" required><option value="">Select one</option><option value="capture">Leads are lost at capture</option><option value="qualification">We cannot tell which leads need attention</option><option value="routing">Ownership and handoffs are unclear</option><option value="followup">Follow-up is slow or inconsistent</option><option value="reporting">Attribution and reporting are unreliable</option><option value="manual">Too much work is copied or repeated manually</option><option value="other">Something else</option></select><label for="bottleneck-detail">What happens in practice? <span>Optional</span></label><textarea id="bottleneck-detail" name="bottleneck_detail" rows="2" maxlength="300" placeholder="A recent example makes the diagnosis more useful."></textarea></fieldset>
+        <fieldset class="step" data-step="4" hidden><legend>What should be different in 90 days?</legend><p>Describe an outcome your team would notice, even if you do not have a precise metric yet.</p><label for="outcome">Desired 90-day outcome</label><textarea id="outcome" name="outcome" rows="3" maxlength="300" placeholder="For example: every inquiry assigned, followed up, and traceable to its source" required></textarea></fieldset>
+        <fieldset class="step" data-step="5" hidden><legend>Who can operate the system?</legend><p>The right design depends on the people who will own it after launch.</p><label for="team">Current team</label><select id="team" name="team" required><option value="">Select one</option><option value="solo">Just me</option><option value="small">A small team</option><option value="multi">Several teams or departments</option><option value="unknown">Still deciding</option></select><label for="timing">When do you want to start? <span>Optional</span></label><select id="timing" name="timing"><option value="">Choose later</option><option value="now">As soon as the scope is clear</option><option value="quarter">Within the next quarter</option><option value="exploring">Exploring for now</option></select></fieldset>
+        <p class="error" id="step-error" role="alert" hidden></p>
+        <div class="wizard-actions"><button class="button button-secondary" type="button" id="back-button" hidden>← Back</button><button class="button button-primary" type="button" id="next-button">Continue <span aria-hidden="true">→</span></button></div>
+      </form>
+      <section class="result" id="result" hidden tabindex="-1" aria-labelledby="result-title"><p class="eyebrow">Your first-pass diagnosis</p><h2 id="result-title">The next step starts here.</h2><p class="result-caveat">This is a structured summary of your answers, not an audit of your live systems or a guaranteed outcome.</p><div class="result-signal"><span>INITIAL FIT SIGNAL</span><strong id="fit-signal"></strong><p id="fit-reason"></p></div><dl id="result-details"></dl><div class="recommendation"><span>RECOMMENDED FIRST ACTION</span><h3 id="recommendation-title"></h3><p id="recommendation-copy"></p></div><div class="result-actions"><a class="button button-primary" id="email-action" href="mailto:evan@1ststep.ai?subject=1stStep%20System%20Audit">Request a review by email ↗</a><button class="button button-secondary" type="button" id="copy-action">Copy this diagnosis</button><button class="text-button" type="button" id="edit-action">Edit answers</button></div><p class="privacy-note">Email opens in your mail app with the summary visible for your review. Nothing is sent automatically.</p><p class="error" id="copy-status" role="status" hidden></p></section>
+      <noscript><p class="no-script">The interactive diagnosis needs JavaScript. You can <a href="mailto:evan@1ststep.ai?subject=1stStep%20System%20Audit">email Evan about a system audit</a> instead.</p></noscript>
+    </div>
+  </main>
+  <footer class="wrap footer"><span>© 2026 1stStep.ai</span><nav aria-label="Footer"><a href="/services/revenue-systems.html">System audit</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></nav></footer>
+  <script type="module" src="/src/site-analytics.js"></script>
+</body>
+</html>

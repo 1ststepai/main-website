@@ -1,16 +1,83 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readFile, readdir, stat } from "node:fs/promises";
 
 const root = new URL("../", import.meta.url);
+const source = (path) => readFile(new URL(path, root), "utf8");
 
-async function source(path) {
-  return readFile(new URL(path, root), "utf8");
-}
+test("the homepage leads with systems architecture and keeps products distinct", async () => {
+  const html = await source("index.html");
+  const llms = await source("public/llms.txt");
+  assert.match(html, /Build the system <em>behind your growth/);
+  assert.match(html, /lead capture, CRM architecture, routing, follow-up, attribution, reporting/i);
+  assert.match(html, /href="\/journey\/"/);
+  assert.match(html, /href="\/services\/revenue-systems\.html"/);
+  assert.match(html, /href="https:\/\/app\.1ststep\.ai\/"/);
+  assert.match(html, /Public concept · product flow in development|public concept/i);
+  assert.match(html, /firststep-logo-transparent-cleaned\.png/);
+  assert.match(llms, /1stStep OS/);
+  assert.match(llms, /AI Job Agent/);
+  assert.doesNotMatch(html, /A website that undersells the business|\$3,250&ndash;\$12,000/);
+  assert.doesNotMatch(html, /<a\b[^>]*\bhref=(?:""|'')/i);
+});
+
+test("the systems funnel and service links have focused destinations", async () => {
+  const html = await source("index.html");
+  for (const anchor of ["problems", "how", "services", "work"]) assert.match(html, new RegExp('id="' + anchor + '"'));
+  for (const path of ["websites", "internal-tools", "revenue-systems"]) {
+    assert.match(html, new RegExp('href="/services/' + path + '\\.html"'));
+  }
+  assert.match(html, /mailto:evan@1ststep\.ai\?subject=1stStep%20System%20Audit/);
+  assert.doesNotMatch(html, /href="\/book\/"/);
+});
+
+test("the journey gives a local diagnosis and only opens email by choice", async () => {
+  const html = await source("journey/index.html");
+  const script = await source("journey/journey.js");
+  const config = await source("vite.config.js");
+  const sitemap = await source("public/sitemap.xml");
+  assert.equal((html.match(/class="step" data-step=/g) || []).length, 6);
+  assert.match(html, /INITIAL FIT SIGNAL/);
+  assert.match(html, /No account or AI request is created/);
+  assert.match(script, /document\.createElement\('dd'\)/);
+  assert.match(script, /encodeURIComponent\(emailBody\)/);
+  assert.doesNotMatch(script, /fetch\(|localStorage|sessionStorage/);
+  assert.match(config, /journey: "journey\/index\.html"/);
+  assert.match(sitemap, /www\.1ststep\.ai\/journey\//);
+});
+
+test("the showcase includes six reachable panels and no cafe proof", async () => {
+  const home = await source("index.html");
+  const campaign = await source("campaigns/outgrown-website/index.html");
+  const llms = await source("public/llms.txt");
+  const generated = await readdir(new URL("public/generated/", root));
+  const css = await source("src/home.css");
+  const script = await source("src/home.js");
+
+  for (const content of [home, campaign, llms, ...generated]) assert.doesNotMatch(content, /the.?spot|spot.?cafe/i);
+  const tabIds = [...home.matchAll(/role="tab" aria-controls="(showcase-[a-z]+)"/g)].map((match) => match[1]);
+  assert.equal(tabIds.length, 6);
+  for (const id of tabIds) assert.match(home, new RegExp(`id="${id}" role="tabpanel"`));
+  for (const project of ["Unveiling Rarities", "DaySetGo", "SwingTradePros", "Real-Rank.ai", "AI Job Agent", "1stStep OS"]) assert.ok(home.includes(project));
+  assert.match(script, /ArrowRight/);
+  assert.match(script, /IntersectionObserver/);
+  assert.match(css, /prefers-reduced-motion:\s*reduce/);
+});
+
+test("homepage metadata and assets identify the systems consultancy", async () => {
+  const html = await source("index.html");
+  const jsonLd = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)?.[1];
+  const data = JSON.parse(jsonLd);
+
+  assert.match(html, /<link rel="canonical" href="https:\/\/www\.1ststep\.ai\/"/);
+  assert.match(html, /og-home\.png/);
+  assert.match(html, /<meta name="description" content="1stStep\.ai designs and builds the systems/);
+  assert.deepEqual(data["@graph"].map((item) => item["@type"]), ["Organization", "WebSite", "WebPage", "CreativeWork", "SoftwareApplication"]);
+  assert.equal((await stat(new URL("public/assets/og-home.png", root))).size > 5000, true);
+});
 
 test("the website service page keeps website visitors on website-intent paths", async () => {
   const html = await source("services/websites.html");
-
   assert.match(html, /href="\/book\/"/);
   assert.match(html, /href="\/fit-check\/"/);
   assert.doesNotMatch(html, /href="\/app-idea-viability-checker\.html"/);
@@ -19,73 +86,14 @@ test("the website service page keeps website visitors on website-intent paths", 
   assert.match(html, /payment (?:plan|schedule)/i);
 });
 
-test("the public homepage has no empty links and gives hesitant website buyers a fit-check path", async () => {
-  const html = await source("index.html");
-
-  assert.doesNotMatch(html, /<a\b[^>]*\bhref=(?:""|'')/i);
-  assert.match(html, /href="\/fit-check\/"[^>]*>Website Fit Review/);
-  assert.match(html, /Two focused, verified reviews/);
-  assert.match(html, /class="fsai-transform-mobile"/);
-  assert.match(html, /A website that undersells the business/);
-  assert.match(html, /Six focused examples of websites, products, and internal tools/);
-  assert.match(html, /Concrete outcome:/);
-  assert.match(html, /data-fsai-work-secondary hidden/);
-  assert.match(html, /Show 3 more projects/);
-  assert.match(html, /Showing 3 selected projects/);
-  assert.doesNotMatch(html, /href="\/services\/websites\.html#platform-support"/);
-  assert.match(html, /class="fsai-client-logos"/);
-  assert.match(html, /Unveiling Rarities/);
-  assert.match(html, /Custom Quote and Agreement Studio/);
-  assert.match(html, /href="\/services\/internal-tools\.html">Explore custom internal tools/);
-  assert.match(html, /data-fsai-quote-demo/);
-  assert.match(html, /Generate sample quote/);
-  assert.match(html, /Interactive demo &middot; sample data/);
-  assert.match(html, /Show 2FA/);
-  assert.match(html, /Password \+ authenticator 2FA/);
-  assert.match(html, /Standards-based 2FA &middot; sample only/);
-  assert.match(html, /Typing authenticator code/);
-  assert.match(html, /Unlocked quote dashboard sample/);
-  assert.match(html, /&#10003; Secure session/);
-  assert.doesNotMatch(html, /href="\/app-idea-viability-checker\.html"/);
-  assert.doesNotMatch(html, /<section class="fsai-platform-support"/);
-  assert.doesNotMatch(html, /<section class="fsai-section" id="services"/);
-  assert.doesNotMatch(html, /class="fsai-platform-details"/);
-});
-
-test("the homepage keeps one hero decision and exposes section navigation", async () => {
-  const html = await source("index.html");
-  const hero = html.match(/<section class="fsai-hero"[\s\S]*?<\/section>/)?.[0] || "";
-  const header = html.match(/<header class="fsai-nav">[\s\S]*?<\/header>/)?.[0] || "";
-
-  assert.equal((hero.match(/href="\/book\/"/g) || []).length, 1);
-  assert.doesNotMatch(hero, /View Website Work|Request a Fit Check|href="#portfolio"/);
-  assert.equal((header.match(/href="\/book\/"/g) || []).length, 1);
-  assert.match(header, /class="fsai-nav-links"/);
-  assert.match(header, /href="#website-offer"/);
-  assert.match(header, /href="#portfolio"/);
-  assert.match(header, /href="#investment"/);
-  assert.match(header, /href="#process"/);
-  assert.match(header, /href="#reviews"/);
-  assert.match(html, /\$3,250&ndash;\$12,000 for custom website work/);
-  assert.match(html, /repairs may start at \$750/);
-  assert.match(html, /single-page builds at \$1,250/);
-  assert.match(html, /Established businesses ready to invest in a custom result/);
-  assert.doesNotMatch(html, /data-fsai-placement="homepage_investment"/);
-});
-
-test("the homepage prioritizes website audits while revenue systems stays on its focused service page", async () => {
-  const home = await source("index.html");
+test("revenue systems remains on its focused service page", async () => {
   const systems = await source("services/revenue-systems.html");
   const config = await source("vite.config.js");
   const sitemap = await source("public/sitemap.xml");
-
-  assert.match(home, /Not sure what your current website is costing you/);
-  assert.match(home, /href="\/fit-check\/"[^>]*>Request a Website Fit Review/);
-  assert.doesNotMatch(home, /href="\/services\/revenue-systems\.html"/);
-  assert.doesNotMatch(home, /CRM stage, tag, and owner cleanup/);
   assert.match(systems, /Revenue Systems Audit and Architecture/);
   assert.match(systems, /GHL \/ LeadConnector, Apollo/);
-  assert.match(systems, /href="\/book\/"/);
+  assert.match(systems, /href="\/journey\/"/);
+  assert.match(systems, /mailto:evan@1ststep\.ai\?subject=1stStep%20System%20Audit/);
   assert.doesNotMatch(systems, /href="\/app-idea-viability-checker\.html"/);
   assert.match(config, /revenueSystems/);
   assert.match(sitemap, /services\/revenue-systems\.html/);
@@ -95,29 +103,17 @@ test("supporting service pages use service-specific booking CTAs", async () => {
   const appBuilds = await source("services/app-builds.html");
   const internalTools = await source("services/internal-tools.html");
   const mvpBuilds = await source("services/mvp-builds.html");
-
   for (const html of [appBuilds, internalTools, mvpBuilds]) {
     assert.match(html, /href="\/book\/"/);
     assert.doesNotMatch(html, /href="\/app-idea-viability-checker\.html"/);
   }
-
   assert.match(appBuilds, /Book an App Build Call/);
   assert.match(internalTools, /Book a Workflow Call/);
   assert.match(mvpBuilds, /Book an MVP Scope Call/);
 });
 
-test("the homepage uses a compact process overview instead of the deep-dive panel", async () => {
-  const html = await source("index.html");
-
-  assert.match(html, /class="fsai-process-summary"/);
-  assert.doesNotMatch(html, /<div class="fsai-process-panel"[^>]*data-fsai-process-panel/);
-  assert.doesNotMatch(html, /data-fsai-process-step=/);
-  assert.doesNotMatch(html, /class="fsai-process-context"/);
-});
-
 test("the exhaustive platform list lives on the focused website service page", async () => {
   const html = await source("services/websites.html");
-
   assert.match(html, /id="platform-support"/);
   assert.match(html, /id="process"/);
   assert.match(html, /WordPress/);
@@ -125,30 +121,24 @@ test("the exhaustive platform list lives on the focused website service page", a
   assert.match(html, /custom HTML, React, Next\.js/);
 });
 
-test("the booking page preserves the verified calendar and explains its loading state", async () => {
-  const html = await source("book/index.html");
-
-  assert.match(html, /https:\/\/api\.leadconnectorhq\.com\/widget\/booking\/Rb4aqLM1NdU5kvZcqNmj/);
-  assert.match(html, /class="calendar-shell"/);
-  assert.match(html, /Loading secure Website Strategy Call calendar/);
-  assert.match(html, /No pressure\./);
-  assert.match(html, /payment schedule/i);
-});
-
-test("the fit check reinforces privacy and payment flexibility without adding fields", async () => {
-  const html = await source("fit-check/index.html");
-
-  assert.equal((html.match(/class="field"/g) || []).length, 4);
-  assert.match(html, /Request a Website Fit Review/);
-  assert.match(html, /Reviewed personally by Evan/);
-  assert.match(html, /payment schedules are available/i);
+test("the booking and fit-check pages preserve their verified paths", async () => {
+  const booking = await source("book/index.html");
+  const fitCheck = await source("fit-check/index.html");
+  assert.match(booking, /https:\/\/api\.leadconnectorhq\.com\/widget\/booking\/Rb4aqLM1NdU5kvZcqNmj/);
+  assert.match(booking, /class="calendar-shell"/);
+  assert.match(booking, /Loading secure Website Strategy Call calendar/);
+  assert.match(booking, /No pressure\./);
+  assert.match(booking, /payment schedule/i);
+  assert.equal((fitCheck.match(/class="field"/g) || []).length, 4);
+  assert.match(fitCheck, /Request a Website Fit Review/);
+  assert.match(fitCheck, /Reviewed personally by Evan/);
+  assert.match(fitCheck, /payment schedules are available/i);
 });
 
 test("the Morris County campaign is focused, transparent, and locally qualified", async () => {
   const html = await source("campaigns/morris-county-free-website/index.html");
   const config = await source("vite.config.js");
   const sitemap = await source("public/sitemap.xml");
-
   assert.match(html, /first 10 qualified Morris County businesses/i);
   assert.match(html, /Design and build fee: <strong>\$0<\/strong>/);
   assert.match(html, /other third-party services/i);
@@ -165,15 +155,4 @@ test("the Morris County campaign is focused, transparent, and locally qualified"
   assert.doesNotMatch(html, /countdown|spots remaining/i);
   assert.match(config, /morrisCountyFreeWebsiteCampaign/);
   assert.match(sitemap, /campaigns\/morris-county-free-website/);
-});
-
-test("the homepage footer gives the Morris County offer a clear visual shortcut", async () => {
-  const html = await source("index.html");
-  const footer = html.match(/<footer class="fsai-footer">[\s\S]*?<\/footer>/)?.[0] || "";
-
-  assert.match(footer, /class="fsai-footer-offer"/);
-  assert.match(footer, /href="\/campaigns\/morris-county-free-website\/"/);
-  assert.match(footer, /src="\/generated\/morris-county-free-website-og\.png"/);
-  assert.match(footer, /alt="Free custom website offer for Morris County businesses"/);
-  assert.match(footer, /First 10 qualified Morris County businesses/);
 });

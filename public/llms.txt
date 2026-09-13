@@ -1,16 +1,17 @@
 # 1stStep.ai
 
-1stStep.ai designs and builds premium websites, cinematic digital experiences, custom web products, dashboards, and native iOS prototypes for founders, businesses, and professionals.
+1stStep.ai is a systems architecture and automation consultancy for founders and operators with existing demand. It connects lead capture, CRM architecture, qualification, routing, follow-up, attribution, reporting, and operational automation. The tools are not the system; the system is how data, leads, decisions, actions, and feedback move between them.
 
-Primary positioning: high-end websites and apps with clear creative direction, thoughtful motion, and production-ready development.
+Primary positioning: Build the systems that scale your business and automate repetitive work. Start by identifying the operational bottleneck, then scope the architecture and implementation.
 
-Primary conversion path:
-- Website: https://www.1ststep.ai/
-- Free App Idea Checker: https://www.1ststep.ai/app-idea-viability-checker.html
-- App builds: https://www.1ststep.ai/services/app-builds.html
-- MVP builds: https://www.1ststep.ai/services/mvp-builds.html
-- Premium websites: https://www.1ststep.ai/services/websites.html
-- Internal tools and integrations: https://www.1ststep.ai/services/internal-tools.html
+Products and paths:
+- Consultancy homepage: https://www.1ststep.ai/
+- Begin Your Journey: https://www.1ststep.ai/journey/ — a browser-local, six-question first-pass diagnosis. Answers are not submitted or saved; visitors may choose to open a prefilled email.
+- Revenue Systems Audit: https://www.1ststep.ai/services/revenue-systems.html
+- 1stStep OS: https://www.1ststep.ai/os — public AI Engineering Operating System concept; product flow in development.
+- 1stStep AI Job Agent: https://app.1ststep.ai/ — separate public beta for job capture and tailored application preparation; applicants review and submit their own applications.
+- App Idea Checker: https://www.1ststep.ai/app-idea-viability-checker.html
+- Other focused services: https://www.1ststep.ai/services/websites.html, https://www.1ststep.ai/services/app-builds.html, https://www.1ststep.ai/services/internal-tools.html
 
 Official profiles:
 - LinkedIn: https://www.linkedin.com/company/1ststep-ai/
@@ -20,25 +21,25 @@ Official profiles:
 - YouTube: https://www.youtube.com/channel/UCynvog-XB0oFBigcrBvmxOg
 - GitHub: https://github.com/1ststepai
 
-Core services:
-- Premium website design and development
-- Cinematic motion and interaction design
-- Custom web apps, dashboards, and SaaS first versions
-- High-fidelity iOS product prototypes and SwiftUI direction
-- Product integrations when the experience requires them
-- Build strategy and first-version scope control
+Current design direction:
+- 1stStep OS is designed to give AI-assisted engineering explicit authority, isolated work, acceptance criteria, evidence, independent audits, and release gates.
+- Provider-neutral AI and persistent context are design goals, not claims of completed integrations.
+- Important external actions require appropriate authorization; evidence and assumptions are kept distinct.
 
-Important product:
-- The App Idea Viability Checker gives prospects a first-pass MVP readiness score, recommended build path, risk breakdown, and next-step recommendation.
+Built with 1stStep examples:
+- DaySetGo — family activity discovery and planning; https://daysetgo.ai/
+- SwingTradePros — trading education, tools, and Nova AI market context; https://swingtradepros.com/
+- Real-Rank.ai — Google visibility monitoring for real estate agents; https://real-rank.ai/
+- Unveiling Rarities — Jeff Pancis author and book website; https://unveilingrarities.com/
+- AI Job Agent and 1stStep OS are also shown with their current stages clearly labeled.
 
 Portfolio accuracy:
-- The Spot Cafe iOS work is a high-fidelity prototype and SwiftUI direction, not a claimed App Store release.
+- Public project descriptions distinguish live sites, private previews, and product concepts.
 
 Separate products:
-- https://resume.1ststep.ai/ is the AI Resume Builder landing page.
-- https://app.1ststep.ai/ is the AI Resume Builder web app.
+- https://app.1ststep.ai/ is the AI Job Agent application, not the 1stStep.ai corporate homepage.
 
 Business rules:
 - 1stStep.ai does not guarantee revenue, rankings, funding, or app success.
-- 1stStep.ai focuses on practical first versions, not bloated full builds.
+- 1stStep.ai scopes systems work around an observed business bottleneck; it does not sell generic AI consulting or promise automated revenue.
 - GitHub repo creation for client projects is locked until proposal acceptance and deposit/payment.

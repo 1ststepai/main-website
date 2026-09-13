@@ -42,6 +42,7 @@
     .gap-list{display:grid;gap:12px;margin:0;padding:0;list-style:none}.gap-list li{display:grid;grid-template-columns:28px 1fr;gap:12px;align-items:start;padding:14px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.028)}.gap-list b{display:grid;place-items:center;width:28px;height:28px;border-radius:9px;background:rgba(79,140,255,.13);color:#77cfff}.gap-list strong{display:block;margin-bottom:4px;font-size:13px}.gap-list span{color:#8d96ae;font-size:12px;line-height:1.5}
     .section{padding:94px 0;border-top:1px solid var(--line)}.section-head{display:flex;justify-content:space-between;gap:28px;align-items:end;margin-bottom:34px}.section-head h2{max-width:680px;margin:0;font:700 clamp(38px,5vw,64px)/.98 "Space Grotesk",sans-serif;letter-spacing:-.055em}.section-head p{max-width:410px;margin:0;color:var(--muted);font-size:14px;line-height:1.65}
     .cases{display:grid;grid-template-columns:repeat(3,1fr);gap:17px}.case{display:flex;flex-direction:column;min-width:0;border:1px solid var(--line);border-radius:22px;overflow:hidden;background:#0d101d}.case-media{aspect-ratio:16/10;overflow:hidden;background:#111626}.case-media img{width:100%;height:100%;object-fit:cover;transition:transform .5s ease}.case:hover .case-media img{transform:scale(1.025)}.case-body{display:flex;flex:1;flex-direction:column;padding:22px}.status{align-self:flex-start;margin-bottom:14px;padding:6px 9px;border:1px solid rgba(86,221,255,.21);border-radius:999px;background:rgba(86,221,255,.06);color:#8be8ff;font:700 9px "Space Grotesk",sans-serif;letter-spacing:.1em;text-transform:uppercase}.case h3{margin:0 0 13px;font:700 22px "Space Grotesk",sans-serif;letter-spacing:-.04em}.before-after{display:grid;gap:11px;margin-bottom:20px}.before-after div{padding:12px;border-left:2px solid rgba(255,255,255,.15);background:rgba(255,255,255,.025)}.before-after b{display:block;margin-bottom:3px;color:#dce1f4;font-size:10px;letter-spacing:.1em;text-transform:uppercase}.before-after span{color:#9099b2;font-size:12px;line-height:1.55}.case a{margin-top:auto;color:#8ddfff;font-size:12px;font-weight:700;text-decoration:none}
+    .case-media.brand-media{display:grid;place-items:center;padding:22px;background:radial-gradient(circle at 70% 25%,rgba(79,140,255,.3),transparent 56%),#10182b;color:#e7eeff;text-align:center;font:700 clamp(27px,3vw,40px)/1.05 "Space Grotesk",sans-serif;letter-spacing:-.06em}.case-media.brand-rank{background:radial-gradient(circle at 70% 25%,rgba(86,221,255,.3),transparent 56%),#0b1b2c}.case-media.brand-stp{background:radial-gradient(circle at 70% 25%,rgba(75,204,132,.28),transparent 56%),#0a1a12}
     .process{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.process div{padding:26px;border:1px solid var(--line);border-radius:19px;background:rgba(255,255,255,.025)}.process b{display:block;margin-bottom:18px;color:#7d8cff;font:700 11px "Space Grotesk",sans-serif;letter-spacing:.12em}.process h3{margin:0 0 9px;font:700 20px "Space Grotesk",sans-serif}.process p{margin:0;color:#8e97af;font-size:13px;line-height:1.65}
     .close{padding:92px 0;text-align:center;border-top:1px solid var(--line)}.close h2{max-width:850px;margin:0 auto 19px;font:700 clamp(42px,6vw,72px)/.96 "Space Grotesk",sans-serif;letter-spacing:-.06em}.close p{max-width:620px;margin:0 auto;color:var(--muted);font-size:16px;line-height:1.7}.close .actions{justify-content:center}
     .legal{display:flex;justify-content:space-between;gap:20px;padding:24px 0 32px;border-top:1px solid var(--line);color:#747e97;font-size:12px}.legal nav{display:flex;gap:18px}
@@ -81,44 +82,44 @@
     <section class="section" id="work">
       <div class="wrap">
         <div class="section-head">
-          <h2>Launched work, with the change made clear.</h2>
-          <p>These are live products and platforms—not speculative mockups. Each one turns a scattered or underpowered experience into a focused digital product.</p>
+          <h2>Real projects, with the product focus made clear.</h2>
+          <p>Explore three public project entry points across job search, local visibility, and trading technology.</p>
         </div>
         <div class="cases">
           <article class="case">
-            <div class="case-media"><img src="/assets/portfolio-resume-cover.jpg" alt="AI Resume Builder live product interface" loading="lazy"></div>
+            <div class="case-media brand-media" role="img" aria-label="1stStep AI Job Agent brand treatment">AI Job Agent</div>
             <div class="case-body">
-              <span class="status">Live public product</span>
-              <h3>AI Resume Builder</h3>
+              <span class="status">Public beta</span>
+              <h3>1stStep AI Job Agent</h3>
               <div class="before-after">
-                <div><b>Before</b><span>Resume tailoring and application work spread across disconnected steps.</span></div>
-                <div><b>After</b><span>A focused browser product for tailoring resumes and organizing a modern job search workflow.</span></div>
+                <div><b>Product focus</b><span>Capture job postings and prepare tailored application materials.</span></div>
+                <div><b>Applicant control</b><span>People review and submit their own applications.</span></div>
               </div>
-              <a href="https://app.1ststep.ai/" target="_blank" rel="noopener" data-fsai-case-study="ai_resume_builder">View launched product &rarr;</a>
+              <a href="https://app.1ststep.ai/" target="_blank" rel="noopener" data-fsai-case-study="ai_job_agent">Explore public beta &rarr;</a>
             </div>
           </article>
           <article class="case">
-            <div class="case-media"><img src="/assets/portfolio-real-rank-cover.jpg" alt="Real Rank AI live reporting product" loading="lazy"></div>
+            <div class="case-media brand-media brand-rank" role="img" aria-label="Real-Rank.ai brand treatment">Real-Rank.ai</div>
             <div class="case-body">
-              <span class="status">Live public product</span>
-              <h3>Real Rank AI</h3>
+              <span class="status">Public website</span>
+              <h3>Real-Rank.ai</h3>
               <div class="before-after">
-                <div><b>Before</b><span>Local visibility signals were difficult to read as one useful business story.</span></div>
-                <div><b>After</b><span>A dedicated Google visibility product built around clear monitoring and reporting.</span></div>
+                <div><b>Audience</b><span>Real estate agents and teams.</span></div>
+                <div><b>Product focus</b><span>Google Maps, local search, and AI search visibility reviews with recommended fixes.</span></div>
               </div>
-              <a href="https://real-rank-ai.vercel.app/" target="_blank" rel="noopener" data-fsai-case-study="real_rank_ai">View launched product &rarr;</a>
+              <a href="https://real-rank.ai/" target="_blank" rel="noopener" data-fsai-case-study="real_rank_ai">Explore Real-Rank.ai &rarr;</a>
             </div>
           </article>
           <article class="case">
-            <div class="case-media"><img src="/assets/portfolio-stp-cover.jpg" alt="Swing Trade Pros protected member platform" loading="lazy"></div>
+            <div class="case-media brand-media brand-stp" role="img" aria-label="SwingTradePros brand treatment">SwingTradePros</div>
             <div class="case-body">
               <span class="status">Live protected platform</span>
               <h3>Swing Trade Pros</h3>
               <div class="before-after">
-                <div><b>Before</b><span>Member alerts, context, and account access lived across separate touchpoints.</span></div>
-                <div><b>After</b><span>A protected member platform with a clear sign-in boundary and unified product experience.</span></div>
+                <div><b>Product focus</b><span>Trading education, alerts, tools, and Nova AI market context.</span></div>
+                <div><b>Member access</b><span>Dashboard features sit behind a member sign-in.</span></div>
               </div>
-              <a href="https://dashboard.swingtradepros.com/" target="_blank" rel="noopener" data-fsai-case-study="swing_trade_pros">View live platform entry &rarr;</a>
+              <a href="https://swingtradepros.com/" target="_blank" rel="noopener" data-fsai-case-study="swing_trade_pros">Explore SwingTradePros &rarr;</a>
             </div>
           </article>
         </div>

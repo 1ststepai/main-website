@@ -13,8 +13,21 @@ const siteAnalytics = {
   },
 };
 
+function serveOsAtExactPath(server) {
+  server.middlewares.use((request, _response, next) => {
+    if (request.url === "/os" || request.url?.startsWith("/os?")) {
+      request.url = request.url.replace(/^\/os/, "/os/index.html");
+    }
+    next();
+  });
+}
+
 export default defineConfig({
-  plugins: [react(), siteAnalytics],
+  plugins: [react(), siteAnalytics, {
+    name: "firststep-os-exact-path",
+    configureServer: serveOsAtExactPath,
+    configurePreviewServer: serveOsAtExactPath,
+  }],
   optimizeDeps: {
     entries: ["index.html"],
   },
@@ -22,6 +35,8 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: "index.html",
+        os: "os/index.html",
+        journey: "journey/index.html",
         book: "book/index.html",
         bookingConfirmed: "book/confirmed/index.html",
         fitCheck: "fit-check/index.html",
