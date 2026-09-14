@@ -33,6 +33,22 @@ function serveAppRoutes(server) {
       }
     });
   });
+  server.middlewares.use('/api/os-roast-intake', async (request, response) => {
+    let body = '';
+    request.on('data', (chunk) => {
+      body += chunk;
+      if (body.length > 1024) request.destroy();
+    });
+    request.on('end', async () => {
+      try {
+        request.body = JSON.parse(body);
+        const { default: handler } = await import('./api/os-roast-intake.js');
+        await handler(request, response);
+      } catch {
+        if (!response.writableEnded) { response.statusCode = 400; response.end(JSON.stringify({ ok: false, code: 'invalid_request' })); }
+      }
+    });
+  });
   server.middlewares.use((request, _response, next) => {
     if (request.url === "/os" || request.url?.startsWith("/os?")) {
       request.url = request.url.replace(/^\/os/, "/os/index.html");
