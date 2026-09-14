@@ -1,5 +1,13 @@
 # Architecture Decision Log
 
+## 2026-09-13: Read-only Agent Control Plane with durable OS authority (ADR-OS-005)
+
+- **Status / owner:** Evan approved the visible product direction in the attached Sections 1–35; source ends mid-manual-fallback example. Read-only admin projection is locally implemented on a separate branch; canonical registry, events, routing, findings and live publishers are **NOT IMPLEMENTED**. G1 backend implementation remains **CLOSED**.
+- **Decision:** Keep `/admin` as the Phase 1 read-only Command Center. Stable Agent identities, normalized events with explicit truth states, role-routed handoffs and independently verified findings belong in the proposed separate OS backend. App-family implementation remains with its Engineering Orchestrator and crosses the boundary only through accepted contracts/publishers. Session lifecycle follows ADR-OS-004. A current encrypted telemetry snapshot is a view, not durable OS memory.
+- **Rationale:** Evan needs one place to distinguish activity, delivery, acknowledgment, re-audit, blocked releases and required decisions without inferring work from open chats or treating a self-report as observed proof. Keeping the control plane read-only avoids giving an immature projection operational authority.
+- **Affected systems / evidence:** [Agent Control Plane contract](OS_AGENT_CONTROL_PLANE_CONTRACT.md), [session lifecycle contract](OS_AGENT_SESSION_LIFECYCLE_CONTRACT.md), public `/admin` telemetry contract and app-orchestrator publisher handoff. Existing ownership and release gates are unchanged.
+- **Dependencies:** Appoint OS backend owner/platform; settle identity/tenant/privacy/retention and app contract; implement durable registry/event/handoff/finding stores and real publishers; verify agent heartbeat/status derivation, offline queue/idempotency, independent auditor PASS, source freshness and browser QA before any live claim. No deployment follows from this record.
+
 ## 2026-09-13: Separate durable Agent identity from runtime sessions (ADR-OS-004)
 
 - **Status / owner:** Product/architecture direction approved by Evan. Lifecycle backend, provider adapters, live session publisher, retention policy, and runtime capability evidence are **NOT IMPLEMENTED / UNKNOWN**. Existing OS G1 implementation gate remains **CLOSED**.

@@ -66,7 +66,7 @@
             "capabilities": {
               "type": "object",
               "additionalProperties": { "enum": ["SUPPORTED", "UNSUPPORTED", "UNKNOWN"] },
-              "required": ["createSession", "bootstrapSession", "verifySession", "awaitAcknowledgement", "fenceSession", "retireSession", "inspectSession"]
+              "required": ["createSession", "bootstrapSession", "verifySession", "awaitAcknowledgement", "fenceSession", "retireSession", "inspectSession", "renameSession", "sendMessage", "getContextHealth"]
             },
             "capabilitiesObservedAt": { "$ref": "#/$defs/time" },
             "health": { "enum": ["HEALTHY", "DEGRADED", "UNREACHABLE", "UNKNOWN"] }
@@ -79,13 +79,15 @@
         { "$ref": "#/$defs/base" },
         {
           "type": "object",
-          "required": ["agentId", "runtimeId", "providerSessionRef", "state", "authorityRevision", "startedAt", "lastObservedAt", "lastHeartbeatAt", "leaseRef", "endedAt", "checkpointId"],
+          "required": ["agentId", "runtimeId", "providerSessionRef", "state", "healthPolicyState", "authorityRevision", "startedAt", "lastObservedAt", "lastHeartbeatAt", "leaseRef", "endedAt", "checkpointId"],
           "properties": {
             "entityType": { "const": "AgentSession" },
             "agentId": { "$ref": "#/$defs/id" },
             "runtimeId": { "$ref": "#/$defs/id" },
             "providerSessionRef": { "type": "string", "minLength": 1 },
+            "sessionName": { "type": ["string", "null"], "maxLength": 120 },
             "state": { "enum": ["CANDIDATE", "ACTIVE", "FENCED", "RETIRED", "FAILED", "UNKNOWN"] },
+            "healthPolicyState": { "enum": ["HEALTHY", "WATCH", "ROTATE_SOON", "ROTATE_NOW", "ROTATION_PREPARED", "ROTATING", "RETIRED", "ROTATION_FAILED", "RUNTIME_SUPPORT_REQUIRED", "UNKNOWN"] },
             "authorityRevision": { "type": "integer", "minimum": 0 },
             "startedAt": { "$ref": "#/$defs/time" },
             "lastObservedAt": { "oneOf": [{ "$ref": "#/$defs/time" }, { "type": "null" }] },
