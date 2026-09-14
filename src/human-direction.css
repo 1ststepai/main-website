@@ -55,3 +55,38 @@ body:has(.os-human-route) .hero{grid-template-columns:minmax(0,.9fr) minmax(0,1.
 @media(max-width:650px){.human-route{border-radius:17px}.human-route-heading,.human-route-ending{padding-inline:18px}.human-route-map{height:365px;min-height:365px}.human-route-point{max-width:205px;gap:8px}.human-route-point .route-dot{width:12px;height:12px;margin-top:4px;border-width:2px}.human-route-point strong,.os-human-route .human-route-point strong{font-size:1rem}.human-route-point p,.os-human-route .human-route-point p{font-size:.68rem}.human-route-point small{font-size:.62rem}.point-start{left:5%;top:30px}.point-middle{left:28%;top:143px}.point-end{right:3%;bottom:24px}.human-route-ending{align-items:flex-start;flex-direction:column;gap:9px;font-size:.6rem}.human-route-ending a{white-space:normal}.human-route-line{transform:scaleX(.95)}.human-pause-thread{gap:3px;margin-top:48px;font-size:.59rem;letter-spacing:.02em}.human-pause-thread span{padding-inline:3px}}
 body.motion-disabled .route-current{animation:none;stroke-dashoffset:0;filter:none}
 @media(prefers-reduced-motion:reduce){.route-current{animation:none;stroke-dashoffset:0;filter:none}}
+
+/* The first-look handoff is a progressive enhancement, so the primary CTA still works without JS. */
+.human-route-entry{display:none;padding:16px 25px 19px;border-top:1px solid rgba(177,206,245,.15)}
+.js-ready .human-route-entry{display:block}
+.human-route-entry label{display:block;margin-bottom:9px;color:#d9ebf3;font:600 .76rem var(--display)}
+.human-route-entry>div{display:flex;gap:9px}
+.human-route-entry input{flex:1;min-width:0;min-height:44px;padding:0 12px;border:1px solid #52738e;border-radius:8px;background:#0b1929;color:#f7f8ff;font:500 .8rem Inter,sans-serif}
+.human-route-entry input::placeholder{color:#9ab1c9}
+.human-route-entry input:focus-visible,.human-route-entry button:focus-visible{outline:3px solid #73def7;outline-offset:2px}
+.human-route-entry button{min-height:44px;padding:0 16px;border:0;border-radius:8px;background:#b7e5f0;color:#091523;font:700 .78rem var(--display);white-space:nowrap}
+.human-route-entry button:hover{background:#e3f6f8}
+.human-route-entry small{display:block;margin-top:8px;color:#adbdcf;font-size:.67rem;line-height:1.4}
+
+/* A pre-rendered vector illustration of layered decisions, work, and evidence.
+   One entrance animation, no 3D engine, textures, or permanent render loop. */
+.human-pause-inner{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.94fr);align-items:center;gap:clamp(30px,5vw,75px)}
+.human-pause h2{font-size:clamp(2.5rem,4.5vw,4.7rem)}
+.signal-sculpture{position:relative;min-width:0;aspect-ratio:620/480}
+.signal-sculpture svg{display:block;width:100%;height:100%;overflow:visible}
+.signal-sculpture .sculpture-plane{transform-box:fill-box;transform-origin:center}
+.signal-sculpture .sculpture-route-base,.signal-sculpture .sculpture-route-trace{fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-width:3}
+.signal-sculpture .sculpture-route-base{stroke:#7194b2;stroke-opacity:.38}
+.signal-sculpture .sculpture-route-trace{stroke:url(#sculpture-signal);stroke-width:4;stroke-dasharray:100;stroke-dashoffset:0}
+.human-pause.is-visible .sculpture-route-trace{animation:sculpture-draw 2.2s ease-out both}
+.human-pause.is-visible .sculpture-plane-front{animation:sculpture-rise .75s ease-out both}
+.human-pause.is-visible .sculpture-plane-middle{animation:sculpture-rise .9s ease-out both}
+.human-pause.is-visible .sculpture-plane-back{animation:sculpture-rise 1.05s ease-out both}
+.sculpture-caption{position:absolute;inset:auto 2% 1%;display:flex;justify-content:space-between;color:#abc7dc;font:500 .61rem var(--mono);letter-spacing:.08em}
+.human-pause-thread{grid-column:1/-1;max-width:none;margin-top:12px}
+@keyframes sculpture-draw{from{stroke-dashoffset:100}to{stroke-dashoffset:0}}
+@keyframes sculpture-rise{from{opacity:.35;transform:translateY(17px)}to{opacity:1;transform:translateY(0)}}
+body.motion-disabled .signal-sculpture *,body.motion-disabled .sculpture-route-trace{animation:none!important;stroke-dashoffset:0}
+@media(prefers-reduced-motion:reduce){.signal-sculpture *,.sculpture-route-trace{animation:none!important;stroke-dashoffset:0}}
+@media(max-width:850px){.human-pause-inner{grid-template-columns:1fr}.signal-sculpture{width:min(100%,570px);margin:0 auto}.human-pause-thread{margin-top:0}}
+@media(max-width:650px){.human-route-entry{padding:16px 18px 19px}.human-route-entry>div{flex-direction:column}.human-route-entry button{width:100%}.human-pause h2{font-size:clamp(2.45rem,10vw,4.5rem)}.sculpture-caption{font-size:.5rem;letter-spacing:0}}

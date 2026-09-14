@@ -12,6 +12,14 @@ const stageNumber = document.querySelector('#stage-number');
 const systemStatus = document.querySelector('#system-status');
 const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
 const track = (name, detail = {}) => window.fsaiTrack?.(name, detail);
+let firstLookPrefill = '';
+try {
+  const handoff = sessionStorage.getItem('fsai_first_look_handoff');
+  sessionStorage.removeItem('fsai_first_look_handoff');
+  firstLookPrefill = normalizeAuditTarget(handoff)?.url || '';
+} catch {
+  // The manual first-look form remains available when browser storage is blocked.
+}
 let state = { stage: 'choose', mode: null, goal: '', auditTarget: null, goalConfirmed: false, answers: {}, qIndex: 0, acceptedRecommendations: [], openRecommendations: [], recommendationChanges: {}, editingRecommendation: null, originUnsure: false };
 let publicScan = { status: 'idle', result: null, error: null };
 let roastRequest = { requestId: crypto.randomUUID(), email: '', receipt: null, sending: false };
@@ -64,7 +72,7 @@ const stateTag = (status) => `<span class="state-tag state-${status.toLowerCase(
 
 function renderChoose() {
   return `${heading('01', 'START WITH ONE LINK', 'What should we look at?', 'Enter a public website or GitHub repository for a free live scan. Add your email after the scan to see the evidence-backed roast. No questionnaire required.')}
-    <form id="audit-target-form" class="audit-target-form"><label class="field-label" for="audit-target-input">Website or GitHub repository</label><div class="audit-target-row"><input id="audit-target-input" name="target" type="text" inputmode="url" autocomplete="url" required spellcheck="false" placeholder="yourwebsite.com or github.com/you/project" aria-describedby="audit-target-help" /><button type="submit" class="action-button primary">Scan public link ↗</button></div><p id="audit-target-help">Submitting fetches public HTML or GitHub metadata. No private access or account is requested.</p></form>
+    <form id="audit-target-form" class="audit-target-form"><label class="field-label" for="audit-target-input">Website or GitHub repository</label><div class="audit-target-row"><input id="audit-target-input" name="target" type="text" inputmode="url" autocomplete="url" required spellcheck="false" placeholder="yourwebsite.com or github.com/you/project" value="${escapeHtml(firstLookPrefill)}" aria-describedby="audit-target-help" /><button type="submit" class="action-button primary">Scan public link ↗</button></div><p id="audit-target-help">Submitting fetches public HTML or GitHub metadata. No private access or account is requested.</p></form>
     <details class="other-paths" open><summary>Or choose one of five starting paths</summary><div class="path-options" role="group" aria-label="Choose a starting path">${Object.entries(modes).map(([key, mode], i) => `<button type="button" class="path-option" data-action="select-mode" data-mode="${key}"><span class="path-index">0${i + 1}</span><span><strong>${escapeHtml(mode.title)}</strong><small>${escapeHtml(mode.description)}</small></span><b aria-hidden="true">↗</b></button>`).join('')}</div></details>
     <p class="stage-disclaimer">No account or OS project is created. This first look is narrower than a connected project audit.</p>`;
 }

@@ -1,4 +1,4 @@
-const motionSections = [...document.querySelectorAll('.hero, .closing')];
+const motionSections = [...document.querySelectorAll('.hero, .closing, .human-pause')];
 
 if ('IntersectionObserver' in window) {
   const observer = new IntersectionObserver((entries) => {
