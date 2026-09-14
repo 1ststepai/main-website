@@ -1,4 +1,5 @@
 import { capabilityNames, deriveCapabilities, deriveGenome, flowForBusiness, getRecommendations, interpretGoal, modes, normalizeAuditTarget, questions, suggestMode } from './onboarding-state.js';
+import { buildPublicRoast } from '../../lib/osPublicRoast.js';
 
 const conversation = document.querySelector('#conversation-content');
 const system = document.querySelector('#system-content');
@@ -13,6 +14,7 @@ const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => 
 const track = (name, detail = {}) => window.fsaiTrack?.(name, detail);
 let state = { stage: 'choose', mode: null, goal: '', auditTarget: null, goalConfirmed: false, answers: {}, qIndex: 0, acceptedRecommendations: [], openRecommendations: [], recommendationChanges: {}, editingRecommendation: null, originUnsure: false };
 let publicScan = { status: 'idle', result: null, error: null };
+let roastRequest = { requestId: crypto.randomUUID(), email: '', receipt: null, sending: false };
 function clearDownstreamDecisions() {
   state.acceptedRecommendations = [];
   state.openRecommendations = [];
@@ -61,7 +63,7 @@ const heading = (_number, eyebrow, title, lede) => `<p class="stage-kicker">${St
 const stateTag = (status) => `<span class="state-tag state-${status.toLowerCase().replace(/[^a-z]+/g, '-')}">${escapeHtml(status)}</span>`;
 
 function renderChoose() {
-  return `${heading('01', 'START WITH ONE LINK', 'What should we look at?', 'Enter a public website or GitHub repository for a free, evidence-backed first look. No questionnaire required.')}
+  return `${heading('01', 'START WITH ONE LINK', 'What should we look at?', 'Enter a public website or GitHub repository for a free live scan. Add your email after the scan to see the evidence-backed roast. No questionnaire required.')}
     <form id="audit-target-form" class="audit-target-form"><label class="field-label" for="audit-target-input">Website or GitHub repository</label><div class="audit-target-row"><input id="audit-target-input" name="target" type="text" inputmode="url" autocomplete="url" required spellcheck="false" placeholder="yourwebsite.com or github.com/you/project" aria-describedby="audit-target-help" /><button type="submit" class="action-button primary">Scan public link ↗</button></div><p id="audit-target-help">Submitting fetches public HTML or GitHub metadata. No private access or account is requested.</p></form>
     <details class="other-paths" open><summary>Or choose one of five starting paths</summary><div class="path-options" role="group" aria-label="Choose a starting path">${Object.entries(modes).map(([key, mode], i) => `<button type="button" class="path-option" data-action="select-mode" data-mode="${key}"><span class="path-index">0${i + 1}</span><span><strong>${escapeHtml(mode.title)}</strong><small>${escapeHtml(mode.description)}</small></span><b aria-hidden="true">↗</b></button>`).join('')}</div></details>
     <p class="stage-disclaimer">No account or OS project is created. This first look is narrower than a connected project audit.</p>`;
@@ -73,14 +75,47 @@ function renderAuditRequest() {
   const body = `I would like a free first look at this public ${label.toLowerCase()}:\n${target.url}\n\nWhat I most want to understand: `;
   const href = `mailto:evan@1ststep.ai?subject=${encodeURIComponent('1stStep OS first-look request')}&body=${encodeURIComponent(body)}`;
   const result = publicScan.result;
+  const roast = result && roastRequest.receipt ? buildPublicRoast(result) : null;
+  const roastForm = publicScan.status === 'done' && result && !roastRequest.receipt ? `<form id="os-roast-form" class="roast-form"><span>THE FREE ROAST</span><h3>Want the straight answer?</h3><p>The scan above is yours. Add your email to see a concise, evidence-backed take and the first fix worth making.</p><label class="field-label" for="os-roast-email">Email address</label><input id="os-roast-email" name="email" type="email" autocomplete="email" maxlength="254" required value="${escapeHtml(roastRequest.email)}" /><label class="roast-consent" for="os-roast-consent"><input id="os-roast-consent" name="consent" type="checkbox" required /><span>I agree to share my email and public link with 1stStep.ai for follow-up about this first look. This does not subscribe me to marketing. See the <a href="/privacy.html">privacy policy</a>.</span></label><button class="action-button primary" type="submit">Show my free roast ↗</button><p id="os-roast-status" role="status" aria-live="polite"></p></form>` : '';
+  const roastOutput = roast ? `<div class="roast-result"><div class="scan-result-head"><span>YOUR FREE ROAST / PUBLIC EVIDENCE</span>${stateTag('FIRST LOOK')}</div><h3 tabindex="-1">${escapeHtml(roast.headline)}</h3><div class="roast-columns"><div><span>WHAT IS WORKING</span>${roast.strengths.length ? roast.strengths.map((item) => `<p><strong>${escapeHtml(item.label)}</strong><small>${escapeHtml(item.evidence)}</small></p>`).join('') : '<p>Nothing confirmed yet from the checks we ran.</p>'}</div><div><span>WHAT NEEDS ATTENTION</span>${roast.improvements.length ? roast.improvements.map((item) => `<p><strong>${escapeHtml(item.label)}</strong><small>${escapeHtml(item.action)}</small></p>`).join('') : '<p>No clear miss in the public basics we checked.</p>'}</div></div><div class="scan-next"><span>${roast.improvements.length ? 'FIX THIS FIRST' : 'YOUR NEXT STEP'}</span><strong>${escapeHtml(roast.nextStep)}</strong></div><p class="scan-note">${escapeHtml(roast.limit)}</p><p class="roast-receipt">Email saved for this first-look follow-up. Reference: ${escapeHtml(roastRequest.receipt)}. The roast is shown here; no report email was sent.</p></div>` : '';
   const output = publicScan.status === 'loading' ? '<div class="scan-loading" role="status"><span class="scan-pulse" aria-hidden="true"></span><strong>Checking the public source…</strong><p>Fetching the link and recording only what the response verifies.</p></div>'
-    : publicScan.status === 'done' && result ? `<div class="scan-result"><div class="scan-result-head"><span>PUBLIC FIRST LOOK / ${escapeHtml(result.source)}</span>${stateTag('EVIDENCE FOUND')}</div><h3>Here is what we found.</h3><p class="scan-source">Inspected <a href="${escapeHtml(result.inspectedUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(result.inspectedUrl)}</a> · ${escapeHtml(new Date(result.checkedAt).toLocaleString())}</p><div class="scan-checks">${result.checks.map((check) => `<div class="scan-check"><div><strong>${escapeHtml(check.label)}</strong>${stateTag(check.status)}</div><p>${escapeHtml(check.evidence)}</p></div>`).join('')}</div><div class="scan-next"><span>YOUR FIRST NEXT STEP</span><strong>${escapeHtml(result.nextStep)}</strong></div><p class="scan-note">${escapeHtml(result.note)}</p></div>`
+    : publicScan.status === 'done' && result ? `<div class="scan-result ${roastRequest.receipt ? 'is-compact' : ''}"><div class="scan-result-head"><span>PUBLIC FIRST LOOK / ${escapeHtml(result.source)}</span>${stateTag('EVIDENCE FOUND')}</div><h3>${roastRequest.receipt ? 'Scan complete.' : 'Here is what we found.'}</h3><p class="scan-source">Inspected <a href="${escapeHtml(result.inspectedUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(result.inspectedUrl)}</a> · ${escapeHtml(new Date(result.checkedAt).toLocaleString())}</p>${roastRequest.receipt ? '<details><summary>Review scan evidence</summary>' : ''}<div class="scan-checks">${result.checks.map((check) => `<div class="scan-check"><div><strong>${escapeHtml(check.label)}</strong>${stateTag(check.status)}</div><p>${escapeHtml(check.evidence)}</p></div>`).join('')}</div>${roastRequest.receipt ? '</details>' : `<div class="scan-next"><span>YOUR FIRST NEXT STEP</span><strong>${escapeHtml(result.nextStep)}</strong></div><p class="scan-note">${escapeHtml(result.note)}</p>`}</div>`
     : publicScan.status === 'error' ? `<div class="scan-error" role="alert"><strong>We couldn't verify this link right now.</strong><p>${escapeHtml(publicScan.error)} No findings were generated.</p></div>` : '';
   return `${heading('02', 'PUBLIC FIRST LOOK', 'Your link. Real evidence.', 'We only report signals we can verify from a public response. This is not a full project, security, or release audit.')}
     <div class="interpretation-card"><span>YOUR ${label.toUpperCase()} / USER PROVIDED</span><strong class="audit-target-value">${escapeHtml(target.url)}</strong></div>
-    <div id="scan-output" aria-live="polite">${output}</div>
-    <div class="stage-actions">${publicScan.status === 'error' ? btn('Try the scan again', 'retry-scan') : ''}<a class="action-button secondary" href="${href}" data-fsai-event="os_first_look_email_opened" data-fsai-placement="audit_request">Request a human review ↗</a></div>
-    <p class="stage-disclaimer">A human review opens an email draft; nothing is sent until you send it. No private repository is connected or saved.</p>`;
+    <div id="scan-output" aria-live="polite">${output}</div>${roastForm}${roastOutput}
+    <div class="stage-actions">${publicScan.status === 'error' ? btn('Try the scan again', 'retry-scan') : ''}${roastRequest.receipt || publicScan.status === 'error' ? `<a class="action-button secondary" href="${href}" data-fsai-event="os_first_look_email_opened" data-fsai-placement="audit_request">Request a human review ↗</a>` : ''}</div>
+    ${roastRequest.receipt || publicScan.status === 'error' ? '<p class="stage-disclaimer">A human review opens an email draft; nothing is sent until you send it. No private repository is connected or saved.</p>' : ''}`;
+}
+
+async function submitRoastRequest(form) {
+  if (roastRequest.sending || roastRequest.receipt || publicScan.status !== 'done' || !state.auditTarget) return;
+  if (!form.reportValidity()) return;
+  roastRequest.email = form.elements.email.value.trim();
+  roastRequest.sending = true;
+  const requestId = roastRequest.requestId;
+  const targetUrl = state.auditTarget.url;
+  const button = form.querySelector('button[type="submit"]');
+  const status = form.querySelector('#os-roast-status');
+  button.disabled = true;
+  status.textContent = 'Saving your request…';
+  try {
+    const response = await fetch('/api/os-roast-intake', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ request_id: requestId, email: roastRequest.email, consent: form.elements.consent.checked, target: targetUrl }), signal: AbortSignal.timeout(10000) });
+    const payload = await response.json();
+    if (roastRequest.requestId !== requestId || state.auditTarget?.url !== targetUrl) return;
+    if (!response.ok || !payload.ok || !payload.persisted || payload.request_id !== requestId) throw new Error(payload.message || 'We could not confirm your request. Please try again.');
+    roastRequest.receipt = payload.request_id;
+    track('os_roast_request_persisted', { kind: state.auditTarget.kind });
+    render();
+    document.querySelector('.roast-result h3')?.focus({ preventScroll: true });
+  } catch (error) {
+    if (roastRequest.requestId !== requestId || state.auditTarget?.url !== targetUrl) return;
+    status.textContent = error.name === 'TimeoutError' ? 'The request timed out. Please try again.' : error.message || 'We could not save your request. Please try again.';
+    status.dataset.state = 'error';
+    button.disabled = false;
+  } finally {
+    if (roastRequest.requestId === requestId) roastRequest.sending = false;
+  }
 }
 
 async function runPublicScan() {
@@ -204,7 +239,7 @@ function renderConversation() {
 
 function renderSystem() {
   if (state.stage === 'choose') return `<div class="system-intro"><div class="signal-route"><span class="signal-node is-active">STARTING POINT</span><i></i><span class="signal-node">INTELLIGENT ROUTE</span><i></i><span class="signal-node">NEXT STEP</span></div><h2 id="system-title">One link.<br /><em>A clearer path.</em></h2><p>Share a public link for a live first look, or choose a starting path to explore how the Project OS could take shape.</p><div class="system-empty">PROJECT STATE <b>WAITING FOR YOUR CHOICE</b></div></div>`;
-  if (state.stage === 'audit-request') return `<div class="system-intro"><div class="signal-route"><span class="signal-node is-active">PUBLIC LINK</span><i></i><span class="signal-node ${publicScan.status === 'done' ? 'is-active' : ''}">VISIBLE SIGNALS</span><i></i><span class="signal-node">NEXT STEP</span></div><h2 id="system-title">A useful first look.<br /><em>No invented score.</em></h2><p>We check public evidence only. A full technical audit still needs a pinned baseline, appropriate permission, and deeper verification.</p><div class="system-empty">PUBLIC SCAN <b>${publicScan.status === 'done' ? 'COMPLETE' : publicScan.status === 'loading' ? 'RUNNING' : publicScan.status === 'error' ? 'UNAVAILABLE' : 'NOT STARTED'}</b></div><div class="system-empty">PROJECT AUDIT <b>NOT STARTED</b></div></div>`;
+  if (state.stage === 'audit-request') return `<div class="system-intro"><div class="signal-route"><span class="signal-node is-active">PUBLIC LINK</span><i></i><span class="signal-node ${publicScan.status === 'done' ? 'is-active' : ''}">VISIBLE SIGNALS</span><i></i><span class="signal-node ${roastRequest.receipt ? 'is-active' : ''}">NEXT STEP</span></div><h2 id="system-title">A useful first look.<br /><em>No invented score.</em></h2><p>We check public evidence only. A full technical audit still needs a pinned baseline, appropriate permission, and deeper verification.</p><div class="system-empty">PUBLIC SCAN <b>${publicScan.status === 'done' ? 'COMPLETE' : publicScan.status === 'loading' ? 'RUNNING' : publicScan.status === 'error' ? 'UNAVAILABLE' : 'NOT STARTED'}</b></div><div class="system-empty">PROJECT AUDIT <b>NOT STARTED</b></div></div>`;
   const genome = deriveGenome(state);
   const active = deriveCapabilities(state);
   const filled = Object.values(genome).filter((signal) => signal.state !== 'UNKNOWN').length;
@@ -245,9 +280,10 @@ function render(focus = false) {
   const percent = progressValue();
   progressTrack.setAttribute('aria-valuenow', String(percent));
   progressFill.style.width = `${percent}%`;
-  progressLabel.textContent = state.stage === 'questions' ? `QUESTION ${state.qIndex + 1} / ${questions[state.mode].length}` : `${String(narrativeNumber()).padStart(2, '0')} / ${state.stage.toUpperCase()}`;
-  stageNumber.textContent = `${String(narrativeNumber()).padStart(2, '0')} / ${state.stage.toUpperCase()}`;
-  systemStatus.textContent = state.stage === 'choose' ? 'WAITING FOR A START' : state.stage === 'continue' ? 'PREVIEW COMPLETE' : 'STATE UPDATED';
+  progressLabel.textContent = state.stage === 'questions' ? `QUESTION ${state.qIndex + 1} / ${questions[state.mode].length}` : state.stage === 'audit-request' ? '02 / PUBLIC SCAN' : `${String(narrativeNumber()).padStart(2, '0')} / ${state.stage.toUpperCase()}`;
+  document.querySelector('.preview-pill').textContent = state.stage === 'audit-request' ? 'LIVE PUBLIC FIRST LOOK' : 'PREVIEW ONLY';
+  stageNumber.textContent = state.stage === 'audit-request' ? '02 / PUBLIC SCAN' : `${String(narrativeNumber()).padStart(2, '0')} / ${state.stage.toUpperCase()}`;
+  systemStatus.textContent = state.stage === 'choose' ? 'WAITING FOR A START' : state.stage === 'audit-request' ? `PUBLIC SCAN ${publicScan.status.toUpperCase()}` : state.stage === 'continue' ? 'PREVIEW COMPLETE' : 'STATE UPDATED';
   backButton.hidden = state.stage === 'choose';
   announcement.textContent = state.stage === 'questions' && state.answers[questions[state.mode][state.qIndex].key] ? 'Project state updated from your answer.' : `Now showing ${state.stage === 'questions' ? 'question ' + (state.qIndex + 1) : state.stage}.`;
   if (focus) {
@@ -265,6 +301,11 @@ conversation.addEventListener('input', (event) => {
 });
 
 conversation.addEventListener('submit', (event) => {
+  if (event.target.id === 'os-roast-form') {
+    event.preventDefault();
+    submitRoastRequest(event.target);
+    return;
+  }
   if (event.target.id === 'audit-target-form') {
     event.preventDefault();
     const input = event.target.elements.target;
@@ -272,6 +313,7 @@ conversation.addEventListener('submit', (event) => {
     if (!auditTarget) { input.setCustomValidity('Enter a public website or GitHub repository URL.'); input.reportValidity(); return; }
     track('os_first_look_target_entered', { kind: auditTarget.kind });
     publicScan = { status: 'idle', result: null, error: null };
+    roastRequest = { requestId: crypto.randomUUID(), email: '', receipt: null, sending: false };
     go('audit-request', { auditTarget });
     runPublicScan();
     return;

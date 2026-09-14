@@ -74,7 +74,7 @@ const NAVIGATION = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
   { id: "command-center", label: "Command Center", icon: Activity },
   { id: "job-agent", label: "Job Agent", icon: Activity },
-  { id: "journey-requests", label: "Journey requests", icon: Mail },
+  { id: "journey-requests", label: "Contact requests", icon: Mail },
   { id: "clients", label: "Clients", icon: Users },
   { id: "quotes", label: "Quotes", icon: FileText },
   { id: "pricing", label: "Pricing", icon: CircleDollarSign },
@@ -956,6 +956,9 @@ function operationsStatusClass(status) {
 function JourneyRequestsPage({ previewMode }) {
   const [requests, setRequests] = useState([]);
   const [cursor, setCursor] = useState("0");
+  const [roastRequests, setRoastRequests] = useState([]);
+  const [roastCursor, setRoastCursor] = useState("0");
+  const [roastError, setRoastError] = useState(previewMode ? "Live OS requests are unavailable in admin preview mode." : "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(previewMode ? "Live requests are unavailable in admin preview mode." : "");
 
@@ -974,11 +977,33 @@ function JourneyRequestsPage({ previewMode }) {
     }
   }
 
-  useEffect(() => { load(); }, [previewMode]);
+  async function loadRoastRequests(nextCursor = "0") {
+    if (previewMode) return;
+    setRoastError("");
+    try {
+      const data = await api(`/api/admin-os-roast-requests?cursor=${encodeURIComponent(nextCursor)}`);
+      setRoastRequests(nextCursor === "0" ? data.requests : (current) => [...current, ...data.requests]);
+      setRoastCursor(data.cursor);
+    } catch (requestError) {
+      setRoastError(requestError.message || "OS first-look requests could not be loaded.");
+    }
+  }
+
+  useEffect(() => { load(); loadRoastRequests(); }, [previewMode]);
 
   return (
     <div className="page-content">
-      <div className="section-heading page-heading"><div><h2>Journey requests</h2><p>Consented systems-diagnosis requests. A saved request is a lead receipt, not an audit or booked meeting.</p></div><button className="button" type="button" onClick={() => load()} disabled={loading || previewMode}><RefreshCw size={16} />Refresh</button></div>
+      <div className="section-heading page-heading"><div><h2>Contact requests</h2><p>Consented systems-diagnosis and OS public first-look requests. A saved request is a lead receipt, not an audit or booked meeting.</p></div><button className="button" type="button" onClick={() => { load(); loadRoastRequests(); }} disabled={loading || previewMode}><RefreshCw size={16} />Refresh</button></div>
+      <h3>OS public first looks</h3>
+      {roastError && <section className="operations-unavailable" role="status"><AlertTriangle size={20} /><div><strong>OS requests unavailable</strong><p>{roastError}</p></div></section>}
+      {!roastError && roastRequests.length === 0 && <p>No saved OS first-look requests found in this scan.</p>}
+      {roastRequests.map((request) => <section className="operations-panel" key={request.request_id}>
+        <h3>{request.kind === "github" ? "Public GitHub first look" : "Public website first look"}</h3>
+        <p><strong>Contact:</strong> <a href={`mailto:${request.email}`}>{request.email}</a> · <strong>Received:</strong> {new Date(request.created_at).toLocaleString()} · <strong>Reference:</strong> {request.request_id}</p>
+        <p><strong>Public link:</strong> {request.target}</p>
+      </section>)}
+      {roastCursor !== "0" && <button className="button" type="button" onClick={() => loadRoastRequests(roastCursor)}>Load more OS requests</button>}
+      <h3>Begin Your Journey</h3>
       {error && <section className="operations-unavailable" role="status"><AlertTriangle size={20} /><div><strong>Requests unavailable</strong><p>{error}</p></div></section>}
       {!error && !loading && requests.length === 0 && <p>No saved requests found in this scan. Additional pages may exist if a cursor is available.</p>}
       {requests.map((request) => <section className="operations-panel" key={request.request_id}>
