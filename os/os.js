@@ -120,7 +120,7 @@ if (demo && !motion.matches) {
   toggle.addEventListener('click', () => {
     const paused = demo.classList.toggle('is-paused');
     toggle.innerHTML = paused ? 'Play <span aria-hidden="true">▶</span>' : 'Pause <span aria-hidden="true">Ⅱ</span>';
-    toggle.setAttribute('aria-label', paused ? 'Play illustrative animation' : 'Pause illustrative animation');
+    toggle.setAttribute('aria-label', paused ? 'Play animation' : 'Pause animation');
   });
 
   replay.addEventListener('click', () => {
@@ -128,7 +128,7 @@ if (demo && !motion.matches) {
     // Reinsert the class on the next frame so every CSS scene restarts together.
     requestAnimationFrame(() => requestAnimationFrame(() => demo.classList.add('is-running')));
     toggle.innerHTML = 'Pause <span aria-hidden="true">Ⅱ</span>';
-    toggle.setAttribute('aria-label', 'Pause illustrative animation');
+    toggle.setAttribute('aria-label', 'Pause animation');
   });
 
   if ('IntersectionObserver' in window) {
