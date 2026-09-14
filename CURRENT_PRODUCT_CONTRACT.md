@@ -4,11 +4,11 @@
 
 ## Finish Mode Ship Board — 2026-09-14
 
-**SHIP TARGET:** A new systems buyer can understand 1stStep.ai, complete Begin Your Journey, receive an honest answer-derived diagnosis and next step, explicitly request contact, and return to that result without Evan or an engineer rescuing the journey. The contact request must be durably recorded and available to the authorized operator; a mail-client draft is not receipt. The existing-builder Free OS Audit is **not** in this release: connection, sealed baseline, evidence-backed audit, and Project persistence are not implemented. `/os/start/` remains a labeled preview until separately verified and released.
+**SHIP TARGET:** Ship the public 1stStep.ai + 1stStep OS experience with three distinct journeys. A (existing builder) reaches `/os/start/`, enters a project locator, and receives only a truthful first-look preview and appropriate next action; no connected audit or saved Project is claimed. B (new builder) receives answer-derived Genome and recommendations within the clearly labeled browser-local preview; no account or return persistence is claimed. C (consulting lead) completes Begin Your Journey, receives a useful answer-derived diagnosis, explicitly requests contact, and returns to the browser-local result; the contact request must be durably recorded and available to the authorized operator. The complete Free OS Audit, account-backed Project persistence, and automatic OS spin-up remain blocked by their owner/data/evidence gates. The first external release may expose A/B only as honest previews after hosted verification, while C's receipt and storage path must pass its full contract. No mail-client draft is a receipt.
 
 **DEFINITION OF DONE:** Exact-source Preview passes the seven steps below on desktop and mobile, including refresh/return, validation, duplicate submission, storage failure and consent paths; the contact record is encrypted, retained under an explicit policy and accessible only to authorized admin; attribution excludes private answers; independent review covers the release-critical trust boundaries; analytics and browser console/network are checked; the exact release candidate and rollback are recorded. Only then report **RELEASE READY — AWAITING PRODUCTION AUTHORIZATION**. Production remains a separate explicit decision.
 
-Status vocabulary in each evidence column: `PASS | FAIL | BLOCKED | NOT IMPLEMENTED | UNKNOWN`. A source implementation or HTTP 200 never upgrades Hosted or Audit to PASS. This table is the **active release journey**; the A/B/D matrix below remains supporting evidence and separate-stream status, not a requirement to bundle those unfinished products into this first release.
+Status vocabulary in each evidence column: `PASS | FAIL | BLOCKED | NOT IMPLEMENTED | UNKNOWN`. A source implementation or HTTP 200 never upgrades Hosted or Audit to PASS. This table tracks C's contact-path release gate; the A/B evidence matrix below tracks the separate OS preview and full-product boundaries. Journey D belongs to the external App Product Family and is not this lead's implementation Ship Board.
 
 | # | Production journey step | Implementation | Automated test | Hosted verification | Independent audit | Blocker | Owner |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -22,6 +22,16 @@ Status vocabulary in each evidence column: `PASS | FAIL | BLOCKED | NOT IMPLEMEN
 
 **JOURNEY: 0 / 7 PASS** at hosted-and-audited release level. Source/test PASS in rows 1–3 is narrower evidence. Live `https://1ststep.ai/`, `/journey/`, `/os/` and `/admin/` returned HTTP 200 on 2026-09-14; `/os/start/` returned 404. Exact deployed Git SHA and rendered behavior remain UNKNOWN.
 
+**A/B preview release checks (separate from the full Free Audit and saved-Project milestones):**
+
+| Journey | First external-release check | Local source/test | Exact hosted verification | Status |
+| --- | --- | --- | --- | --- |
+| A | Homepage → `/os` → existing-project `/os/start/` first look gives a truthful locator-derived next action without claiming connection, audit or save | PASS | UNKNOWN (`/os/start/` live 404 at last check) | BLOCKED |
+| B | Homepage → `/os` → idea `/os/start/` gives answer-derived Genome and recommendations labeled browser-local preview | PASS | UNKNOWN (`/os/start/` live 404 at last check) | BLOCKED |
+| A/B | Navigation, mobile/accessibility, return/reset semantics and preview limitations are verified at exact candidate | PARTIAL | UNKNOWN | BLOCKED |
+
+**A/B PREVIEW: 0 / 3 PASS** at hosted release level. Full A/B account-backed persistence and evidence-backed free audit remain NOT IMPLEMENTED; these preview checks do not substitute for them.
+
 | Priority | Blocker | User Journey Step | Owner | Next Action | Acceptance Test | Status |
 | --- | --- | --- | --- | --- | --- | --- |
 | P0 | `SHIP-P0-01` Lead consent, privacy, encrypted durable storage and admin-only read boundary | 4–6 | Public-site lead + Evan for storage provider | Review local security evidence; approve/configure a protected KV destination for Preview and Production; run hosted denial/readback | Consent, idempotency, distributed rate limit, encryption, admin denial and retention pass at exact hosted SHA | BLOCKED |
@@ -29,7 +39,7 @@ Status vocabulary in each evidence column: `PASS | FAIL | BLOCKED | NOT IMPLEMEN
 | P1 | `SHIP-P1-02` Return to useful result | 7 | Public-site lead | Add automated refresh/clear browser check, then repeat on Preview | Refresh and return recover result; clearing browser data removes it; no server-side Project claim | BLOCKED |
 | P1 | `SHIP-P1-03` Exact-source hosted and independent release proof | 1–7 | Public-site lead + independent reviewer | Build Preview from final SHA; verify mobile, auth, errors, analytics and release gate | Seven hosted steps and trust-boundary audit PASS; rollback identified | BLOCKED |
 
-**Active stream allocation (maximum three):** (1) public website/Journey Finish Mode, working here; (2) app-family First Real User Application, owned by its Engineering Orchestrator and currently modified in its isolated integration worktree; (3) Audit/OS infrastructure only where it removes an audit availability or Ship Board blocker. Live agent counts are UNKNOWN; open worktrees are not active-agent proof. Growth, Sales, Opportunity, advanced Command Center, agency and speculative OS features remain LATER. The app PR #80 is open; the public-site repository currently has no open PR. App-family changes stay with its orchestrator.
+**Active stream allocation (maximum three for this lead):** (1) public website and consulting Journey; (2) public `/os` and `/os/start/` convergence; (3) minimum Audit/Command Center infrastructure required to operate those journeys. App-family First Real User work is an `EXTERNAL DEPENDENCY — APP PRODUCT FAMILY`, owned by its Engineering Orchestrator; it consumes none of this lead's implementation slots. Live agent counts are UNKNOWN; open worktrees are not active-agent proof. Growth, Sales, Opportunity, advanced Command Center, agency and speculative OS features remain LATER. The older app PR and public PR inventory below are point-in-time evidence, not current open-PR claims.
 
 **Local evidence this cycle:** The six-answer browser path produced the correct first-pass diagnosis and survived a reload at 390px width. A missing local API produced no success receipt and preserved the answers; a technical JSON error was then replaced by a plain-language failure message. Focused intake/authorization/encryption/idempotency/fail-closed tests and Vite build passed. The real hosted write/read path and independent review remain UNKNOWN. `vercel env ls` showed `FIRSTSTEP_DATA_ENCRYPTION_KEY` and admin secrets but **no `KV_REST_API_URL` or `KV_REST_API_TOKEN` in Preview or Production**; do not treat the existing admin workspace or App Idea Checker as durably stored there without further evidence.
 
@@ -37,7 +47,7 @@ Status vocabulary in each evidence column: `PASS | FAIL | BLOCKED | NOT IMPLEMEN
 
 ### Supporting baseline and future journeys
 
-The following 2026-09-13 convergence snapshot is retained for provenance. Its older `REQUIRED FOR CURRENT RELEASE` classification and A/B/D journey expectations are **superseded for the first external release** by the Finish Mode Ship Target above; they remain separate future milestones or app-family authority work. No row below may silently expand this first Ship Target.
+The following 2026-09-13 convergence snapshot is retained for provenance. Its older `REQUIRED FOR CURRENT RELEASE` classification is superseded by the Finish Mode Ship Target above. A/B full persistence and Free Audit remain future gated milestones; D is external app-family status only. No row below silently expands this first Ship Target.
 
 **Milestone:** A new user completes the applicable journey without manual rescue; correct state survives return; failures and unknowns are honest; security and attribution hold; an independent auditor can reproduce the result. A local build, an HTTP 200, or source code alone does not meet this milestone.
 
