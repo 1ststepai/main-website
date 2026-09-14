@@ -48,6 +48,32 @@ test("individual stale agents become unknown even when their source is fresh", (
   assert.equal(result.counts.unknown, 1);
 });
 
+test("session identity remains separate from durable agent identity and unknown without telemetry", () => {
+  const base = snapshot("public-ecosystem").agents[0];
+  const session = {
+    health: "healthy", runtime: "codex", sessionId: "runtime-session-2",
+    lastCheckpoint: { id: "checkpoint-7", createdAt: new Date(now - 2000).toISOString() },
+    rotation: { id: "rotation-1", state: "AWAITING_ACKNOWLEDGEMENT", updatedAt: new Date(now).toISOString() },
+    history: [{ sessionId: "runtime-session-1", runtime: "claude", startedAt: new Date(now - 60_000).toISOString(), endedAt: new Date(now - 5000).toISOString(), state: "retired" }],
+  };
+  const source = normalizeCommandCenterSource(snapshot("public-ecosystem", { agents: [{ ...base, session }] }), now);
+  assert.equal(source.agents[0].id, base.id);
+  assert.equal(source.agents[0].session.sessionId, "runtime-session-2");
+  assert.equal(source.agents[0].session.history[0].sessionId, "runtime-session-1");
+  assert.equal(normalizeCommandCenterSource(snapshot("app-family"), now).agents[0].session, null);
+  const stale = normalizeCommandCenterSource(snapshot("public-ecosystem", { agents: [{ ...base, updatedAt: new Date(now - 10 * 60_000).toISOString(), session }] }), now);
+  assert.equal(summarizeCommandCenter([stale, normalizeCommandCenterSource(snapshot("app-family"), now)], now).agents[0].session.health, "unknown");
+});
+
+test("unsupported rotation is explicit and malformed session history is rejected", () => {
+  const base = snapshot("public-ecosystem").agents[0];
+  const session = { health: "unknown", rotation: { id: "rotation-2", state: "ROTATION_REQUIRES_RUNTIME_SUPPORT", updatedAt: new Date(now).toISOString() } };
+  const normalized = normalizeCommandCenterSource(snapshot("public-ecosystem", { agents: [{ ...base, session }] }), now);
+  assert.equal(normalized.agents[0].session.rotation.state, "ROTATION_REQUIRES_RUNTIME_SUPPORT");
+  assert.throws(() => normalizeCommandCenterSource(snapshot("public-ecosystem", { agents: [{ ...base, session: { ...session, sessionId: "C:\\private\\session.json" } }] }), now), /invalid_telemetry/);
+  assert.throws(() => normalizeCommandCenterSource(snapshot("public-ecosystem", { agents: [{ ...base, session: { ...session, history: [{ sessionId: "bad", runtime: "codex", startedAt: new Date(now).toISOString(), endedAt: new Date(now - 1000).toISOString(), state: "retired" }] } }] }), now), /invalid_session_history/);
+});
+
 test("handoff acknowledgement needs explicit delivery and acknowledgement evidence", () => {
   const base = { id: "handoff-1", project: "1stStep", updatedAt: new Date(now).toISOString(), from: "Auditor", to: "Lead", status: "acknowledged" };
   assert.throws(() => normalizeCommandCenterSource(snapshot("public-ecosystem", { handoffs: [{ ...base }] }), now), /invalid_handoff_state/);

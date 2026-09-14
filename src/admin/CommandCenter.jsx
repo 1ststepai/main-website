@@ -49,7 +49,15 @@ function AgentGroup({ source, agents, coverage }) {
   return <Card>
     <div className="cc-card-head"><div><p className="cc-eyebrow">Product authority</p><h3>{SOURCE_LABELS[source]}</h3></div><Badge value={sourceCoverage?.state || "unconnected"} /></div>
     {rows.length ? <div className="cc-list">{rows.map((agent) => <article className="cc-row" key={`${source}:${agent.id}`}>
-      <span className="cc-agent-node" aria-hidden="true" /><div className="cc-row-main"><strong>{agent.name}</strong><p>{agent.task || "Task unknown"}</p><small>{agent.project || "Project unknown"} · Owner: {agent.owner || "unknown"} · Seen {when(agent.updatedAt)}</small></div><Badge value={agent.status} />
+      <span className="cc-agent-node" aria-hidden="true" /><div className="cc-row-main"><strong>{agent.name}</strong><p>{agent.task || "Task unknown"}</p><small>{agent.project || "Project unknown"} · Owner: {agent.owner || "unknown"} · Seen {when(agent.updatedAt)}</small>
+      <div className="cc-session" aria-label={`Session lifecycle for ${agent.name}`}>
+        <span>Session health <Badge value={agent.session?.health || "unknown"} /></span>
+        <span>Runtime: {agent.session?.runtime || "UNKNOWN"}{agent.session?.sessionId ? ` · ${agent.session.sessionId}` : ""}</span>
+        <span>Checkpoint: {agent.session?.lastCheckpoint ? `${agent.session.lastCheckpoint.id} · ${when(agent.session.lastCheckpoint.createdAt)}` : "UNKNOWN"}</span>
+        <span>Rotation: <code>{agent.session?.rotation?.state || "UNKNOWN"}</code></span>
+      </div>
+      {agent.session?.history?.length > 0 && <details className="cc-session-history"><summary>Session history ({agent.session.history.length} reported)</summary><ul>{agent.session.history.map((item) => <li key={item.sessionId}>{item.runtime} · {item.sessionId} · {item.state} · {when(item.startedAt)} to {item.endedAt ? when(item.endedAt) : "end unknown"}</li>)}</ul></details>}
+      </div><Badge value={agent.status} />
     </article>)}</div> : <div className="cc-authority-map"><p>{registryComplete ? "The complete registry reports no agents." : "Expected authority roles — registration and live state unverified:"}</p>{!registryComplete && <ul>{EXPECTED_ROLES[source].map((name) => <li key={name}>{name}</li>)}</ul>}</div>}
   </Card>;
 }
