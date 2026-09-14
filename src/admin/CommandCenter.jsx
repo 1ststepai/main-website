@@ -23,6 +23,7 @@ const EMPTY_COMMAND_CENTER = {
   counts: { registered: null, working: null, auditing: null, waiting: null, blocked: null, idle: null, offline: null, stale: null },
   agents: [], projects: [], events: [], audits: [], findings: [], handoffs: [], decisions: [], releases: [], builds: [],
   auditCapacity: null,
+  shipMode: null,
 };
 
 function when(value) {
@@ -84,6 +85,21 @@ function Overview({ data }) {
     </div>
     <Card><div className="cc-card-head"><h3>Latest reported activity</h3><span className="cc-muted">{data.events.length ? `${data.events.length} reported` : "Unknown"}</span></div>{data.events.length ? <div className="cc-list">{data.events.slice(0, 8).map((event) => <article className="cc-row" key={`${event.source}:${event.id}`}><span className="cc-agent-node" aria-hidden="true" /><div className="cc-row-main"><strong>{event.summary}</strong><small>{event.kind} · {event.project || "Project unknown"} · {when(event.at)} · {event.truthState}</small></div></article>)}</div> : <Empty label="No reported activity" coverage={!unknownSources.length} />}</Card>
   </div>;
+}
+
+function ShipMode({ value }) {
+  const programs = [
+    { label: "Public / OS — External user candidate", status: value?.status || "UNKNOWN", source: "Public/OS Ship Board" },
+    { label: "App family — First real user candidate", status: "UNKNOWN", source: "App family publisher not connected" },
+    { label: "DaySetGo — Core journey → iOS release", status: "UNKNOWN", source: "DaySetGo publisher not connected" },
+  ];
+  return <Card><div className="cc-card-head"><div><p className="cc-eyebrow">Ship Mode / read-only</p><h3>Program liveness</h3></div><span className="cc-muted">{value ? `Public sweep ${when(value.observedAt)}` : "No fresh public sweep"}</span></div>
+    {value?.eligibleUnowned > 0 && <div className="cc-notice" role="alert">⚠ Eligible work exists but no agent is working. This is a control-plane incident.</div>}
+    <div className="cc-list">{programs.map((program) => <div className="cc-row" key={program.label}><div className="cc-row-main"><strong>{program.label}</strong><small>{program.source}</small></div><Badge value={program.status.toLowerCase()} /></div>)}</div>
+    {value && <><p className="cc-freshness">Eligible without active owner: {value.eligibleUnowned ?? "UNKNOWN"} · Stale runtime bindings: {value.staleAgents ?? "UNKNOWN"} · Next eligible: {value.nextEligibleItem || "NONE REPORTED"}</p>
+      <div className="cc-list">{value.currentWorkItems.map((item) => <div className="cc-row" key={item.id}><div className="cc-row-main"><strong>{item.id} · {item.state}</strong><small>Owner: {item.ownerRole} · Last activity: {when(item.lastActivityAt)} · Heartbeat: {when(item.lastHeartbeatAt)} · Time in state at sweep: {item.timeInStateMs == null ? "UNKNOWN" : `${Math.floor(item.timeInStateMs / 60_000)} min`} · Waiting: {item.waitingReason || "NONE REPORTED"}</small></div><Badge value={item.health.toLowerCase()} /></div>)}</div></>}
+    <p className="cc-freshness">A local runtime assertion is not independent proof of work. No app-family or DaySetGo liveness publisher is connected.</p>
+  </Card>;
 }
 
 function Records({ items, type, coverage }) {
@@ -151,10 +167,10 @@ export function CommandCenter({ api, previewMode, view, onViewChange }) {
     {error && <div className="cc-notice" role="alert">{error} All operational states are unknown until the feed recovers.</div>}
     <div className="cc-source-strip" aria-label="Telemetry coverage">{snapshot.coverage.map((source) => <span key={source.source}>{SOURCE_LABELS[source.source]} <Badge value={source.state} /> <small>{source.observedAt ? `Last report ${when(source.observedAt)}` : "No report"}{source.state === "live" && !source.registryComplete ? " · Agent registry partial" : ""}</small></span>)}</div>
     {view === "agents" && <><div className="cc-metrics" aria-label="Live agent counts">{[["Registered", "registered"], ["Working", "working"], ["Auditing", "auditing"], ["Waiting", "waiting"], ["Blocked", "blocked"], ["Idle", "idle"], ["Offline", "offline"], ["Stale", "stale"]].map(([label, key]) => <div key={key}><strong>{snapshot.counts[key] ?? "UNKNOWN"}</strong><span>{label}</span></div>)}</div><p className="cc-freshness">Ecosystem totals appear only when both authority feeds and agent registries are complete. Previously active agent records older than five minutes become stale; other old records become unknown.</p><div className="cc-stack"><AgentGroup source="public-ecosystem" agents={snapshot.agents} coverage={snapshot.coverage} /><AgentGroup source="app-family" agents={snapshot.agents} coverage={snapshot.coverage} /></div></>}
-    {view === "command-center" && <><AuditCapacity value={snapshot.auditCapacity} /><Overview data={snapshot} /></>}
+    {view === "command-center" && <><ShipMode value={snapshot.shipMode} /><AuditCapacity value={snapshot.auditCapacity} /><Overview data={snapshot} /></>}
     {view === "session-lifecycle" && <SessionLifecycle agents={snapshot.agents} coverage={coverageKnown} />}
     {view === "activity" && <ActivityView items={snapshot.events} coverage={coverageKnown} />}
-    {!["agents", "command-center", "activity", "session-lifecycle"].includes(view) && <div className="cc-stack">{view === "audits" && <AuditCapacity value={snapshot.auditCapacity} />}<Card><div className="cc-card-head"><div><p className="cc-eyebrow">Reported records</p><h3>{title}</h3></div><span className="cc-muted">{coverageKnown ? `${records.length} reported` : "Coverage incomplete"}</span></div><Records items={records} type={title} coverage={coverageKnown} /></Card>{view === "projects" && <Card><div className="cc-card-head"><h3>Builds</h3><span className="cc-muted">{coverageKnown ? `${snapshot.builds.length} reported` : "Coverage incomplete"}</span></div><Records items={snapshot.builds} type="Builds" coverage={coverageKnown} /></Card>}{view === "audits" && <Card><div className="cc-card-head"><h3>Findings</h3><span className="cc-muted">{coverageKnown ? `${snapshot.findings.length} reported` : "Coverage incomplete"}</span></div><Records items={snapshot.findings} type="Findings" coverage={coverageKnown} /></Card>}</div>}
+    {!["agents", "command-center", "activity", "session-lifecycle"].includes(view) && <div className="cc-stack">{view === "projects" && <ShipMode value={snapshot.shipMode} />}{view === "audits" && <AuditCapacity value={snapshot.auditCapacity} />}<Card><div className="cc-card-head"><div><p className="cc-eyebrow">Reported records</p><h3>{view === "projects" ? "Ship Board WorkItems (reported)" : title}</h3></div><span className="cc-muted">{coverageKnown ? `${records.length} reported` : "Coverage incomplete"}</span></div><Records items={records} type={title} coverage={coverageKnown} /></Card>{view === "projects" && <Card><div className="cc-card-head"><h3>Builds</h3><span className="cc-muted">{coverageKnown ? `${snapshot.builds.length} reported` : "Coverage incomplete"}</span></div><Records items={snapshot.builds} type="Builds" coverage={coverageKnown} /></Card>}{view === "audits" && <Card><div className="cc-card-head"><h3>Findings</h3><span className="cc-muted">{coverageKnown ? `${snapshot.findings.length} reported` : "Coverage incomplete"}</span></div><Records items={snapshot.findings} type="Findings" coverage={coverageKnown} /></Card>}</div>}
     <p className="cc-footnote"><Activity size={13} /> Read-only view. Reporting a state does not acknowledge a handoff, close an audit, clear a release gate, or authorize an agent action.</p>
   </main>;
 }

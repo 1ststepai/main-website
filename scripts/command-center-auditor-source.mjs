@@ -143,6 +143,18 @@ export function auditorSourceSnapshot(stateDir, now = new Date()) {
     const events = fs.existsSync(eventsDir) ? fs.readdirSync(eventsDir).filter((event) => /^\d{10}\.json$/.test(event)).sort().map((event) => JSON.parse(fs.readFileSync(path.join(eventsDir, event), "utf8"))) : [];
     return { item, events, state: events.at(-1)?.state || item.state };
   }) : [];
+  const healthFile = path.join(stateDir, "work", "health", "latest.json");
+  let shipMode = null;
+  if (fs.existsSync(healthFile)) {
+    const candidate = JSON.parse(fs.readFileSync(healthFile, "utf8"));
+    if (candidate.schemaVersion !== 1 || candidate.project !== "public-os" || !Array.isArray(candidate.currentWorkItems)) throw new Error("Invalid Ship Mode health projection");
+    const publicWork = work.filter(({ item }) => item.project !== "app-family");
+    if (candidate.currentWorkItems.length !== publicWork.length ||
+      new Set(candidate.currentWorkItems.map((row) => row.id)).size !== publicWork.length ||
+      candidate.currentWorkItems.some((row) => !publicWork.some(({ item, state }) => item.id === row.id && state === row.state && item.ownerRole === row.ownerRole))) throw new Error("Ship Mode health/journal mismatch");
+    const age = now.getTime() - Date.parse(candidate.observedAt);
+    if (Number.isFinite(age) && age >= 0 && age <= 5 * 60_000) shipMode = candidate;
+  }
   const payload = {
     schemaVersion: 1,
     contentFree: true,
@@ -150,6 +162,7 @@ export function auditorSourceSnapshot(stateDir, now = new Date()) {
     observedAt: now.toISOString(),
     registryComplete: false,
     auditCapacity: auditCapacitySnapshot(stateDir, now),
+    shipMode,
     agents: [], projects: work.map(({ item, events, state }) => ({ id: item.id, name: `Ship Board ${item.id}`, project: item.project,
       owner: item.ownerRole, status: state, updatedAt: events.at(-1)?.at || item.createdAt })),
     decisions: work.filter(({ state }) => state === "DECISION_REQUIRED").map(({ item, events }) => ({ id: item.id, title: `Owner decision for ${item.id}`,
