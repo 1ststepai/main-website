@@ -1,5 +1,11 @@
 # Architecture Decision Log
 
+## 2026-09-14: OS setup intake beside the deeper-audit inquiry
+
+- **Status / owner:** Evan directed an OS setup offer both after the public first look and for builders who skip it. Public-site lead owns the local UX; paid setup, live Project persistence, model usage, and Production release remain separately gated.
+- **Decision:** Route both entry points into the existing four-question existing-builder OS preview. Preserve a prior public link and first-look reference as context, while keeping unsubmitted goal/answer state browser-local. At the final step, a separately consented setup request saves the email, goal, four answers, and optional public link in an encrypted 90-day first-party contact record with an admin receipt. A reviewed email draft is a fallback when storage is unavailable. Neither an opened draft nor a saved inquiry is an accepted setup order, saved OS, or permission to access code.
+- **Boundary:** Present deeper audit and OS setup as distinct optional next steps. Neither runs Codex/Claude or incurs a paid provider call from a visitor click. Real setup requires a scoped service agreement, appropriate project access, persistence, payment/budget decisions, and evidence-backed implementation under the existing OS authority gates.
+
 ## 2026-09-14: Public first look may lead to a scoped deeper-audit inquiry
 
 - **Status / owner:** Evan directed a deeper-audit upsell after the public roast. Public-site lead owns the local inquiry CTA; deeper-audit delivery, pricing, model budget, repository permissions, and Production release are not approved by this UI change.

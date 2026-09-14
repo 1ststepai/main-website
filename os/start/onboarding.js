@@ -23,6 +23,10 @@ try {
 let state = { stage: 'choose', mode: null, goal: '', auditTarget: null, goalConfirmed: false, answers: {}, qIndex: 0, acceptedRecommendations: [], openRecommendations: [], recommendationChanges: {}, editingRecommendation: null, originUnsure: false };
 let publicScan = { status: 'idle', result: null, error: null };
 let roastRequest = { requestId: crypto.randomUUID(), email: '', receipt: null, sending: false };
+let setupRequest = { requestId: crypto.randomUUID(), receipt: null, sending: false };
+function resetSetupRequestOnChange() {
+  if (setupRequest.receipt || setupRequest.sending) setupRequest = { requestId: crypto.randomUUID(), receipt: null, sending: false };
+}
 function clearDownstreamDecisions() {
   state.acceptedRecommendations = [];
   state.openRecommendations = [];
@@ -71,11 +75,12 @@ const heading = (_number, eyebrow, title, lede) => `<p class="stage-kicker">${St
 const stateTag = (status) => `<span class="state-tag state-${status.toLowerCase().replace(/[^a-z]+/g, '-')}">${escapeHtml(status)}</span>`;
 
 function renderChoose() {
-  if (roastRequest.receipt && roastRequest.target) return `${heading('01', 'PUBLIC FIRST LOOK', 'Your first look is saved.', 'Return to the public scan or start a new request.')}
-    <div class="audit-target-form"><span class="form-step">REQUEST SAVED</span><p class="audit-target-value">${escapeHtml(roastRequest.target.url)}</p><div class="stage-actions">${btn('Return to your scan', 'return-to-first-look')}${btn('Start another first look', 'new-first-look', 'secondary')}</div></div>`;
+  if (roastRequest.receipt && roastRequest.target) return `${heading('01', 'PUBLIC FIRST LOOK', 'Your first look is saved.', 'Return to the public scan or explore a possible OS setup for this build.')}
+    <div class="audit-target-form"><span class="form-step">REQUEST SAVED</span><p class="audit-target-value">${escapeHtml(roastRequest.target.url)}</p><div class="stage-actions">${btn('Return to your scan', 'return-to-first-look')}${btn('Explore OS setup', 'start-os-setup', 'secondary')}${btn('Start another first look', 'new-first-look', 'secondary')}</div></div>`;
   const firstLook = roastRequest.email ? `<form id="audit-target-form" class="audit-target-form"><span class="form-step">02 / PUBLIC LINK</span><h3>What should we look at?</h3><p>Your email has not been saved yet. We save your request before scanning this public link.</p><label class="field-label" for="audit-target-input">Website or GitHub repository</label><div class="audit-target-row"><input id="audit-target-input" name="target" type="text" inputmode="url" autocomplete="url" required spellcheck="false" placeholder="yourwebsite.com or github.com/you/project" value="${escapeHtml(firstLookPrefill)}" aria-describedby="audit-target-help" /><button type="submit" class="action-button primary">Save & scan ↗</button></div><p id="audit-target-help">Public HTML or GitHub metadata only. No private access or account is requested.</p><p id="first-look-status" role="status" aria-live="polite"></p><button type="button" class="edit-first-look" data-action="edit-first-look-email">Change email</button></form>` : `<form id="first-look-email-form" class="audit-target-form"><span class="form-step">01 / EMAIL</span><h3>Start with your email.</h3><p>Then add a public website or GitHub link for a live first look and a free, evidence-backed roast.</p><label class="field-label" for="first-look-email">Email address</label><input id="first-look-email" name="email" type="email" autocomplete="email" maxlength="254" required /><label class="roast-consent" for="first-look-consent"><input id="first-look-consent" name="consent" type="checkbox" required /><span>I agree to share my email and public link with 1stStep.ai for follow-up about this first look. This consent alone does not subscribe me to marketing. See the <a href="/privacy.html">privacy policy</a>.</span></label><label class="roast-consent optional-marketing" for="first-look-marketing"><input id="first-look-marketing" name="marketing" type="checkbox" /><span>Optional: Email me occasional 1stStep.ai updates about AI engineering and business systems. I can unsubscribe at any time. This choice is separate from my first-look request.</span></label><button type="submit" class="action-button primary">Continue to public link ↗</button><p>Email is saved only when you submit your link. If saving fails, no scan runs.</p></form>`;
   return `${heading('01', 'FREE PUBLIC FIRST LOOK', 'A useful first look.', 'Give us your email first, then a public link. We show only findings supported by the public response. No questionnaire required.')}
     ${firstLook}
+    <div class="setup-alternative"><span>ALREADY KNOW YOU WANT HELP WITH THE BUILD?</span><p>Skip the public first look. Tell us what you are building and see a proposed OS setup path.</p>${btn('Explore OS setup instead', 'start-os-setup', 'secondary')}</div>
     <details class="other-paths" open><summary>Or choose one of five starting paths</summary><div class="path-options" role="group" aria-label="Choose a starting path">${Object.entries(modes).map(([key, mode], i) => `<button type="button" class="path-option" data-action="select-mode" data-mode="${key}"><span class="path-index">0${i + 1}</span><span><strong>${escapeHtml(mode.title)}</strong><small>${escapeHtml(mode.description)}</small></span><b aria-hidden="true">↗</b></button>`).join('')}</div></details>
     <p class="stage-disclaimer">No account or OS project is created. This first look is narrower than a connected project audit.</p>`;
 }
@@ -97,7 +102,7 @@ function renderAuditRequest() {
     <div class="interpretation-card"><span>YOUR ${label.toUpperCase()} / USER PROVIDED</span><strong class="audit-target-value">${escapeHtml(target.url)}</strong></div>
     <div id="scan-output" aria-live="polite">${output}</div>${roastOutput}
     ${roast ? '<p class="stage-disclaimer">Want to go beyond public signals? A deeper project audit can be scoped around your code, tests, accessibility, security, and release risks where access and evidence allow. We agree the scope and any fee before work or model usage begins.</p>' : ''}
-    <div class="stage-actions">${publicScan.status === 'error' ? btn('Try the scan again', 'retry-scan') : ''}${roast ? `<a class="action-button primary" href="${deepAuditHref}" data-fsai-event="os_deeper_audit_email_opened" data-fsai-placement="audit_request">Ask about a deeper audit ↗</a>` : publicScan.status === 'error' ? `<a class="action-button secondary" href="${fallbackHref}" data-fsai-event="os_first_look_email_opened" data-fsai-placement="audit_request">Request help ↗</a>` : ''}</div>
+    <div class="stage-actions">${publicScan.status === 'error' ? btn('Try the scan again', 'retry-scan') : ''}${roast ? `<a class="action-button primary" href="${deepAuditHref}" data-fsai-event="os_deeper_audit_email_opened" data-fsai-placement="audit_request">Ask about a deeper audit ↗</a>${btn('Explore OS setup instead', 'start-os-setup', 'secondary')}` : publicScan.status === 'error' ? `<a class="action-button secondary" href="${fallbackHref}" data-fsai-event="os_first_look_email_opened" data-fsai-placement="audit_request">Request help ↗</a>${btn('Explore OS setup instead', 'start-os-setup', 'secondary')}` : ''}</div>
     ${roastRequest.receipt || publicScan.status === 'error' ? '<p class="stage-disclaimer">This opens an email draft; nothing is sent until you send it. No private repository is connected or saved by this first look.</p>' : ''}`;
 }
 
@@ -140,6 +145,32 @@ async function submitFirstLookTarget(form, auditTarget) {
   }
 }
 
+async function submitOsSetup(form) {
+  if (setupRequest.sending || setupRequest.receipt || !form.reportValidity()) return;
+  const requestId = setupRequest.requestId;
+  const status = form.querySelector('#os-setup-status');
+  const button = form.querySelector('button[type="submit"]');
+  setupRequest.sending = true;
+  button.disabled = true;
+  status.textContent = 'Saving your OS setup request…';
+  try {
+    const response = await fetch('/api/os-setup-intake', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ request_id: requestId, email: form.elements.email.value, consent: form.elements.consent.checked, goal: state.goal, answers: state.answers, target: state.auditTarget?.url || null, first_look_request_id: state.auditTarget ? roastRequest.receipt : null }), signal: AbortSignal.timeout(10000) });
+    const payload = await response.json().catch(() => ({}));
+    if (setupRequest.requestId !== requestId) return;
+    if (!response.ok || !payload.ok || !payload.persisted || payload.request_id !== requestId) throw new Error(payload.message || 'We could not confirm your request. Please try again.');
+    setupRequest.receipt = payload.request_id;
+    track('os_setup_request_persisted', { from_first_look: Boolean(state.auditTarget) });
+    render();
+  } catch (error) {
+    if (setupRequest.requestId !== requestId) return;
+    status.textContent = error.name === 'TimeoutError' ? 'Saving took too long. Please retry; the same request will not be duplicated.' : error.message || 'We could not save your request. Please try again.';
+    status.dataset.state = 'error';
+    button.disabled = false;
+  } finally {
+    if (setupRequest.requestId === requestId) setupRequest.sending = false;
+  }
+}
+
 async function runPublicScan() {
   if (!state.auditTarget || !roastRequest.receipt) return;
   publicScan = { status: 'loading', result: null, error: null };
@@ -168,7 +199,7 @@ function renderDescribe() {
     growth: ['What have you built?', 'Tell us what people should discover and what feels stuck.', 'We built a product for…'],
     unsure: ["That's fine. What are you trying to accomplish?", 'Use your own words. A simple rule will suggest a starting path for you to confirm.', 'I am trying to…'],
   }[state.mode];
-  return `${heading('02', 'DESCRIBE THE GOAL', prompts[0], prompts[1])}<form id="goal-form"><label class="field-label" for="goal-input">Your ${modes[state.mode].noun} or current challenge</label><textarea id="goal-input" name="goal" required minlength="8" maxlength="800" rows="7" placeholder="${prompts[2]}">${escapeHtml(state.goal)}</textarea><div class="field-foot"><span>8–800 characters · never submitted</span><span id="char-count">${state.goal.length} / 800</span></div><div class="stage-actions"><button type="submit" class="action-button primary">See what 1stStep understands <span aria-hidden="true">↗</span></button></div></form>`;
+  return `${heading('02', 'DESCRIBE THE GOAL', prompts[0], prompts[1])}${state.auditTarget ? `<p class="stage-disclaimer">Continuing from your public link: ${escapeHtml(state.auditTarget.url)}. This intake uses your answers; no code or private project data was inspected.</p>` : ''}<form id="goal-form"><label class="field-label" for="goal-input">Your ${modes[state.mode].noun} or current challenge</label><textarea id="goal-input" name="goal" required minlength="8" maxlength="800" rows="7" placeholder="${prompts[2]}">${escapeHtml(state.goal)}</textarea><div class="field-foot"><span>8–800 characters · ${state.mode === 'existing' ? 'saved only if you submit the OS setup request' : 'never submitted'}</span><span id="char-count">${state.goal.length} / 800</span></div><div class="stage-actions"><button type="submit" class="action-button primary">See what 1stStep understands <span aria-hidden="true">↗</span></button></div></form>`;
 }
 
 function renderRoute() {
@@ -186,7 +217,7 @@ function renderInterpret() {
 }
 
 function renderConnect() {
-  return `${heading('04', 'CONNECT YOUR PROJECT', 'Read first. Write later.', 'A future baseline will begin with the exact repository and commit. There is no connector or scan in this preview.')}
+  return `${heading('04', 'CONNECT YOUR PROJECT', 'Read first. Write later.', 'A future baseline will begin with the exact repository and commit. No repository connector or code scan runs in this intake preview.')}
     <div class="connector-list"><div><strong>GitHub</strong>${stateTag('PLANNED')}<small>Read-only connection is not available here.</small></div><div><strong>Upload an archive</strong>${stateTag('PLANNED')}<small>No file leaves this page because upload is not implemented.</small></div><div><strong>Another provider</strong>${stateTag('PLANNED')}<small>A future adapter would need a separate permission review.</small></div><div><strong>I can't share code</strong>${stateTag('AVAILABLE')}<small>Continue with a self-reported project profile.</small></div></div>
     <div class="connection-plan" aria-label="Planned connection sequence, not performed"><span>REPOSITORY <small>NOT CONNECTED</small></span><i aria-hidden="true">→</i><span>FILES <small>NOT READ</small></span><i aria-hidden="true">→</i><span>STACK <small>UNKNOWN</small></span><i aria-hidden="true">→</i><span>BASELINE <small>NOT PINNED</small></span></div>
     <div class="permissions"><div><span>FUTURE READ SCOPE</span><p>Repository contents · metadata · dependencies/config · tests/workflows</p></div><div><span>NOT REQUESTED</span><p>Push code · merge pull requests · delete repository · change settings</p></div></div><p class="stage-disclaimer">No permission is requested or granted in this preview.</p><div class="stage-actions">${btn('Continue without connecting', 'skip-connect')}</div>`;
@@ -236,10 +267,24 @@ function renderReveal() {
 }
 
 function renderContinue() {
-  return `${heading('11', 'THE NEXT STEP', 'Use the AI you already have.', 'The preview can show a direction today. Export, provider handoff, repository connection, and saving a Project OS need later product work.')}
-    <div class="provider-grid"><div><strong>Claude Code</strong>${stateTag('PLANNED')}<small>Provider workflow not connected.</small></div><div><strong>Codex</strong>${stateTag('PLANNED')}<small>Provider workflow not connected.</small></div><div><strong>Other AI</strong>${stateTag('PLANNED')}<small>Provider-neutral handoff intended.</small></div><div><strong>Download Project OS</strong>${stateTag('PLANNED')}<small>No files were compiled.</small></div></div>
-    <div class="outcome-card"><span>GOAL → ROUTE → NEXT STEP</span><strong>${escapeHtml(modes[state.mode].short)}</strong><p>${escapeHtml(state.goal)}</p><small>Preview complete. Your answers will disappear on reload.</small></div>
-    <div class="stage-actions"><a class="action-button primary" href="/journey/" data-fsai-event="os_preview_journey_click" data-fsai-placement="end">Talk through your project ↗</a><a class="action-button secondary" href="/os">Explore 1stStep OS</a></div><p class="stage-disclaimer">Begin Your Journey is the existing consultancy path. It does not save this preview or create an OS account.</p>`;
+  const setupBody = [
+    'I completed the 1stStep OS setup preview and would like to discuss a scoped setup.',
+    roastRequest.receipt && state.auditTarget ? `Public first-look reference: ${roastRequest.receipt}` : null,
+    state.auditTarget ? `Public link: ${state.auditTarget.url}` : null,
+    `Starting path: ${modes[state.mode].short}`,
+    `My goal: ${state.goal}`,
+    ...Object.entries(state.answers).map(([key, value]) => `${key}: ${value}`),
+  ].filter(Boolean).join('\n\n');
+  const setupHref = `mailto:evan@1ststep.ai?subject=${encodeURIComponent('1stStep OS setup inquiry')}&body=${encodeURIComponent(setupBody)}`;
+  const setupContact = setupRequest.receipt
+    ? `<div class="setup-alternative" role="status"><span>OS SETUP INQUIRY SAVED</span><p>We received your request for a scoped OS setup conversation. Reference: ${escapeHtml(setupRequest.receipt)}. No Project OS, account, payment, or agent run was started.</p></div>`
+    : `<form id="os-setup-form" class="audit-target-form"><span class="form-step">REQUEST A SCOPED OS SETUP</span><p>Send your goal and four project answers for a human scope review. No repository access, setup, model work, or payment begins from this request.</p><label class="field-label" for="os-setup-email">Email address</label><input id="os-setup-email" name="email" type="email" autocomplete="email" maxlength="254" value="${escapeHtml(roastRequest.email)}" required /><label class="roast-consent" for="os-setup-consent"><input id="os-setup-consent" name="consent" type="checkbox" required /><span>I agree to send my email, goal, project answers, and any public link to 1stStep.ai for follow-up about OS setup. This does not subscribe me to marketing. See the <a href="/privacy.html">privacy policy</a>.</span></label><button type="submit" class="action-button primary">Request OS setup review ↗</button><p id="os-setup-status" role="status" aria-live="polite"></p></form>`;
+  return `${heading('11', 'THE NEXT STEP', state.mode === 'existing' ? "Let's scope your OS setup." : 'Use the AI you already have.', state.mode === 'existing' ? 'Your answers point to a possible way forward. Talk with us about the work, access, and controls your project actually needs before any setup begins.' : 'The preview can show a direction today. Export, provider handoff, repository connection, and saving a Project OS need later product work.')}
+    ${state.mode === 'existing' ? '' : `<div class="provider-grid"><div><strong>Claude Code</strong>${stateTag('PLANNED')}<small>Provider workflow not connected.</small></div><div><strong>Codex</strong>${stateTag('PLANNED')}<small>Provider workflow not connected.</small></div><div><strong>Other AI</strong>${stateTag('PLANNED')}<small>Provider-neutral handoff intended.</small></div><div><strong>Download Project OS</strong>${stateTag('PLANNED')}<small>No files were compiled.</small></div></div>`}
+    <div class="outcome-card"><span>GOAL → ROUTE → NEXT STEP</span><strong>${escapeHtml(modes[state.mode].short)}</strong><p>${escapeHtml(state.goal)}</p><small>${setupRequest.receipt ? 'Your submitted answers were saved for a scoped review.' : 'Preview complete. Your answers will disappear on reload unless you submit a request.'}</small></div>
+    ${state.mode === 'existing' ? '<div class="setup-alternative"><span>WHAT A SCOPED OS SETUP CAN INCLUDE</span><p>A verified project baseline, a prioritized engineering plan, and the checks and agent roles needed to build and release safely. We review your project before recommending a scope or fee.</p></div>' : ''}
+    ${state.mode === 'existing' ? setupContact : ''}
+    <div class="stage-actions">${state.mode === 'existing' && !setupRequest.receipt ? `<a class="action-button secondary" href="${setupHref}" data-fsai-event="os_setup_inquiry_email_opened" data-fsai-placement="end">Use an email draft instead ↗</a>` : state.mode !== 'existing' ? `<a class="action-button primary" href="/journey/" data-fsai-event="os_preview_journey_click" data-fsai-placement="end">Talk through your project ↗</a>` : ''}<a class="action-button secondary" href="/os">Explore 1stStep OS</a></div><p class="stage-disclaimer">${state.mode === 'existing' ? setupRequest.receipt ? 'Scope and pricing still require agreement.' : 'The email alternative opens a draft containing your answers for your review; opening it is not a saved request. Scope and pricing still require agreement.' : 'Begin Your Journey is the existing consultancy path. It does not save this preview or create an OS account.'}</p>`;
 }
 
 function renderConversation() {
@@ -279,7 +324,7 @@ function renderSystem() {
     : '<div class="system-response"><span>INTERPRETATION PENDING</span><p>Your words are visible as an inferred goal until you confirm them.</p></div>';
   const modeView = state.mode === 'business' && state.answers.workflow ? `<div class="mode-state"><span>DRAFT PROCESS HYPOTHESIS / NOT OBSERVED</span><div class="process-flow">${flowForBusiness(state.answers).map((item, index) => `<div><b>${String(index + 1).padStart(2, '0')}</b>${escapeHtml(item)}</div>`).join('')}</div><small>Steps are illustrative; no process was observed or automated.</small><div class="opportunity-preview"><span>AUTOMATION CANDIDATES / PRELIMINARY ORDER</span><div><b>01</b> Draft or prepare the repeated handoff ${stateTag('UNVERIFIED')}</div><div><b>02</b> Record a reviewed outcome ${stateTag('UNVERIFIED')}</div><div><b>03</b> Measure volume before estimating ROI ${stateTag('UNVERIFIED')}</div></div></div>`
     : state.mode === 'growth' ? `<div class="mode-state"><span>DISCOVERY GENOME / SELF-REPORTED</span><div class="discovery-states"><div>Positioning ${stateTag('UNVERIFIED')}</div><div>Technical SEO ${stateTag('NEEDS CONNECTION')}</div><div>Content ${stateTag('UNVERIFIED')}</div><div>Entity authority ${stateTag('UNVERIFIED')}</div><div>AI answerability ${stateTag('NEEDS CONNECTION')}</div><div>Third-party presence ${stateTag('NEEDS CONNECTION')}</div><div>Social distribution ${stateTag('UNVERIFIED')}</div><div>Conversion ${stateTag('NEEDS CONNECTION')}</div><div>Analytics ${stateTag('NEEDS CONNECTION')}</div><div>Stated channel ${stateTag(state.answers.channels ? 'USER STATED' : 'UNKNOWN')}</div></div><small>No search, channel, or conversion data was measured.</small></div>`
-    : state.mode === 'existing' ? `<div class="mode-state"><span>REPOSITORY BASELINE</span><div class="baseline-mini"><strong>Not connected</strong>${stateTag('UNVERIFIED')}</div><small>No code or repository metadata has been inspected.</small></div>` : '';
+    : state.mode === 'existing' ? `<div class="mode-state"><span>REPOSITORY BASELINE</span><div class="baseline-mini"><strong>Not connected</strong>${stateTag('UNVERIFIED')}</div><small>No code, pinned commit, or private repository data has been inspected.</small></div>` : '';
   const mobileNext = state.stage === 'questions' ? `<div class="mobile-next-action">${btn(state.qIndex === questions[state.mode].length - 1 ? (state.mode === 'existing' ? 'View the unverified baseline' : 'See preliminary recommendations') : 'Next question', 'next-question', 'primary', currentAnswer ? '' : 'disabled')}</div>` : '';
   return `<div class="system-heading"><p>PROJECT STATE / ${escapeHtml(modes[state.mode]?.short || 'FINDING PATH')}</p><h2 id="system-title">The system is <em>learning your project.</em></h2><small>${filled} of 12 signals have a preliminary value</small></div>${response}${modeView}
     <div class="signal-highlights" aria-label="Recently resolved project signals">${resolved.map(([key, signal]) => `<div><span>${escapeHtml(key)}</span><strong>${escapeHtml(signal.value)}</strong>${stateTag(signal.state)}</div>`).join('')}</div>
@@ -297,7 +342,7 @@ function render(focus = false) {
   document.body.classList.toggle('is-in-flow', state.stage !== 'choose');
   conversation.innerHTML = renderConversation();
   system.innerHTML = renderSystem();
-  document.querySelector('#privacy-note').textContent = roastRequest.receipt ? 'A submitted first-look email and public link are retained for 90 days. Project answers stay in this tab. No account or OS project is created.' : 'Your answers stay in this tab and disappear on reload. No account or OS project is created.';
+  document.querySelector('#privacy-note').textContent = setupRequest.receipt ? 'Your consented OS setup inquiry is retained for 90 days. No account or OS project was created.' : roastRequest.receipt ? 'A submitted first-look email and public link are retained for 90 days. Project answers stay in this tab unless you submit an OS setup request. No account or OS project is created.' : 'Your answers stay in this tab and disappear on reload unless you submit an OS setup request. No account or OS project is created.';
   document.querySelector('.system-panel').classList.remove('is-updated');
   requestAnimationFrame(() => document.querySelector('.system-panel').classList.add('is-updated'));
   const percent = progressValue();
@@ -324,6 +369,11 @@ conversation.addEventListener('input', (event) => {
 });
 
 conversation.addEventListener('submit', (event) => {
+  if (event.target.id === 'os-setup-form') {
+    event.preventDefault();
+    submitOsSetup(event.target);
+    return;
+  }
   if (event.target.id === 'first-look-email-form') {
     event.preventDefault();
     if (!event.target.reportValidity()) return;
@@ -347,6 +397,7 @@ conversation.addEventListener('submit', (event) => {
   if (goal.length < 8) { event.target.goal.setCustomValidity('Please add at least 8 characters.'); event.target.goal.reportValidity(); return; }
   event.target.goal.setCustomValidity('');
   if (state.goal !== goal) {
+    resetSetupRequestOnChange();
     state.answers = {};
     state.qIndex = 0;
     clearDownstreamDecisions();
@@ -376,17 +427,20 @@ document.querySelector('.stage-layout').addEventListener('click', (event) => {
     roastRequest = { requestId: crypto.randomUUID(), email: '', receipt: null, sending: false };
     render();
     document.querySelector('#first-look-email')?.focus();
-  } else if (action === 'select-mode') {
-    const mode = target.dataset.mode;
+  } else if (action === 'select-mode' || action === 'start-os-setup') {
+    const mode = action === 'start-os-setup' ? 'existing' : target.dataset.mode;
     if (!modes[mode]) return;
-    state = { stage: 'choose', mode, goal: '', auditTarget: null, goalConfirmed: false, answers: {}, qIndex: 0, acceptedRecommendations: [], openRecommendations: [], recommendationChanges: {}, editingRecommendation: null, originUnsure: mode === 'unsure' };
+    const fromFirstLook = action === 'start-os-setup' && Boolean(roastRequest.receipt && roastRequest.target);
+    setupRequest = { requestId: crypto.randomUUID(), receipt: null, sending: false };
+    go('describe', { mode, goal: '', auditTarget: fromFirstLook ? roastRequest.target : null, goalConfirmed: false, answers: {}, qIndex: 0, acceptedRecommendations: [], openRecommendations: [], recommendationChanges: {}, editingRecommendation: null, originUnsure: mode === 'unsure' });
     track('os_onboarding_started', { mode });
-    track('os_start_mode_selected', { mode });
+    track('os_start_mode_selected', { mode, via: action === 'start-os-setup' ? fromFirstLook ? 'public_first_look' : 'skip_first_look' : 'starting_paths' });
+    if (action === 'start-os-setup') track('os_setup_intake_started', { from_first_look: fromFirstLook });
     if (mode === 'business') track('os_business_flow_started', { mode });
     if (mode === 'growth') track('os_discovery_flow_started', { mode });
-    go('describe');
   } else if (action === 'route-mode') {
     if (state.mode !== target.dataset.mode) {
+      resetSetupRequestOnChange();
       state.answers = {};
       state.qIndex = 0;
       clearDownstreamDecisions();
@@ -406,7 +460,10 @@ document.querySelector('.stage-layout').addEventListener('click', (event) => {
   } else if (action === 'answer') {
     const question = questions[state.mode][state.qIndex];
     if (!question.options.includes(target.dataset.answer)) return;
-    if (state.answers[question.key] !== target.dataset.answer) clearDownstreamDecisions();
+    if (state.answers[question.key] !== target.dataset.answer) {
+      resetSetupRequestOnChange();
+      clearDownstreamDecisions();
+    }
     state.answers[question.key] = target.dataset.answer;
     snapshots.set(history.state?.osPreviewKey, structuredClone(state));
     track('os_question_answered', { mode: state.mode, question: question.key });

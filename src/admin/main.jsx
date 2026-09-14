@@ -959,6 +959,9 @@ function JourneyRequestsPage({ previewMode }) {
   const [roastRequests, setRoastRequests] = useState([]);
   const [roastCursor, setRoastCursor] = useState("0");
   const [roastError, setRoastError] = useState(previewMode ? "Live OS requests are unavailable in admin preview mode." : "");
+  const [setupRequests, setSetupRequests] = useState([]);
+  const [setupCursor, setSetupCursor] = useState("0");
+  const [setupError, setSetupError] = useState(previewMode ? "Live OS setup requests are unavailable in admin preview mode." : "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(previewMode ? "Live requests are unavailable in admin preview mode." : "");
 
@@ -989,11 +992,35 @@ function JourneyRequestsPage({ previewMode }) {
     }
   }
 
-  useEffect(() => { load(); loadRoastRequests(); }, [previewMode]);
+  async function loadSetupRequests(nextCursor = "0") {
+    if (previewMode) return;
+    setSetupError("");
+    try {
+      const data = await api(`/api/admin-os-setup-requests?cursor=${encodeURIComponent(nextCursor)}`);
+      setSetupRequests(nextCursor === "0" ? data.requests : (current) => [...current, ...data.requests]);
+      setSetupCursor(data.cursor);
+    } catch (requestError) {
+      setSetupError(requestError.message || "OS setup requests could not be loaded.");
+    }
+  }
+
+  useEffect(() => { load(); loadRoastRequests(); loadSetupRequests(); }, [previewMode]);
 
   return (
     <div className="page-content">
-      <div className="section-heading page-heading"><div><h2>Contact requests</h2><p>Consented systems-diagnosis and OS public first-look requests. A saved request is a lead receipt, not an audit or booked meeting.</p></div><button className="button" type="button" onClick={() => { load(); loadRoastRequests(); }} disabled={loading || previewMode}><RefreshCw size={16} />Refresh</button></div>
+      <div className="section-heading page-heading"><div><h2>Contact requests</h2><p>Consented systems-diagnosis, OS first-look, and OS setup inquiries. A saved request is a lead receipt, not an audit, setup order, or booked meeting.</p></div><button className="button" type="button" onClick={() => { load(); loadRoastRequests(); loadSetupRequests(); }} disabled={loading || previewMode}><RefreshCw size={16} />Refresh</button></div>
+      <h3>OS setup inquiries</h3>
+      {setupError && <section className="operations-unavailable" role="status"><AlertTriangle size={20} /><div><strong>OS setup requests unavailable</strong><p>{setupError}</p></div></section>}
+      {!setupError && setupRequests.length === 0 && <p>No saved OS setup requests found in this scan.</p>}
+      {setupRequests.map((request) => <section className="operations-panel" key={request.request_id}>
+        <h3>Scoped OS setup inquiry</h3>
+        <p><strong>Contact:</strong> <a href={`mailto:${request.email}`}>{request.email}</a> · <strong>Received:</strong> {new Date(request.created_at).toLocaleString()} · <strong>Reference:</strong> {request.request_id}</p>
+        {request.target && <p><strong>Public link:</strong> {request.target}</p>}
+        {request.first_look_request_id && <p><strong>First-look reference:</strong> {request.first_look_request_id} (visitor supplied)</p>}
+        <p><strong>Goal:</strong> {request.goal}</p>
+        <dl>{Object.entries(request.answers).map(([name, value]) => <div key={name}><dt>{name}</dt><dd>{value}</dd></div>)}</dl>
+      </section>)}
+      {setupCursor !== "0" && <button className="button" type="button" onClick={() => loadSetupRequests(setupCursor)}>Load more OS setup requests</button>}
       <h3>OS public first looks</h3>
       {roastError && <section className="operations-unavailable" role="status"><AlertTriangle size={20} /><div><strong>OS requests unavailable</strong><p>{roastError}</p></div></section>}
       {!roastError && roastRequests.length === 0 && <p>No saved OS first-look requests found in this scan.</p>}
