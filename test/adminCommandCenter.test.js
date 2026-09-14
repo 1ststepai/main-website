@@ -131,6 +131,32 @@ test("auditor collector emits only verified report and inbox metadata", () => {
   }
 });
 
+test("public WorkItem transitions project into admin without claiming a live agent", () => {
+  const temp = fs.mkdtempSync(path.join(os.tmpdir(), "cc-public-work-"));
+  try {
+    const at = new Date(now).toISOString();
+    fs.mkdirSync(path.join(temp, "work", "items"), { recursive: true });
+    fs.mkdirSync(path.join(temp, "work", "events", "SHIP-P0-01"), { recursive: true });
+    fs.writeFileSync(path.join(temp, "work", "items", "SHIP-P0-01.json"), JSON.stringify({
+      id: "SHIP-P0-01", project: "public-site", ownerRole: "public-lead-engineer",
+      state: "QUEUED", createdAt: at, nextAction: "private answer data must never publish"
+    }));
+    fs.writeFileSync(path.join(temp, "work", "events", "SHIP-P0-01", "0000000001.json"), JSON.stringify({
+      id: "SHIP-P0-01", sequence: 1, state: "DECISION_REQUIRED", at
+    }));
+    const result = auditorSourceSnapshot(temp, new Date(now));
+    assert.equal(result.agents.length, 0);
+    assert.equal(result.registryComplete, false);
+    assert.equal(result.projects[0].status, "DECISION_REQUIRED");
+    assert.equal(result.decisions[0].status, "needs_owner");
+    assert.equal(result.events[0].truthState, "SYSTEM_DERIVED");
+    assert.equal(JSON.stringify(result).includes("private answer data"), false);
+  } finally {
+    if (!path.resolve(temp).startsWith(path.resolve(os.tmpdir()) + path.sep)) throw new Error("Unexpected test cleanup path");
+    fs.rmSync(temp, { recursive: true, force: true });
+  }
+});
+
 test("audit capacity projects durable job and provider state without candidate content", () => {
   const temp = fs.mkdtempSync(path.join(os.tmpdir(), "cc-audit-capacity-"));
   try {

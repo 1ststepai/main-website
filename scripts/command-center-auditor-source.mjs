@@ -79,7 +79,7 @@ function verifiedReport(file) {
 }
 
 function publishedHandoff(stateDir, role, report) {
-  const agentId = { "lead-engineering-manager": "ecosystem-lead-engineering-manager", "looping-agent": "ecosystem-loop-agent", "app-engineering-orchestrator": "app-engineering-orchestrator", "app-loop-agent": "app-loop-agent" }[role];
+  const agentId = { "lead-engineering-manager": "ecosystem-lead-engineering-manager", "looping-agent": "ecosystem-loop-agent", "public-lead-engineer": "public-lead-engineer", "app-engineering-orchestrator": "app-engineering-orchestrator", "app-loop-agent": "app-loop-agent" }[role];
   const messageId = `${report.auditId}-${agentId}`;
   const pointerFile = path.join(stateDir, "mailbox", "inbox", agentId, `${messageId}.json`);
   const messageFile = path.join(stateDir, "mailbox", "messages", `${messageId}.json`);
@@ -135,6 +135,14 @@ function publishedHandoff(stateDir, role, report) {
 
 export function auditorSourceSnapshot(stateDir, now = new Date()) {
   const reports = reportFiles(stateDir).map(verifiedReport).sort((a, b) => b.timestamp.localeCompare(a.timestamp)).slice(0, 50);
+  const workDir = path.join(stateDir, "work", "items");
+  const work = fs.existsSync(workDir) ? fs.readdirSync(workDir).filter((name) => /^[A-Za-z0-9][A-Za-z0-9._:-]{0,99}\.json$/.test(name)).slice(0, 100).map((name) => {
+    const item = JSON.parse(fs.readFileSync(path.join(workDir, name), "utf8"));
+    if (`${item.id}.json` !== name || !["public-site", "os", "app-family"].includes(item.project)) throw new Error("Invalid WorkItem metadata");
+    const eventsDir = path.join(stateDir, "work", "events", item.id);
+    const events = fs.existsSync(eventsDir) ? fs.readdirSync(eventsDir).filter((event) => /^\d{10}\.json$/.test(event)).sort().map((event) => JSON.parse(fs.readFileSync(path.join(eventsDir, event), "utf8"))) : [];
+    return { item, events, state: events.at(-1)?.state || item.state };
+  }) : [];
   const payload = {
     schemaVersion: 1,
     contentFree: true,
@@ -142,14 +150,20 @@ export function auditorSourceSnapshot(stateDir, now = new Date()) {
     observedAt: now.toISOString(),
     registryComplete: false,
     auditCapacity: auditCapacitySnapshot(stateDir, now),
-    agents: [], projects: [], decisions: [], releases: [], builds: [],
-    events: reports.map((report) => ({
+    agents: [], projects: work.map(({ item, events, state }) => ({ id: item.id, name: `Ship Board ${item.id}`, project: item.project,
+      owner: item.ownerRole, status: state, updatedAt: events.at(-1)?.at || item.createdAt })),
+    decisions: work.filter(({ state }) => state === "DECISION_REQUIRED").map(({ item, events }) => ({ id: item.id, title: `Owner decision for ${item.id}`,
+      project: item.project, status: "needs_owner", updatedAt: events.at(-1)?.at || item.createdAt })), releases: [], builds: [],
+    events: [...reports.map((report) => ({
       id: `audit-${report.auditId}`,
       at: report.timestamp,
       kind: "independent_audit",
       summary: `Independent audit ${report.auditId}: ${report.disposition}`,
       project: path.basename(String(report.repository || "1stStep.ai ecosystem")),
-    })),
+    })), ...work.flatMap(({ item, events }) => events.map((event) => ({ id: `work-${item.id}-${event.sequence}`, at: event.at,
+      kind: "work_transition", summary: `${item.id}: ${event.state}`, project: item.project,
+      agentRole: item.ownerRole, entityType: "work_item", entityId: item.id, truthState: "SYSTEM_DERIVED",
+      evidenceRefs: event.auditJobId ? [event.auditJobId] : [] })))].sort((a, b) => b.at.localeCompare(a.at)).slice(0, 150),
     audits: reports.map((report) => ({
       id: report.auditId,
       title: `Audit ${report.taskId}`,
@@ -163,7 +177,7 @@ export function auditorSourceSnapshot(stateDir, now = new Date()) {
       reAuditStatus: "unknown",
       evidenceRef: report.auditId,
     })),
-    handoffs: reports.flatMap((report) => (report.project === "app-family" ? ["app-engineering-orchestrator", "app-loop-agent"] : ["lead-engineering-manager", "looping-agent"]).map((role) => publishedHandoff(stateDir, role, report)).filter(Boolean)),
+    handoffs: reports.flatMap((report) => (report.project === "app-family" ? ["app-engineering-orchestrator", "app-loop-agent"] : ["lead-engineering-manager", "looping-agent", "public-lead-engineer"]).map((role) => publishedHandoff(stateDir, role, report)).filter(Boolean)),
   };
   return normalizeCommandCenterSource(payload, now.getTime());
 }
