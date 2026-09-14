@@ -139,8 +139,8 @@ test("audit capacity projects durable job and provider state without candidate c
     fs.mkdirSync(path.join(temp, "jobs"), { recursive: true });
     fs.mkdirSync(path.join(temp, "job-events", jobId), { recursive: true });
     fs.writeFileSync(path.join(temp, "jobs", `${jobId}.json`), JSON.stringify({ schemaVersion: 1, jobId, status: "QUEUED", externalAiAllowed: true, dataClassification: "PUBLIC", privateDiff: "must not publish" }));
-    fs.writeFileSync(path.join(temp, "job-events", jobId, `1000-${jobId}.json`), JSON.stringify({ jobId, status: "TIER_1_COMPLETE", provider: "openrouter-free-primary", model: "free-model", at: nowIso }));
-    fs.writeFileSync(path.join(temp, "job-events", jobId, `2000-${jobId}.json`), JSON.stringify({ jobId, status: "AWAITING_CLAUDE", at: nowIso }));
+    fs.writeFileSync(path.join(temp, "job-events", jobId, "0000000001.json"), JSON.stringify({ jobId, status: "TIER_1_COMPLETE", provider: "openrouter-free-primary", model: "free-model", at: nowIso, sequence: 1 }));
+    fs.writeFileSync(path.join(temp, "job-events", jobId, "0000000002.json"), JSON.stringify({ jobId, status: "AWAITING_CLAUDE", at: nowIso, sequence: 2 }));
     const result = auditorSourceSnapshot(temp, new Date(now));
     assert.equal(result.auditCapacity.auditQueue, 1);
     assert.equal(result.auditCapacity.claudeEscalation, 1);

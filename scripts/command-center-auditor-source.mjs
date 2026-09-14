@@ -21,7 +21,7 @@ function auditCapacitySnapshot(stateDir, now) {
     const job = JSON.parse(fs.readFileSync(path.join(directory, name), "utf8"));
     if (`${job.jobId}.json` !== name || job.schemaVersion !== 1) throw new Error("Invalid durable AuditJob metadata");
     const eventsDir = path.join(stateDir, "job-events", job.jobId);
-    const events = fs.existsSync(eventsDir) ? fs.readdirSync(eventsDir).filter((event) => /^\d+-[a-f0-9-]{36}\.json$/i.test(event)).sort().map((event) => JSON.parse(fs.readFileSync(path.join(eventsDir, event), "utf8"))) : [];
+    const events = fs.existsSync(eventsDir) ? fs.readdirSync(eventsDir).filter((event) => /^\d{10}\.json$/.test(event)).sort().map((event) => JSON.parse(fs.readFileSync(path.join(eventsDir, event), "utf8"))) : [];
     return { job, events, status: events.at(-1)?.status || job.status };
   });
   const latest = (provider) => jobs.flatMap((item) => item.events).filter((event) => event.provider === provider && /_(?:UNAVAILABLE|COMPLETE)$/.test(event.status)).sort((a, b) => a.at.localeCompare(b.at)).at(-1);
