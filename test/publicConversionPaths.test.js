@@ -31,17 +31,20 @@ test("the systems funnel and service links have focused destinations", async () 
   assert.doesNotMatch(html, /href="\/book\/"/);
 });
 
-test("the journey gives a local diagnosis and only opens email by choice", async () => {
+test("the journey gives a local diagnosis and requires explicit consent to request review", async () => {
   const html = await source("journey/index.html");
   const script = await source("journey/journey.js");
   const config = await source("vite.config.js");
   const sitemap = await source("public/sitemap.xml");
   assert.equal((html.match(/class="step" data-step=/g) || []).length, 6);
   assert.match(html, /INITIAL FIT SIGNAL/);
-  assert.match(html, /No account or AI request is created/);
+  assert.match(html, /No account or AI audit is created/);
+  assert.match(html, /id="request-consent"[^>]*type="checkbox"[^>]*required/);
+  assert.match(html, /id="clear-action"/);
   assert.match(script, /document\.createElement\('dd'\)/);
   assert.match(script, /encodeURIComponent\(emailBody\)/);
-  assert.doesNotMatch(script, /fetch\(|localStorage|sessionStorage/);
+  assert.match(script, /fetch\('\/api\/journey-intake'/);
+  assert.match(script, /localStorage\.setItem/);
   assert.match(config, /journey: "journey\/index\.html"/);
   assert.match(sitemap, /www\.1ststep\.ai\/journey\//);
 });

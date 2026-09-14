@@ -9,6 +9,38 @@ const progress = document.querySelector('#progress-fill');
 let current = 0;
 let summaryText = '';
 let started = false;
+const savedKey = 'firststepJourneyDiagnosisV1';
+let requestId = crypto.randomUUID();
+let savedReceipt = '';
+let currentAnswers = '';
+
+function savedState() {
+  try { return JSON.parse(localStorage.getItem(savedKey) || 'null'); } catch { return null; }
+}
+
+function persistState() {
+  try { localStorage.setItem(savedKey, JSON.stringify({ answers: JSON.parse(currentAnswers), request_id: requestId, receipt: savedReceipt })); } catch { /* Browser storage can be disabled. */ }
+}
+
+function showReceipt() {
+  const status = document.querySelector('#request-status');
+  const button = document.querySelector('#request-button');
+  const email = document.querySelector('#request-email');
+  const consent = document.querySelector('#request-consent');
+  if (savedReceipt) {
+    status.textContent = `Request received. Reference: ${savedReceipt}. We will follow up by email.`;
+    status.dataset.state = 'success';
+    button.disabled = true;
+    email.disabled = true;
+    consent.disabled = true;
+  } else {
+    status.textContent = '';
+    delete status.dataset.state;
+    button.disabled = false;
+    email.disabled = false;
+    consent.disabled = false;
+  }
+}
 
 const actions = {
   capture: ['Trace every entry point', 'List each form, ad, calendar, and inbound channel. Verify where the lead is recorded and who sees it first.'],
@@ -48,8 +80,17 @@ function selectedText(name) {
   return select.selectedOptions[0]?.textContent || '';
 }
 
-function buildDiagnosis() {
+function buildDiagnosis(restored = false) {
   const data = new FormData(form);
+  const answers = Object.fromEntries(data.entries());
+  const serializedAnswers = JSON.stringify(answers);
+  if (serializedAnswers !== currentAnswers) {
+    requestId = crypto.randomUUID();
+    savedReceipt = '';
+    currentAnswers = serializedAnswers;
+  }
+  persistState();
+  showReceipt();
   const answer = (name) => String(data.get(name) || '').trim();
   const demand = answer('demand');
   const bottleneck = answer('bottleneck');
@@ -93,13 +134,13 @@ function buildDiagnosis() {
   const subject = demand === 'none' ? '1stStep next-step question' : '1stStep system audit request';
   const emailBody = summaryText.slice(0, 1750) + (summaryText.length > 1750 ? '\n\n[Summary shortened for email. Full version can be copied from the page.]' : '');
   email.href = `mailto:evan@1ststep.ai?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(emailBody)}`;
-  email.textContent = demand === 'none' ? 'Discuss the next step by email ↗' : 'Request a review by email ↗';
+  email.textContent = 'Use my email app instead ↗';
   form.hidden = true;
   result.hidden = false;
   label.textContent = 'DIAGNOSIS / YOUR ANSWERS';
   progress.style.width = '100%';
   result.focus();
-  window.fsaiTrack?.('journey_diagnosis_view');
+  if (!restored) window.fsaiTrack?.('journey_diagnosis_view');
 }
 
 form.addEventListener('submit', (event) => event.preventDefault());
@@ -115,6 +156,42 @@ next.addEventListener('click', () => {
 back.addEventListener('click', () => showStep(current - 1));
 document.querySelector('#edit-action').addEventListener('click', () => showStep(0));
 document.querySelector('#email-action').addEventListener('click', () => window.fsaiTrack?.('journey_email_open'));
+document.querySelector('#clear-action').addEventListener('click', () => {
+  try { localStorage.removeItem(savedKey); } catch { /* Browser storage can be disabled. */ }
+  form.reset();
+  requestId = crypto.randomUUID();
+  savedReceipt = '';
+  currentAnswers = '';
+  showStep(0);
+});
+document.querySelector('#request-form').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const requestForm = event.currentTarget;
+  if (!requestForm.reportValidity() || savedReceipt) return;
+  const status = document.querySelector('#request-status');
+  const button = document.querySelector('#request-button');
+  button.disabled = true;
+  status.textContent = 'Sending your request…';
+  delete status.dataset.state;
+  const attribution = window.fsaiAttribution?.get() || {};
+  try {
+    const response = await fetch('/api/journey-intake', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ request_id: requestId, email: requestForm.elements.email.value, consent: requestForm.elements.consent.checked, answers: JSON.parse(currentAnswers), attribution }),
+    });
+    const body = await response.json();
+    if (!response.ok || !body.ok || !body.persisted || body.request_id !== requestId) throw new Error(body.message || 'We could not confirm your request. Your answers remain here; please try again.');
+    savedReceipt = body.request_id;
+    persistState();
+    showReceipt();
+    window.fsaiTrack?.('journey_request_persisted');
+  } catch (error) {
+    status.textContent = error instanceof SyntaxError ? 'We could not confirm your request. Your answers remain here; please try again.' : (error.message || 'We could not confirm your request. Your answers remain here; please try again.');
+    status.dataset.state = 'error';
+    button.disabled = false;
+  }
+});
 document.querySelector('#copy-action').addEventListener('click', async () => {
   const status = document.querySelector('#copy-status');
   try {
@@ -127,3 +204,15 @@ document.querySelector('#copy-action').addEventListener('click', async () => {
 });
 
 showStep(0, false);
+const previous = savedState();
+if (previous && previous.answers && typeof previous.answers === 'object') {
+  for (const [name, value] of Object.entries(previous.answers)) {
+    if (form.elements[name] && typeof value === 'string') form.elements[name].value = value;
+  }
+  if ([...form.querySelectorAll('[required]')].every((field) => field.value.trim())) {
+    currentAnswers = JSON.stringify(Object.fromEntries(new FormData(form).entries()));
+    if (typeof previous.request_id === 'string') requestId = previous.request_id;
+    if (previous.receipt === requestId) savedReceipt = previous.receipt;
+    buildDiagnosis(true);
+  }
+}
