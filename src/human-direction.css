@@ -56,16 +56,12 @@ body:has(.os-human-route) .hero{grid-template-columns:minmax(0,.9fr) minmax(0,1.
 body.motion-disabled .route-current{animation:none;stroke-dashoffset:0;filter:none}
 @media(prefers-reduced-motion:reduce){.route-current{animation:none;stroke-dashoffset:0;filter:none}}
 
-/* The first-look handoff is a progressive enhancement, so the primary CTA still works without JS. */
-.human-route-entry{display:none;padding:16px 25px 19px;border-top:1px solid rgba(177,206,245,.15)}
-.js-ready .human-route-entry{display:block}
-.human-route-entry label{display:block;margin-bottom:9px;color:#d9ebf3;font:600 .76rem var(--display)}
-.human-route-entry>div{display:flex;gap:9px}
-.human-route-entry input{flex:1;min-width:0;min-height:44px;padding:0 12px;border:1px solid #52738e;border-radius:8px;background:#0b1929;color:#f7f8ff;font:500 .8rem Inter,sans-serif}
-.human-route-entry input::placeholder{color:#9ab1c9}
-.human-route-entry input:focus-visible,.human-route-entry button:focus-visible{outline:3px solid #73def7;outline-offset:2px}
-.human-route-entry button{min-height:44px;padding:0 16px;border:0;border-radius:8px;background:#b7e5f0;color:#091523;font:700 .78rem var(--display);white-space:nowrap}
-.human-route-entry button:hover{background:#e3f6f8}
+/* Route to the email-first first look even when JavaScript is unavailable. */
+.human-route-entry{display:flex;align-items:center;flex-wrap:wrap;gap:9px 18px;padding:16px 25px 19px;border-top:1px solid rgba(177,206,245,.15)}
+.human-route-entry strong{flex:1;min-width:180px;color:#d9ebf3;font:600 .76rem var(--display)}
+.human-route-entry a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 16px;border-radius:8px;background:#b7e5f0;color:#091523;font:700 .78rem var(--display);white-space:nowrap;text-decoration:none}
+.human-route-entry a:hover{background:#e3f6f8}
+.human-route-entry a:focus-visible{outline:3px solid #73def7;outline-offset:2px}
 .human-route-entry small{display:block;margin-top:8px;color:#adbdcf;font-size:.67rem;line-height:1.4}
 
 /* A pre-rendered vector illustration of layered decisions, work, and evidence.
@@ -89,4 +85,4 @@ body.motion-disabled .route-current{animation:none;stroke-dashoffset:0;filter:no
 body.motion-disabled .signal-sculpture *,body.motion-disabled .sculpture-route-trace{animation:none!important;stroke-dashoffset:0}
 @media(prefers-reduced-motion:reduce){.signal-sculpture *,.sculpture-route-trace{animation:none!important;stroke-dashoffset:0}}
 @media(max-width:850px){.human-pause-inner{grid-template-columns:1fr}.signal-sculpture{width:min(100%,570px);margin:0 auto}.human-pause-thread{margin-top:0}}
-@media(max-width:650px){.human-route-entry{padding:16px 18px 19px}.human-route-entry>div{flex-direction:column}.human-route-entry button{width:100%}.human-pause h2{font-size:clamp(2.45rem,10vw,4.5rem)}.sculpture-caption{font-size:.5rem;letter-spacing:0}}
+@media(max-width:650px){.human-route-entry{padding:16px 18px 19px}.human-route-entry a{width:100%}.human-pause h2{font-size:clamp(2.45rem,10vw,4.5rem)}.sculpture-caption{font-size:.5rem;letter-spacing:0}}

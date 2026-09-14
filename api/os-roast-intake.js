@@ -25,6 +25,6 @@ export default async function handler(req, res) {
     return reply(res, 200, { ok: true, ...result });
   } catch (error) {
     const status = Number(error.statusCode) || (error instanceof SyntaxError ? 400 : 503);
-    return reply(res, status, { ok: false, code: error.code || (status === 400 ? 'invalid_request' : 'intake_unavailable'), message: status >= 500 ? 'We could not save your request. Your scan remains on this page; please try again.' : error.message });
+    return reply(res, status, { ok: false, code: error.code || (status === 400 ? 'invalid_request' : 'intake_unavailable'), message: status >= 500 ? 'We could not save your request. No scan ran; please try again.' : error.message });
   }
 }

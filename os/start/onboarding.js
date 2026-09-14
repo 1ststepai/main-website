@@ -71,8 +71,11 @@ const heading = (_number, eyebrow, title, lede) => `<p class="stage-kicker">${St
 const stateTag = (status) => `<span class="state-tag state-${status.toLowerCase().replace(/[^a-z]+/g, '-')}">${escapeHtml(status)}</span>`;
 
 function renderChoose() {
-  return `${heading('01', 'START WITH ONE LINK', 'What should we look at?', 'Enter a public website or GitHub repository for a free live scan. Add your email after the scan to see the evidence-backed roast. No questionnaire required.')}
-    <form id="audit-target-form" class="audit-target-form"><label class="field-label" for="audit-target-input">Website or GitHub repository</label><div class="audit-target-row"><input id="audit-target-input" name="target" type="text" inputmode="url" autocomplete="url" required spellcheck="false" placeholder="yourwebsite.com or github.com/you/project" value="${escapeHtml(firstLookPrefill)}" aria-describedby="audit-target-help" /><button type="submit" class="action-button primary">Scan public link ↗</button></div><p id="audit-target-help">Submitting fetches public HTML or GitHub metadata. No private access or account is requested.</p></form>
+  if (roastRequest.receipt && roastRequest.target) return `${heading('01', 'PUBLIC FIRST LOOK', 'Your first look is saved.', 'Return to the public scan or start a new request.')}
+    <div class="audit-target-form"><span class="form-step">REQUEST SAVED</span><p class="audit-target-value">${escapeHtml(roastRequest.target.url)}</p><div class="stage-actions">${btn('Return to your scan', 'return-to-first-look')}${btn('Start another first look', 'new-first-look', 'secondary')}</div></div>`;
+  const firstLook = roastRequest.email ? `<form id="audit-target-form" class="audit-target-form"><span class="form-step">02 / PUBLIC LINK</span><h3>What should we look at?</h3><p>Your email has not been saved yet. We save your request before scanning this public link.</p><label class="field-label" for="audit-target-input">Website or GitHub repository</label><div class="audit-target-row"><input id="audit-target-input" name="target" type="text" inputmode="url" autocomplete="url" required spellcheck="false" placeholder="yourwebsite.com or github.com/you/project" value="${escapeHtml(firstLookPrefill)}" aria-describedby="audit-target-help" /><button type="submit" class="action-button primary">Save & scan ↗</button></div><p id="audit-target-help">Public HTML or GitHub metadata only. No private access or account is requested.</p><p id="first-look-status" role="status" aria-live="polite"></p><button type="button" class="edit-first-look" data-action="edit-first-look-email">Change email</button></form>` : `<form id="first-look-email-form" class="audit-target-form"><span class="form-step">01 / EMAIL</span><h3>Start with your email.</h3><p>Then add a public website or GitHub link for a live first look and a free, evidence-backed roast.</p><label class="field-label" for="first-look-email">Email address</label><input id="first-look-email" name="email" type="email" autocomplete="email" maxlength="254" required /><label class="roast-consent" for="first-look-consent"><input id="first-look-consent" name="consent" type="checkbox" required /><span>I agree to share my email and public link with 1stStep.ai for follow-up about this first look. This does not subscribe me to marketing. See the <a href="/privacy.html">privacy policy</a>.</span></label><button type="submit" class="action-button primary">Continue to public link ↗</button><p>Email is saved only when you submit your link. If saving fails, no scan runs.</p></form>`;
+  return `${heading('01', 'FREE PUBLIC FIRST LOOK', 'A useful first look.', 'Give us your email first, then a public link. We show only findings supported by the public response. No questionnaire required.')}
+    ${firstLook}
     <details class="other-paths" open><summary>Or choose one of five starting paths</summary><div class="path-options" role="group" aria-label="Choose a starting path">${Object.entries(modes).map(([key, mode], i) => `<button type="button" class="path-option" data-action="select-mode" data-mode="${key}"><span class="path-index">0${i + 1}</span><span><strong>${escapeHtml(mode.title)}</strong><small>${escapeHtml(mode.description)}</small></span><b aria-hidden="true">↗</b></button>`).join('')}</div></details>
     <p class="stage-disclaimer">No account or OS project is created. This first look is narrower than a connected project audit.</p>`;
 }
@@ -84,50 +87,58 @@ function renderAuditRequest() {
   const href = `mailto:evan@1ststep.ai?subject=${encodeURIComponent('1stStep OS first-look request')}&body=${encodeURIComponent(body)}`;
   const result = publicScan.result;
   const roast = result && roastRequest.receipt ? buildPublicRoast(result) : null;
-  const roastForm = publicScan.status === 'done' && result && !roastRequest.receipt ? `<form id="os-roast-form" class="roast-form"><span>THE FREE ROAST</span><h3>Want the straight answer?</h3><p>The scan above is yours. Add your email to see a concise, evidence-backed take and the first fix worth making.</p><label class="field-label" for="os-roast-email">Email address</label><input id="os-roast-email" name="email" type="email" autocomplete="email" maxlength="254" required value="${escapeHtml(roastRequest.email)}" /><label class="roast-consent" for="os-roast-consent"><input id="os-roast-consent" name="consent" type="checkbox" required /><span>I agree to share my email and public link with 1stStep.ai for follow-up about this first look. This does not subscribe me to marketing. See the <a href="/privacy.html">privacy policy</a>.</span></label><button class="action-button primary" type="submit">Show my free roast ↗</button><p id="os-roast-status" role="status" aria-live="polite"></p></form>` : '';
   const roastOutput = roast ? `<div class="roast-result"><div class="scan-result-head"><span>YOUR FREE ROAST / PUBLIC EVIDENCE</span>${stateTag('FIRST LOOK')}</div><h3 tabindex="-1">${escapeHtml(roast.headline)}</h3><div class="roast-columns"><div><span>WHAT IS WORKING</span>${roast.strengths.length ? roast.strengths.map((item) => `<p><strong>${escapeHtml(item.label)}</strong><small>${escapeHtml(item.evidence)}</small></p>`).join('') : '<p>Nothing confirmed yet from the checks we ran.</p>'}</div><div><span>WHAT NEEDS ATTENTION</span>${roast.improvements.length ? roast.improvements.map((item) => `<p><strong>${escapeHtml(item.label)}</strong><small>${escapeHtml(item.action)}</small></p>`).join('') : '<p>No clear miss in the public basics we checked.</p>'}</div></div><div class="scan-next"><span>${roast.improvements.length ? 'FIX THIS FIRST' : 'YOUR NEXT STEP'}</span><strong>${escapeHtml(roast.nextStep)}</strong></div><p class="scan-note">${escapeHtml(roast.limit)}</p><p class="roast-receipt">Email saved for this first-look follow-up. Reference: ${escapeHtml(roastRequest.receipt)}. The roast is shown here; no report email was sent.</p></div>` : '';
   const output = publicScan.status === 'loading' ? '<div class="scan-loading" role="status"><span class="scan-pulse" aria-hidden="true"></span><strong>Checking the public source…</strong><p>Fetching the link and recording only what the response verifies.</p></div>'
     : publicScan.status === 'done' && result ? `<div class="scan-result ${roastRequest.receipt ? 'is-compact' : ''}"><div class="scan-result-head"><span>PUBLIC FIRST LOOK / ${escapeHtml(result.source)}</span>${stateTag('EVIDENCE FOUND')}</div><h3>${roastRequest.receipt ? 'Scan complete.' : 'Here is what we found.'}</h3><p class="scan-source">Inspected <a href="${escapeHtml(result.inspectedUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(result.inspectedUrl)}</a> · ${escapeHtml(new Date(result.checkedAt).toLocaleString())}</p>${roastRequest.receipt ? '<details><summary>Review scan evidence</summary>' : ''}<div class="scan-checks">${result.checks.map((check) => `<div class="scan-check"><div><strong>${escapeHtml(check.label)}</strong>${stateTag(check.status)}</div><p>${escapeHtml(check.evidence)}</p></div>`).join('')}</div>${roastRequest.receipt ? '</details>' : `<div class="scan-next"><span>YOUR FIRST NEXT STEP</span><strong>${escapeHtml(result.nextStep)}</strong></div><p class="scan-note">${escapeHtml(result.note)}</p>`}</div>`
     : publicScan.status === 'error' ? `<div class="scan-error" role="alert"><strong>We couldn't verify this link right now.</strong><p>${escapeHtml(publicScan.error)} No findings were generated.</p></div>` : '';
   return `${heading('02', 'PUBLIC FIRST LOOK', 'Your link. Real evidence.', 'We only report signals we can verify from a public response. This is not a full project, security, or release audit.')}
     <div class="interpretation-card"><span>YOUR ${label.toUpperCase()} / USER PROVIDED</span><strong class="audit-target-value">${escapeHtml(target.url)}</strong></div>
-    <div id="scan-output" aria-live="polite">${output}</div>${roastForm}${roastOutput}
+    <div id="scan-output" aria-live="polite">${output}</div>${roastOutput}
     <div class="stage-actions">${publicScan.status === 'error' ? btn('Try the scan again', 'retry-scan') : ''}${roastRequest.receipt || publicScan.status === 'error' ? `<a class="action-button secondary" href="${href}" data-fsai-event="os_first_look_email_opened" data-fsai-placement="audit_request">Request a human review ↗</a>` : ''}</div>
     ${roastRequest.receipt || publicScan.status === 'error' ? '<p class="stage-disclaimer">A human review opens an email draft; nothing is sent until you send it. No private repository is connected or saved.</p>' : ''}`;
 }
 
-async function submitRoastRequest(form) {
-  if (roastRequest.sending || roastRequest.receipt || publicScan.status !== 'done' || !state.auditTarget) return;
-  if (!form.reportValidity()) return;
-  roastRequest.email = form.elements.email.value.trim();
+async function submitFirstLookTarget(form, auditTarget) {
+  if (roastRequest.sending || roastRequest.receipt || !roastRequest.email || !form.reportValidity()) return;
+  const targetUrl = auditTarget.url;
+  if (roastRequest.attemptedTarget && roastRequest.attemptedTarget !== targetUrl) roastRequest.requestId = crypto.randomUUID();
+  roastRequest.attemptedTarget = targetUrl;
   roastRequest.sending = true;
   const requestId = roastRequest.requestId;
-  const targetUrl = state.auditTarget.url;
   const button = form.querySelector('button[type="submit"]');
-  const status = form.querySelector('#os-roast-status');
+  const status = form.querySelector('#first-look-status');
   button.disabled = true;
-  status.textContent = 'Saving your request…';
+  form.elements.target.disabled = true;
+  form.querySelector('.edit-first-look').disabled = true;
+  status.textContent = 'Saving your request before the scan…';
   try {
-    const response = await fetch('/api/os-roast-intake', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ request_id: requestId, email: roastRequest.email, consent: form.elements.consent.checked, target: targetUrl }), signal: AbortSignal.timeout(10000) });
-    const payload = await response.json();
-    if (roastRequest.requestId !== requestId || state.auditTarget?.url !== targetUrl) return;
+    const response = await fetch('/api/os-roast-intake', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ request_id: requestId, email: roastRequest.email, consent: true, target: targetUrl }), signal: AbortSignal.timeout(10000) });
+    const payload = await response.json().catch(() => ({}));
+    if (roastRequest.requestId !== requestId) return;
     if (!response.ok || !payload.ok || !payload.persisted || payload.request_id !== requestId) throw new Error(payload.message || 'We could not confirm your request. Please try again.');
     roastRequest.receipt = payload.request_id;
-    track('os_roast_request_persisted', { kind: state.auditTarget.kind });
-    render();
-    document.querySelector('.roast-result h3')?.focus({ preventScroll: true });
+    roastRequest.target = auditTarget;
+    track('os_roast_request_persisted', { kind: auditTarget.kind });
+    track('os_first_look_target_entered', { kind: auditTarget.kind });
+    firstLookPrefill = '';
+    if (state.stage === 'choose') {
+      go('audit-request', { auditTarget });
+      runPublicScan();
+    }
   } catch (error) {
-    if (roastRequest.requestId !== requestId || state.auditTarget?.url !== targetUrl) return;
-    status.textContent = error.name === 'TimeoutError' ? 'The request timed out. Please try again.' : error.message || 'We could not save your request. Please try again.';
+    if (roastRequest.requestId !== requestId) return;
+    status.textContent = error.name === 'TimeoutError' ? 'The save timed out. No scan ran. Please try again.' : error.message || 'We could not save your request. No scan ran. Please try again.';
     status.dataset.state = 'error';
     button.disabled = false;
+    form.elements.target.disabled = false;
+    form.querySelector('.edit-first-look').disabled = false;
   } finally {
     if (roastRequest.requestId === requestId) roastRequest.sending = false;
   }
 }
 
 async function runPublicScan() {
-  if (!state.auditTarget) return;
+  if (!state.auditTarget || !roastRequest.receipt) return;
   publicScan = { status: 'loading', result: null, error: null };
   render();
   const target = state.auditTarget.url;
@@ -283,6 +294,7 @@ function render(focus = false) {
   document.body.classList.toggle('is-in-flow', state.stage !== 'choose');
   conversation.innerHTML = renderConversation();
   system.innerHTML = renderSystem();
+  document.querySelector('#privacy-note').textContent = roastRequest.receipt ? 'A submitted first-look email and public link are retained for 90 days. Project answers stay in this tab. No account or OS project is created.' : 'Your answers stay in this tab and disappear on reload. No account or OS project is created.';
   document.querySelector('.system-panel').classList.remove('is-updated');
   requestAnimationFrame(() => document.querySelector('.system-panel').classList.add('is-updated'));
   const percent = progressValue();
@@ -309,9 +321,12 @@ conversation.addEventListener('input', (event) => {
 });
 
 conversation.addEventListener('submit', (event) => {
-  if (event.target.id === 'os-roast-form') {
+  if (event.target.id === 'first-look-email-form') {
     event.preventDefault();
-    submitRoastRequest(event.target);
+    if (!event.target.reportValidity()) return;
+    roastRequest.email = event.target.elements.email.value.trim();
+    render();
+    document.querySelector('#audit-target-input')?.focus();
     return;
   }
   if (event.target.id === 'audit-target-form') {
@@ -319,11 +334,7 @@ conversation.addEventListener('submit', (event) => {
     const input = event.target.elements.target;
     const auditTarget = normalizeAuditTarget(input.value);
     if (!auditTarget) { input.setCustomValidity('Enter a public website or GitHub repository URL.'); input.reportValidity(); return; }
-    track('os_first_look_target_entered', { kind: auditTarget.kind });
-    publicScan = { status: 'idle', result: null, error: null };
-    roastRequest = { requestId: crypto.randomUUID(), email: '', receipt: null, sending: false };
-    go('audit-request', { auditTarget });
-    runPublicScan();
+    submitFirstLookTarget(event.target, auditTarget);
     return;
   }
   if (event.target.id !== 'goal-form') return;
@@ -347,8 +358,20 @@ document.querySelector('.stage-layout').addEventListener('click', (event) => {
   const target = event.target.closest('[data-action]');
   if (!target) return;
   const action = target.dataset.action;
-  if (action === 'retry-scan') {
+  if (action === 'return-to-first-look' && roastRequest.target) {
+    go('audit-request', { auditTarget: roastRequest.target });
+  } else if (action === 'new-first-look') {
+    roastRequest = { requestId: crypto.randomUUID(), email: '', receipt: null, sending: false };
+    publicScan = { status: 'idle', result: null, error: null };
+    render();
+    document.querySelector('#first-look-email')?.focus();
+  } else if (action === 'retry-scan') {
     runPublicScan();
+  } else if (action === 'edit-first-look-email') {
+    if (roastRequest.sending) return;
+    roastRequest = { requestId: crypto.randomUUID(), email: '', receipt: null, sending: false };
+    render();
+    document.querySelector('#first-look-email')?.focus();
   } else if (action === 'select-mode') {
     const mode = target.dataset.mode;
     if (!modes[mode]) return;
