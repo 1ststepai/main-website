@@ -1,0 +1,155 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://1ststep.ai/schemas/os-agent-session-lifecycle.v1.schema.json",
+  "title": "1stStep OS agent session lifecycle proposal",
+  "oneOf": [
+    { "$ref": "#/$defs/Agent" },
+    { "$ref": "#/$defs/AgentRuntime" },
+    { "$ref": "#/$defs/AgentSession" },
+    { "$ref": "#/$defs/AgentCheckpoint" },
+    { "$ref": "#/$defs/SessionRotation" }
+  ],
+  "$defs": {
+    "id": { "type": "string", "format": "uuid" },
+    "time": { "type": "string", "format": "date-time" },
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "authorityRef"],
+      "properties": {
+        "kind": { "enum": ["ECOSYSTEM", "PROJECT"] },
+        "authorityRef": { "type": "string", "minLength": 1 },
+        "organizationId": { "$ref": "#/$defs/id" },
+        "projectId": { "$ref": "#/$defs/id" }
+      }
+    },
+    "base": {
+      "type": "object",
+      "required": ["schemaVersion", "entityType", "id", "createdAt"],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "entityType": { "type": "string" },
+        "id": { "$ref": "#/$defs/id" },
+        "createdAt": { "$ref": "#/$defs/time" }
+      }
+    },
+    "Agent": {
+      "allOf": [
+        { "$ref": "#/$defs/base" },
+        {
+          "type": "object",
+          "required": ["scope", "role", "ownerRef", "bindingRevision", "currentSessionId", "status", "updatedAt"],
+          "properties": {
+            "entityType": { "const": "Agent" },
+            "scope": { "$ref": "#/$defs/scope" },
+            "role": { "type": "string", "minLength": 1 },
+            "ownerRef": { "type": "string", "minLength": 1 },
+            "bindingRevision": { "type": "integer", "minimum": 0 },
+            "currentSessionId": { "oneOf": [{ "$ref": "#/$defs/id" }, { "type": "null" }] },
+            "status": { "enum": ["ACTIVE", "WAITING", "BLOCKED", "IDLE", "UNKNOWN"] },
+            "updatedAt": { "$ref": "#/$defs/time" }
+          }
+        }
+      ]
+    },
+    "AgentRuntime": {
+      "allOf": [
+        { "$ref": "#/$defs/base" },
+        {
+          "type": "object",
+          "required": ["provider", "adapterVersion", "capabilities", "capabilitiesObservedAt", "health"],
+          "properties": {
+            "entityType": { "const": "AgentRuntime" },
+            "provider": { "type": "string", "minLength": 1 },
+            "adapterVersion": { "type": "string", "minLength": 1 },
+            "capabilities": {
+              "type": "object",
+              "additionalProperties": { "enum": ["SUPPORTED", "UNSUPPORTED", "UNKNOWN"] },
+              "required": ["createSession", "bootstrapSession", "verifySession", "awaitAcknowledgement", "fenceSession", "retireSession", "inspectSession"]
+            },
+            "capabilitiesObservedAt": { "$ref": "#/$defs/time" },
+            "health": { "enum": ["HEALTHY", "DEGRADED", "UNREACHABLE", "UNKNOWN"] }
+          }
+        }
+      ]
+    },
+    "AgentSession": {
+      "allOf": [
+        { "$ref": "#/$defs/base" },
+        {
+          "type": "object",
+          "required": ["agentId", "runtimeId", "providerSessionRef", "state", "authorityRevision", "startedAt", "lastObservedAt", "lastHeartbeatAt", "leaseRef", "endedAt", "checkpointId"],
+          "properties": {
+            "entityType": { "const": "AgentSession" },
+            "agentId": { "$ref": "#/$defs/id" },
+            "runtimeId": { "$ref": "#/$defs/id" },
+            "providerSessionRef": { "type": "string", "minLength": 1 },
+            "state": { "enum": ["CANDIDATE", "ACTIVE", "FENCED", "RETIRED", "FAILED", "UNKNOWN"] },
+            "authorityRevision": { "type": "integer", "minimum": 0 },
+            "startedAt": { "$ref": "#/$defs/time" },
+            "lastObservedAt": { "oneOf": [{ "$ref": "#/$defs/time" }, { "type": "null" }] },
+            "lastHeartbeatAt": { "oneOf": [{ "$ref": "#/$defs/time" }, { "type": "null" }] },
+            "leaseRef": { "type": ["string", "null"] },
+            "endedAt": { "oneOf": [{ "$ref": "#/$defs/time" }, { "type": "null" }] },
+            "checkpointId": { "oneOf": [{ "$ref": "#/$defs/id" }, { "type": "null" }] }
+          }
+        }
+      ]
+    },
+    "AgentCheckpoint": {
+      "allOf": [
+        { "$ref": "#/$defs/base" },
+        {
+          "type": "object",
+          "required": ["agentId", "sessionId", "scope", "digest", "taskEnvelopeIds", "jobCheckpointIds", "inputRevisionRefs", "sourceRefs", "artifactDigests", "remainingWorkRefs", "openDecisionRefs", "openGateRefs", "nextAction", "authorityRef", "permissionRef", "budgetRef", "expiresAt"],
+          "properties": {
+            "entityType": { "const": "AgentCheckpoint" },
+            "agentId": { "$ref": "#/$defs/id" },
+            "sessionId": { "$ref": "#/$defs/id" },
+            "scope": { "$ref": "#/$defs/scope" },
+            "digest": { "$ref": "#/$defs/digest" },
+            "taskEnvelopeIds": { "type": "array", "items": { "$ref": "#/$defs/id" } },
+            "jobCheckpointIds": { "type": "array", "items": { "$ref": "#/$defs/id" } },
+            "inputRevisionRefs": { "type": "array", "items": { "type": "string" } },
+            "sourceRefs": { "type": "array", "items": { "type": "string" } },
+            "artifactDigests": { "type": "array", "items": { "$ref": "#/$defs/digest" } },
+            "remainingWorkRefs": { "type": "array", "items": { "type": "string" } },
+            "openDecisionRefs": { "type": "array", "items": { "type": "string" } },
+            "openGateRefs": { "type": "array", "items": { "type": "string" } },
+            "nextAction": { "type": "string" },
+            "authorityRef": { "type": "string", "minLength": 1 },
+            "permissionRef": { "type": "string", "minLength": 1 },
+            "budgetRef": { "type": "string", "minLength": 1 },
+            "expiresAt": { "$ref": "#/$defs/time" }
+          }
+        }
+      ]
+    },
+    "SessionRotation": {
+      "allOf": [
+        { "$ref": "#/$defs/base" },
+        {
+          "type": "object",
+          "required": ["agentId", "oldSessionId", "newSessionId", "checkpointId", "runtimeId", "idempotencyKey", "trigger", "state", "expectedBindingRevision", "committedBindingRevision", "stepEvidence", "failureReason", "updatedAt"],
+          "properties": {
+            "entityType": { "const": "SessionRotation" },
+            "agentId": { "$ref": "#/$defs/id" },
+            "oldSessionId": { "$ref": "#/$defs/id" },
+            "newSessionId": { "oneOf": [{ "$ref": "#/$defs/id" }, { "type": "null" }] },
+            "checkpointId": { "oneOf": [{ "$ref": "#/$defs/id" }, { "type": "null" }] },
+            "runtimeId": { "$ref": "#/$defs/id" },
+            "idempotencyKey": { "type": "string", "minLength": 1 },
+            "trigger": { "enum": ["HEALTH", "CONTEXT_LIMIT", "USAGE_LIMIT", "POLICY", "OPERATOR"] },
+            "state": { "enum": ["CHECKPOINTING", "ROTATION_REQUIRES_RUNTIME_SUPPORT", "CREATING", "BOOTSTRAPPING", "VERIFYING", "AWAITING_ACKNOWLEDGEMENT", "SWITCHING_BINDING", "RETIRING_OLD_SESSION", "COMPLETED", "FAILED", "RECOVERY_REQUIRED"] },
+            "expectedBindingRevision": { "type": "integer", "minimum": 0 },
+            "committedBindingRevision": { "oneOf": [{ "type": "integer", "minimum": 1 }, { "type": "null" }] },
+            "stepEvidence": { "type": "object", "additionalProperties": { "$ref": "#/$defs/time" } },
+            "failureReason": { "type": ["string", "null"] },
+            "updatedAt": { "$ref": "#/$defs/time" }
+          }
+        }
+      ]
+    }
+  }
+}

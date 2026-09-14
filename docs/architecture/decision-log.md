@@ -1,5 +1,14 @@
 # Architecture Decision Log
 
+## 2026-09-13: Separate durable Agent identity from runtime sessions (ADR-OS-004)
+
+- **Status / owner:** Product/architecture direction approved by Evan. Lifecycle backend, provider adapters, live session publisher, retention policy, and runtime capability evidence are **NOT IMPLEMENTED / UNKNOWN**. Existing OS G1 implementation gate remains **CLOSED**.
+- **Decision:** A durable `Agent` owns a role across many ephemeral `AgentSession` records. `AgentRuntime` advertises verified provider capabilities. Immutable `AgentCheckpoint` records canonical continuation state; `SessionRotation` enforces checkpoint → programmatic session creation → compact bootstrap → state verification → acknowledgment → atomic role binding switch → old-session retirement/fencing. The old binding remains authoritative throughout prepare. No full conversation-history copy. Unsupported creation is explicitly `ROTATION_REQUIRES_RUNTIME_SUPPORT`; Evan manually opening a chat is not an automatic-rotation solution.
+- **Rationale:** Provider conversations expire or lose context, while project authority, checkpoints, audit evidence, and release decisions must remain durable and recoverable. Two-phase switching prevents simultaneous active authority and false handoff success.
+- **Affected systems / ownership:** Proposed separate OS backend owns canonical state and orchestrator; provider adapters implement capabilities under that backend. Public `/admin/agents` displays content-free lifecycle projections only. The `app.1ststep.ai` Engineering Orchestrator retains app-family implementation and supplies its projection by accepted contract.
+- **Evidence / implementation dependencies:** [Lifecycle contract and schema](OS_AGENT_SESSION_LIFECYCLE_CONTRACT.md); existing [G1 package](OS_G1_OWNER_DECISION_PACKAGE.md). Assign backend owner and platform, resolve identity/privacy/retention and app handoff, verify actual runtime creation APIs, implement durable leases/compare-and-swap with failure recovery, and test concurrency and fencing before any live-rotation claim. No production change follows from this decision.
+- **Supersession:** None; existing `AgentJob`, `Checkpoint`, provider adapter and release gates remain in force.
+
 ## 2026-09-13: Standard free OS Audit requires zero metered AI/API usage (ADR-OS-003)
 
 - **Status / owner:** Binding product/architecture invariant approved by Evan; engine, call-boundary tests, cost telemetry and release gate are **NOT IMPLEMENTED / NOT_EVALUATED**. No implementation or production change is authorized by this decision.
