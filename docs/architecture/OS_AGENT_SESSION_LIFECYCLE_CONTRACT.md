@@ -24,6 +24,8 @@ The versioned entity shapes are in [os-agent-session-lifecycle.v1.schema.json](o
 
 The two-phase boundary is **prepare** (checkpoint, create, bootstrap, verify, acknowledge) then **commit** (binding switch, old-session retirement/fencing). Each step has persisted evidence and a monotonic state transition. A failed prepare cannot switch binding. A failed commit requires reconciliation against the canonical binding revision before retry; replay must not spawn duplicate sessions or re-run completed work.
 
+The handoff inbox belongs to the durable `Agent`, never `AgentSession`. Rotation cannot consume or discard queued entries: the new runtime binds to the same role inbox, ingests unacknowledged items, verifies their audit references against current project state, and emits its own acknowledgement receipt. Runtime compatibility metadata must include provider, runtime/version, model, and explicit messaging, create/resume/rename/receive capabilities. Unsupported or incompatible direct session resume is a runtime health incident, not OS delivery failure. The local file-backed ecosystem mailbox is a prototype; it does not provide authenticated binding or a programmatic session-creation adapter.
+
 Automatic rotation is an internal session-lifecycle operation. It does not authorize repository edits, deployments, releases, customer contact, paid provider usage, or any other external action beyond the existing Agent authority contract and budget. The existing no-idle-model-polling rule remains in force.
 
 ## Adapter and Command Center handoff
