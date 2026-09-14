@@ -1,0 +1,146 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import readHandler from "../api/admin-command-center.js";
+import ingestHandler from "../api/admin-command-center-ingest.js";
+import { ADMIN_COOKIE_NAME, createAdminSessionToken } from "../lib/admin/auth.js";
+import { normalizeCommandCenterSource, summarizeCommandCenter } from "../lib/admin/commandCenter.js";
+import { auditorSourceSnapshot } from "../scripts/command-center-auditor-source.mjs";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+
+const now = Date.parse("2026-09-13T12:00:00.000Z");
+function snapshot(source, overrides = {}) {
+  return {
+    schemaVersion: 1,
+    contentFree: true,
+    source,
+    observedAt: new Date(now).toISOString(),
+    registryComplete: true,
+    agents: [{ id: `${source}-lead`, name: "Lead", project: "1stStep", updatedAt: new Date(now).toISOString(), status: "working", task: "Audit release candidate", owner: "Engineering" }],
+    projects: [], events: [], audits: [], handoffs: [], decisions: [], releases: [], builds: [],
+    ...overrides,
+  };
+}
+
+function responseRecorder() {
+  return { statusCode: 200, headers: {}, body: "", setHeader(name, value) { this.headers[name] = value; }, end(value = "") { this.body = value; } };
+}
+
+test("agent counts require both fresh and complete authority registries", () => {
+  const publicSource = normalizeCommandCenterSource(snapshot("public-ecosystem"), now);
+  const appSource = normalizeCommandCenterSource(snapshot("app-family"), now);
+  const complete = summarizeCommandCenter([publicSource, appSource], now);
+  assert.equal(complete.counts.registered, 2);
+  assert.equal(complete.counts.working, 2);
+  assert.equal(summarizeCommandCenter([publicSource, null], now).counts.registered, null);
+  assert.equal(summarizeCommandCenter([publicSource, appSource], now + 6 * 60_000).counts.working, null);
+  const partial = normalizeCommandCenterSource(snapshot("app-family", { registryComplete: false }), now);
+  assert.equal(summarizeCommandCenter([publicSource, partial], now).counts.registered, null);
+});
+
+test("individual stale agents become unknown even when their source is fresh", () => {
+  const staleAgent = normalizeCommandCenterSource(snapshot("public-ecosystem", {
+    agents: [{ ...snapshot("public-ecosystem").agents[0], updatedAt: new Date(now - 10 * 60_000).toISOString() }],
+  }), now);
+  const result = summarizeCommandCenter([staleAgent, normalizeCommandCenterSource(snapshot("app-family"), now)], now);
+  assert.equal(result.counts.working, 1);
+  assert.equal(result.counts.unknown, 1);
+});
+
+test("handoff acknowledgement needs explicit delivery and acknowledgement evidence", () => {
+  const base = { id: "handoff-1", project: "1stStep", updatedAt: new Date(now).toISOString(), from: "Auditor", to: "Lead", status: "acknowledged" };
+  assert.throws(() => normalizeCommandCenterSource(snapshot("public-ecosystem", { handoffs: [{ ...base }] }), now), /invalid_handoff_state/);
+  assert.throws(() => normalizeCommandCenterSource(snapshot("public-ecosystem", { handoffs: [{ ...base, deliveredAt: new Date(now).toISOString(), acknowledgedAt: new Date(now - 1000).toISOString() }] }), now), /invalid_handoff_state/);
+  const valid = normalizeCommandCenterSource(snapshot("public-ecosystem", { handoffs: [{ ...base, deliveredAt: new Date(now).toISOString(), acknowledgedAt: new Date(now).toISOString() }] }), now);
+  assert.equal(valid.handoffs[0].status, "acknowledged");
+});
+
+test("telemetry rejects missing content-free attestation and secret-shaped labels", () => {
+  assert.throws(() => normalizeCommandCenterSource(snapshot("public-ecosystem", { contentFree: false }), now), /invalid_telemetry/);
+  assert.throws(() => normalizeCommandCenterSource(snapshot("public-ecosystem", { agents: [{ ...snapshot("public-ecosystem").agents[0], task: "contact foo@example.com" }] }), now), /invalid_telemetry/);
+});
+
+test("auditor collector emits only verified report and inbox metadata", () => {
+  const temp = fs.mkdtempSync(path.join(os.tmpdir(), "firststep-command-center-test-"));
+  try {
+    const auditId = "11111111-1111-4111-8111-111111111111";
+    const report = { auditId, taskId: "INFRA-001", repository: "C:\\Private\\1ststep.ai", candidateSha: "a".repeat(40), disposition: "FAIL", timestamp: new Date(now).toISOString(), findings: [{ severity: "high", evidence: "private material must not cross the bridge" }] };
+    fs.mkdirSync(path.join(temp, "audits"));
+    fs.mkdirSync(path.join(temp, "inbox", "lead-engineering-manager"), { recursive: true });
+    fs.writeFileSync(path.join(temp, "audits", `${auditId}.json`), JSON.stringify(report));
+    fs.writeFileSync(path.join(temp, "inbox", "lead-engineering-manager", `${auditId}.json`), JSON.stringify({ auditId, candidateSha: report.candidateSha, disposition: report.disposition, timestamp: report.timestamp }));
+    const result = auditorSourceSnapshot(temp, new Date(now));
+    assert.equal(result.registryComplete, false);
+    assert.equal(result.agents.length, 0);
+    assert.equal(result.audits[0].severity, "high");
+    assert.equal(result.handoffs[0].status, "delivered");
+    assert.equal(result.handoffs[0].acknowledgedAt, null);
+    assert.equal(result.handoffs.length, 1);
+    assert.equal(JSON.stringify(result).includes("private material"), false);
+  } finally {
+    if (!path.resolve(temp).startsWith(path.resolve(os.tmpdir()) + path.sep)) throw new Error("Unexpected test cleanup path");
+    fs.rmSync(temp, { recursive: true, force: true });
+  }
+});
+
+test("read API is session-protected and ingest API is publisher-protected", async () => {
+  const old = {
+    session: process.env.FIRSTSTEP_ADMIN_SESSION_SECRET,
+    publicKey: process.env.FIRSTSTEP_COMMAND_CENTER_PUBLIC_INGEST_SECRET,
+    appKey: process.env.FIRSTSTEP_COMMAND_CENTER_APP_INGEST_SECRET,
+    kvUrl: process.env.KV_REST_API_URL,
+    kvToken: process.env.KV_REST_API_TOKEN,
+    encryptionKey: process.env.FIRSTSTEP_DATA_ENCRYPTION_KEY,
+    fetch: globalThis.fetch,
+  };
+  const publicKey = "public0123456789abcdef0123456789abcdef";
+  process.env.FIRSTSTEP_ADMIN_SESSION_SECRET = "admin0123456789abcdef0123456789abcdef";
+  process.env.FIRSTSTEP_COMMAND_CENTER_PUBLIC_INGEST_SECRET = publicKey;
+  process.env.FIRSTSTEP_COMMAND_CENTER_APP_INGEST_SECRET = "app__0123456789abcdef0123456789abcdef";
+  process.env.KV_REST_API_URL = "https://kv.example.test";
+  process.env.KV_REST_API_TOKEN = "test-kv-token";
+  process.env.FIRSTSTEP_DATA_ENCRYPTION_KEY = "11".repeat(32);
+  const stored = new Map();
+  globalThis.fetch = async (_url, options) => {
+    const [operation, key, value] = JSON.parse(options.body);
+    if (operation === "SET") { stored.set(key, value); return { ok: true, json: async () => ({ result: "OK" }) }; }
+    return { ok: true, json: async () => ({ result: stored.get(key) ?? null }) };
+  };
+  try {
+    const anonymous = responseRecorder();
+    await readHandler({ method: "GET", headers: {} }, anonymous);
+    assert.equal(anonymous.statusCode, 401);
+
+    const noKey = responseRecorder();
+    await ingestHandler({ method: "POST", headers: { "content-type": "application/json" }, body: snapshot("public-ecosystem") }, noKey);
+    assert.equal(noKey.statusCode, 401);
+    assert.equal(stored.size, 0);
+
+    const published = responseRecorder();
+    await ingestHandler({ method: "POST", headers: { "content-type": "application/json", "x-1ststep-command-center-key": publicKey }, body: snapshot("public-ecosystem", { observedAt: new Date().toISOString(), agents: [] }) }, published);
+    assert.equal(published.statusCode, 200);
+    assert.equal(stored.size, 1);
+    assert.equal([...stored.values()][0].includes("Audit release candidate"), false);
+
+    const token = createAdminSessionToken();
+    const read = responseRecorder();
+    await readHandler({ method: "GET", headers: { cookie: `${ADMIN_COOKIE_NAME}=${encodeURIComponent(token)}` } }, read);
+    assert.equal(read.statusCode, 200);
+    const result = JSON.parse(read.body).commandCenter;
+    assert.equal(result.coverage[0].state, "live");
+    assert.equal(result.coverage[1].state, "unconnected");
+    assert.equal(result.counts.registered, null);
+    assert.equal(read.body.includes(publicKey), false);
+    assert.equal(read.headers["Cache-Control"], "no-store, private");
+
+    const forbiddenWrite = responseRecorder();
+    await readHandler({ method: "POST", headers: { cookie: `${ADMIN_COOKIE_NAME}=${encodeURIComponent(token)}` } }, forbiddenWrite);
+    assert.equal(forbiddenWrite.statusCode, 405);
+  } finally {
+    for (const [key, name] of Object.entries({ session: "FIRSTSTEP_ADMIN_SESSION_SECRET", publicKey: "FIRSTSTEP_COMMAND_CENTER_PUBLIC_INGEST_SECRET", appKey: "FIRSTSTEP_COMMAND_CENTER_APP_INGEST_SECRET", kvUrl: "KV_REST_API_URL", kvToken: "KV_REST_API_TOKEN", encryptionKey: "FIRSTSTEP_DATA_ENCRYPTION_KEY" })) {
+      if (old[key] === undefined) delete process.env[name]; else process.env[name] = old[key];
+    }
+    globalThis.fetch = old.fetch;
+  }
+});

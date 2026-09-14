@@ -1,5 +1,14 @@
 # Architecture Decision Log
 
+## 2026-09-13: Read-only Command Center inside the protected public-site admin
+
+- **Status / owner:** Locally implemented proposal under Evan's Phase 1 Command Center instruction; production integration pending. Public-site agent owns the admin presentation and public/ecosystem telemetry contract. The app Engineering Orchestrator retains app-family publisher authority.
+- **Decision:** Add Command Center views within the existing `/admin` Studio. Only authenticated admin GETs read normalized, metadata-only snapshots. Separate source-scoped publisher credentials may update a snapshot in existing private KV; the browser cannot publish or control agents. Missing, stale, or incomplete source evidence remains `UNKNOWN`, and handoff delivery never implies acknowledgement.
+- **Rationale:** Vercel cannot read local engineering worktree files, and no verified central runtime feed exists. A source contract allows truthful observability without changing agent/release authority.
+- **Affected systems:** Public-site admin, its private KV namespace, first-party ecosystem publisher integration, and a contract handoff to the app Engineering Orchestrator.
+- **Implementation / audit:** `docs/architecture/COMMAND_CENTER_TELEMETRY_CONTRACT.md` defines the schema and ownership. Test auth, source isolation, freshness, unknown counts, handoff evidence, browser rendering, and release gates before production. This entry does not claim live publishers are connected.
+- **Reversal:** Remove the admin routes and telemetry keys; no product repository, agent, audit, or release record is mutated by the UI.
+
 ## 2026-09-13: Public-site and OS engineering authority
 
 - **Status / owner:** Approved by Evan Pancis through the public-site master operating prompt; Evan retains human authority for material business and risk decisions.
