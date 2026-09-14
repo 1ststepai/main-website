@@ -13,12 +13,10 @@ if (story) {
     </div>`;
 
   const stages = {
-    connect: frame('01 / START WITH AN EXACT BASELINE', 'First, know what exists.', 'PLANNED CONNECTION',
-      'A real connection would identify the repository and pin a baseline before making any claim about the build.',
-      `<div class="story-file-head"><span>example/repository</span>${badge('SAMPLE')}</div>
-       <div class="story-file-tree"><div><i>⌑</i> src/ <span>application</span></div><div><i>⌑</i> tests/ <span>verification</span></div><div><i>⌑</i> package.json <span>dependencies</span></div><div><i>⌑</i> workflow.yml <span>release</span></div></div>
-       <div class="story-route"><span>REPOSITORY</span><b>→</b><span>STACK</span><b>→</b><span>ARCHITECTURE</span><b>→</b><span>BASELINE</span></div>`,
-      `<h4>What would happen</h4><p>Read-only project access, file inventory, stack detection, architecture map, then a pinned commit.</p><div class="story-truth">This sample is not connected. No files were inspected.</div>`),
+    connect: frame('01 / CONNECT YOUR PROJECT', 'Connect Your Project', 'PLANNED CONNECTION',
+      'Begin with a public website or repository link. A future read-only connection would map the project and pin its exact baseline.',
+      `<div class="story-connect-card"><span class="story-connect-icon" aria-hidden="true">◉</span><strong>Start with your project</strong><small>Website URL or public GitHub link</small><div class="story-connect-input">your-site.com <span>PUBLIC LINK</span></div><a href="/os/start/" data-fsai-event="os_onboarding_entry_click" data-fsai-placement="home_demo">Open first-look preview →</a><small>No repository is connected from this demo.</small></div>`,
+      `<div class="story-file-head"><span>Example project structure</span>${badge('SAMPLE')}</div><div class="story-file-tree"><div><i>⌑</i> src/ <span>application</span></div><div><i>⌑</i> tests/ <span>verification</span></div><div><i>⌑</i> package.json <span>dependencies</span></div><div><i>⌑</i> workflow.yml <span>release</span></div></div><div class="story-route"><span>REPOSITORY</span><b>→</b><span>STACK</span><b>→</b><span>BASELINE</span></div><div class="story-truth">Illustrative files only. No scan has run.</div>`),
     audit: frame('02 / EVIDENCE BEFORE SCORES', 'Find what actually needs attention.', 'ILLUSTRATIVE AUDIT',
       'Applicable checks produce findings with a reason, an owner, and evidence. Unknown stays unknown.',
       `<div class="story-checks"><div><span>Repository baseline</span>${badge('NOT CONNECTED')}</div><div><span>Deterministic checks</span>${badge('SAMPLE')}</div><div><span>Authentication · Security</span>${badge('SAMPLE')}</div><div><span>Architecture · Tests</span>${badge('SAMPLE')}</div><div><span>Accessibility · Release</span>${badge('SAMPLE')}</div></div>
