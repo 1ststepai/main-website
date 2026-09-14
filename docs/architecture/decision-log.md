@@ -77,6 +77,14 @@
 - **Alternatives:** Browser-only persistence cannot provide authenticated ownership or safe repository access; one-project-per-user would require a later security/schema retrofit; granting organization membership implicit access to every project risks context leakage; extending the Job Agent service directly creates cross-product tenant and release coupling; provider conversation state cannot be the canonical project ledger.
 - **Implementation / audit dependencies:** Review [the complete proposal](OS_BACKEND_CONTRACT_PROPOSAL.md) and [versioned schema](os-contract.v1.schema.json), appoint the OS backend owner, resolve platform/identity/privacy/retention/GitHub permissions, first-party portfolio placement, pattern-use policy, and cost decisions, then authorize a narrow P0 implementation. Separate-backend approval alone does not authorize GitHub App registration, backend scaffolding, production deployment, billing, or external writes. Verify two-project same-organization isolation, tenant isolation, idempotency, immutable baseline, pattern sanitization, provenance, and end-to-end UI truth before release.
 - **Supersession:** None. The 2026-09-13 public-site authority decision remains in force.
+## 2026-09-13: Read-only Command Center inside the protected public-site admin
+
+- **Status / owner:** Locally implemented proposal under Evan's Phase 1 Command Center instruction; production integration pending. Public-site agent owns the admin presentation and public/ecosystem telemetry contract. The app Engineering Orchestrator retains app-family publisher authority.
+- **Decision:** Add Command Center views within the existing `/admin` Studio. Only authenticated admin GETs read normalized, metadata-only snapshots. Separate source-scoped publisher credentials may update a snapshot in existing private KV; the browser cannot publish or control agents. Missing, stale, or incomplete source evidence remains `UNKNOWN`, and handoff delivery never implies acknowledgement.
+- **Rationale:** Vercel cannot read local engineering worktree files, and no verified central runtime feed exists. A source contract allows truthful observability without changing agent/release authority.
+- **Affected systems:** Public-site admin, its private KV namespace, first-party ecosystem publisher integration, and a contract handoff to the app Engineering Orchestrator.
+- **Implementation / audit:** `docs/architecture/COMMAND_CENTER_TELEMETRY_CONTRACT.md` defines the schema and ownership. Test auth, source isolation, freshness, unknown counts, handoff evidence, browser rendering, and release gates before production. This entry does not claim live publishers are connected.
+- **Reversal:** Remove the admin routes and telemetry keys; no product repository, agent, audit, or release record is mutated by the UI.
 
 ## 2026-09-13: Public-site and OS engineering authority
 
