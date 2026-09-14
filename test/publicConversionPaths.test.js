@@ -5,11 +5,15 @@ import { readFile, readdir, stat } from "node:fs/promises";
 const root = new URL("../", import.meta.url);
 const source = (path) => readFile(new URL(path, root), "utf8");
 
-test("the homepage leads with systems architecture and keeps products distinct", async () => {
+test("the homepage leads to the real OS preview and preserves the consulting path", async () => {
   const html = await source("index.html");
   const llms = await source("public/llms.txt");
-  assert.match(html, /Build the system <em>behind your growth/);
-  assert.match(html, /lead capture, CRM architecture, routing, follow-up, attribution, reporting/i);
+  assert.match(html, /AI made starting easy/);
+  assert.match(html, /1stStep helps you finish/);
+  assert.match(html, /Deploy Our OS/);
+  assert.match(html, /href="\/os\/start\/"/);
+  assert.match(html, /Need a business system instead\? Begin Your Journey/);
+  assert.match(html, /Lead capture, CRM architecture, qualification, routing, follow-up/i);
   assert.match(html, /href="\/journey\/"/);
   assert.match(html, /href="\/services\/revenue-systems\.html"/);
   assert.match(html, /href="https:\/\/app\.1ststep\.ai\/"/);
@@ -74,7 +78,7 @@ test("homepage metadata and assets identify the systems consultancy", async () =
 
   assert.match(html, /<link rel="canonical" href="https:\/\/www\.1ststep\.ai\/"/);
   assert.match(html, /og-home\.png/);
-  assert.match(html, /<meta name="description" content="1stStep\.ai designs and builds the systems/);
+  assert.match(html, /<meta name="description" content="AI made starting easy\. 1stStep helps you finish/);
   assert.deepEqual(data["@graph"].map((item) => item["@type"]), ["Organization", "WebSite", "WebPage", "CreativeWork", "SoftwareApplication"]);
   assert.equal((await stat(new URL("public/assets/og-home.png", root))).size > 5000, true);
 });

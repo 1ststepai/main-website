@@ -31,17 +31,17 @@ Build the systems that connect leads, data, tools, people, decisions, follow-up,
 
 Do not describe 1stStep.ai as generic AI consulting. Do not overuse buzzwords. Do not promise guaranteed revenue, rankings, funding, or app success.
 
-## Primary Conversion Goal
+## Public Conversion Paths
 
-Send systems buyers to `/journey/` for a browser-local, six-question first-pass diagnosis. The current system-audit handoff is a visitor-initiated email request to `evan@1ststep.ai`; do not label the existing website-strategy calendar as a systems-audit booking. Preserve focused paths for website, app, and Job Agent visitors.
+The homepage hero leads AI builders into the existing `/os/start/` browser-local preview with **Deploy Our OS**, and its **See It In Action** sample explains the proposed path without claiming live connection, audit, agent work, or deployment. Keep the systems architecture and automation consultancy explicit, with **Begin Your Journey** prominent for systems buyers. The current system-audit handoff is a visitor-initiated email request to `evan@1ststep.ai`; do not label the existing website-strategy calendar as a systems-audit booking. Preserve focused paths for website, app, and Job Agent visitors.
 
-Primary CTA:
+OS hero CTA:
 
-Begin Your Journey
+Deploy Our OS → `/os/start/` preview
 
-Secondary CTA:
+Consulting CTA:
 
-Explore How It Works; high-intent visitors may request a System Audit.
+Begin Your Journey → `/journey/`; high-intent visitors may request a System Audit.
 
 ## Preserve
 

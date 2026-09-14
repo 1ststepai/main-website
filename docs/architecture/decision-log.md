@@ -1,5 +1,11 @@
 # Architecture Decision Log
 
+## 2026-09-14: Public OS visual storytelling with truthful capability labels (ADR-OS-009)
+
+- **Status / owner:** Evan approved the dark/cinematic concept as the Public/OS visual target and interaction storyboard for the current Finish Mode; public-site lead owns implementation. Local candidate only; no release or Production approval.
+- **Decision:** Lead the homepage with “AI made starting easy. 1stStep helps you finish,” route **Deploy Our OS** to the existing `/os/start/` preview, and use interactive Connect → Audit → Plan → Build & Fix → Verify → Deploy storytelling rather than a static concept image. Keep Begin Your Journey available for consulting buyers and preserve the canonical logo. Mark every sample or future state illustrative, planned, partial, or live according to actual evidence; no simulated connection, finding, agent activity, score, or deployment.
+- **Dependencies:** Preserve the five-path onboarding and browser-local Genome contract. Verify responsive/keyboard/reduced-motion behavior, performance, exact-source Preview and capability truth before any release claim. Journey C protected storage/retention and all existing owner/audit/Production gates remain open.
+
 ## 2026-09-14: Nontechnical autonomy is a customer OS invariant (ADR-OS-008)
 
 - **Status / owner:** Evan approved this as binding product direction for future customer-facing 1stStep OS experiences. It does not assert that the proposed OS backend, automatic audit routing, session rotation, or customer Command Center is live, or promote deferred implementation under ADR-OS-006.
