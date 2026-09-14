@@ -3,24 +3,24 @@ const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
 const track = (name, detail) => window.fsaiTrack?.(name, detail);
 
 const genomeExamples = {
-  parents: {
-    idea: '“I want to build an app that helps parents find things to do with their kids.”',
-    fields: ['Build a new product', 'Consumer app', 'Idea', 'Parents and caregivers', 'Beginner', 'Web + mobile', 'Optional', 'No', 'Family preferences', 'Consumer discovery', 'Medium', 'Lean'],
+  idea: {
+    idea: '“I have an idea for a tool that helps small teams stay organized.”',
+    fields: ['Build a new product', 'Digital tool', 'Idea', 'Small teams', 'First-time builder', 'To decide', 'Optional', 'To decide', 'Team information', 'Find early users', 'To assess', 'Lean'],
     active: ['Research', 'Product', 'Design', 'Engineering', 'Security', 'Business', 'Discovery', 'Growth', 'Operations'],
   },
   existing: {
-    idea: '“I built an app with AI, but I need to know what is safe to launch.”',
-    fields: ['Audit an existing build', 'AI-built app', 'Working prototype', 'Existing users', 'Developer', 'Web app', 'Present', 'To assess', 'Account information', 'Repair before growth', 'Needs review', 'Scoped'],
+    idea: '“I have a working app and want to know what it needs before launch.”',
+    fields: ['Review an existing build', 'Existing app', 'Working prototype', 'Intended users', 'Builder or team', 'Web app', 'To assess', 'To assess', 'To assess', 'Launch readiness', 'Needs review', 'Scoped'],
     active: ['Research', 'Product', 'Design', 'Engineering', 'AI', 'Security', 'Business', 'Operations'],
   },
-  business: {
-    idea: '“I own a moving company. My team spends too much time following up and preparing quotes.”',
-    fields: ['Automate business work', 'Internal workflows', 'Operating business', 'Customers and staff', 'Owner + team', 'CRM + web', 'Selective', 'Existing billing', 'Customer records', 'Local discovery', 'Needs review', 'Scoped'],
+  workflow: {
+    idea: '“My team repeats the same handoffs across email, spreadsheets, and other tools.”',
+    fields: ['Improve a workflow', 'Internal process', 'Operating business', 'Staff and customers', 'Owner and team', 'Current tools', 'Selective', 'Existing systems', 'Business records', 'Better handoffs', 'Needs review', 'Scoped'],
     active: ['Research', 'Product', 'Design', 'Engineering', 'AI', 'Security', 'Business', 'Operations'],
   },
-  growth: {
-    idea: '“My product is live, but the right customers are not finding it.”',
-    fields: ['Grow a live product', 'Digital product', 'Launched', 'Potential buyers', 'Small team', 'Web + search', 'Selective', 'Varies', 'Analytics', 'Search and channels', 'To assess', 'Lean'],
+  live: {
+    idea: '“Our product is live, but we need a clearer path to reach and retain users.”',
+    fields: ['Improve a live product', 'Digital product', 'Launched', 'Current and future users', 'Product team', 'Current channels', 'Selective', 'To assess', 'Usage data', 'Reach and retention', 'To assess', 'Lean'],
     active: ['Research', 'Product', 'Design', 'Business', 'Pricing', 'Media', 'Discovery', 'Growth', 'Operations'],
   },
 };
