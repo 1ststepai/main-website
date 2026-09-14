@@ -82,7 +82,7 @@ const NAVIGATION = [
 ];
 
 function commandViewFromPath() {
-  const segment = window.location.pathname.match(/^\/admin\/(command-center|agents|projects|activity|audits|handoffs|decisions|releases)\/?$/)?.[1];
+  const segment = window.location.pathname.match(/^\/admin\/(command-center|agents|projects|activity|audits|handoffs|decisions|releases|session-lifecycle)\/?$/)?.[1];
   return segment || null;
 }
 

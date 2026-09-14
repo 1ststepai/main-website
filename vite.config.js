@@ -21,7 +21,7 @@ function serveAppRoutes(server) {
     if (request.url === "/os" || request.url?.startsWith("/os?")) {
       request.url = request.url.replace(/^\/os/, "/os/index.html");
     }
-    if (/^\/admin\/(command-center|agents|projects|activity|audits|handoffs|decisions|releases)\/?(?:\?.*)?$/.test(request.url || "")) {
+    if (/^\/admin\/(command-center|agents|projects|activity|audits|handoffs|decisions|releases|session-lifecycle)\/?(?:\?.*)?$/.test(request.url || "")) {
       request.url = "/admin/index.html";
     }
     next();

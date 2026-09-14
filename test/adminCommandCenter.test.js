@@ -39,13 +39,13 @@ test("agent counts require both fresh and complete authority registries", () => 
   assert.equal(summarizeCommandCenter([publicSource, partial], now).counts.registered, null);
 });
 
-test("individual stale agents become unknown even when their source is fresh", () => {
+test("previously working agents become stale when their own record ages out", () => {
   const staleAgent = normalizeCommandCenterSource(snapshot("public-ecosystem", {
     agents: [{ ...snapshot("public-ecosystem").agents[0], updatedAt: new Date(now - 10 * 60_000).toISOString() }],
   }), now);
   const result = summarizeCommandCenter([staleAgent, normalizeCommandCenterSource(snapshot("app-family"), now)], now);
   assert.equal(result.counts.working, 1);
-  assert.equal(result.counts.unknown, 1);
+  assert.equal(result.counts.stale, 1);
 });
 
 test("session identity remains separate from durable agent identity and unknown without telemetry", () => {
@@ -80,6 +80,26 @@ test("handoff acknowledgement needs explicit delivery and acknowledgement eviden
   assert.throws(() => normalizeCommandCenterSource(snapshot("public-ecosystem", { handoffs: [{ ...base, deliveredAt: new Date(now).toISOString(), acknowledgedAt: new Date(now - 1000).toISOString() }] }), now), /invalid_handoff_state/);
   const valid = normalizeCommandCenterSource(snapshot("public-ecosystem", { handoffs: [{ ...base, deliveredAt: new Date(now).toISOString(), acknowledgedAt: new Date(now).toISOString() }] }), now);
   assert.equal(valid.handoffs[0].status, "acknowledged");
+  assert.throws(() => normalizeCommandCenterSource(snapshot("public-ecosystem", { handoffs: [{ ...base, status: "in_progress", deliveredAt: new Date(now).toISOString() }] }), now), /invalid_handoff_state/);
+  const queued = normalizeCommandCenterSource(snapshot("public-ecosystem", { handoffs: [{ ...base, status: "recipient_offline", recipientRole: "APP_LOOP", recipientAgentId: "app-loop-agent" }] }), now);
+  assert.equal(queued.handoffs[0].acknowledgedAt, null);
+  assert.equal(queued.handoffs[0].recipientAgentId, "app-loop-agent");
+});
+
+test("event truth state never upgrades a model report to observed proof", () => {
+  const event = { id: "build-1", at: new Date(now).toISOString(), kind: "BUILD_PASSED", summary: "Build passed", project: "1stStep", agentId: "app-loop-agent", truthState: "AGENT_REPORTED", evidenceRefs: [] };
+  const result = normalizeCommandCenterSource(snapshot("app-family", { events: [event, { ...event, id: "build-2", truthState: undefined }] }), now);
+  assert.equal(result.events[0].truthState, "AGENT_REPORTED");
+  assert.equal(result.events[1].truthState, "UNKNOWN");
+  assert.equal(summarizeCommandCenter([result], now).events[0].truthState, "AGENT_REPORTED");
+});
+
+test("independent finding PASS needs auditor and evidence in the read model", () => {
+  const finding = { id: "AUD-024", project: "1stStep", updatedAt: new Date(now).toISOString(), status: "pass", severity: "high", truthState: "AGENT_REPORTED" };
+  assert.throws(() => normalizeCommandCenterSource(snapshot("public-ecosystem", { findings: [finding] }), now), /invalid_finding_verdict/);
+  const verified = normalizeCommandCenterSource(snapshot("public-ecosystem", { findings: [{ ...finding, truthState: "AUDITOR_VERIFIED", auditorId: "eco-auditor", evidenceRef: "evidence-024" }] }), now);
+  assert.equal(verified.findings[0].status, "pass");
+  assert.equal(summarizeCommandCenter([verified], now).findings[0].truthState, "AUDITOR_VERIFIED");
 });
 
 test("telemetry rejects missing content-free attestation and secret-shaped labels", () => {

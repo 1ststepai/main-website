@@ -692,9 +692,11 @@ button, select { cursor: pointer; }
 .cc-live, .cc-working, .cc-acknowledged, .cc-pass, .cc-ready { color: var(--success); border-color: rgba(101,226,183,.28); background: rgba(101,226,183,.08); }
 .cc-waiting, .cc-stale, .cc-awaiting_reaudit, .cc-in_review, .cc-needs_owner { color: #ffd792; border-color: rgba(255,187,82,.25); background: rgba(255,187,82,.07); }
 .cc-blocked, .cc-fail { color: var(--danger); border-color: rgba(255,123,145,.25); background: rgba(255,123,145,.07); }
-.cc-metrics { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); margin-bottom: 8px; border: 1px solid var(--line-2); border-radius: 13px; background: var(--surface); overflow: hidden; }
+.cc-metrics { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); margin-bottom: 8px; border: 1px solid var(--line-2); border-radius: 13px; background: var(--surface); overflow: hidden; }
 .cc-metrics > div { display: flex; flex-direction: column; gap: 4px; padding: 17px 18px; border-right: 1px solid var(--line); }
 .cc-metrics > div:last-child { border-right: 0; }
+.cc-metrics > div:nth-child(4n) { border-right: 0; }
+.cc-metrics > div:nth-child(n+5) { border-top: 1px solid var(--line); }
 .cc-metrics strong { font-size: clamp(18px,2.2vw,29px); letter-spacing: -.03em; }
 .cc-metrics span, .cc-muted { color: var(--muted-2); font-size: 11px; }
 .cc-freshness, .cc-footnote { color: var(--muted-2); font-size: 11px; line-height: 1.6; }
@@ -716,6 +718,10 @@ button, select { cursor: pointer; }
 .cc-session-history { margin-top: 8px; color: var(--muted-2); font-size: 11px; }
 .cc-session-history summary { width: max-content; max-width: 100%; cursor: pointer; color: var(--cyan); }
 .cc-session-history ul { margin: 7px 0 0; padding-left: 18px; overflow-wrap: anywhere; }
+.cc-filters { display: flex; flex-wrap: wrap; gap: 12px; margin: 14px 0; }
+.cc-filters label { display: grid; gap: 5px; color: var(--muted-2); font-size: 11px; min-width: 145px; }
+.cc-filters input, .cc-filters select { min-height: 38px; width: 100%; max-width: 260px; border: 1px solid var(--line-2); border-radius: 8px; padding: 7px 10px; background: var(--surface); color: var(--ink); font: inherit; }
+.cc-filters input:focus-visible, .cc-filters select:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
 .cc-authority-map { padding-top: 3px; border-top: 1px solid var(--line); }
 .cc-authority-map ul { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px 20px; padding-left: 18px; color: var(--muted-2); font-size: 11px; line-height: 1.5; }
 .cc-empty { padding: 24px; border: 1px dashed var(--line-2); border-radius: 10px; text-align: center; }

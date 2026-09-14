@@ -9,7 +9,8 @@
     { "source": "/admin/audits", "destination": "/admin/index.html" },
     { "source": "/admin/handoffs", "destination": "/admin/index.html" },
     { "source": "/admin/decisions", "destination": "/admin/index.html" },
-    { "source": "/admin/releases", "destination": "/admin/index.html" }
+    { "source": "/admin/releases", "destination": "/admin/index.html" },
+    { "source": "/admin/session-lifecycle", "destination": "/admin/index.html" }
   ],
   "headers": [
     {
