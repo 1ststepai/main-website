@@ -7,6 +7,7 @@
     "dev": "vite --host 127.0.0.1",
     "build": "vite build",
     "preview": "vite preview --host 127.0.0.1",
+    "command-center:auditor": "node scripts/command-center-auditor-source.mjs",
     "security:generate-secrets": "node scripts/generate-admin-secrets.mjs",
     "security:recover-secrets": "node scripts/recover-admin-secrets.mjs",
     "test": "node --test",

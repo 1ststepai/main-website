@@ -16,12 +16,15 @@ const siteAnalytics = {
   },
 };
 
-function serveOsAtExactPath(server) {
+function serveAppRoutes(server) {
   server.middlewares.use((request, _response, next) => {
     if (request.url === "/os" || request.url?.startsWith("/os?")) {
       request.url = request.url.replace(/^\/os/, "/os/index.html");
     } else if (request.url === "/os/start" || request.url === "/os/start/" || request.url?.startsWith("/os/start?")) {
       request.url = request.url.replace(/^\/os\/start\/?/, "/os/start/index.html");
+    }
+    if (/^\/admin\/(command-center|agents|projects|activity|audits|handoffs|decisions|releases|session-lifecycle)\/?(?:\?.*)?$/.test(request.url || "")) {
+      request.url = "/admin/index.html";
     }
     next();
   });
@@ -29,9 +32,9 @@ function serveOsAtExactPath(server) {
 
 export default defineConfig({
   plugins: [react(), siteAnalytics, {
-    name: "firststep-os-exact-path",
-    configureServer: serveOsAtExactPath,
-    configurePreviewServer: serveOsAtExactPath,
+    name: "firststep-app-routes",
+    configureServer: serveAppRoutes,
+    configurePreviewServer: serveAppRoutes,
   }],
   optimizeDeps: {
     entries: ["index.html"],

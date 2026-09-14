@@ -1,3 +1,5 @@
+import './os-story.js';
+
 const showcase = document.querySelector("[data-showcase]");
 if (showcase) {
   const tabs = Array.from(showcase.querySelectorAll('[role="tab"]'));

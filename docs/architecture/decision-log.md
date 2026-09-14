@@ -1,5 +1,17 @@
 # Architecture Decision Log
 
+## 2026-09-14: Preserve legacy website-client proof in the Public/OS presentation
+
+- **Status / owner:** Evan directed preservation of legitimate legacy social proof; public-site lead owns the local presentation candidate. No Production release approval.
+- **Decision:** Use the two named, five-star Google review excerpts already published on the legacy 1stStep.ai homepage, with exact wording and source links, in a restrained hero proof row, post-demo cards, and final trust section. Identify these as website-project reviews, never as 1stStep OS endorsements. Retain the current selected-project showcase without reintroducing previously excluded portfolio content or treating text labels as approved client logos.
+- **Evidence / limit:** [Social proof provenance](../SOCIAL_PROOF_PROVENANCE.md) records the exact legacy commit, reviewer names, links, and claims. The existing Google Reviews API currently returns no aggregate rating or review count; both remain unknown and are omitted until verified. External shortlink freshness and release-stage proof review remain open.
+
+## 2026-09-14: Public OS visual storytelling with truthful capability labels (ADR-OS-009)
+
+- **Status / owner:** Evan approved the dark/cinematic concept as the Public/OS visual target and interaction storyboard for the current Finish Mode; public-site lead owns implementation. Local candidate only; no release or Production approval.
+- **Decision:** Lead the homepage with “AI made starting easy. 1stStep helps you finish,” route **Deploy Our OS** to the existing `/os/start/` preview, and use interactive Connect → Audit → Plan → Build & Fix → Verify → Deploy storytelling rather than a static concept image. Keep Begin Your Journey available for consulting buyers and preserve the canonical logo. Mark every sample or future state illustrative, planned, partial, or live according to actual evidence; no simulated connection, finding, agent activity, score, or deployment.
+- **Dependencies:** Preserve the five-path onboarding and browser-local Genome contract. Verify responsive/keyboard/reduced-motion behavior, performance, exact-source Preview and capability truth before any release claim. Journey C protected storage/retention and all existing owner/audit/Production gates remain open.
+
 ## 2026-09-14: Nontechnical autonomy is a customer OS invariant (ADR-OS-008)
 
 - **Status / owner:** Evan approved this as binding product direction for future customer-facing 1stStep OS experiences. It does not assert that the proposed OS backend, automatic audit routing, session rotation, or customer Command Center is live, or promote deferred implementation under ADR-OS-006.
@@ -65,6 +77,14 @@
 - **Alternatives:** Browser-only persistence cannot provide authenticated ownership or safe repository access; one-project-per-user would require a later security/schema retrofit; granting organization membership implicit access to every project risks context leakage; extending the Job Agent service directly creates cross-product tenant and release coupling; provider conversation state cannot be the canonical project ledger.
 - **Implementation / audit dependencies:** Review [the complete proposal](OS_BACKEND_CONTRACT_PROPOSAL.md) and [versioned schema](os-contract.v1.schema.json), appoint the OS backend owner, resolve platform/identity/privacy/retention/GitHub permissions, first-party portfolio placement, pattern-use policy, and cost decisions, then authorize a narrow P0 implementation. Separate-backend approval alone does not authorize GitHub App registration, backend scaffolding, production deployment, billing, or external writes. Verify two-project same-organization isolation, tenant isolation, idempotency, immutable baseline, pattern sanitization, provenance, and end-to-end UI truth before release.
 - **Supersession:** None. The 2026-09-13 public-site authority decision remains in force.
+## 2026-09-13: Read-only Command Center inside the protected public-site admin
+
+- **Status / owner:** Locally implemented proposal under Evan's Phase 1 Command Center instruction; production integration pending. Public-site agent owns the admin presentation and public/ecosystem telemetry contract. The app Engineering Orchestrator retains app-family publisher authority.
+- **Decision:** Add Command Center views within the existing `/admin` Studio. Only authenticated admin GETs read normalized, metadata-only snapshots. Separate source-scoped publisher credentials may update a snapshot in existing private KV; the browser cannot publish or control agents. Missing, stale, or incomplete source evidence remains `UNKNOWN`, and handoff delivery never implies acknowledgement.
+- **Rationale:** Vercel cannot read local engineering worktree files, and no verified central runtime feed exists. A source contract allows truthful observability without changing agent/release authority.
+- **Affected systems:** Public-site admin, its private KV namespace, first-party ecosystem publisher integration, and a contract handoff to the app Engineering Orchestrator.
+- **Implementation / audit:** `docs/architecture/COMMAND_CENTER_TELEMETRY_CONTRACT.md` defines the schema and ownership. Test auth, source isolation, freshness, unknown counts, handoff evidence, browser rendering, and release gates before production. This entry does not claim live publishers are connected.
+- **Reversal:** Remove the admin routes and telemetry keys; no product repository, agent, audit, or release record is mutated by the UI.
 
 ## 2026-09-13: Public-site and OS engineering authority
 

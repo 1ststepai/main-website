@@ -3,7 +3,16 @@
   "rewrites": [
     { "source": "/os", "destination": "/os/index.html" },
     { "source": "/os/start", "destination": "/os/start/index.html" },
-    { "source": "/os/start/", "destination": "/os/start/index.html" }
+    { "source": "/os/start/", "destination": "/os/start/index.html" },
+    { "source": "/admin/command-center", "destination": "/admin/index.html" },
+    { "source": "/admin/agents", "destination": "/admin/index.html" },
+    { "source": "/admin/projects", "destination": "/admin/index.html" },
+    { "source": "/admin/activity", "destination": "/admin/index.html" },
+    { "source": "/admin/audits", "destination": "/admin/index.html" },
+    { "source": "/admin/handoffs", "destination": "/admin/index.html" },
+    { "source": "/admin/decisions", "destination": "/admin/index.html" },
+    { "source": "/admin/releases", "destination": "/admin/index.html" },
+    { "source": "/admin/session-lifecycle", "destination": "/admin/index.html" }
   ],
   "headers": [
     {
