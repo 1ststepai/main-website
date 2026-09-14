@@ -1,5 +1,11 @@
 # Architecture Decision Log
 
+## 2026-09-14: Public first look may lead to a scoped deeper-audit inquiry
+
+- **Status / owner:** Evan directed a deeper-audit upsell after the public roast. Public-site lead owns the local inquiry CTA; deeper-audit delivery, pricing, model budget, repository permissions, and Production release are not approved by this UI change.
+- **Decision:** After a verified public first look, offer a clearly labeled inquiry for a deeper project audit. State that scope and any fee are agreed before work or Codex/Claude usage begins. The existing email-draft handoff includes the public link and first-look reference; opening the draft is not a submitted inquiry, connected audit, or saved Project.
+- **Dependency:** A truly automatic deeper audit requires the separate permissioned baseline, evidence, cost, owner, and provider contracts. Do not use an agent subscription or API budget for visitor submissions without explicit configuration and authorization.
+
 ## 2026-09-14: First-party OS contact intake with separate optional marketing choice
 
 - **Status / owner:** Evan chose `/admin` as the near-term place to see OS first-look inquiries and approved a separate optional choice for future marketing. Public-site lead owns the local candidate. Exact hosted storage provider/account, 90-day retention, independent trust-boundary review, and Production release remain open gates.

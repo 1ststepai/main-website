@@ -83,8 +83,10 @@ function renderChoose() {
 function renderAuditRequest() {
   const target = state.auditTarget;
   const label = target.kind === 'github' ? 'GitHub repository' : 'Website';
-  const body = `I would like a free first look at this public ${label.toLowerCase()}:\n${target.url}\n\nWhat I most want to understand: `;
-  const href = `mailto:evan@1ststep.ai?subject=${encodeURIComponent('1stStep OS first-look request')}&body=${encodeURIComponent(body)}`;
+  const deepAuditBody = `I saw the public first look for this ${label.toLowerCase()}:\n${target.url}\n\nFirst-look reference: ${roastRequest.receipt || 'not saved'}\n\nI would like to discuss a deeper project audit. My main concern is: `;
+  const fallbackBody = `I would like help reviewing this public ${label.toLowerCase()}:\n${target.url}\n\nWhat I most want to understand: `;
+  const deepAuditHref = `mailto:evan@1ststep.ai?subject=${encodeURIComponent('1stStep OS deeper audit inquiry')}&body=${encodeURIComponent(deepAuditBody)}`;
+  const fallbackHref = `mailto:evan@1ststep.ai?subject=${encodeURIComponent('1stStep OS first-look help')}&body=${encodeURIComponent(fallbackBody)}`;
   const result = publicScan.result;
   const roast = result && roastRequest.receipt ? buildPublicRoast(result) : null;
   const roastOutput = roast ? `<div class="roast-result"><div class="scan-result-head"><span>YOUR FREE ROAST / PUBLIC EVIDENCE</span>${stateTag('FIRST LOOK')}</div><h3 tabindex="-1">${escapeHtml(roast.headline)}</h3><div class="roast-columns"><div><span>WHAT IS WORKING</span>${roast.strengths.length ? roast.strengths.map((item) => `<p><strong>${escapeHtml(item.label)}</strong><small>${escapeHtml(item.evidence)}</small></p>`).join('') : '<p>Nothing confirmed yet from the checks we ran.</p>'}</div><div><span>WHAT NEEDS ATTENTION</span>${roast.improvements.length ? roast.improvements.map((item) => `<p><strong>${escapeHtml(item.label)}</strong><small>${escapeHtml(item.action)}</small></p>`).join('') : '<p>No clear miss in the public basics we checked.</p>'}</div></div><div class="scan-next"><span>${roast.improvements.length ? 'FIX THIS FIRST' : 'YOUR NEXT STEP'}</span><strong>${escapeHtml(roast.nextStep)}</strong></div><p class="scan-note">${escapeHtml(roast.limit)}</p><p class="roast-receipt">Email saved for this first-look follow-up. Reference: ${escapeHtml(roastRequest.receipt)}. The roast is shown here; no report email was sent.</p></div>` : '';
@@ -94,8 +96,9 @@ function renderAuditRequest() {
   return `${heading('02', 'PUBLIC FIRST LOOK', 'Your link. Real evidence.', 'We only report signals we can verify from a public response. This is not a full project, security, or release audit.')}
     <div class="interpretation-card"><span>YOUR ${label.toUpperCase()} / USER PROVIDED</span><strong class="audit-target-value">${escapeHtml(target.url)}</strong></div>
     <div id="scan-output" aria-live="polite">${output}</div>${roastOutput}
-    <div class="stage-actions">${publicScan.status === 'error' ? btn('Try the scan again', 'retry-scan') : ''}${roastRequest.receipt || publicScan.status === 'error' ? `<a class="action-button secondary" href="${href}" data-fsai-event="os_first_look_email_opened" data-fsai-placement="audit_request">Request a human review ↗</a>` : ''}</div>
-    ${roastRequest.receipt || publicScan.status === 'error' ? '<p class="stage-disclaimer">A human review opens an email draft; nothing is sent until you send it. No private repository is connected or saved.</p>' : ''}`;
+    ${roast ? '<p class="stage-disclaimer">Want to go beyond public signals? A deeper project audit can be scoped around your code, tests, accessibility, security, and release risks where access and evidence allow. We agree the scope and any fee before work or model usage begins.</p>' : ''}
+    <div class="stage-actions">${publicScan.status === 'error' ? btn('Try the scan again', 'retry-scan') : ''}${roast ? `<a class="action-button primary" href="${deepAuditHref}" data-fsai-event="os_deeper_audit_email_opened" data-fsai-placement="audit_request">Ask about a deeper audit ↗</a>` : publicScan.status === 'error' ? `<a class="action-button secondary" href="${fallbackHref}" data-fsai-event="os_first_look_email_opened" data-fsai-placement="audit_request">Request help ↗</a>` : ''}</div>
+    ${roastRequest.receipt || publicScan.status === 'error' ? '<p class="stage-disclaimer">This opens an email draft; nothing is sent until you send it. No private repository is connected or saved by this first look.</p>' : ''}`;
 }
 
 async function submitFirstLookTarget(form, auditTarget) {
