@@ -1,4 +1,5 @@
 import './os-story.js';
+import './site-motion.js';
 
 const showcase = document.querySelector("[data-showcase]");
 if (showcase) {

@@ -49,6 +49,7 @@ if (story) {
       tab.tabIndex = active ? 0 : -1;
     });
     const step = tabs[chosen].dataset.storyStep;
+    story.style.setProperty('--story-progress', `${((chosen + 0.5) / tabs.length) * 100}%`);
     panel.setAttribute('aria-labelledby', tabs[chosen].id);
     panel.dataset.capabilityState = capabilityStates[step];
     panel.innerHTML = stages[step];
