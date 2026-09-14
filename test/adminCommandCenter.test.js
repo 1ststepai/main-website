@@ -131,6 +131,30 @@ test("auditor collector emits only verified report and inbox metadata", () => {
   }
 });
 
+test("audit capacity projects durable job and provider state without candidate content", () => {
+  const temp = fs.mkdtempSync(path.join(os.tmpdir(), "cc-audit-capacity-"));
+  try {
+    const jobId = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
+    const nowIso = new Date(now).toISOString();
+    fs.mkdirSync(path.join(temp, "jobs"), { recursive: true });
+    fs.mkdirSync(path.join(temp, "job-events", jobId), { recursive: true });
+    fs.writeFileSync(path.join(temp, "jobs", `${jobId}.json`), JSON.stringify({ schemaVersion: 1, jobId, status: "QUEUED", externalAiAllowed: true, dataClassification: "PUBLIC", privateDiff: "must not publish" }));
+    fs.writeFileSync(path.join(temp, "job-events", jobId, `1000-${jobId}.json`), JSON.stringify({ jobId, status: "TIER_1_COMPLETE", provider: "openrouter-free-primary", model: "free-model", at: nowIso }));
+    fs.writeFileSync(path.join(temp, "job-events", jobId, `2000-${jobId}.json`), JSON.stringify({ jobId, status: "AWAITING_CLAUDE", at: nowIso }));
+    const result = auditorSourceSnapshot(temp, new Date(now));
+    assert.equal(result.auditCapacity.auditQueue, 1);
+    assert.equal(result.auditCapacity.claudeEscalation, 1);
+    assert.equal(result.auditCapacity.providers.find((provider) => provider.id === "openrouter-free-primary").status, "AVAILABLE");
+    assert.equal(result.auditCapacity.providers.find((provider) => provider.id === "openrouter-free-primary").model, "free-model");
+    assert.equal(result.auditCapacity.providers.find((provider) => provider.id === "deepseek-paid").status, "DISABLED_BUDGET_0");
+    assert.equal(JSON.stringify(result).includes("must not publish"), false);
+    assert.throws(() => normalizeCommandCenterSource(snapshot("public-ecosystem", { auditCapacity: { ...result.auditCapacity, providers: [{ id: "openrouter", label: "contact foo@example.com", status: "AVAILABLE" }] } }), now), /invalid_telemetry/);
+  } finally {
+    if (!path.resolve(temp).startsWith(path.resolve(os.tmpdir()) + path.sep)) throw new Error("Unexpected test cleanup path");
+    fs.rmSync(temp, { recursive: true, force: true });
+  }
+});
+
 test("auditor collector distinguishes persisted OS delivery from incompatible runtime and later acknowledgement", () => {
   const temp = fs.mkdtempSync(path.join(os.tmpdir(), "cc-mailbox-"));
   try {

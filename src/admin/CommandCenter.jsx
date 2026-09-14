@@ -22,6 +22,7 @@ const EMPTY_COMMAND_CENTER = {
   coverage: ["public-ecosystem", "app-family"].map((source) => ({ source, state: "unconnected", observedAt: null, registryComplete: false })),
   counts: { registered: null, working: null, auditing: null, waiting: null, blocked: null, idle: null, offline: null, stale: null },
   agents: [], projects: [], events: [], audits: [], findings: [], handoffs: [], decisions: [], releases: [], builds: [],
+  auditCapacity: null,
 };
 
 function when(value) {
@@ -40,6 +41,14 @@ function Empty({ label, coverage }) {
 
 function Card({ children, className = "" }) {
   return <section className={`cc-card ${className}`}>{children}</section>;
+}
+
+function AuditCapacity({ value }) {
+  return <Card><div className="cc-card-head"><div><p className="cc-eyebrow">Audit router / read-only</p><h3>Audit Capacity</h3></div><span className="cc-muted">{value ? `Observed ${when(value.observedAt)}` : "Source unknown"}</span></div>
+    {value ? <><div className="cc-list">{value.providers.map((provider) => <div className="cc-row" key={provider.id}><div className="cc-row-main"><strong>{provider.label}</strong><small>{provider.model || "Current model unknown"}</small></div><Badge value={provider.status} /></div>)}</div>
+      <div className="cc-metrics" aria-label="Audit queue"><div><strong>{value.auditQueue ?? "UNKNOWN"}</strong><span>Audit queue</span></div><div><strong>{value.autoRoutable ?? "UNKNOWN"}</strong><span>Auto-routable</span></div><div><strong>{value.claudeEscalation ?? "UNKNOWN"}</strong><span>Claude escalation</span></div></div></> : <Empty label="Audit provider status unknown" coverage={false} />}
+    <p className="cc-freshness">A free-model PASS covers only its stated source-review scope. Provider availability does not clear a release gate.</p>
+  </Card>;
 }
 
 function AgentGroup({ source, agents, coverage }) {
@@ -141,10 +150,10 @@ export function CommandCenter({ api, previewMode, view, onViewChange }) {
     {error && <div className="cc-notice" role="alert">{error} All operational states are unknown until the feed recovers.</div>}
     <div className="cc-source-strip" aria-label="Telemetry coverage">{snapshot.coverage.map((source) => <span key={source.source}>{SOURCE_LABELS[source.source]} <Badge value={source.state} /> <small>{source.observedAt ? `Last report ${when(source.observedAt)}` : "No report"}{source.state === "live" && !source.registryComplete ? " · Agent registry partial" : ""}</small></span>)}</div>
     {view === "agents" && <><div className="cc-metrics" aria-label="Live agent counts">{[["Registered", "registered"], ["Working", "working"], ["Auditing", "auditing"], ["Waiting", "waiting"], ["Blocked", "blocked"], ["Idle", "idle"], ["Offline", "offline"], ["Stale", "stale"]].map(([label, key]) => <div key={key}><strong>{snapshot.counts[key] ?? "UNKNOWN"}</strong><span>{label}</span></div>)}</div><p className="cc-freshness">Ecosystem totals appear only when both authority feeds and agent registries are complete. Previously active agent records older than five minutes become stale; other old records become unknown.</p><div className="cc-stack"><AgentGroup source="public-ecosystem" agents={snapshot.agents} coverage={snapshot.coverage} /><AgentGroup source="app-family" agents={snapshot.agents} coverage={snapshot.coverage} /></div></>}
-    {view === "command-center" && <Overview data={snapshot} />}
+    {view === "command-center" && <><AuditCapacity value={snapshot.auditCapacity} /><Overview data={snapshot} /></>}
     {view === "session-lifecycle" && <SessionLifecycle agents={snapshot.agents} coverage={coverageKnown} />}
     {view === "activity" && <ActivityView items={snapshot.events} coverage={coverageKnown} />}
-    {!["agents", "command-center", "activity", "session-lifecycle"].includes(view) && <div className="cc-stack"><Card><div className="cc-card-head"><div><p className="cc-eyebrow">Reported records</p><h3>{title}</h3></div><span className="cc-muted">{coverageKnown ? `${records.length} reported` : "Coverage incomplete"}</span></div><Records items={records} type={title} coverage={coverageKnown} /></Card>{view === "projects" && <Card><div className="cc-card-head"><h3>Builds</h3><span className="cc-muted">{coverageKnown ? `${snapshot.builds.length} reported` : "Coverage incomplete"}</span></div><Records items={snapshot.builds} type="Builds" coverage={coverageKnown} /></Card>}{view === "audits" && <Card><div className="cc-card-head"><h3>Findings</h3><span className="cc-muted">{coverageKnown ? `${snapshot.findings.length} reported` : "Coverage incomplete"}</span></div><Records items={snapshot.findings} type="Findings" coverage={coverageKnown} /></Card>}</div>}
+    {!["agents", "command-center", "activity", "session-lifecycle"].includes(view) && <div className="cc-stack">{view === "audits" && <AuditCapacity value={snapshot.auditCapacity} />}<Card><div className="cc-card-head"><div><p className="cc-eyebrow">Reported records</p><h3>{title}</h3></div><span className="cc-muted">{coverageKnown ? `${records.length} reported` : "Coverage incomplete"}</span></div><Records items={records} type={title} coverage={coverageKnown} /></Card>{view === "projects" && <Card><div className="cc-card-head"><h3>Builds</h3><span className="cc-muted">{coverageKnown ? `${snapshot.builds.length} reported` : "Coverage incomplete"}</span></div><Records items={snapshot.builds} type="Builds" coverage={coverageKnown} /></Card>}{view === "audits" && <Card><div className="cc-card-head"><h3>Findings</h3><span className="cc-muted">{coverageKnown ? `${snapshot.findings.length} reported` : "Coverage incomplete"}</span></div><Records items={snapshot.findings} type="Findings" coverage={coverageKnown} /></Card>}</div>}
     <p className="cc-footnote"><Activity size={13} /> Read-only view. Reporting a state does not acknowledge a handoff, close an audit, clear a release gate, or authorize an agent action.</p>
   </main>;
 }

@@ -8,12 +8,50 @@ const DISPOSITION_STATUS = {
   PASS: "pass",
   PASS_WITH_FOLLOW_UP: "open",
   FAIL: "fail",
+  INCONCLUSIVE: "blocked",
+  ESCALATE: "blocked",
   AUDIT_PROVIDER_UNAVAILABLE: "blocked",
 };
 const SEVERITY_ORDER = ["critical", "high", "medium", "low"];
 
+function auditCapacitySnapshot(stateDir, now) {
+  const directory = path.join(stateDir, "jobs");
+  if (!fs.existsSync(directory)) return null;
+  const jobs = fs.readdirSync(directory).filter((name) => UUID_JSON.test(name)).map((name) => {
+    const job = JSON.parse(fs.readFileSync(path.join(directory, name), "utf8"));
+    if (`${job.jobId}.json` !== name || job.schemaVersion !== 1) throw new Error("Invalid durable AuditJob metadata");
+    const eventsDir = path.join(stateDir, "job-events", job.jobId);
+    const events = fs.existsSync(eventsDir) ? fs.readdirSync(eventsDir).filter((event) => /^\d+-[a-f0-9-]{36}\.json$/i.test(event)).sort().map((event) => JSON.parse(fs.readFileSync(path.join(eventsDir, event), "utf8"))) : [];
+    return { job, events, status: events.at(-1)?.status || job.status };
+  });
+  const latest = (provider) => jobs.flatMap((item) => item.events).filter((event) => event.provider === provider && /_(?:UNAVAILABLE|COMPLETE)$/.test(event.status)).sort((a, b) => a.at.localeCompare(b.at)).at(-1);
+  const state = (provider) => {
+    const event = latest(provider);
+    if (!event) return "UNKNOWN";
+    if (now.getTime() - Date.parse(event.at) > 5 * 60_000) return "UNKNOWN";
+    if (event.status.endsWith("_COMPLETE")) return "AVAILABLE";
+    if (event.code === "QUOTA") return "USAGE_EXHAUSTED";
+    if (event.code === "AUTH") return "AUTH_UNAVAILABLE";
+    return "UNKNOWN";
+  };
+  const freeStatus = state("openrouter-free-primary");
+  return {
+    observedAt: now.toISOString(), truthState: "SYSTEM_DERIVED",
+    providers: [
+      { id: "deterministic", label: "Deterministic Engine", status: "AVAILABLE" },
+      { id: "openrouter-free-primary", label: "OpenRouter Free Pool", model: latest("openrouter-free-primary")?.status.endsWith("_COMPLETE") ? latest("openrouter-free-primary")?.model || null : null, status: freeStatus },
+      { id: "claude-escalation", label: "Claude", model: latest("claude-escalation")?.status.endsWith("_COMPLETE") ? latest("claude-escalation")?.model || null : null, status: state("claude-escalation") },
+      { id: "deepseek-paid", label: "DeepSeek", status: "DISABLED_BUDGET_0" },
+    ],
+    auditQueue: jobs.filter((item) => ["QUEUED", "RUNNING", "AWAITING_CLAUDE", "INCONCLUSIVE"].includes(item.status)).length,
+    autoRoutable: freeStatus === "AVAILABLE" ? jobs.filter((item) => item.status === "QUEUED" && item.job.externalAiAllowed && item.job.dataClassification === "PUBLIC").length : null,
+    claudeEscalation: jobs.filter((item) => item.status === "AWAITING_CLAUDE").length,
+  };
+}
+
 function reportFiles(stateDir) {
   const directory = path.join(stateDir, "audits");
+  if (!fs.existsSync(directory)) return [];
   return fs.readdirSync(directory).filter((name) => UUID_JSON.test(name)).map((name) => path.join(directory, name));
 }
 
@@ -91,6 +129,7 @@ export function auditorSourceSnapshot(stateDir, now = new Date()) {
     source: "public-ecosystem",
     observedAt: now.toISOString(),
     registryComplete: false,
+    auditCapacity: auditCapacitySnapshot(stateDir, now),
     agents: [], projects: [], decisions: [], releases: [], builds: [],
     events: reports.map((report) => ({
       id: `audit-${report.auditId}`,
