@@ -29,6 +29,38 @@ function verifiedReport(file) {
 }
 
 function publishedHandoff(stateDir, role, report) {
+  const agentId = role === "lead-engineering-manager" ? "ecosystem-lead-engineering-manager" : "ecosystem-loop-agent";
+  const messageId = `${report.auditId}-${agentId}`;
+  const pointerFile = path.join(stateDir, "mailbox", "inbox", agentId, `${messageId}.json`);
+  const messageFile = path.join(stateDir, "mailbox", "messages", `${messageId}.json`);
+  if (fs.existsSync(pointerFile) && fs.existsSync(messageFile)) {
+    const pointer = JSON.parse(fs.readFileSync(pointerFile, "utf8"));
+    const message = JSON.parse(fs.readFileSync(messageFile, "utf8"));
+    if (pointer.messageId !== messageId || pointer.recipientAgentId !== agentId
+      || message.auditId !== report.auditId || message.candidateSha !== report.candidateSha
+      || message.disposition !== report.disposition || message.recipientAgentId !== agentId
+      || !Number.isFinite(Date.parse(pointer.queuedAt))) throw new Error(`OS mailbox/report mismatch: ${messageId}`);
+    const receiptDir = path.join(stateDir, "mailbox", "receipts", agentId, messageId);
+    const receipts = fs.existsSync(receiptDir) ? fs.readdirSync(receiptDir).filter((name) => /\.(INGESTED|ACKNOWLEDGED|IN_PROGRESS)\.json$/.test(name)).map((name) => JSON.parse(fs.readFileSync(path.join(receiptDir, name), "utf8"))) : [];
+    for (const receipt of receipts) {
+      if (receipt.messageId !== messageId || receipt.agentId !== agentId || !Number.isFinite(Date.parse(receipt.at))) throw new Error(`OS receipt mismatch: ${messageId}`);
+    }
+    const latest = (state) => receipts.filter((item) => item.state === state).map((item) => item.at).sort().at(-1) || null;
+    const acknowledgedAt = latest("ACKNOWLEDGED");
+    const runtimeConsumption = latest("IN_PROGRESS") ? "IN_PROGRESS" : acknowledgedAt ? "ACKNOWLEDGED" : latest("INGESTED") ? "INGESTED" : "UNREAD";
+    const failureFile = path.join(stateDir, "mailbox", "runtime-failures", `${messageId}.json`);
+    const failure = fs.existsSync(failureFile) ? JSON.parse(fs.readFileSync(failureFile, "utf8")) : null;
+    if (failure && (failure.messageId !== messageId || failure.agentId !== agentId)) throw new Error(`OS runtime failure mismatch: ${messageId}`);
+    return {
+      id: messageId, project: path.basename(String(report.repository || "1stStep.ai ecosystem")), updatedAt: latest("IN_PROGRESS") || acknowledgedAt || pointer.queuedAt,
+      from: report.provider === "claude" ? "Claude Auditor" : "Independent Ecosystem Auditor", to: agentId, status: runtimeConsumption === "IN_PROGRESS" ? "in_progress" : acknowledgedAt ? "acknowledged" : "queued",
+      deliveredAt: pointer.queuedAt, acknowledgedAt, recipientAgentId: agentId,
+      osDelivery: "AVAILABLE_TO_RECIPIENT", runtimeConsumption,
+      runtimeDelivery: acknowledgedAt ? "ACKNOWLEDGED" : runtimeConsumption === "UNREAD" && failure ? "RUNTIME_INCOMPATIBLE" : "WAITING_FOR_RUNTIME",
+      runtimeReason: runtimeConsumption === "UNREAD" ? failure?.reason || null : null, retained: true, cycle: message.cycle ?? null,
+      findingIds: message.findingIds || [], evidenceRefs: [report.auditId],
+    };
+  }
   const file = path.join(stateDir, "inbox", role, `${report.auditId}.json`);
   if (!fs.existsSync(file)) return null;
   const handoff = JSON.parse(fs.readFileSync(file, "utf8"));
@@ -47,6 +79,7 @@ function publishedHandoff(stateDir, role, report) {
     status: "delivered",
     deliveredAt: report.timestamp,
     acknowledgedAt: null,
+    osDelivery: "UNKNOWN", runtimeConsumption: "UNREAD", runtimeDelivery: "UNKNOWN", retained: false,
   };
 }
 

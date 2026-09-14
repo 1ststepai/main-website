@@ -121,9 +121,50 @@ test("auditor collector emits only verified report and inbox metadata", () => {
     assert.equal(result.agents.length, 0);
     assert.equal(result.audits[0].severity, "high");
     assert.equal(result.handoffs[0].status, "delivered");
+    assert.equal(result.handoffs[0].osDelivery, "UNKNOWN");
     assert.equal(result.handoffs[0].acknowledgedAt, null);
     assert.equal(result.handoffs.length, 1);
     assert.equal(JSON.stringify(result).includes("private material"), false);
+  } finally {
+    if (!path.resolve(temp).startsWith(path.resolve(os.tmpdir()) + path.sep)) throw new Error("Unexpected test cleanup path");
+    fs.rmSync(temp, { recursive: true, force: true });
+  }
+});
+
+test("auditor collector distinguishes persisted OS delivery from incompatible runtime and later acknowledgement", () => {
+  const temp = fs.mkdtempSync(path.join(os.tmpdir(), "cc-mailbox-"));
+  try {
+    const auditId = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
+    const agentId = "ecosystem-loop-agent";
+    const messageId = `${auditId}-${agentId}`;
+    const stamp = new Date(now - 3000).toISOString();
+    const queuedAt = new Date(now - 2000).toISOString();
+    const report = { auditId, taskId: "ECO-CYCLE-2", candidateSha: "a".repeat(40), disposition: "FAIL", timestamp: stamp, repository: "1ststep.ai", findings: [{ id: "ECO-AUD-031", severity: "high", evidence: "private material" }] };
+    const message = { messageId, auditId, recipientAgentId: agentId, candidateSha: report.candidateSha, disposition: report.disposition, cycle: 2, findingIds: ["ECO-AUD-031"] };
+    fs.mkdirSync(path.join(temp, "audits"), { recursive: true });
+    fs.mkdirSync(path.join(temp, "mailbox", "messages"), { recursive: true });
+    fs.mkdirSync(path.join(temp, "mailbox", "inbox", agentId), { recursive: true });
+    fs.mkdirSync(path.join(temp, "mailbox", "runtime-failures"), { recursive: true });
+    fs.writeFileSync(path.join(temp, "audits", `${auditId}.json`), JSON.stringify(report));
+    fs.writeFileSync(path.join(temp, "mailbox", "messages", `${messageId}.json`), JSON.stringify(message));
+    fs.writeFileSync(path.join(temp, "mailbox", "inbox", agentId, `${messageId}.json`), JSON.stringify({ messageId, recipientAgentId: agentId, queuedAt }));
+    fs.writeFileSync(path.join(temp, "mailbox", "runtime-failures", `${messageId}.json`), JSON.stringify({ messageId, agentId, reason: "RUNTIME_MODEL_INCOMPATIBLE" }));
+    let [handoff] = auditorSourceSnapshot(temp, new Date(now)).handoffs;
+    assert.equal(handoff.cycle, 2);
+    assert.equal(handoff.osDelivery, "AVAILABLE_TO_RECIPIENT");
+    assert.equal(handoff.runtimeDelivery, "RUNTIME_INCOMPATIBLE");
+    assert.equal(handoff.runtimeConsumption, "UNREAD");
+    assert.equal(handoff.retained, true);
+    assert.equal(JSON.stringify(handoff).includes("private material"), false);
+    const receiptDir = path.join(temp, "mailbox", "receipts", agentId, messageId);
+    fs.mkdirSync(receiptDir, { recursive: true });
+    const sessionId = "codex-cycle-015";
+    fs.writeFileSync(path.join(receiptDir, `${sessionId}.INGESTED.json`), JSON.stringify({ messageId, agentId, sessionId, state: "INGESTED", at: new Date(now - 1000).toISOString() }));
+    fs.writeFileSync(path.join(receiptDir, `${sessionId}.ACKNOWLEDGED.json`), JSON.stringify({ messageId, agentId, sessionId, state: "ACKNOWLEDGED", at: new Date(now).toISOString() }));
+    [handoff] = auditorSourceSnapshot(temp, new Date(now)).handoffs;
+    assert.equal(handoff.runtimeConsumption, "ACKNOWLEDGED");
+    assert.equal(handoff.runtimeDelivery, "ACKNOWLEDGED");
+    assert.equal(handoff.status, "acknowledged");
   } finally {
     if (!path.resolve(temp).startsWith(path.resolve(os.tmpdir()) + path.sep)) throw new Error("Unexpected test cleanup path");
     fs.rmSync(temp, { recursive: true, force: true });
