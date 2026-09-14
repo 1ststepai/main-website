@@ -29,6 +29,7 @@ body{background:#070912}
 .audit-target-form input[type=email]{display:block;width:100%;min-height:48px;padding:0 14px;border:1px solid rgba(152,184,248,.4);border-radius:8px;background:#0b1221;color:#f7f8ff;font:inherit}
 .audit-target-form input[type=email]:focus-visible,.audit-target-form .edit-first-look:focus-visible{outline:3px solid var(--cyan);outline-offset:3px}
 .audit-target-form .roast-consent{margin:15px 0 18px}
+.audit-target-form .optional-marketing{margin-top:19px;padding-top:15px;border-top:1px solid rgba(152,184,248,.2)}
 .audit-target-form .edit-first-look{margin-top:8px;padding:7px 0;border:0;background:none;color:#91e1ef;text-decoration:underline;cursor:pointer}
 .audit-target-form #first-look-status[data-state=error]{color:#ffb6a7}
 .audit-target-row{display:flex;gap:9px}

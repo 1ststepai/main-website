@@ -1001,6 +1001,7 @@ function JourneyRequestsPage({ previewMode }) {
         <h3>{request.kind === "github" ? "Public GitHub first look" : "Public website first look"}</h3>
         <p><strong>Contact:</strong> <a href={`mailto:${request.email}`}>{request.email}</a> · <strong>Received:</strong> {new Date(request.created_at).toLocaleString()} · <strong>Reference:</strong> {request.request_id}</p>
         <p><strong>Public link:</strong> {request.target}</p>
+        <p><strong>Optional marketing:</strong> {request.marketing_opt_in ? `Requested updates · ${request.marketing_consent_version || "wording unknown"} · not synced to Brevo` : "No marketing opt-in"}</p>
       </section>)}
       {roastCursor !== "0" && <button className="button" type="button" onClick={() => loadRoastRequests(roastCursor)}>Load more OS requests</button>}
       <h3>Begin Your Journey</h3>

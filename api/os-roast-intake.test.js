@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import handler from './os-roast-intake.js';
 import adminHandler from './admin-os-roast-requests.js';
-import { listRoastRequests, normalizeRoastRequest } from '../lib/osRoastIntake.js';
+import { listRoastRequests, MARKETING_CONSENT_VERSION, normalizeRoastRequest } from '../lib/osRoastIntake.js';
 import { createAdminSessionToken } from '../lib/admin/auth.js';
 
 const requestId = 'f67d4186-7c5e-4ea0-9aa8-f55b51b4a719';
@@ -14,7 +14,9 @@ function response() {
 
 test('roast intake requires consent and accepts only bounded public links', () => {
   const input = { request_id: requestId, email: 'Person@Example.com', consent: true, target: 'https://github.com/openai/codex?token=secret' };
-  assert.deepEqual(normalizeRoastRequest(input), { request_id: requestId, email: 'person@example.com', target: 'https://github.com/openai/codex', kind: 'github', consent: true });
+  assert.deepEqual(normalizeRoastRequest(input), { request_id: requestId, email: 'person@example.com', target: 'https://github.com/openai/codex', kind: 'github', consent: true, marketing_opt_in: false, marketing_consent_version: null });
+  assert.deepEqual(normalizeRoastRequest({ ...input, marketing_opt_in: true }).marketing_consent_version, MARKETING_CONSENT_VERSION);
+  assert.throws(() => normalizeRoastRequest({ ...input, marketing_opt_in: 'yes' }), { code: 'invalid_marketing_choice' });
   assert.throws(() => normalizeRoastRequest({ ...input, consent: false }), { code: 'consent_required' });
   assert.throws(() => normalizeRoastRequest({ ...input, target: 'http://127.0.0.1/admin' }), { code: 'invalid_target' });
 });
@@ -54,10 +56,22 @@ test('intake stores a minimized encrypted 90-day record and only confirms durabl
   assert.ok(!stored.value.includes('private-path'));
   const listed = await listRoastRequests();
   assert.deepEqual(listed.requests.map(({ email, target }) => ({ email, target })), [{ email: 'person@example.com', target: 'https://example.com/' }]);
+  assert.equal(listed.requests[0].marketing_opt_in, false);
+  assert.equal(listed.requests[0].marketing_consent_version, null);
   const authorized = response();
   await adminHandler({ method: 'GET', headers: { cookie: `fsai_admin_session=${createAdminSessionToken()}` }, query: {} }, authorized);
   assert.equal(authorized.statusCode, 200);
   assert.equal(JSON.parse(authorized.body).requests[0].email, 'person@example.com');
+  const optedIn = response();
+  const optedInId = 'e64f74df-daa2-467b-814e-59a8d1688123';
+  await handler({ ...req, body: { ...req.body, request_id: optedInId, email: 'updates@example.com', marketing_opt_in: true } }, optedIn);
+  assert.equal(optedIn.statusCode, 200);
+  assert.equal(records.get(`os:roast-request:${optedInId}`).ttl, 90 * 24 * 60 * 60);
+  assert.ok(!records.get(`os:roast-request:${optedInId}`).value.includes('updates@example.com'));
+  const optedInReadback = response();
+  await adminHandler({ method: 'GET', headers: { cookie: `fsai_admin_session=${createAdminSessionToken()}` }, query: {} }, optedInReadback);
+  assert.deepEqual(JSON.parse(optedInReadback.body).requests.map(({ email, marketing_opt_in }) => ({ email, marketing_opt_in })), [{ email: 'person@example.com', marketing_opt_in: false }, { email: 'updates@example.com', marketing_opt_in: true }]);
+  assert.equal(JSON.parse(optedInReadback.body).requests[1].marketing_consent_version, MARKETING_CONSENT_VERSION);
   const replay = response();
   await handler(req, replay);
   assert.equal(JSON.parse(replay.body).replayed, true);

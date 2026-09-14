@@ -1,5 +1,12 @@
 # Architecture Decision Log
 
+## 2026-09-14: First-party OS contact intake with separate optional marketing choice
+
+- **Status / owner:** Evan chose `/admin` as the near-term place to see OS first-look inquiries and approved a separate optional choice for future marketing. Public-site lead owns the local candidate. Exact hosted storage provider/account, 90-day retention, independent trust-boundary review, and Production release remain open gates.
+- **Decision:** Request email and first-look consent before the public link; save the encrypted, bounded 90-day contact record before running the scan. Keep OS first looks under a distinct first-party storage prefix and authenticated `/admin` Contact requests view. Default the marketing choice to off and record its boolean and wording version when on. This is an inquiry, not a marketing-list subscription; do not sync to Brevo or send campaigns from this intake.
+- **Marketing choice v1 (`os-first-look-marketing-2026-09-14-v1`):** “Optional: Email me occasional 1stStep.ai updates about AI engineering and business systems. I can unsubscribe at any time. This choice is separate from my first-look request.” Bump the version if this wording changes.
+- **Boundary:** A future mailing-list integration requires a separately verified subscription and suppression flow, an approved retention/data contract, and provider-specific configuration. The current 90-day request record does not establish a durable long-term marketing audience. Local synthetic storage tests do not satisfy hosted-provider/account approval or Production verification.
+
 ## 2026-09-14: Bounded public-source first look for OS Journey A
 
 - **Status / owner:** Evan selected the OS website/GitHub path for the first live on-page scan. Public-site lead owns the local candidate; hosted verification, independent release review, and Production approval remain open.
