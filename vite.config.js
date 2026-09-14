@@ -17,6 +17,22 @@ const siteAnalytics = {
 };
 
 function serveAppRoutes(server) {
+  server.middlewares.use('/api/os-public-scan', async (request, response) => {
+    let body = '';
+    request.on('data', (chunk) => {
+      body += chunk;
+      if (body.length > 512) request.destroy();
+    });
+    request.on('end', async () => {
+      try {
+        request.body = JSON.parse(body);
+        const { default: handler } = await import('./api/os-public-scan.js');
+        await handler(request, response);
+      } catch {
+        if (!response.writableEnded) { response.statusCode = 400; response.end(JSON.stringify({ ok: false, error: 'INVALID_TARGET' })); }
+      }
+    });
+  });
   server.middlewares.use((request, _response, next) => {
     if (request.url === "/os" || request.url?.startsWith("/os?")) {
       request.url = request.url.replace(/^\/os/, "/os/index.html");

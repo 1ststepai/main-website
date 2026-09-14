@@ -1,5 +1,11 @@
 # Architecture Decision Log
 
+## 2026-09-14: Bounded public-source first look for OS Journey A
+
+- **Status / owner:** Evan selected the OS website/GitHub path for the first live on-page scan. Public-site lead owns the local candidate; hosted verification, independent release review, and Production approval remain open.
+- **Decision:** After explicit link submission, fetch only one public HTTPS HTML page or fixed-host GitHub public repository metadata. Present observed fields, source URL and time, an evidence-derived next step, and explicit unknowns. No score, private repository access, customer account, Project persistence, metered AI call, or claim of a full OS Audit. An unavailable source yields no findings and offers a user-initiated human review draft.
+- **Boundary / dependencies:** Keep server-side URL and resolved-address validation, bounded response size/time, and rate limiting. This public-site first look does not move the G1 backend owner, data/retention, evidence, app-family, or release gates for the connected Free OS Audit. Verify the exact candidate in a browser and hosted Preview before any Production release decision.
+
 ## 2026-09-14: Preserve legacy website-client proof in the Public/OS presentation
 
 - **Status / owner:** Evan directed preservation of legitimate legacy social proof; public-site lead owns the local presentation candidate. No Production release approval.

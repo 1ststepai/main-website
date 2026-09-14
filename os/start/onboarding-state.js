@@ -13,13 +13,15 @@ export function normalizeAuditTarget(input) {
   if (!raw) return null;
   let url;
   try { url = new URL(/^https?:\/\//i.test(raw) ? raw : `https://${raw}`); } catch { return null; }
-  if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password) return null;
+  if (url.protocol !== 'https:' || url.username || url.password || url.port) return null;
   const host = url.hostname.toLowerCase();
   if (!/^[a-z0-9-]+(?:\.[a-z0-9-]+)+$/.test(host) || /^\d+(?:\.\d+){3}$/.test(host) || host.endsWith('.local') || host.endsWith('.internal')) return null;
   if (host === 'github.com' || host === 'www.github.com') {
     const parts = url.pathname.split('/').filter(Boolean);
     if (parts.length < 2 || !/^[\w.-]+$/.test(parts[0]) || !/^[\w.-]+$/.test(parts[1])) return null;
-    return { kind: 'github', url: `https://github.com/${parts[0]}/${parts[1].replace(/\.git$/i, '')}` };
+    const repo = parts[1].replace(/\.git$/i, '');
+    if (!repo || repo === '.' || repo === '..') return null;
+    return { kind: 'github', url: `https://github.com/${parts[0]}/${repo}` };
   }
   url.search = '';
   url.hash = '';

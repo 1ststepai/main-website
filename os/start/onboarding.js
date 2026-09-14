@@ -12,6 +12,7 @@ const systemStatus = document.querySelector('#system-status');
 const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
 const track = (name, detail = {}) => window.fsaiTrack?.(name, detail);
 let state = { stage: 'choose', mode: null, goal: '', auditTarget: null, goalConfirmed: false, answers: {}, qIndex: 0, acceptedRecommendations: [], openRecommendations: [], recommendationChanges: {}, editingRecommendation: null, originUnsure: false };
+let publicScan = { status: 'idle', result: null, error: null };
 function clearDownstreamDecisions() {
   state.acceptedRecommendations = [];
   state.openRecommendations = [];
@@ -60,10 +61,10 @@ const heading = (_number, eyebrow, title, lede) => `<p class="stage-kicker">${St
 const stateTag = (status) => `<span class="state-tag state-${status.toLowerCase().replace(/[^a-z]+/g, '-')}">${escapeHtml(status)}</span>`;
 
 function renderChoose() {
-  return `${heading('01', 'START WITH ONE LINK', 'What should we look at?', 'Enter a public website or GitHub repository. Start a free first-look request without a long questionnaire.')}
-    <form id="audit-target-form" class="audit-target-form"><label class="field-label" for="audit-target-input">Website or GitHub repository</label><div class="audit-target-row"><input id="audit-target-input" name="target" type="text" inputmode="url" autocomplete="url" required spellcheck="false" placeholder="yourwebsite.com or github.com/you/project" aria-describedby="audit-target-help" /><button type="submit" class="action-button primary">Start here ↗</button></div><p id="audit-target-help">Public links only. We do not scan or connect to anything when you enter a link.</p></form>
+  return `${heading('01', 'START WITH ONE LINK', 'What should we look at?', 'Enter a public website or GitHub repository for a free, evidence-backed first look. No questionnaire required.')}
+    <form id="audit-target-form" class="audit-target-form"><label class="field-label" for="audit-target-input">Website or GitHub repository</label><div class="audit-target-row"><input id="audit-target-input" name="target" type="text" inputmode="url" autocomplete="url" required spellcheck="false" placeholder="yourwebsite.com or github.com/you/project" aria-describedby="audit-target-help" /><button type="submit" class="action-button primary">Scan public link ↗</button></div><p id="audit-target-help">Submitting fetches public HTML or GitHub metadata. No private access or account is requested.</p></form>
     <details class="other-paths" open><summary>Or choose one of five starting paths</summary><div class="path-options" role="group" aria-label="Choose a starting path">${Object.entries(modes).map(([key, mode], i) => `<button type="button" class="path-option" data-action="select-mode" data-mode="${key}"><span class="path-index">0${i + 1}</span><span><strong>${escapeHtml(mode.title)}</strong><small>${escapeHtml(mode.description)}</small></span><b aria-hidden="true">↗</b></button>`).join('')}</div></details>
-    <p class="stage-disclaimer">Your link stays in this tab until you choose to open an email draft. No account or OS project is created.</p>`;
+    <p class="stage-disclaimer">No account or OS project is created. This first look is narrower than a connected project audit.</p>`;
 }
 
 function renderAuditRequest() {
@@ -71,10 +72,35 @@ function renderAuditRequest() {
   const label = target.kind === 'github' ? 'GitHub repository' : 'Website';
   const body = `I would like a free first look at this public ${label.toLowerCase()}:\n${target.url}\n\nWhat I most want to understand: `;
   const href = `mailto:evan@1ststep.ai?subject=${encodeURIComponent('1stStep OS first-look request')}&body=${encodeURIComponent(body)}`;
-  return `${heading('02', 'FIRST LOOK / REQUEST', 'One link is enough to begin.', 'We can review a public page or repository and respond with a bounded first look. This preview has not inspected it.')}
-    <div class="interpretation-card"><span>YOUR ${label.toUpperCase()} / USER PROVIDED</span><strong class="audit-target-value">${escapeHtml(target.url)}</strong><p>${target.kind === 'github' ? 'A public repository can be reviewed manually. A private repository needs a future read-only connection; this link alone grants no access.' : 'A first look can cover public-facing clarity, experience, and visible technical signals. It cannot verify private systems from a URL.'}</p></div>
-    <div class="stage-actions"><a class="action-button primary" href="${href}" data-fsai-event="os_first_look_email_opened" data-fsai-placement="audit_request">Open email request ↗</a></div>
-    <p class="stage-disclaimer">The email button opens a draft in your email app. No request is sent until you send it. This is a human first-look request, not an instant automated audit or a confirmed booking.</p>`;
+  const result = publicScan.result;
+  const output = publicScan.status === 'loading' ? '<div class="scan-loading" role="status"><span class="scan-pulse" aria-hidden="true"></span><strong>Checking the public source…</strong><p>Fetching the link and recording only what the response verifies.</p></div>'
+    : publicScan.status === 'done' && result ? `<div class="scan-result"><div class="scan-result-head"><span>PUBLIC FIRST LOOK / ${escapeHtml(result.source)}</span>${stateTag('EVIDENCE FOUND')}</div><h3>Here is what we found.</h3><p class="scan-source">Inspected <a href="${escapeHtml(result.inspectedUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(result.inspectedUrl)}</a> · ${escapeHtml(new Date(result.checkedAt).toLocaleString())}</p><div class="scan-checks">${result.checks.map((check) => `<div class="scan-check"><div><strong>${escapeHtml(check.label)}</strong>${stateTag(check.status)}</div><p>${escapeHtml(check.evidence)}</p></div>`).join('')}</div><div class="scan-next"><span>YOUR FIRST NEXT STEP</span><strong>${escapeHtml(result.nextStep)}</strong></div><p class="scan-note">${escapeHtml(result.note)}</p></div>`
+    : publicScan.status === 'error' ? `<div class="scan-error" role="alert"><strong>We couldn't verify this link right now.</strong><p>${escapeHtml(publicScan.error)} No findings were generated.</p></div>` : '';
+  return `${heading('02', 'PUBLIC FIRST LOOK', 'Your link. Real evidence.', 'We only report signals we can verify from a public response. This is not a full project, security, or release audit.')}
+    <div class="interpretation-card"><span>YOUR ${label.toUpperCase()} / USER PROVIDED</span><strong class="audit-target-value">${escapeHtml(target.url)}</strong></div>
+    <div id="scan-output" aria-live="polite">${output}</div>
+    <div class="stage-actions">${publicScan.status === 'error' ? btn('Try the scan again', 'retry-scan') : ''}<a class="action-button secondary" href="${href}" data-fsai-event="os_first_look_email_opened" data-fsai-placement="audit_request">Request a human review ↗</a></div>
+    <p class="stage-disclaimer">A human review opens an email draft; nothing is sent until you send it. No private repository is connected or saved.</p>`;
+}
+
+async function runPublicScan() {
+  if (!state.auditTarget) return;
+  publicScan = { status: 'loading', result: null, error: null };
+  render();
+  const target = state.auditTarget.url;
+  try {
+    const response = await fetch('/api/os-public-scan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: target }), signal: AbortSignal.timeout(12000) });
+    const payload = await response.json();
+    if (!response.ok || !payload.ok) throw new Error(({ RATE_LIMITED: 'Too many scans from this connection. Please try later.', PUBLIC_REPOSITORY_NOT_FOUND: 'That repository is not publicly available.', INVALID_TARGET: 'Enter an HTTPS public website or GitHub repository.', TARGET_TIMEOUT: 'The public source timed out.', RESPONSE_TOO_LARGE: 'The public page exceeded the first-look size limit.' })[payload.error] || 'The public source could not be inspected.');
+    if (state.auditTarget?.url !== target) return;
+    publicScan = { status: 'done', result: payload.result, error: null };
+    track('os_public_scan_completed', { kind: payload.result.kind });
+  } catch (error) {
+    if (state.auditTarget?.url !== target) return;
+    publicScan = { status: 'error', result: null, error: error.name === 'TimeoutError' ? 'The scan timed out.' : error.message };
+    track('os_public_scan_unavailable', { kind: state.auditTarget.kind });
+  }
+  if (state.stage === 'audit-request') render();
 }
 
 function renderDescribe() {
@@ -177,8 +203,8 @@ function renderConversation() {
 }
 
 function renderSystem() {
-  if (state.stage === 'choose') return `<div class="system-intro"><div class="signal-route"><span class="signal-node is-active">STARTING POINT</span><i></i><span class="signal-node">INTELLIGENT ROUTE</span><i></i><span class="signal-node">NEXT STEP</span></div><h2 id="system-title">One link.<br /><em>A clearer path.</em></h2><p>Share a public link for a human first look, or choose a starting path to explore how the Project OS could take shape.</p><div class="system-empty">PROJECT STATE <b>WAITING FOR YOUR CHOICE</b></div></div>`;
-  if (state.stage === 'audit-request') return `<div class="system-intro"><div class="signal-route"><span class="signal-node is-active">YOUR LINK</span><i></i><span class="signal-node">HUMAN REVIEW</span><i></i><span class="signal-node">NEXT STEP</span></div><h2 id="system-title">A useful first look.<br /><em>No invented score.</em></h2><p>We can start from the public material you share. A verified technical audit would need a real baseline, permission, and evidence.</p><div class="system-empty">AUDIT STATE <b>NOT STARTED</b></div></div>`;
+  if (state.stage === 'choose') return `<div class="system-intro"><div class="signal-route"><span class="signal-node is-active">STARTING POINT</span><i></i><span class="signal-node">INTELLIGENT ROUTE</span><i></i><span class="signal-node">NEXT STEP</span></div><h2 id="system-title">One link.<br /><em>A clearer path.</em></h2><p>Share a public link for a live first look, or choose a starting path to explore how the Project OS could take shape.</p><div class="system-empty">PROJECT STATE <b>WAITING FOR YOUR CHOICE</b></div></div>`;
+  if (state.stage === 'audit-request') return `<div class="system-intro"><div class="signal-route"><span class="signal-node is-active">PUBLIC LINK</span><i></i><span class="signal-node ${publicScan.status === 'done' ? 'is-active' : ''}">VISIBLE SIGNALS</span><i></i><span class="signal-node">NEXT STEP</span></div><h2 id="system-title">A useful first look.<br /><em>No invented score.</em></h2><p>We check public evidence only. A full technical audit still needs a pinned baseline, appropriate permission, and deeper verification.</p><div class="system-empty">PUBLIC SCAN <b>${publicScan.status === 'done' ? 'COMPLETE' : publicScan.status === 'loading' ? 'RUNNING' : publicScan.status === 'error' ? 'UNAVAILABLE' : 'NOT STARTED'}</b></div><div class="system-empty">PROJECT AUDIT <b>NOT STARTED</b></div></div>`;
   const genome = deriveGenome(state);
   const active = deriveCapabilities(state);
   const filled = Object.values(genome).filter((signal) => signal.state !== 'UNKNOWN').length;
@@ -245,7 +271,9 @@ conversation.addEventListener('submit', (event) => {
     const auditTarget = normalizeAuditTarget(input.value);
     if (!auditTarget) { input.setCustomValidity('Enter a public website or GitHub repository URL.'); input.reportValidity(); return; }
     track('os_first_look_target_entered', { kind: auditTarget.kind });
+    publicScan = { status: 'idle', result: null, error: null };
     go('audit-request', { auditTarget });
+    runPublicScan();
     return;
   }
   if (event.target.id !== 'goal-form') return;
@@ -269,7 +297,9 @@ document.querySelector('.stage-layout').addEventListener('click', (event) => {
   const target = event.target.closest('[data-action]');
   if (!target) return;
   const action = target.dataset.action;
-  if (action === 'select-mode') {
+  if (action === 'retry-scan') {
+    runPublicScan();
+  } else if (action === 'select-mode') {
     const mode = target.dataset.mode;
     if (!modes[mode]) return;
     state = { stage: 'choose', mode, goal: '', auditTarget: null, goalConfirmed: false, answers: {}, qIndex: 0, acceptedRecommendations: [], openRecommendations: [], recommendationChanges: {}, editingRecommendation: null, originUnsure: mode === 'unsure' };
