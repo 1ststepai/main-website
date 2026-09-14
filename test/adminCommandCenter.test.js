@@ -138,12 +138,14 @@ test("audit capacity projects durable job and provider state without candidate c
     const nowIso = new Date(now).toISOString();
     fs.mkdirSync(path.join(temp, "jobs"), { recursive: true });
     fs.mkdirSync(path.join(temp, "job-events", jobId), { recursive: true });
-    fs.writeFileSync(path.join(temp, "jobs", `${jobId}.json`), JSON.stringify({ schemaVersion: 1, jobId, status: "QUEUED", externalAiAllowed: true, dataClassification: "PUBLIC", privateDiff: "must not publish" }));
+    fs.writeFileSync(path.join(temp, "jobs", `${jobId}.json`), JSON.stringify({ schemaVersion: 1, jobId, project: "app-family", findingOrTask: "AUD-024", createdAt: nowIso, status: "QUEUED", externalAiAllowed: true, dataClassification: "PUBLIC", privateDiff: "must not publish" }));
     fs.writeFileSync(path.join(temp, "job-events", jobId, "0000000001.json"), JSON.stringify({ jobId, status: "TIER_1_COMPLETE", provider: "openrouter-free-primary", model: "free-model", at: nowIso, sequence: 1 }));
     fs.writeFileSync(path.join(temp, "job-events", jobId, "0000000002.json"), JSON.stringify({ jobId, status: "AWAITING_CLAUDE", at: nowIso, sequence: 2 }));
     const result = auditorSourceSnapshot(temp, new Date(now));
     assert.equal(result.auditCapacity.auditQueue, 1);
     assert.equal(result.auditCapacity.claudeEscalation, 1);
+    assert.equal(result.auditCapacity.jobs[0].findingId, "AUD-024");
+    assert.equal(result.auditCapacity.activeJobs, 0);
     assert.equal(result.auditCapacity.providers.find((provider) => provider.id === "openrouter-free-primary").status, "AVAILABLE");
     assert.equal(result.auditCapacity.providers.find((provider) => provider.id === "openrouter-free-primary").model, "free-model");
     assert.equal(result.auditCapacity.providers.find((provider) => provider.id === "deepseek-paid").status, "DISABLED_BUDGET_0");
@@ -155,16 +157,16 @@ test("audit capacity projects durable job and provider state without candidate c
   }
 });
 
-test("auditor collector distinguishes persisted OS delivery from incompatible runtime and later acknowledgement", () => {
+test("app-family auditor handoff distinguishes persisted OS delivery from runtime acknowledgement", () => {
   const temp = fs.mkdtempSync(path.join(os.tmpdir(), "cc-mailbox-"));
   try {
     const auditId = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
-    const agentId = "ecosystem-loop-agent";
+    const agentId = "app-loop-agent";
     const messageId = `${auditId}-${agentId}`;
     const stamp = new Date(now - 3000).toISOString();
     const queuedAt = new Date(now - 2000).toISOString();
-    const report = { auditId, taskId: "ECO-CYCLE-2", candidateSha: "a".repeat(40), disposition: "FAIL", timestamp: stamp, repository: "1ststep.ai", findings: [{ id: "ECO-AUD-031", severity: "high", evidence: "private material" }] };
-    const message = { messageId, auditId, recipientAgentId: agentId, candidateSha: report.candidateSha, disposition: report.disposition, cycle: 2, findingIds: ["ECO-AUD-031"] };
+    const report = { auditId, taskId: "AUD-024", project: "app-family", candidateSha: "a".repeat(40), disposition: "FAIL", timestamp: stamp, repository: "app-family", findings: [{ id: "AUD-024", severity: "high", evidence: "private material" }] };
+    const message = { messageId, auditId, recipientAgentId: agentId, candidateSha: report.candidateSha, disposition: report.disposition, cycle: 2, findingIds: ["AUD-024"] };
     fs.mkdirSync(path.join(temp, "audits"), { recursive: true });
     fs.mkdirSync(path.join(temp, "mailbox", "messages"), { recursive: true });
     fs.mkdirSync(path.join(temp, "mailbox", "inbox", agentId), { recursive: true });

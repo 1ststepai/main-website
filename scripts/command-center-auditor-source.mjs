@@ -35,17 +35,29 @@ function auditCapacitySnapshot(stateDir, now) {
     return "UNKNOWN";
   };
   const freeStatus = state("openrouter-free-primary");
+  const recentJobs = jobs.slice().sort((a, b) => b.job.createdAt.localeCompare(a.job.createdAt)).slice(0, 20).map(({ job, events, status }) => {
+    const attempts = events.filter((event) => /_COMPLETE$/.test(event.status));
+    const reportFile = path.join(stateDir, "audits", `${job.jobId}.json`);
+    const report = fs.existsSync(reportFile) ? verifiedReport(reportFile) : null;
+    if (report && (report.jobId !== job.jobId || report.candidateSha !== job.baseline.candidateSha)) throw new Error("AuditJob/report mismatch");
+    return { id: job.jobId, project: job.project, findingId: job.findingOrTask, status, provider: report?.provider || attempts.at(-1)?.provider || null,
+      model: report?.model || attempts.at(-1)?.model || null, verdict: report?.verdict || null, costUsd: report?.provider === "openrouter" || report?.provider === "cloudflare" || report?.provider === "deterministic" ? 0 : null,
+      createdAt: job.createdAt, updatedAt: events.at(-1)?.at || job.createdAt };
+  });
   return {
     observedAt: now.toISOString(), truthState: "SYSTEM_DERIVED",
     providers: [
       { id: "deterministic", label: "Deterministic Engine", status: "AVAILABLE" },
+      { id: "cloudflare-workers-ai-free", label: "Cloudflare Workers AI Free", model: latest("cloudflare-workers-ai-free")?.status.endsWith("_COMPLETE") ? latest("cloudflare-workers-ai-free")?.model || null : null, status: state("cloudflare-workers-ai-free") },
       { id: "openrouter-free-primary", label: "OpenRouter Free Pool", model: latest("openrouter-free-primary")?.status.endsWith("_COMPLETE") ? latest("openrouter-free-primary")?.model || null : null, status: freeStatus },
       { id: "claude-escalation", label: "Claude", model: latest("claude-escalation")?.status.endsWith("_COMPLETE") ? latest("claude-escalation")?.model || null : null, status: state("claude-escalation") },
       { id: "deepseek-paid", label: "DeepSeek", status: "DISABLED_BUDGET_0" },
     ],
     auditQueue: jobs.filter((item) => ["QUEUED", "RUNNING", "AWAITING_CLAUDE", "INCONCLUSIVE"].includes(item.status)).length,
-    autoRoutable: freeStatus === "AVAILABLE" ? jobs.filter((item) => item.status === "QUEUED" && item.job.externalAiAllowed && item.job.dataClassification === "PUBLIC").length : null,
+    activeJobs: jobs.filter((item) => item.status === "RUNNING" || /^TIER_\d+_RUNNING$/.test(item.status)).length,
+    autoRoutable: [freeStatus, state("cloudflare-workers-ai-free")].includes("AVAILABLE") ? jobs.filter((item) => item.status === "QUEUED" && item.job.externalAiAllowed && item.job.dataClassification === "PUBLIC").length : null,
     claudeEscalation: jobs.filter((item) => item.status === "AWAITING_CLAUDE").length,
+    jobs: recentJobs,
   };
 }
 
@@ -67,7 +79,7 @@ function verifiedReport(file) {
 }
 
 function publishedHandoff(stateDir, role, report) {
-  const agentId = role === "lead-engineering-manager" ? "ecosystem-lead-engineering-manager" : "ecosystem-loop-agent";
+  const agentId = { "lead-engineering-manager": "ecosystem-lead-engineering-manager", "looping-agent": "ecosystem-loop-agent", "app-engineering-orchestrator": "app-engineering-orchestrator", "app-loop-agent": "app-loop-agent" }[role];
   const messageId = `${report.auditId}-${agentId}`;
   const pointerFile = path.join(stateDir, "mailbox", "inbox", agentId, `${messageId}.json`);
   const messageFile = path.join(stateDir, "mailbox", "messages", `${messageId}.json`);
@@ -151,7 +163,7 @@ export function auditorSourceSnapshot(stateDir, now = new Date()) {
       reAuditStatus: "unknown",
       evidenceRef: report.auditId,
     })),
-    handoffs: reports.flatMap((report) => ["lead-engineering-manager", "looping-agent"].map((role) => publishedHandoff(stateDir, role, report)).filter(Boolean)),
+    handoffs: reports.flatMap((report) => (report.project === "app-family" ? ["app-engineering-orchestrator", "app-loop-agent"] : ["lead-engineering-manager", "looping-agent"]).map((role) => publishedHandoff(stateDir, role, report)).filter(Boolean)),
   };
   return normalizeCommandCenterSource(payload, now.getTime());
 }
