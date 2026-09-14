@@ -1,5 +1,11 @@
 # Architecture Decision Log
 
+## 2026-09-14: Preserve legacy website-client proof in the Public/OS presentation
+
+- **Status / owner:** Evan directed preservation of legitimate legacy social proof; public-site lead owns the local presentation candidate. No Production release approval.
+- **Decision:** Use the two named, five-star Google review excerpts already published on the legacy 1stStep.ai homepage, with exact wording and source links, in a restrained hero proof row, post-demo cards, and final trust section. Identify these as website-project reviews, never as 1stStep OS endorsements. Retain the current selected-project showcase without reintroducing previously excluded portfolio content or treating text labels as approved client logos.
+- **Evidence / limit:** [Social proof provenance](../SOCIAL_PROOF_PROVENANCE.md) records the exact legacy commit, reviewer names, links, and claims. The existing Google Reviews API currently returns no aggregate rating or review count; both remain unknown and are omitted until verified. External shortlink freshness and release-stage proof review remain open.
+
 ## 2026-09-14: Public OS visual storytelling with truthful capability labels (ADR-OS-009)
 
 - **Status / owner:** Evan approved the dark/cinematic concept as the Public/OS visual target and interaction storyboard for the current Finish Mode; public-site lead owns implementation. Local candidate only; no release or Production approval.
