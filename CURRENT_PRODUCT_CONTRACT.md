@@ -2,9 +2,46 @@
 
 **Authority and date:** Evan's 1stStep.ai Convergence & Release Program, reconciled 2026-09-13 ET. This is the single implementation contract for the current convergence milestone. `AGENTS.md`, the public-site operating charter, accepted architecture decisions, app-orchestrator records, security rules, and release gates retain their governing authority. Historical prompts and proposed architectures are evidence, not additional active scope. Update this contract only when evidence or an owner decision changes a row. No statement below authorizes Production deployment.
 
+## Finish Mode Ship Board — 2026-09-14
+
+**SHIP TARGET:** A new systems buyer can understand 1stStep.ai, complete Begin Your Journey, receive an honest answer-derived diagnosis and next step, explicitly request contact, and return to that result without Evan or an engineer rescuing the journey. The contact request must be durably recorded and available to the authorized operator; a mail-client draft is not receipt. The existing-builder Free OS Audit is **not** in this release: connection, sealed baseline, evidence-backed audit, and Project persistence are not implemented. `/os/start/` remains a labeled preview until separately verified and released.
+
+**DEFINITION OF DONE:** Exact-source Preview passes the seven steps below on desktop and mobile, including refresh/return, validation, duplicate submission, storage failure and consent paths; the contact record is encrypted, retained under an explicit policy and accessible only to authorized admin; attribution excludes private answers; independent review covers the release-critical trust boundaries; analytics and browser console/network are checked; the exact release candidate and rollback are recorded. Only then report **RELEASE READY — AWAITING PRODUCTION AUTHORIZATION**. Production remains a separate explicit decision.
+
+Status vocabulary in each evidence column: `PASS | FAIL | BLOCKED | NOT IMPLEMENTED | UNKNOWN`. A source implementation or HTTP 200 never upgrades Hosted or Audit to PASS. This table is the **active release journey**; the A/B/D matrix below remains supporting evidence and separate-stream status, not a requirement to bundle those unfinished products into this first release.
+
+| # | Production journey step | Implementation | Automated test | Hosted verification | Independent audit | Blocker | Owner |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | Stranger reaches homepage and understands systems consultancy versus OS/Job Agent | PASS | PASS | UNKNOWN | UNKNOWN | Rendered conversion/CTA proof at exact source | Public-site lead |
+| 2 | Opens `/journey/` and completes six validated answers | PASS | PASS | UNKNOWN | UNKNOWN | Desktop/mobile keyboard and error-path proof | Public-site lead |
+| 3 | Receives truthful first-pass diagnosis and relevant next action | PASS | PASS | UNKNOWN | UNKNOWN | Exact hosted behavior and no audit claim | Public-site lead |
+| 4 | Explicitly opts in and submits a contact request | PASS | PASS | UNKNOWN | UNKNOWN | Preview needs storage configuration and browser success proof | Public-site lead |
+| 5 | Lead and minimal attribution persist with duplicate/failure safeguards | PASS | PASS | UNKNOWN | UNKNOWN | `SHIP-P0-01`: no KV variables in Preview/Production | Public-site lead |
+| 6 | Authorized operator can retrieve request; unauthorized user cannot | PASS | PASS | UNKNOWN | UNKNOWN | `SHIP-P0-01`: hosted admin readback not proved | Public-site lead |
+| 7 | Visitor returns to diagnosis and sees honest request status | PASS | UNKNOWN | UNKNOWN | UNKNOWN | `SHIP-P1-02`: local browser reload passed; hosted and automated return proof missing | Public-site lead |
+
+**JOURNEY: 0 / 7 PASS** at hosted-and-audited release level. Source/test PASS in rows 1–3 is narrower evidence. Live `https://1ststep.ai/`, `/journey/`, `/os/` and `/admin/` returned HTTP 200 on 2026-09-14; `/os/start/` returned 404. Exact deployed Git SHA and rendered behavior remain UNKNOWN.
+
+| Priority | Blocker | User Journey Step | Owner | Next Action | Acceptance Test | Status |
+| --- | --- | --- | --- | --- | --- | --- |
+| P0 | `SHIP-P0-01` Lead consent, privacy, encrypted durable storage and admin-only read boundary | 4–6 | Public-site lead + Evan for storage provider | Review local security evidence; approve/configure a protected KV destination for Preview and Production; run hosted denial/readback | Consent, idempotency, distributed rate limit, encryption, admin denial and retention pass at exact hosted SHA | BLOCKED |
+| P1 | `SHIP-P1-01` Journey contact request and truthful receipt | 4–5 | Public-site lead | Finish browser success proof against configured Preview, including network failure | Persisted receipt from real server; failed request retains answers and shows no success | BLOCKED |
+| P1 | `SHIP-P1-02` Return to useful result | 7 | Public-site lead | Add automated refresh/clear browser check, then repeat on Preview | Refresh and return recover result; clearing browser data removes it; no server-side Project claim | BLOCKED |
+| P1 | `SHIP-P1-03` Exact-source hosted and independent release proof | 1–7 | Public-site lead + independent reviewer | Build Preview from final SHA; verify mobile, auth, errors, analytics and release gate | Seven hosted steps and trust-boundary audit PASS; rollback identified | BLOCKED |
+
+**Active stream allocation (maximum three):** (1) public website/Journey Finish Mode, working here; (2) app-family First Real User Application, owned by its Engineering Orchestrator and currently modified in its isolated integration worktree; (3) Audit/OS infrastructure only where it removes an audit availability or Ship Board blocker. Live agent counts are UNKNOWN; open worktrees are not active-agent proof. Growth, Sales, Opportunity, advanced Command Center, agency and speculative OS features remain LATER. The app PR #80 is open; the public-site repository currently has no open PR. App-family changes stay with its orchestrator.
+
+**Local evidence this cycle:** The six-answer browser path produced the correct first-pass diagnosis and survived a reload at 390px width. A missing local API produced no success receipt and preserved the answers; a technical JSON error was then replaced by a plain-language failure message. Focused intake/authorization/encryption/idempotency/fail-closed tests and Vite build passed. The real hosted write/read path and independent review remain UNKNOWN. `vercel env ls` showed `FIRSTSTEP_DATA_ENCRYPTION_KEY` and admin secrets but **no `KV_REST_API_URL` or `KV_REST_API_TOKEN` in Preview or Production**; do not treat the existing admin workspace or App Idea Checker as durably stored there without further evidence.
+
+**Owner decisions:** The narrow Journey implementation is locally reversible. For hosted contact persistence, Evan must approve the exact protected storage provider/account and 90-day retention/PII boundary before credentials are provisioned. OS G1 persistence, app résumé/billing choices and Production promotion remain separate decisions at their gates. Never expose or copy provider credentials into this board.
+
+### Supporting baseline and future journeys
+
+The following 2026-09-13 convergence snapshot is retained for provenance. Its older `REQUIRED FOR CURRENT RELEASE` classification and A/B/D journey expectations are **superseded for the first external release** by the Finish Mode Ship Target above; they remain separate future milestones or app-family authority work. No row below may silently expand this first Ship Target.
+
 **Milestone:** A new user completes the applicable journey without manual rescue; correct state survives return; failures and unknowns are honest; security and attribution hold; an independent auditor can reproduce the result. A local build, an HTTP 200, or source code alone does not meet this milestone.
 
-## Reconciled scope
+## Historical reconciled scope
 
 | Class | Governing requirement |
 | --- | --- |

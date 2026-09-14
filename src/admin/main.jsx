@@ -72,6 +72,7 @@ const EMPTY_WORKSPACE = {
 const NAVIGATION = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
   { id: "job-agent", label: "Job Agent", icon: Activity },
+  { id: "journey-requests", label: "Journey requests", icon: Mail },
   { id: "clients", label: "Clients", icon: Users },
   { id: "quotes", label: "Quotes", icon: FileText },
   { id: "pricing", label: "Pricing", icon: CircleDollarSign },
@@ -943,6 +944,45 @@ function operationsStatusClass(status) {
   if (["disabled", "blocked"].includes(status)) return "guarded";
   if (["failed", "degraded"].includes(status)) return "attention";
   return "unknown";
+}
+
+function JourneyRequestsPage({ previewMode }) {
+  const [requests, setRequests] = useState([]);
+  const [cursor, setCursor] = useState("0");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(previewMode ? "Live requests are unavailable in admin preview mode." : "");
+
+  async function load(nextCursor = "0") {
+    if (previewMode) return;
+    setLoading(true);
+    setError("");
+    try {
+      const data = await api(`/api/admin-journey-requests?cursor=${encodeURIComponent(nextCursor)}`);
+      setRequests(nextCursor === "0" ? data.requests : (current) => [...current, ...data.requests]);
+      setCursor(data.cursor);
+    } catch (requestError) {
+      setError(requestError.message || "Journey requests could not be loaded.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => { load(); }, [previewMode]);
+
+  return (
+    <div className="page-content">
+      <div className="section-heading page-heading"><div><h2>Journey requests</h2><p>Consented systems-diagnosis requests. A saved request is a lead receipt, not an audit or booked meeting.</p></div><button className="button" type="button" onClick={() => load()} disabled={loading || previewMode}><RefreshCw size={16} />Refresh</button></div>
+      {error && <section className="operations-unavailable" role="status"><AlertTriangle size={20} /><div><strong>Requests unavailable</strong><p>{error}</p></div></section>}
+      {!error && !loading && requests.length === 0 && <p>No saved requests found in this scan. Additional pages may exist if a cursor is available.</p>}
+      {requests.map((request) => <section className="operations-panel" key={request.request_id}>
+        <h3>{request.answers.business}</h3>
+        <p><strong>Contact:</strong> <a href={`mailto:${request.email}`}>{request.email}</a> · <strong>Received:</strong> {new Date(request.created_at).toLocaleString()} · <strong>Reference:</strong> {request.request_id}</p>
+        <dl>{Object.entries(request.answers).filter(([, value]) => value).map(([name, value]) => <div key={name}><dt>{name.replaceAll("_", " ")}</dt><dd>{value}</dd></div>)}</dl>
+        <p><strong>Attribution:</strong> {Object.entries(request.attribution).filter(([, value]) => value).map(([name, value]) => `${name}=${value}`).join(" · ") || "Unknown"}</p>
+      </section>)}
+      {cursor !== "0" && <button className="button" type="button" onClick={() => load(cursor)} disabled={loading}>Load more</button>}
+    </div>
+  );
 }
 
 function JobAgentOperationsPage({ previewMode }) {
@@ -1919,6 +1959,7 @@ function StudioApp({ previewMode = false }) {
   let pageContent;
   if (page === "overview") pageContent = <Overview workspace={workspace} onEditQuote={editQuote} onNewQuote={newQuote} />;
   if (page === "job-agent") pageContent = <JobAgentOperationsPage previewMode={previewMode} />;
+  if (page === "journey-requests") pageContent = <JourneyRequestsPage previewMode={previewMode} />;
   if (page === "clients") pageContent = <ClientsPage workspace={workspace} updateWorkspace={updateWorkspace} />;
   if (page === "quotes") pageContent = <QuotesPage workspace={workspace} onEditQuote={editQuote} onNewQuote={newQuote} />;
   if (page === "pricing") pageContent = <PricingPage workspace={workspace} updateWorkspace={updateWorkspace} onStartQuote={newQuote} />;
@@ -1949,7 +1990,7 @@ function StudioApp({ previewMode = false }) {
             <>
               {message && <span className="save-message" role="status">{message}</span>}
               {page === "quote-editor" && <button className="button ghost" onClick={() => setPage("quotes")}><ArrowLeft size={16} />All quotes</button>}
-              {page !== "job-agent" && <button className="button" onClick={save} disabled={saving || (!dirty && !previewMode)}><Save size={16} />{saving ? "Saving…" : dirty ? "Save draft" : "Saved"}</button>}
+              {page !== "job-agent" && page !== "journey-requests" && <button className="button" onClick={save} disabled={saving || (!dirty && !previewMode)}><Save size={16} />{saving ? "Saving…" : dirty ? "Save draft" : "Saved"}</button>}
               {editorActions && <button className="button primary" disabled={saving} onClick={() => openPreview(selectedQuote.id)}><Eye size={17} />{dirty ? "Save, preview & send" : "Preview & send"}</button>}
             </>
           )}
