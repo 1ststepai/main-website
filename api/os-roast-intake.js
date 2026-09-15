@@ -1,6 +1,6 @@
 import { isSameOriginRequest } from '../lib/admin/auth.js';
 import { checkRateLimit, setRateLimitHeaders } from '../lib/http/rateLimit.js';
-import { enforceJourneyRateLimit } from '../lib/journey/intakeStore.js';
+import { enforceProtectedLeadRateLimit } from '../lib/protectedLeadStore.js';
 import { saveRoastRequest } from '../lib/osRoastIntake.js';
 
 function reply(res, status, body) {
@@ -20,7 +20,7 @@ export default async function handler(req, res) {
   try {
     const raw = typeof req.body === 'string' ? req.body : JSON.stringify(req.body || {});
     if (Buffer.byteLength(raw, 'utf8') > 1024) return reply(res, 413, { ok: false, code: 'payload_too_large' });
-    await enforceJourneyRateLimit(req, 'os-roast');
+    await enforceProtectedLeadRateLimit(req, 'os-roast');
     const result = await saveRoastRequest(JSON.parse(raw));
     return reply(res, 200, { ok: true, ...result });
   } catch (error) {
