@@ -13,13 +13,20 @@ const savedKey = 'firststepJourneyDiagnosisV1';
 let requestId = crypto.randomUUID();
 let savedReceipt = '';
 let currentAnswers = '';
+const requestedIntent = /(?:^|[?&])intent=ai-operations-audit(?:&|$)/.test(globalThis.location?.search || '') ? 'ai-operations-audit' : '';
+const intent = requestedIntent === 'ai-operations-audit' ? requestedIntent : '';
+const intentBanner = document.querySelector('#journey-intent');
+if (intent) {
+  intentBanner.hidden = false;
+  window.addEventListener('load', () => window.fsaiTrack?.('ai_operations_audit_intent_selected'), { once: true });
+}
 
 function savedState() {
   try { return JSON.parse(localStorage.getItem(savedKey) || 'null'); } catch { return null; }
 }
 
 function persistState() {
-  try { localStorage.setItem(savedKey, JSON.stringify({ answers: JSON.parse(currentAnswers), request_id: requestId, receipt: savedReceipt })); } catch { /* Browser storage can be disabled. */ }
+  try { localStorage.setItem(savedKey, JSON.stringify({ intent, answers: JSON.parse(currentAnswers), request_id: requestId, receipt: savedReceipt })); } catch { /* Browser storage can be disabled. */ }
 }
 
 function showReceipt() {
@@ -178,7 +185,7 @@ document.querySelector('#request-form').addEventListener('submit', async (event)
     const response = await fetch('/api/journey-intake', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ request_id: requestId, email: requestForm.elements.email.value, consent: requestForm.elements.consent.checked, answers: JSON.parse(currentAnswers), attribution }),
+      body: JSON.stringify({ request_id: requestId, email: requestForm.elements.email.value, consent: requestForm.elements.consent.checked, intent, answers: JSON.parse(currentAnswers), attribution }),
     });
     const body = await response.json();
     if (!response.ok || !body.ok || !body.persisted || body.request_id !== requestId) throw new Error(body.message || 'We could not confirm your request. Your answers remain here; please try again.');
@@ -186,6 +193,7 @@ document.querySelector('#request-form').addEventListener('submit', async (event)
     persistState();
     showReceipt();
     window.fsaiTrack?.('journey_request_persisted');
+    if (intent === 'ai-operations-audit') window.fsaiTrack?.('journey_ai_operations_complete');
   } catch (error) {
     status.textContent = error instanceof SyntaxError ? 'We could not confirm your request. Your answers remain here; please try again.' : (error.message || 'We could not confirm your request. Your answers remain here; please try again.');
     status.dataset.state = 'error';

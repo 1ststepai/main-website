@@ -31,6 +31,7 @@ function payload(overrides = {}) {
     request_id: randomUUID(),
     email: "Founder@Example.com",
     consent: true,
+    intent: "ai-operations-audit",
     answers: {
       business: "A local moving company",
       demand: "existing",
@@ -90,6 +91,7 @@ test("Journey intake rejects missing consent and invalid facts before persistenc
   assert.throws(() => normalizeJourneyRequest(payload({ consent: false })), { code: "consent_required" });
   assert.throws(() => normalizeJourneyRequest(payload({ answers: { ...payload().answers, demand: "invented" } })), { code: "invalid_request" });
   assert.throws(() => normalizeJourneyRequest(payload({ email: "not-email" })), { code: "invalid_email" });
+  assert.throws(() => normalizeJourneyRequest(payload({ intent: "unknown-offer" })), { code: "invalid_request" });
 });
 
 test("encrypted lead receipt is idempotent, conflicts safely, and requires an admin session to read", async () => {
@@ -104,6 +106,7 @@ test("encrypted lead receipt is idempotent, conflicts safely, and requires an ad
   const stored = [...records.values()][0];
   assert.equal(stored.includes("Founder@Example.com"), false);
   assert.equal(decryptProtectedJson(stored, "journey-intake").email, "founder@example.com");
+  assert.equal(decryptProtectedJson(stored, "journey-intake").intent, "ai-operations-audit");
 
   const repeat = response();
   await publicHandler(publicReq, repeat);
@@ -122,6 +125,7 @@ test("encrypted lead receipt is idempotent, conflicts safely, and requires an ad
   assert.equal(allowed.statusCode, 200);
   assert.equal(allowed.body.requests.length, 1);
   assert.equal(allowed.body.requests[0].email, "founder@example.com");
+  assert.equal(allowed.body.requests[0].intent, "ai-operations-audit");
 });
 
 test("missing durable storage fails closed without a false receipt", async () => {

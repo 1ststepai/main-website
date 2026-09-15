@@ -1,5 +1,11 @@
-import './os-story.js';
 import './site-motion.js';
+import { renderCommercialConfig } from './commercial-display.js';
+
+renderCommercialConfig();
+
+document.querySelector('[data-automation-example]')?.addEventListener('pointerover', () => {
+  window.fsaiTrack?.('automation_example_interaction');
+}, { once: true });
 
 const auditForm = document.querySelector('#home-audit-form');
 if (auditForm) {
@@ -64,7 +70,7 @@ if (showcase) {
   }
 
   tabs.forEach((tab, index) => {
-    tab.addEventListener("click", () => { paused = true; selectProject(index); });
+    tab.addEventListener("click", () => { paused = true; selectProject(index); window.fsaiTrack?.('selected_work_open', { project: tab.dataset.project || `project_${index + 1}` }); });
     tab.addEventListener("keydown", (event) => {
       const next = event.key === "ArrowRight" || event.key === "ArrowDown" ? index + 1
         : event.key === "ArrowLeft" || event.key === "ArrowUp" ? index - 1

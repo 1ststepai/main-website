@@ -106,7 +106,7 @@ function renderAuditRequest() {
     <div class="interpretation-card"><span>YOUR ${label.toUpperCase()} / USER PROVIDED</span><strong class="audit-target-value">${escapeHtml(target.url)}</strong></div>
     <div id="scan-output" aria-live="polite">${output}</div>${roastOutput}
     ${roast ? '<p class="stage-disclaimer">Want to go beyond public signals? A deeper project audit can be scoped around your code, tests, accessibility, security, and release risks where access and evidence allow. We agree the scope and any fee before work or model usage begins.</p>' : ''}
-    <div class="stage-actions">${publicScan.status === 'error' ? btn('Try the scan again', 'retry-scan') : ''}${roast ? `<a class="action-button primary" href="${deepAuditHref}" data-fsai-event="os_deeper_audit_email_opened" data-fsai-placement="audit_request">Ask about a deeper audit ↗</a>${btn('Explore OS setup instead', 'start-os-setup', 'secondary')}` : publicScan.status === 'error' ? `<a class="action-button secondary" href="${fallbackHref}" data-fsai-event="os_first_look_email_opened" data-fsai-placement="audit_request">Request help ↗</a>${btn('Explore OS setup instead', 'start-os-setup', 'secondary')}` : ''}</div>
+    <div class="stage-actions">${publicScan.status === 'error' ? btn('Try the scan again', 'retry-scan') : ''}${roast ? `<a class="action-button primary" href="${deepAuditHref}" data-fsai-event="deep_technical_audit_click" data-fsai-placement="audit_request">Ask about a deeper audit ↗</a>${btn('Explore OS setup instead', 'start-os-setup', 'secondary')}` : publicScan.status === 'error' ? `<a class="action-button secondary" href="${fallbackHref}" data-fsai-event="os_first_look_email_opened" data-fsai-placement="audit_request">Request help ↗</a>${btn('Explore OS setup instead', 'start-os-setup', 'secondary')}` : ''}</div>
     ${roastRequest.receipt || publicScan.status === 'error' ? '<p class="stage-disclaimer">This opens an email draft; nothing is sent until you send it. No private repository is connected or saved by this first look.</p>' : ''}`;
 }
 
@@ -187,6 +187,7 @@ async function runPublicScan() {
     if (state.auditTarget?.url !== target) return;
     publicScan = { status: 'done', result: payload.result, error: null };
     track('os_public_scan_completed', { kind: payload.result.kind });
+    track('free_public_audit_result_view', { kind: payload.result.kind });
   } catch (error) {
     if (state.auditTarget?.url !== target) return;
     publicScan = { status: 'error', result: null, error: error.name === 'TimeoutError' ? 'The scan timed out.' : error.message };

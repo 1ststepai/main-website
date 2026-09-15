@@ -106,6 +106,7 @@ export default defineConfig({
         mvpBuilds: "services/mvp-builds.html",
         websites: "services/websites.html",
         revenueSystems: "services/revenue-systems.html",
+        aiOperations: "services/ai-operations.html",
         internalTools: "services/internal-tools.html",
         privacy: "privacy.html",
         terms: "terms.html",
