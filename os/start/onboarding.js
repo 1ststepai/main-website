@@ -120,7 +120,7 @@ async function submitFirstLookTarget(form, auditTarget) {
   form.querySelector('.edit-first-look').disabled = true;
   status.textContent = 'Saving your request before the scan…';
   try {
-    const response = await fetch('/api/os-roast-intake', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ request_id: requestId, email: roastRequest.email, consent: true, marketing_opt_in: roastRequest.marketingOptIn === true, target: targetUrl }), signal: AbortSignal.timeout(10000) });
+    const response = await fetch('/api/os-roast-intake', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ request_id: requestId, email: roastRequest.email, consent: true, marketing_opt_in: roastRequest.marketingOptIn === true, target: targetUrl, attribution: window.fsaiAttribution?.get?.() || {} }), signal: AbortSignal.timeout(10000) });
     const payload = await response.json().catch(() => ({}));
     if (roastRequest.requestId !== requestId) return;
     if (!response.ok || !payload.ok || !payload.persisted || payload.request_id !== requestId) throw new Error(payload.message || 'We could not confirm your request. Please try again.');
@@ -154,7 +154,7 @@ async function submitOsSetup(form) {
   button.disabled = true;
   status.textContent = 'Saving your OS setup request…';
   try {
-    const response = await fetch('/api/os-setup-intake', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ request_id: requestId, email: form.elements.email.value, consent: form.elements.consent.checked, goal: state.goal, answers: state.answers, target: state.auditTarget?.url || null, first_look_request_id: state.auditTarget ? roastRequest.receipt : null }), signal: AbortSignal.timeout(10000) });
+    const response = await fetch('/api/os-setup-intake', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ request_id: requestId, email: form.elements.email.value, consent: form.elements.consent.checked, goal: state.goal, answers: state.answers, target: state.auditTarget?.url || null, first_look_request_id: state.auditTarget ? roastRequest.receipt : null, attribution: window.fsaiAttribution?.get?.() || {} }), signal: AbortSignal.timeout(10000) });
     const payload = await response.json().catch(() => ({}));
     if (setupRequest.requestId !== requestId) return;
     if (!response.ok || !payload.ok || !payload.persisted || payload.request_id !== requestId) throw new Error(payload.message || 'We could not confirm your request. Please try again.');

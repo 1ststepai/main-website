@@ -1018,6 +1018,7 @@ function JourneyRequestsPage({ previewMode }) {
         {request.target && <p><strong>Public link:</strong> {request.target}</p>}
         {request.first_look_request_id && <p><strong>First-look reference:</strong> {request.first_look_request_id} (visitor supplied)</p>}
         <p><strong>Goal:</strong> {request.goal}</p>
+        <p><strong>Attribution:</strong> {Object.entries(request.attribution || {}).filter(([, value]) => value).map(([name, value]) => `${name}=${value}`).join(" · ") || "Unknown"}</p>
         <dl>{Object.entries(request.answers).map(([name, value]) => <div key={name}><dt>{name}</dt><dd>{value}</dd></div>)}</dl>
       </section>)}
       {setupCursor !== "0" && <button className="button" type="button" onClick={() => loadSetupRequests(setupCursor)}>Load more OS setup requests</button>}
@@ -1029,6 +1030,7 @@ function JourneyRequestsPage({ previewMode }) {
         <p><strong>Contact:</strong> <a href={`mailto:${request.email}`}>{request.email}</a> · <strong>Received:</strong> {new Date(request.created_at).toLocaleString()} · <strong>Reference:</strong> {request.request_id}</p>
         <p><strong>Public link:</strong> {request.target}</p>
         <p><strong>Optional marketing:</strong> {request.marketing_opt_in ? `Requested updates · ${request.marketing_consent_version || "wording unknown"} · not synced to Brevo` : "No marketing opt-in"}</p>
+        <p><strong>Attribution:</strong> {Object.entries(request.attribution || {}).filter(([, value]) => value).map(([name, value]) => `${name}=${value}`).join(" · ") || "Unknown"}</p>
       </section>)}
       {roastCursor !== "0" && <button className="button" type="button" onClick={() => loadRoastRequests(roastCursor)}>Load more OS requests</button>}
       <h3>Begin Your Journey</h3>

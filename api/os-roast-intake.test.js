@@ -13,8 +13,8 @@ function response() {
 }
 
 test('roast intake requires consent and accepts only bounded public links', () => {
-  const input = { request_id: requestId, email: 'Person@Example.com', consent: true, target: 'https://github.com/openai/codex?token=secret' };
-  assert.deepEqual(normalizeRoastRequest(input), { request_id: requestId, email: 'person@example.com', target: 'https://github.com/openai/codex', kind: 'github', consent: true, marketing_opt_in: false, marketing_consent_version: null });
+  const input = { request_id: requestId, email: 'Person@Example.com', consent: true, target: 'https://github.com/openai/codex?token=secret', attribution: { utm_source: 'linkedin', utm_campaign: 'launch', landing_path: '/os/start/?secret=removed' } };
+  assert.deepEqual(normalizeRoastRequest(input), { request_id: requestId, email: 'person@example.com', target: 'https://github.com/openai/codex', kind: 'github', attribution: { utm_source: 'linkedin', utm_medium: '', utm_campaign: 'launch', utm_content: '', utm_term: '', first_touch_source: '', first_touch_campaign: '', landing_path: '/os/start/' }, consent: true, marketing_opt_in: false, marketing_consent_version: null });
   assert.deepEqual(normalizeRoastRequest({ ...input, marketing_opt_in: true }).marketing_consent_version, MARKETING_CONSENT_VERSION);
   assert.throws(() => normalizeRoastRequest({ ...input, marketing_opt_in: 'yes' }), { code: 'invalid_marketing_choice' });
   assert.throws(() => normalizeRoastRequest({ ...input, consent: false }), { code: 'consent_required' });
@@ -44,7 +44,7 @@ test('intake stores a minimized encrypted 90-day record and only confirms durabl
     else if (operation === 'MGET') result = JSON.parse(options.body).slice(1).map((item) => records.get(item)?.value ?? null);
     return new Response(JSON.stringify({ result }), { status: 200, headers: { 'Content-Type': 'application/json' } });
   };
-  const req = { method: 'POST', headers: { host: '1ststep.ai', origin: 'https://1ststep.ai', 'content-type': 'application/json', 'x-forwarded-for': '203.0.113.8' }, body: { request_id: requestId, email: 'person@example.com', consent: true, target: 'example.com/private-path?private=removed' } };
+  const req = { method: 'POST', headers: { host: '1ststep.ai', origin: 'https://1ststep.ai', 'content-type': 'application/json', 'x-forwarded-for': '203.0.113.8' }, body: { request_id: requestId, email: 'person@example.com', consent: true, target: 'example.com/private-path?private=removed', attribution: { utm_source: 'linkedin', landing_path: '/os/start/?private=removed' } } };
   const first = response();
   await handler(req, first);
   assert.equal(first.statusCode, 200);
@@ -58,6 +58,8 @@ test('intake stores a minimized encrypted 90-day record and only confirms durabl
   assert.deepEqual(listed.requests.map(({ email, target }) => ({ email, target })), [{ email: 'person@example.com', target: 'https://example.com/' }]);
   assert.equal(listed.requests[0].marketing_opt_in, false);
   assert.equal(listed.requests[0].marketing_consent_version, null);
+  assert.equal(listed.requests[0].attribution.utm_source, 'linkedin');
+  assert.equal(listed.requests[0].attribution.landing_path, '/os/start/');
   const authorized = response();
   await adminHandler({ method: 'GET', headers: { cookie: `fsai_admin_session=${createAdminSessionToken()}` }, query: {} }, authorized);
   assert.equal(authorized.statusCode, 200);

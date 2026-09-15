@@ -6,7 +6,7 @@ import { normalizeOsSetupRequest } from '../lib/osSetupIntake.js';
 import { createAdminSessionToken } from '../lib/admin/auth.js';
 
 const requestId = '8c691bc1-2e29-44a5-85ae-323463c8743d';
-const input = { request_id: requestId, email: 'Builder@Example.com', consent: true, goal: 'I need a safer release path for my web app.', answers: { stage: 'Working privately', concern: 'Quality and testing', access: 'Read-only access later', evidence: 'Automated tests' }, target: 'https://example.com/private-path?token=removed' };
+const input = { request_id: requestId, email: 'Builder@Example.com', consent: true, goal: 'I need a safer release path for my web app.', answers: { stage: 'Working privately', concern: 'Quality and testing', access: 'Read-only access later', evidence: 'Automated tests' }, target: 'https://example.com/private-path?token=removed', attribution: { utm_source: 'google', utm_campaign: 'os-launch', landing_path: '/os/?secret=removed' } };
 
 function response() {
   const headers = new Map();
@@ -16,6 +16,7 @@ function response() {
 test('OS setup inquiry validates separate consent, bounded answers, and public link', () => {
   assert.deepEqual(normalizeOsSetupRequest(input).target, 'https://example.com/');
   assert.equal(normalizeOsSetupRequest(input).email, 'builder@example.com');
+  assert.deepEqual(normalizeOsSetupRequest(input).attribution, { utm_source: 'google', utm_medium: '', utm_campaign: 'os-launch', utm_content: '', utm_term: '', first_touch_source: '', first_touch_campaign: '', landing_path: '/os/' });
   assert.equal(normalizeOsSetupRequest({ ...input, target: null }).target, null);
   assert.throws(() => normalizeOsSetupRequest({ ...input, consent: false }), { code: 'consent_required' });
   assert.throws(() => normalizeOsSetupRequest({ ...input, answers: { ...input.answers, access: 'Owner' } }), { code: 'invalid_answers' });
@@ -65,6 +66,7 @@ test('OS setup inquiry is encrypted, idempotent, admin-readable, and expires aft
   assert.equal(admin.statusCode, 200);
   assert.deepEqual(JSON.parse(admin.body).requests[0].answers, input.answers);
   assert.equal(JSON.parse(admin.body).requests[0].target, 'https://example.com/');
+  assert.equal(JSON.parse(admin.body).requests[0].attribution.utm_campaign, 'os-launch');
   assert.equal(JSON.parse(admin.body).requests.find((item) => item.request_id === directId).target, null);
   const replay = response();
   await handler(req, replay);
