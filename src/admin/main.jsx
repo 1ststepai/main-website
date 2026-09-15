@@ -1026,7 +1026,7 @@ function JourneyRequestsPage({ previewMode }) {
       {roastError && <section className="operations-unavailable" role="status"><AlertTriangle size={20} /><div><strong>OS requests unavailable</strong><p>{roastError}</p></div></section>}
       {!roastError && roastRequests.length === 0 && <p>No saved OS first-look requests found in this scan.</p>}
       {roastRequests.map((request) => <section className="operations-panel" key={request.request_id}>
-        <h3>{request.kind === "github" ? "Public GitHub first look" : "Public website first look"}</h3>
+        <h3>{{ github: "Public GitHub first look", web_app: "Public web app first look", mobile_app: "Public mobile app listing first look", website: "Public website first look" }[request.source_type] || (request.kind === "github" ? "Public GitHub first look" : "Public website first look")}</h3>
         <p><strong>Contact:</strong> <a href={`mailto:${request.email}`}>{request.email}</a> · <strong>Received:</strong> {new Date(request.created_at).toLocaleString()} · <strong>Reference:</strong> {request.request_id}</p>
         <p><strong>Public link:</strong> {request.target}</p>
         <p><strong>Optional marketing:</strong> {request.marketing_opt_in ? `Requested updates · ${request.marketing_consent_version || "wording unknown"} · not synced to Brevo` : "No marketing opt-in"}</p>

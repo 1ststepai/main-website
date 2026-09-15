@@ -14,11 +14,14 @@ function response() {
 
 test('roast intake requires consent and accepts only bounded public links', () => {
   const input = { request_id: requestId, email: 'Person@Example.com', consent: true, target: 'https://github.com/openai/codex?token=secret', attribution: { utm_source: 'linkedin', utm_campaign: 'launch', landing_path: '/os/start/?secret=removed' } };
-  assert.deepEqual(normalizeRoastRequest(input), { request_id: requestId, email: 'person@example.com', target: 'https://github.com/openai/codex', kind: 'github', attribution: { utm_source: 'linkedin', utm_medium: '', utm_campaign: 'launch', utm_content: '', utm_term: '', first_touch_source: '', first_touch_campaign: '', landing_path: '/os/start/' }, consent: true, marketing_opt_in: false, marketing_consent_version: null });
+  assert.deepEqual(normalizeRoastRequest(input), { request_id: requestId, email: 'person@example.com', target: 'https://github.com/openai/codex', kind: 'github', source_type: 'github', attribution: { utm_source: 'linkedin', utm_medium: '', utm_campaign: 'launch', utm_content: '', utm_term: '', first_touch_source: '', first_touch_campaign: '', landing_path: '/os/start/' }, consent: true, marketing_opt_in: false, marketing_consent_version: null });
   assert.deepEqual(normalizeRoastRequest({ ...input, marketing_opt_in: true }).marketing_consent_version, MARKETING_CONSENT_VERSION);
   assert.throws(() => normalizeRoastRequest({ ...input, marketing_opt_in: 'yes' }), { code: 'invalid_marketing_choice' });
   assert.throws(() => normalizeRoastRequest({ ...input, consent: false }), { code: 'consent_required' });
   assert.throws(() => normalizeRoastRequest({ ...input, target: 'http://127.0.0.1/admin' }), { code: 'invalid_target' });
+  assert.equal(normalizeRoastRequest({ ...input, target: 'https://example.com/app', source_type: 'web_app' }).source_type, 'web_app');
+  assert.equal(normalizeRoastRequest({ ...input, target: 'https://apps.apple.com/us/app/example/id123456789', source_type: 'mobile_app' }).target, 'https://apps.apple.com/us/app/example/id123456789');
+  assert.throws(() => normalizeRoastRequest({ ...input, target: 'https://example.com', source_type: 'github' }), { code: 'invalid_source_type' });
 });
 
 test('intake stores a minimized encrypted 90-day record and only confirms durable writes', async (t) => {

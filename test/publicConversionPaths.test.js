@@ -12,6 +12,9 @@ test("the homepage leads to the real OS preview and preserves the consulting pat
   assert.match(html, /1stStep helps you finish/);
   assert.match(html, /Deploy Our OS/);
   assert.match(html, /href="\/os\/start\/"/);
+  assert.match(html, /id="home-audit-form"/);
+  for (const type of ['website', 'web_app', 'github', 'mobile_app']) assert.match(html, new RegExp(`name="source_type" value="${type}"`));
+  assert.match(html, /Run my free audit/);
   assert.match(html, /Need a business system instead\? Begin Your Journey/);
   assert.match(html, /Lead capture, CRM architecture, qualification, routing, follow-up/i);
   assert.match(html, /href="\/journey\/"/);

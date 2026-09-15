@@ -13,16 +13,20 @@ const systemStatus = document.querySelector('#system-status');
 const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
 const track = (name, detail = {}) => window.fsaiTrack?.(name, detail);
 let firstLookPrefill = '';
+let firstLookHandoff = null;
 try {
   const handoff = sessionStorage.getItem('fsai_first_look_handoff');
   sessionStorage.removeItem('fsai_first_look_handoff');
-  firstLookPrefill = normalizeAuditTarget(handoff)?.url || '';
+  try { firstLookHandoff = JSON.parse(handoff); } catch { firstLookPrefill = normalizeAuditTarget(handoff)?.url || ''; }
 } catch {
   // The manual first-look form remains available when browser storage is blocked.
 }
-let state = { stage: 'choose', mode: null, goal: '', auditTarget: null, goalConfirmed: false, answers: {}, qIndex: 0, acceptedRecommendations: [], openRecommendations: [], recommendationChanges: {}, editingRecommendation: null, originUnsure: false };
+const handedTarget = normalizeAuditTarget(firstLookHandoff?.target);
+const validHandoff = handedTarget && /^[0-9a-f-]{36}$/i.test(firstLookHandoff?.receipt || '') && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(firstLookHandoff?.email || '');
+if (validHandoff) handedTarget.sourceType = firstLookHandoff.source_type || handedTarget.sourceType;
+let state = { stage: validHandoff ? 'audit-request' : 'choose', mode: null, goal: '', auditTarget: validHandoff ? handedTarget : null, goalConfirmed: false, answers: {}, qIndex: 0, acceptedRecommendations: [], openRecommendations: [], recommendationChanges: {}, editingRecommendation: null, originUnsure: false };
 let publicScan = { status: 'idle', result: null, error: null };
-let roastRequest = { requestId: crypto.randomUUID(), email: '', receipt: null, sending: false };
+let roastRequest = { requestId: validHandoff ? firstLookHandoff.receipt : crypto.randomUUID(), email: validHandoff ? firstLookHandoff.email.trim() : '', receipt: validHandoff ? firstLookHandoff.receipt : null, target: validHandoff ? handedTarget : null, marketingOptIn: false, sending: false };
 let setupRequest = { requestId: crypto.randomUUID(), receipt: null, sending: false };
 function resetSetupRequestOnChange() {
   if (setupRequest.receipt || setupRequest.sending) setupRequest = { requestId: crypto.randomUUID(), receipt: null, sending: false };
@@ -77,7 +81,7 @@ const stateTag = (status) => `<span class="state-tag state-${status.toLowerCase(
 function renderChoose() {
   if (roastRequest.receipt && roastRequest.target) return `${heading('01', 'PUBLIC FIRST LOOK', 'Your first look is saved.', 'Return to the public scan or explore a possible OS setup for this build.')}
     <div class="audit-target-form"><span class="form-step">REQUEST SAVED</span><p class="audit-target-value">${escapeHtml(roastRequest.target.url)}</p><div class="stage-actions">${btn('Return to your scan', 'return-to-first-look')}${btn('Explore OS setup', 'start-os-setup', 'secondary')}${btn('Start another first look', 'new-first-look', 'secondary')}</div></div>`;
-  const firstLook = roastRequest.email ? `<form id="audit-target-form" class="audit-target-form"><span class="form-step">02 / PUBLIC LINK</span><h3>What should we look at?</h3><p>Your email has not been saved yet. We save your request before scanning this public link.</p><label class="field-label" for="audit-target-input">Website or GitHub repository</label><div class="audit-target-row"><input id="audit-target-input" name="target" type="text" inputmode="url" autocomplete="url" required spellcheck="false" placeholder="yourwebsite.com or github.com/you/project" value="${escapeHtml(firstLookPrefill)}" aria-describedby="audit-target-help" /><button type="submit" class="action-button primary">Save & scan ↗</button></div><p id="audit-target-help">Public HTML or GitHub metadata only. No private access or account is requested.</p><p id="first-look-status" role="status" aria-live="polite"></p><button type="button" class="edit-first-look" data-action="edit-first-look-email">Change email</button></form>` : `<form id="first-look-email-form" class="audit-target-form"><span class="form-step">01 / EMAIL</span><h3>Start with your email.</h3><p>Then add a public website or GitHub link for a live first look and a free, evidence-backed roast.</p><label class="field-label" for="first-look-email">Email address</label><input id="first-look-email" name="email" type="email" autocomplete="email" maxlength="254" required /><label class="roast-consent" for="first-look-consent"><input id="first-look-consent" name="consent" type="checkbox" required /><span>I agree to share my email and public link with 1stStep.ai for follow-up about this first look. This consent alone does not subscribe me to marketing. See the <a href="/privacy.html">privacy policy</a>.</span></label><label class="roast-consent optional-marketing" for="first-look-marketing"><input id="first-look-marketing" name="marketing" type="checkbox" /><span>Optional: Email me occasional 1stStep.ai updates about AI engineering and business systems. I can unsubscribe at any time. This choice is separate from my first-look request.</span></label><button type="submit" class="action-button primary">Continue to public link ↗</button><p>Email is saved only when you submit your link. If saving fails, no scan runs.</p></form>`;
+  const firstLook = roastRequest.email ? `<form id="audit-target-form" class="audit-target-form"><span class="form-step">02 / PUBLIC LINK</span><h3>What should we look at?</h3><p>Your email has not been saved yet. We save your request before scanning this public link.</p><label class="field-label" for="audit-target-input">Website, web app, GitHub repository, or app-store listing</label><div class="audit-target-row"><input id="audit-target-input" name="target" type="text" inputmode="url" autocomplete="url" required spellcheck="false" placeholder="yourwebsite.com or github.com/you/project" value="${escapeHtml(firstLookPrefill)}" aria-describedby="audit-target-help" /><button type="submit" class="action-button primary">Save & scan ↗</button></div><p id="audit-target-help">Public response or metadata only. No private access or account is requested.</p><p id="first-look-status" role="status" aria-live="polite"></p><button type="button" class="edit-first-look" data-action="edit-first-look-email">Change email</button></form>` : `<form id="first-look-email-form" class="audit-target-form"><span class="form-step">01 / EMAIL</span><h3>Start with your email.</h3><p>Then add a public website, web app, GitHub repository, or app-store link for a live evidence-backed first look.</p><label class="field-label" for="first-look-email">Email address</label><input id="first-look-email" name="email" type="email" autocomplete="email" maxlength="254" required /><label class="roast-consent" for="first-look-consent"><input id="first-look-consent" name="consent" type="checkbox" required /><span>I agree to share my email and public link with 1stStep.ai for follow-up about this first look. This consent alone does not subscribe me to marketing. See the <a href="/privacy.html">privacy policy</a>.</span></label><label class="roast-consent optional-marketing" for="first-look-marketing"><input id="first-look-marketing" name="marketing" type="checkbox" /><span>Optional: Email me occasional 1stStep.ai updates about AI engineering and business systems. I can unsubscribe at any time. This choice is separate from my first-look request.</span></label><button type="submit" class="action-button primary">Continue to public link ↗</button><p>Email is saved only when you submit your link. If saving fails, no scan runs.</p></form>`;
   return `${heading('01', 'FREE PUBLIC FIRST LOOK', 'A useful first look.', 'Give us your email first, then a public link. We show only findings supported by the public response. No questionnaire required.')}
     ${firstLook}
     <div class="setup-alternative"><span>ALREADY KNOW YOU WANT HELP WITH THE BUILD?</span><p>Skip the public first look. Tell us what you are building and see a proposed OS setup path.</p>${btn('Explore OS setup instead', 'start-os-setup', 'secondary')}</div>
@@ -87,7 +91,7 @@ function renderChoose() {
 
 function renderAuditRequest() {
   const target = state.auditTarget;
-  const label = target.kind === 'github' ? 'GitHub repository' : 'Website';
+  const label = target.kind === 'github' ? 'GitHub repository' : target.sourceType === 'mobile_app' ? 'Mobile app listing' : target.sourceType === 'web_app' ? 'Web app' : 'Website';
   const deepAuditBody = `I saw the public first look for this ${label.toLowerCase()}:\n${target.url}\n\nFirst-look reference: ${roastRequest.receipt || 'not saved'}\n\nI would like to discuss a deeper project audit. My main concern is: `;
   const fallbackBody = `I would like help reviewing this public ${label.toLowerCase()}:\n${target.url}\n\nWhat I most want to understand: `;
   const deepAuditHref = `mailto:evan@1ststep.ai?subject=${encodeURIComponent('1stStep OS deeper audit inquiry')}&body=${encodeURIComponent(deepAuditBody)}`;
@@ -120,7 +124,7 @@ async function submitFirstLookTarget(form, auditTarget) {
   form.querySelector('.edit-first-look').disabled = true;
   status.textContent = 'Saving your request before the scan…';
   try {
-    const response = await fetch('/api/os-roast-intake', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ request_id: requestId, email: roastRequest.email, consent: true, marketing_opt_in: roastRequest.marketingOptIn === true, target: targetUrl, attribution: window.fsaiAttribution?.get?.() || {} }), signal: AbortSignal.timeout(10000) });
+    const response = await fetch('/api/os-roast-intake', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ request_id: requestId, email: roastRequest.email, consent: true, marketing_opt_in: roastRequest.marketingOptIn === true, target: targetUrl, source_type: auditTarget.sourceType, attribution: window.fsaiAttribution?.get?.() || {} }), signal: AbortSignal.timeout(10000) });
     const payload = await response.json().catch(() => ({}));
     if (roastRequest.requestId !== requestId) return;
     if (!response.ok || !payload.ok || !payload.persisted || payload.request_id !== requestId) throw new Error(payload.message || 'We could not confirm your request. Please try again.');
@@ -177,9 +181,9 @@ async function runPublicScan() {
   render();
   const target = state.auditTarget.url;
   try {
-    const response = await fetch('/api/os-public-scan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: target }), signal: AbortSignal.timeout(12000) });
+    const response = await fetch('/api/os-public-scan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: target, source_type: state.auditTarget.sourceType }), signal: AbortSignal.timeout(12000) });
     const payload = await response.json();
-    if (!response.ok || !payload.ok) throw new Error(({ RATE_LIMITED: 'Too many scans from this connection. Please try later.', PUBLIC_REPOSITORY_NOT_FOUND: 'That repository is not publicly available.', INVALID_TARGET: 'Enter an HTTPS public website or GitHub repository.', TARGET_TIMEOUT: 'The public source timed out.', RESPONSE_TOO_LARGE: 'The public page exceeded the first-look size limit.' })[payload.error] || 'The public source could not be inspected.');
+    if (!response.ok || !payload.ok) throw new Error(({ RATE_LIMITED: 'Too many scans from this connection. Please try later.', PUBLIC_REPOSITORY_NOT_FOUND: 'That repository is not publicly available.', INVALID_TARGET: 'Enter an HTTPS public website, web app, GitHub repository, or official app-store listing.', INVALID_SOURCE_TYPE: 'The link does not match the audit type selected.', TARGET_TIMEOUT: 'The public source timed out.', RESPONSE_TOO_LARGE: 'The public page exceeded the first-look size limit.' })[payload.error] || 'The public source could not be inspected.');
     if (state.auditTarget?.url !== target) return;
     publicScan = { status: 'done', result: payload.result, error: null };
     track('os_public_scan_completed', { kind: payload.result.kind });
@@ -512,3 +516,4 @@ document.querySelector('.stage-layout').addEventListener('click', (event) => {
 
 backButton.addEventListener('click', () => history.back());
 render();
+if (validHandoff) runPublicScan();

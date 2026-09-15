@@ -21,11 +21,24 @@ export function normalizeAuditTarget(input) {
     if (parts.length < 2 || !/^[\w.-]+$/.test(parts[0]) || !/^[\w.-]+$/.test(parts[1])) return null;
     const repo = parts[1].replace(/\.git$/i, '');
     if (!repo || repo === '.' || repo === '..') return null;
-    return { kind: 'github', url: `https://github.com/${parts[0]}/${repo}` };
+    return { kind: 'github', sourceType: 'github', url: `https://github.com/${parts[0]}/${repo}` };
+  }
+  if (host === 'apps.apple.com') {
+    if (!/\/app\/(?:[^/]+\/)?id\d+\/?$/i.test(url.pathname)) return null;
+    url.search = '';
+    url.hash = '';
+    return { kind: 'website', sourceType: 'mobile_app', url: url.toString() };
+  }
+  if (host === 'play.google.com') {
+    const appId = url.searchParams.get('id');
+    if (url.pathname !== '/store/apps/details' || !appId || !/^[a-z0-9._]{3,180}$/i.test(appId)) return null;
+    url.search = `?id=${encodeURIComponent(appId)}`;
+    url.hash = '';
+    return { kind: 'website', sourceType: 'mobile_app', url: url.toString() };
   }
   url.search = '';
   url.hash = '';
-  return { kind: 'website', url: url.toString() };
+  return { kind: 'website', sourceType: 'website', url: url.toString() };
 }
 
 export const questions = {

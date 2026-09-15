@@ -36,6 +36,7 @@
   <link rel="stylesheet" href="/src/showcase-logos.css" />
   <link rel="stylesheet" href="/src/site-motion.css" />
   <link rel="stylesheet" href="/src/human-direction.css" />
+  <link rel="stylesheet" href="/src/home-audit.css" />
   <script type="module" src="/src/home.js"></script>
   <script type="application/ld+json">
   {
@@ -77,11 +78,27 @@
           <div class="human-route-point point-middle"><span class="route-dot"></span><div><small>02 / LOOK CLOSER</small><strong>What is actually happening?</strong><p>Find the useful signals before making promises.</p></div></div>
           <div class="human-route-point point-end"><span class="route-dot"></span><div><small>03 / MOVE FORWARD</small><strong>What matters next?</strong><p>A clear recommendation for your situation.</p></div></div>
         </div>
-        <div class="human-route-entry"><strong>Have a public website or GitHub link?</strong><a href="/os/start/" data-fsai-event="os_onboarding_entry_click" data-fsai-placement="home_route_form">Get your free first look <span aria-hidden="true">↗</span></a><small>Email and consent come first, then your link. We save the request before running the public scan.</small></div>
+        <div class="human-route-entry"><strong>Have something live already?</strong><a href="#free-audit" data-fsai-event="home_audit_jump" data-fsai-placement="home_route_form">Audit it free <span aria-hidden="true">↓</span></a><small>Website, web app, public GitHub repository, or mobile app listing.</small></div>
       </div>
       <div class="hero-signal" aria-hidden="true"><svg viewBox="0 0 1200 180" preserveAspectRatio="none" focusable="false"><defs><linearGradient id="hero-signal-gradient" x1="0" x2="1"><stop offset="0" stop-color="#4677ff" stop-opacity="0"/><stop offset=".38" stop-color="#54e7ff"/><stop offset=".76" stop-color="#4677ff"/><stop offset="1" stop-color="#a99cff" stop-opacity="0"/></linearGradient></defs><path class="hero-signal-base" d="M0 146H185Q211 146 226 128L291 63Q307 47 330 47H565Q589 47 606 63L663 120Q679 137 704 137H930Q954 137 973 119L1030 64Q1046 47 1071 47H1200"/><path class="hero-signal-trace" pathLength="1000" d="M0 146H185Q211 146 226 128L291 63Q307 47 330 47H565Q589 47 606 63L663 120Q679 137 704 137H930Q954 137 973 119L1030 64Q1046 47 1071 47H1200"/><circle class="hero-signal-node" cx="330" cy="47" r="5"/><circle class="hero-signal-node" cx="704" cy="137" r="5"/><circle class="hero-signal-node" cx="1071" cy="47" r="5"/></svg></div>
       <button class="motion-control" type="button" data-motion-toggle aria-pressed="false"><span aria-hidden="true">▶</span><span data-motion-label>Enable motion</span></button>
     </section>
+
+    <section class="home-audit" id="free-audit" aria-labelledby="home-audit-title"><div class="container home-audit-grid">
+      <div class="home-audit-copy"><p class="eyebrow">FREE PUBLIC AUDIT</p><h2 id="home-audit-title">Show us what<br />you've built.</h2><p>Choose the public source. We save your email and link, then run a real evidence-based first look with no paid AI usage.</p><ul><li>See what is already working</li><li>Find the first visible weakness</li><li>Choose a deeper audit or OS setup next</li></ul></div>
+      <form class="home-audit-form" id="home-audit-form">
+        <fieldset><legend>What should we audit?</legend><div class="audit-type-grid">
+          <label><input type="radio" name="source_type" value="website" checked /><span><b>Website</b><small>Public page</small></span></label>
+          <label><input type="radio" name="source_type" value="web_app" /><span><b>Web app</b><small>Public surface</small></span></label>
+          <label><input type="radio" name="source_type" value="github" /><span><b>GitHub</b><small>Public repository</small></span></label>
+          <label><input type="radio" name="source_type" value="mobile_app" /><span><b>Mobile app</b><small>Store listing</small></span></label>
+        </div></fieldset>
+        <div class="home-audit-fields"><label for="home-audit-email">Your email</label><input id="home-audit-email" name="email" type="email" autocomplete="email" maxlength="254" required placeholder="you@company.com" /><label for="home-audit-target">Public link</label><input id="home-audit-target" name="target" type="url" inputmode="url" autocomplete="url" required spellcheck="false" placeholder="https://yourwebsite.com" aria-describedby="home-audit-scope" /></div>
+        <label class="home-audit-consent"><input name="consent" type="checkbox" required /><span>I agree to share my email and public link with 1stStep.ai for this audit and related follow-up. This does not subscribe me to marketing. See the <a href="/privacy.html">privacy policy</a>.</span></label>
+        <button class="button button-primary" type="submit">Run my free audit <span aria-hidden="true">↗</span></button>
+        <p id="home-audit-scope">We inspect one public HTML response. No private pages or accounts.</p><p id="home-audit-status" role="status" aria-live="polite"></p>
+      </form>
+    </div></section>
 
     <div class="proof-strip" aria-label="Existing 1stStep.ai client proof"><div class="container proof-strip-inner"><div class="proof-strip-rating"><span aria-hidden="true">★★★★★</span><strong>Two featured 5-star Google reviews</strong></div><div class="proof-strip-context">Completed website work · client feedback</div><a href="#reviews">Read the reviews <span aria-hidden="true">↗</span></a></div></div>
 
