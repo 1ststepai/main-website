@@ -54,6 +54,7 @@ import {
   paymentScheduleForQuote,
 } from "../../lib/admin/paymentPlans.js";
 import { draftQuoteFromBrief } from "../../lib/admin/quoteBriefAssistant.js";
+import { CommandCenter, COMMAND_VIEWS } from "./CommandCenter.jsx";
 import "./admin.css";
 
 const DEFAULT_TEMPLATES = DEFAULT_CONTRACT_TEMPLATES;
@@ -71,13 +72,20 @@ const EMPTY_WORKSPACE = {
 
 const NAVIGATION = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
+  { id: "command-center", label: "Command Center", icon: Activity },
   { id: "job-agent", label: "Job Agent", icon: Activity },
+  { id: "journey-requests", label: "Contact requests", icon: Mail },
   { id: "clients", label: "Clients", icon: Users },
   { id: "quotes", label: "Quotes", icon: FileText },
   { id: "pricing", label: "Pricing", icon: CircleDollarSign },
   { id: "contracts", label: "Contracts", icon: ScrollText },
   { id: "settings", label: "Settings", icon: Settings },
 ];
+
+function commandViewFromPath() {
+  const segment = window.location.pathname.match(/^\/admin\/(command-center|agents|projects|activity|audits|handoffs|decisions|releases|session-lifecycle)\/?$/)?.[1];
+  return segment || null;
+}
 
 function recordId(prefix) {
   return `${prefix}_${crypto.randomUUID().replaceAll("-", "")}`;
@@ -945,6 +953,100 @@ function operationsStatusClass(status) {
   return "unknown";
 }
 
+function JourneyRequestsPage({ previewMode }) {
+  const [requests, setRequests] = useState([]);
+  const [cursor, setCursor] = useState("0");
+  const [roastRequests, setRoastRequests] = useState([]);
+  const [roastCursor, setRoastCursor] = useState("0");
+  const [roastError, setRoastError] = useState(previewMode ? "Live OS requests are unavailable in admin preview mode." : "");
+  const [setupRequests, setSetupRequests] = useState([]);
+  const [setupCursor, setSetupCursor] = useState("0");
+  const [setupError, setSetupError] = useState(previewMode ? "Live OS setup requests are unavailable in admin preview mode." : "");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(previewMode ? "Live requests are unavailable in admin preview mode." : "");
+
+  async function load(nextCursor = "0") {
+    if (previewMode) return;
+    setLoading(true);
+    setError("");
+    try {
+      const data = await api(`/api/admin-journey-requests?cursor=${encodeURIComponent(nextCursor)}`);
+      setRequests(nextCursor === "0" ? data.requests : (current) => [...current, ...data.requests]);
+      setCursor(data.cursor);
+    } catch (requestError) {
+      setError(requestError.message || "Journey requests could not be loaded.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function loadRoastRequests(nextCursor = "0") {
+    if (previewMode) return;
+    setRoastError("");
+    try {
+      const data = await api(`/api/admin-os-roast-requests?cursor=${encodeURIComponent(nextCursor)}`);
+      setRoastRequests(nextCursor === "0" ? data.requests : (current) => [...current, ...data.requests]);
+      setRoastCursor(data.cursor);
+    } catch (requestError) {
+      setRoastError(requestError.message || "OS first-look requests could not be loaded.");
+    }
+  }
+
+  async function loadSetupRequests(nextCursor = "0") {
+    if (previewMode) return;
+    setSetupError("");
+    try {
+      const data = await api(`/api/admin-os-setup-requests?cursor=${encodeURIComponent(nextCursor)}`);
+      setSetupRequests(nextCursor === "0" ? data.requests : (current) => [...current, ...data.requests]);
+      setSetupCursor(data.cursor);
+    } catch (requestError) {
+      setSetupError(requestError.message || "OS setup requests could not be loaded.");
+    }
+  }
+
+  useEffect(() => { load(); loadRoastRequests(); loadSetupRequests(); }, [previewMode]);
+
+  return (
+    <div className="page-content">
+      <div className="section-heading page-heading"><div><h2>Contact requests</h2><p>Consented systems-diagnosis, OS first-look, and OS setup inquiries. A saved request is a lead receipt, not an audit, setup order, or booked meeting.</p></div><button className="button" type="button" onClick={() => { load(); loadRoastRequests(); loadSetupRequests(); }} disabled={loading || previewMode}><RefreshCw size={16} />Refresh</button></div>
+      <h3>OS setup inquiries</h3>
+      {setupError && <section className="operations-unavailable" role="status"><AlertTriangle size={20} /><div><strong>OS setup requests unavailable</strong><p>{setupError}</p></div></section>}
+      {!setupError && setupRequests.length === 0 && <p>No saved OS setup requests found in this scan.</p>}
+      {setupRequests.map((request) => <section className="operations-panel" key={request.request_id}>
+        <h3>Scoped OS setup inquiry</h3>
+        <p><strong>Contact:</strong> <a href={`mailto:${request.email}`}>{request.email}</a> · <strong>Received:</strong> {new Date(request.created_at).toLocaleString()} · <strong>Reference:</strong> {request.request_id}</p>
+        {request.target && <p><strong>Public link:</strong> {request.target}</p>}
+        {request.first_look_request_id && <p><strong>First-look reference:</strong> {request.first_look_request_id} (visitor supplied)</p>}
+        <p><strong>Goal:</strong> {request.goal}</p>
+        <p><strong>Attribution:</strong> {Object.entries(request.attribution || {}).filter(([, value]) => value).map(([name, value]) => `${name}=${value}`).join(" · ") || "Unknown"}</p>
+        <dl>{Object.entries(request.answers).map(([name, value]) => <div key={name}><dt>{name}</dt><dd>{value}</dd></div>)}</dl>
+      </section>)}
+      {setupCursor !== "0" && <button className="button" type="button" onClick={() => loadSetupRequests(setupCursor)}>Load more OS setup requests</button>}
+      <h3>OS public first looks</h3>
+      {roastError && <section className="operations-unavailable" role="status"><AlertTriangle size={20} /><div><strong>OS requests unavailable</strong><p>{roastError}</p></div></section>}
+      {!roastError && roastRequests.length === 0 && <p>No saved OS first-look requests found in this scan.</p>}
+      {roastRequests.map((request) => <section className="operations-panel" key={request.request_id}>
+        <h3>{{ github: "Public GitHub first look", web_app: "Public web app first look", mobile_app: "Public mobile app listing first look", website: "Public website first look" }[request.source_type] || (request.kind === "github" ? "Public GitHub first look" : "Public website first look")}</h3>
+        <p><strong>Contact:</strong> <a href={`mailto:${request.email}`}>{request.email}</a> · <strong>Received:</strong> {new Date(request.created_at).toLocaleString()} · <strong>Reference:</strong> {request.request_id}</p>
+        <p><strong>Public link:</strong> {request.target}</p>
+        <p><strong>Optional marketing:</strong> {request.marketing_opt_in ? `Requested updates · ${request.marketing_consent_version || "wording unknown"} · not synced to Brevo` : "No marketing opt-in"}</p>
+        <p><strong>Attribution:</strong> {Object.entries(request.attribution || {}).filter(([, value]) => value).map(([name, value]) => `${name}=${value}`).join(" · ") || "Unknown"}</p>
+      </section>)}
+      {roastCursor !== "0" && <button className="button" type="button" onClick={() => loadRoastRequests(roastCursor)}>Load more OS requests</button>}
+      <h3>Begin Your Journey</h3>
+      {error && <section className="operations-unavailable" role="status"><AlertTriangle size={20} /><div><strong>Requests unavailable</strong><p>{error}</p></div></section>}
+      {!error && !loading && requests.length === 0 && <p>No saved requests found in this scan. Additional pages may exist if a cursor is available.</p>}
+      {requests.map((request) => <section className="operations-panel" key={request.request_id}>
+        <h3>{request.answers.business}</h3>
+        <p><strong>Contact:</strong> <a href={`mailto:${request.email}`}>{request.email}</a> · <strong>Received:</strong> {new Date(request.created_at).toLocaleString()} · <strong>Reference:</strong> {request.request_id}</p>
+        <dl>{Object.entries(request.answers).filter(([, value]) => value).map(([name, value]) => <div key={name}><dt>{name.replaceAll("_", " ")}</dt><dd>{value}</dd></div>)}</dl>
+        <p><strong>Attribution:</strong> {Object.entries(request.attribution).filter(([, value]) => value).map(([name, value]) => `${name}=${value}`).join(" · ") || "Unknown"}</p>
+      </section>)}
+      {cursor !== "0" && <button className="button" type="button" onClick={() => load(cursor)} disabled={loading}>Load more</button>}
+    </div>
+  );
+}
+
 function JobAgentOperationsPage({ previewMode }) {
   const [operations, setOperations] = useState(null);
   const [loading, setLoading] = useState(!previewMode);
@@ -1696,7 +1798,8 @@ function QuotePreview({ quote, client, onClose, onSend, previewMode }) {
 function StudioApp({ previewMode = false }) {
   const [workspace, setWorkspace] = useState(previewMode ? previewWorkspace() : EMPTY_WORKSPACE);
   const [workspaceLoading, setWorkspaceLoading] = useState(!previewMode);
-  const [page, setPage] = useState(previewMode ? "quote-editor" : "overview");
+  const [page, setPage] = useState(commandViewFromPath() ? "command-center" : previewMode ? "quote-editor" : "overview");
+  const [commandView, setCommandView] = useState(commandViewFromPath() || "agents");
   const [selectedQuoteId, setSelectedQuoteId] = useState(previewMode ? workspace.quotes[0]?.id : null);
   const [previewQuoteId, setPreviewQuoteId] = useState(null);
   const [dirty, setDirty] = useState(false);
@@ -1712,6 +1815,29 @@ function StudioApp({ previewMode = false }) {
       .catch((error) => setMessage(error.message))
       .finally(() => setWorkspaceLoading(false));
   }, [previewMode]);
+
+  useEffect(() => {
+    function restorePath() {
+      const command = commandViewFromPath();
+      setCommandView(command || "agents");
+      setPage(command ? "command-center" : "overview");
+    }
+    window.addEventListener("popstate", restorePath);
+    return () => window.removeEventListener("popstate", restorePath);
+  }, []);
+
+  function navigatePage(nextPage) {
+    const path = (nextPage === "command-center" ? `/admin/${commandView}` : "/admin/") + (previewMode ? "?preview=1" : "");
+    if (`${window.location.pathname}${window.location.search}` !== path) window.history.pushState({}, "", path);
+    setPage(nextPage);
+  }
+
+  function navigateCommandView(nextView) {
+    if (!COMMAND_VIEWS.some(([id]) => id === nextView)) return;
+    window.history.pushState({}, "", `/admin/${nextView}${previewMode ? "?preview=1" : ""}`);
+    setCommandView(nextView);
+    setPage("command-center");
+  }
 
   useEffect(() => {
     if (!dirty) return undefined;
@@ -1914,11 +2040,13 @@ function StudioApp({ previewMode = false }) {
   const selectedQuote = workspace.quotes.find((quote) => quote.id === selectedQuoteId);
   const previewQuote = workspace.quotes.find((quote) => quote.id === previewQuoteId);
   const previewClient = workspace.clients.find((client) => client.id === previewQuote?.client_id);
-  const pageTitle = page === "quote-editor" ? (selectedQuote?.project_title || "New quote") : NAVIGATION.find((item) => item.id === page)?.label || "1stStep Studio";
+  const pageTitle = page === "quote-editor" ? (selectedQuote?.project_title || "New quote") : page === "command-center" ? COMMAND_VIEWS.find(([id]) => id === commandView)?.[1] || "Command Center" : NAVIGATION.find((item) => item.id === page)?.label || "1stStep Studio";
 
   let pageContent;
   if (page === "overview") pageContent = <Overview workspace={workspace} onEditQuote={editQuote} onNewQuote={newQuote} />;
+  if (page === "command-center") pageContent = <CommandCenter api={api} previewMode={previewMode} view={commandView} onViewChange={navigateCommandView} />;
   if (page === "job-agent") pageContent = <JobAgentOperationsPage previewMode={previewMode} />;
+  if (page === "journey-requests") pageContent = <JourneyRequestsPage previewMode={previewMode} />;
   if (page === "clients") pageContent = <ClientsPage workspace={workspace} updateWorkspace={updateWorkspace} />;
   if (page === "quotes") pageContent = <QuotesPage workspace={workspace} onEditQuote={editQuote} onNewQuote={newQuote} />;
   if (page === "pricing") pageContent = <PricingPage workspace={workspace} updateWorkspace={updateWorkspace} onStartQuote={newQuote} />;
@@ -1939,7 +2067,7 @@ function StudioApp({ previewMode = false }) {
   const editorActions = page === "quote-editor" && selectedQuote;
   return (
     <div className="studio-shell">
-      <Sidebar page={page === "quote-editor" ? "quotes" : page} setPage={setPage} onLogout={logout} mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
+      <Sidebar page={page === "quote-editor" ? "quotes" : page} setPage={navigatePage} onLogout={logout} mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
       <div className="studio-main">
         <Topbar
           title={pageTitle}
@@ -1949,12 +2077,12 @@ function StudioApp({ previewMode = false }) {
             <>
               {message && <span className="save-message" role="status">{message}</span>}
               {page === "quote-editor" && <button className="button ghost" onClick={() => setPage("quotes")}><ArrowLeft size={16} />All quotes</button>}
-              {page !== "job-agent" && <button className="button" onClick={save} disabled={saving || (!dirty && !previewMode)}><Save size={16} />{saving ? "Saving…" : dirty ? "Save draft" : "Saved"}</button>}
+              {page !== "job-agent" && page !== "journey-requests" && page !== "command-center" && <button className="button" onClick={save} disabled={saving || (!dirty && !previewMode)}><Save size={16} />{saving ? "Saving…" : dirty ? "Save draft" : "Saved"}</button>}
               {editorActions && <button className="button primary" disabled={saving} onClick={() => openPreview(selectedQuote.id)}><Eye size={17} />{dirty ? "Save, preview & send" : "Preview & send"}</button>}
             </>
           )}
         />
-        {previewMode && <div className="preview-banner"><Eye size={15} />Local design preview. Sample records stay in this browser session and are never uploaded.</div>}
+        {previewMode && page !== "command-center" && <div className="preview-banner"><Eye size={15} />Local design preview. Sample records stay in this browser session and are never uploaded.</div>}
         <div className="workspace-body">{pageContent}</div>
       </div>
       {previewQuote && previewClient && (

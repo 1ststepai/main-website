@@ -11,6 +11,12 @@
       typicalTimeline: "",
       depositTerms: ""
     }),
+    aiOperationsAudit: Object.freeze({
+      enabled: true,
+      priceDisplay: "Starting around $1,500",
+      creditDisplay: "May be credited toward an approved implementation project.",
+      checkoutEnabled: false
+    }),
     websiteBlueprint: Object.freeze({
       enabled: false,
       priceDisplay: "",

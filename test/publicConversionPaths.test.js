@@ -5,12 +5,19 @@ import { readFile, readdir, stat } from "node:fs/promises";
 const root = new URL("../", import.meta.url);
 const source = (path) => readFile(new URL(path, root), "utf8");
 
-test("the homepage leads with systems architecture and keeps products distinct", async () => {
+test("the homepage leads with consultancy and preserves the free audit and OS paths", async () => {
   const html = await source("index.html");
   const llms = await source("public/llms.txt");
-  assert.match(html, /Build the system <em>behind your growth/);
-  assert.match(html, /lead capture, CRM architecture, routing, follow-up, attribution, reporting/i);
-  assert.match(html, /href="\/journey\/"/);
+  assert.match(html, /We build the systems/);
+  assert.match(html, /that move your business forward/);
+  assert.match(html, /Find What We Can Automate/);
+  assert.match(html, /href="\/journey\/\?intent=ai-operations-audit"/);
+  assert.match(html, /id="home-audit-form"/);
+  for (const type of ['website', 'web_app', 'github', 'mobile_app']) assert.match(html, new RegExp(`name="source_type" value="${type}"`));
+  assert.match(html, /Run my free audit/);
+  assert.match(html, /AI Operations Audit/);
+  assert.match(html, /Lead paths, CRM architecture, follow-up, reporting/i);
+  assert.match(html, /href="\/services\/ai-operations\.html"/);
   assert.match(html, /href="\/services\/revenue-systems\.html"/);
   assert.match(html, /href="https:\/\/app\.1ststep\.ai\/"/);
   assert.match(html, /Public concept · product flow in development|public concept/i);
@@ -21,27 +28,32 @@ test("the homepage leads with systems architecture and keeps products distinct",
   assert.doesNotMatch(html, /<a\b[^>]*\bhref=(?:""|'')/i);
 });
 
-test("the systems funnel and service links have focused destinations", async () => {
+test("the consultancy funnel and service links have focused destinations", async () => {
   const html = await source("index.html");
   for (const anchor of ["problems", "how", "services", "work"]) assert.match(html, new RegExp('id="' + anchor + '"'));
-  for (const path of ["websites", "internal-tools", "revenue-systems"]) {
+  for (const path of ["websites", "app-builds", "ai-operations", "revenue-systems"]) {
     assert.match(html, new RegExp('href="/services/' + path + '\\.html"'));
   }
-  assert.match(html, /mailto:evan@1ststep\.ai\?subject=1stStep%20System%20Audit/);
+  assert.match(html, /Starting around \$1,500/);
   assert.doesNotMatch(html, /href="\/book\/"/);
 });
 
-test("the journey gives a local diagnosis and only opens email by choice", async () => {
+test("the journey gives a local diagnosis and requires explicit consent to request review", async () => {
   const html = await source("journey/index.html");
   const script = await source("journey/journey.js");
   const config = await source("vite.config.js");
   const sitemap = await source("public/sitemap.xml");
   assert.equal((html.match(/class="step" data-step=/g) || []).length, 6);
   assert.match(html, /INITIAL FIT SIGNAL/);
-  assert.match(html, /No account or AI request is created/);
+  assert.match(html, /No account or AI audit is created/);
+  assert.match(html, /id="request-consent"[^>]*type="checkbox"[^>]*required/);
+  assert.match(html, /id="clear-action"/);
   assert.match(script, /document\.createElement\('dd'\)/);
   assert.match(script, /encodeURIComponent\(emailBody\)/);
-  assert.doesNotMatch(script, /fetch\(|localStorage|sessionStorage/);
+  assert.match(script, /fetch\('\/api\/journey-intake'/);
+  assert.match(script, /localStorage\.setItem/);
+  assert.match(script, /journey_ai_operations_complete/);
+  assert.match(script, /intent/);
   assert.match(config, /journey: "journey\/index\.html"/);
   assert.match(sitemap, /www\.1ststep\.ai\/journey\//);
 });
@@ -71,9 +83,24 @@ test("homepage metadata and assets identify the systems consultancy", async () =
 
   assert.match(html, /<link rel="canonical" href="https:\/\/www\.1ststep\.ai\/"/);
   assert.match(html, /og-home\.png/);
-  assert.match(html, /<meta name="description" content="1stStep\.ai designs and builds the systems/);
-  assert.deepEqual(data["@graph"].map((item) => item["@type"]), ["Organization", "WebSite", "WebPage", "CreativeWork", "SoftwareApplication"]);
+  assert.match(html, /<meta name="description" content="1stStep\.ai finds operational bottlenecks/);
+  assert.deepEqual(data["@graph"].map((item) => item["@type"]), ["Organization", "WebSite", "WebPage", "Service", "CreativeWork", "SoftwareApplication"]);
   assert.equal((await stat(new URL("public/assets/og-home.png", root))).size > 5000, true);
+});
+
+test("AI Operations has an indexable service page and one qualified Journey route", async () => {
+  const page = await source("services/ai-operations.html");
+  const config = await source("public/commercial-config.js");
+  const vite = await source("vite.config.js");
+  const sitemap = await source("public/sitemap.xml");
+  assert.match(page, /AI Operations Audit/);
+  assert.match(page, /href="\/journey\/\?intent=ai-operations-audit"/);
+  assert.match(page, /paid diagnostic/i);
+  assert.doesNotMatch(page, /Buy now/i);
+  assert.match(config, /priceDisplay: "Starting around \$1,500"/);
+  assert.match(config, /checkoutEnabled: false/);
+  assert.match(vite, /aiOperations/);
+  assert.match(sitemap, /services\/ai-operations\.html/);
 });
 
 test("the website service page keeps website visitors on website-intent paths", async () => {

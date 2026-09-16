@@ -1,0 +1,72 @@
+/* Sources: STP public/brand/stp-logo-transparent.png (also live at swingtradepros.com),
+   Real Rank live header SVG at www.real-rank.ai, and the locked 1stStep asset for Job Agent. */
+.showcase-stp,
+.showcase-rank,
+.showcase-agent{
+  position:relative;
+  isolation:isolate;
+  padding:clamp(20px,3vw,38px);
+}
+.showcase-stp{
+  padding:12px;
+  background:radial-gradient(ellipse at 48% 52%,#173c38 0%,#0a1b28 56%,#07121f 100%);
+}
+.showcase-stp .portfolio-stp-logo{
+  width:min(100%,530px);
+  height:auto;
+  max-height:300px;
+  object-fit:contain;
+  filter:drop-shadow(0 18px 25px #0008);
+}
+.showcase-rank{
+  background:radial-gradient(ellipse at 50% 45%,#24301d 0%,#101b1c 50%,#080f19 100%);
+}
+.portfolio-rank-lockup{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:clamp(8px,1.3vw,18px);
+  width:100%;
+}
+.showcase-rank .portfolio-rank-lockup img{
+  width:clamp(78px,9vw,122px);
+  height:auto;
+  flex:none;
+  object-fit:contain;
+}
+.portfolio-rank-lockup strong{
+  color:#f5d58a;
+  font:800 clamp(1.65rem,3vw,2.9rem)/1 var(--display);
+  letter-spacing:.015em;
+  white-space:nowrap;
+  text-shadow:0 0 20px #f5b82e38;
+}
+.showcase-agent{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  background:radial-gradient(ellipse at 50% 45%,#1a3453 0%,#121f39 53%,#0a1428 100%);
+}
+.showcase-agent .portfolio-agent-logo{
+  width:min(68%,275px);
+  height:auto;
+  max-height:210px;
+  object-fit:contain;
+  filter:drop-shadow(0 10px 25px #06142888);
+}
+.portfolio-agent-label{
+  color:#e4f4ff;
+  font:650 clamp(1.12rem,2vw,1.7rem)/1.15 var(--display);
+  letter-spacing:-.035em;
+  text-align:center;
+}
+@media(max-width:620px){
+  .showcase-stp,.showcase-rank,.showcase-agent{padding:20px}
+  .showcase-stp{padding:8px}
+  .showcase-stp .portfolio-stp-logo{width:min(100%,360px);max-height:180px}
+  .showcase-rank .portfolio-rank-lockup img{width:80px}
+  .portfolio-rank-lockup strong{font-size:clamp(1.4rem,7vw,2rem)}
+  .showcase-agent .portfolio-agent-logo{width:min(56%,165px);max-height:140px}
+}
