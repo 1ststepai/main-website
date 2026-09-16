@@ -33,7 +33,7 @@ The independent 1stStep.ai Ecosystem Auditor reviewed draft [PR #7](https://gith
 | `ECO-027` | P2 · `SHIP-P0-01` / Journey C | Evan selects the protected storage destination and retention boundary; public-site lead then proves hosted consented write, authorized readback and honest failure behavior. |
 | `ECO-019` (carried) | P2 · admin security | Public-site lead applies private/noindex/admin headers to bare `/admin` as well as nested routes and verifies the hosted response. |
 
-The existing `SHIP-P1-03` review item is now **REMEDIATION REQUIRED** rather than audit-UNKNOWN. The auditor requests a new exact-SHA submission using `2026-09-13-ecosystem-remediation-handoff.md` §4 after the bounded fixes and owner decisions. App-family implementation remains external to this board.
+The existing `SHIP-P1-03` review item is now **REMEDIATION REQUIRED** rather than audit-UNKNOWN. Mission Control attached the original report to canonical task `1stStep.ai website:codex/public-phase2-release-20260916` as handoff `bd8b671d4fbc66be143f8cfab2a8a56ed0982915021af7c533b2fec10c6a4c40`. Its routing state is `PREPARED_NOT_SENT`; no agent message was dispatched. Its generic `audit_status` remains `UNKNOWN` because raw FAIL reports are not normalized by that registry; this contract and the source report carry the explicit **FAIL** verdict. The auditor requests a new exact-SHA submission using `2026-09-13-ecosystem-remediation-handoff.md` §4 after the bounded fixes and owner decisions. App-family implementation remains external to this board.
 
 ### Public/OS Release Train — source reconciliation, 2026-09-14
 
