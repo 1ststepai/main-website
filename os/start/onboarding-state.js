@@ -8,6 +8,16 @@ export const modes = {
 
 export const capabilityNames = ['Research', 'Product', 'Design', 'Engineering', 'AI', 'Security', 'Business', 'Pricing', 'Media', 'Discovery', 'Growth', 'Sales', 'Automation', 'Operations', 'Recovery', 'Learning'];
 
+export function safeInspectedHref(value) {
+  if (typeof value !== 'string' || value !== value.trim()) return null;
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:' && url.hostname && !url.username && !url.password ? url.href : null;
+  } catch {
+    return null;
+  }
+}
+
 export function normalizeAuditTarget(input) {
   const raw = String(input || '').trim();
   if (!raw) return null;
@@ -38,7 +48,7 @@ export function normalizeAuditTarget(input) {
   }
   url.search = '';
   url.hash = '';
-  return { kind: 'website', sourceType: 'website', url: url.toString() };
+  return { kind: 'website', sourceType: 'website', url: `${url.origin}/` };
 }
 
 export const questions = {

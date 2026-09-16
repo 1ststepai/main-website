@@ -1,9 +1,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { deriveCapabilities, deriveGenome, getRecommendations, normalizeAuditTarget, suggestMode } from './onboarding-state.js';
+import { deriveCapabilities, deriveGenome, getRecommendations, normalizeAuditTarget, safeInspectedHref, suggestMode } from './onboarding-state.js';
+
+test('scan evidence links only absolute HTTPS URLs', () => {
+  assert.equal(safeInspectedHref('https://example.com/path'), 'https://example.com/path');
+  for (const input of ['javascript:alert(1)', 'data:text/html,<script>alert(1)</script>', '//example.com', ' https://example.com', 'https://user:pass@example.com', 'not a URL']) {
+    assert.equal(safeInspectedHref(input), null, input);
+  }
+});
 
 test('first-look target accepts public website or GitHub locators without secrets', () => {
   assert.deepEqual(normalizeAuditTarget('example.com/?utm_source=chat#top'), { kind: 'website', sourceType: 'website', url: 'https://example.com/' });
+  assert.deepEqual(normalizeAuditTarget('https://example.com/private-path'), { kind: 'website', sourceType: 'website', url: 'https://example.com/' });
   assert.deepEqual(normalizeAuditTarget('https://github.com/owner/repo/tree/main?token=secret'), { kind: 'github', sourceType: 'github', url: 'https://github.com/owner/repo' });
   assert.deepEqual(normalizeAuditTarget('https://play.google.com/store/apps/details?id=com.example.app&utm_source=removed'), { kind: 'website', sourceType: 'mobile_app', url: 'https://play.google.com/store/apps/details?id=com.example.app' });
   for (const input of ['localhost:3000', 'http://127.0.0.1', 'https://user:pass@example.com', 'javascript:alert(1)', 'https://github.com/owner']) {

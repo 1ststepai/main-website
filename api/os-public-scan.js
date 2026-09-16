@@ -1,6 +1,7 @@
 import { scanPublicTarget } from '../lib/osPublicScan.js';
 import { checkRateLimit, setRateLimitHeaders } from '../lib/http/rateLimit.js';
 import { applyCors, getRequestHeader } from '../lib/http/cors.js';
+import { getSavedRoastScanTarget } from '../lib/osRoastIntake.js';
 
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
@@ -15,7 +16,13 @@ export default async function handler(req, res) {
   if (!limit.allowed) { res.statusCode = 429; res.end(JSON.stringify({ error: 'RATE_LIMITED' })); return; }
   const input = req.body.url;
   try {
-    const result = await scanPublicTarget(input, req.body.source_type);
+    const savedTarget = await getSavedRoastScanTarget(req.body.request_id, input, req.body.source_type);
+    if (!savedTarget) {
+      res.statusCode = 403;
+      res.end(JSON.stringify({ ok: false, error: 'SAVED_REQUEST_REQUIRED' }));
+      return;
+    }
+    const result = await scanPublicTarget(savedTarget, req.body.source_type);
     res.statusCode = 200;
     res.end(JSON.stringify({ ok: true, result }));
   } catch (error) {
