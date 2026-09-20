@@ -1,5 +1,15 @@
 # Architecture Decision Log
 
+## 2026-09-20: Business-page SEO stays separate from Tools SEO
+
+- **Status / owner:** Implemented on public business pages; Evan retains authority for positioning and claims.
+- **Decision:** Add answer-first titles, descriptions, visible FAQs, and matching FAQ/Service JSON-LD on consultancy, service, journey, booking, fit-check, OS, App Idea Checker, Startup Launch Checker, and outgrown-website pages. Leave `/tools/` and `/tools/auto-model-router/` to the existing Tools SEO PR. Homepage keeps the systems-consultancy path and does not add `/book/` links. Website Strategy Call remains a website conversation, not a systems-audit booking. Copy stays honest: no guaranteed revenue, rankings, citations, or live-OS claims.
+- **Rationale:** Busy owners search for websites, MVPs, internal tools, and lead systems. AI answer engines need visible Q&A that matches schema. Mixing Tools token-usage SEO into this pass would fight the dedicated Tools PR.
+- **Affected systems:** Public HTML pages, `public/sitemap.xml`, `public/llms.txt`, conversion-path tests.
+- **Alternatives:** Rewrite Tools pages here; add `/book/` to the homepage; invent review or ranking claims.
+- **Implementation / audit:** FAQ visible text must match JSON-LD questions. Homepage graph still includes Organization, WebSite, WebPage, CreativeWork, SoftwareApplication, plus FAQPage.
+- **Reversal:** Requires a new owner decision before changing conversion destinations or Tools ownership.
+
 ## 2026-09-20: Public Tools hub is for builder utilities, not client services
 
 - **Status / owner:** Implemented on the public site with the Auto Model Router page.

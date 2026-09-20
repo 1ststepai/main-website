@@ -3,20 +3,25 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Startup Launch Readiness Checker | 1stStep.ai</title>
+    <title>Is Your Startup Ready to Launch? | 1stStep.ai</title>
     <meta
       name="description"
-      content="Turn a startup idea into a launch plan with a readiness score, prioritized checklist, weekly actions, and founder-friendly risk flags."
+      content="Is your startup ready to launch? Get a readiness score, prioritized checklist, weekly actions, and risk flags. Independent planning tool, not legal or financial advice."
     />
-    <link rel="canonical" href="https://1ststep.ai/startup-launch-checker/" />
-    <meta property="og:title" content="Startup Launch Readiness Checker | 1stStep.ai" />
+    <link rel="canonical" href="https://www.1ststep.ai/startup-launch-checker/" />
+    <meta name="robots" content="index,follow" />
+    <meta property="og:title" content="Is Your Startup Ready to Launch? | 1stStep.ai" />
     <meta
       property="og:description"
       content="A founder-facing planning tool for turning a vague startup idea into a clear launch plan."
     />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://1ststep.ai/startup-launch-checker/" />
-    <meta property="og:image" content="https://1ststep.ai/assets/firststep-social-preview-v3.jpg" />
+    <meta property="og:site_name" content="1stStep.ai" />
+    <meta property="og:url" content="https://www.1ststep.ai/startup-launch-checker/" />
+    <meta property="og:image" content="https://www.1ststep.ai/assets/firststep-social-preview-v3.jpg" />
+    <script type="application/ld+json">
+      {"@context":"https://schema.org","@graph":[{"@type":"WebApplication","name":"Startup Launch Readiness Checker","url":"https://www.1ststep.ai/startup-launch-checker/","applicationCategory":"BusinessApplication","isAccessibleForFree":true,"description":"Independent planning tool that turns a startup idea into a launch plan with a readiness score and checklist."},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What does this checker do?","acceptedAnswer":{"@type":"Answer","text":"It turns a startup idea into a launch plan with a readiness score, checklist, and weekly actions."}},{"@type":"Question","name":"Is this legal or financial advice?","acceptedAnswer":{"@type":"Answer","text":"No. It is an independent product prototype and planning tool. It is not legal, tax, financial, or investment advice."}},{"@type":"Question","name":"How is this different from the App Idea Checker?","acceptedAnswer":{"@type":"Answer","text":"The App Idea Checker scores whether an idea is worth building. This tool focuses on launch readiness after you have an idea."}}]}]}
+    </script>
     <meta name="theme-color" content="#080b16" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
@@ -608,6 +613,47 @@
         font-size: 0.94rem;
       }
 
+      .seo-faq {
+        margin: 48px 0 16px;
+        padding-top: 36px;
+        border-top: 1px solid var(--line);
+      }
+
+      .seo-faq h2 {
+        margin: 0 0 10px;
+        font-size: clamp(28px, 4vw, 40px);
+        letter-spacing: -0.04em;
+      }
+
+      .faq-list {
+        display: grid;
+        gap: 12px;
+        margin: 22px 0 0;
+      }
+
+      .faq-list details {
+        padding: 16px 18px;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: var(--panel);
+      }
+
+      .faq-list summary {
+        cursor: pointer;
+        font-weight: 700;
+      }
+
+      .faq-list p {
+        margin: 12px 0 0;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      .faq-list a {
+        color: var(--indigo);
+        font-weight: 700;
+      }
+
       @media (max-width: 980px) {
         .hero,
         .tool-grid {
@@ -835,8 +881,8 @@
         </a>
         <div class="nav-links">
           <a class="nav-link" href="/app-idea-viability-checker.html">App Idea Checker</a>
-          <a class="nav-link" href="/#portfolio">Portfolio</a>
-          <a class="nav-link" href="/#contact">Contact</a>
+          <a class="nav-link" href="/fit-check/">Website Fit Check</a>
+          <a class="nav-link" href="/book/">Book a Call</a>
         </div>
       </nav>
 
@@ -1045,6 +1091,15 @@
             <article class="note"><strong>MVP scope</strong><p>Intake, readiness score, prioritized checklist, weekly action plan, and risk flags.</p></article>
             <article class="note"><strong>What I would test next</strong><p>Onboarding completion, checklist conversion, repeated blocker patterns, and founder confidence.</p></article>
           </div>
+        </div>
+      </section>
+      <section class="seo-faq" id="faq" aria-labelledby="faq-title">
+        <p class="eyebrow">Common questions</p>
+        <h2 id="faq-title">A planning tool, not legal advice.</h2>
+        <div class="faq-list">
+          <details><summary>What does this checker do?</summary><p>It turns a startup idea into a launch plan with a readiness score, checklist, and weekly actions.</p></details>
+          <details><summary>Is this legal or financial advice?</summary><p>No. It is an independent product prototype and planning tool. It is not legal, tax, financial, or investment advice.</p></details>
+          <details><summary>How is this different from the App Idea Checker?</summary><p>The App Idea Checker scores whether an idea is worth building. This tool focuses on launch readiness after you have an idea.</p><p><a href="/app-idea-viability-checker.html">Open the App Idea Checker</a> · <a href="/fit-check/">Website Fit Check</a></p></details>
         </div>
       </section>
     </main>
