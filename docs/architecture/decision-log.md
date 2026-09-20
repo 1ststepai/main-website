@@ -1,5 +1,15 @@
 # Architecture Decision Log
 
+## 2026-09-20: Auto Model Router listings stay honest about marketplace status
+
+- **Status / owner:** Implemented on the public Tools pages; Evan retains authority for claiming an official marketplace is live.
+- **Decision:** Advertise Auto Model Router install with real public URLs only: GitHub (install works today) and the cursor.directory community listing. Label cursor.directory as community and do not claim it is live in Cursor’s official Marketplace. Show Cursor official Marketplace and Claude community plugin catalog as “Submitted — pending review” with no invented product URLs. Optional Anthropic docs link for how community plugins are discovered is allowed. Codex public directory remains out of scope. The plugin must not be described as guaranteeing billing or token savings. The live-motion demo from the later-merged pass remains on the same page and is a separate honesty rule (motion replay, not savings proof).
+- **Rationale:** Marketplace submissions can exist before a public product page. Linking `/marketplace/publish` or a guessed slug would over-claim availability.
+- **Affected systems:** `/tools/auto-model-router/`, `/tools/`, `public/llms.txt`, site README.
+- **Alternatives:** Hide pending catalogs; wait until official product URLs exist; invent marketplace slugs.
+- **Implementation / audit:** Tests must keep GitHub and cursor.directory hrefs, require the pending status strings, and reject `cursor.com/marketplace/publish` or a fake official product URL.
+- **Reversal:** Requires a new owner decision before labeling official Cursor or Claude listings as live.
+
 ## 2026-09-20: Auto Model Router live demo is a motion replay of the real pass, not a slide deck
 
 - **Status / owner:** Implemented on `/tools/auto-model-router/`; Evan remains authority for any later billing or estimator claims. Supersedes the earlier “play Evan’s recorded Codex MP4 as a 40-second session recording” presentation after Evan rejected the instructional slide-deck cut.
