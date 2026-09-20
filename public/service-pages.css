@@ -37,6 +37,12 @@ p,li{color:#aeb4c9}
 .cta .btn{margin-top:0;background:#fff;color:#7163ff}
 .cta .btn.ghost{background:rgba(255,255,255,.06);color:#fff;border-color:rgba(255,255,255,.2)}
 footer{border-top-color:rgba(255,255,255,.08);color:#788097}
+.faq{margin:48px 0 8px;padding-top:36px;border-top:1px solid rgba(255,255,255,.1);position:relative}
+.faq h2{margin:0 0 10px;color:#f7f8ff;font-size:clamp(26px,4vw,36px);letter-spacing:-.04em}
+.faq-lede{margin:0 0 22px;max-width:68ch}
+.faq article{margin:0 0 12px;padding:18px 20px;border:1px solid rgba(255,255,255,.1);border-radius:16px;background:rgba(255,255,255,.03)}
+.faq h3{margin:0 0 8px;color:#f7f8ff;font-size:17px}
+.faq p{margin:0}
 a:focus-visible{outline:2px solid #65e7ff;outline-offset:4px}
 @media(max-width:760px){
   .wrap{width:calc(100% - 28px)}

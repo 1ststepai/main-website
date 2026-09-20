@@ -72,8 +72,9 @@ test("homepage metadata and assets identify the systems consultancy", async () =
 
   assert.match(html, /<link rel="canonical" href="https:\/\/www\.1ststep\.ai\/"/);
   assert.match(html, /og-home\.png/);
-  assert.match(html, /<meta name="description" content="1stStep\.ai designs and builds the systems/);
-  assert.deepEqual(data["@graph"].map((item) => item["@type"]), ["Organization", "WebSite", "WebPage", "CreativeWork", "SoftwareApplication"]);
+  assert.match(html, /<title>Websites, apps, and AI automation for busy owners \| 1stStep\.ai<\/title>/);
+  assert.match(html, /<meta name="description" content="1stStep\.ai builds websites that get leads/);
+  assert.deepEqual(data["@graph"].map((item) => item["@type"]), ["Organization", "WebSite", "WebPage", "CreativeWork", "SoftwareApplication", "FAQPage"]);
   assert.equal((await stat(new URL("public/assets/og-home.png", root))).size > 5000, true);
 });
 
@@ -223,4 +224,36 @@ test("the Auto Model Router page is optional, honest, and opt-in", async () => {
   assert.match(config, /autoModelRouter: "tools\/auto-model-router\/index.html"/);
   assert.match(sitemap, /tools\/auto-model-router\//);
   assert.match(readme, /\/tools\/auto-model-router\//);
+});
+
+test("sitewide business pages keep answer-first titles and matching FAQ schema", async () => {
+  const pages = [
+    ["index.html", "Websites, apps, and AI automation for busy owners | 1stStep.ai", "What does 1stStep.ai build?"],
+    ["services/websites.html", "A website that gets leads | 1stStep.ai", "Can you rebuild a website that no longer gets leads?"],
+    ["services/app-builds.html", "Someone to build my iOS app | 1stStep.ai", "Can I hire someone to build my app?"],
+    ["services/mvp-builds.html", "Hire someone to build your MVP | 1stStep.ai", "Can I hire someone to build my MVP?"],
+    ["services/internal-tools.html", "AI automation for my business | 1stStep.ai", "Do you install an AI chatbot for small businesses by default?"],
+    ["services/revenue-systems.html", "Revenue systems and ops automation | 1stStep.ai", "Is this the same as booking a website strategy call?"],
+    ["journey/index.html", "Find the bottleneck in your business | 1stStep.ai", "Is this a paid audit or a booking?"],
+    ["book/index.html", "Book a website strategy call | 1stStep.ai", "Is this a systems audit?"],
+    ["fit-check/index.html", "Is my website a fit to rebuild? | 1stStep.ai", "What is a Website Fit Check?"],
+    ["os/index.html", "AI engineering operating system | 1stStep OS", "Is 1stStep OS a live product I can log into?"],
+    ["app-idea-viability-checker.html", "Is my app idea worth building? | 1stStep.ai", "Is the checker a guarantee that my idea will work?"],
+    ["startup-launch-checker/index.html", "Startup launch checklist | 1stStep.ai", "Is this legal, tax, or investment advice?"],
+    ["campaigns/outgrown-website/index.html", "I outgrew my website | 1stStep.ai", "Is this Real Rank or local SEO?"],
+    ["campaigns/morris-county-free-website/index.html", "Free Website Build for Morris County Businesses | 1stStep.ai", "Does 1stStep.ai buy my domain or hosting?"],
+  ];
+
+  const escape = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  for (const [path, title, faq] of pages) {
+    const html = await source(path);
+    assert.match(html, new RegExp(`<title>${escape(title)}</title>`));
+    assert.match(html, /"@type":\s*"FAQPage"/);
+    assert.match(html, new RegExp(escape(faq)));
+  }
+
+  const sitemap = await source("public/sitemap.xml");
+  assert.match(sitemap, /www\.1ststep\.ai\/startup-launch-checker\//);
+  const llms = await source("public/llms.txt");
+  assert.match(llms, /builds apps, MVPs, websites, and practical AI automations/);
 });

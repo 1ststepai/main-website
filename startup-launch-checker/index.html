@@ -3,19 +3,30 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Startup Launch Readiness Checker | 1stStep.ai</title>
+    <title>Startup launch checklist | 1stStep.ai</title>
     <meta
       name="description"
       content="Turn a startup idea into a launch plan with a readiness score, prioritized checklist, weekly actions, and founder-friendly risk flags."
     />
-    <link rel="canonical" href="https://1ststep.ai/startup-launch-checker/" />
-    <meta property="og:title" content="Startup Launch Readiness Checker | 1stStep.ai" />
+    <link rel="canonical" href="https://www.1ststep.ai/startup-launch-checker/" />
+    <meta name="robots" content="index,follow" />
+    <script type="application/ld+json">
+      {"@context":"https://schema.org","@graph":[
+        {"@type":"WebApplication","name":"Startup Launch Checker","url":"https://www.1ststep.ai/startup-launch-checker/","applicationCategory":"BusinessApplication","isAccessibleForFree":true,"description":"A founder-facing planning tool that turns a startup idea into a readiness score, checklist, and weekly actions."},
+        {"@type":"FAQPage","mainEntity":[
+          {"@type":"Question","name":"What is the Startup Launch Checker?","acceptedAnswer":{"@type":"Answer","text":"A free planning tool. Answer a few questions and get a readiness score, prioritized checklist, and the highest-leverage actions for this week."}},
+          {"@type":"Question","name":"Is this legal, tax, or investment advice?","acceptedAnswer":{"@type":"Answer","text":"No. It is an independent product prototype and planning tool, not legal, tax, financial, or investment advice."}},
+          {"@type":"Question","name":"Do I have to hire 1stStep after I use it?","acceptedAnswer":{"@type":"Answer","text":"No. The checker is free. Hiring 1stStep to build an MVP or website is a separate conversation."}}
+        ]}
+      ]}
+    </script>
+    <meta property="og:title" content="Startup launch checklist | 1stStep.ai" />
     <meta
       property="og:description"
       content="A founder-facing planning tool for turning a vague startup idea into a clear launch plan."
     />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://1ststep.ai/startup-launch-checker/" />
+    <meta property="og:url" content="https://www.1ststep.ai/startup-launch-checker/" />
     <meta property="og:image" content="https://1ststep.ai/assets/firststep-social-preview-v3.jpg" />
     <meta name="theme-color" content="#080b16" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
@@ -817,6 +828,12 @@
         .hero { padding: 28px 20px; border-radius: 24px; }
       }
 
+      .faq { margin: 36px 0 0; padding: 28px 0 0; border-top: 1px solid var(--line); }
+      .faq h2 { margin: 0 0 16px; font-size: clamp(24px, 4vw, 34px); letter-spacing: -0.03em; }
+      .faq article { margin: 0 0 12px; padding: 16px 18px; border: 1px solid var(--line); border-radius: 16px; background: #fff; }
+      .faq h3 { margin: 0 0 6px; font-size: 17px; }
+      .faq p { margin: 0; color: var(--muted); line-height: 1.6; }
+
       @media (prefers-reduced-motion: reduce) {
         *, *::before, *::after {
           scroll-behavior: auto !important;
@@ -1046,6 +1063,12 @@
             <article class="note"><strong>What I would test next</strong><p>Onboarding completion, checklist conversion, repeated blocker patterns, and founder confidence.</p></article>
           </div>
         </div>
+      </section>
+      <section class="faq" id="faq" aria-labelledby="launch-faq-title">
+        <h2 id="launch-faq-title">Before you generate a plan</h2>
+        <article><h3>What is the Startup Launch Checker?</h3><p>A free planning tool. Answer a few questions and get a readiness score, prioritized checklist, and the highest-leverage actions for this week.</p></article>
+        <article><h3>Is this legal, tax, or investment advice?</h3><p>No. It is an independent product prototype and planning tool, not legal, tax, financial, or investment advice.</p></article>
+        <article><h3>Do I have to hire 1stStep after I use it?</h3><p>No. The checker is free. Hiring 1stStep to build an MVP or website is a separate conversation.</p></article>
       </section>
     </main>
 

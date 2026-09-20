@@ -1,5 +1,15 @@
 # Architecture Decision Log
 
+## 2026-09-20: Sitewide SEO and AI-SEO stay answer-first and honest
+
+- **Status / owner:** Implemented on public HTML pages listed in `public/sitemap.xml`; Evan retains authority for later product, pricing, or savings claims.
+- **Decision:** Align titles, H1/H2, meta, visible FAQs, and FAQPage/Organization/WebSite/Service schema with two audiences: busy owners (websites, apps, MVPs, automation, revenue systems) and AI builders (Tools). Keep one entity: 1stStep.ai builds apps, MVPs, websites, and practical AI automations for busy owners with existing demand; the Tools shelf is a separate free-utility path. Website Strategy Call stays a website conversation, not a systems-audit booking. Chatbots are not a default product. No fake reviews, rankings, or savings percentages.
+- **Rationale:** Search and LLM discovery need plain answers on the pages people already use. Keyword alignment only helps if copy stays falsifiable and conversion paths stay focused.
+- **Affected systems:** Homepage, service pages, journey, book, fit-check, OS, checkers, public campaigns, sitemap, `public/llms.txt`. Tools token-usage honesty from the same-day Tools decision remains in force.
+- **Alternatives:** Keep a tools-only SEO PR; publish stuffed titles or unverifiable claims.
+- **Implementation / audit:** Visible FAQ text must match FAQPage schema. Homepage still does not link `/book/`. Supporting service pages still do not href the App Idea Checker. Tests lock the new titles and schema types.
+- **Reversal:** Requires a new owner decision before promising quantified outcomes or mixing Real Rank/local SEO into the main site.
+
 ## 2026-09-20: Tools pages target token-usage search intent without overclaiming
 
 - **Status / owner:** Implemented on `/tools/` and `/tools/auto-model-router/`; Evan retains authority for later product or savings claims.
