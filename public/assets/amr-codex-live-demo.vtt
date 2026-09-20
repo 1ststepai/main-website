@@ -1,0 +1,16 @@
+WEBVTT
+
+00:00.000 --> 00:03.800
+Auto Model Router — live Codex demo, chat only. Recorded from a real session in the 1ststep.ai project.
+
+00:03.800 --> 00:08.800
+Most coding tasks do not need the heaviest model. The skill suggests the lightest sufficient tier and waits.
+
+00:08.800 --> 00:24.500
+Real Codex chat: Auto suggests fast on activation, then fast for renaming getUserName to fetchUserName, and waits.
+
+00:24.500 --> 00:34.500
+This proves suggest → wait. Savings apply only if fast maps to a cheaper model that actually runs.
+
+00:34.500 --> 00:40.400
+Try it at github.com/1ststepai/auto-model-router and 1ststep.ai/tools/auto-model-router

@@ -97,7 +97,7 @@
     .confirmation .chip{justify-content:center}
     .reset{min-height:46px;border:1px solid var(--line);border-radius:999px;background:transparent;color:#d7def3;font:600 13px Inter,sans-serif;cursor:pointer}
     .legal{display:flex;justify-content:space-between;gap:20px;padding:24px 0 32px;border-top:1px solid var(--line);color:#747e97;font-size:12px}.legal nav{display:flex;gap:18px}
-    :where(a,button,input,textarea,label):focus-visible{outline:3px solid var(--cyan);outline-offset:3px}
+    :where(a,button,input,textarea,label,video):focus-visible{outline:3px solid var(--cyan);outline-offset:3px}
     .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
     .amr-live{min-width:0;padding:48px 0 0}
     .amr-live-card{min-width:0;padding:28px 28px 26px;border:1px solid rgba(255,255,255,.14);border-radius:28px;background:linear-gradient(155deg,rgba(18,22,39,.98),rgba(9,12,22,.98));box-shadow:0 48px 110px -58px rgba(79,140,255,.55)}
@@ -105,8 +105,8 @@
     .amr-live-card h2{margin:0 0 10px;font:700 clamp(26px,3.4vw,36px)/1.08 "Space Grotesk",sans-serif;letter-spacing:-.04em}
     .amr-live-lead{max-width:68ch;margin:0 0 22px;color:#8d96ad;font-size:15px;line-height:1.65}
     .amr-live-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(280px,.95fr);gap:28px;align-items:start}
-    .amr-live-shot{margin:0;min-width:0}
-    .amr-live-shot img{display:block;width:100%;height:auto;border:1px solid rgba(255,255,255,.1);border-radius:20px;background:#000}
+    .amr-live-shot{margin:0 0 22px;min-width:0}
+    .amr-live-shot video{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:contain;border:1px solid rgba(255,255,255,.1);border-radius:20px;background:#000}
     .amr-live-shot figcaption{margin:10px 2px 0;color:#7f899f;font-size:12px;line-height:1.5}
     .amr-live-copy{display:grid;gap:16px;min-width:0}
     .amr-live-copy h3{margin:0 0 8px;font:700 15px "Space Grotesk",sans-serif;letter-spacing:-.02em}
@@ -228,34 +228,37 @@
       <div class="amr-live-card">
         <p class="amr-live-kicker">Live demo</p>
         <h2 id="live-title">Real Codex session</h2>
-        <p class="amr-live-lead">Evan’s Codex session with Auto Model Router loaded. The agent suggested a tier and waited. It did not start the rename. This shows suggest&nbsp;&rarr; wait, not billing or token savings.</p>
+        <p class="amr-live-lead">Play the recorded Codex pass. Evan’s session with Auto Model Router loaded. The agent suggested a tier and waited. It did not start the rename. This shows suggest&nbsp;&rarr; wait, not billing or token savings.</p>
+        <figure class="amr-live-shot">
+          <video controls playsinline preload="metadata" width="1280" height="720" poster="/assets/amr-codex-live-pass.png" aria-label="Recorded 40-second Codex Auto Model Router session. The agent suggests fast on activation, then suggests fast for renaming getUserName to fetchUserName, and waits for confirm.">
+            <source src="/assets/amr-codex-live-demo.mp4" type="video/mp4">
+            <track kind="captions" src="/assets/amr-codex-live-demo.vtt" srclang="en" label="English" default>
+            <a href="/assets/amr-codex-live-demo.mp4">Download the recorded Codex session (MP4)</a>
+          </video>
+          <figcaption>Recorded 40-second pass of the real Codex session (chat only). Exact replies are quoted below. This is not a live IDE embed.</figcaption>
+        </figure>
         <div class="amr-live-grid">
-          <figure class="amr-live-shot">
-            <img src="/assets/amr-codex-live-pass.png" width="1080" height="1198" decoding="async" alt="Codex session: Auto Model Router suggests fast on activation, then suggests fast for renaming getUserName to fetchUserName and waits for confirm.">
-            <figcaption>Real Codex session. Exact replies are quoted beside the screenshot.</figcaption>
-          </figure>
           <div class="amr-live-copy">
-            <div>
-              <h3>Exact replies from the pass</h3>
-              <ol class="replies">
-                <li>
-                  <span>1 · Activation</span>
-                  <q>Auto suggests fast — no substantial work has been requested yet. Confirm to run, or override: fast / standard / reasoning / max.</q>
-                </li>
-                <li>
-                  <span>2 · Rename test</span>
-                  <q>Auto suggests fast — this is a small, reversible, single-file rename with same-file call sites. Confirm to run, or override: fast / standard / reasoning / max.</q>
-                </li>
-              </ol>
-            </div>
+            <h3>Exact replies from the pass</h3>
+            <ol class="replies">
+              <li>
+                <span>1 · Activation</span>
+                <q>Auto suggests fast — no substantial work has been requested yet. Confirm to run, or override: fast / standard / reasoning / max.</q>
+              </li>
+              <li>
+                <span>2 · Rename test</span>
+                <q>Auto suggests fast — this is a small, reversible, single-file rename with same-file call sites. Confirm to run, or override: fast / standard / reasoning / max.</q>
+              </li>
+            </ol>
             <p class="amr-honest-live">Honesty: this demonstrates suggest&nbsp;&rarr; wait behavior. It is not a billing dashboard and does not claim usage or cost savings.</p>
-            <div class="amr-try" id="try-codex">
-              <div class="amr-try-head">
-                <h3>Try this in Codex</h3>
-                <button type="button" class="amr-copy" id="amr-copy-prompt">Copy prompt</button>
-              </div>
-              <p>Paste after the skill is installed. Codex should suggest <strong>fast</strong> and stop. Do not treat a confirm as implied.</p>
-              <pre id="amr-try-prompt">Following the auto-model-router skill in this session.
+          </div>
+          <div class="amr-try" id="try-codex">
+            <div class="amr-try-head">
+              <h3>Try this in Codex</h3>
+              <button type="button" class="amr-copy" id="amr-copy-prompt">Copy prompt</button>
+            </div>
+            <p>Paste after the skill is installed. Codex should suggest <strong>fast</strong> and stop. Do not treat a confirm as implied.</p>
+            <pre id="amr-try-prompt">Following the auto-model-router skill in this session.
 
 TEST — do not write code yet.
 
@@ -267,7 +270,6 @@ Task to classify: "Rename the function getUserName to fetchUserName in one file 
 
 Reply ONLY in this shape first:
 Auto suggests &lt;tier&gt; — &lt;reason&gt;. Confirm to run, or override: fast / standard / reasoning / max.</pre>
-            </div>
           </div>
         </div>
       </div>
@@ -279,7 +281,7 @@ Auto suggests &lt;tier&gt; — &lt;reason&gt;. Confirm to run, or override: fast
           <div>
             <p class="amr-demo-kicker">Example flow (illustrative)</p>
             <h2 id="demo-title">How the skill chooses a tier</h2>
-            <p class="amr-demo-note">A CSS model of classify &rarr; suggest &rarr; confirm &rarr; run. Separate from the real Codex session above. Not a live IDE recording or Cursor embed.</p>
+            <p class="amr-demo-note">Illustrative CSS animation of classify &rarr; suggest &rarr; confirm &rarr; run. Separate from the recorded Codex session above. This mock is not a live IDE recording or Cursor embed.</p>
           </div>
           <button type="button" class="amr-demo-toggle" id="amr-demo-toggle" aria-pressed="true">Pause</button>
         </header>

@@ -3,11 +3,11 @@
 ## 2026-09-20: Auto Model Router live demo is a real Codex session, not savings proof
 
 - **Status / owner:** Implemented on `/tools/auto-model-router/`; Evan remains authority for any later billing or estimator claims.
-- **Decision:** Add a Live demo section labeled “Real Codex session” that quotes Evan’s Codex activation and `getUserName` → `fetchUserName` replies and shows the session frame. Keep the existing CSS animation, labeled as an illustrative example only. Offer a copy-paste “Try this in Codex” rename prompt. Do not present the demo as billing, invoice, or token-savings evidence.
-- **Rationale:** Visitors need to see suggest → wait before they install. The illustrative animation explains the four-step flow; the live section is the real pass. Mixing those labels, or implying cost savings, would overclaim.
-- **Affected systems:** `/tools/auto-model-router/`, Tools hub copy, `public/assets/amr-codex-live-pass.png`, README, `llms.txt`.
-- **Alternatives:** Replace the CSS animation with the screenshot; claim estimator savings on the public page.
-- **Implementation / audit:** Exact replies must remain the real-pass strings. Honest copy must say suggest → wait, not savings. The illustrative kicker stays `Example flow (illustrative)`.
+- **Decision:** Add a Live demo section labeled “Real Codex session” that plays Evan’s recorded Codex pass (`amr-codex-live-demo.mp4`), quotes the activation and `getUserName` → `fetchUserName` replies, and uses the session frame as the video poster. Keep the existing CSS animation, labeled as an illustrative example only. Offer a copy-paste “Try this in Codex” rename prompt. Do not present the demo as billing, invoice, or token-savings evidence.
+- **Rationale:** Visitors need to see suggest → wait before they install. The recorded pass is the real session; the illustrative animation only explains the four-step flow. Mixing those labels, or implying cost savings, would overclaim.
+- **Affected systems:** `/tools/auto-model-router/`, Tools hub copy, `public/assets/amr-codex-live-demo.mp4`, `public/assets/amr-codex-live-pass.png`, README, `llms.txt`.
+- **Alternatives:** Keep only the still frame; replace the CSS animation; claim estimator savings on the public page.
+- **Implementation / audit:** The live section must embed the recorded MP4 with controls and the session-frame poster. Exact replies must remain the real-pass strings. Honest copy must say suggest → wait, not savings. The illustrative kicker stays `Example flow (illustrative)`.
 - **Reversal:** Requires a new owner decision before removing the live session or treating the page as a billing dashboard.
 
 ## 2026-09-20: Homepage first screen is owner-offer + fit-check, architecture below the fold
