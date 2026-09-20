@@ -8,8 +8,9 @@ const source = (path) => readFile(new URL(path, root), "utf8");
 test("the homepage leads with systems architecture and keeps products distinct", async () => {
   const html = await source("index.html");
   const llms = await source("public/llms.txt");
-  assert.match(html, /Build the system <em>behind your growth/);
+  assert.match(html, /Websites, apps, and AI systems <em>that follow up your leads/);
   assert.match(html, /lead capture, CRM architecture, routing, follow-up, attribution, reporting/i);
+  assert.match(html, /href="\/fit-check\/"/);
   assert.match(html, /href="\/journey\/"/);
   assert.match(html, /href="\/services\/revenue-systems\.html"/);
   assert.match(html, /href="https:\/\/app\.1ststep\.ai\/"/);
@@ -25,9 +26,10 @@ test("the homepage leads with systems architecture and keeps products distinct",
 test("the systems funnel and service links have focused destinations", async () => {
   const html = await source("index.html");
   for (const anchor of ["problems", "how", "services", "work"]) assert.match(html, new RegExp('id="' + anchor + '"'));
-  for (const path of ["websites", "internal-tools", "revenue-systems"]) {
+  for (const path of ["websites", "internal-tools", "revenue-systems", "mvp-builds"]) {
     assert.match(html, new RegExp('href="/services/' + path + '\\.html"'));
   }
+  assert.match(html, /href="\/fit-check\/"/);
   assert.match(html, /mailto:evan@1ststep\.ai\?subject=1stStep%20System%20Audit/);
   assert.doesNotMatch(html, /href="\/book\/"/);
 });

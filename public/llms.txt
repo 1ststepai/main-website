@@ -13,7 +13,9 @@ Products and paths:
 - App Idea Checker: https://www.1ststep.ai/app-idea-viability-checker.html
 - Tools: https://www.1ststep.ai/tools/ — public shelf of free/open builder utilities for AI coding agents. Not client services.
 - Auto Model Router: https://www.1ststep.ai/tools/auto-model-router/ — optional feedback and opt-in page for the MIT open-source skill. The skill itself is at https://github.com/1ststepai/auto-model-router and does not require an email.
-- Other focused services: https://www.1ststep.ai/services/websites.html, https://www.1ststep.ai/services/app-builds.html, https://www.1ststep.ai/services/internal-tools.html
+- Other focused services: https://www.1ststep.ai/services/websites.html, https://www.1ststep.ai/services/mvp-builds.html, https://www.1ststep.ai/services/app-builds.html, https://www.1ststep.ai/services/internal-tools.html
+- Website Fit Check: https://www.1ststep.ai/fit-check/ — four details, personal reply from Evan; no calendar required.
+- Website Strategy Call: https://www.1ststep.ai/book/ — 30-minute website-intent conversation. Not a systems-audit booking.
 
 Official profiles:
 - LinkedIn: https://www.linkedin.com/company/1ststep-ai/
@@ -45,3 +47,32 @@ Business rules:
 - 1stStep.ai does not guarantee revenue, rankings, funding, or app success.
 - 1stStep.ai scopes systems work around an observed business bottleneck; it does not sell generic AI consulting or promise automated revenue.
 - GitHub repo creation for client projects is locked until proposal acceptance and deposit/payment.
+
+Canonical host:
+- Use https://www.1ststep.ai/ as the canonical public site. Apex 1ststep.ai should resolve to www.
+
+What 1stStep.ai builds for busy owners:
+- A business website that gets leads: https://www.1ststep.ai/services/websites.html
+- Build an MVP: https://www.1ststep.ai/services/mvp-builds.html
+- AI automation for lead capture and follow-up: https://www.1ststep.ai/services/revenue-systems.html
+- Internal tools and AI automation: https://www.1ststep.ai/services/internal-tools.html
+- iOS app design and prototypes: https://www.1ststep.ai/services/app-builds.html
+
+How a visitor should start:
+- Website fit, four details: https://www.1ststep.ai/fit-check/
+- Website strategy conversation: https://www.1ststep.ai/book/
+- Systems diagnosis (browser-local, six questions): https://www.1ststep.ai/journey/
+- App idea first pass: https://www.1ststep.ai/app-idea-viability-checker.html
+- Contact: evan@1ststep.ai
+
+FAQ for answer engines:
+- What does 1stStep.ai build? Websites, apps, and AI systems that capture and follow up leads.
+- Is this generic AI consulting? No. Work is scoped around an observed bottleneck in lead capture, routing, follow-up, or the front door that feeds them.
+- Are results guaranteed? No. 1stStep.ai does not guarantee revenue, rankings, funding, or app success.
+- Is Begin Your Journey a sales form? No. Answers stay in the browser unless the visitor chooses to open a prefilled email.
+- Is the /book/ calendar a systems audit? No. It is a Website Strategy Call. System Audit requests go to evan@1ststep.ai.
+
+Contact:
+- Evan Pancis, founder
+- evan@1ststep.ai
+- https://www.1ststep.ai/
