@@ -1,5 +1,15 @@
 # Architecture Decision Log
 
+## 2026-09-20: Homepage first screen is owner-offer + fit-check, architecture below the fold
+
+- **Status / owner:** Implemented on the public site; complementary to Tools PRs #10 and #11. Evan retains authority for CTA or booking-path changes.
+- **Decision:** The homepage first screen states the offer in owner language—websites, apps, and AI systems that capture and follow up leads—with one primary CTA to `/fit-check/`. Service pages are secondary links. The architecture story, Begin Your Journey, and System Audit email stay below the fold. `/book/` remains the website-strategy calendar and is not the homepage primary CTA. Canonical host is `www.1ststep.ai`.
+- **Rationale:** Busy owners need the offer and next step in the first screen. Fit Check is the lighter website-intent start. Journey remains the systems diagnosis. This sprint does not change Tools pages owned by open PRs #10 and #11.
+- **Affected systems:** Homepage hero/FAQ, service H1s and OG, sitemap, robots, `llms.txt`, fit-check/book metadata.
+- **Alternatives:** Keep Journey as the only first-screen CTA; send all owners to `/book/`.
+- **Implementation / audit:** JSON-LD FAQ must match visible FAQ text. Do not label `/book/` as a System Audit. No guaranteed-revenue copy.
+- **Reversal:** Requires a new owner decision before moving the primary homepage CTA off `/fit-check/`.
+
 ## 2026-09-20: Public Tools hub is for builder utilities, not client services
 
 - **Status / owner:** Implemented on the public site with the Auto Model Router page.

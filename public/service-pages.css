@@ -22,7 +22,7 @@ body{
 main{margin:42px auto 72px;padding:clamp(38px,6vw,72px);border:1px solid rgba(255,255,255,.1);border-radius:30px;background:linear-gradient(145deg,rgba(16,19,34,.94),rgba(8,11,21,.96));box-shadow:0 55px 130px -70px rgba(79,140,255,.7);position:relative;overflow:hidden}
 main::before{content:"";position:absolute;width:420px;height:420px;right:-180px;top:-210px;border-radius:50%;background:rgba(111,89,255,.18);filter:blur(34px);pointer-events:none}
 .eyebrow{color:#9d91ff;position:relative}
-h1{font-size:clamp(44px,6.2vw,76px);max-width:13ch;color:#f7f8ff;position:relative}
+h1{font-size:clamp(44px,6.2vw,76px);max-width:16ch;color:#f7f8ff;position:relative}
 p,li{color:#aeb4c9}
 .lede{font-size:clamp(17px,2vw,20px);max-width:720px;position:relative}
 .hero-actions,.cta-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
@@ -49,4 +49,10 @@ a:focus-visible{outline:2px solid #65e7ff;outline-offset:4px}
   .grid{grid-template-columns:1fr}
   .card{min-height:0}
 }
+.faq{margin:48px 0 0;padding-top:36px;border-top:1px solid rgba(255,255,255,.08)}
+.faq h2{margin:0 0 18px;font-size:clamp(26px,3.4vw,36px);letter-spacing:-.03em;color:#f7f8ff}
+.faq-list{display:grid;gap:12px;margin:0}
+.faq-list>div{padding:20px 22px;border:1px solid rgba(255,255,255,.09);border-radius:16px;background:rgba(16,20,36,.72)}
+.faq-list dt{margin:0 0 8px;color:#f7f8ff;font-size:17px;font-weight:700}
+.faq-list dd{margin:0;color:#aeb4c9;line-height:1.65}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.btn,.card{transition:none}}
