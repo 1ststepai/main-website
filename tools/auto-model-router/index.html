@@ -97,9 +97,33 @@
     .confirmation .chip{justify-content:center}
     .reset{min-height:46px;border:1px solid var(--line);border-radius:999px;background:transparent;color:#d7def3;font:600 13px Inter,sans-serif;cursor:pointer}
     .legal{display:flex;justify-content:space-between;gap:20px;padding:24px 0 32px;border-top:1px solid var(--line);color:#747e97;font-size:12px}.legal nav{display:flex;gap:18px}
-    :where(a,button,input,textarea,label):focus-visible{outline:3px solid var(--cyan);outline-offset:3px}
+    :where(a,button,input,textarea,label,video):focus-visible{outline:3px solid var(--cyan);outline-offset:3px}
     .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-    .amr-demo{min-width:0;padding:34px 0 0}
+    .amr-live{min-width:0;padding:48px 0 0}
+    .amr-live-card{min-width:0;padding:28px 28px 26px;border:1px solid rgba(255,255,255,.14);border-radius:28px;background:linear-gradient(155deg,rgba(18,22,39,.98),rgba(9,12,22,.98));box-shadow:0 48px 110px -58px rgba(79,140,255,.55)}
+    .amr-live-kicker{margin:0 0 8px;color:#56ddff;font:700 11px/1.2 "Space Grotesk",sans-serif;letter-spacing:.14em;text-transform:uppercase}
+    .amr-live-card h2{margin:0 0 10px;font:700 clamp(26px,3.4vw,36px)/1.08 "Space Grotesk",sans-serif;letter-spacing:-.04em}
+    .amr-live-lead{max-width:68ch;margin:0 0 22px;color:#8d96ad;font-size:15px;line-height:1.65}
+    .amr-live-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(280px,.95fr);gap:28px;align-items:start}
+    .amr-live-shot{margin:0 0 22px;min-width:0}
+    .amr-live-shot video{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:contain;border:1px solid rgba(255,255,255,.1);border-radius:20px;background:#000}
+    .amr-live-shot figcaption{margin:10px 2px 0;color:#7f899f;font-size:12px;line-height:1.5}
+    .amr-live-copy{display:grid;gap:16px;min-width:0}
+    .amr-live-copy h3{margin:0 0 8px;font:700 15px "Space Grotesk",sans-serif;letter-spacing:-.02em}
+    .replies{margin:0;padding:0;list-style:none;display:grid;gap:12px}
+    .replies li{padding:14px 15px 13px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.03)}
+    .replies span{display:block;margin-bottom:6px;color:#9d91ff;font:700 11px/1 "Space Grotesk",sans-serif;letter-spacing:.1em;text-transform:uppercase}
+    .replies q{display:block;quotes:none;color:#e8ecf8;font-size:14px;line-height:1.55}
+    .amr-honest-live{margin:0;padding:14px 15px;border:1px solid rgba(86,221,255,.2);border-radius:16px;background:rgba(86,221,255,.06);color:#c5eef8;font-size:13px;line-height:1.6}
+    .amr-try{padding:16px 16px 14px;border:1px solid var(--line);border-radius:16px;background:#0a0d18}
+    .amr-try-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+    .amr-try-head h3{margin:0}
+    .amr-try p{margin:0 0 12px;color:#8d96ad;font-size:13px;line-height:1.55}
+    .amr-try pre{margin:0;padding:14px;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:#070912;color:#d7def3;font:500 12.5px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere}
+    .amr-copy{flex:none;min-width:44px;min-height:40px;padding:0 14px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.03);color:#d7def3;font:600 13px Inter,sans-serif;cursor:pointer}
+    .amr-copy:hover{border-color:rgba(121,167,255,.45)}
+    .amr-copy[data-copied="true"]{border-color:rgba(86,221,255,.4);color:#bcf4ff}
+    .amr-demo{min-width:0;padding:28px 0 0}
     .amr-demo-card{min-width:0;overflow:clip;border:1px solid rgba(255,255,255,.14);border-radius:28px;background:linear-gradient(155deg,rgba(18,22,39,.98),rgba(9,12,22,.98));box-shadow:0 48px 110px -58px rgba(79,140,255,.55)}
     .amr-demo-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding:22px 24px 18px;border-bottom:1px solid var(--line)}
     .amr-demo-kicker{margin:0 0 8px;color:#9d91ff;font:700 11px/1.2 "Space Grotesk",sans-serif;letter-spacing:.14em;text-transform:uppercase}
@@ -173,8 +197,8 @@
     @keyframes amr-run-b{0%,82%{opacity:0}85%,90%{opacity:1}93%,100%{opacity:0}}
     @keyframes amr-done-b{0%,91%{opacity:0}94%,96%{opacity:1}100%{opacity:0}}
     @keyframes amr-rail{0%,24%{color:#e8ecf8;border-color:rgba(86,221,255,.28);background:rgba(86,221,255,.08)}25%,100%{color:#7f899f;border-color:transparent;background:transparent}}
-    @media(max-width:860px){.intro{text-align:center;padding-top:48px}.intro h1,.lede,.amr-demo-note{margin-left:auto;margin-right:auto}.links{justify-content:center}.layout{grid-template-columns:1fr;gap:34px;padding:32px 0 62px}.amr-demo-head{flex-direction:column}}
-    @media(max-width:600px){.wrap{width:calc(100% - 28px)}.nav{padding:14px 0}.intro{padding-top:32px}.layout{padding:24px 0 44px}.nav-links{font-size:13px}h1{font-size:clamp(42px,14vw,62px)}.signal{grid-template-columns:1fr}.form-card,.amr-demo-card{padding:0;border-radius:22px}.form-card{padding:26px 19px}.amr-demo-head,.amr-rail,.amr-stage,.amr-static{padding-left:18px;padding-right:18px}.amr-stage{min-height:360px}.amr-scenes{min-height:300px}.legal{align-items:flex-start;flex-direction:column}}
+    @media(max-width:860px){.intro{text-align:center;padding-top:48px}.intro h1,.lede,.amr-demo-note,.amr-live-lead{margin-left:auto;margin-right:auto}.links{justify-content:center}.layout{grid-template-columns:1fr;gap:34px;padding:32px 0 62px}.amr-live-grid{grid-template-columns:1fr}.amr-demo-head{flex-direction:column}}
+    @media(max-width:600px){.wrap{width:calc(100% - 28px)}.nav{padding:14px 0}.intro{padding-top:32px}.layout{padding:24px 0 44px}.nav-links{font-size:13px}h1{font-size:clamp(42px,14vw,62px)}.signal{grid-template-columns:1fr}.form-card,.amr-demo-card,.amr-live-card{padding:0;border-radius:22px}.form-card{padding:26px 19px}.amr-live-card{padding:22px 18px}.amr-demo-head,.amr-rail,.amr-stage,.amr-static{padding-left:18px;padding-right:18px}.amr-stage{min-height:360px}.amr-scenes{min-height:300px}.amr-try-head{flex-direction:column;align-items:flex-start}.legal{align-items:flex-start;flex-direction:column}}
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}.amr-demo:not(.is-playing) *{animation:none!important}}
   </style>
 </head>
@@ -193,9 +217,61 @@
       <h1 id="amr-title">Suggest a lighter <span class="gradient">model tier.</span> Confirm before it runs.</h1>
       <p class="lede">Auto Model Router is a portable policy for Cursor, Claude, Codex, and other multi-model agents. It classifies work into the lightest sufficient tier, shows the suggestion, and waits for you to confirm or override. The skill stays usable without an email&mdash;this page is only for optional feedback.</p>
       <div class="links">
+        <a class="chip" href="#live-demo">See the live demo</a>
         <a class="chip" href="https://github.com/1ststepai/auto-model-router" target="_blank" rel="noopener">GitHub repository</a>
         <a class="chip" href="https://github.com/1ststepai/auto-model-router/blob/main/INSTALL.md" target="_blank" rel="noopener">INSTALL.md</a>
         <a class="chip" href="https://github.com/1ststepai/auto-model-router/blob/main/LICENSE" target="_blank" rel="noopener">MIT license</a>
+      </div>
+    </section>
+
+    <section class="amr-live" id="live-demo" aria-labelledby="live-title">
+      <div class="amr-live-card">
+        <p class="amr-live-kicker">Live demo</p>
+        <h2 id="live-title">Motion replay of the real pass</h2>
+        <p class="amr-live-lead">Play the live-motion chat replay. A Codex-style UI animates the real Auto Model Router pass: load skill &rarr; suggest fast &rarr; wait &rarr; rename getUserName to fetchUserName &rarr; suggest fast &rarr; wait &rarr; confirm &rarr; run on fast. This is the flow happening, not a slide explainer. It shows suggest&nbsp;&rarr; wait&nbsp;&rarr; confirm, not billing or token savings.</p>
+        <figure class="amr-live-shot">
+          <video controls playsinline preload="metadata" width="1280" height="720" poster="/assets/amr-codex-live-pass.png" aria-label="Motion replay of the real Auto Model Router pass in a Codex-style chat UI. The agent suggests fast on activation and waits, then suggests fast for renaming getUserName to fetchUserName, waits, and runs on fast only after confirm.">
+            <source src="/assets/amr-codex-live-demo.mp4" type="video/mp4">
+            <track kind="captions" src="/assets/amr-codex-live-demo.vtt" srclang="en" label="English">
+            <a href="/assets/amr-codex-live-demo.mp4">Download the live-motion chat demo (MP4)</a>
+          </video>
+          <figcaption>Motion replay of the real suggest&nbsp;&rarr; wait&nbsp;&rarr; confirm pass (Codex-style chat UI). Exact replies are quoted below. This is not a slide explainer or a live IDE embed.</figcaption>
+        </figure>
+        <div class="amr-live-grid">
+          <div class="amr-live-copy">
+            <h3>Exact replies from the pass</h3>
+            <ol class="replies">
+              <li>
+                <span>1 · Activation</span>
+                <q>Auto suggests fast — no substantial work has been requested yet. Confirm to run, or override: fast / standard / reasoning / max.</q>
+              </li>
+              <li>
+                <span>2 · Rename test</span>
+                <q>Auto suggests fast — this is a small, reversible, single-file rename with same-file call sites. Confirm to run, or override: fast / standard / reasoning / max.</q>
+              </li>
+            </ol>
+            <p class="amr-honest-live">Honesty: this demonstrates suggest&nbsp;&rarr; wait behavior. It is not a billing dashboard and does not claim usage or cost savings.</p>
+          </div>
+          <div class="amr-try" id="try-codex">
+            <div class="amr-try-head">
+              <h3>Try this in Codex</h3>
+              <button type="button" class="amr-copy" id="amr-copy-prompt">Copy prompt</button>
+            </div>
+            <p>Paste after the skill is installed. Codex should suggest <strong>fast</strong> and stop. Do not treat a confirm as implied.</p>
+            <pre id="amr-try-prompt">Following the auto-model-router skill in this session.
+
+TEST — do not write code yet.
+
+Task to classify: "Rename the function getUserName to fetchUserName in one file and update its call sites in that same file."
+
+1. Suggest the lightest sufficient tier (fast / standard / reasoning / max) with a one-line reason.
+2. STOP and wait for my confirm or override.
+3. Do not edit files until I say confirm (or a different tier).
+
+Reply ONLY in this shape first:
+Auto suggests &lt;tier&gt; — &lt;reason&gt;. Confirm to run, or override: fast / standard / reasoning / max.</pre>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -205,7 +281,7 @@
           <div>
             <p class="amr-demo-kicker">Example flow (illustrative)</p>
             <h2 id="demo-title">How the skill chooses a tier</h2>
-            <p class="amr-demo-note">A model conversation that shows classify &rarr; suggest &rarr; confirm &rarr; run. Not a live IDE recording or Cursor embed.</p>
+            <p class="amr-demo-note">Illustrative CSS animation of classify &rarr; suggest &rarr; confirm &rarr; run. Separate from the live-motion chat replay above. This mock is not a live IDE recording or Cursor embed.</p>
           </div>
           <button type="button" class="amr-demo-toggle" id="amr-demo-toggle" aria-pressed="true">Pause</button>
         </header>
@@ -355,6 +431,28 @@
 
     reducedMotion.addEventListener("change", applyMotionPreference);
     applyMotionPreference();
+
+    const copyBtn = document.querySelector("#amr-copy-prompt");
+    const promptEl = document.querySelector("#amr-try-prompt");
+    copyBtn.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(promptEl.textContent);
+        copyBtn.dataset.copied = "true";
+        copyBtn.textContent = "Copied";
+        window.fsaiTrack?.("auto_model_router_prompt_copied");
+        window.setTimeout(() => {
+          copyBtn.removeAttribute("data-copied");
+          copyBtn.textContent = "Copy prompt";
+        }, 1800);
+      } catch {
+        const range = document.createRange();
+        range.selectNodeContents(promptEl);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+        copyBtn.textContent = "Select and copy";
+      }
+    });
 
     const card = document.querySelector("#feedback-card");
     const form = document.querySelector("#amr-feedback-form");

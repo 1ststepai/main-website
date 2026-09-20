@@ -1,0 +1,19 @@
+WEBVTT
+
+00:00.000 --> 00:03.000
+Load auto-model-router. Before any real work: suggest a tier, then wait for confirm.
+
+00:03.000 --> 00:07.000
+Auto suggests fast — no substantial work has been requested yet. Confirm to run, or override: fast / standard / reasoning / max.
+
+00:07.000 --> 00:09.500
+Rename getUserName to fetchUserName in one file. Suggest a tier and stop — do not edit until confirm.
+
+00:09.500 --> 00:13.000
+Auto suggests fast — small, reversible, single-file rename with same-file call sites. Confirm to run, or override: fast / standard / reasoning / max.
+
+00:13.000 --> 00:14.500
+confirm
+
+00:14.500 --> 00:17.400
+Running on fast… rename applied in that file only.
