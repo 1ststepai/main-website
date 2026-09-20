@@ -5,6 +5,7 @@ import {
   normalizeAutoModelRouterFeedback,
   validateAutoModelRouterFeedbackPayload,
 } from "../lib/autoModelRouter/normalizeFeedback.js";
+import { mockJsonRequest, mockResponse } from "./helpers/publicApi.js";
 
 function payload(overrides = {}) {
   return {
@@ -17,34 +18,6 @@ function payload(overrides = {}) {
       malicious_field: "<script>alert(1)</script>",
     },
     ...overrides,
-  };
-}
-
-function mockResponse() {
-  return {
-    statusCode: 200,
-    headers: new Map(),
-    body: "",
-    setHeader(name, value) {
-      this.headers.set(name.toLowerCase(), String(value));
-    },
-    end(value = "") {
-      this.body = String(value);
-    },
-  };
-}
-
-function mockRequest(body, headers = {}) {
-  return {
-    method: "POST",
-    body,
-    headers: {
-      "content-type": "application/json",
-      host: "www.1ststep.ai",
-      origin: "https://www.1ststep.ai",
-      "x-forwarded-for": `203.0.113.${Math.floor(Math.random() * 180) + 1}`,
-      ...headers,
-    },
   };
 }
 
@@ -104,7 +77,7 @@ test("delivers a notification without echoing personal data", async (t) => {
   process.env.APP_IDEA_NOTIFY_TO = "owner@1ststep.ai";
   process.env.APP_IDEA_NOTIFY_FROM = "Website <website@1ststep.ai>";
 
-  const req = mockRequest(payload(), { "idempotency-key": "amr:test:delivery:001" });
+  const req = mockJsonRequest(payload(), { "idempotency-key": "amr:test:delivery:001" });
   const res = mockResponse();
   await handler(req, res);
 
@@ -122,7 +95,7 @@ test("fails closed when feedback delivery is not configured", async (t) => {
   delete process.env.APP_IDEA_NOTIFY_TO;
   delete process.env.APP_IDEA_NOTIFY_FROM;
 
-  const req = mockRequest(payload(), { "idempotency-key": "amr:test:closed:001" });
+  const req = mockJsonRequest(payload(), { "idempotency-key": "amr:test:closed:001" });
   const res = mockResponse();
   await handler(req, res);
 
@@ -133,7 +106,7 @@ test("fails closed when feedback delivery is not configured", async (t) => {
 });
 
 test("rejects hostile cross-origin feedback requests", async () => {
-  const req = mockRequest(payload(), { origin: "https://attacker.example" });
+  const req = mockJsonRequest(payload(), { origin: "https://attacker.example" });
   const res = mockResponse();
   await handler(req, res);
   assert.equal(res.statusCode, 403);
@@ -141,7 +114,7 @@ test("rejects hostile cross-origin feedback requests", async () => {
 });
 
 test("returns a clear validation error for email without opt-in", async () => {
-  const req = mockRequest(payload({ opt_in: false }), { "idempotency-key": "amr:test:optin:001" });
+  const req = mockJsonRequest(payload({ opt_in: false }), { "idempotency-key": "amr:test:optin:001" });
   const res = mockResponse();
   await handler(req, res);
   const body = JSON.parse(res.body);
