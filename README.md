@@ -101,10 +101,14 @@ The open-source Auto Model Router skill has a public install and opt-in feedback
 
 The page includes a Live demo with a playable motion replay of the real suggest → wait → confirm pass (Codex-style chat UI on a `getUserName` → `fetchUserName` rename) plus a separately labeled illustrative CSS animation of classify → suggest → confirm → run. The live section is not a slide explainer and is not a billing or savings claim. The page posts to `/api/auto-model-router-feedback`. Email is optional. The MIT skill remains usable without signing up. If a visitor leaves an email, they must check a clear opt-in for product feedback and related 1stStep tool updates. Delivery uses the existing Resend notification path (`RESEND_API_KEY`, `APP_IDEA_NOTIFY_TO`, `APP_IDEA_NOTIFY_FROM`). No new SaaS dependency is added.
 
-Source and install docs:
+Source, install, and listings:
 
-- https://github.com/1ststepai/auto-model-router
-- https://github.com/1ststepai/auto-model-router/blob/main/INSTALL.md
+- GitHub (install works today): https://github.com/1ststepai/auto-model-router
+- INSTALL.md: https://github.com/1ststepai/auto-model-router/blob/main/INSTALL.md
+- cursor.directory (community; not Cursor’s official Marketplace): https://cursor.directory/plugins/auto-model-router
+- Cursor official Marketplace: submitted, pending Cursor review (no public product URL yet)
+- Claude community plugin catalog: submitted, pending Anthropic review
+- The skill does not guarantee billing or token savings.
 
 ## Local Development
 

@@ -28,6 +28,10 @@
       "license": "https://opensource.org/licenses/MIT",
       "programmingLanguage": "Markdown",
       "url": "https://www.1ststep.ai/tools/auto-model-router/",
+      "sameAs": [
+        "https://github.com/1ststepai/auto-model-router",
+        "https://cursor.directory/plugins/auto-model-router"
+      ],
       "author": {
         "@type": "Organization",
         "name": "1stStep.ai",
@@ -72,6 +76,26 @@
     .honest{margin-top:28px;padding:18px 18px 16px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.025)}
     .honest h2{margin:0 0 8px;font:700 15px "Space Grotesk",sans-serif;letter-spacing:-.02em}
     .honest p{margin:0;color:#8d96ad;font-size:13px;line-height:1.6}
+    .get-it{scroll-margin-top:24px;padding:56px 0 8px}
+    .get-it-head h2{margin:0 0 12px;font:700 clamp(28px,4vw,40px)/1.05 "Space Grotesk",sans-serif;letter-spacing:-.04em}
+    .get-it-lede{max-width:68ch;margin:0 0 22px;color:#bdc3d7;font-size:16px;line-height:1.65}
+    .listings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .listing{display:grid;gap:8px;align-content:start;padding:20px 20px 18px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.03);text-decoration:none}
+    a.listing:hover{border-color:rgba(121,167,255,.45)}
+    .listing-live{border-color:rgba(255,255,255,.15)}
+    .listing-kicker{color:#9d91ff;font:700 10px/1 "Space Grotesk",sans-serif;letter-spacing:.12em;text-transform:uppercase}
+    .listing-pending .listing-kicker{color:#8d96ad}
+    .listing h3{margin:0;font:700 18px "Space Grotesk",sans-serif;letter-spacing:-.03em}
+    .listing p{margin:0;color:#8992aa;font-size:13px;line-height:1.55}
+    .listing-status{margin:0;color:#e8ecf8;font-size:13px;font-weight:600;line-height:1.5}
+    .listing-doc{color:#b7c8ff;font-size:13px;font-weight:600;text-decoration:none}
+    .listing-doc:hover{color:#d7def3}
+    .install-cmds{margin-top:16px;padding:20px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.025)}
+    .install-cmds h3{margin:0 0 8px;font:700 16px "Space Grotesk",sans-serif;letter-spacing:-.02em}
+    .install-cmds p{margin:0 0 14px;color:#8d96ad;font-size:13px;line-height:1.55}
+    .cmd{margin:0 0 12px;padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:#0a0d18;color:#d7def3;font:500 12px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow-x:auto;white-space:pre}
+    .cmd:last-child{margin-bottom:0}
+    .install-cmds code{padding:1px 6px;border:1px solid var(--line);border-radius:6px;background:#0a0d18;font:500 12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
     .form-card{position:relative;padding:34px;border:1px solid rgba(255,255,255,.15);border-radius:28px;background:linear-gradient(155deg,rgba(18,22,39,.98),rgba(9,12,22,.98));box-shadow:0 48px 110px -58px rgba(79,140,255,.75)}
     .form-card::before{content:"";position:absolute;inset:-1px;border-radius:inherit;padding:1px;background:linear-gradient(135deg,rgba(139,124,255,.65),transparent 42%,rgba(86,221,255,.34));-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;pointer-events:none}
     .form-card h2{margin:0 0 8px;font:700 28px "Space Grotesk",sans-serif;letter-spacing:-.04em}
@@ -197,8 +221,8 @@
     @keyframes amr-run-b{0%,82%{opacity:0}85%,90%{opacity:1}93%,100%{opacity:0}}
     @keyframes amr-done-b{0%,91%{opacity:0}94%,96%{opacity:1}100%{opacity:0}}
     @keyframes amr-rail{0%,24%{color:#e8ecf8;border-color:rgba(86,221,255,.28);background:rgba(86,221,255,.08)}25%,100%{color:#7f899f;border-color:transparent;background:transparent}}
-    @media(max-width:860px){.intro{text-align:center;padding-top:48px}.intro h1,.lede,.amr-demo-note,.amr-live-lead{margin-left:auto;margin-right:auto}.links{justify-content:center}.layout{grid-template-columns:1fr;gap:34px;padding:32px 0 62px}.amr-live-grid{grid-template-columns:1fr}.amr-demo-head{flex-direction:column}}
-    @media(max-width:600px){.wrap{width:calc(100% - 28px)}.nav{padding:14px 0}.intro{padding-top:32px}.layout{padding:24px 0 44px}.nav-links{font-size:13px}h1{font-size:clamp(42px,14vw,62px)}.signal{grid-template-columns:1fr}.form-card,.amr-demo-card,.amr-live-card{padding:0;border-radius:22px}.form-card{padding:26px 19px}.amr-live-card{padding:22px 18px}.amr-demo-head,.amr-rail,.amr-stage,.amr-static{padding-left:18px;padding-right:18px}.amr-stage{min-height:360px}.amr-scenes{min-height:300px}.amr-try-head{flex-direction:column;align-items:flex-start}.legal{align-items:flex-start;flex-direction:column}}
+    @media(max-width:860px){.intro{text-align:center;padding-top:48px}.intro h1,.lede,.amr-demo-note,.amr-live-lead,.get-it-lede{margin-left:auto;margin-right:auto}.links{justify-content:center}.get-it{text-align:center}.listings{grid-template-columns:1fr}.listing,.install-cmds{text-align:left}.layout{grid-template-columns:1fr;gap:34px;padding:32px 0 62px}.amr-live-grid{grid-template-columns:1fr}.amr-demo-head{flex-direction:column}}
+    @media(max-width:600px){.wrap{width:calc(100% - 28px)}.nav{padding:14px 0}.intro{padding-top:32px}.layout{padding:24px 0 44px}.nav-links{font-size:13px}h1{font-size:clamp(42px,14vw,62px)}.signal,.listings{grid-template-columns:1fr}.form-card,.amr-demo-card,.amr-live-card{padding:0;border-radius:22px}.form-card{padding:26px 19px}.amr-live-card{padding:22px 18px}.amr-demo-head,.amr-rail,.amr-stage,.amr-static{padding-left:18px;padding-right:18px}.amr-stage{min-height:360px}.amr-scenes{min-height:300px}.amr-try-head{flex-direction:column;align-items:flex-start}.legal{align-items:flex-start;flex-direction:column}}
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}.amr-demo:not(.is-playing) *{animation:none!important}}
   </style>
 </head>
@@ -207,6 +231,7 @@
     <a class="brand" href="/" aria-label="1stStep.ai home"><img src="/assets/firststep-logo-transparent-cleaned.png" alt=""><span>1stStep.ai</span></a>
     <nav class="nav-links" aria-label="Primary navigation">
       <a href="/tools/">All tools</a>
+      <a href="#get-it">Install</a>
       <a href="https://github.com/1ststepai/auto-model-router" target="_blank" rel="noopener">GitHub</a>
     </nav>
   </header>
@@ -218,7 +243,9 @@
       <p class="lede">Auto Model Router is a portable policy for Cursor, Claude, Codex, and other multi-model agents. It classifies work into the lightest sufficient tier, shows the suggestion, and waits for you to confirm or override. The skill stays usable without an email&mdash;this page is only for optional feedback.</p>
       <div class="links">
         <a class="chip" href="#live-demo">See the live demo</a>
+        <a class="chip" href="#get-it">Install &amp; listings</a>
         <a class="chip" href="https://github.com/1ststepai/auto-model-router" target="_blank" rel="noopener">GitHub repository</a>
+        <a class="chip" href="https://cursor.directory/plugins/auto-model-router" target="_blank" rel="noopener">cursor.directory</a>
         <a class="chip" href="https://github.com/1ststepai/auto-model-router/blob/main/INSTALL.md" target="_blank" rel="noopener">INSTALL.md</a>
         <a class="chip" href="https://github.com/1ststepai/auto-model-router/blob/main/LICENSE" target="_blank" rel="noopener">MIT license</a>
       </div>
@@ -345,6 +372,51 @@ Auto suggests &lt;tier&gt; — &lt;reason&gt;. Confirm to run, or override: fast
             <li>Auth refresh fails only for pre-rotation users. Auto suggests <strong>reasoning</strong> &mdash; unknown-root-cause debugging. Confirm, then it runs on the reasoning tier.</li>
           </ol>
         </div>
+      </div>
+    </section>
+
+    <section class="get-it" id="get-it" aria-labelledby="get-it-title">
+      <div class="get-it-head">
+        <p class="eyebrow">Get it</p>
+        <h2 id="get-it-title">Install &amp; listings</h2>
+        <p class="get-it-lede">Install from GitHub today. Community and official catalogs are listed only when a real public URL exists. The plugin does not guarantee billing or token savings.</p>
+      </div>
+      <div class="listings">
+        <a class="listing listing-live" href="https://github.com/1ststepai/auto-model-router" target="_blank" rel="noopener">
+          <span class="listing-kicker">Works today</span>
+          <h3>GitHub</h3>
+          <p>Clone the repo or add it as a plugin marketplace. Full host steps stay in INSTALL.md.</p>
+        </a>
+        <a class="listing listing-live" href="https://cursor.directory/plugins/auto-model-router" target="_blank" rel="noopener">
+          <span class="listing-kicker">cursor.directory · community</span>
+          <h3>cursor.directory</h3>
+          <p>Community listing. It may still be in security scan or unpublished until review finishes. This is not Cursor's official Marketplace.</p>
+        </a>
+        <article class="listing listing-pending" aria-label="Cursor official Marketplace status">
+          <span class="listing-kicker">No public URL yet</span>
+          <h3>Cursor official Marketplace</h3>
+          <p class="listing-status">Submitted &mdash; pending Cursor review</p>
+          <p>No public product page is available yet. This is not a live official Marketplace listing.</p>
+        </article>
+        <article class="listing listing-pending" aria-label="Claude community plugin catalog status">
+          <span class="listing-kicker">No public URL yet</span>
+          <h3>Claude community plugin catalog</h3>
+          <p class="listing-status">Submitted &mdash; pending Anthropic review</p>
+          <p>No product page yet. Anthropic documents how community marketplaces work.</p>
+          <a class="listing-doc" href="https://code.claude.com/docs/en/discover-plugins" target="_blank" rel="noopener">Anthropic docs: discover community plugins</a>
+        </article>
+      </div>
+      <div class="install-cmds">
+        <h3>GitHub install commands</h3>
+        <p>These add the GitHub repo as a plugin source. They are not official Cursor Marketplace or Anthropic catalog listings.</p>
+<pre class="cmd"># Claude Code (in a session)
+/plugin marketplace add 1ststepai/auto-model-router
+/plugin install auto-model-router@auto-model-router
+/reload-plugins</pre>
+<pre class="cmd"># Codex
+codex plugin marketplace add 1ststepai/auto-model-router
+codex plugin add auto-model-router@auto-model-router</pre>
+        <p>Cursor Teams / Enterprise: Dashboard → Plugins &amp; MCPs → Import from Repo → <code>https://github.com/1ststepai/auto-model-router</code>, then install Auto Model Router from Customize. Individuals can copy the skill or use the apply script in INSTALL.md.</p>
       </div>
     </section>
 
