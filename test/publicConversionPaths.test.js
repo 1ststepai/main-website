@@ -170,9 +170,9 @@ test("the Tools hub lists only live builder utilities", async () => {
   assert.match(html, /Tools for your own build/);
   assert.match(html, /Open utilities for/);
   assert.match(html, /href="\/tools\/auto-model-router\/"/);
-  assert.match(html, /real Codex session/);
+  assert.match(html, /motion replay of the real suggest/);
   assert.match(html, /illustrative CSS flow/);
-  assert.match(html, /playable recording/);
+  assert.match(html, /playable motion replay/);
   assert.match(html, /https:\/\/github.com\/1ststepai\/auto-model-router/);
   assert.match(html, /INSTALL\.md/);
   assert.match(html, /More coming/);
@@ -206,12 +206,13 @@ test("the Auto Model Router page is optional, honest, and opt-in", async () => {
   assert.match(html, /No silent email harvesting/);
   assert.match(html, /usable without an email|works the same either way/i);
   assert.match(html, /id="live-demo"/);
-  assert.match(html, /Real Codex session/);
+  assert.match(html, /Motion replay of the real pass/);
   assert.match(html, /<video[^>]*controls[^>]*playsinline/i);
   assert.match(html, /poster="\/assets\/amr-codex-live-pass\.png"/);
   assert.match(html, /amr-codex-live-demo\.mp4/);
   assert.match(html, /amr-codex-live-pass\.png/);
-  assert.match(html, /Play the recorded Codex pass/);
+  assert.match(html, /Play the live-motion chat replay/);
+  assert.match(html, /not a slide explainer/);
   assert.match(html, /Auto suggests fast — no substantial work has been requested yet/);
   assert.match(html, /small, reversible, single-file rename with same-file call sites/);
   assert.match(html, /Try this in Codex/);
@@ -221,7 +222,7 @@ test("the Auto Model Router page is optional, honest, and opt-in", async () => {
   assert.match(html, /Example flow \(illustrative\)/);
   assert.match(html, /Illustrative CSS animation/);
   assert.match(html, /not a live IDE recording/i);
-  assert.match(html, /Separate from the recorded Codex session/);
+  assert.match(html, /Separate from the live-motion chat replay/);
   assert.match(html, /Rename getUserName/);
   assert.match(html, /Running on fast tier/);
   assert.match(html, /Running on reasoning tier/);
@@ -234,5 +235,5 @@ test("the Auto Model Router page is optional, honest, and opt-in", async () => {
   assert.match(config, /autoModelRouter: "tools\/auto-model-router\/index.html"/);
   assert.match(sitemap, /tools\/auto-model-router\//);
   assert.match(readme, /\/tools\/auto-model-router\//);
-  assert.match(readme, /Live demo with a playable recording of Evan/);
+  assert.match(readme, /Live demo with a playable motion replay/);
 });

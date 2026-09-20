@@ -76,7 +76,7 @@ test("llms.txt names the owner offer, start paths, and canonical www host", asyn
   assert.match(llms, /Is the \/book\/ calendar a systems audit\? No/);
   assert.match(llms, /Tools: https:\/\/www\.1ststep\.ai\/tools\//);
   assert.match(llms, /Auto Model Router: https:\/\/www\.1ststep\.ai\/tools\/auto-model-router\//);
-  assert.match(llms, /real Codex session showing suggest/);
+  assert.match(llms, /motion replay of the real suggest/);
   assert.match(llms, /Not a billing or savings claim/);
 });
 

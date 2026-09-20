@@ -1,8 +1,18 @@
 # Architecture Decision Log
 
+## 2026-09-20: Auto Model Router live demo is a motion replay of the real pass, not a slide deck
+
+- **Status / owner:** Implemented on `/tools/auto-model-router/`; Evan remains authority for any later billing or estimator claims. Supersedes the earlier “play Evan’s recorded Codex MP4 as a 40-second session recording” presentation after Evan rejected the instructional slide-deck cut.
+- **Decision:** Ship the Live demo as a Codex-style chat motion replay of the real suggest → wait → confirm pass (`amr-codex-live-demo.mp4`). Label it as a motion replay, not a slide explainer. Use a wait-state frame as the video poster. Keep the exact real-pass reply strings. Keep the CSS animation labeled `Example flow (illustrative)`. Do not present the demo as billing, invoice, or token-savings evidence. Do not recreate title-card slide decks as the live demo.
+- **Rationale:** Visitors need to see the flow happening in a chat UI. A slide deck does not demonstrate suggest → wait → confirm.
+- **Affected systems:** `/tools/auto-model-router/`, Tools hub copy, `public/assets/amr-codex-live-demo.mp4`, `public/assets/amr-codex-live-pass.png`, `public/assets/amr-codex-live-demo.vtt`, README, `llms.txt`.
+- **Alternatives:** Keep the rejected slide-deck MP4; claim a raw unedited Codex screen recording; claim estimator savings on the public page.
+- **Implementation / audit:** The live section must embed the motion-replay MP4 with controls and the wait-frame poster. Exact replies must remain the real-pass strings. Honest copy must say suggest → wait → confirm, not savings or slides. The illustrative kicker stays `Example flow (illustrative)`.
+- **Reversal:** Requires a new owner decision before removing the live-motion replay or treating the page as a billing dashboard.
+
 ## 2026-09-20: Auto Model Router live demo is a real Codex session, not savings proof
 
-- **Status / owner:** Implemented on `/tools/auto-model-router/`; Evan remains authority for any later billing or estimator claims.
+- **Status / owner:** Superseded by the motion-replay decision above after Evan rejected the slide-deck cut. Honesty rule (no billing or token-savings claim) still holds.
 - **Decision:** Add a Live demo section labeled “Real Codex session” that plays Evan’s recorded Codex pass (`amr-codex-live-demo.mp4`), quotes the activation and `getUserName` → `fetchUserName` replies, and uses the session frame as the video poster. Keep the existing CSS animation, labeled as an illustrative example only. Offer a copy-paste “Try this in Codex” rename prompt. Do not present the demo as billing, invoice, or token-savings evidence.
 - **Rationale:** Visitors need to see suggest → wait before they install. The recorded pass is the real session; the illustrative animation only explains the four-step flow. Mixing those labels, or implying cost savings, would overclaim.
 - **Affected systems:** `/tools/auto-model-router/`, Tools hub copy, `public/assets/amr-codex-live-demo.mp4`, `public/assets/amr-codex-live-pass.png`, README, `llms.txt`.

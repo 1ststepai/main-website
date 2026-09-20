@@ -12,7 +12,7 @@ Products and paths:
 - 1stStep AI Job Agent: https://app.1ststep.ai/ — separate public beta for job capture and tailored application preparation; applicants review and submit their own applications.
 - App Idea Checker: https://www.1ststep.ai/app-idea-viability-checker.html
 - Tools: https://www.1ststep.ai/tools/ — public shelf of free/open builder utilities for AI coding agents. Not client services.
-- Auto Model Router: https://www.1ststep.ai/tools/auto-model-router/ — optional feedback and opt-in page for the MIT open-source skill. Includes a playable recording of a real Codex session showing suggest → wait, plus a separately labeled illustrative flow. Not a billing or savings claim. The skill itself is at https://github.com/1ststepai/auto-model-router and does not require an email.
+- Auto Model Router: https://www.1ststep.ai/tools/auto-model-router/ — optional feedback and opt-in page for the MIT open-source skill. Includes a playable motion replay of the real suggest → wait → confirm pass (Codex-style chat UI), plus a separately labeled illustrative flow. Not a slide explainer. Not a billing or savings claim. The skill itself is at https://github.com/1ststepai/auto-model-router and does not require an email.
 - Other focused services: https://www.1ststep.ai/services/websites.html, https://www.1ststep.ai/services/mvp-builds.html, https://www.1ststep.ai/services/app-builds.html, https://www.1ststep.ai/services/internal-tools.html
 - Website Fit Check: https://www.1ststep.ai/fit-check/ — four details, personal reply from Evan; no calendar required.
 - Website Strategy Call: https://www.1ststep.ai/book/ — 30-minute website-intent conversation. Not a systems-audit booking.

@@ -1,16 +1,19 @@
 WEBVTT
 
-00:00.000 --> 00:03.800
-Auto Model Router — live Codex demo, chat only. Recorded from a real session in the 1ststep.ai project.
+00:00.000 --> 00:03.000
+Load auto-model-router. Before any real work: suggest a tier, then wait for confirm.
 
-00:03.800 --> 00:08.800
-Most coding tasks do not need the heaviest model. The skill suggests the lightest sufficient tier and waits.
+00:03.000 --> 00:07.000
+Auto suggests fast — no substantial work has been requested yet. Confirm to run, or override: fast / standard / reasoning / max.
 
-00:08.800 --> 00:24.500
-Real Codex chat: Auto suggests fast on activation, then fast for renaming getUserName to fetchUserName, and waits.
+00:07.000 --> 00:09.500
+Rename getUserName to fetchUserName in one file. Suggest a tier and stop — do not edit until confirm.
 
-00:24.500 --> 00:34.500
-This proves suggest → wait. Savings apply only if fast maps to a cheaper model that actually runs.
+00:09.500 --> 00:13.000
+Auto suggests fast — small, reversible, single-file rename with same-file call sites. Confirm to run, or override: fast / standard / reasoning / max.
 
-00:34.500 --> 00:40.400
-Try it at github.com/1ststepai/auto-model-router and 1ststep.ai/tools/auto-model-router
+00:13.000 --> 00:14.500
+confirm
+
+00:14.500 --> 00:17.400
+Running on fast… rename applied in that file only.
