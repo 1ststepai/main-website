@@ -10,8 +10,11 @@ test("the homepage leads with systems architecture and keeps products distinct",
   const llms = await source("public/llms.txt");
   assert.match(html, /Websites, apps, and AI that <em>get leads/);
   assert.match(html, /lead capture, CRM architecture, routing, follow-up, attribution, reporting/i);
-  assert.match(html, /<div class="hero-actions"><a class="button button-primary" href="\/journey\/"/);
-  assert.doesNotMatch(html, /<div class="hero-actions">[\s\S]*?button-secondary/);
+  const heroActions = html.match(/<div class="hero-actions">([\s\S]*?)<\/div>/)?.[1] || "";
+  assert.match(heroActions, /button-primary/);
+  assert.match(heroActions, /href="\/journey\/"/);
+  assert.doesNotMatch(heroActions, /button-secondary/);
+  assert.equal((heroActions.match(/<a\b/g) || []).length, 1);
   assert.match(html, /href="\/journey\/"/);
   assert.match(html, /href="\/services\/revenue-systems\.html"/);
   assert.match(html, /href="https:\/\/app\.1ststep\.ai\/"/);
