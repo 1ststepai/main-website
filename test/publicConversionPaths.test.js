@@ -168,6 +168,8 @@ test("the Tools hub lists only live builder utilities", async () => {
   assert.match(html, /Tools for your own build/);
   assert.match(html, /Open utilities for/);
   assert.match(html, /href="\/tools\/auto-model-router\/"/);
+  assert.match(html, /href="\.\/tools\.css"/);
+  assert.match(html, /href="\.\/tools-hub\.css"/);
   assert.match(html, /https:\/\/github.com\/1ststepai\/auto-model-router/);
   assert.match(html, /INSTALL\.md/);
   assert.match(html, /More coming/);
@@ -189,6 +191,8 @@ test("the Auto Model Router page is optional, honest, and opt-in", async () => {
   const readme = await source("README.md");
   assert.match(html, /Suggest a lighter/);
   assert.match(html, /confirm before it runs/i);
+  assert.match(html, /href="\.\.\/tools\.css"/);
+  assert.match(html, /href="\.\/page\.css"/);
   assert.match(html, /href="\/tools\/"/);
   assert.match(html, /https:\/\/github.com\/1ststepai\/auto-model-router/);
   assert.match(html, /INSTALL\.md/);

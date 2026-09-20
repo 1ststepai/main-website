@@ -17,6 +17,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" />
+  <link rel="stylesheet" href="./tools.css" />
+  <link rel="stylesheet" href="./tools-hub.css" />
   <link rel="icon" href="/favicon.ico" sizes="any" />
   <script type="application/ld+json">
     {
@@ -38,54 +40,6 @@
       }
     }
   </script>
-  <style>
-    :root{
-      color-scheme:dark;--bg:#070912;--ink:#f7f8ff;--muted:#aeb4c9;
-      --line:rgba(255,255,255,.11);--cyan:#56ddff;
-      font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
-    }
-    *{box-sizing:border-box}
-    body{
-      min-width:320px;min-height:100vh;margin:0;color:var(--ink);background:
-        radial-gradient(48% 36% at 91% 3%,rgba(103,84,255,.2),transparent 67%),
-        radial-gradient(38% 31% at 3% 12%,rgba(54,175,255,.12),transparent 72%),
-        linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),
-        linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px),var(--bg);
-      background-size:auto,auto,48px 48px,48px 48px,auto;-webkit-font-smoothing:antialiased;
-    }
-    a{color:inherit}.wrap{width:min(1120px,calc(100% - 48px));margin:0 auto}
-    .nav{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:18px 0;border-bottom:1px solid var(--line)}
-    .brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none;font:700 18px "Space Grotesk",sans-serif}
-    .brand img{width:28px;height:28px;object-fit:contain}
-    .nav-links{display:flex;align-items:center;gap:22px;color:var(--muted);font-size:14px;font-weight:600;text-decoration:none}
-    .nav-links a{text-decoration:none}
-    .nav-links a[aria-current="page"]{color:#fff}
-    .hero{padding:78px 0 28px}
-    .eyebrow{margin:0 0 17px;color:#9d91ff;font:700 11px/1.2 "Space Grotesk",sans-serif;letter-spacing:.15em;text-transform:uppercase}
-    h1{max-width:16ch;margin:0 0 22px;font:700 clamp(44px,6vw,76px)/.95 "Space Grotesk",sans-serif;letter-spacing:-.06em}
-    .gradient{background:linear-gradient(100deg,#b39cff,#79a7ff 54%,#65e7ff);-webkit-background-clip:text;background-clip:text;color:transparent}
-    .lede{max-width:640px;margin:0;color:#bdc3d7;font-size:18px;line-height:1.72}
-    .grid{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr);gap:16px;padding:36px 0 72px}
-    .card{position:relative;display:flex;flex-direction:column;align-items:flex-start;min-height:280px;padding:28px;border:1px solid var(--line);border-radius:24px;background:rgba(255,255,255,.03)}
-    .card-live{border-color:rgba(255,255,255,.15);background:linear-gradient(155deg,rgba(18,22,39,.98),rgba(9,12,22,.98));box-shadow:0 48px 110px -58px rgba(79,140,255,.75);text-decoration:none}
-    .card-live::before{content:"";position:absolute;inset:-1px;border-radius:inherit;padding:1px;background:linear-gradient(135deg,rgba(139,124,255,.65),transparent 42%,rgba(86,221,255,.34));-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;pointer-events:none}
-    .card-live:focus-within{border-color:rgba(121,167,255,.4)}
-    .badge{display:inline-flex;align-items:center;min-height:26px;margin:0 0 16px;padding:0 10px;border:1px solid var(--line);border-radius:999px;color:#c9d3ee;font:700 10px/1 "Space Grotesk",sans-serif;letter-spacing:.12em;text-transform:uppercase}
-    .badge-live{border-color:rgba(86,221,255,.35);color:#bcf4ff}
-    h2{margin:0 0 12px;font:700 28px "Space Grotesk",sans-serif;letter-spacing:-.04em}
-    .card p{margin:0;color:#9aa3bb;font-size:15px;line-height:1.65}
-    .card-links{display:flex;flex-wrap:wrap;gap:10px;margin-top:auto;padding-top:22px}
-    .chip{display:inline-flex;align-items:center;min-height:38px;padding:0 13px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.03);color:#d7def3;font-size:13px;font-weight:600;text-decoration:none}
-    .chip:hover{border-color:rgba(121,167,255,.45)}
-    .chip-primary{border:0;background:linear-gradient(100deg,#8b7cff 0%,#4f8cff 52%,#56ddff 100%);color:#fff}
-    .note{margin:0 0 86px;padding:18px 20px;border:1px solid var(--line);border-radius:16px;color:#8d96ad;font-size:13px;line-height:1.6}
-    .note a{color:#b7c8ff;font-weight:600;text-decoration:none}
-    .legal{display:flex;justify-content:space-between;gap:20px;padding:24px 0 32px;border-top:1px solid var(--line);color:#747e97;font-size:12px}.legal nav{display:flex;gap:18px}
-    :where(a,button):focus-visible{outline:3px solid var(--cyan);outline-offset:3px}
-    @media(max-width:860px){.hero{padding:48px 0 12px}h1{max-width:none}.grid{grid-template-columns:1fr;padding-bottom:48px}.card{min-height:0}}
-    @media(max-width:600px){.wrap{width:calc(100% - 28px)}.nav{padding:14px 0;flex-wrap:wrap}.nav-links{gap:16px;font-size:13px}.hero{padding:32px 0 8px}h1{font-size:clamp(42px,13vw,62px)}.card{padding:22px 18px;border-radius:20px}.legal{align-items:flex-start;flex-direction:column}}
-    @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}
-  </style>
 </head>
 <body data-fsai-page-event="tools_hub_view" data-fsai-audience="oss_tools">
   <header class="wrap nav">
@@ -105,7 +59,7 @@
     </section>
 
     <section class="grid" aria-label="Available and upcoming tools">
-      <article class="card card-live">
+      <article class="card glow-panel card-live">
         <p class="badge badge-live">Live · MIT</p>
         <h2>Auto Model Router</h2>
         <p>Suggest the lightest sufficient model tier, then wait for you to confirm. Install the skill, read the docs, or leave optional feedback. Email is never required to use it.</p>

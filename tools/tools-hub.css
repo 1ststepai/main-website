@@ -1,0 +1,17 @@
+.hero{padding:78px 0 28px}
+h1{max-width:16ch}
+.lede{max-width:640px}
+.nav-links{gap:22px}
+.grid{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr);gap:16px;padding:36px 0 72px}
+.card{position:relative;display:flex;flex-direction:column;align-items:flex-start;min-height:280px;padding:28px;border:1px solid var(--line);border-radius:24px;background:rgba(255,255,255,.03)}
+.card-live:focus-within{border-color:rgba(121,167,255,.4)}
+.badge{display:inline-flex;align-items:center;min-height:26px;margin:0 0 16px;padding:0 10px;border:1px solid var(--line);border-radius:999px;color:#c9d3ee;font:700 10px/1 "Space Grotesk",sans-serif;letter-spacing:.12em;text-transform:uppercase}
+.badge-live{border-color:rgba(86,221,255,.35);color:#bcf4ff}
+.card h2{margin:0 0 12px;font:700 28px "Space Grotesk",sans-serif;letter-spacing:-.04em}
+.card p{margin:0;color:#9aa3bb;font-size:15px;line-height:1.65}
+.card-links{display:flex;flex-wrap:wrap;gap:10px;margin-top:auto;padding-top:22px}
+.card-links .chip{min-height:38px;padding:0 13px}
+.note{margin:0 0 86px;padding:18px 20px;border:1px solid var(--line);border-radius:16px;color:#8d96ad;font-size:13px;line-height:1.6}
+.note a{color:#b7c8ff;font-weight:600;text-decoration:none}
+@media(max-width:860px){.hero{padding:48px 0 12px}h1{max-width:none}.grid{grid-template-columns:1fr;padding-bottom:48px}.card{min-height:0}}
+@media(max-width:600px){.hero{padding:32px 0 8px}.card{padding:22px 18px;border-radius:20px}}
