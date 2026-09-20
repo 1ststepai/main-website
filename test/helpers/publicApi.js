@@ -12,7 +12,10 @@ export function mockResponse() {
   };
 }
 
+let requestSerial = 0;
+
 export function mockJsonRequest(body, headers = {}, method = "POST") {
+  requestSerial += 1;
   return {
     method,
     body,
@@ -20,7 +23,7 @@ export function mockJsonRequest(body, headers = {}, method = "POST") {
       "content-type": "application/json",
       host: "www.1ststep.ai",
       origin: "https://www.1ststep.ai",
-      "x-forwarded-for": `203.0.113.${Math.floor(Math.random() * 180) + 1}`,
+      "x-forwarded-for": `203.0.113.${(requestSerial % 180) + 1}`,
       ...headers,
     },
   };
