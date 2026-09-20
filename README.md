@@ -82,6 +82,30 @@ APP_IDEA_FORWARDING_ENABLED=true
 
 Repo creation remains locked until proposal acceptance and deposit/payment gates are met.
 
+## Public Tools
+
+Builder utilities live under `/tools/`. This is a public shelf for free/open tools that help people build with AI coding agents. It is not the client internal-tools service.
+
+```text
+/tools/
+/tools/auto-model-router/
+```
+
+## Auto Model Router
+
+The open-source Auto Model Router skill has a public install and opt-in feedback page at:
+
+```text
+/tools/auto-model-router/
+```
+
+The page posts to `/api/auto-model-router-feedback`. Email is optional. The MIT skill remains usable without signing up. If a visitor leaves an email, they must check a clear opt-in for product feedback and related 1stStep tool updates. Delivery uses the existing Resend notification path (`RESEND_API_KEY`, `APP_IDEA_NOTIFY_TO`, `APP_IDEA_NOTIFY_FROM`). No new SaaS dependency is added.
+
+Source and install docs:
+
+- https://github.com/1ststepai/auto-model-router
+- https://github.com/1ststepai/auto-model-router/blob/main/INSTALL.md
+
 ## Local Development
 
 Install dependencies:

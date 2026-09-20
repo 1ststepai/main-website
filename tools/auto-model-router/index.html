@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Auto Model Router | Open-source skill from 1stStep.ai</title>
+  <meta name="description" content="Portable MIT skill that suggests the lightest sufficient model tier, then waits for you to confirm. Leave optional feedback or opt in to email about this tool and related 1stStep tools." />
+  <link rel="canonical" href="https://www.1ststep.ai/tools/auto-model-router/" />
+  <meta name="robots" content="index,follow,max-image-preview:large" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="1stStep.ai" />
+  <meta property="og:title" content="Auto Model Router | Open-source skill from 1stStep.ai" />
+  <meta property="og:description" content="Suggest the lightest sufficient model tier, confirm before it runs. MIT, usable without email." />
+  <meta property="og:url" content="https://www.1ststep.ai/tools/auto-model-router/" />
+  <meta property="og:image" content="https://www.1ststep.ai/assets/banner-1ststep-og.png" />
+  <meta name="theme-color" content="#070912" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" />
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareSourceCode",
+      "name": "Auto Model Router",
+      "description": "A portable MIT skill that classifies coding-agent work into the lightest sufficient tier, suggests it, and waits for confirmation before running.",
+      "codeRepository": "https://github.com/1ststepai/auto-model-router",
+      "license": "https://opensource.org/licenses/MIT",
+      "programmingLanguage": "Markdown",
+      "url": "https://www.1ststep.ai/tools/auto-model-router/",
+      "author": {
+        "@type": "Organization",
+        "name": "1stStep.ai",
+        "url": "https://www.1ststep.ai/"
+      }
+    }
+  </script>
+  <style>
+    :root{
+      color-scheme:dark;--bg:#070912;--panel:#0e1120;--ink:#f7f8ff;--muted:#aeb4c9;
+      --line:rgba(255,255,255,.11);--violet:#8b7cff;--blue:#4f8cff;--cyan:#56ddff;
+      --grad:linear-gradient(100deg,#8b7cff 0%,#4f8cff 52%,#56ddff 100%);
+      font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+    }
+    *{box-sizing:border-box}
+    body{
+      min-width:320px;min-height:100vh;margin:0;color:var(--ink);background:
+        radial-gradient(48% 36% at 91% 3%,rgba(103,84,255,.2),transparent 67%),
+        radial-gradient(38% 31% at 3% 12%,rgba(54,175,255,.12),transparent 72%),
+        linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px),var(--bg);
+      background-size:auto,auto,48px 48px,48px 48px,auto;-webkit-font-smoothing:antialiased;
+    }
+    a{color:inherit}.wrap{width:min(1120px,calc(100% - 48px));margin:0 auto}
+    .nav{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:18px 0;border-bottom:1px solid var(--line)}
+    .brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none;font:700 18px "Space Grotesk",sans-serif}
+    .brand img{width:28px;height:28px;object-fit:contain}
+    .nav-links{display:flex;align-items:center;gap:18px;color:var(--muted);font-size:14px;font-weight:600}
+    .nav-links a{text-decoration:none}
+    .layout{display:grid;grid-template-columns:minmax(0,.96fr) minmax(400px,.82fr);gap:52px;align-items:start;padding:72px 0 86px}
+    .eyebrow{margin:0 0 17px;color:#9d91ff;font:700 11px/1.2 "Space Grotesk",sans-serif;letter-spacing:.15em;text-transform:uppercase}
+    h1{max-width:13ch;margin:0 0 23px;font:700 clamp(44px,6vw,76px)/.95 "Space Grotesk",sans-serif;letter-spacing:-.06em}
+    .gradient{background:linear-gradient(100deg,#b39cff,#79a7ff 54%,#65e7ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+    .lede{max-width:590px;margin:0;color:#bdc3d7;font-size:18px;line-height:1.72}
+    .links{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
+    .chip{display:inline-flex;align-items:center;min-height:40px;padding:0 14px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.03);color:#d7def3;font-size:13px;font-weight:600;text-decoration:none}
+    .chip:hover{border-color:rgba(121,167,255,.45)}
+    .signal{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:34px}
+    .signal div{padding:16px;border:1px solid var(--line);border-radius:15px;background:rgba(255,255,255,.03)}
+    .signal strong{display:block;margin-bottom:5px;color:#fff;font-size:13px}.signal span{color:#8992aa;font-size:11px;line-height:1.45}
+    .honest{margin-top:28px;padding:18px 18px 16px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.025)}
+    .honest h2{margin:0 0 8px;font:700 15px "Space Grotesk",sans-serif;letter-spacing:-.02em}
+    .honest p{margin:0;color:#8d96ad;font-size:13px;line-height:1.6}
+    .form-card{position:relative;padding:34px;border:1px solid rgba(255,255,255,.15);border-radius:28px;background:linear-gradient(155deg,rgba(18,22,39,.98),rgba(9,12,22,.98));box-shadow:0 48px 110px -58px rgba(79,140,255,.75)}
+    .form-card::before{content:"";position:absolute;inset:-1px;border-radius:inherit;padding:1px;background:linear-gradient(135deg,rgba(139,124,255,.65),transparent 42%,rgba(86,221,255,.34));-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;pointer-events:none}
+    .form-card h2{margin:0 0 8px;font:700 28px "Space Grotesk",sans-serif;letter-spacing:-.04em}
+    .form-intro{margin:0 0 25px;color:var(--muted);font-size:14px;line-height:1.6}
+    form{display:grid;gap:17px}.field{display:grid;gap:8px}.field label{font-size:12px;font-weight:700;color:#e5e8f5}.field-hint{margin:0;color:#7f899f;font-size:11px;line-height:1.5}
+    input,textarea{width:100%;border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:0 14px;background:#0a0d18;color:#fff;font:500 15px Inter,sans-serif;outline:none}
+    input{min-height:50px}
+    textarea{min-height:148px;padding:12px 14px;resize:vertical;line-height:1.5}
+    input:focus,textarea:focus{border-color:#69baff;box-shadow:0 0 0 3px rgba(79,140,255,.15)}
+    .confirm{display:grid;grid-template-columns:18px 1fr;gap:11px;align-items:start;padding:14px;border:1px solid var(--line);border-radius:13px;background:rgba(255,255,255,.025);color:#c5ccde;font-size:12px;line-height:1.55}
+    .confirm input{width:18px;height:18px;min-height:0;margin:1px 0 0;padding:0;accent-color:#6f8fff}
+    .submit{min-height:52px;border:0;border-radius:999px;background:var(--grad);color:#fff;font:700 14px Inter,sans-serif;cursor:pointer;box-shadow:0 20px 42px -21px rgba(79,140,255,.9)}
+    .submit:disabled{cursor:wait;opacity:.65}.privacy{margin:0;color:#747e97;font-size:11px;line-height:1.5;text-align:center}
+    .privacy a{color:#b7c8ff;font-weight:600;text-decoration:none}
+    .status{display:none;margin:0;padding:13px 14px;border-radius:12px;font-size:13px;line-height:1.5}
+    .status[data-state="error"]{display:block;border:1px solid rgba(255,93,118,.28);background:rgba(255,93,118,.08);color:#ffb8c3}
+    .status[data-state="success"]{display:block;border:1px solid rgba(86,221,255,.26);background:rgba(86,221,255,.07);color:#bcf4ff}
+    .confirmation{display:none;text-align:center;padding:12px 4px 4px}
+    .form-card.is-sent form{display:none}
+    .form-card.is-sent .confirmation{display:grid;gap:14px}
+    .confirmation h2{margin:0}
+    .confirmation p{margin:0;color:var(--muted);font-size:15px;line-height:1.65}
+    .confirmation .chip{justify-content:center}
+    .reset{min-height:46px;border:1px solid var(--line);border-radius:999px;background:transparent;color:#d7def3;font:600 13px Inter,sans-serif;cursor:pointer}
+    .legal{display:flex;justify-content:space-between;gap:20px;padding:24px 0 32px;border-top:1px solid var(--line);color:#747e97;font-size:12px}.legal nav{display:flex;gap:18px}
+    :where(a,button,input,textarea,label):focus-visible{outline:3px solid var(--cyan);outline-offset:3px}
+    @media(max-width:860px){.layout{grid-template-columns:1fr;gap:34px;padding:48px 0 62px}.copy{text-align:center}.copy h1,.lede,.honest{margin-left:auto;margin-right:auto}.links{justify-content:center}}
+    @media(max-width:600px){.wrap{width:calc(100% - 28px)}.nav{padding:14px 0}.layout{padding:32px 0 44px}.nav-links{font-size:13px}h1{font-size:clamp(42px,14vw,62px)}.signal{grid-template-columns:1fr}.form-card{padding:26px 19px;border-radius:22px}.legal{align-items:flex-start;flex-direction:column}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}
+  </style>
+</head>
+<body data-fsai-page-event="auto_model_router_view" data-fsai-audience="oss_tools">
+  <header class="wrap nav">
+    <a class="brand" href="/" aria-label="1stStep.ai home"><img src="/assets/firststep-logo-transparent-cleaned.png" alt=""><span>1stStep.ai</span></a>
+    <nav class="nav-links" aria-label="Primary navigation">
+      <a href="/tools/">All tools</a>
+      <a href="https://github.com/1ststepai/auto-model-router" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+  </header>
+
+  <main class="wrap layout">
+    <section class="copy" aria-labelledby="amr-title">
+      <p class="eyebrow">Open-source MIT skill</p>
+      <h1 id="amr-title">Suggest a lighter <span class="gradient">model tier.</span> Confirm before it runs.</h1>
+      <p class="lede">Auto Model Router is a portable policy for Cursor, Claude, Codex, and other multi-model agents. It classifies work into the lightest sufficient tier, shows the suggestion, and waits for you to confirm or override. The skill stays usable without an email&mdash;this page is only for optional feedback.</p>
+      <div class="links">
+        <a class="chip" href="https://github.com/1ststepai/auto-model-router" target="_blank" rel="noopener">GitHub repository</a>
+        <a class="chip" href="https://github.com/1ststepai/auto-model-router/blob/main/INSTALL.md" target="_blank" rel="noopener">INSTALL.md</a>
+        <a class="chip" href="https://github.com/1ststepai/auto-model-router/blob/main/LICENSE" target="_blank" rel="noopener">MIT license</a>
+      </div>
+      <div class="signal" aria-label="What the skill does">
+        <div><strong>Classify</strong><span>fast, standard, reasoning, or max &mdash; capability labels, not vendor model names.</span></div>
+        <div><strong>Suggest &rarr; confirm</strong><span>The agent explains the tier first. You confirm or override before substantial work.</span></div>
+        <div><strong>Escalate once</strong><span>If a light attempt fails, it says so and steps up. Explicit model choices always win.</span></div>
+      </div>
+      <div class="honest">
+        <h2>Honest scope</h2>
+        <p>This is a readable heuristic, not trained routing ML and not a billing dashboard. Usage savings happen only if the confirmed lighter tier is mapped to a cheaper or faster model (or lower effort) and that mapped choice is what actually runs. Percentages in the repo estimator are relative comparisons from a local log, not vendor invoices or promised savings.</p>
+      </div>
+    </section>
+
+    <section class="form-card" id="feedback-card" aria-labelledby="form-title">
+      <form id="amr-feedback-form" novalidate>
+        <h2 id="form-title">Leave feedback</h2>
+        <p class="form-intro">Email is optional. The skill works the same either way. If you share an email, you must opt in to hear about this tool and related 1stStep tools.</p>
+        <div class="field">
+          <label for="feedback">What should we improve?</label>
+          <textarea id="feedback" name="feedback" maxlength="4000" placeholder="What worked, what felt unclear, or what you wish it did."></textarea>
+          <p class="field-hint">Leave feedback, an email, or both. At least one is required.</p>
+        </div>
+        <div class="field">
+          <label for="email">Email <span style="font-weight:500;color:#7f899f">(optional)</span></label>
+          <input id="email" name="email" type="email" autocomplete="email" placeholder="you@company.com" maxlength="254">
+        </div>
+        <label class="confirm" for="opt-in">
+          <input id="opt-in" name="opt_in" type="checkbox" value="yes">
+          <span>OK to email me about Auto Model Router and related 1stStep tools. Emails are for product feedback and related tool updates only.</span>
+        </label>
+        <p class="status" id="form-status" role="status" aria-live="polite"></p>
+        <button class="submit" type="submit">Send feedback &rarr;</button>
+        <p class="privacy">No silent email harvesting. Required only if you want a reply or updates. See the <a href="/privacy.html">privacy policy</a>.</p>
+      </form>
+      <div class="confirmation" id="confirmation" role="status" aria-live="polite" hidden>
+        <p class="eyebrow">Received</p>
+        <h2>Thanks &mdash; that landed.</h2>
+        <p id="confirmation-copy">Your note was delivered. The skill remains free to use from GitHub with no account.</p>
+        <a class="chip" href="https://github.com/1ststepai/auto-model-router/blob/main/INSTALL.md" target="_blank" rel="noopener">Continue with INSTALL.md</a>
+        <button class="reset" type="button" id="send-another">Send another note</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="wrap legal">
+    <span>&copy; 2026 1stStep.ai. Built by Evan Pancis.</span>
+    <nav aria-label="Legal links"><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></nav>
+  </footer>
+
+  <script type="module" src="/src/site-analytics.js"></script>
+  <script type="module">
+    const card = document.querySelector("#feedback-card");
+    const form = document.querySelector("#amr-feedback-form");
+    const status = document.querySelector("#form-status");
+    const button = form.querySelector("button[type='submit']");
+    const email = document.querySelector("#email");
+    const optIn = document.querySelector("#opt-in");
+    const confirmation = document.querySelector("#confirmation");
+    const confirmationCopy = document.querySelector("#confirmation-copy");
+    const sendAnother = document.querySelector("#send-another");
+    let started = false;
+
+    function syncOptInRequirement() {
+      const needsOptIn = Boolean(email.value.trim());
+      optIn.required = needsOptIn;
+      optIn.setAttribute("aria-required", needsOptIn ? "true" : "false");
+    }
+
+    function showForm() {
+      card.classList.remove("is-sent");
+      confirmation.hidden = true;
+      form.hidden = false;
+      status.removeAttribute("data-state");
+      status.textContent = "";
+    }
+
+    function showConfirmation(optedIn) {
+      confirmationCopy.textContent = optedIn
+        ? "Your note was delivered. We’ll only email you about this tool and related 1stStep tools — you can unsubscribe any time."
+        : "Your note was delivered. No email was stored for follow-up. The skill remains free to use from GitHub with no account.";
+      form.hidden = true;
+      confirmation.hidden = false;
+      card.classList.add("is-sent");
+    }
+
+    email.addEventListener("input", syncOptInRequirement);
+    syncOptInRequirement();
+
+    form.addEventListener("input", () => {
+      if (!started) {
+        started = true;
+        window.fsaiTrack?.("auto_model_router_start");
+      }
+    });
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      status.removeAttribute("data-state");
+      status.textContent = "";
+
+      const data = new FormData(form);
+      const payload = {
+        email: String(data.get("email") || "").trim(),
+        feedback: String(data.get("feedback") || "").trim(),
+        opt_in: data.get("opt_in") === "yes",
+        attribution: window.fsaiAttribution?.get?.() || {},
+      };
+
+      if (!payload.email && !payload.feedback) {
+        status.dataset.state = "error";
+        status.textContent = "Leave feedback, an email, or both.";
+        return;
+      }
+      if (payload.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payload.email)) {
+        status.dataset.state = "error";
+        status.textContent = "That email address does not look valid.";
+        email.focus();
+        return;
+      }
+      if (payload.email && !payload.opt_in) {
+        status.dataset.state = "error";
+        status.textContent = "Check the opt-in if you want to leave an email. The skill works without one.";
+        optIn.focus();
+        return;
+      }
+
+      button.disabled = true;
+      button.textContent = "Sending…";
+
+      try {
+        const response = await fetch("/api/auto-model-router-feedback", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Idempotency-Key": `amr:${crypto.randomUUID()}`,
+          },
+          body: JSON.stringify(payload),
+        });
+        const result = await response.json();
+        if (!response.ok || !result.ok) {
+          const detail = Array.isArray(result.errors) && result.errors.length
+            ? result.errors[0]
+            : result.message;
+          throw new Error(detail || "Please try again.");
+        }
+
+        form.reset();
+        syncOptInRequirement();
+        showConfirmation(payload.opt_in);
+        window.fsaiTrack?.("auto_model_router_submitted", {
+          has_email: Boolean(payload.email),
+          has_feedback: Boolean(payload.feedback),
+          opted_in: payload.opt_in,
+        });
+      } catch (error) {
+        status.dataset.state = "error";
+        status.textContent = error.message || "Your note could not be sent. Please try again.";
+        window.fsaiTrack?.("auto_model_router_error");
+      } finally {
+        button.disabled = false;
+        button.textContent = "Send feedback →";
+      }
+    });
+
+    sendAnother.addEventListener("click", () => {
+      showForm();
+      document.querySelector("#feedback").focus();
+    });
+  </script>
+</body>
+</html>

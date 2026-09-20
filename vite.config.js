@@ -16,10 +16,13 @@ const siteAnalytics = {
   },
 };
 
-function serveOsAtExactPath(server) {
+function serveExactIndexPaths(server) {
+  const routes = ["/os", "/tools"];
   server.middlewares.use((request, _response, next) => {
-    if (request.url === "/os" || request.url?.startsWith("/os?")) {
-      request.url = request.url.replace(/^\/os/, "/os/index.html");
+    const url = request.url || "";
+    const path = url.split("?")[0];
+    if (routes.includes(path)) {
+      request.url = url.replace(path, `${path}/index.html`);
     }
     next();
   });
@@ -27,9 +30,9 @@ function serveOsAtExactPath(server) {
 
 export default defineConfig({
   plugins: [react(), siteAnalytics, {
-    name: "firststep-os-exact-path",
-    configureServer: serveOsAtExactPath,
-    configurePreviewServer: serveOsAtExactPath,
+    name: "firststep-exact-index-paths",
+    configureServer: serveExactIndexPaths,
+    configurePreviewServer: serveExactIndexPaths,
   }],
   optimizeDeps: {
     entries: ["index.html"],
@@ -48,6 +51,8 @@ export default defineConfig({
         appIdeaViabilityChecker: "app-idea-viability-checker.html",
         adminStudio: "admin/index.html",
         startupLaunchChecker: "startup-launch-checker/index.html",
+        tools: "tools/index.html",
+        autoModelRouter: "tools/auto-model-router/index.html",
         appBuilds: "services/app-builds.html",
         mvpBuilds: "services/mvp-builds.html",
         websites: "services/websites.html",
