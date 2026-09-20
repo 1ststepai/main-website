@@ -48,6 +48,7 @@ export default defineConfig({
         appIdeaViabilityChecker: "app-idea-viability-checker.html",
         adminStudio: "admin/index.html",
         startupLaunchChecker: "startup-launch-checker/index.html",
+        autoModelRouter: "tools/auto-model-router/index.html",
         appBuilds: "services/app-builds.html",
         mvpBuilds: "services/mvp-builds.html",
         websites: "services/websites.html",

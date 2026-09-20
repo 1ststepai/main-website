@@ -13,6 +13,7 @@ test("the homepage leads with systems architecture and keeps products distinct",
   assert.match(html, /href="\/journey\/"/);
   assert.match(html, /href="\/services\/revenue-systems\.html"/);
   assert.match(html, /href="https:\/\/app\.1ststep\.ai\/"/);
+  assert.match(html, /href="\/tools\/auto-model-router\/"/);
   assert.match(html, /Public concept · product flow in development|public concept/i);
   assert.match(html, /firststep-logo-transparent-cleaned\.png/);
   assert.match(llms, /1stStep OS/);
@@ -155,4 +156,26 @@ test("the Morris County campaign is focused, transparent, and locally qualified"
   assert.doesNotMatch(html, /countdown|spots remaining/i);
   assert.match(config, /morrisCountyFreeWebsiteCampaign/);
   assert.match(sitemap, /campaigns\/morris-county-free-website/);
+});
+
+test("the Auto Model Router page is optional, honest, and opt-in", async () => {
+  const html = await source("tools/auto-model-router/index.html");
+  const config = await source("vite.config.js");
+  const sitemap = await source("public/sitemap.xml");
+  const readme = await source("README.md");
+  assert.match(html, /Suggest a lighter/);
+  assert.match(html, /confirm before it runs/i);
+  assert.match(html, /https:\/\/github.com\/1ststepai\/auto-model-router/);
+  assert.match(html, /INSTALL\.md/);
+  assert.match(html, /billing dashboard/i);
+  assert.match(html, /mapped to a cheaper or faster model/i);
+  assert.match(html, /name="opt_in"/);
+  assert.match(html, /href="\/privacy.html"/);
+  assert.match(html, /fetch\("\/api\/auto-model-router-feedback"/);
+  assert.match(html, /data-fsai-page-event="auto_model_router_view"/);
+  assert.match(html, /No silent email harvesting/);
+  assert.match(html, /usable without an email|works the same either way/i);
+  assert.match(config, /autoModelRouter: "tools\/auto-model-router\/index.html"/);
+  assert.match(sitemap, /tools\/auto-model-router\//);
+  assert.match(readme, /\/tools\/auto-model-router\//);
 });

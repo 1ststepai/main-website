@@ -82,6 +82,21 @@ APP_IDEA_FORWARDING_ENABLED=true
 
 Repo creation remains locked until proposal acceptance and deposit/payment gates are met.
 
+## Auto Model Router
+
+The open-source Auto Model Router skill has a public opt-in feedback page at:
+
+```text
+/tools/auto-model-router/
+```
+
+The page posts to `/api/auto-model-router-feedback`. Email is optional. The MIT skill remains usable without signing up. If a visitor leaves an email, they must check a clear opt-in for product feedback and related 1stStep tool updates. Delivery uses the existing Resend notification path (`RESEND_API_KEY`, `APP_IDEA_NOTIFY_TO`, `APP_IDEA_NOTIFY_FROM`). No new SaaS dependency is added.
+
+Source and install docs:
+
+- https://github.com/1ststepai/auto-model-router
+- https://github.com/1ststepai/auto-model-router/blob/main/INSTALL.md
+
 ## Local Development
 
 Install dependencies:
