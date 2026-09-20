@@ -19,6 +19,13 @@
     <meta property="og:site_name" content="1stStep.ai" />
     <meta property="og:url" content="https://www.1ststep.ai/startup-launch-checker/" />
     <meta property="og:image" content="https://www.1ststep.ai/assets/firststep-social-preview-v3.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Startup Launch Readiness Checker from 1stStep.ai." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Is Your Startup Ready to Launch? | 1stStep.ai" />
+    <meta name="twitter:description" content="A founder-facing planning tool for turning a vague startup idea into a clear launch plan." />
+    <meta name="twitter:image" content="https://www.1ststep.ai/assets/firststep-social-preview-v3.jpg" />
     <script type="application/ld+json">
       {"@context":"https://schema.org","@graph":[{"@type":"WebApplication","name":"Startup Launch Readiness Checker","url":"https://www.1ststep.ai/startup-launch-checker/","applicationCategory":"BusinessApplication","isAccessibleForFree":true,"description":"Independent planning tool that turns a startup idea into a launch plan with a readiness score and checklist."},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What does this checker do?","acceptedAnswer":{"@type":"Answer","text":"It turns a startup idea into a launch plan with a readiness score, checklist, and weekly actions."}},{"@type":"Question","name":"Is this legal or financial advice?","acceptedAnswer":{"@type":"Answer","text":"No. It is an independent product prototype and planning tool. It is not legal, tax, financial, or investment advice."}},{"@type":"Question","name":"How is this different from the App Idea Checker?","acceptedAnswer":{"@type":"Answer","text":"The App Idea Checker scores whether an idea is worth building. This tool focuses on launch readiness after you have an idea."}}]}]}
     </script>
@@ -613,6 +620,24 @@
         font-size: 0.94rem;
       }
 
+      .site-hub {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px 16px;
+        margin-top: 14px;
+        font-size: 0.88rem;
+        font-weight: 600;
+      }
+
+      .site-hub a {
+        color: #4d5dff;
+        text-decoration: none;
+      }
+
+      .site-hub a:hover {
+        text-decoration: underline;
+      }
+
       .seo-faq {
         margin: 48px 0 16px;
         padding-top: 36px;
@@ -880,9 +905,11 @@
           <img class="brand-logo" src="/assets/firststep-logo-transparent-cleaned.png" alt="1stStep.ai" />
         </a>
         <div class="nav-links">
-          <a class="nav-link" href="/app-idea-viability-checker.html">App Idea Checker</a>
+          <a class="nav-link" href="/">Home</a>
+          <a class="nav-link" href="/services/websites.html">Services</a>
           <a class="nav-link" href="/fit-check/">Website Fit Check</a>
           <a class="nav-link" href="/book/">Book a Call</a>
+          <a class="nav-link" href="/tools/">Tools</a>
         </div>
       </nav>
 
@@ -1106,6 +1133,7 @@
 
     <footer class="shell footer">
       <span>1stStep.ai product prototype. Independent planning tool, not legal, tax, financial, or investment advice.</span>
+      <nav class="site-hub" aria-label="Site"><a href="/">Home</a><a href="/services/websites.html">Services</a><a href="/fit-check/">Fit Check</a><a href="/book/">Book a call</a><a href="/tools/">Tools</a></nav>
     </footer>
 
     <script>

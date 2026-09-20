@@ -8,11 +8,13 @@ const source = (path) => readFile(new URL(path, root), "utf8");
 const pages = [
   {
     path: "index.html",
-    title: "Build the System Behind Your Growth | 1stStep.ai",
+    title: "Websites, Apps &amp; AI That Get Leads | 1stStep.ai",
     description: "1stStep.ai designs and builds the systems",
     canonical: "https://www.1ststep.ai/",
     faq: "What does 1stStep.ai actually build?",
-    noBook: true,
+    book: true,
+    fitCheck: true,
+    tools: true,
   },
   {
     path: "services/websites.html",
@@ -22,6 +24,7 @@ const pages = [
     faq: "What kind of websites do you build?",
     book: true,
     fitCheck: true,
+    tools: true,
   },
   {
     path: "services/app-builds.html",
@@ -31,6 +34,7 @@ const pages = [
     faq: "Do you ship finished App Store apps?",
     book: true,
     fitCheck: true,
+    tools: true,
   },
   {
     path: "services/mvp-builds.html",
@@ -40,6 +44,7 @@ const pages = [
     faq: "What does an MVP include here?",
     book: true,
     fitCheck: true,
+    tools: true,
   },
   {
     path: "services/internal-tools.html",
@@ -49,6 +54,7 @@ const pages = [
     faq: "When should I replace spreadsheets with a custom tool?",
     book: true,
     fitCheck: true,
+    tools: true,
   },
   {
     path: "services/revenue-systems.html",
@@ -58,6 +64,7 @@ const pages = [
     faq: "What is a revenue systems audit?",
     book: true,
     fitCheck: true,
+    tools: true,
   },
   {
     path: "fit-check/index.html",
@@ -66,6 +73,7 @@ const pages = [
     canonical: "https://www.1ststep.ai/fit-check/",
     faq: "What do I need to submit?",
     book: true,
+    tools: true,
   },
   {
     path: "book/index.html",
@@ -74,6 +82,7 @@ const pages = [
     canonical: "https://www.1ststep.ai/book/",
     faq: "What is this call?",
     fitCheck: true,
+    tools: true,
   },
   {
     path: "journey/index.html",
@@ -83,6 +92,7 @@ const pages = [
     faq: "Are my answers saved?",
     book: true,
     fitCheck: true,
+    tools: true,
   },
   {
     path: "os/index.html",
@@ -90,6 +100,9 @@ const pages = [
     description: "1stStep OS is a public concept",
     canonical: "https://www.1ststep.ai/os",
     faq: "Is 1stStep OS a live product?",
+    book: true,
+    fitCheck: true,
+    tools: true,
   },
   {
     path: "app-idea-viability-checker.html",
@@ -99,6 +112,7 @@ const pages = [
     faq: "Is the checker a guarantee that my idea will work?",
     book: true,
     fitCheck: true,
+    tools: true,
   },
   {
     path: "startup-launch-checker/index.html",
@@ -108,6 +122,7 @@ const pages = [
     faq: "Is this legal or financial advice?",
     book: true,
     fitCheck: true,
+    tools: true,
   },
   {
     path: "campaigns/outgrown-website/index.html",
@@ -117,6 +132,7 @@ const pages = [
     faq: "How do I know I outgrew my website?",
     book: true,
     fitCheck: true,
+    tools: true,
   },
 ];
 
@@ -172,9 +188,13 @@ test("business pages have answer-first titles, descriptions, and matching FAQ sc
     const types = blocks.flatMap(collectTypes);
     assert.ok(types.includes("FAQPage"), `${page.path} should declare FAQPage`);
 
-    if (page.noBook) assert.doesNotMatch(html, /href="\/book\/"/);
     if (page.book) assert.match(html, /href="\/book\/"/);
     if (page.fitCheck) assert.match(html, /href="\/fit-check\/"/);
+    if (page.tools) assert.match(html, /href="\/tools\/"/);
+    assert.match(html, /property="og:title"/, `${page.path} should have og:title`);
+    assert.match(html, /name="twitter:card"/, `${page.path} should have twitter:card`);
+    assert.match(html, /property="og:image"/, `${page.path} should have og:image`);
+    assert.doesNotMatch(html, /rel="canonical" href="https:\/\/1ststep\.ai/, `${page.path} canonical should use www`);
   }
 });
 
@@ -185,7 +205,9 @@ test("homepage organization schema still names the consultancy and its services"
   assert.equal(organization.name, "1stStep.ai");
   assert.ok(organization.makesOffer.some((offer) => offer.url.includes("/services/websites.html")));
   assert.ok(organization.makesOffer.some((offer) => offer.url.includes("/services/internal-tools.html")));
-  assert.doesNotMatch(html, /href="\/book\/"/);
+  assert.match(html, /href="\/book\/"/);
+  assert.match(html, /href="\/fit-check\/"/);
+  assert.match(html, /href="\/tools\/"/);
 });
 
 test("sitemap lists business conversion pages and leaves tools URLs in place", async () => {
@@ -206,8 +228,43 @@ test("sitemap lists business conversion pages and leaves tools URLs in place", a
     "https://www.1ststep.ai/services/revenue-systems.html",
     "https://www.1ststep.ai/tools/",
     "https://www.1ststep.ai/tools/auto-model-router/",
+    "https://www.1ststep.ai/privacy.html",
+    "https://www.1ststep.ai/terms.html",
+    "https://www.1ststep.ai/campaigns/morris-county-free-website/",
   ]) {
     assert.match(sitemap, new RegExp(loc.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+  }
+  assert.match(sitemap, /<lastmod>2026-09-20<\/lastmod>/);
+  assert.doesNotMatch(sitemap, /https:\/\/1ststep\.ai\//);
+  assert.doesNotMatch(sitemap, /\/admin\/|\/demos\/|\/book\/confirmed\/|\/tools\/visual-renders\//);
+});
+
+test("llms.txt summarizes owner services and key URLs for LLM crawlers", async () => {
+  const llms = await source("public/llms.txt");
+  assert.match(llms, /websites, apps, internal tools, and practical AI that get leads/i);
+  assert.match(llms, /https:\/\/www\.1ststep\.ai\/journey\//);
+  assert.match(llms, /https:\/\/www\.1ststep\.ai\/fit-check\//);
+  assert.match(llms, /https:\/\/www\.1ststep\.ai\/book\//);
+  assert.match(llms, /https:\/\/www\.1ststep\.ai\/services\/websites\.html/);
+  assert.match(llms, /https:\/\/www\.1ststep\.ai\/tools\//);
+  assert.match(llms, /does not guarantee revenue, rankings/);
+});
+
+test("www canonicals and sitemap robots stay consistent", async () => {
+  const robots = await source("public/robots.txt");
+  const rootRobots = await source("robots.txt");
+  const rootSitemap = await source("sitemap.xml");
+  assert.match(robots, /Sitemap: https:\/\/www\.1ststep\.ai\/sitemap\.xml/);
+  assert.match(rootRobots, /Sitemap: https:\/\/www\.1ststep\.ai\/sitemap\.xml/);
+  assert.doesNotMatch(rootSitemap, /https:\/\/1ststep\.ai\//);
+  for (const path of ["privacy.html", "terms.html"]) {
+    const html = await source(path);
+    assert.match(html, new RegExp(`rel="canonical" href="https://www.1ststep.ai/${path}"`));
+    assert.match(html, /name="twitter:card"/);
+    assert.match(html, /href="\/services\/websites\.html"/);
+    assert.match(html, /href="\/fit-check\/"/);
+    assert.match(html, /href="\/book\/"/);
+    assert.match(html, /href="\/tools\/"/);
   }
 });
 

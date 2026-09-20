@@ -1,12 +1,23 @@
 # Architecture Decision Log
 
+## 2026-09-20: Free discoverability layer — owner homepage, sitemap, llms.txt, hubs
+
+- **Status / owner:** Implemented on the public site; Evan retains authority for positioning and claims.
+- **Decision:** Keep the prior business-page meta/FAQ pass and add free discoverability work: refresh `public/sitemap.xml` lastmods and list all indexable public HTML pages (including startup-launch-checker, revenue-systems, internal-tools, privacy, and terms); strengthen `/llms.txt` with an owner-language service summary and key URLs; change the homepage hero to “Websites, apps, and AI that get leads” with one primary CTA (Begin Your Journey) while keeping architecture as the method in How it works; complete OG/Twitter cards on key pages; keep www canonicals; add home ↔ services ↔ fit-check ↔ book ↔ tools hub links. Homepage footer/FAQ may link `/book/` as a website-call hub, not as a systems-audit booking. Tools SEO copy remains owned by the Tools PR; only additive cards/hubs are allowed here. No invented reviews or metrics.
+- **Rationale:** Evan asked for everything free for discoverability on this PR. The earlier “homepage does not add `/book/`” rule is superseded for hub/footer/FAQ links only. The hero CTA stays Journey.
+- **Affected systems:** Homepage, service pages, conversion pages, `public/sitemap.xml`, `public/llms.txt`, `robots.txt`, OG/Twitter tags, conversion and SEO tests.
+- **Alternatives:** Keep the systems-only homepage H1; omit `/book/` from homepage hubs; rewrite Tools copy here.
+- **Implementation / audit:** Homepage description still starts with “1stStep.ai designs and builds the systems” and still names CRM architecture. Visible FAQ text must match JSON-LD. Sitemap locs stay `https://www.1ststep.ai/...`.
+- **Supersedes:** The homepage-no-`/book/` clause of “Business-page SEO stays separate from Tools SEO.”
+- **Reversal:** Requires a new owner decision before changing the homepage primary CTA or labeling `/book/` as a systems audit.
+
 ## 2026-09-20: Business-page SEO stays separate from Tools SEO
 
 - **Status / owner:** Implemented on public business pages; Evan retains authority for positioning and claims.
-- **Decision:** Add answer-first titles, descriptions, visible FAQs, and matching FAQ/Service JSON-LD on consultancy, service, journey, booking, fit-check, OS, App Idea Checker, Startup Launch Checker, and outgrown-website pages. Leave `/tools/` and `/tools/auto-model-router/` to the existing Tools SEO PR. Homepage keeps the systems-consultancy path and does not add `/book/` links. Website Strategy Call remains a website conversation, not a systems-audit booking. Copy stays honest: no guaranteed revenue, rankings, citations, or live-OS claims.
+- **Decision:** Add answer-first titles, descriptions, visible FAQs, and matching FAQ/Service JSON-LD on consultancy, service, journey, booking, fit-check, OS, App Idea Checker, Startup Launch Checker, and outgrown-website pages. Leave `/tools/` and `/tools/auto-model-router/` SEO copy to the existing Tools SEO PR. Website Strategy Call remains a website conversation, not a systems-audit booking. Copy stays honest: no guaranteed revenue, rankings, citations, or live-OS claims. Homepage `/book/` hub links are now allowed by the later discoverability decision.
 - **Rationale:** Busy owners search for websites, MVPs, internal tools, and lead systems. AI answer engines need visible Q&A that matches schema. Mixing Tools token-usage SEO into this pass would fight the dedicated Tools PR.
 - **Affected systems:** Public HTML pages, `public/sitemap.xml`, `public/llms.txt`, conversion-path tests.
-- **Alternatives:** Rewrite Tools pages here; add `/book/` to the homepage; invent review or ranking claims.
+- **Alternatives:** Rewrite Tools pages here; invent review or ranking claims.
 - **Implementation / audit:** FAQ visible text must match JSON-LD questions. Homepage graph still includes Organization, WebSite, WebPage, CreativeWork, SoftwareApplication, plus FAQPage.
 - **Reversal:** Requires a new owner decision before changing conversion destinations or Tools ownership.
 

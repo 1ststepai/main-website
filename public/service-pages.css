@@ -37,6 +37,9 @@ p,li{color:#aeb4c9}
 .cta .btn{margin-top:0;background:#fff;color:#7163ff}
 .cta .btn.ghost{background:rgba(255,255,255,.06);color:#fff;border-color:rgba(255,255,255,.2)}
 footer{border-top-color:rgba(255,255,255,.08);color:#788097}
+.site-hub{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;margin-top:12px;font-size:13px;font-weight:600}
+.site-hub a{color:#8ddfff;text-decoration:none}
+.site-hub a:hover{text-decoration:underline}
 a:focus-visible{outline:2px solid #65e7ff;outline-offset:4px}
 @media(max-width:760px){
   .wrap{width:calc(100% - 28px)}

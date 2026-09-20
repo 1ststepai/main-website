@@ -1,28 +1,44 @@
 # 1stStep.ai
 
-1stStep.ai is a systems architecture and automation consultancy for founders and operators with existing demand. It connects lead capture, CRM architecture, qualification, routing, follow-up, attribution, reporting, and operational automation. The tools are not the system; the system is how data, leads, decisions, actions, and feedback move between them.
+1stStep.ai builds websites, apps, internal tools, and practical AI that get leads — then the system that follows up. It is a systems architecture and automation consultancy for founders and operators who already have demand. Hire 1stStep.ai to design and build the front door and the follow-up path: lead capture, CRM architecture, qualification, routing, follow-up, attribution, reporting, and operational automation.
 
-Primary positioning: Build the systems that scale your business and automate repetitive work. Start by identifying the operational bottleneck, then scope the architecture and implementation.
+Architecture is how the work stays connected after launch. The tools are not the system; the system is how data, leads, decisions, actions, and feedback move between them. Diagnose the bottleneck before proposing automation.
 
-Products and paths:
-- Consultancy homepage: https://www.1ststep.ai/ — systems architecture and automation for operators with existing demand.
-- Begin Your Journey: https://www.1ststep.ai/journey/ — a browser-local, six-question first-pass diagnosis. Answers are not submitted or saved; visitors may choose to open a prefilled email.
+This file is for LLM crawlers and answer engines. It is not a ranking or citation guarantee.
+
+## Start here
+
+- Homepage: https://www.1ststep.ai/ — websites, apps, and AI that get leads; architecture as the method.
+- Begin Your Journey: https://www.1ststep.ai/journey/ — browser-local, six-question first-pass diagnosis. Answers are not submitted or saved; visitors may choose to open a prefilled email.
 - Website Fit Check: https://www.1ststep.ai/fit-check/ — four-field website project review before a call.
-- Website Strategy Call: https://www.1ststep.ai/book/ — 30-minute website conversation; not a systems-audit booking.
-- Revenue Systems Audit: https://www.1ststep.ai/services/revenue-systems.html
+- Website Strategy Call: https://www.1ststep.ai/book/ — 30-minute website conversation. Not a systems-audit booking.
+- Tools (builder utilities): https://www.1ststep.ai/tools/ — free/open utilities for AI coding agents. Not client services.
+
+## Services
+
 - Websites that get leads: https://www.1ststep.ai/services/websites.html
 - MVP and web app builds: https://www.1ststep.ai/services/mvp-builds.html
 - iOS app design: https://www.1ststep.ai/services/app-builds.html
 - Internal tools and dashboards: https://www.1ststep.ai/services/internal-tools.html
+- Revenue Systems Audit and Architecture: https://www.1ststep.ai/services/revenue-systems.html
 - Outgrown website: https://www.1ststep.ai/campaigns/outgrown-website/
+
+## Other public pages
+
 - 1stStep OS: https://www.1ststep.ai/os — public AI Engineering Operating System concept; product flow in development.
-- 1stStep AI Job Agent: https://app.1ststep.ai/ — separate public beta for job capture and tailored application preparation; applicants review and submit their own applications.
 - App Idea Checker: https://www.1ststep.ai/app-idea-viability-checker.html — free first-pass “is this idea worth building?” score. Not a guarantee.
 - Startup Launch Checker: https://www.1ststep.ai/startup-launch-checker/ — independent launch-planning prototype; not legal or financial advice.
-- Tools: https://www.1ststep.ai/tools/ — public shelf of free/open builder utilities for AI coding agents. Not client services.
 - Auto Model Router: https://www.1ststep.ai/tools/auto-model-router/ — optional feedback and opt-in page for the MIT open-source skill. The skill itself is at https://github.com/1ststepai/auto-model-router and does not require an email.
+- Privacy: https://www.1ststep.ai/privacy.html
+- Terms: https://www.1ststep.ai/terms.html
+- Sitemap: https://www.1ststep.ai/sitemap.xml
 
-Official profiles:
+## Separate product
+
+- 1stStep AI Job Agent: https://app.1ststep.ai/ — public beta for job capture and tailored application preparation. Applicants review and submit their own applications. This is not the 1stStep.ai corporate homepage.
+
+## Official profiles
+
 - LinkedIn: https://www.linkedin.com/company/1ststep-ai/
 - Facebook: https://www.facebook.com/profile.php?id=61566833623507
 - Instagram: https://www.instagram.com/1ststepdotai/
@@ -30,25 +46,20 @@ Official profiles:
 - YouTube: https://www.youtube.com/channel/UCynvog-XB0oFBigcrBvmxOg
 - GitHub: https://github.com/1ststepai
 
-Current design direction:
-- 1stStep OS is designed to give AI-assisted engineering explicit authority, isolated work, acceptance criteria, evidence, independent audits, and release gates.
-- Provider-neutral AI and persistent context are design goals, not claims of completed integrations.
-- Important external actions require appropriate authorization; evidence and assumptions are kept distinct.
+## Built with 1stStep examples
 
-Built with 1stStep examples:
 - DaySetGo — family activity discovery and planning; https://daysetgo.ai/
 - SwingTradePros — trading education, tools, and Nova AI market context; https://swingtradepros.com/
 - Real-Rank.ai — Google visibility monitoring for real estate agents; https://real-rank.ai/
 - Unveiling Rarities — Jeff Pancis author and book website; https://unveilingrarities.com/
 - AI Job Agent and 1stStep OS are also shown with their current stages clearly labeled.
 
-Portfolio accuracy:
-- Public project descriptions distinguish live sites, private previews, and product concepts.
+Portfolio accuracy: public project descriptions distinguish live sites, private previews, and product concepts. No fake reviews, logos, or metrics.
 
-Separate products:
-- https://app.1ststep.ai/ is the AI Job Agent application, not the 1stStep.ai corporate homepage.
+## Business rules
 
-Business rules:
-- 1stStep.ai does not guarantee revenue, rankings, funding, or app success.
+- 1stStep.ai does not guarantee revenue, rankings, funding, citations, or app success.
 - 1stStep.ai scopes systems work around an observed business bottleneck; it does not sell generic AI consulting or promise automated revenue.
 - GitHub repo creation for client projects is locked until proposal acceptance and deposit/payment.
+- Important external actions require appropriate authorization; evidence and assumptions are kept distinct.
+- Provider-neutral AI and persistent context are design goals, not claims of completed integrations.
