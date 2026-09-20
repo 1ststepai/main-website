@@ -1,0 +1,18 @@
+---
+description: Portable Auto model router — suggest lightest tier, wait for confirm
+alwaysApply: true
+---
+
+Before choosing a model or effort for substantial work, follow the auto-model-router skill:
+
+1. Read task context (scope, ambiguity, risk, reversibility).
+2. Classify into lightest sufficient tier: fast / standard / reasoning / max.
+3. Suggest the tier + short why in chat.
+4. Wait for user confirmation or override.
+5. Then run with the mapped model/effort.
+6. Escalate once after a failed light attempt.
+
+Prefer lighter for reversible work. Never under-provision security or irreversible actions.
+Honor an explicit user model/effort choice.
+
+Canonical upstream: https://github.com/1ststepai/auto-model-router
