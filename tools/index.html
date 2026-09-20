@@ -3,16 +3,20 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Tools for your own build | 1stStep.ai</title>
-  <meta name="description" content="Free, open tools from 1stStep.ai that help people build with AI coding agents such as Cursor, Claude, and Codex. Not client services." />
+  <title>AI coding tools to reduce token usage | 1stStep.ai</title>
+  <meta name="description" content="Free Cursor, Claude Code, and Codex tools for high token usage. Auto Model Router suggests a cheaper model for simple tasks, then waits for you to confirm." />
   <link rel="canonical" href="https://www.1ststep.ai/tools/" />
   <meta name="robots" content="index,follow,max-image-preview:large" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="1stStep.ai" />
-  <meta property="og:title" content="Tools for your own build | 1stStep.ai" />
-  <meta property="og:description" content="Open utilities for Cursor, Claude, and Codex. Auto Model Router is live. More tools will be listed here when they are public." />
+  <meta property="og:title" content="AI coding tools to reduce token usage | 1stStep.ai" />
+  <meta property="og:description" content="Free tools for Cursor, Claude Code, and Codex when token usage and usage limits add up. Auto Model Router is live: suggest a cheaper model, then confirm." />
   <meta property="og:url" content="https://www.1ststep.ai/tools/" />
   <meta property="og:image" content="https://www.1ststep.ai/assets/banner-1ststep-og.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="AI coding tools to reduce token usage | 1stStep.ai" />
+  <meta name="twitter:description" content="Free tools for Cursor, Claude Code, and Codex when token usage and usage limits add up. Auto Model Router is live." />
+  <meta name="twitter:image" content="https://www.1ststep.ai/assets/banner-1ststep-og.png" />
   <meta name="theme-color" content="#070912" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -21,21 +25,33 @@
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "CollectionPage",
-      "name": "1stStep.ai Tools",
-      "description": "Free and open tools that help people build with AI coding agents.",
-      "url": "https://www.1ststep.ai/tools/",
-      "isPartOf": { "@type": "WebSite", "name": "1stStep.ai", "url": "https://www.1ststep.ai/" },
-      "mainEntity": {
-        "@type": "ItemList",
-        "numberOfItems": 1,
-        "itemListElement": [{
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Auto Model Router",
-          "url": "https://www.1ststep.ai/tools/auto-model-router/"
-        }]
-      }
+      "@graph": [
+        {
+          "@type": "CollectionPage",
+          "@id": "https://www.1ststep.ai/tools/#page",
+          "name": "AI coding tools to reduce token usage",
+          "description": "Free and open tools that help people spend fewer tokens in Cursor, Claude Code, Codex, and similar agents. Listings are usable without an account or email. Auto Model Router suggests a cheaper model tier and waits for confirmation; it does not shrink context by itself or promise automatic savings.",
+          "url": "https://www.1ststep.ai/tools/",
+          "isPartOf": { "@type": "WebSite", "name": "1stStep.ai", "url": "https://www.1ststep.ai/" },
+          "mainEntity": {
+            "@type": "ItemList",
+            "numberOfItems": 1,
+            "itemListElement": [{
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Auto Model Router",
+              "url": "https://www.1ststep.ai/tools/auto-model-router/"
+            }]
+          }
+        },
+        {
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.1ststep.ai/" },
+            { "@type": "ListItem", "position": 2, "name": "AI coding tools", "item": "https://www.1ststep.ai/tools/" }
+          ]
+        }
+      ]
     }
   </script>
   <style>
@@ -62,9 +78,9 @@
     .nav-links a[aria-current="page"]{color:#fff}
     .hero{padding:78px 0 28px}
     .eyebrow{margin:0 0 17px;color:#9d91ff;font:700 11px/1.2 "Space Grotesk",sans-serif;letter-spacing:.15em;text-transform:uppercase}
-    h1{max-width:16ch;margin:0 0 22px;font:700 clamp(44px,6vw,76px)/.95 "Space Grotesk",sans-serif;letter-spacing:-.06em}
+    h1{max-width:18ch;margin:0 0 22px;font:700 clamp(44px,6vw,76px)/.95 "Space Grotesk",sans-serif;letter-spacing:-.06em}
     .gradient{background:linear-gradient(100deg,#b39cff,#79a7ff 54%,#65e7ff);-webkit-background-clip:text;background-clip:text;color:transparent}
-    .lede{max-width:640px;margin:0;color:#bdc3d7;font-size:18px;line-height:1.72}
+    .lede{max-width:680px;margin:0;color:#bdc3d7;font-size:18px;line-height:1.72}
     .grid{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr);gap:16px;padding:36px 0 72px}
     .card{position:relative;display:flex;flex-direction:column;align-items:flex-start;min-height:280px;padding:28px;border:1px solid var(--line);border-radius:24px;background:rgba(255,255,255,.03)}
     .card-live{border-color:rgba(255,255,255,.15);background:linear-gradient(155deg,rgba(18,22,39,.98),rgba(9,12,22,.98));box-shadow:0 48px 110px -58px rgba(79,140,255,.75);text-decoration:none}
@@ -73,6 +89,8 @@
     .badge{display:inline-flex;align-items:center;min-height:26px;margin:0 0 16px;padding:0 10px;border:1px solid var(--line);border-radius:999px;color:#c9d3ee;font:700 10px/1 "Space Grotesk",sans-serif;letter-spacing:.12em;text-transform:uppercase}
     .badge-live{border-color:rgba(86,221,255,.35);color:#bcf4ff}
     h2{margin:0 0 12px;font:700 28px "Space Grotesk",sans-serif;letter-spacing:-.04em}
+    .card h2 a{text-decoration:none}
+    .card h2 a:hover{color:#d7e7ff}
     .card p{margin:0;color:#9aa3bb;font-size:15px;line-height:1.65}
     .card-links{display:flex;flex-wrap:wrap;gap:10px;margin-top:auto;padding-top:22px}
     .chip{display:inline-flex;align-items:center;min-height:38px;padding:0 13px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.03);color:#d7def3;font-size:13px;font-weight:600;text-decoration:none}
@@ -100,15 +118,15 @@
   <main class="wrap">
     <section class="hero" aria-labelledby="tools-title">
       <p class="eyebrow">Tools for your own build</p>
-      <h1 id="tools-title">Open utilities for <span class="gradient">AI coding agents.</span></h1>
-      <p class="lede">Free, public tools that help people build with Cursor, Claude, Codex, and similar agents. This is not a client-services catalog. Each listing is usable without creating an account or leaving an email.</p>
+      <h1 id="tools-title">AI coding tools to <span class="gradient">reduce token usage.</span></h1>
+      <p class="lede">When Cursor is running out of usage, Claude Code hits a usage limit too fast, or agent token burn feels high, these free utilities help you spend on the work that needs it. This is not a client-services catalog. Each listing is usable without an account or email. Nothing here claims automatic percentage savings.</p>
     </section>
 
     <section class="grid" aria-label="Available and upcoming tools">
       <article class="card card-live">
         <p class="badge badge-live">Live · MIT</p>
-        <h2>Auto Model Router</h2>
-        <p>Suggest the lightest sufficient model tier, then wait for you to confirm. Install the skill, read the docs, or leave optional feedback. Email is never required to use it.</p>
+        <h2><a href="/tools/auto-model-router/">Auto Model Router</a></h2>
+        <p>Use a cheaper model for simple tasks instead of sending everything to Opus. The skill suggests the lightest sufficient tier for Cursor, Claude Code, and Codex, then waits for you to confirm. It does not shrink context by itself. Token savings happen only if that cheaper model or lower effort actually runs.</p>
         <div class="card-links">
           <a class="chip chip-primary" href="/tools/auto-model-router/">Open the tool &rarr;</a>
           <a class="chip" href="https://github.com/1ststepai/auto-model-router" target="_blank" rel="noopener">GitHub</a>

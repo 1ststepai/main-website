@@ -1,5 +1,15 @@
 # Architecture Decision Log
 
+## 2026-09-20: Tools pages target token-usage search intent without overclaiming
+
+- **Status / owner:** Implemented on `/tools/` and `/tools/auto-model-router/`; Evan retains authority for later product or savings claims.
+- **Decision:** Align public Tools titles, headings, and copy with how people search for Cursor/Claude usage limits and agent token burn, while keeping the existing honesty contract. Auto Model Router remains suggest → confirm. It does not shrink context by itself, does not always pick the right model, and does not save a percentage automatically. Dashboard figures stay relative estimates from a local log. Complementary habits (new chat, `/compact`, trim rules/MCP, Composer vs Opus, lean.ctx/ponytail-style context tools) are described as separate tips, not as features of the skill. The skill remains free without email.
+- **Rationale:** The live pages described the policy accurately but not the problem people actually Google. Search-aligned copy only helps if it stays falsifiable.
+- **Affected systems:** `/tools/`, `/tools/auto-model-router/`, sitemap, `public/llms.txt`.
+- **Alternatives:** Keep product-policy-only titles; publish unverifiable savings percentages.
+- **Implementation / audit:** FAQ visible text must match FAQPage schema. Tests reject automatic-percentage and always-right-model claims.
+- **Reversal:** Requires a new owner decision before promising quantified savings or silent model switching.
+
 ## 2026-09-20: Public Tools hub is for builder utilities, not client services
 
 - **Status / owner:** Implemented on the public site with the Auto Model Router page.

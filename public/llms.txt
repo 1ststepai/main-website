@@ -11,8 +11,8 @@ Products and paths:
 - 1stStep OS: https://www.1ststep.ai/os — public AI Engineering Operating System concept; product flow in development.
 - 1stStep AI Job Agent: https://app.1ststep.ai/ — separate public beta for job capture and tailored application preparation; applicants review and submit their own applications.
 - App Idea Checker: https://www.1ststep.ai/app-idea-viability-checker.html
-- Tools: https://www.1ststep.ai/tools/ — public shelf of free/open builder utilities for AI coding agents. Not client services.
-- Auto Model Router: https://www.1ststep.ai/tools/auto-model-router/ — optional feedback and opt-in page for the MIT open-source skill. The skill itself is at https://github.com/1ststepai/auto-model-router and does not require an email.
+- Tools: https://www.1ststep.ai/tools/ — public shelf of free/open AI coding tools for people trying to reduce token usage in Cursor, Claude Code, and Codex. Not client services. No automatic savings claims.
+- Auto Model Router: https://www.1ststep.ai/tools/auto-model-router/ — MIT skill that suggests a cheaper model tier for simple tasks, then waits for confirmation. It does not shrink context by itself. Savings only if a cheaper model or lower effort actually runs. Dashboard figures are relative estimates from a local log, not live billing. The skill is free without email; the page is optional opt-in feedback. Source: https://github.com/1ststepai/auto-model-router
 - Other focused services: https://www.1ststep.ai/services/websites.html, https://www.1ststep.ai/services/app-builds.html, https://www.1ststep.ai/services/internal-tools.html
 
 Official profiles:
