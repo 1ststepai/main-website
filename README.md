@@ -82,9 +82,18 @@ APP_IDEA_FORWARDING_ENABLED=true
 
 Repo creation remains locked until proposal acceptance and deposit/payment gates are met.
 
+## Public Tools
+
+Builder utilities live under `/tools/`. This is a public shelf for free/open tools that help people build with AI coding agents. It is not the client internal-tools service.
+
+```text
+/tools/
+/tools/auto-model-router/
+```
+
 ## Auto Model Router
 
-The open-source Auto Model Router skill has a public opt-in feedback page at:
+The open-source Auto Model Router skill has a public install and opt-in feedback page at:
 
 ```text
 /tools/auto-model-router/

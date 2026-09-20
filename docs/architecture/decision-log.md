@@ -1,5 +1,15 @@
 # Architecture Decision Log
 
+## 2026-09-20: Public Tools hub is for builder utilities, not client services
+
+- **Status / owner:** Implemented on the public site with the Auto Model Router page.
+- **Decision:** Publish `/tools/` as a short hub for free/open tools that help people build with AI coding agents. List only live, usable tools. Auto Model Router is the first card. Future directions may be mentioned as unlisted work, never as fake products. Homepage primary nav and Explore footer link to the hub. Distinguish this shelf from `/services/internal-tools.html`.
+- **Rationale:** A single signup URL is not enough of a public home for OSS builder tools. A hub keeps later tools from becoming one-off URLs and keeps services vs. utilities separate.
+- **Affected systems:** Homepage nav/footer, `/tools/`, `/tools/auto-model-router/`, sitemap, Vite/Vercel `/tools` rewrite.
+- **Alternatives:** Keep only the Auto Model Router URL; mix OSS tools into the OS or services pages.
+- **Implementation / audit:** Hub copy must stay honest. Email remains optional on the Auto Model Router form.
+- **Reversal:** Requires a new owner decision before removing the hub or treating Tools as a paid catalog.
+
 ## 2026-09-20: Auto Model Router public feedback is opt-in only
 
 - **Status / owner:** Implemented for the public site; Evan retains authority for any later CRM or marketing-list expansion.

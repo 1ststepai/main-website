@@ -13,7 +13,7 @@ test("the homepage leads with systems architecture and keeps products distinct",
   assert.match(html, /href="\/journey\/"/);
   assert.match(html, /href="\/services\/revenue-systems\.html"/);
   assert.match(html, /href="https:\/\/app\.1ststep\.ai\/"/);
-  assert.match(html, /href="\/tools\/auto-model-router\/"/);
+  assert.match(html, /href="\/tools\/"/);
   assert.match(html, /Public concept · product flow in development|public concept/i);
   assert.match(html, /firststep-logo-transparent-cleaned\.png/);
   assert.match(llms, /1stStep OS/);
@@ -158,6 +158,30 @@ test("the Morris County campaign is focused, transparent, and locally qualified"
   assert.match(sitemap, /campaigns\/morris-county-free-website/);
 });
 
+test("the Tools hub lists only live builder utilities", async () => {
+  const html = await source("tools/index.html");
+  const home = await source("index.html");
+  const config = await source("vite.config.js");
+  const sitemap = await source("public/sitemap.xml");
+  const vercel = await source("vercel.json");
+  const readme = await source("README.md");
+  assert.match(html, /Tools for your own build/);
+  assert.match(html, /Open utilities for/);
+  assert.match(html, /href="\/tools\/auto-model-router\/"/);
+  assert.match(html, /https:\/\/github.com\/1ststepai\/auto-model-router/);
+  assert.match(html, /INSTALL\.md/);
+  assert.match(html, /More coming/);
+  assert.match(html, /until they exist|until it is public and usable/i);
+  assert.match(html, /href="\/services\/internal-tools\.html"/);
+  assert.doesNotMatch(html, /lean\.ctx|ponytail/i);
+  assert.match(home, /<nav class="main-nav"[^>]*>[\s\S]*href="\/tools\/"/);
+  assert.match(config, /tools: "tools\/index.html"/);
+  assert.match(config, /["']\/tools["']/);
+  assert.match(sitemap, /www\.1ststep\.ai\/tools\//);
+  assert.match(vercel, /"source": "\/tools"/);
+  assert.match(readme, /\/tools\//);
+});
+
 test("the Auto Model Router page is optional, honest, and opt-in", async () => {
   const html = await source("tools/auto-model-router/index.html");
   const config = await source("vite.config.js");
@@ -165,6 +189,7 @@ test("the Auto Model Router page is optional, honest, and opt-in", async () => {
   const readme = await source("README.md");
   assert.match(html, /Suggest a lighter/);
   assert.match(html, /confirm before it runs/i);
+  assert.match(html, /href="\/tools\/"/);
   assert.match(html, /https:\/\/github.com\/1ststepai\/auto-model-router/);
   assert.match(html, /INSTALL\.md/);
   assert.match(html, /billing dashboard/i);

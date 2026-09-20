@@ -54,7 +54,9 @@
     a{color:inherit}.wrap{width:min(1120px,calc(100% - 48px));margin:0 auto}
     .nav{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:18px 0;border-bottom:1px solid var(--line)}
     .brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none;font:700 18px "Space Grotesk",sans-serif}
-    .brand img{width:28px;height:28px;object-fit:contain}.back{color:var(--muted);text-decoration:none;font-size:14px;font-weight:600}
+    .brand img{width:28px;height:28px;object-fit:contain}
+    .nav-links{display:flex;align-items:center;gap:18px;color:var(--muted);font-size:14px;font-weight:600}
+    .nav-links a{text-decoration:none}
     .layout{display:grid;grid-template-columns:minmax(0,.96fr) minmax(400px,.82fr);gap:52px;align-items:start;padding:72px 0 86px}
     .eyebrow{margin:0 0 17px;color:#9d91ff;font:700 11px/1.2 "Space Grotesk",sans-serif;letter-spacing:.15em;text-transform:uppercase}
     h1{max-width:13ch;margin:0 0 23px;font:700 clamp(44px,6vw,76px)/.95 "Space Grotesk",sans-serif;letter-spacing:-.06em}
@@ -96,14 +98,17 @@
     .legal{display:flex;justify-content:space-between;gap:20px;padding:24px 0 32px;border-top:1px solid var(--line);color:#747e97;font-size:12px}.legal nav{display:flex;gap:18px}
     :where(a,button,input,textarea,label):focus-visible{outline:3px solid var(--cyan);outline-offset:3px}
     @media(max-width:860px){.layout{grid-template-columns:1fr;gap:34px;padding:48px 0 62px}.copy{text-align:center}.copy h1,.lede,.honest{margin-left:auto;margin-right:auto}.links{justify-content:center}}
-    @media(max-width:600px){.wrap{width:calc(100% - 28px)}.nav{padding:14px 0}.layout{padding:32px 0 44px}.back{font-size:12px}h1{font-size:clamp(42px,14vw,62px)}.signal{grid-template-columns:1fr}.form-card{padding:26px 19px;border-radius:22px}.legal{align-items:flex-start;flex-direction:column}}
+    @media(max-width:600px){.wrap{width:calc(100% - 28px)}.nav{padding:14px 0}.layout{padding:32px 0 44px}.nav-links{font-size:13px}h1{font-size:clamp(42px,14vw,62px)}.signal{grid-template-columns:1fr}.form-card{padding:26px 19px;border-radius:22px}.legal{align-items:flex-start;flex-direction:column}}
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}
   </style>
 </head>
 <body data-fsai-page-event="auto_model_router_view" data-fsai-audience="oss_tools">
   <header class="wrap nav">
     <a class="brand" href="/" aria-label="1stStep.ai home"><img src="/assets/firststep-logo-transparent-cleaned.png" alt=""><span>1stStep.ai</span></a>
-    <a class="back" href="https://github.com/1ststepai/auto-model-router" target="_blank" rel="noopener">View on GitHub &rarr;</a>
+    <nav class="nav-links" aria-label="Primary navigation">
+      <a href="/tools/">All tools</a>
+      <a href="https://github.com/1ststepai/auto-model-router" target="_blank" rel="noopener">GitHub</a>
+    </nav>
   </header>
 
   <main class="wrap layout">
