@@ -168,6 +168,7 @@ test("the Tools hub lists only live builder utilities", async () => {
   assert.match(html, /Tools for your own build/);
   assert.match(html, /Open utilities for/);
   assert.match(html, /href="\/tools\/auto-model-router\/"/);
+  assert.match(html, /illustrative example flow/);
   assert.match(html, /https:\/\/github.com\/1ststepai\/auto-model-router/);
   assert.match(html, /INSTALL\.md/);
   assert.match(html, /More coming/);
@@ -200,6 +201,14 @@ test("the Auto Model Router page is optional, honest, and opt-in", async () => {
   assert.match(html, /data-fsai-page-event="auto_model_router_view"/);
   assert.match(html, /No silent email harvesting/);
   assert.match(html, /usable without an email|works the same either way/i);
+  assert.match(html, /Example flow \(illustrative\)/);
+  assert.match(html, /not a live IDE recording/i);
+  assert.match(html, /Rename getUserName/);
+  assert.match(html, /Running on fast tier/);
+  assert.match(html, /Running on reasoning tier/);
+  assert.match(html, /prefers-reduced-motion:\s*reduce/);
+  assert.match(html, /id="amr-demo-toggle"/);
+  assert.match(html, /Play example/);
   assert.match(config, /autoModelRouter: "tools\/auto-model-router\/index.html"/);
   assert.match(sitemap, /tools\/auto-model-router\//);
   assert.match(readme, /\/tools\/auto-model-router\//);
