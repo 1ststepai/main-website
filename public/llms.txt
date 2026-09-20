@@ -5,15 +5,22 @@
 Primary positioning: Build the systems that scale your business and automate repetitive work. Start by identifying the operational bottleneck, then scope the architecture and implementation.
 
 Products and paths:
-- Consultancy homepage: https://www.1ststep.ai/
+- Consultancy homepage: https://www.1ststep.ai/ — systems architecture and automation for operators with existing demand.
 - Begin Your Journey: https://www.1ststep.ai/journey/ — a browser-local, six-question first-pass diagnosis. Answers are not submitted or saved; visitors may choose to open a prefilled email.
+- Website Fit Check: https://www.1ststep.ai/fit-check/ — four-field website project review before a call.
+- Website Strategy Call: https://www.1ststep.ai/book/ — 30-minute website conversation; not a systems-audit booking.
 - Revenue Systems Audit: https://www.1ststep.ai/services/revenue-systems.html
+- Websites that get leads: https://www.1ststep.ai/services/websites.html
+- MVP and web app builds: https://www.1ststep.ai/services/mvp-builds.html
+- iOS app design: https://www.1ststep.ai/services/app-builds.html
+- Internal tools and dashboards: https://www.1ststep.ai/services/internal-tools.html
+- Outgrown website: https://www.1ststep.ai/campaigns/outgrown-website/
 - 1stStep OS: https://www.1ststep.ai/os — public AI Engineering Operating System concept; product flow in development.
 - 1stStep AI Job Agent: https://app.1ststep.ai/ — separate public beta for job capture and tailored application preparation; applicants review and submit their own applications.
-- App Idea Checker: https://www.1ststep.ai/app-idea-viability-checker.html
+- App Idea Checker: https://www.1ststep.ai/app-idea-viability-checker.html — free first-pass “is this idea worth building?” score. Not a guarantee.
+- Startup Launch Checker: https://www.1ststep.ai/startup-launch-checker/ — independent launch-planning prototype; not legal or financial advice.
 - Tools: https://www.1ststep.ai/tools/ — public shelf of free/open builder utilities for AI coding agents. Not client services.
 - Auto Model Router: https://www.1ststep.ai/tools/auto-model-router/ — optional feedback and opt-in page for the MIT open-source skill. The skill itself is at https://github.com/1ststepai/auto-model-router and does not require an email.
-- Other focused services: https://www.1ststep.ai/services/websites.html, https://www.1ststep.ai/services/app-builds.html, https://www.1ststep.ai/services/internal-tools.html
 
 Official profiles:
 - LinkedIn: https://www.linkedin.com/company/1ststep-ai/

@@ -49,4 +49,13 @@ a:focus-visible{outline:2px solid #65e7ff;outline-offset:4px}
   .grid{grid-template-columns:1fr}
   .card{min-height:0}
 }
+.seo-faq{margin:48px 0 0;padding-top:40px;border-top:1px solid rgba(255,255,255,.09);position:relative;scroll-margin-top:24px}
+.seo-faq h2{margin:12px 0 8px;max-width:16ch;font-size:clamp(28px,4vw,42px);line-height:1.08;letter-spacing:-.035em;color:#f7f8ff}
+.seo-faq>p{max-width:680px}
+.faq-list{display:grid;gap:12px;margin:28px 0 0}
+.faq-list details{padding:18px 20px;border:1px solid rgba(255,255,255,.09);border-radius:16px;background:rgba(255,255,255,.03)}
+.faq-list summary{cursor:pointer;color:#f7f8ff;font-weight:700;font-size:17px;line-height:1.4}
+.faq-list summary::-webkit-details-marker{color:#65e7ff}
+.faq-list p{margin:12px 0 0}
+.faq-list a{color:#8ddfff;font-weight:700}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.btn,.card{transition:none}}
