@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>1stStep OS | Open-source AI engineering foundation</title>
-  <meta name="description" content="1stStep OS is an in-development open-source foundation for AI-assisted engineering. Phase 0: idea to profile to ZIP in progress. Free core. Not a live product or ZIP demo." />
+  <title>1stStep OS | Public free core, Cycle 1 local ZIP</title>
+  <meta name="description" content="1stStep OS Cycle 1 is a public free core: clone GitHub, run locally, and export a Project OS markdown ZIP. Not a hosted product, full agent OS, or control plane." />
   <link rel="canonical" href="https://www.1ststep.ai/tools/1ststep-os/" />
   <meta name="robots" content="index,follow,max-image-preview:large" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="1stStep.ai" />
-  <meta property="og:title" content="1stStep OS | Open-source AI engineering foundation" />
-  <meta property="og:description" content="Foundation in development. Public concept on 1ststep.ai/os. Source available soon. Free core promised. Not a live ZIP demo." />
+  <meta property="og:title" content="1stStep OS | Public free core, Cycle 1 local ZIP" />
+  <meta property="og:description" content="Clone https://github.com/1ststepai/1ststep-os, run locally, open localhost:3000/os, download a markdown ZIP. Free core. Not a hosted product." />
   <meta property="og:url" content="https://www.1ststep.ai/tools/1ststep-os/" />
   <meta property="og:image" content="https://www.1ststep.ai/assets/banner-1ststep-og.png" />
   <meta name="theme-color" content="#070912" />
@@ -22,17 +22,18 @@
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "WebPage",
-      "name": "1stStep OS — open-source foundation",
-      "description": "Public listing for the 1stStep OS open-source foundation. Phase 0, in development. Idea to profile to ZIP is in progress. Free core promised. Not a live product.",
+      "@type": "SoftwareSourceCode",
+      "name": "1stStep OS",
+      "description": "Public free core for AI-assisted engineering. Cycle 1: clone, run locally, idea to project profile to markdown ZIP. Not a hosted product, full agent OS, or production control plane.",
+      "codeRepository": "https://github.com/1ststepai/1ststep-os",
+      "programmingLanguage": "TypeScript",
       "url": "https://www.1ststep.ai/tools/1ststep-os/",
-      "creativeWorkStatus": "Incomplete",
-      "isPartOf": { "@type": "WebSite", "name": "1stStep.ai", "url": "https://www.1ststep.ai/" },
-      "relatedLink": [
-        "https://www.1ststep.ai/os",
-        "https://www.1ststep.ai/tools/",
-        "https://www.1ststep.ai/tools/1ststep-os-audit/"
-      ]
+      "sameAs": ["https://github.com/1ststepai/1ststep-os", "https://www.1ststep.ai/os"],
+      "author": {
+        "@type": "Organization",
+        "name": "1stStep.ai",
+        "url": "https://www.1ststep.ai/"
+      }
     }
   </script>
 </head>
@@ -42,71 +43,84 @@
     <nav class="nav-links" aria-label="Primary navigation">
       <a href="/tools/">All tools</a>
       <a href="/os">Concept page</a>
+      <a href="https://github.com/1ststepai/1ststep-os" target="_blank" rel="noopener">GitHub</a>
     </nav>
   </header>
 
   <main class="wrap">
     <section class="intro" aria-labelledby="os-title">
-      <p class="eyebrow">Foundation · Phase 0 · in development</p>
-      <h1 id="os-title">An OS for AI engineering. <span class="gradient">Still being built.</span></h1>
-      <p class="lede">1stStep OS is the open-source foundation around explicit authority, isolated work, evidence, and release gates. The public concept is live. The thin vertical is not: idea &rarr; profile &rarr; ZIP is in progress. The core is intended to stay free. This is not a claim that the OS product is live.</p>
+      <p class="eyebrow">Foundation · Cycle 1 · free core · local only</p>
+      <h1 id="os-title">An OS for AI engineering. <span class="gradient">Cycle 1 runs locally.</span></h1>
+      <p class="lede">1stStep OS is the open-source foundation around explicit authority, isolated work, evidence, and release gates. Cycle 1 is live as a public free core: clone the repo, run it on your machine, paste an idea, and download a Project OS markdown ZIP. This is not a hosted product, not a full agent OS, and not a control plane.</p>
       <div class="links">
-        <a class="chip chip-primary" href="/os">Read the public concept &rarr;</a>
+        <a class="chip chip-primary" href="https://github.com/1ststepai/1ststep-os" target="_blank" rel="noopener">Open GitHub &rarr;</a>
+        <a class="chip" href="#get-it">Local ZIP commands</a>
+        <a class="chip" href="/os">Public concept page</a>
         <a class="chip" href="/tools/1ststep-os-audit/">Free OS Audit CLI</a>
         <a class="chip" href="/tools/">All tools</a>
       </div>
       <div class="signal">
-        <div><strong>Phase 0</strong><span>Idea to project profile to ZIP is the current build path. Not finished.</span></div>
+        <div><strong>Public GitHub</strong><span>Clone https://github.com/1ststepai/1ststep-os. The source is public today.</span></div>
+        <div><strong>Cycle 1 ZIP</strong><span>Idea &rarr; project profile &rarr; markdown ZIP on localhost. No model is called.</span></div>
         <div><strong>Free core</strong><span>The foundation is meant to stay usable without a metered product lock-in.</span></div>
-        <div><strong>Source available soon</strong><span>The GitHub repo is not public yet. No live ZIP download is offered here.</span></div>
       </div>
       <aside class="honest">
         <h2>Honesty</h2>
-        <p>1stStep OS is not live as a shipped product. There is no live ZIP demo on this page. Diagrams and walkthroughs on the concept page are illustrative. Do not treat this listing as a marketplace, hosted app, or consulting intake. When the repository is public, this page will link it.</p>
+        <p>Cycle 1 is a thin vertical, not production-ready. The compile API is unauthenticated and must not be deployed publicly. This site does not host a ZIP generator. 1stStep OS is not a hosted control plane or a complete agent OS. Diagrams and walkthroughs on the concept page are illustrative. Do not treat this listing as a marketplace, hosted app, or consulting intake.</p>
       </aside>
     </section>
 
     <div class="layout">
-      <section class="get-it" id="status" aria-labelledby="status-title">
+      <section class="get-it" id="get-it" aria-labelledby="get-it-title">
         <div class="get-it-head">
-          <p class="eyebrow">Where to go</p>
-          <h2 id="status-title">Concept now. Source when public.</h2>
-          <p class="get-it-lede">Use the public concept page to understand the design. Use OS Audit if you already have a repository to inspect. Do not expect a downloadable OS ZIP from this listing yet.</p>
+          <p class="eyebrow">Get it</p>
+          <h2 id="get-it-title">Clone, then run Cycle 1 locally</h2>
+          <p class="get-it-lede">The public repo is the install. Node 22 or newer. Nothing here requires an email, account, or paid API key. Do not expect a hosted ZIP download from 1ststep.ai.</p>
         </div>
         <div class="listings">
-          <a class="listing listing-live" href="/os">
-            <span class="listing-kicker">Public now</span>
-            <h3>1stStep OS concept</h3>
-            <p>https://www.1ststep.ai/os &mdash; public concept, product flow in development. Illustrative, not a live control plane.</p>
-          </a>
-          <article class="listing listing-pending" aria-label="GitHub source status">
-            <span class="listing-kicker">Not public yet</span>
+          <a class="listing listing-live" href="https://github.com/1ststepai/1ststep-os" target="_blank" rel="noopener">
+            <span class="listing-kicker">Works today</span>
             <h3>GitHub · 1ststepai/1ststep-os</h3>
-            <p class="listing-status">Source available soon</p>
-            <p>The intended repository is not publicly reachable today. This page does not link a 404.</p>
-          </article>
+            <p>Public source. Clone it. This is the live listing for the free core.</p>
+          </a>
+          <a class="listing listing-live" href="#get-it">
+            <span class="listing-kicker">Local ZIP demo</span>
+            <h3>Idea &rarr; profile &rarr; ZIP</h3>
+            <p>After start, open http://localhost:3000/os. Paste an idea, compile, download a markdown ZIP.</p>
+          </a>
+          <a class="listing listing-live" href="/os">
+            <span class="listing-kicker">Public concept</span>
+            <h3>1stStep OS concept</h3>
+            <p>https://www.1ststep.ai/os &mdash; the intended operating system. Illustrative demos stay labeled. Not a live control plane.</p>
+          </a>
           <a class="listing listing-live" href="/tools/1ststep-os-audit/">
             <span class="listing-kicker">Companion · live CLI</span>
             <h3>1stStep OS Audit</h3>
             <p>Free offline audit for existing projects. Evidence over docs. Does not rewrite your repo.</p>
           </a>
-          <article class="listing listing-pending" aria-label="ZIP demo status">
-            <span class="listing-kicker">Not offered yet</span>
-            <h3>Idea &rarr; profile &rarr; ZIP</h3>
-            <p class="listing-status">In progress · Phase 0</p>
-            <p>No live ZIP generator or downloadable starter is claimed on this site.</p>
-          </article>
+        </div>
+        <div class="install-cmds">
+          <h3>Local commands</h3>
+          <p>Cycle 1 compiles a Project OS markdown ZIP on your machine. No model is called. Do not deploy the unauthenticated compile API.</p>
+<pre class="cmd">git clone https://github.com/1ststepai/1ststep-os
+cd 1ststep-os
+npm install && npm test && npm run build && npm start</pre>
+<pre class="cmd">Then open http://localhost:3000/os
+Paste an idea → compile → download a Project OS markdown ZIP.
+Node 22 or newer. Local only.</pre>
         </div>
       </section>
 
       <aside class="side-card" aria-labelledby="free-core">
-        <h2 id="free-core">Free core promise</h2>
-        <ul>
-          <li>Vendor-neutral project memory is the design center.</li>
-          <li>The core is intended to remain free to use.</li>
-          <li>Paid surfaces, if any, would be optional later&mdash;not this listing.</li>
-        </ul>
-        <p>This is a product direction, not a live runtime. The usable tool on the shelf today is the OS Audit CLI.</p>
+        <h2 id="free-core">What it does now</h2>
+        <ol>
+          <li>Clone the public GitHub repository.</li>
+          <li>Install, test, build, and start on localhost.</li>
+          <li>Open <code>/os</code>, paste an idea, compile a markdown ZIP.</li>
+          <li>Keep project memory in files. Conversations stay disposable.</li>
+        </ol>
+        <p>This is Cycle 1 of the free core, not a hosted runtime. The companion CLI for existing repos is OS Audit.</p>
+        <p><a class="chip" href="/tools/1ststep-os-audit/">1stStep OS Audit CLI</a></p>
       </aside>
     </div>
   </main>
