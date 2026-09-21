@@ -211,6 +211,7 @@ test("the Tools hub lists live builder utilities and honest in-development listi
   assert.match(readme, /\/tools\//);
   assert.match(readme, /\/tools\/1ststep-os-audit\//);
   assert.match(readme, /\/tools\/1ststep-os\//);
+  assert.match(await source("tools/tools-shelf.css"), /chip-primary/);
 });
 
 test("the Auto Model Router page is optional, honest, and opt-in", async () => {
@@ -298,6 +299,7 @@ test("the 1stStep OS Audit page is a free CLI listing, not a hire form", async (
   assert.doesNotMatch(html, /href="\/book\/"/);
   assert.doesNotMatch(html, /href="\/journey\/"/);
   assert.doesNotMatch(html, /Book a|Begin Your Journey|hire us/i);
+  assert.match(html, /href="\/tools\/tools-shelf\.css"/);
   assert.match(html, /data-fsai-page-event="os_audit_tool_view"/);
   assert.match(html, /<link rel="canonical" href="https:\/\/www\.1ststep\.ai\/tools\/1ststep-os-audit\/"/);
   assert.match(config, /osAudit: "tools\/1ststep-os-audit\/index.html"/);
@@ -328,6 +330,7 @@ test("the 1stStep OS tools listing stays foundation-status and does not overclai
   assert.doesNotMatch(html, /href="\/book\/"/);
   assert.doesNotMatch(html, /href="\/journey\/"/);
   assert.doesNotMatch(html, /Book a|Begin Your Journey|hire us/i);
+  assert.match(html, /href="\/tools\/tools-shelf\.css"/);
   assert.match(html, /data-fsai-page-event="os_foundation_tool_view"/);
   assert.match(html, /<link rel="canonical" href="https:\/\/www\.1ststep\.ai\/tools\/1ststep-os\/"/);
   assert.match(config, /osFoundation: "tools\/1ststep-os\/index.html"/);
