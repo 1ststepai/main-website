@@ -57,7 +57,8 @@
     .nav-links{display:flex;align-items:center;gap:18px;color:var(--muted);font-size:14px;font-weight:600}
     .nav-links a{text-decoration:none}
     .intro{padding:72px 0 0}
-    .layout{display:grid;grid-template-columns:minmax(0,.96fr) minmax(0,.82fr);gap:52px;align-items:start;padding:40px 0 86px}
+    .layout{display:grid;grid-template-columns:minmax(0,.96fr) minmax(0,.82fr);gap:52px;align-items:start;padding:40px 0 86px;min-width:0}
+    .get-it,.install-cmds,.listings,.listing,.side-card{min-width:0}
     .eyebrow{margin:0 0 17px;color:#9d91ff;font:700 11px/1.2 "Space Grotesk",sans-serif;letter-spacing:.15em;text-transform:uppercase}
     h1{max-width:16ch;margin:0 0 23px;font:700 clamp(44px,6vw,76px)/.95 "Space Grotesk",sans-serif;letter-spacing:-.06em}
     .gradient{background:linear-gradient(100deg,#b39cff,#79a7ff 54%,#65e7ff);-webkit-background-clip:text;background-clip:text;color:transparent}
@@ -86,7 +87,7 @@
     .install-cmds{margin-top:16px;padding:20px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.025)}
     .install-cmds h3{margin:0 0 8px;font:700 16px "Space Grotesk",sans-serif;letter-spacing:-.02em}
     .install-cmds p{margin:0 0 14px;color:#8d96ad;font-size:13px;line-height:1.55}
-    .cmd{margin:0 0 12px;padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:#0a0d18;color:#d7def3;font:500 12px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow-x:auto;white-space:pre}
+    .cmd{margin:0 0 12px;padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:#0a0d18;color:#d7def3;font:500 12px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;max-width:100%;overflow-x:auto;overflow-wrap:anywhere;white-space:pre-wrap}
     .cmd:last-child{margin-bottom:0}
     .install-cmds code{padding:1px 6px;border:1px solid var(--line);border-radius:6px;background:#0a0d18;font:500 12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
     .side-card{position:relative;padding:28px;border:1px solid rgba(255,255,255,.15);border-radius:28px;background:linear-gradient(155deg,rgba(18,22,39,.98),rgba(9,12,22,.98));box-shadow:0 48px 110px -58px rgba(79,140,255,.75)}
