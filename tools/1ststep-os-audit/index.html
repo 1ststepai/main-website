@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>1stStep OS Audit | Free offline project audit CLI</title>
+  <meta name="description" content="Free offline project audit from 1stStep.ai. Evidence over docs, zero metered API cost path, CLI with --help. Scores can be draft. Does not rewrite your repo." />
+  <link rel="canonical" href="https://www.1ststep.ai/tools/1ststep-os-audit/" />
+  <meta name="robots" content="index,follow,max-image-preview:large" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="1stStep.ai" />
+  <meta property="og:title" content="1stStep OS Audit | Free offline project audit CLI" />
+  <meta property="og:description" content="Audit the actual project, not the documentation claims. Local CLI. Zero metered API cost path. Does not rewrite your repo." />
+  <meta property="og:url" content="https://www.1ststep.ai/tools/1ststep-os-audit/" />
+  <meta property="og:image" content="https://www.1ststep.ai/assets/banner-1ststep-og.png" />
+  <meta name="theme-color" content="#070912" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" />
+  <link rel="stylesheet" href="/tools/tools-shelf.css" />
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareSourceCode",
+      "name": "1stStep OS Audit",
+      "description": "Free offline project audit CLI. Evidence over docs, zero metered API cost path. Does not rewrite the target repository. Readiness scores can be draft.",
+      "codeRepository": "https://github.com/1ststepai/1ststep-os-audit",
+      "programmingLanguage": "TypeScript",
+      "url": "https://www.1ststep.ai/tools/1ststep-os-audit/",
+      "sameAs": ["https://github.com/1ststepai/1ststep-os-audit"],
+      "author": {
+        "@type": "Organization",
+        "name": "1stStep.ai",
+        "url": "https://www.1ststep.ai/"
+      }
+    }
+  </script>
+</head>
+<body data-fsai-page-event="os_audit_tool_view" data-fsai-audience="oss_tools">
+  <header class="wrap nav">
+    <a class="brand" href="/" aria-label="1stStep.ai home"><img src="/assets/firststep-logo-transparent-cleaned.png" alt=""><span>1stStep.ai</span></a>
+    <nav class="nav-links" aria-label="Primary navigation">
+      <a href="/tools/">All tools</a>
+      <a href="#get-it">CLI</a>
+      <a href="https://github.com/1ststepai/1ststep-os-audit" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+  </header>
+
+  <main class="wrap">
+    <section class="intro" aria-labelledby="osaudit-title">
+      <p class="eyebrow">Free offline CLI</p>
+      <h1 id="osaudit-title">Audit the project, <span class="gradient">not the docs.</span></h1>
+      <p class="lede">1stStep OS Audit is a local CLI for existing repositories. It prefers evidence over documentation theater, keeps a zero metered API cost path, and never rewrites the target tree. A <code>SECURITY.md</code> is not proof of security. Run <code>--help</code> after clone.</p>
+      <div class="links">
+        <a class="chip chip-primary" href="https://github.com/1ststepai/1ststep-os-audit" target="_blank" rel="noopener">Open GitHub &rarr;</a>
+        <a class="chip" href="#get-it">CLI with --help</a>
+        <a class="chip" href="/os">1stStep OS concept</a>
+        <a class="chip" href="/tools/">All tools</a>
+      </div>
+      <div class="signal">
+        <div><strong>Evidence over docs</strong><span>Findings need citations against a snapshot, not README claims.</span></div>
+        <div><strong>Zero metered API cost</strong><span>The free path is local and deterministic. No paid model call is required.</span></div>
+        <div><strong>Does not rewrite your repo</strong><span>Capture is read-only. Audit home stays outside the target.</span></div>
+      </div>
+      <aside class="honest">
+        <h2>Honesty</h2>
+        <p>Readiness scores can be draft. Incomplete coverage must not be published as a finished 0&ndash;100 grade. This CLI does not rewrite your repository, does not claim a live hosted dashboard, and is not a hire-us form. Companion product 1stStep OS is still a foundation, listed separately.</p>
+      </aside>
+    </section>
+
+    <div class="layout">
+      <section class="get-it" id="get-it" aria-labelledby="get-it-title">
+        <div class="get-it-head">
+          <p class="eyebrow">Get it</p>
+          <h2 id="get-it-title">Clone and run --help</h2>
+          <p class="get-it-lede">The public repo is the install. Node 24 or newer. Nothing here requires an email, account, or paid API key.</p>
+        </div>
+        <div class="listings">
+          <a class="listing listing-live" href="https://github.com/1ststepai/1ststep-os-audit" target="_blank" rel="noopener">
+            <span class="listing-kicker">Works today</span>
+            <h3>GitHub</h3>
+            <p>Public source. Clone, install, then ask the CLI for help. This is the live listing.</p>
+          </a>
+          <article class="listing listing-live" aria-label="Free cost path">
+            <span class="listing-kicker">Free path</span>
+            <h3>audit:free and check:free-cost</h3>
+            <p>Deterministic offline audit and a gate that fails if a metered API dependency appears.</p>
+          </article>
+        </div>
+        <div class="install-cmds">
+          <h3>Local commands</h3>
+          <p>Audit output is written to an audit home outside the target (default <code>~/.osaudit</code> for <code>osaudit</code>). The target tree is not rewritten.</p>
+<pre class="cmd">git clone https://github.com/1ststepai/1ststep-os-audit
+cd 1ststep-os-audit
+npm install
+node engine/src/cli.ts --help
+npm run audit:free -- --help
+npm run check:free-cost</pre>
+<pre class="cmd">osaudit — 1stStep OS Audit local CLI
+
+Commands:
+  validate | lock [--update] | init &lt;path&gt; --target ID --name NAME
+  confirm | baseline | score | report | finalize
+  help
+
+Global:
+  --home ~/.osaudit   --target TGT-ID   --by user.owner
+  -h, --help
+
+Never writes into the target project tree.</pre>
+        </div>
+      </section>
+
+      <aside class="side-card" aria-labelledby="what-it-does">
+        <h2 id="what-it-does">What it does now</h2>
+        <ol>
+          <li>Snapshot the target without writing into it.</li>
+          <li>Collect evidence against that snapshot.</li>
+          <li>Score only from engine rules, not from agent-typed numbers.</li>
+          <li>Leave findings draft until coverage and evidence are enough.</li>
+        </ol>
+        <p>It is a companion to the 1stStep OS concept, not a claim that the OS product is live.</p>
+        <p><a class="chip" href="/tools/1ststep-os/">1stStep OS foundation status</a></p>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="wrap legal">
+    <span>&copy; 2026 1stStep.ai. Built by Evan Pancis.</span>
+    <nav aria-label="Legal links"><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></nav>
+  </footer>
+</body>
+</html>

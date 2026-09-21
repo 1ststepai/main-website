@@ -89,7 +89,31 @@ Builder utilities live under `/tools/`. This is a public shelf for free/open too
 ```text
 /tools/
 /tools/auto-model-router/
+/tools/1ststep-os-audit/
+/tools/1ststep-os/
 ```
+
+Live tools: Auto Model Router and 1stStep OS Audit. 1stStep OS is listed as a foundation / in-development card (Phase 0; idea→profile→ZIP in progress; free core; public concept at `/os`; GitHub source available soon). Do not describe 1stStep OS as live. Do not claim a live ZIP demo.
+
+## 1stStep OS Audit
+
+Public CLI page:
+
+```text
+/tools/1ststep-os-audit/
+```
+
+Pitch on the page: free offline project audit, evidence over docs, zero metered API cost path, CLI with `--help`. Honest limits: scores can be draft; the CLI does not rewrite the target repo. Source: https://github.com/1ststepai/1ststep-os-audit
+
+## 1stStep OS (foundation)
+
+Public listing (not a live product):
+
+```text
+/tools/1ststep-os/
+```
+
+Status: Phase 0, in development. Idea→profile→ZIP in progress. Free core promised. Point visitors to https://www.1ststep.ai/os. Do not href the GitHub repo while it 404s for public readers.
 
 ## Auto Model Router
 
