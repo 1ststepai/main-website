@@ -93,7 +93,7 @@ Builder utilities live under `/tools/`. This is a public shelf for free/open too
 /tools/1ststep-os/
 ```
 
-Live tools: Auto Model Router and 1stStep OS Audit. 1stStep OS is listed as a foundation / in-development card (Phase 0; idea→profile→ZIP in progress; free core; public concept at `/os`; GitHub source available soon). Do not describe 1stStep OS as live. Do not claim a live ZIP demo.
+Live tools: Auto Model Router, 1stStep OS Audit, and 1stStep OS Cycle 1 as a public free core. 1stStep OS is cloneable at https://github.com/1ststepai/1ststep-os. Local Cycle 1 ZIP: `npm install && npm test && npm run build && npm start`, then http://localhost:3000/os. Do not describe 1stStep OS as a hosted product, full agent OS, or production control plane. Do not claim a hosted ZIP generator on this site.
 
 ## 1stStep OS Audit
 
@@ -105,15 +105,15 @@ Public CLI page:
 
 Pitch on the page: free offline project audit, evidence over docs, zero metered API cost path, CLI with `--help`. Honest limits: scores can be draft; the CLI does not rewrite the target repo. Source: https://github.com/1ststepai/1ststep-os-audit
 
-## 1stStep OS (foundation)
+## 1stStep OS (public free core)
 
-Public listing (not a live product):
+Public listing for the cloneable Cycle 1 core (not a hosted product):
 
 ```text
 /tools/1ststep-os/
 ```
 
-Status: Phase 0, in development. Idea→profile→ZIP in progress. Free core promised. Point visitors to https://www.1ststep.ai/os. Do not href the GitHub repo while it 404s for public readers.
+Status: Cycle 1, public GitHub, local idea→profile→markdown ZIP. Free core. Point visitors to https://github.com/1ststepai/1ststep-os and https://www.1ststep.ai/os. Exact local commands: `npm install && npm test && npm run build && npm start`, then open http://localhost:3000/os. Not production-ready. Do not deploy the unauthenticated compile API. Do not offer a hosted ZIP generator on Vercel or this site.
 
 ## Auto Model Router
 

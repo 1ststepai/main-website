@@ -79,12 +79,13 @@ test("llms.txt names the owner offer, start paths, and canonical www host", asyn
   assert.match(llms, /Tools: https:\/\/www\.1ststep\.ai\/tools\//);
   assert.match(llms, /Auto Model Router: https:\/\/www\.1ststep\.ai\/tools\/auto-model-router\//);
   assert.match(llms, /1stStep OS Audit: https:\/\/www\.1ststep\.ai\/tools\/1ststep-os-audit\//);
-  assert.match(llms, /1stStep OS \(foundation \/ in development\): https:\/\/www\.1ststep\.ai\/tools\/1ststep-os\//);
+  assert.match(llms, /1stStep OS \(public free core \/ Cycle 1\): https:\/\/www\.1ststep\.ai\/tools\/1ststep-os\//);
   assert.match(llms, /https:\/\/github.com\/1ststepai\/1ststep-os-audit/);
-  assert.match(llms, /source available soon/);
+  assert.match(llms, /https:\/\/github.com\/1ststepai\/1ststep-os/);
+  assert.match(llms, /localhost:3000\/os/);
   assert.match(llms, /Does not rewrite the target repository/);
-  assert.match(llms, /Not a live OS product/);
-  assert.match(llms, /No live ZIP demo/);
+  assert.match(llms, /Not a hosted product/);
+  assert.match(llms, /No hosted ZIP generator/);
   assert.match(llms, /motion replay of the real suggest/);
   assert.match(llms, /Not a billing or savings claim/);
   assert.match(llms, /https:\/\/github.com\/1ststepai\/auto-model-router/);
