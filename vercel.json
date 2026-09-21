@@ -2,7 +2,9 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
     { "source": "/os", "destination": "/os/index.html" },
-    { "source": "/tools", "destination": "/tools/index.html" }
+    { "source": "/tools", "destination": "/tools/index.html" },
+    { "source": "/tools/1ststep-os-audit", "destination": "/tools/1ststep-os-audit/index.html" },
+    { "source": "/tools/1ststep-os", "destination": "/tools/1ststep-os/index.html" }
   ],
   "headers": [
     {

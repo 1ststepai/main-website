@@ -1,5 +1,15 @@
 # Architecture Decision Log
 
+## 2026-09-21: Tools hub lists OS Audit live and OS foundation with honest status
+
+- **Status / owner:** Implemented on `/tools/`; Evan retains authority for claiming 1stStep OS is live, linking a public OS GitHub repo, or publishing a ZIP demo.
+- **Decision:** Add two listings to the public Tools hub. **1stStep OS Audit** is a live, usable free CLI at `/tools/1ststep-os-audit/` with GitHub `https://github.com/1ststepai/1ststep-os-audit`. Pitch: evidence over docs, zero metered API cost path, CLI `--help`, scores can be draft, does not rewrite the target repo. **1stStep OS** is listed at `/tools/1ststep-os/` as foundation / in development (Phase 0, idea→profile→ZIP in progress, free core). Primary public reference is `https://www.1ststep.ai/os`. Do not claim the OS product is live. Do not offer a live ZIP demo. Do not href `github.com/1ststepai/1ststep-os` while it 404s for public readers; say “source available soon.” Primary CTAs on these pages are GitHub/CLI or the concept page, not a hire-us path. Extends the 2026-09-20 hub rule: live tools stay live; in-development work may be named only with an explicit status label.
+- **Rationale:** The audit CLI is public and usable. The OS repo is not. Listing both on the tools shelf without overclaim keeps builder utilities discoverable and honest.
+- **Affected systems:** `/tools/`, `/tools/1ststep-os-audit/`, `/tools/1ststep-os/`, `/os` audit section link, sitemap, Vite/Vercel inputs, `public/llms.txt`, README.
+- **Alternatives:** Wait until OS GitHub is public; hide OS until ZIP exists; treat Audit as an `/os` subsection only.
+- **Implementation / audit:** Tests must keep GitHub href for Audit, reject a live OS GitHub href, require “source available soon,” “Phase 0,” “not live,” and “does not rewrite.” No hire-us primary CTA on the new tool pages.
+- **Reversal:** Requires a new owner decision before labeling 1stStep OS live or linking a public OS repository.
+
 ## 2026-09-20: Auto Model Router listings stay honest about marketplace status
 
 - **Status / owner:** Implemented on the public Tools pages; Evan retains authority for claiming an official marketplace is live.

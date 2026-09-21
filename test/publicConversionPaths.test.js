@@ -160,7 +160,7 @@ test("the Morris County campaign is focused, transparent, and locally qualified"
   assert.match(sitemap, /campaigns\/morris-county-free-website/);
 });
 
-test("the Tools hub lists only live builder utilities", async () => {
+test("the Tools hub lists live builder utilities and honest in-development listings", async () => {
   const html = await source("tools/index.html");
   const home = await source("index.html");
   const config = await source("vite.config.js");
@@ -170,6 +170,8 @@ test("the Tools hub lists only live builder utilities", async () => {
   assert.match(html, /Tools for your own build/);
   assert.match(html, /Open utilities for/);
   assert.match(html, /href="\/tools\/auto-model-router\/"/);
+  assert.match(html, /href="\/tools\/1ststep-os-audit\/"/);
+  assert.match(html, /href="\/tools\/1ststep-os\/"/);
   assert.match(html, /motion replay of the real suggest/);
   assert.match(html, /illustrative CSS flow/);
   assert.match(html, /playable motion replay/);
@@ -180,16 +182,35 @@ test("the Tools hub lists only live builder utilities", async () => {
   assert.match(html, /submitted, pending review/);
   assert.match(html, /INSTALL\.md/);
   assert.doesNotMatch(html, /cursor\.com\/marketplace\/publish/);
+  assert.match(html, /1stStep OS Audit/);
+  assert.match(html, /Evidence over docs/);
+  assert.match(html, /Zero metered API cost path/);
+  assert.match(html, /does not rewrite your repo/i);
+  assert.match(html, /https:\/\/github.com\/1ststepai\/1ststep-os-audit/);
+  assert.match(html, /Foundation · in development/);
+  assert.match(html, /Phase 0/);
+  assert.match(html, /idea &rarr; profile &rarr; ZIP in progress/);
+  assert.match(html, /Source available soon/);
+  assert.match(html, /Not a live product or ZIP demo/);
+  assert.doesNotMatch(html, /href="https:\/\/github.com\/1ststepai\/1ststep-os"/);
   assert.match(html, /More coming/);
   assert.match(html, /until they exist|until it is public and usable/i);
   assert.match(html, /href="\/services\/internal-tools\.html"/);
   assert.doesNotMatch(html, /lean\.ctx|ponytail/i);
   assert.match(home, /<nav class="main-nav"[^>]*>[\s\S]*href="\/tools\/"/);
   assert.match(config, /tools: "tools\/index.html"/);
+  assert.match(config, /osAudit: "tools\/1ststep-os-audit\/index.html"/);
+  assert.match(config, /osFoundation: "tools\/1ststep-os\/index.html"/);
   assert.match(config, /["']\/tools["']/);
   assert.match(sitemap, /www\.1ststep\.ai\/tools\//);
+  assert.match(sitemap, /www\.1ststep\.ai\/tools\/1ststep-os-audit\//);
+  assert.match(sitemap, /www\.1ststep\.ai\/tools\/1ststep-os\//);
   assert.match(vercel, /"source": "\/tools"/);
+  assert.match(vercel, /"source": "\/tools\/1ststep-os-audit"/);
+  assert.match(vercel, /"source": "\/tools\/1ststep-os"/);
   assert.match(readme, /\/tools\//);
+  assert.match(readme, /\/tools\/1ststep-os-audit\//);
+  assert.match(readme, /\/tools\/1ststep-os\//);
 });
 
 test("the Auto Model Router page is optional, honest, and opt-in", async () => {
@@ -253,4 +274,63 @@ test("the Auto Model Router page is optional, honest, and opt-in", async () => {
   assert.match(sitemap, /tools\/auto-model-router\//);
   assert.match(readme, /\/tools\/auto-model-router\//);
   assert.match(readme, /Live demo with a playable motion replay/);
+});
+
+test("the 1stStep OS Audit page is a free CLI listing, not a hire form", async () => {
+  const html = await source("tools/1ststep-os-audit/index.html");
+  const config = await source("vite.config.js");
+  const sitemap = await source("public/sitemap.xml");
+  const readme = await source("README.md");
+  const os = await source("os/index.html");
+  assert.match(html, /Audit the project/);
+  assert.match(html, /not the docs/i);
+  assert.match(html, /href="\/tools\/"/);
+  assert.match(html, /https:\/\/github.com\/1ststepai\/1ststep-os-audit/);
+  assert.match(html, /Evidence over docs/);
+  assert.match(html, /Zero metered API cost/);
+  assert.match(html, /Does not rewrite your repo/);
+  assert.match(html, /--help/);
+  assert.match(html, /node engine\/src\/cli\.ts --help/);
+  assert.match(html, /npm run audit:free -- --help/);
+  assert.match(html, /Never writes into the target project tree/);
+  assert.match(html, /Scores can be draft|Readiness scores can be draft/i);
+  assert.match(html, /not a hire-us form/i);
+  assert.doesNotMatch(html, /href="\/book\/"/);
+  assert.doesNotMatch(html, /href="\/journey\/"/);
+  assert.doesNotMatch(html, /Book a|Begin Your Journey|hire us/i);
+  assert.match(html, /data-fsai-page-event="os_audit_tool_view"/);
+  assert.match(html, /<link rel="canonical" href="https:\/\/www\.1ststep\.ai\/tools\/1ststep-os-audit\/"/);
+  assert.match(config, /osAudit: "tools\/1ststep-os-audit\/index.html"/);
+  assert.match(sitemap, /tools\/1ststep-os-audit\//);
+  assert.match(readme, /\/tools\/1ststep-os-audit\//);
+  assert.match(os, /href="\/tools\/1ststep-os-audit\/"/);
+  assert.match(os, /CLI LISTED ON TOOLS/);
+});
+
+test("the 1stStep OS tools listing stays foundation-status and does not overclaim", async () => {
+  const html = await source("tools/1ststep-os/index.html");
+  const config = await source("vite.config.js");
+  const sitemap = await source("public/sitemap.xml");
+  const readme = await source("README.md");
+  assert.match(html, /Still being built/);
+  assert.match(html, /Phase 0/);
+  assert.match(html, /in development/i);
+  assert.match(html, /idea &rarr; profile &rarr; ZIP|Idea &rarr; profile &rarr; ZIP/);
+  assert.match(html, /Free core/);
+  assert.match(html, /Source available soon/);
+  assert.match(html, /Not a live product or ZIP demo|is not live as a shipped product/i);
+  assert.match(html, /href="\/os"/);
+  assert.match(html, /href="\/tools\/"/);
+  assert.match(html, /href="\/tools\/1ststep-os-audit\/"/);
+  assert.doesNotMatch(html, /href="https:\/\/github.com\/1ststepai\/1ststep-os"/);
+  assert.doesNotMatch(html, /OS is live/);
+  assert.doesNotMatch(html, /download the ZIP|ZIP is ready/i);
+  assert.doesNotMatch(html, /href="\/book\/"/);
+  assert.doesNotMatch(html, /href="\/journey\/"/);
+  assert.doesNotMatch(html, /Book a|Begin Your Journey|hire us/i);
+  assert.match(html, /data-fsai-page-event="os_foundation_tool_view"/);
+  assert.match(html, /<link rel="canonical" href="https:\/\/www\.1ststep\.ai\/tools\/1ststep-os\/"/);
+  assert.match(config, /osFoundation: "tools\/1ststep-os\/index.html"/);
+  assert.match(sitemap, /tools\/1ststep-os\//);
+  assert.match(readme, /Do not describe 1stStep OS as live/);
 });

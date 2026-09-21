@@ -17,7 +17,7 @@ const siteAnalytics = {
 };
 
 function serveExactIndexPaths(server) {
-  const routes = ["/os", "/tools"];
+  const routes = ["/os", "/tools", "/tools/auto-model-router", "/tools/1ststep-os-audit", "/tools/1ststep-os"];
   server.middlewares.use((request, _response, next) => {
     const url = request.url || "";
     const path = url.split("?")[0];
@@ -53,6 +53,8 @@ export default defineConfig({
         startupLaunchChecker: "startup-launch-checker/index.html",
         tools: "tools/index.html",
         autoModelRouter: "tools/auto-model-router/index.html",
+        osAudit: "tools/1ststep-os-audit/index.html",
+        osFoundation: "tools/1ststep-os/index.html",
         appBuilds: "services/app-builds.html",
         mvpBuilds: "services/mvp-builds.html",
         websites: "services/websites.html",

@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>1stStep OS Audit | Free offline project audit CLI</title>
+  <meta name="description" content="Free offline project audit from 1stStep.ai. Evidence over docs, zero metered API cost path, CLI with --help. Scores can be draft. Does not rewrite your repo." />
+  <link rel="canonical" href="https://www.1ststep.ai/tools/1ststep-os-audit/" />
+  <meta name="robots" content="index,follow,max-image-preview:large" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="1stStep.ai" />
+  <meta property="og:title" content="1stStep OS Audit | Free offline project audit CLI" />
+  <meta property="og:description" content="Audit the actual project, not the documentation claims. Local CLI. Zero metered API cost path. Does not rewrite your repo." />
+  <meta property="og:url" content="https://www.1ststep.ai/tools/1ststep-os-audit/" />
+  <meta property="og:image" content="https://www.1ststep.ai/assets/banner-1ststep-og.png" />
+  <meta name="theme-color" content="#070912" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" />
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareSourceCode",
+      "name": "1stStep OS Audit",
+      "description": "Free offline project audit CLI. Evidence over docs, zero metered API cost path. Does not rewrite the target repository. Readiness scores can be draft.",
+      "codeRepository": "https://github.com/1ststepai/1ststep-os-audit",
+      "programmingLanguage": "TypeScript",
+      "url": "https://www.1ststep.ai/tools/1ststep-os-audit/",
+      "sameAs": ["https://github.com/1ststepai/1ststep-os-audit"],
+      "author": {
+        "@type": "Organization",
+        "name": "1stStep.ai",
+        "url": "https://www.1ststep.ai/"
+      }
+    }
+  </script>
+  <style>
+    :root{
+      color-scheme:dark;--bg:#070912;--ink:#f7f8ff;--muted:#aeb4c9;
+      --line:rgba(255,255,255,.11);--cyan:#56ddff;
+      font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+    }
+    *{box-sizing:border-box}
+    body{
+      min-width:320px;min-height:100vh;margin:0;color:var(--ink);background:
+        radial-gradient(48% 36% at 91% 3%,rgba(103,84,255,.2),transparent 67%),
+        radial-gradient(38% 31% at 3% 12%,rgba(54,175,255,.12),transparent 72%),
+        linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px),var(--bg);
+      background-size:auto,auto,48px 48px,48px 48px,auto;-webkit-font-smoothing:antialiased;
+    }
+    a{color:inherit}.wrap{width:min(1120px,calc(100% - 48px));margin:0 auto}
+    .nav{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:18px 0;border-bottom:1px solid var(--line)}
+    .brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none;font:700 18px "Space Grotesk",sans-serif}
+    .brand img{width:28px;height:28px;object-fit:contain}
+    .nav-links{display:flex;align-items:center;gap:18px;color:var(--muted);font-size:14px;font-weight:600}
+    .nav-links a{text-decoration:none}
+    .intro{padding:72px 0 0}
+    .layout{display:grid;grid-template-columns:minmax(0,.96fr) minmax(0,.82fr);gap:52px;align-items:start;padding:40px 0 86px}
+    .eyebrow{margin:0 0 17px;color:#9d91ff;font:700 11px/1.2 "Space Grotesk",sans-serif;letter-spacing:.15em;text-transform:uppercase}
+    h1{max-width:16ch;margin:0 0 23px;font:700 clamp(44px,6vw,76px)/.95 "Space Grotesk",sans-serif;letter-spacing:-.06em}
+    .gradient{background:linear-gradient(100deg,#b39cff,#79a7ff 54%,#65e7ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+    .lede{max-width:640px;margin:0;color:#bdc3d7;font-size:18px;line-height:1.72}
+    .lede code,.get-it-lede code,.install-cmds code{padding:1px 6px;border:1px solid var(--line);border-radius:6px;background:#0a0d18;font:500 12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#d7def3}
+    .links{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
+    .chip{display:inline-flex;align-items:center;min-height:40px;padding:0 14px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.03);color:#d7def3;font-size:13px;font-weight:600;text-decoration:none}
+    .chip:hover{border-color:rgba(121,167,255,.45)}
+    .chip-primary{border:0;background:linear-gradient(100deg,#8b7cff 0%,#4f8cff 52%,#56ddff 100%);color:#fff}
+    .signal{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:34px}
+    .signal div{padding:16px;border:1px solid var(--line);border-radius:15px;background:rgba(255,255,255,.03)}
+    .signal strong{display:block;margin-bottom:5px;color:#fff;font-size:13px}.signal span{color:#8992aa;font-size:11px;line-height:1.45}
+    .honest{margin-top:28px;padding:18px 18px 16px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.025)}
+    .honest h2{margin:0 0 8px;font:700 15px "Space Grotesk",sans-serif;letter-spacing:-.02em}
+    .honest p{margin:0;color:#8d96ad;font-size:13px;line-height:1.6}
+    .get-it{scroll-margin-top:24px}
+    .get-it-head h2{margin:0 0 12px;font:700 clamp(28px,4vw,40px)/1.05 "Space Grotesk",sans-serif;letter-spacing:-.04em}
+    .get-it-lede{max-width:68ch;margin:0 0 22px;color:#bdc3d7;font-size:16px;line-height:1.65}
+    .listings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .listing{display:grid;gap:8px;align-content:start;padding:20px 20px 18px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.03);text-decoration:none}
+    a.listing:hover{border-color:rgba(121,167,255,.45)}
+    .listing-live{border-color:rgba(255,255,255,.15)}
+    .listing-kicker{color:#9d91ff;font:700 10px/1 "Space Grotesk",sans-serif;letter-spacing:.12em;text-transform:uppercase}
+    .listing h3{margin:0;font:700 18px "Space Grotesk",sans-serif;letter-spacing:-.03em}
+    .listing p{margin:0;color:#8992aa;font-size:13px;line-height:1.55}
+    .install-cmds{margin-top:16px;padding:20px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.025)}
+    .install-cmds h3{margin:0 0 8px;font:700 16px "Space Grotesk",sans-serif;letter-spacing:-.02em}
+    .install-cmds p{margin:0 0 14px;color:#8d96ad;font-size:13px;line-height:1.55}
+    .cmd{margin:0 0 12px;padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:#0a0d18;color:#d7def3;font:500 12px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow-x:auto;white-space:pre}
+    .cmd:last-child{margin-bottom:0}
+    .install-cmds code{padding:1px 6px;border:1px solid var(--line);border-radius:6px;background:#0a0d18;font:500 12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+    .side-card{position:relative;padding:28px;border:1px solid rgba(255,255,255,.15);border-radius:28px;background:linear-gradient(155deg,rgba(18,22,39,.98),rgba(9,12,22,.98));box-shadow:0 48px 110px -58px rgba(79,140,255,.75)}
+    .side-card::before{content:"";position:absolute;inset:-1px;border-radius:inherit;padding:1px;background:linear-gradient(135deg,rgba(139,124,255,.65),transparent 42%,rgba(86,221,255,.34));-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;pointer-events:none}
+    .side-card h2{margin:0 0 10px;font:700 24px "Space Grotesk",sans-serif;letter-spacing:-.04em}
+    .side-card p{margin:0 0 14px;color:var(--muted);font-size:14px;line-height:1.65}
+    .side-card p:last-child{margin-bottom:0}
+    .side-card ol{margin:0;padding-left:18px;color:#c5ccde;font-size:14px;line-height:1.7}
+    .legal{display:flex;justify-content:space-between;gap:20px;padding:24px 0 32px;border-top:1px solid var(--line);color:#747e97;font-size:12px}.legal nav{display:flex;gap:18px}
+    :where(a,button):focus-visible{outline:3px solid var(--cyan);outline-offset:3px}
+    @media(max-width:860px){.intro{text-align:center;padding-top:48px}.intro h1,.lede,.get-it-lede{margin-left:auto;margin-right:auto}.links{justify-content:center}.get-it{text-align:center}.listings{grid-template-columns:1fr}.listing,.install-cmds{text-align:left}.layout{grid-template-columns:1fr;gap:34px;padding:32px 0 62px}}
+    @media(max-width:600px){.wrap{width:calc(100% - 28px)}.nav{padding:14px 0;flex-wrap:wrap}.intro{padding-top:32px}.layout{padding:24px 0 44px}.nav-links{gap:14px;font-size:13px}h1{font-size:clamp(42px,14vw,62px)}.signal,.listings{grid-template-columns:1fr}.side-card{padding:26px 19px;border-radius:22px}.legal{align-items:flex-start;flex-direction:column}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}
+  </style>
+</head>
+<body data-fsai-page-event="os_audit_tool_view" data-fsai-audience="oss_tools">
+  <header class="wrap nav">
+    <a class="brand" href="/" aria-label="1stStep.ai home"><img src="/assets/firststep-logo-transparent-cleaned.png" alt=""><span>1stStep.ai</span></a>
+    <nav class="nav-links" aria-label="Primary navigation">
+      <a href="/tools/">All tools</a>
+      <a href="#get-it">CLI</a>
+      <a href="https://github.com/1ststepai/1ststep-os-audit" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+  </header>
+
+  <main class="wrap">
+    <section class="intro" aria-labelledby="osaudit-title">
+      <p class="eyebrow">Free offline CLI</p>
+      <h1 id="osaudit-title">Audit the project, <span class="gradient">not the docs.</span></h1>
+      <p class="lede">1stStep OS Audit is a local CLI for existing repositories. It prefers evidence over documentation theater, keeps a zero metered API cost path, and never rewrites the target tree. A <code>SECURITY.md</code> is not proof of security. Run <code>--help</code> after clone.</p>
+      <div class="links">
+        <a class="chip chip-primary" href="https://github.com/1ststepai/1ststep-os-audit" target="_blank" rel="noopener">Open GitHub &rarr;</a>
+        <a class="chip" href="#get-it">CLI with --help</a>
+        <a class="chip" href="/os">1stStep OS concept</a>
+        <a class="chip" href="/tools/">All tools</a>
+      </div>
+      <div class="signal">
+        <div><strong>Evidence over docs</strong><span>Findings need citations against a snapshot, not README claims.</span></div>
+        <div><strong>Zero metered API cost</strong><span>The free path is local and deterministic. No paid model call is required.</span></div>
+        <div><strong>Does not rewrite your repo</strong><span>Capture is read-only. Audit home stays outside the target.</span></div>
+      </div>
+      <aside class="honest">
+        <h2>Honesty</h2>
+        <p>Readiness scores can be draft. Incomplete coverage must not be published as a finished 0&ndash;100 grade. This CLI does not rewrite your repository, does not claim a live hosted dashboard, and is not a hire-us form. Companion product 1stStep OS is still a foundation, listed separately.</p>
+      </aside>
+    </section>
+
+    <div class="layout">
+      <section class="get-it" id="get-it" aria-labelledby="get-it-title">
+        <div class="get-it-head">
+          <p class="eyebrow">Get it</p>
+          <h2 id="get-it-title">Clone and run --help</h2>
+          <p class="get-it-lede">The public repo is the install. Node 24 or newer. Nothing here requires an email, account, or paid API key.</p>
+        </div>
+        <div class="listings">
+          <a class="listing listing-live" href="https://github.com/1ststepai/1ststep-os-audit" target="_blank" rel="noopener">
+            <span class="listing-kicker">Works today</span>
+            <h3>GitHub</h3>
+            <p>Public source. Clone, install, then ask the CLI for help. This is the live listing.</p>
+          </a>
+          <article class="listing listing-live" aria-label="Free cost path">
+            <span class="listing-kicker">Free path</span>
+            <h3>audit:free and check:free-cost</h3>
+            <p>Deterministic offline audit and a gate that fails if a metered API dependency appears.</p>
+          </article>
+        </div>
+        <div class="install-cmds">
+          <h3>Local commands</h3>
+          <p>Audit output is written to an audit home outside the target (default <code>~/.osaudit</code> for <code>osaudit</code>). The target tree is not rewritten.</p>
+<pre class="cmd">git clone https://github.com/1ststepai/1ststep-os-audit
+cd 1ststep-os-audit
+npm install
+node engine/src/cli.ts --help
+npm run audit:free -- --help
+npm run check:free-cost</pre>
+<pre class="cmd">osaudit — 1stStep OS Audit local CLI
+
+Commands:
+  validate | lock [--update] | init &lt;path&gt; --target ID --name NAME
+  confirm | baseline | score | report | finalize
+  help
+
+Global:
+  --home ~/.osaudit   --target TGT-ID   --by user.owner
+  -h, --help
+
+Never writes into the target project tree.</pre>
+        </div>
+      </section>
+
+      <aside class="side-card" aria-labelledby="what-it-does">
+        <h2 id="what-it-does">What it does now</h2>
+        <ol>
+          <li>Snapshot the target without writing into it.</li>
+          <li>Collect evidence against that snapshot.</li>
+          <li>Score only from engine rules, not from agent-typed numbers.</li>
+          <li>Leave findings draft until coverage and evidence are enough.</li>
+        </ol>
+        <p>It is a companion to the 1stStep OS concept, not a claim that the OS product is live.</p>
+        <p><a class="chip" href="/tools/1ststep-os/">1stStep OS foundation status</a></p>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="wrap legal">
+    <span>&copy; 2026 1stStep.ai. Built by Evan Pancis.</span>
+    <nav aria-label="Legal links"><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></nav>
+  </footer>
+</body>
+</html>
