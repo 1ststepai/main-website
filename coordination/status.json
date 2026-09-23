@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "firststep.status.v1",
+  "repo": "1ststepai/main-website",
+  "authority": "public-lead-engineer",
+  "sourceSha": "324e589784703c75f446f2356d7e35156e8514fd",
+  "testedSha": null,
+  "previewSha": null,
+  "productionSha": null,
+  "truth": "SOURCE_OBSERVED_ONLY",
+  "tasks": [
+    {
+      "id": "COORD-PILOT-001",
+      "status": "ready",
+      "ownerRole": "public-lead-engineer",
+      "nextAction": "Review isolated coordination pilot; no product implementation authorization",
+      "ownerDecisionRequired": false
+    }
+  ],
+  "runtime": "UNKNOWN",
+  "sharedState": {
+    "repo": "1ststepai/1ststep-control-plane",
+    "branch": "coordination-state"
+  }
+}
