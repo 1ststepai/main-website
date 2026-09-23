@@ -29,6 +29,7 @@ function serveExactIndexPaths(server) {
 }
 
 export default defineConfig({
+  define: { __FOUNDRY_RD__: JSON.stringify(process.env.VERCEL_ENV !== "production") },
   plugins: [react(), siteAnalytics, {
     name: "firststep-exact-index-paths",
     configureServer: serveExactIndexPaths,
