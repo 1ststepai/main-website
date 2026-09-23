@@ -8,8 +8,8 @@ const source = (path) => readFile(new URL(path, root), "utf8");
 test("the homepage leads with custom builds and keeps products distinct", async () => {
   const html = await source("index.html");
   const llms = await source("public/llms.txt");
-  assert.match(html, /We build it\. <em>You stay in control/);
-  assert.match(html, /lead capture, CRM architecture, routing, follow-up, attribution, reporting/i);
+  assert.match(html, /Build the system <br>your business <br><em>is missing/);
+  assert.match(html, /remove manual work, connect your tools/);
   for (const intent of ["build_new", "finish_build", "automate_business"]) assert.match(html, new RegExp(`href="/fit-check/\\?intent=${intent}"`));
   assert.match(html, /href="\/services\/revenue-systems\.html"/);
   assert.match(html, /href="https:\/\/app\.1ststep\.ai\/"/);
@@ -49,22 +49,15 @@ test("the journey gives a local diagnosis and only opens email by choice", async
   assert.match(sitemap, /www\.1ststep\.ai\/journey\//);
 });
 
-test("the showcase includes six reachable panels and no cafe proof", async () => {
+test("proof tells three honest project stories and keeps Foundry optional", async () => {
   const home = await source("index.html");
-  const campaign = await source("campaigns/outgrown-website/index.html");
-  const llms = await source("public/llms.txt");
-  const generated = await readdir(new URL("public/generated/", root));
-  const css = await source("src/home.css");
-  const script = await source("src/home.js");
-
-  for (const content of [home, campaign, llms, ...generated]) assert.doesNotMatch(content, /the.?spot|spot.?cafe/i);
-  const tabIds = [...home.matchAll(/role="tab" aria-controls="(showcase-[a-z]+)"/g)].map((match) => match[1]);
-  assert.equal(tabIds.length, 6);
-  for (const id of tabIds) assert.match(home, new RegExp(`id="${id}" role="tabpanel"`));
-  for (const project of ["Unveiling Rarities", "DaySetGo", "SwingTradePros", "Real-Rank.ai", "AI Job Agent", "1stStep OS"]) assert.ok(home.includes(project));
-  assert.match(script, /ArrowRight/);
-  assert.match(script, /IntersectionObserver/);
-  assert.match(css, /prefers-reduced-motion:\s*reduce/);
+  assert.equal((home.match(/class="project(?: featured)?"/g)||[]).length, 3);
+  for (const project of ["DaySetGo", "SwingTradePros", "Job Agent"]) assert.ok(home.includes(project));
+  for (const label of ["THE PROBLEM", "WHAT WE BUILT", "WHAT NOW WORKS"]) assert.equal(home.split(label).length-1,3);
+  assert.match(home, /not paid client case studies/);
+  assert.match(home, /href="\/foundry\/"/);
+  assert.doesNotMatch(home, /<iframe|<canvas|three|scene\.js|the.?spot|spot.?cafe/i);
+  assert.match(await source("src/outcome-home.css"), /prefers-reduced-motion:reduce/);
 });
 
 test("homepage metadata and assets identify the systems consultancy", async () => {
@@ -74,7 +67,7 @@ test("homepage metadata and assets identify the systems consultancy", async () =
 
   assert.match(html, /<link rel="canonical" href="https:\/\/www\.1ststep\.ai\/"/);
   assert.match(html, /og-home\.png/);
-  assert.match(html, /<meta name="description" content="1stStep\.ai designs, builds, launches, and hands off/);
+  assert.match(html, /<meta name="description" content="Custom software, AI systems, and automation/);
   assert.deepEqual(data["@graph"].map((item) => item["@type"]), ["Organization", "WebSite", "WebPage", "CreativeWork", "SoftwareApplication"]);
   assert.equal((await stat(new URL("public/assets/og-home.png", root))).size > 5000, true);
 });
@@ -148,8 +141,8 @@ test("reviews are source-linked and portfolio work has the approved ownership la
   const html = await source("index.html");
   assert.match(html, /https:\/\/maps\.app\.goo\.gl\/Xe6z1vueaEDnTa6F8/);
   assert.match(html, /https:\/\/maps\.app\.goo\.gl\/sAkN17AerGYeXzAX9/);
-  assert.equal((html.match(/1stStep product\/project/g) || []).length, 6);
-  assert.match(html, /do not classify any showcased project as a paid client engagement/i);
+  assert.equal((html.match(/1stStep product\/project/g) || []).length, 3);
+  assert.match(html, /Review status does not establish paid client status/i);
 });
 
 test("the Morris County campaign is focused, transparent, and locally qualified", async () => {
@@ -214,7 +207,7 @@ test("the Tools hub lists live builder utilities and honest in-development listi
   assert.match(html, /until they exist|until it is public and usable/i);
   assert.match(html, /href="\/services\/internal-tools\.html"/);
   assert.doesNotMatch(html, /lean\.ctx|ponytail/i);
-  assert.match(home, /<nav class="main-nav"[^>]*>[\s\S]*href="\/tools\/"/);
+  assert.match(home, /<nav aria-label="Footer"[^>]*>[\s\S]*href="\/tools\/"/);
   assert.match(config, /tools: "tools\/index.html"/);
   assert.match(config, /osAudit: "tools\/1ststep-os-audit\/index.html"/);
   assert.match(config, /osFoundation: "tools\/1ststep-os\/index.html"/);

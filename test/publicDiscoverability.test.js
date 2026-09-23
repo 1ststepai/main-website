@@ -100,18 +100,16 @@ test("llms.txt names the owner offer, start paths, and canonical www host", asyn
 
 test("homepage first screen exposes the three commercial paths and services", async () => {
   const html = await source("index.html");
-  const hero = html.slice(html.indexOf('class="hero'), html.indexOf("signal-strip"));
+  const hero = html.slice(html.indexOf('class="hero'), html.indexOf("</section>", html.indexOf('class="hero')));
   for (const intent of ["build_new", "finish_build", "automate_business"]) assert.match(hero, new RegExp(`href="/fit-check/\\?intent=${intent}"`));
   assert.equal((hero.match(/button button-primary/g) || []).length, 1);
   assert.doesNotMatch(hero, /href="\/journey\/"/);
   assert.doesNotMatch(hero, /href="\/book\/"/);
-  assert.match(hero, /Business website that gets leads/);
-  assert.match(hero, /Build an MVP/);
-  assert.match(hero, /AI automation/);
-  assert.match(hero, /Internal tools/);
+  assert.match(hero, /Custom software, AI systems, and automation/);
+  assert.match(hero, /Tell us what you need built/);
   assert.match(html, /id="problems"/);
   assert.match(html, /id="how"/);
-  assert.match(html, /A build process with a real handoff/);
+  assert.match(html, /From the bottleneck<br><em>to the handoff/);
   assert.match(html, /<link rel="canonical" href="https:\/\/www\.1ststep\.ai\/"/);
   assert.match(html, /property="og:image" content="https:\/\/www\.1ststep\.ai\/assets\/og-home\.png"/);
 });
@@ -120,7 +118,7 @@ test("homepage FAQ JSON-LD matches visible questions", async () => {
   const html = await source("index.html");
   const names = faqNames(html);
   for (const name of names) {
-    assert.match(html, new RegExp(`<dt>${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}</dt>`));
+    assert.match(html, new RegExp(`<summary>${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}</summary>`));
   }
   assert.ok(names.includes("Do you guarantee leads, rankings, or revenue?"));
 });

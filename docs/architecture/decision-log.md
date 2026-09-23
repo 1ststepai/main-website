@@ -125,3 +125,13 @@
 - **Rationale:** Immediate defense in depth with no new vendor.
 - **Risk:** Serverless instances do not share the in-memory limits or idempotency cache.
 - **Reversal:** Replace the in-memory layer with an approved durable store while keeping the same response contract.
+
+## 2026-09-23: Outcome-led commercial homepage; Foundry remains separate
+
+- **Owner / authority:** Evan's explicit outcome-led homepage instruction. Preview only; no merge or Production approval.
+- **Base:** 0d8eb5ae59fc02770b7f1992000b0251008ff4b7. Isolated branch astra/outcome-homepage-preview.
+- **Decision:** Lead with business outcomes and the Build / Finish / Automate paths. Use a six-second, one-shot illustrative workflow transformation with pause/replay and static reduced-motion behavior. Keep the entire Foundry implementation unchanged at /foundry/, linked as optional capability proof.
+- **Preserved:** Intake/API/security/analytics/attribution implementation, intent identifiers, approved client-control language and counsel gate. No absolute ownership claim. No new packages.
+- **Proof boundary:** Three first-party products/projects, never paid-client engagements. DaySetGo public-demo screenshot, Job Agent public-entry screenshot and Nova public-access screenshot were captured 2026-09-22 and reused without fabricating interfaces or results. Sources: https://www.daysetgo.ai/plan?mode=demo ; https://app.1ststep.ai/concierge ; https://swingtradepros.com/ai-assistant-demo . Authenticated service completion is not claimed. Prior owner-approved Google excerpts and their exact source links are preserved; review status is separate from paid-client status.
+- **Verification:** Existing security/intake tests remain intact. Updated homepage tests assert the approved headline, three honest project stories, optional Foundry link, correct intake paths and FAQ parity. Browser checks cover 1440/1280/768/390/320 widths, no overflow, all intent/attribution paths, keyboard FAQ, pause/finite motion, reduced motion and no Foundry renderer request on the homepage. No external form submitted.
+- **Release gate / rollback:** Owner Preview review required. No merge or Production. Previous candidate remains available at the base SHA.
