@@ -7,7 +7,7 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 // One procedural instrument: ten semantic cassettes dock around an inspectable core.
 export function createFoundry(host, {tier="balanced", onSlow=()=>{}, started=performance.now()}={}){
  const settings=TIERS[tier]||TIERS.balanced;
- const mobile=matchMedia('(max-width:760px)').matches;
+ let mobile=matchMedia('(max-width:760px)').matches;
  const renderer=new T.WebGLRenderer({antialias:tier==='full',alpha:true,powerPreference:tier==='lite'?'low-power':'high-performance'});
  renderer.setPixelRatio(Math.min(devicePixelRatio,settings.dpr));renderer.setClearColor(0,0);renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.45;host.append(renderer.domElement);
  const meter=createMeter(renderer,tier,started);
@@ -79,7 +79,7 @@ export function createFoundry(host, {tier="balanced", onSlow=()=>{}, started=per
  const distance=mobile?14.5:12.5;camera.position.set(.45+px*.12,(1-reveal)*.9+py*.08,distance-assemble*1.1+handoff*1.2);camera.lookAt(mobile?0:.4,mobile?-.3:0,0);root.updateMatrixWorld(true);camera.updateMatrixWorld();labelBatch.update(camera);renderer.render(scene,camera);meter.frame(now,current);host.dataset.progress=current.toFixed(3);host.dataset.quality=quality;
  if(Math.abs(target-current)>.0002||settled<2){settled++;raf=requestAnimationFrame(frame)} }
  function wake(){settled=0;if(!raf&&!disposed&&visible&&!document.hidden){last=0;meter.idle();raf=requestAnimationFrame(frame)}}
- function resize(){renderer.setSize(host.clientWidth,host.clientHeight);camera.aspect=host.clientWidth/host.clientHeight;camera.updateProjectionMatrix();wake()}
+ function resize(){mobile=matchMedia('(max-width:760px)').matches;renderer.setSize(host.clientWidth,host.clientHeight);camera.aspect=host.clientWidth/host.clientHeight;camera.updateProjectionMatrix();wake()}
  function pointer(e){px=(e.clientX/innerWidth-.5);py=(e.clientY/innerHeight-.5);wake()}
  function visibility(){if(document.hidden){cancelAnimationFrame(raf);raf=0}else wake()}
  const observer=new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;if(!visible){cancelAnimationFrame(raf);raf=0}else wake()});observer.observe(host);addEventListener('resize',resize);addEventListener('pointermove',pointer,{passive:true});document.addEventListener('visibilitychange',visibility);renderer.domElement.addEventListener('webglcontextlost',lost);
