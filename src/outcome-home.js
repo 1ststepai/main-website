@@ -28,3 +28,12 @@ if ('IntersectionObserver' in window) new IntersectionObserver(([entry]) => {
   visible = entry.isIntersecting; pauseState();
 }).observe(figure);
 preferences(); play();
+
+// Homepage-only preference; never forwarded to analytics or other routes.
+const appearance = document.querySelector('#appearance');
+appearance.value = document.documentElement.dataset.theme || 'original';
+appearance.addEventListener('change', () => {
+  const theme = appearance.value === 'light' ? 'light' : 'original';
+  document.documentElement.dataset.theme = theme;
+  try { localStorage.setItem('firststep-home-appearance', theme); } catch { /* Session-only when storage is blocked. */ }
+});

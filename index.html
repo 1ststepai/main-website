@@ -1,6 +1,14 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="original">
 <head>
+  <script>
+    // Apply only the explicit homepage preference before styles or visible content.
+    try {
+      if (localStorage.getItem('firststep-home-appearance') === 'light') {
+        document.documentElement.dataset.theme = 'light';
+      }
+    } catch { /* Storage may be unavailable; Original remains usable. */ }
+  </script>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#070912" />
@@ -57,7 +65,7 @@
 </head>
 <body data-fsai-page-event="home_view" data-fsai-audience="systems_architecture">
 <a class="skip-link" href="#main">Skip to content</a>
-<header class="site-header"><div class="container header-inner"><a class="brand" href="/" aria-label="1stStep.ai home"><img src="/assets/firststep-logo-transparent-cleaned.png" width="1147" height="946" alt=""/><span>1stStep.ai</span></a><nav aria-label="Primary navigation"><a href="#work">The work</a><a href="#services">What we build</a><a href="#how">Our process</a></nav><a class="header-cta" href="/fit-check/" data-fsai-placement="header">Let's build ↗</a></div></header>
+<header class="site-header"><div class="container header-inner"><a class="brand" href="/" aria-label="1stStep.ai home"><img src="/assets/firststep-logo-transparent-cleaned.png" width="1147" height="946" alt=""/><span>1stStep.ai</span></a><nav aria-label="Primary navigation"><a href="#work">The work</a><a href="#services">What we build</a><a href="#how">Our process</a></nav><div class="appearance"><label for="appearance">Appearance</label><select id="appearance"><option value="original">Original</option><option value="light">Light</option></select></div><a class="header-cta" href="/fit-check/" data-fsai-placement="header">Let's build ↗</a></div></header>
 <main id="main">
 <section class="hero container" aria-labelledby="hero-title">
 <div class="hero-copy"><p class="eyebrow">SOFTWARE. AI. AUTOMATION. / BUILT AROUND YOUR BUSINESS.</p><h1 id="hero-title">Build the system <br>your business <br><em>is missing.</em></h1><p class="hero-lede">Custom software, AI systems, and automation that remove manual work, connect your tools, and turn broken or unfinished processes into working systems.</p><a class="button button-primary" href="/fit-check/" data-fsai-placement="hero">Tell us what you need built <span aria-hidden="true">↗</span></a><p class="hero-assurance">Built by 1stStep. Designed for client control.</p><div class="hero-paths" aria-label="Choose your starting point"><a href="/fit-check/?intent=build_new" data-fsai-intent="build_new" data-fsai-placement="hero">New build ↗</a><a href="/fit-check/?intent=finish_build" data-fsai-intent="finish_build" data-fsai-placement="hero">Finish my build ↗</a><a href="/fit-check/?intent=automate_business" data-fsai-intent="automate_business" data-fsai-placement="hero">Automate my business ↗</a></div></div>
