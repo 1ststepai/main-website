@@ -100,3 +100,9 @@
 .project-image.agent { --proof-surface:var(--proof-agent); }
 .project-image.nova { --proof-surface:var(--proof-nova); }
 .image-label,.project-image small { z-index:1; background:var(--proof-surface); padding:4px 6px; border-radius:3px; }
+
+.learning-path { display:flex; align-items:center; justify-content:space-between; gap:24px; padding-block:30px; }
+.learning-path h2 { font:500 24px/1.2 var(--font); letter-spacing:-.04em; margin:0 0 8px; }
+.learning-path p { font-size:12px; line-height:1.6; color:var(--text-muted); margin:0; }
+.learning-path a { flex-shrink:0; }
+@media(max-width:760px) { .learning-path { align-items:flex-start; flex-direction:column; gap:16px; } }
