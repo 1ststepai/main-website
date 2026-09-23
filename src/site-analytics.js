@@ -128,7 +128,7 @@ function decorateAttributionLinks() {
 
     if (
       url.origin === window.location.origin &&
-      (url.pathname === "/book/" || url.pathname === "/fit-check/")
+      (url.pathname === "/book/" || url.pathname === "/fit-check/" || url.pathname === "/journey/")
     ) {
       link.href = appendAttribution(url);
     }
@@ -147,6 +147,15 @@ function handleTrackedClick(event) {
     return;
   }
 
+  const intakeIntent = cleanValue(link.dataset.fsaiIntent);
+  if (intakeIntent) {
+    trackSiteEvent("commercial_intake_path_click", {
+      intent: intakeIntent,
+      placement: cleanValue(link.dataset.fsaiPlacement || "site"),
+    });
+    return;
+  }
+
   let url;
   try {
     url = new URL(link.href, window.location.origin);
@@ -159,8 +168,9 @@ function handleTrackedClick(event) {
       placement: cleanValue(link.dataset.fsaiPlacement || "site"),
     });
   } else if (url.origin === window.location.origin && url.pathname === "/fit-check/") {
-    trackSiteEvent("fit_check_click", {
+    trackSiteEvent("commercial_intake_click", {
       placement: cleanValue(link.dataset.fsaiPlacement || "site"),
+      intent: cleanValue(url.searchParams.get("intent") || "unselected"),
     });
   } else if (link.dataset.fsaiCaseStudy) {
     trackSiteEvent("case_study_click", {

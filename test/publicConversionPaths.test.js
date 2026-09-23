@@ -5,13 +5,12 @@ import { readFile, readdir, stat } from "node:fs/promises";
 const root = new URL("../", import.meta.url);
 const source = (path) => readFile(new URL(path, root), "utf8");
 
-test("the homepage leads with systems architecture and keeps products distinct", async () => {
+test("the homepage leads with custom builds and keeps products distinct", async () => {
   const html = await source("index.html");
   const llms = await source("public/llms.txt");
-  assert.match(html, /Websites, apps, and AI systems <em>that follow up your leads/);
+  assert.match(html, /We build it\. <em>You stay in control/);
   assert.match(html, /lead capture, CRM architecture, routing, follow-up, attribution, reporting/i);
-  assert.match(html, /href="\/fit-check\/"/);
-  assert.match(html, /href="\/journey\/"/);
+  for (const intent of ["build_new", "finish_build", "automate_business"]) assert.match(html, new RegExp(`href="/fit-check/\\?intent=${intent}"`));
   assert.match(html, /href="\/services\/revenue-systems\.html"/);
   assert.match(html, /href="https:\/\/app\.1ststep\.ai\/"/);
   assert.match(html, /href="\/tools\/"/);
@@ -23,14 +22,15 @@ test("the homepage leads with systems architecture and keeps products distinct",
   assert.doesNotMatch(html, /<a\b[^>]*\bhref=(?:""|'')/i);
 });
 
-test("the systems funnel and service links have focused destinations", async () => {
+test("the commercial funnel and service links have focused destinations", async () => {
   const html = await source("index.html");
   for (const anchor of ["problems", "how", "services", "work"]) assert.match(html, new RegExp('id="' + anchor + '"'));
   for (const path of ["websites", "internal-tools", "revenue-systems", "mvp-builds"]) {
     assert.match(html, new RegExp('href="/services/' + path + '\\.html"'));
   }
-  assert.match(html, /href="\/fit-check\/"/);
-  assert.match(html, /mailto:evan@1ststep\.ai\?subject=1stStep%20System%20Audit/);
+  assert.match(html, /href="\/fit-check\/\?intent=build_new"/);
+  assert.match(html, /href="\/fit-check\/\?intent=finish_build"/);
+  assert.match(html, /href="\/fit-check\/\?intent=automate_business"/);
   assert.doesNotMatch(html, /href="\/book\/"/);
 });
 
@@ -74,7 +74,7 @@ test("homepage metadata and assets identify the systems consultancy", async () =
 
   assert.match(html, /<link rel="canonical" href="https:\/\/www\.1ststep\.ai\/"/);
   assert.match(html, /og-home\.png/);
-  assert.match(html, /<meta name="description" content="1stStep\.ai designs and builds the systems/);
+  assert.match(html, /<meta name="description" content="1stStep\.ai designs, builds, launches, and hands off/);
   assert.deepEqual(data["@graph"].map((item) => item["@type"]), ["Organization", "WebSite", "WebPage", "CreativeWork", "SoftwareApplication"]);
   assert.equal((await stat(new URL("public/assets/og-home.png", root))).size > 5000, true);
 });
@@ -82,7 +82,7 @@ test("homepage metadata and assets identify the systems consultancy", async () =
 test("the website service page keeps website visitors on website-intent paths", async () => {
   const html = await source("services/websites.html");
   assert.match(html, /href="\/book\/"/);
-  assert.match(html, /href="\/fit-check\/"/);
+  assert.match(html, /href="\/fit-check\/\?intent=build_new"/);
   assert.doesNotMatch(html, /href="\/app-idea-viability-checker\.html"/);
   assert.match(html, /data-fsai-page-event="website_service_view"/);
   assert.match(html, /src="\/src\/site-analytics\.js"/);
@@ -95,24 +95,20 @@ test("revenue systems remains on its focused service page", async () => {
   const sitemap = await source("public/sitemap.xml");
   assert.match(systems, /Revenue Systems Audit and Architecture/);
   assert.match(systems, /GHL \/ LeadConnector, Apollo/);
-  assert.match(systems, /href="\/journey\/"/);
+  assert.match(systems, /href="\/fit-check\/\?intent=automate_business"/);
   assert.match(systems, /mailto:evan@1ststep\.ai\?subject=1stStep%20System%20Audit/);
   assert.doesNotMatch(systems, /href="\/app-idea-viability-checker\.html"/);
   assert.match(config, /revenueSystems/);
   assert.match(sitemap, /services\/revenue-systems\.html/);
 });
 
-test("supporting service pages use service-specific booking CTAs", async () => {
+test("supporting service pages route to the matching commercial intent", async () => {
   const appBuilds = await source("services/app-builds.html");
   const internalTools = await source("services/internal-tools.html");
   const mvpBuilds = await source("services/mvp-builds.html");
-  for (const html of [appBuilds, internalTools, mvpBuilds]) {
-    assert.match(html, /href="\/book\/"/);
-    assert.doesNotMatch(html, /href="\/app-idea-viability-checker\.html"/);
-  }
-  assert.match(appBuilds, /Book an App Build Call/);
-  assert.match(internalTools, /Book a Workflow Call/);
-  assert.match(mvpBuilds, /Book an MVP Scope Call/);
+  for (const html of [appBuilds, mvpBuilds]) assert.match(html, /href="\/fit-check\/\?intent=build_new"/);
+  assert.match(internalTools, /href="\/fit-check\/\?intent=automate_business"/);
+  for (const html of [appBuilds, internalTools, mvpBuilds]) assert.doesNotMatch(html, /href="\/app-idea-viability-checker\.html"/);
 });
 
 test("the exhaustive platform list lives on the focused website service page", async () => {
@@ -124,7 +120,7 @@ test("the exhaustive platform list lives on the focused website service page", a
   assert.match(html, /custom HTML, React, Next\.js/);
 });
 
-test("the booking and fit-check pages preserve their verified paths", async () => {
+test("the booking path remains and commercial intake exposes three honest paths", async () => {
   const booking = await source("book/index.html");
   const fitCheck = await source("fit-check/index.html");
   assert.match(booking, /https:\/\/api\.leadconnectorhq\.com\/widget\/booking\/Rb4aqLM1NdU5kvZcqNmj/);
@@ -132,10 +128,28 @@ test("the booking and fit-check pages preserve their verified paths", async () =
   assert.match(booking, /Loading secure Website Strategy Call calendar/);
   assert.match(booking, /No pressure\./);
   assert.match(booking, /payment schedule/i);
-  assert.equal((fitCheck.match(/class="field"/g) || []).length, 4);
-  assert.match(fitCheck, /Request a Website Fit Review/);
-  assert.match(fitCheck, /Reviewed personally by Evan/);
-  assert.match(fitCheck, /payment schedules are available/i);
+  for (const intent of ["build_new", "finish_build", "automate_business"]) assert.match(fitCheck, new RegExp(`value="${intent}"`));
+  assert.match(fitCheck, /approved delivery provider accepted the request/i);
+  assert.match(fitCheck, /does not prove inbox delivery/i);
+  assert.match(fitCheck, /keeps your answers on screen after an error/i);
+});
+
+test("commercial intake preserves intent and attribution without personal analytics", async () => {
+  const intake = await source("src/commercial-intake.js");
+  const analytics = await source("src/site-analytics.js");
+  assert.match(intake, /params\.get\("intent"\)/);
+  assert.match(intake, /window\.fsaiAttribution/);
+  assert.match(intake, /Idempotency-Key/);
+  assert.doesNotMatch(analytics, /email:/);
+  assert.match(analytics, /commercial_intake_path_click/);
+});
+
+test("reviews are source-linked and portfolio work has the approved ownership label", async () => {
+  const html = await source("index.html");
+  assert.match(html, /https:\/\/maps\.app\.goo\.gl\/Xe6z1vueaEDnTa6F8/);
+  assert.match(html, /https:\/\/maps\.app\.goo\.gl\/sAkN17AerGYeXzAX9/);
+  assert.equal((html.match(/1stStep product\/project/g) || []).length, 6);
+  assert.match(html, /do not classify any showcased project as a paid client engagement/i);
 });
 
 test("the Morris County campaign is focused, transparent, and locally qualified", async () => {

@@ -1,8 +1,8 @@
 # 1stStep.ai
 
-1stStep.ai is a systems architecture and automation consultancy for founders and operators with existing demand. It connects lead capture, CRM architecture, qualification, routing, follow-up, attribution, reporting, and operational automation. The tools are not the system; the system is how data, leads, decisions, actions, and feedback move between them.
+1stStep.ai builds custom apps, AI systems, automations, internal tools, and websites. Work is designed, built, launched, documented, and organized for client control.
 
-Primary positioning: Build the systems that scale your business and automate repetitive work. Start by identifying the operational bottleneck, then scope the architecture and implementation.
+Primary positioning: We build it. You stay in control. Visitors start by choosing one of three paths: build something new, finish an existing build, or automate a business workflow.
 
 Products and paths:
 - Consultancy homepage: https://www.1ststep.ai/
@@ -16,7 +16,7 @@ Products and paths:
 - 1stStep OS Audit: https://www.1ststep.ai/tools/1ststep-os-audit/ — free offline project audit CLI. Evidence over docs. Zero metered API cost path. Clone https://github.com/1ststepai/1ststep-os-audit and run --help. Scores can be draft. Does not rewrite the target repository. Not a hosted dashboard.
 - 1stStep OS (public free core / Cycle 1): https://www.1ststep.ai/tools/1ststep-os/ — clone https://github.com/1ststepai/1ststep-os, then `npm install && npm test && npm run build && npm start` and open http://localhost:3000/os for idea→profile→markdown ZIP. Free core. Not a hosted product, full agent OS, or control plane. Not production-ready. Do not deploy the unauthenticated compile API. No hosted ZIP generator on 1ststep.ai. Public concept: https://www.1ststep.ai/os.
 - Other focused services: https://www.1ststep.ai/services/websites.html, https://www.1ststep.ai/services/mvp-builds.html, https://www.1ststep.ai/services/app-builds.html, https://www.1ststep.ai/services/internal-tools.html
-- Website Fit Check: https://www.1ststep.ai/fit-check/ — four details, personal reply from Evan; no calendar required.
+- Commercial project intake: https://www.1ststep.ai/fit-check/ — one form for a new build, an existing build, or business automation. A success response means the approved delivery provider accepted the request; it does not prove inbox delivery, a read, or CRM creation.
 - Website Strategy Call: https://www.1ststep.ai/book/ — 30-minute website-intent conversation. Not a systems-audit booking.
 
 Official profiles:
@@ -32,7 +32,7 @@ Current design direction:
 - Provider-neutral AI and persistent context are design goals, not claims of completed integrations.
 - Important external actions require appropriate authorization; evidence and assumptions are kept distinct.
 
-Built with 1stStep examples:
+1stStep product/project examples (not automatically verified client work):
 - DaySetGo — family activity discovery and planning; https://daysetgo.ai/
 - SwingTradePros — trading education, tools, and Nova AI market context; https://swingtradepros.com/
 - Real-Rank.ai — Google visibility monitoring for real estate agents; https://real-rank.ai/
@@ -40,7 +40,8 @@ Built with 1stStep examples:
 - AI Job Agent and 1stStep OS are also shown with their current stages clearly labeled.
 
 Portfolio accuracy:
-- Public project descriptions distinguish live sites, private previews, and product concepts.
+- Public project descriptions distinguish live sites, private previews, and product concepts. A verified review does not by itself establish that a showcased project was a paid client engagement.
+- Verified Google review excerpts link directly to their sources. They are social proof only unless client status is separately verified and permission is appropriate.
 
 Separate products:
 - https://app.1ststep.ai/ is the AI Job Agent application, not the 1stStep.ai corporate homepage.
@@ -61,7 +62,9 @@ What 1stStep.ai builds for busy owners:
 - iOS app design and prototypes: https://www.1ststep.ai/services/app-builds.html
 
 How a visitor should start:
-- Website fit, four details: https://www.1ststep.ai/fit-check/
+- Build something new: https://www.1ststep.ai/fit-check/?intent=build_new
+- Finish an existing build: https://www.1ststep.ai/fit-check/?intent=finish_build
+- Automate a business workflow: https://www.1ststep.ai/fit-check/?intent=automate_business
 - Website strategy conversation: https://www.1ststep.ai/book/
 - Systems diagnosis (browser-local, six questions): https://www.1ststep.ai/journey/
 - App idea first pass: https://www.1ststep.ai/app-idea-viability-checker.html

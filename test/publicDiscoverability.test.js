@@ -70,7 +70,10 @@ test("robots.txt allows the public site, blocks private paths, and points at the
 
 test("llms.txt names the owner offer, start paths, and canonical www host", async () => {
   const llms = await source("public/llms.txt");
-  assert.match(llms, /Website Fit Check: https:\/\/www\.1ststep\.ai\/fit-check\//);
+  assert.match(llms, /Commercial project intake: https:\/\/www\.1ststep\.ai\/fit-check\//);
+  assert.match(llms, /intent=build_new/);
+  assert.match(llms, /intent=finish_build/);
+  assert.match(llms, /intent=automate_business/);
   assert.match(llms, /Website Strategy Call: https:\/\/www\.1ststep\.ai\/book\//);
   assert.match(llms, /services\/mvp-builds\.html/);
   assert.match(llms, /Use https:\/\/www\.1ststep\.ai\//);
@@ -95,10 +98,10 @@ test("llms.txt names the owner offer, start paths, and canonical www host", asyn
   assert.match(llms, /does not guarantee billing or token savings/);
 });
 
-test("homepage first screen is one fit-check CTA with service links and architecture below", async () => {
+test("homepage first screen exposes the three commercial paths and services", async () => {
   const html = await source("index.html");
   const hero = html.slice(html.indexOf('class="hero'), html.indexOf("signal-strip"));
-  assert.match(hero, /href="\/fit-check\/"/);
+  for (const intent of ["build_new", "finish_build", "automate_business"]) assert.match(hero, new RegExp(`href="/fit-check/\\?intent=${intent}"`));
   assert.equal((hero.match(/button button-primary/g) || []).length, 1);
   assert.doesNotMatch(hero, /href="\/journey\/"/);
   assert.doesNotMatch(hero, /href="\/book\/"/);
@@ -108,7 +111,7 @@ test("homepage first screen is one fit-check CTA with service links and architec
   assert.match(hero, /Internal tools/);
   assert.match(html, /id="problems"/);
   assert.match(html, /id="how"/);
-  assert.match(html, /Find the leak\. Design the route/);
+  assert.match(html, /A build process with a real handoff/);
   assert.match(html, /<link rel="canonical" href="https:\/\/www\.1ststep\.ai\/"/);
   assert.match(html, /property="og:image" content="https:\/\/www\.1ststep\.ai\/assets\/og-home\.png"/);
 });
