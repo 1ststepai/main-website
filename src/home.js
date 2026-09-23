@@ -77,11 +77,12 @@ function resetMotion() {
 toggle.addEventListener('click', () => {
   paused = !paused;
   document.body.classList.toggle('motion-paused', paused);
+  if (paused) document.getAnimations().forEach(animation => animation.cancel());
   toggle.setAttribute('aria-pressed', String(paused));
   toggle.textContent = paused ? 'Resume motion' : 'Pause motion';
   resetMotion(); schedule();
 });
-reduced.addEventListener('change', () => { toggle.hidden = reduced.matches; resetMotion(); schedule(); });
+reduced.addEventListener('change', () => { toggle.hidden = reduced.matches; if (reduced.matches) document.getAnimations().forEach(animation => animation.cancel()); resetMotion(); schedule(); });
 const stages = [
   ['Request', 'Start with the outcome.', 'Choose “Next stage” to assemble the example.'],
   ['Research / context', 'Know the starting point.', 'Example: inspect the current workflow, inputs, and constraints.'],
@@ -107,3 +108,85 @@ function showStage() {
 next.hidden = reset.hidden = false;
 next.addEventListener('click', () => { step = (step + 1) % stages.length; showStage(); });
 reset.addEventListener('click', () => { step = 0; showStage(); });
+
+
+// Swap verified captures inside the existing stage; never synthesize product results.
+const productScreens = {
+  daysetgo: {
+    title: 'DaySetGo', description: 'Family planning, made tangible.',
+    url: 'https://www.daysetgo.ai/plan?mode=demo', link: 'Explore the demo planner ↗',
+    image: '/assets/daysetgo-planner-20260922.webp', width: 1440, height: 1000,
+    bar: 'daysetgo.ai / sample planner', state: 'PUBLIC DEMO',
+    alt: "DaySetGo's actual public demo planner with family preferences and a sample itinerary; demo data is explicitly unverified.",
+    caption: 'Actual public demo interface, captured September 22, 2026. Sample itinerary, prices, and availability are fictionalized or unverified.'
+  },
+  'job-agent': {
+    title: '1stStep Job Agent', description: 'A focused entry into your job search.',
+    url: 'https://app.1ststep.ai/concierge', link: 'Open the Job Agent ↗',
+    image: '/assets/job-agent-public-entry-20260922.webp', width: 1440, height: 1000,
+    bar: 'app.1ststep.ai / concierge', state: 'PUBLIC ENTRY',
+    alt: 'Actual Job Agent public entry screen with My Jobs, Needs You, Saved Info, Agent Status, and a Start my Job Agent control. No account data or job results are displayed.',
+    caption: 'Current public entry interface, captured September 22, 2026. Starting the workflow requires sign-in. Authenticated search, matching, and application results are not demonstrated here.'
+  },
+  nova: {
+    title: 'SwingTradePros / Nova', description: 'Market education through a focused assistant.',
+    url: 'https://swingtradepros.com/ai-assistant-demo', link: 'Explore the public Nova interface ↗',
+    image: '/assets/nova-public-gate-20260922.webp', width: 568, height: 621,
+    bar: 'swingtradepros.com / Nova', state: 'EMAIL-GATED UI',
+    alt: 'Actual Nova public assistant interface showing its email access gate, topic controls, message field, and educational disclaimer. The assistant has not been unlocked.',
+    caption: 'Current email-gated assistant interface, captured September 22, 2026. No email was entered and no AI request or trade was made. This is interface evidence, not live analysis or trading performance.'
+  }
+};
+const productChoices = [...document.querySelectorAll('.product-switcher button[data-product]')];
+let productLoad = 0;
+productChoices.forEach((button, index) => {
+  button.hidden = false;
+  button.addEventListener('click', async () => {
+    const key = button.dataset.product;
+    const screen = productScreens[key];
+    const version = ++productLoad;
+    // Keep the last good image and its matching caption until the next asset decodes.
+    product.setAttribute('aria-busy', 'true');
+    const image = new Image();
+    image.src = screen.image;
+    try { await image.decode(); } catch {
+      if (version !== productLoad) return;
+      product.removeAttribute('aria-busy');
+      product.querySelector('figcaption').textContent = 'This screenshot could not load. The existing product links remain available; choose a product to retry.';
+      return;
+    }
+    if (version !== productLoad) return;
+    productChoices.forEach(item => item.setAttribute('aria-pressed', String(item === button)));
+    product.dataset.product = key;
+    product.querySelector('h3').textContent = screen.title;
+    product.querySelector('.product-caption p').textContent = screen.description;
+    const link = product.querySelector('.product-caption a');
+    link.href = screen.url; link.textContent = screen.link;
+    const surface = product.querySelector('.product-screen');
+    surface.href = screen.image;
+    surface.setAttribute('aria-label', `Open full-size ${screen.title} screenshot`);
+    const picture = surface.querySelector('img');
+    picture.src = screen.image; picture.alt = screen.alt;
+    picture.width = screen.width; picture.height = screen.height;
+    const bars = surface.querySelectorAll('.window-bar span');
+    bars[1].textContent = screen.bar; bars[2].textContent = screen.state;
+    const caption = product.querySelector('figcaption');
+    caption.replaceChildren(document.createTextNode(`${screen.caption} `));
+    const fullSize = document.createElement('a');
+    fullSize.href = screen.image; fullSize.textContent = 'View full-size ↗';
+    fullSize.target = '_blank'; fullSize.rel = 'noopener'; caption.append(fullSize);
+    product.removeAttribute('aria-busy');
+    if (!paused && !reduced.matches) surface.animate(
+      [{ opacity: .2, transform: 'translate3d(0,18px,-100px) rotateX(8deg)' }, { opacity: 1, transform: 'translate3d(0,0,0) rotateX(0)' }],
+      { duration: 650, easing: 'cubic-bezier(.2,.7,.2,1)' }
+    );
+  });
+  button.addEventListener('keydown', event => {
+    const direction = event.key === 'ArrowRight' ? 1 : event.key === 'ArrowLeft' ? -1 : 0;
+    if (!direction) return;
+    event.preventDefault();
+    const target = productChoices[(index + direction + productChoices.length) % productChoices.length];
+    target.focus(); target.click();
+  });
+});
+product.querySelector('figcaption').setAttribute('aria-live', 'polite');

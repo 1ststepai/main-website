@@ -136,3 +136,14 @@
 - **Risk:** Local Chromium measurements are not field Core Web Vitals or physical-device frame-rate evidence. Full-size screenshot access supplements the compact mobile preview.
 - **Verification:** See docs/CINEMATIC-STORYBOARD.md and scripts/verify-home-cinematic.cjs. No form content enters visual controls or analytics. No animation executes work or creates activity.
 - **Reversal:** Restore the homepage files from the exact approved base. No database or external-service migration is involved.
+
+
+## 2026-09-22: Final cinematic amplification of approved architecture
+
+- **Owner / authority:** Codex implementing Evan's explicit three-improvement request. Exact base f47b1b19a689ec4c854409c08b263c8a75244f25; isolated branch codex/release1-amplification-20260922. Preview only.
+- **Decision:** Preserve the six sections and all commercial contracts. Give existing hero real preserve-3d Z planes, reuse the product stage for manual screenshot selection, and amplify the existing seven-stage illustration with wires, assembly, inspection, launch, and owner handoff.
+- **Product proof:** Current direct browser captures of Job Agent's public concierge entry and Nova's email-gated public assistant are suitable interface evidence. They do not prove authenticated Job Agent workflows, live AI responses, trading performance, or application activity. Rejected older QA and marketing images as evidence of current authenticated UI.
+- **Accessibility / performance:** No new runtime dependency, no autoplay, no background loop. Additional captures load only on selection. Preserve reduced-motion and pause behavior; reuse existing browser checks and add product failure/retry and no-page-growth assertions.
+- **Affected systems:** Homepage HTML/CSS/JS and captured public assets only. Intake, analytics, attribution, SEO/schema, privacy, APIs, Studio, and dependencies are unchanged.
+- **Rollback:** Approved f47b1b19a689ec4c854409c08b263c8a75244f25 Preview. No migration or external-service configuration changes.
+- **Evidence:** docs/AMPLIFICATION-ASSETS.md and scripts/verify-home-amplification.cjs. Exact-candidate validation and deployment metadata are recorded under ignored output/ at release time.
