@@ -8,7 +8,7 @@ const source = (path) => readFile(new URL(path, root), "utf8");
 test("the homepage leads with custom builds and keeps products distinct", async () => {
   const html = await source("index.html");
   const llms = await source("public/llms.txt");
-  assert.match(html, /We build it\. <em>You stay in control/);
+  assert.match(html, /We build it\.<br><em>You stay<br>in control/);
   assert.match(html, /lead capture, CRM architecture, routing, follow-up, attribution, reporting/i);
   for (const intent of ["build_new", "finish_build", "automate_business"]) assert.match(html, new RegExp(`href="/fit-check/\\?intent=${intent}"`));
   assert.match(html, /href="\/services\/revenue-systems\.html"/);
@@ -24,7 +24,7 @@ test("the homepage leads with custom builds and keeps products distinct", async 
 
 test("the commercial funnel and service links have focused destinations", async () => {
   const html = await source("index.html");
-  for (const anchor of ["problems", "how", "services", "work"]) assert.match(html, new RegExp('id="' + anchor + '"'));
+  for (const anchor of ["machine", "how", "services", "work"]) assert.match(html, new RegExp('id="' + anchor + '"'));
   for (const path of ["websites", "internal-tools", "revenue-systems", "mvp-builds"]) {
     assert.match(html, new RegExp('href="/services/' + path + '\\.html"'));
   }
@@ -49,18 +49,20 @@ test("the journey gives a local diagnosis and only opens email by choice", async
   assert.match(sitemap, /www\.1ststep\.ai\/journey\//);
 });
 
-test("the showcase includes six reachable panels and no cafe proof", async () => {
+test("the showcase includes six reachable products and no cafe proof", async () => {
   const home = await source("index.html");
   const campaign = await source("campaigns/outgrown-website/index.html");
   const llms = await source("public/llms.txt");
   const generated = await readdir(new URL("public/generated/", root));
-  const css = await source("src/home.css");
+  const css = await source("src/home-cinematic.css");
   const script = await source("src/home.js");
 
   for (const content of [home, campaign, llms, ...generated]) assert.doesNotMatch(content, /the.?spot|spot.?cafe/i);
-  const tabIds = [...home.matchAll(/role="tab" aria-controls="(showcase-[a-z]+)"/g)].map((match) => match[1]);
-  assert.equal(tabIds.length, 6);
-  for (const id of tabIds) assert.match(home, new RegExp(`id="${id}" role="tabpanel"`));
+  assert.equal((home.match(/1stStep product\/project/g) || []).length, 6);
+  assert.match(home, /daysetgo-planner-20260922\.webp/);
+  assert.match(home, /Actual public demo interface/);
+  assert.match(home, /fictionalized or unverified/);
+  assert.ok(home.indexOf('id="work"') < home.indexOf('id="machine"'));
   for (const project of ["Unveiling Rarities", "DaySetGo", "SwingTradePros", "Real-Rank.ai", "AI Job Agent", "1stStep OS"]) assert.ok(home.includes(project));
   assert.match(script, /ArrowRight/);
   assert.match(script, /IntersectionObserver/);

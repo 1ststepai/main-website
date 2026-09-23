@@ -125,3 +125,14 @@
 - **Rationale:** Immediate defense in depth with no new vendor.
 - **Risk:** Serverless instances do not share the in-memory limits or idempotency cache.
 - **Reversal:** Replace the in-memory layer with an approved durable store while keeping the same response contract.
+
+
+## 2026-09-22: Cinematic Release 1 homepage, isolated Preview only
+
+- **Decision:** Recompose the approved Release 1 homepage into six beats with native, user-controlled spatial motion; preserve commercial backend, intake, analytics, attribution, SEO/schema, privacy, and Studio.
+- **Authority:** Owner's cinematic visual mission, exact base e1c7c7696b08d9a47959d7f1be8be2c882b5cf39. Production and merging are not authorized.
+- **Alternatives:** Keep the long consulting layout; add a 3D or animation library. Native transforms and a finite interactive illustration meet the narrative without another dependency.
+- **Assets:** Actual public DaySetGo demo planner captured September 22, 2026, optimized to WebP. Sample data remains explicitly unverified; this is first-party product work, not verified client work. Other products remain honest links because verified UI assets were unavailable.
+- **Risk:** Local Chromium measurements are not field Core Web Vitals or physical-device frame-rate evidence. Full-size screenshot access supplements the compact mobile preview.
+- **Verification:** See docs/CINEMATIC-STORYBOARD.md and scripts/verify-home-cinematic.cjs. No form content enters visual controls or analytics. No animation executes work or creates activity.
+- **Reversal:** Restore the homepage files from the exact approved base. No database or external-service migration is involved.

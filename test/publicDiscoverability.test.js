@@ -98,20 +98,20 @@ test("llms.txt names the owner offer, start paths, and canonical www host", asyn
   assert.match(llms, /does not guarantee billing or token savings/);
 });
 
-test("homepage first screen exposes the three commercial paths and services", async () => {
+test("homepage exposes three commercial paths and disclosed service destinations", async () => {
   const html = await source("index.html");
-  const hero = html.slice(html.indexOf('class="hero'), html.indexOf("signal-strip"));
+  const hero = html.slice(html.indexOf('class="hero'), html.indexOf("</section>"));
   for (const intent of ["build_new", "finish_build", "automate_business"]) assert.match(hero, new RegExp(`href="/fit-check/\\?intent=${intent}"`));
   assert.equal((hero.match(/button button-primary/g) || []).length, 1);
   assert.doesNotMatch(hero, /href="\/journey\/"/);
   assert.doesNotMatch(hero, /href="\/book\/"/);
-  assert.match(hero, /Business website that gets leads/);
-  assert.match(hero, /Build an MVP/);
-  assert.match(hero, /AI automation/);
-  assert.match(hero, /Internal tools/);
-  assert.match(html, /id="problems"/);
+  assert.match(html, /Business websites/);
+  assert.match(html, /MVP builds/);
+  assert.match(html, /AI automation/);
+  assert.match(html, /Internal tools/);
+  assert.match(html, /id="machine"/);
   assert.match(html, /id="how"/);
-  assert.match(html, /A build process with a real handoff/);
+  assert.match(html, /Handed over properly/);
   assert.match(html, /<link rel="canonical" href="https:\/\/www\.1ststep\.ai\/"/);
   assert.match(html, /property="og:image" content="https:\/\/www\.1ststep\.ai\/assets\/og-home\.png"/);
 });
@@ -120,8 +120,10 @@ test("homepage FAQ JSON-LD matches visible questions", async () => {
   const html = await source("index.html");
   const names = faqNames(html);
   for (const name of names) {
-    assert.match(html, new RegExp(`<dt>${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}</dt>`));
+    assert.match(html, new RegExp(`<summary>${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}</summary>`));
   }
+  const faq = jsonLdBlocks(html).find(block => block["@type"] === "FAQPage");
+  for (const item of faq.mainEntity) assert.ok(html.includes(`<p>${item.acceptedAnswer.text}</p>`), 'FAQ answer parity');
   assert.ok(names.includes("Do you guarantee leads, rankings, or revenue?"));
 });
 
