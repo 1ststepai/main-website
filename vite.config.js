@@ -41,6 +41,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: "index.html",
+        foundry: "foundry/index.html",
         os: "os/index.html",
         journey: "journey/index.html",
         book: "book/index.html",
