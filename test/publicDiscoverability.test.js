@@ -103,7 +103,9 @@ test("homepage first screen exposes the three commercial paths and services", as
   const hero = html.slice(html.indexOf('class="hero'), html.indexOf("</section>", html.indexOf('class="hero')));
   for (const intent of ["build_new", "finish_build", "automate_business"]) assert.match(hero, new RegExp(`href="/fit-check/\\?intent=${intent}"`));
   assert.equal((hero.match(/button button-primary/g) || []).length, 1);
-  assert.doesNotMatch(hero, /href="\/journey\/"/);
+  // Owner decision 2026-09-26: Journey returns as the secondary path, never an equal-weight button.
+  assert.equal((hero.match(/href="\/journey\/"/g) || []).length, 1);
+  assert.match(hero, /<p class="hero-secondary">[^<]*<a href="\/journey\/"/);
   assert.doesNotMatch(hero, /href="\/book\/"/);
   assert.match(hero, /Custom software, AI systems, and automation/);
   assert.match(hero, /Tell us what you need built/);

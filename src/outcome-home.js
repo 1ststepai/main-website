@@ -1,33 +1,14 @@
-const figure = document.querySelector('.workflow-figure');
-const replay = document.querySelector('#replay');
-const pause = document.querySelector('#pause');
-const reduced = matchMedia('(prefers-reduced-motion: reduce)');
-let userPaused = false, visible = true;
-function pauseState() {
-  figure.classList.toggle('paused', userPaused || document.hidden || !visible);
-  pause.textContent = userPaused ? 'Resume' : 'Pause';
-  pause.setAttribute('aria-pressed', String(userPaused));
-}
-function play() {
-  figure.classList.remove('running');
-  if (reduced.matches) return;
-  void figure.offsetWidth;
-  userPaused = false;
-  figure.classList.add('running');
-  pauseState();
-}
-function preferences() {
-  replay.hidden = pause.hidden = reduced.matches;
-  if (reduced.matches) figure.classList.remove('running');
-}
-replay.addEventListener('click', play);
-pause.addEventListener('click', () => { userPaused = !userPaused; pauseState(); });
-reduced.addEventListener('change', preferences);
-document.addEventListener('visibilitychange', pauseState);
-if ('IntersectionObserver' in window) new IntersectionObserver(([entry]) => {
-  visible = entry.isIntersecting; pauseState();
-}).observe(figure);
-preferences(); play();
+// The Signal Path loads after the page is usable. If it fails, the figure keeps (or
+// returns to) its complete static state; content and CTAs never depend on it.
+const RESOLVED = 'reach-repair reach-signal reach-capture reach-qualify reach-route reach-follow reach-convert reach-measure reach-loop';
+import('./signal-path.js')
+  .then((signalPath) => signalPath.init())
+  .catch(() => {
+    const figure = document.getElementById('signal-path');
+    if (!figure) return;
+    figure.removeAttribute('data-pending');
+    figure.classList.add(...RESOLVED.split(' '));
+  });
 
 // Homepage-only preference; never forwarded to analytics or other routes.
 const appearance = document.querySelector('#appearance');
