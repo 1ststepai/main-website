@@ -199,7 +199,7 @@ export function init() {
 
 // Desktop only: a slim status rail carries the same system through the sections below the hero.
 function initRail(figure) {
-  const wide = matchMedia('(min-width: 1180px)');
+  const wide = matchMedia('(min-width: 1280px)');
   const sections = Object.keys(SECTION_STATES).map((id) => document.getElementById(id)).filter(Boolean);
   if (!sections.length || !('IntersectionObserver' in window)) return;
 

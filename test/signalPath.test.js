@@ -59,7 +59,7 @@ test("reduced motion is a designed static state with step-through, not a disable
   assert.match(script, /onReducedMotionChange\(\(reduce\) => \{ if \(reduce\) showResolved\(\); \}\)/);
   assert.match(script, /button\.disabled = false;[\s\S]*showStep\(i\)/);
   assert.match(css, /prefers-reduced-motion:reduce/);
-  assert.match(css, /@media\(max-width:1179px\) \{ \.sp-rail \{ display:none; \} \}/);
+  assert.match(css, /@media\(max-width:1279px\) \{ \.sp-rail \{ display:none; \} \}/);
 });
 
 test("the timeline resolves once, in order, in about six seconds", () => {
