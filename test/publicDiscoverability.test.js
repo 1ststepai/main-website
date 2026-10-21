@@ -98,34 +98,32 @@ test("llms.txt names the owner offer, start paths, and canonical www host", asyn
   assert.match(llms, /does not guarantee billing or token savings/);
 });
 
-test("homepage first screen books the Website Strategy Call and offers reel sound", async () => {
+test("homepage first screen books the Website Strategy Call and the reel offers sound", async () => {
   const html = await source("index.html");
   const hero = html.slice(html.indexOf('class="hero'), html.indexOf("</section>", html.indexOf('class="hero')));
-  assert.match(hero, /Build the system your business is missing/);
-  assert.match(hero, /href="\/book\/"[^>]*>Book a 20-min call/);
-  assert.match(hero, /poster="\/home-v2\/poster_16x9\.webp"/);
-  assert.match(hero, /Tap for sound/);
-  assert.doesNotMatch(hero, /Watch with sound|href="\/fit-check\//);
-  assert.equal((html.match(/class="reel-sound"/g) || []).length, 2);
+  assert.match(hero, /Get more from the business you/);
+  assert.match(hero, /href="\/book\/"[^>]*>Book a call/);
+  assert.doesNotMatch(hero, /Watch with sound|href="\/fit-check\/|Tap for sound/);
+  assert.match(html, /poster="\/home-v2\/poster_16x9\.webp"/);
+  assert.match(html, /Tap for sound/);
+  assert.equal((html.match(/class="reel-sound"/g) || []).length, 1);
   assert.doesNotMatch(html, /TODO: connect the 20-minute booking link|class="sound"/);
-  assert.match(html, /id="how"/);
-  assert.match(html, /id="paths"/);
+  assert.doesNotMatch(html, /id="how"|id="paths"/);
   assert.match(html, /<link rel="canonical" href="https:\/\/www\.1ststep\.ai\/"/);
   assert.match(html, /property="og:image" content="https:\/\/www\.1ststep\.ai\/assets\/og-home\.png"/);
 });
 
-test("the homepage cursor dot tracks the pointer and stays off without a mouse", async () => {
+test("the homepage uses the system cursor and does not hijack scroll", async () => {
+  const html = await source("index.html");
   const js = await source("src/home-v2.js");
   const css = await source("src/home-v2.css");
-  const cursor = js.slice(js.indexOf("if (FINE && !RM)"), js.indexOf("$$('[data-cursor]')"));
-  assert.match(cursor, /RING_LERP = 0\.(?:[5-9]\d*|1)/);
-  assert.match(cursor, /translate3d/);
-  assert.doesNotMatch(cursor, /quickTo\((?:dot|ring)/);
-  assert.match(cursor, /pointerType !== 'mouse'/);
-  assert.match(cursor, /classList\.add\('has-cursor'\)/);
-  assert.ok(cursor.indexOf("drawDot()") < cursor.indexOf("classList.add('has-cursor')"));
-  assert.match(css, /prefers-reduced-motion:reduce[\s\S]*\.has-cursor,\.has-cursor a,\.has-cursor button\{cursor:auto\}/);
-  assert.match(css, /\.has-cursor,\.has-cursor a,\.has-cursor button\{cursor:none\}/);
+  const site = await source("src/v2-site.css");
+  assert.doesNotMatch(html, /class="cursor"|lenis\.min\.js|gsap\.min\.js|ScrollTrigger/);
+  assert.doesNotMatch(js, /new Lenis|requestAnimationFrame|pointermove|ScrollTrigger|gsap/);
+  assert.match(js, /prefers-reduced-motion: reduce/);
+  assert.doesNotMatch(css, /cursor:\s*none|backdrop-filter|\.grain|lenis/);
+  assert.match(css, /prefers-reduced-motion:\s*reduce/);
+  assert.doesNotMatch(site, /backdrop-filter/);
 });
 
 test("public subpages use the v2 chrome and drop the navy and lavender theme", async () => {
@@ -167,9 +165,12 @@ test("public subpages use the v2 chrome and drop the navy and lavender theme", a
 });
 
 test("the integrations row uses approved marks, pauses, and states the trademark limit", async () => {
-  const html = await source("index.html");
+  const home = await source("index.html");
+  assert.doesNotMatch(home, /id="works"|Works with the tools|integrations\.css/);
+  const html = await source("services/websites.html");
   const css = await source("src/integrations.css");
-  const works = html.slice(html.indexOf('id="works"'), html.indexOf('id="how"'));
+  const start = html.indexOf('id="works"');
+  const works = html.slice(start, html.indexOf("</section>", start));
   assert.match(works, /Works with the tools/);
   assert.match(works, /Logos are trademarks of their respective owners\. 1stStep\.ai connects with these tools and is not affiliated with or endorsed by them\./);
   assert.doesNotMatch(works, /partner/i);

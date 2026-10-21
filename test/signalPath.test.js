@@ -7,21 +7,17 @@ const root = new URL("../", import.meta.url);
 const source = (path) => readFile(new URL(path, root), "utf8");
 const RESOLVED = ["repair", "signal", ...STAGES, "loop"];
 
-test("the v2 homepage explains the offer in HTML and keeps the signal-path figure unmounted", async () => {
+test("the homepage states the offer in HTML and leaves the signal-path figure unmounted", async () => {
   const html = await source("index.html");
   const hero = html.slice(html.indexOf('<section class="hero'), html.indexOf("</section>"));
   assert.match(hero, /id="hero-title"/);
-  assert.match(hero, /Build the system your business is missing/);
-  assert.match(hero, /Book a 20-min call/);
+  assert.match(hero, /Get more from the business you <em>already have\.<\/em>/);
+  assert.match(hero, /Book a call/);
   assert.doesNotMatch(html, /id="signal-path"|Deploy Our OS/i);
-  assert.match(html, /Illustrative example, not a client's data\./);
-  for (const name of ["Capture", "Qualify", "Route", "Follow up", "Book", "Credit"]) {
-    assert.match(html, new RegExp(`<h4>${name}</h4>`));
-  }
+  assert.doesNotMatch(html, /<h4>Capture<\/h4>|Illustrative example, not a client's data/);
   const js = await source("src/home-v2.js");
   assert.match(js, /prefers-reduced-motion: reduce/);
-  assert.match(js, /staticFallback/);
-  assert.match(await source("src/home-v2.css"), /overflow:hidden;clip-path:inset\(0\)/);
+  assert.doesNotMatch(js, /staticFallback|new Lenis/);
 });
 
 test("reduced motion is a designed static state with step-through, not a disabled animation", async () => {

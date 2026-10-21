@@ -1,5 +1,13 @@
 # Architecture Decision Log
 
+## 2026-10-21: Homepage is a short studio page, and the custom cursor is gone
+
+- **Status / owner:** Evan replaced the long homepage brief and asked to keep the cursor and performance cleanup. Preview only. No production deploy.
+- **Decision:** The homepage is five parts: a hero (“Get more from the business you already have.”, one subline, Book a call), selected work, what we do, a short founder strip, and a closing Book a call. Selected work is DaySetGo, SwingTradePros, Job Agent, SkillSprout, Real-Rank.ai (a capture of the public homepage), and the approved v4 reel. Book a call still goes to `/book/`. The label is “Book a call”. The custom cursor, Lenis, GSAP, ScrollTrigger, the grain layer, and the long homepage sections are removed. Motion is a hero reveal, a scroll-in on each work piece, and a hover scale on the work image. Those use transform and opacity. Reduced motion turns them off and leaves the reel on its poster, with the sound control hidden. The fixed header on subpages uses a solid ink background instead of a blur. The integrations row stays on the five service pages. This supersedes the long v2 section order, the custom-cursor entry below, and the empty testimonial and client-reel slots. Those slots are removed, not filled. The v4 reel file, its poster, the music credit, the founder photograph, and the locked logo stay.
+- **Rationale:** Evan asked for a cleaner page that shows the design work, and for the pointer lag to stop.
+- **Affected systems:** `index.html`, `src/home-v2.css`, `src/home-v2.js`, the fixed header in `src/v2-site.css`, `public/home-v2/real-rank.webp`, `public/llms.txt`.
+- **Rollback:** Restore the previous homepage files, the cursor, and the header blur. Leave the service-page integrations in place.
+
 ## 2026-10-21: Homepage reel is the approved v4 cut
 
 - **Status / owner:** Evan approved `1ststep_reel_16x9_v4_web` for the homepage preview. Preview only. No production deploy.

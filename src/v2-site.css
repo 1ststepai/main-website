@@ -12,7 +12,7 @@ body.v2 :where(.eyebrow,.kicker,.tag,.aivc-eyebrow,.listing-kicker,.badge){color
 body.v2 .skip-link,body.v2 .skip{position:absolute;left:16px;top:12px;z-index:120;transform:translateY(-160%);background:#D4FF3A;color:#0D0C0A;font-weight:800;text-decoration:none;padding:10px 14px;border-radius:99px}
 body.v2 .skip-link:focus,body.v2 .skip:focus{transform:none}
 body.v2 :focus-visible{outline:2px solid #D4FF3A;outline-offset:3px}
-body.v2 header.nav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;gap:14px;width:auto;max-width:none;margin:0;padding:18px 40px!important;border:0;border-radius:0;background:rgba(13,12,10,.92);backdrop-filter:blur(16px);box-shadow:none}
+body.v2 header.nav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;gap:14px;width:auto;max-width:none;margin:0;padding:18px 40px!important;border:0;border-bottom:1px solid rgba(241,234,219,.14);border-radius:0;background:#0D0C0A;box-shadow:none}
 body.v2 header.nav .logo{display:inline-flex;align-items:center;flex:none;text-decoration:none}
 body.v2 header.nav .logo img{height:46px;width:auto;display:block;filter:none;max-width:none}
 body.v2 .nav-blend{display:flex;align-items:center;gap:32px;flex:1;min-width:0}

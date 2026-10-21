@@ -2,10 +2,10 @@
 
 1stStep.ai builds custom apps, AI systems, automations, internal tools, and websites. Work is designed, built, launched, documented, and organized for client control.
 
-Primary positioning: We build it. You stay in control. The homepage leads with that offer. Its “Book a 20-min call” buttons go to the Website Strategy Call at https://www.1ststep.ai/book/. Begin Your Journey and Fit Check stay available from the footer. The three paths — new build, finish a stalled build, automate the business — are on the homepage.
+Primary positioning: Get more from the business you already have. The homepage leads with that line. Its “Book a call” buttons go to the Website Strategy Call at https://www.1ststep.ai/book/. Begin Your Journey and Fit Check stay available from the footer. Longer service detail lives on the service pages.
 
 Products and paths:
-- Consultancy homepage: https://www.1ststep.ai/ — approved v2. The Bramblewick makeover is a fictional example. Product screenshots are 1stStep's own products, with no invented metrics. SkillSprout has no public numbers. SwingTradePros states 8,000+ Discord members, 4,000+ YouTube subscribers, and Node AI, with no performance claim.
+- Consultancy homepage: https://www.1ststep.ai/ — a short studio page. Selected work is 1stStep's own products (DaySetGo, SwingTradePros, Job Agent, SkillSprout, Real-Rank.ai) plus the studio reel. No invented metrics, testimonials, or clients. SkillSprout has no public numbers. SwingTradePros is described with Node AI and no performance claim.
 - Begin Your Journey: https://www.1ststep.ai/journey/ — a browser-local, six-question first-pass diagnosis. Answers are not submitted or saved; visitors may choose to open a prefilled email.
 - Revenue Systems Audit: https://www.1ststep.ai/services/revenue-systems.html
 - 1stStep OS: https://www.1ststep.ai/os — public AI Engineering Operating System concept. Cycle 1 of the free core is cloneable for a local markdown ZIP demo; not a hosted product. Illustrative diagrams stay labeled.
