@@ -1,5 +1,13 @@
 # Architecture Decision Log
 
+## 2026-10-21: Homepage cartoon reel plays with sound on request
+
+- **Status / owner:** Evan supplied a web-ready 16:9 reel with an AAC track and asked for it on the homepage preview. Preview only. No production deploy.
+- **Decision:** Replace `public/home-v2/reel_16x9.mp4` with that file everywhere the 16:9 reel is used (hero desktop and the cartoon-ad cinema). Keep the existing poster. Autoplay stays muted. A “Tap for sound” control on the hero and on the cinema unmutes that copy, restarts it at the beginning, and switches to a mute icon. The portrait hero file keeps its video frames and now carries the same AAC track, copied rather than re-encoded, so the phone hero can unmute too. This supersedes the “reels have no audio” note in the homepage v2 entry.
+- **Rationale:** Browsers block audible autoplay. The soundtrack is part of the reel Evan delivered, and the portrait crop is the same film.
+- **Affected systems:** Homepage hero, cartoon-ad cinema, `public/home-v2/reel_16x9.mp4`, `public/home-v2/reel_9x16.mp4`.
+- **Rollback:** Restore the previous silent reel files and remove the sound controls.
+
 ## 2026-10-21: Homepage “Book a 20-min call” uses the Website Strategy Call
 
 - **Status / owner:** Evan directed this on the v2 homepage preview branch. Preview only. No production deploy.

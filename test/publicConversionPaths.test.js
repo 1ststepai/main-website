@@ -20,6 +20,12 @@ test("the homepage leads with the v2 offer and keeps products distinct", async (
   assert.match(llms, /1stStep OS/);
   assert.match(llms, /AI Job Agent/);
   assert.doesNotMatch(html, /TradingView|guaranteed revenue|A website that undersells the business|\$3,250&ndash;\$12,000|Watch with sound|TODO: connect the 20-minute booking link/);
+  assert.match(html, /data-src16="\/home-v2\/reel_16x9\.mp4"/);
+  assert.match(html, /data-src="\/home-v2\/reel_16x9\.mp4"/);
+  const reel16 = await readFile(new URL("public/home-v2/reel_16x9.mp4", root));
+  const reel9 = await readFile(new URL("public/home-v2/reel_9x16.mp4", root));
+  assert.ok(reel16.includes(Buffer.from("mp4a")));
+  assert.ok(reel9.includes(Buffer.from("mp4a")));
   assert.doesNotMatch(html, /<a\b[^>]*\bhref=(?:""|'')/i);
 });
 

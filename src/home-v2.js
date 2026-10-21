@@ -15,6 +15,43 @@ const startHero = () => {
 };
 if (!RM) requestAnimationFrame(() => requestAnimationFrame(startHero));
 
+const reels = [];
+const paintSound = (button, on) => {
+  const label = $('span', button);
+  button.classList.toggle('is-on', on);
+  button.setAttribute('aria-pressed', String(on));
+  button.setAttribute('aria-label', on ? 'Mute' : 'Tap for sound');
+  if (label) label.hidden = on;
+};
+const sourceFor = (video) => video.classList.contains('hero-vid') ? (MOB ? video.dataset.src9 : video.dataset.src16) : video.dataset.src;
+const bindSound = (video, button) => {
+  if (!video || !button) return;
+  button.addEventListener('click', () => {
+    if (!video.muted) {
+      video.muted = true;
+      paintSound(button, false);
+      return;
+    }
+    reels.forEach((other) => {
+      if (other.video === video) return;
+      other.video.muted = true;
+      paintSound(other.button, false);
+    });
+    if (!video.getAttribute('src')) video.src = sourceFor(video);
+    video.volume = 1;
+    video.muted = false;
+    video.removeAttribute('muted');
+    const restart = () => { try { video.currentTime = 0; } catch {} };
+    if (video.readyState >= 1) restart();
+    else video.addEventListener('loadedmetadata', restart, { once: true });
+    video.play().catch(() => {});
+    paintSound(button, true);
+  });
+  reels.push({ video, button });
+};
+bindSound(hv, $('.hero .reel-sound'));
+bindSound($('.ads-vid'), $('.screen .reel-sound'));
+
 const mk = $('.mk');
 if (MOB && mk) mk.dataset.v = 'm';
 const [COLS, ROWS] = MOB ? [4, 8] : [10, 6];
