@@ -27,6 +27,7 @@
   <meta name="twitter:image" content="https://www.1ststep.ai/assets/og-home.png" />
   <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="/fonts/instrument-serif-italic-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" as="image" href="/home-v2/poster_16x9.webp" fetchpriority="high" />
   <link rel="stylesheet" href="/src/home-v2.css" />
   <script type="application/ld+json">
   {
@@ -44,20 +45,28 @@
 <body data-fsai-page-event="home_view" data-fsai-audience="systems_architecture">
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="nav">
-  <a class="logo" href="/" aria-label="1stStep.ai home"><img src="/assets/firststep-logo-transparent-cleaned.png" width="1147" height="946" alt="" /></a>
+  <a class="logo" href="/" aria-label="1stStep.ai home"><img src="/assets/firststep-logo-transparent-cleaned.png" width="1147" height="946" alt="" decoding="async" fetchpriority="low" /></a>
   <a class="wordmark" href="/">1stStep<i>.ai</i></a>
   <nav aria-label="Primary">
     <a href="#work">Work</a>
-    <a href="#practice">Practice</a>
+    <a href="#example">Example</a>
   </nav>
   <a class="pill" href="/book/" data-fsai-placement="header">Book a call</a>
 </header>
 <main id="main">
   <section class="hero" id="top">
-    <div class="wrap">
+    <img class="hero-poster" src="/home-v2/poster_16x9.webp" width="1280" height="720" alt="" fetchpriority="high" decoding="async" />
+    <video class="hero-vid" muted loop playsinline preload="none" poster="/home-v2/poster_16x9.webp" data-src="/home-v2/1ststep-reel-v4.mp4" width="1280" height="720"></video>
+    <div class="hero-shade" aria-hidden="true"></div>
+    <button class="reel-sound" type="button" aria-pressed="false" aria-label="Tap for sound">
+      <svg class="ico-off" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3.5 9.2v5.6h3.4L12 19.2V4.8L6.9 9.2H3.5z"/><path d="M15.2 9.2a3.6 3.6 0 010 5.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+      <svg class="ico-on" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3.5 9.2v5.6h3.4L12 19.2V4.8L6.9 9.2H3.5z"/><path d="M16 9.2l4.6 5.6M20.6 9.2L16 14.8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+      <span>Tap for sound</span>
+    </button>
+    <div class="hero-copy wrap">
       <h1 id="hero-title">Get more from the business you <em>already have.</em></h1>
-      <p class="lede">Software, automation, and websites for a business that already has demand.</p>
-      <a class="btn hero-cta" href="/book/" data-fsai-placement="hero">Book a call</a>
+      <p class="lede">Software and systems for demand you already have.</p>
+      <a class="btn" href="/book/" data-fsai-placement="hero">Book a call</a>
     </div>
   </section>
 
@@ -70,104 +79,68 @@
       <div class="pieces">
         <article class="piece">
           <a href="https://daysetgo.ai/" target="_blank" rel="noopener">
-            <div class="frame"><img src="/home-v2/daysetgo.webp" width="1440" height="1000" alt="DaySetGo day planner demo" /></div>
-            <div class="cap">
-              <h3>DaySetGo <span>Public demo</span></h3>
-              <p>Planning a family day: up to three plans, one easy choice. You approve every detail.</p>
-            </div>
+            <div class="device"><span class="device-top" aria-hidden="true"><i></i><i></i><i></i></span><img src="/home-v2/daysetgo.webp" width="1440" height="1000" alt="DaySetGo day planner demo" decoding="async" loading="lazy"></div>
+            <div class="cap"><h3>DaySetGo</h3><span>Family day plans</span></div>
           </a>
         </article>
         <article class="piece">
           <a href="https://swingtradepros.com" target="_blank" rel="noopener">
-            <div class="frame"><img src="/home-v2/swingtradepros.webp" width="1280" height="780" alt="SwingTradePros homepage" /></div>
-            <div class="cap">
-              <h3>SwingTradePros <span>Live</span></h3>
-              <p>Trading education, alerts, and Node AI for market context.</p>
-            </div>
+            <div class="device"><span class="device-top" aria-hidden="true"><i></i><i></i><i></i></span><img src="/home-v2/swingtradepros.webp" width="1280" height="780" alt="SwingTradePros homepage" decoding="async" loading="lazy"></div>
+            <div class="cap"><h3>SwingTradePros</h3><span>Alerts and Node AI</span></div>
           </a>
         </article>
         <article class="piece">
           <a href="https://app.1ststep.ai/" target="_blank" rel="noopener">
-            <div class="frame"><img src="/home-v2/job-agent.webp" width="1440" height="1000" alt="Job Agent entry page" /></div>
-            <div class="cap">
-              <h3>Job Agent <span>Public beta</span></h3>
-              <p>A job-search workspace. You review before anything is sent.</p>
-            </div>
+            <div class="device"><span class="device-top" aria-hidden="true"><i></i><i></i><i></i></span><img src="/home-v2/job-agent.webp" width="1440" height="1000" alt="Job Agent entry page" decoding="async" loading="lazy"></div>
+            <div class="cap"><h3>Job Agent</h3><span>Review before send</span></div>
           </a>
         </article>
         <article class="piece">
           <a href="https://skillsprout.1ststep.ai" target="_blank" rel="noopener">
-            <div class="frame"><img src="/home-v2/skillsprout.webp" width="1600" height="1000" alt="SkillSprout worksheet builder with a validated preview" /></div>
-            <div class="cap">
-              <h3>SkillSprout <span>Live beta</span></h3>
-              <p>Printable K–6 Math and ELA worksheets with answer keys, for special educators.</p>
-            </div>
+            <div class="device"><span class="device-top" aria-hidden="true"><i></i><i></i><i></i></span><img src="/home-v2/skillsprout.webp" width="1600" height="1000" alt="SkillSprout worksheet builder with a validated preview" decoding="async" loading="lazy"></div>
+            <div class="cap"><h3>SkillSprout</h3><span>K–6 worksheets</span></div>
           </a>
         </article>
         <article class="piece">
           <a href="https://real-rank.ai/" target="_blank" rel="noopener">
-            <div class="frame"><img src="/home-v2/real-rank.webp" width="1440" height="900" alt="Real-Rank.ai homepage" /></div>
-            <div class="cap">
-              <h3>Real-Rank.ai <span>Public site</span></h3>
-              <p>Google Maps, local search, and AI search visibility reviews for real estate agents and teams.</p>
-            </div>
+            <div class="device"><span class="device-top" aria-hidden="true"><i></i><i></i><i></i></span><img src="/home-v2/real-rank.webp" width="1440" height="900" alt="Real-Rank.ai homepage" decoding="async" loading="lazy"></div>
+            <div class="cap"><h3>Real-Rank.ai</h3><span>Search visibility</span></div>
           </a>
-        </article>
-        <article class="piece">
-          <div class="frame frame-film">
-            <video class="work-vid" muted loop playsinline preload="none" poster="/home-v2/poster_16x9.webp" data-src="/home-v2/1ststep-reel-v4.mp4" width="1280" height="720"></video>
-            <button class="reel-sound" type="button" aria-pressed="false" aria-label="Tap for sound">
-              <svg class="ico-off" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3.5 9.2v5.6h3.4L12 19.2V4.8L6.9 9.2H3.5z"/><path d="M15.2 9.2a3.6 3.6 0 010 5.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
-              <svg class="ico-on" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3.5 9.2v5.6h3.4L12 19.2V4.8L6.9 9.2H3.5z"/><path d="M16 9.2l4.6 5.6M20.6 9.2L16 14.8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
-              <span>Tap for sound</span>
-            </button>
-          </div>
-          <div class="cap">
-            <h3>Studio reel</h3>
-            <p>A short film made the same way we make cartoon ads.</p>
-          </div>
         </article>
       </div>
     </div>
   </section>
 
-  <section class="practice" id="practice">
+  <section class="example" id="example" aria-labelledby="example-title">
     <div class="wrap">
-      <header class="sec">
-        <h2>What we do</h2>
-      </header>
-      <ul>
-        <li>
-          <a href="/services/mvp-builds.html">
-            <h3>New builds</h3>
-            <p>A focused first version of a web app, portal, or dashboard.</p>
-          </a>
-        </li>
-        <li>
-          <a href="/fit-check/?intent=finish_build">
-            <h3>Finish a stalled build</h3>
-            <p>Recover or complete a build that is already underway.</p>
-          </a>
-        </li>
-        <li>
-          <a href="/services/revenue-systems.html">
-            <h3>Automation</h3>
-            <p>Lead capture, routing, and follow-up for demand you already have.</p>
-          </a>
-        </li>
-        <li>
-          <a href="/services/websites.html">
-            <h3>Websites</h3>
-            <p>A business site with one clear next step.</p>
-          </a>
-        </li>
-      </ul>
+      <p class="ex">Example</p>
+      <h2 id="example-title">Lost, then booked.</h2>
+      <div class="split">
+        <div class="panel lost">
+          <h3>Lost</h3>
+          <ol>
+            <li><i></i><span>Inquiry</span></li>
+            <li><i></i><span>No follow-up</span></li>
+            <li><i></i><span>Unbooked</span></li>
+          </ol>
+        </div>
+        <div class="to" aria-hidden="true"></div>
+        <div class="panel booked">
+          <h3>Booked</h3>
+          <ol>
+            <li><i></i><span>Captured</span></li>
+            <li><i></i><span>Follow-up</span></li>
+            <li><i></i><span>Booked</span></li>
+          </ol>
+        </div>
+      </div>
+      <p class="note">Example, not a client's data.</p>
     </div>
   </section>
 
-  <section class="founder" id="founder">
-    <div class="wrap founder-row">
-      <figure>
+  <section class="close" id="book">
+    <div class="wrap close-row">
+      <figure id="founder">
         <picture>
           <source srcset="/home-v2/evan-pancis.avif" type="image/avif" />
           <source srcset="/home-v2/evan-pancis.webp" type="image/webp" />
@@ -176,15 +149,8 @@
       </figure>
       <div>
         <h2>Evan Pancis</h2>
-        <p>You talk to the person who builds it.</p>
+        <a class="btn xl" href="/book/" data-fsai-placement="home_final">Book a call</a>
       </div>
-    </div>
-  </section>
-
-  <section class="close" id="book">
-    <div class="wrap">
-      <h2>Tell me what the business needs next.</h2>
-      <a class="btn" href="/book/" data-fsai-placement="home_final">Book a call</a>
     </div>
   </section>
 </main>

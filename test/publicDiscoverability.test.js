@@ -103,9 +103,9 @@ test("homepage first screen books the Website Strategy Call and the reel offers 
   const hero = html.slice(html.indexOf('class="hero'), html.indexOf("</section>", html.indexOf('class="hero')));
   assert.match(hero, /Get more from the business you/);
   assert.match(hero, /href="\/book\/"[^>]*>Book a call/);
-  assert.doesNotMatch(hero, /Watch with sound|href="\/fit-check\/|Tap for sound/);
-  assert.match(html, /poster="\/home-v2\/poster_16x9\.webp"/);
-  assert.match(html, /Tap for sound/);
+  assert.match(hero, /Tap for sound/);
+  assert.match(hero, /poster="\/home-v2\/poster_16x9\.webp"/);
+  assert.doesNotMatch(hero, /Watch with sound|href="\/fit-check\//);
   assert.equal((html.match(/class="reel-sound"/g) || []).length, 1);
   assert.doesNotMatch(html, /TODO: connect the 20-minute booking link|class="sound"/);
   assert.doesNotMatch(html, /id="how"|id="paths"/);

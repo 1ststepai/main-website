@@ -1,5 +1,13 @@
 # Architecture Decision Log
 
+## 2026-10-21: Homepage leads with the reel and the product frames
+
+- **Status / owner:** Evan said the short studio page had too much text and was not impressive enough. Preview only. No production deploy.
+- **Decision:** The first screen is the approved v4 reel, full bleed, with the headline “Get more from the business you already have.” and Book a call. Selected work is five device frames: DaySetGo, SwingTradePros, Job Agent, SkillSprout, and Real-Rank.ai. Captions are labels. A before/after board shows a lost lead beside a booked lead and is marked “Example, not a client's data.” It has no counts and no client name. The founder photograph sits with the closing Book a call. Motion is a hero reveal, a scroll-in, a short parallax on the frames, and a hover scale. Those use transform and opacity, driven by CSS, with no scroll library and no custom cursor. Reduced motion leaves the reel on its poster and shows the boards in place. The video file waits until the browser is idle, and it does not autoplay on a slow or data-saver connection. This supersedes the section density in the short-studio-page entry. The headline, `/book/`, the reel credit, the headshot, and the honesty rules stay.
+- **Rationale:** The page should show the film and the shipped products, and stay smooth.
+- **Affected systems:** `index.html`, `src/home-v2.css`, `src/home-v2.js`, `public/llms.txt`.
+- **Rollback:** Restore the previous short studio homepage.
+
 ## 2026-10-21: Homepage is a short studio page, and the custom cursor is gone
 
 - **Status / owner:** Evan replaced the long homepage brief and asked to keep the cursor and performance cleanup. Preview only. No production deploy.

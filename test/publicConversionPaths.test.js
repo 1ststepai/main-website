@@ -8,7 +8,7 @@ const source = (path) => readFile(new URL(path, root), "utf8");
 test("the homepage leads with the studio offer and keeps products distinct", async () => {
   const html = await source("index.html");
   const llms = await source("public/llms.txt");
-  const work = html.slice(html.indexOf('id="work"'), html.indexOf('id="practice"'));
+  const work = html.slice(html.indexOf('id="work"'), html.indexOf('id="example"'));
   assert.match(html, /Get more from the business you <em>already have\.<\/em>/);
   assert.match(work, /Node AI/);
   assert.doesNotMatch(work, /8,000\+|4,000\+|TradingView/);
@@ -35,8 +35,8 @@ test("the homepage leads with the studio offer and keeps products distinct", asy
 
 test("the homepage keeps a short section order and service pages keep their own destinations", async () => {
   const html = await source("index.html");
-  for (const anchor of ["work", "practice", "founder", "book"]) assert.match(html, new RegExp('id="' + anchor + '"'));
-  assert.ok(html.indexOf('id="work"') < html.indexOf('id="practice"') && html.indexOf('id="practice"') < html.indexOf('id="founder"') && html.indexOf('id="founder"') < html.indexOf('id="book"'));
+  for (const anchor of ["work", "example", "founder", "book"]) assert.match(html, new RegExp('id="' + anchor + '"'));
+  assert.ok(html.indexOf('id="work"') < html.indexOf('id="example"') && html.indexOf('id="example"') < html.indexOf('id="book"'));
   assert.doesNotMatch(html, /id="makeover"|id="flow"|id="paths"|id="works"|id="how"/);
   assert.equal((html.match(/href="\/book\/"/g) || []).length, 3);
   for (const path of ["websites", "internal-tools", "revenue-systems", "mvp-builds"]) {
@@ -61,10 +61,10 @@ test("the journey gives a local diagnosis and only opens email by choice", async
 
 test("selected work shows first-party products without invented metrics", async () => {
   const home = await source("index.html");
-  const work = home.slice(home.indexOf('id="work"'), home.indexOf('id="practice"'));
-  assert.equal((work.match(/class="piece"/g)||[]).length, 6);
+  const work = home.slice(home.indexOf('id="work"'), home.indexOf('id="example"'));
+  assert.equal((work.match(/class="piece"/g)||[]).length, 5);
   let at = 0;
-  for (const project of ["DaySetGo", "SwingTradePros", "Job Agent", "SkillSprout", "Real-Rank.ai", "Studio reel"]) {
+  for (const project of ["DaySetGo", "SwingTradePros", "Job Agent", "SkillSprout", "Real-Rank.ai"]) {
     const next = work.indexOf(project, at);
     assert.ok(next > at, project);
     at = next;

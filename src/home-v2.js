@@ -1,33 +1,48 @@
 (() => {
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const video = document.querySelector('.work-vid');
+  const video = document.querySelector('.hero-vid');
   const button = document.querySelector('.reel-sound');
+  if (!video || !button) return;
 
   const paintSound = (on) => {
-    if (!button) return;
     button.setAttribute('aria-pressed', on ? 'true' : 'false');
     button.setAttribute('aria-label', on ? 'Mute' : 'Tap for sound');
     const label = button.querySelector('span');
     if (label) label.textContent = on ? 'Mute' : 'Tap for sound';
   };
 
-  if (!video || !button) return;
+  const arm = () => {
+    if (!video.getAttribute('src')) video.src = video.dataset.src;
+  };
 
   if (reduced) {
     button.hidden = true;
     return;
   }
 
-  video.src = video.dataset.src;
-  video.muted = true;
-  video.play().catch(() => {});
+  const conn = navigator.connection;
+  const slow = conn && (conn.saveData || /2g/.test(conn.effectiveType || ''));
+  if (!slow) {
+    const play = () => {
+      arm();
+      video.muted = true;
+      video.play().catch(() => {});
+    };
+    const afterPaint = () => {
+      const wait = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
+      wait.then(() => setTimeout(play, 600));
+    };
+    if (document.readyState === 'complete') afterPaint();
+    else addEventListener('load', afterPaint, { once: true });
+  }
 
   button.addEventListener('click', () => {
-    if (!video.muted) {
+    if (video.getAttribute('src') && !video.muted) {
       video.muted = true;
       paintSound(false);
       return;
     }
+    arm();
     video.volume = 1;
     video.muted = false;
     video.removeAttribute('muted');
