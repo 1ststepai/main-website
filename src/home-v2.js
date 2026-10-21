@@ -13,14 +13,6 @@ const startHero = () => {
   hv.src = MOB ? hv.dataset.src9 : hv.dataset.src16;
   hv.play().catch(() => {});
 };
-const snd = $('.sound');
-snd?.addEventListener('click', () => {
-  if (!hv.src) startHero();
-  hv.muted = !hv.muted;
-  if (!hv.muted) { hv.currentTime = 0; hv.play().catch(() => {}); }
-  snd.textContent = hv.muted ? '▶ Watch with sound' : '■ Mute';
-  snd.setAttribute('aria-pressed', String(!hv.muted));
-});
 if (!RM) requestAnimationFrame(() => requestAnimationFrame(startHero));
 
 const mk = $('.mk');

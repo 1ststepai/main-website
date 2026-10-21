@@ -15,18 +15,18 @@ test("the homepage leads with the v2 offer and keeps products distinct", async (
   assert.match(html, /href="\/tools\/"/);
   assert.match(html, /href="\/journey\/"/);
   assert.match(html, /firststep-logo-transparent-cleaned\.png/);
-  assert.match(html, /TODO: connect the 20-minute booking link/);
+  assert.equal((html.match(/Book a 20-min call/g) || []).length, 3);
+  assert.equal((html.match(/href="\/book\/"/g) || []).length, 3);
   assert.match(llms, /1stStep OS/);
   assert.match(llms, /AI Job Agent/);
-  assert.doesNotMatch(html, /TradingView|guaranteed revenue|A website that undersells the business|\$3,250&ndash;\$12,000/);
-  assert.doesNotMatch(html, /href="\/book\/"/);
+  assert.doesNotMatch(html, /TradingView|guaranteed revenue|A website that undersells the business|\$3,250&ndash;\$12,000|Watch with sound|TODO: connect the 20-minute booking link/);
   assert.doesNotMatch(html, /<a\b[^>]*\bhref=(?:""|'')/i);
 });
 
 test("the homepage sections stay in the v2 order and service pages keep their own destinations", async () => {
   const html = await source("index.html");
   for (const anchor of ["makeover", "flow", "work", "paths", "how", "book"]) assert.match(html, new RegExp('id="' + anchor + '"'));
-  assert.doesNotMatch(html, /href="\/book\/"/);
+  assert.equal((html.match(/href="\/book\/"/g) || []).length, 3);
   for (const path of ["websites", "internal-tools", "revenue-systems", "mvp-builds"]) {
     assert.match(await source(`services/${path}.html`), /<h1/);
   }

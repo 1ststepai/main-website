@@ -2,7 +2,7 @@
 
 1stStep.ai builds custom apps, AI systems, automations, internal tools, and websites. Work is designed, built, launched, documented, and organized for client control.
 
-Primary positioning: We build it. You stay in control. The homepage leads with that offer. Its “Book a 20-min call” button is a marked TODO until a booking URL is approved. https://www.1ststep.ai/book/ remains the Website Strategy Call and is a different page. Begin Your Journey and Fit Check stay available from the footer. The three paths — new build, finish a stalled build, automate the business — are on the homepage and route to that TODO for now.
+Primary positioning: We build it. You stay in control. The homepage leads with that offer. Its “Book a 20-min call” buttons go to the Website Strategy Call at https://www.1ststep.ai/book/. Begin Your Journey and Fit Check stay available from the footer. The three paths — new build, finish a stalled build, automate the business — are on the homepage.
 
 Products and paths:
 - Consultancy homepage: https://www.1ststep.ai/ — approved v2. The Bramblewick makeover is a fictional example. Product screenshots are 1stStep's own products, with no invented metrics. SkillSprout has no public numbers. SwingTradePros states 8,000+ Discord members, 4,000+ YouTube subscribers, and Node AI, with no performance claim.

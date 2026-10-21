@@ -1,5 +1,13 @@
 # Architecture Decision Log
 
+## 2026-10-21: Homepage “Book a 20-min call” uses the Website Strategy Call
+
+- **Status / owner:** Evan directed this on the v2 homepage preview branch. Preview only. No production deploy.
+- **Decision:** Every homepage control labeled “Book a 20-min call” links to `/book/`, the existing LeadConnector Website Strategy Call. Remove the visible booking TODO. Remove “Watch with sound” because the reel files have no audio track; the hero still plays muted. The three path rows and “Ask about a cartoon ad” still scroll to the closing section. This supersedes the booking bullet in the homepage v2 entry below.
+- **Rationale:** Evan named `/book/` as the destination. The calendar page keeps its own Website Strategy Call label.
+- **Affected systems:** Homepage header, hero, and closing CTA; `public/llms.txt`; homepage tests.
+- **Rollback:** Point those three controls back to an approved booking URL, or restore the TODO, without relabeling `/book/` itself.
+
 ## 2026-10-21: Homepage v2 replaces the Signal Path first screen on a preview branch
 
 - **Status / owner:** Implementing on `cursor/homepage-v2-1b3b` from the approved v2 handoff. Evan owns the design. This change is preview-only. It does not authorize a production deploy or any change to the live `1ststep.ai` / `www.1ststep.ai` domains.

@@ -98,16 +98,15 @@ test("llms.txt names the owner offer, start paths, and canonical www host", asyn
   assert.match(llms, /does not guarantee billing or token savings/);
 });
 
-test("homepage first screen states the v2 offer and keeps the website-strategy calendar off it", async () => {
+test("homepage first screen books the Website Strategy Call and has no sound control", async () => {
   const html = await source("index.html");
   const hero = html.slice(html.indexOf('class="hero'), html.indexOf("</section>", html.indexOf('class="hero')));
   assert.match(hero, /Build the system your business is missing/);
-  assert.match(hero, /Book a 20-min call/);
-  assert.match(hero, /Watch with sound/);
-  assert.doesNotMatch(hero, /href="\/book\/"|href="\/fit-check\//);
+  assert.match(hero, /href="\/book\/"[^>]*>Book a 20-min call/);
+  assert.doesNotMatch(hero, /Watch with sound|href="\/fit-check\//);
+  assert.doesNotMatch(html, /TODO: connect the 20-minute booking link|class="sound"/);
   assert.match(html, /id="how"/);
   assert.match(html, /id="paths"/);
-  assert.match(html, /TODO: connect the 20-minute booking link/);
   assert.match(html, /<link rel="canonical" href="https:\/\/www\.1ststep\.ai\/"/);
   assert.match(html, /property="og:image" content="https:\/\/www\.1ststep\.ai\/assets\/og-home\.png"/);
 });

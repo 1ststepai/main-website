@@ -46,7 +46,6 @@ section{position:relative}
 .hero-foot{display:flex;justify-content:space-between;align-items:flex-end;gap:40px;margin-top:34px}
 .hero-foot p{max-width:34em;font-size:20px;margin:0;color:#E6DFD0;text-shadow:0 2px 16px rgba(13,12,10,.9)}
 .hero-ctas{display:flex;align-items:center;gap:18px;flex-shrink:0}
-.sound{font:600 15px var(--disp);background:rgba(241,234,219,.1);color:var(--cream);border:1.5px solid var(--line);border-radius:99px;padding:16px 22px;backdrop-filter:blur(8px)}
 .scroll-hint{position:absolute;right:40px;top:50%;writing-mode:vertical-rl;font-size:12px;letter-spacing:.3em;text-transform:uppercase;opacity:.7;display:flex;align-items:center;gap:12px}
 .scroll-hint span{width:1px;height:60px;background:var(--cream);transform-origin:top;animation:sh 1.8s infinite}@keyframes sh{0%{transform:scaleY(0)}60%{transform:scaleY(1)}100%{transform:scaleY(1);opacity:0}}
 /* marquee */
@@ -135,7 +134,7 @@ footer{display:flex;justify-content:space-between;align-items:center;gap:20px;pa
  .work-intro{background:none;margin:0;padding:0}
  body{font-size:17px}.nav{padding:14px 18px;gap:10px}.logo img{height:38px}.nav-blend{gap:12px}.nav nav{display:none}.pill{margin-left:auto;font-size:13px;padding:8px 14px}.grain{opacity:.05;animation:none}
  .hero-in{padding:24px 18px 40px}.kinetic{font-size:clamp(52px,16vw,96px)}.hero-foot{flex-direction:column;align-items:flex-start;gap:22px;margin-top:22px}.hero-foot p{font-size:17px}
- .hero-ctas{flex-wrap:wrap;gap:12px}.btn{font-size:17px;padding:17px 24px}.sound{padding:13px 16px;font-size:14px}.scroll-hint{display:none}
+ .hero-ctas{flex-wrap:wrap;gap:12px}.btn{font-size:17px;padding:17px 24px}.scroll-hint{display:none}
  .mk-pin{grid-template-columns:1fr;gap:28px;padding:90px 18px 40px}.mk-stage{max-width:min(280px,calc((100svh - 330px)*.4));margin:0 auto;width:100%}.mk-sub,.mk-steps{display:none}.mk-pin{gap:18px;padding-top:80px;min-height:100svh;align-content:center}.mk .h2{margin-bottom:12px}.mk .tag{margin-bottom:12px}.ghost-link{margin-top:14px;font-size:15px}
  .mk-steps li{font-size:15px}.f1{left:6%;top:42%}.f2{left:6%;top:56%}.f3{left:38%;top:68%}.f4{left:8%;top:18%}
  .snap-cta{left:7%;top:73%;width:62%;height:7.4%;font-size:12px}.snap-tap{left:7%;top:83%}
