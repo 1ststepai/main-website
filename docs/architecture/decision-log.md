@@ -1,5 +1,17 @@
 # Architecture Decision Log
 
+## 2026-10-21: Homepage v2 replaces the Signal Path first screen on a preview branch
+
+- **Status / owner:** Implementing on `cursor/homepage-v2-1b3b` from the approved v2 handoff. Evan owns the design. This change is preview-only. It does not authorize a production deploy or any change to the live `1ststep.ai` / `www.1ststep.ai` domains.
+- **Decision:** Rebuild the public homepage from the v2 static prototype (ink `#0D0C0A`, cream `#F1EADB`, acid `#D4FF3A`, Archivo + Instrument Serif, film grain, reel hero, pinned fictional makeover, pinned lead-to-booked flow, horizontal portfolio, three paths, cartoon-ads cinema, founder, CTA). Keep the Vite multi-page app, the existing routes, SEO head (canonical `https://www.1ststep.ai/`, OG image, Organization JSON-LD), the locked logo, and the LeadConnector calendar on `/book/`. Self-host Archivo and Instrument Serif. Vendor GSAP 3.12.5, ScrollTrigger, and Lenis. Do not mount the Signal Path figure on the homepage. Leave `src/signal-path.js` in the repo, unmounted, so the previous motion model can be restored.
+- **Booking:** The v2 copy says “Book a 20-min call.” `/book/` is the 30-minute Website Strategy Call, so the homepage button does not use it. The control scrolls to a visible TODO until Evan names the destination. Footer links keep `/journey/` and `/fit-check/` reachable.
+- **Honesty:** Bramblewick is labeled “Example makeover · fictional business,” and `/makeover/before.html` and `/makeover/after.html` are `noindex`. SkillSprout has no metrics. SwingTradePros shows only 8,000+ Discord members, 4,000+ YouTube subscribers, and the name Node AI. No TradingView mention and no performance claim. The Evan photo, testimonials, and client sample reel stay empty placeholders. The lead flow is labeled illustrative.
+- **Fixes in this pass:** A heavier lower scrim sits behind the hero type so burned-in reel captions do not read through the subtext. Makeover tiles are clipped with `overflow: hidden` and `clip-path: inset(0)` on the browser viewport. Hero and cinema video stay off until needed. Below-fold stills are WebP with `loading="lazy"`. Reels were re-encoded at CRF 27 (SSIM about 0.987 and 0.990) and have no audio track.
+- **CSP:** Homepage fonts, scripts, images, and video are same-origin, which the existing policy already allows. Google Fonts stays allowed for the fictional makeover pages and the rest of the site. The homepage does not embed the LeadConnector frame.
+- **Alternatives:** Point the new CTA at `/book/` or `/fit-check/`; rewrite the page as React; delete the Signal Path module.
+- **Verification:** Local build, existing route tests updated for the homepage contract, and browser checks at 1440 and 390. Preview URL when Vercel provides one. Production verification is out of scope.
+- **Rollback:** Revert this branch. Do not alias the preview to production. The previous production homepage remains the live site until a separate release decision.
+
 ## 2026-09-21: 1stStep OS Cycle 1 is a public free core, not a hosted product
 
 - **Status / owner:** Approved by Evan via the public-site update request; implemented on `/tools/1ststep-os/`, `/tools/`, and `/os`. Evan retains authority for claiming a hosted OS product, deploying a compile API, or offering a ZIP generator on Vercel or 1ststep.ai.

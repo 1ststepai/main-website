@@ -98,31 +98,24 @@ test("llms.txt names the owner offer, start paths, and canonical www host", asyn
   assert.match(llms, /does not guarantee billing or token savings/);
 });
 
-test("homepage first screen exposes the three commercial paths and services", async () => {
+test("homepage first screen states the v2 offer and keeps the website-strategy calendar off it", async () => {
   const html = await source("index.html");
   const hero = html.slice(html.indexOf('class="hero'), html.indexOf("</section>", html.indexOf('class="hero')));
-  for (const intent of ["build_new", "finish_build", "automate_business"]) assert.match(hero, new RegExp(`href="/fit-check/\\?intent=${intent}"`));
-  assert.equal((hero.match(/button button-primary/g) || []).length, 1);
-  // Owner decision 2026-09-26: Journey returns as the secondary path, never an equal-weight button.
-  assert.equal((hero.match(/href="\/journey\/"/g) || []).length, 1);
-  assert.match(hero, /<p class="hero-secondary">[^<]*<a href="\/journey\/"/);
-  assert.doesNotMatch(hero, /href="\/book\/"/);
-  assert.match(hero, /Custom software, AI systems, and automation/);
-  assert.match(hero, /Tell us what you need built/);
-  assert.match(html, /id="problems"/);
+  assert.match(hero, /Build the system your business is missing/);
+  assert.match(hero, /Book a 20-min call/);
+  assert.match(hero, /Watch with sound/);
+  assert.doesNotMatch(hero, /href="\/book\/"|href="\/fit-check\//);
   assert.match(html, /id="how"/);
-  assert.match(html, /From the bottleneck<br><em>to the handoff/);
+  assert.match(html, /id="paths"/);
+  assert.match(html, /TODO: connect the 20-minute booking link/);
   assert.match(html, /<link rel="canonical" href="https:\/\/www\.1ststep\.ai\/"/);
   assert.match(html, /property="og:image" content="https:\/\/www\.1ststep\.ai\/assets\/og-home\.png"/);
 });
 
-test("homepage FAQ JSON-LD matches visible questions", async () => {
+test("homepage does not publish FAQ structured data without a visible FAQ", async () => {
   const html = await source("index.html");
-  const names = faqNames(html);
-  for (const name of names) {
-    assert.match(html, new RegExp(`<summary>${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}</summary>`));
-  }
-  assert.ok(names.includes("Do you guarantee leads, rankings, or revenue?"));
+  assert.equal(jsonLdBlocks(html).some((block) => block["@type"] === "FAQPage"), false);
+  assert.doesNotMatch(html, /<summary>/);
 });
 
 test("service page H1s use search language and carry basic OG", async () => {
