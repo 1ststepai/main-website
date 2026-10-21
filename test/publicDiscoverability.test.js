@@ -114,6 +114,20 @@ test("homepage first screen books the Website Strategy Call and offers reel soun
   assert.match(html, /property="og:image" content="https:\/\/www\.1ststep\.ai\/assets\/og-home\.png"/);
 });
 
+test("the homepage cursor dot tracks the pointer and stays off without a mouse", async () => {
+  const js = await source("src/home-v2.js");
+  const css = await source("src/home-v2.css");
+  const cursor = js.slice(js.indexOf("if (FINE && !RM)"), js.indexOf("$$('[data-cursor]')"));
+  assert.match(cursor, /RING_LERP = 0\.(?:[5-9]\d*|1)/);
+  assert.match(cursor, /translate3d/);
+  assert.doesNotMatch(cursor, /quickTo\((?:dot|ring)/);
+  assert.match(cursor, /pointerType !== 'mouse'/);
+  assert.match(cursor, /classList\.add\('has-cursor'\)/);
+  assert.ok(cursor.indexOf("drawDot()") < cursor.indexOf("classList.add('has-cursor')"));
+  assert.match(css, /prefers-reduced-motion:reduce[\s\S]*\.has-cursor,\.has-cursor a,\.has-cursor button\{cursor:auto\}/);
+  assert.match(css, /\.has-cursor,\.has-cursor a,\.has-cursor button\{cursor:none\}/);
+});
+
 test("public subpages use the v2 chrome and drop the navy and lavender theme", async () => {
   const pages = [
     "tools/index.html",

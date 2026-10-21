@@ -266,17 +266,64 @@ ScrollTrigger.create({
   onToggle: (s) => { if (hv) s.isActive ? hv.play().catch(() => {}) : hv.pause(); },
 });
 
-if (FINE) {
-  document.documentElement.classList.add('has-cursor');
+if (FINE && !RM) {
   const c = $('.cursor');
   const dot = $('.c-dot');
   const ring = $('.c-ring');
   const lbl = $('.c-ring b');
-  const dx = gsap.quickTo(dot, 'x', { duration: .08 });
-  const dy = gsap.quickTo(dot, 'y', { duration: .08 });
-  const rx = gsap.quickTo(ring, 'x', { duration: .45, ease: 'power3' });
-  const ry = gsap.quickTo(ring, 'y', { duration: .45, ease: 'power3' });
-  addEventListener('pointermove', (e) => { dx(e.clientX); dy(e.clientY); rx(e.clientX); ry(e.clientY); });
+  const RING_LERP = 0.65;
+  let x = 0;
+  let y = 0;
+  let ringX = 0;
+  let ringY = 0;
+  let following = false;
+  let armed = false;
+  const drawDot = () => { dot.style.transform = `translate3d(${x}px,${y}px,0)`; };
+  const drawRing = () => { ring.style.transform = `translate3d(${ringX}px,${ringY}px,0)`; };
+  const followRing = () => {
+    if (c.classList.contains('big')) {
+      ringX = x;
+      ringY = y;
+      following = false;
+      drawRing();
+      return;
+    }
+    ringX += (x - ringX) * RING_LERP;
+    ringY += (y - ringY) * RING_LERP;
+    if (Math.hypot(x - ringX, y - ringY) < 0.4) {
+      ringX = x;
+      ringY = y;
+      following = false;
+      drawRing();
+      return;
+    }
+    drawRing();
+    requestAnimationFrame(followRing);
+  };
+  addEventListener('pointermove', (e) => {
+    if (e.pointerType && e.pointerType !== 'mouse') return;
+    x = e.clientX;
+    y = e.clientY;
+    drawDot();
+    if (!armed) {
+      ringX = x;
+      ringY = y;
+      drawRing();
+      document.documentElement.classList.add('has-cursor');
+      armed = true;
+      return;
+    }
+    if (c.classList.contains('big')) {
+      ringX = x;
+      ringY = y;
+      drawRing();
+      return;
+    }
+    if (!following) {
+      following = true;
+      requestAnimationFrame(followRing);
+    }
+  });
   $$('[data-cursor]').forEach((el) => {
     el.addEventListener('pointerenter', () => { lbl.textContent = el.dataset.cursor; c.classList.add('big'); });
     el.addEventListener('pointerleave', () => c.classList.remove('big'));

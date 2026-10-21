@@ -153,7 +153,7 @@ footer{display:flex;justify-content:space-between;align-items:center;gap:20px;pa
  .ads{grid-template-columns:1fr;padding:80px 18px 110px;gap:40px}.cinema{padding:18px 18px 0;border-radius:16px}.seats{margin:16px -18px 0;height:40px}
  .founder{grid-template-columns:1fr;padding:90px 18px 60px;gap:30px}.ph{max-width:300px}
  .voices{padding:10px 18px 60px}.v-slot{padding:32px 20px;font-size:17px}.cta{padding:80px 18px}footer{padding:24px 18px;flex-wrap:wrap}}
-@media (prefers-reduced-motion:reduce){.grain,.mq-track,.scroll-hint span,.snap-cta.pulse{animation:none}.after-tiles .tile{opacity:1}.before-tiles{display:none}.snap-cta,.snap-tap{opacity:1}.node p{opacity:1;transform:none}.hero-vid,.hero .reel-sound{display:none}.hero{background:#0D0C0A url(/home-v2/poster_16x9.webp) center 22%/cover}}
+@media (prefers-reduced-motion:reduce){.grain,.mq-track,.scroll-hint span,.snap-cta.pulse{animation:none}.after-tiles .tile{opacity:1}.before-tiles{display:none}.snap-cta,.snap-tap{opacity:1}.node p{opacity:1;transform:none}.hero-vid,.hero .reel-sound{display:none}.hero{background:#0D0C0A url(/home-v2/poster_16x9.webp) center 22%/cover}.has-cursor .cursor{display:none}.has-cursor,.has-cursor a,.has-cursor button{cursor:auto}}
 @media (prefers-reduced-motion:reduce) and (max-width:900px){.hero{background-image:url(/home-v2/poster_9x16.webp);background-position:center top}}
 .b-url{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media (max-width:900px){.b-bar{padding:8px 10px;gap:5px}.b-bar i{width:7px;height:7px}.b-url{font-size:10px;margin-left:6px;padding:2px 8px}}

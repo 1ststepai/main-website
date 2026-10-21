@@ -1,5 +1,13 @@
 # Architecture Decision Log
 
+## 2026-10-21: Homepage cursor dot follows the pointer with no ease
+
+- **Status / owner:** Evan asked for this on the homepage v2 preview. Preview only. No production deploy.
+- **Decision:** The main cursor dot is positioned in the pointer event, with no duration and no lerp. The ring eases at 0.65 per frame and snaps once it is within half a pixel. While the ring is the visible cursor (the hover label), it uses the same instant position as the dot. The system cursor stays visible until that first placement, and stays visible on touch and when reduced motion is requested. The custom cursor does not run in those cases.
+- **Rationale:** Hiding the system cursor while the replacement eases behind the pointer reads as lag.
+- **Affected systems:** Homepage cursor in `src/home-v2.js` and `src/home-v2.css`.
+- **Rollback:** Restore the previous quickTo durations and show the custom cursor on load for any fine pointer.
+
 ## 2026-10-21: Integrations row uses only marks the brands allow
 
 - **Status / owner:** Evan asked for a “works with” logo row on the homepage preview, after the paths section, and on the service pages when that was straightforward. Preview only. No production deploy.
