@@ -98,14 +98,19 @@ test("llms.txt names the owner offer, start paths, and canonical www host", asyn
   assert.match(llms, /does not guarantee billing or token savings/);
 });
 
-test("homepage first screen books the Website Strategy Call and the reel offers sound", async () => {
+test("homepage first screen books the Website Strategy Call over a system diagram", async () => {
   const html = await source("index.html");
-  const hero = html.slice(html.indexOf('class="hero'), html.indexOf("</section>", html.indexOf('class="hero')));
+  const heroStart = html.indexOf('<section class="hero');
+  const hero = html.slice(heroStart, html.indexOf("</section>", heroStart));
+  const work = html.slice(html.indexOf('id="work"'), html.indexOf('id="example"'));
   assert.match(hero, /Get more from the business you/);
   assert.match(hero, /href="\/book\/"[^>]*>Book a call/);
-  assert.match(hero, /Tap for sound/);
-  assert.match(hero, /poster="\/home-v2\/poster_16x9\.webp"/);
-  assert.doesNotMatch(hero, /Watch with sound|href="\/fit-check\//);
+  assert.match(hero, />Lead</);
+  assert.match(hero, />Booked</);
+  assert.doesNotMatch(hero, /Tap for sound|poster_16x9|<video|Watch with sound|href="\/fit-check\//);
+  assert.match(work, /Tap for sound/);
+  assert.match(work, /poster="\/home-v2\/poster_16x9\.webp"/);
+  assert.match(work, /class="work-vid"/);
   assert.equal((html.match(/class="reel-sound"/g) || []).length, 1);
   assert.doesNotMatch(html, /TODO: connect the 20-minute booking link|class="sound"/);
   assert.doesNotMatch(html, /id="how"|id="paths"/);
@@ -121,6 +126,9 @@ test("the homepage uses the system cursor and does not hijack scroll", async () 
   assert.doesNotMatch(html, /class="cursor"|lenis\.min\.js|gsap\.min\.js|ScrollTrigger/);
   assert.doesNotMatch(js, /new Lenis|requestAnimationFrame|pointermove|ScrollTrigger|gsap/);
   assert.match(js, /prefers-reduced-motion: reduce/);
+  assert.match(js, /IntersectionObserver/);
+  assert.match(css, /animation-play-state:\s*paused/);
+  assert.match(css, /\.hero\.is-on/);
   assert.doesNotMatch(css, /cursor:\s*none|backdrop-filter|\.grain|lenis/);
   assert.match(css, /prefers-reduced-motion:\s*reduce/);
   assert.doesNotMatch(site, /backdrop-filter/);

@@ -1,5 +1,13 @@
 # Architecture Decision Log
 
+## 2026-10-21: Homepage hero is a quiet system diagram, and the reel is a work card
+
+- **Status / owner:** Evan asked to take the cartoon reel out of the first screen and to match the feel of the Swing Trade Pros homepage hero, adapted to 1stStep. Preview only. No production deploy.
+- **Decision:** The hero is the headline “Get more from the business you already have.”, one subline, and Book a call to `/book/`, over a low-contrast diagram. Scattered nodes labeled Lead, Call, Form, and Tool drift, then lines draw into one path that ends at Booked. The word Example sits on that end node. The loop is about 12 seconds. It runs only while the hero is on screen (`is-on` via IntersectionObserver, the same pause idea as Swing Trade Pros’ `.desk-is-running`). Reduced motion shows the connected diagram still, with no draw and no drift. The approved v4 reel moves into Selected work as a smaller card: muted, looping, playsinline, with one Tap for sound control that restarts at the beginning. The card loads when it nears the viewport and pauses when it leaves. The footer music credit stays. Reference studied: the live hero at https://swingtradepros.com/ (`header.animated-desk-hero`). Its scene uses a CSS wipe (`.desk-chart-wipe`, `desk-fixed-chart-reveal`, 12s, scaleX) and a faint scanline, paused until `.desk-is-running`, and hidden under `prefers-reduced-motion`. No Swing Trade Pros source repository was available from this environment. This supersedes the full-bleed reel placement in the entry below. The headline, `/book/`, the reel file, the music credit, the headshot, and the honesty rules stay.
+- **Rationale:** The film was in front of the offer. The first screen should read as the offer, with motion that shows a system coming together and does not compete with the type.
+- **Affected systems:** `index.html`, `src/home-v2.css`, `src/home-v2.js`, `public/llms.txt`.
+- **Rollback:** Restore the full-bleed reel hero from the previous homepage commit. Leave the reel file and the music credit in place.
+
 ## 2026-10-21: Homepage leads with the reel and the product frames
 
 - **Status / owner:** Evan said the short studio page had too much text and was not impressive enough. Preview only. No production deploy.

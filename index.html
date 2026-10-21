@@ -27,7 +27,6 @@
   <meta name="twitter:image" content="https://www.1ststep.ai/assets/og-home.png" />
   <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="/fonts/instrument-serif-italic-latin.woff2" as="font" type="font/woff2" crossorigin />
-  <link rel="preload" as="image" href="/home-v2/poster_16x9.webp" fetchpriority="high" />
   <link rel="stylesheet" href="/src/home-v2.css" />
   <script type="application/ld+json">
   {
@@ -54,15 +53,56 @@
   <a class="pill" href="/book/" data-fsai-placement="header">Book a call</a>
 </header>
 <main id="main">
-  <section class="hero" id="top">
-    <img class="hero-poster" src="/home-v2/poster_16x9.webp" width="1280" height="720" alt="" fetchpriority="high" decoding="async" />
-    <video class="hero-vid" muted loop playsinline preload="none" poster="/home-v2/poster_16x9.webp" data-src="/home-v2/1ststep-reel-v4.mp4" width="1280" height="720"></video>
-    <div class="hero-shade" aria-hidden="true"></div>
-    <button class="reel-sound" type="button" aria-pressed="false" aria-label="Tap for sound">
-      <svg class="ico-off" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3.5 9.2v5.6h3.4L12 19.2V4.8L6.9 9.2H3.5z"/><path d="M15.2 9.2a3.6 3.6 0 010 5.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
-      <svg class="ico-on" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3.5 9.2v5.6h3.4L12 19.2V4.8L6.9 9.2H3.5z"/><path d="M16 9.2l4.6 5.6M20.6 9.2L16 14.8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
-      <span>Tap for sound</span>
-    </button>
+  <section class="hero is-on" id="top">
+    <div class="hero-scene" aria-hidden="true">
+      <div class="hero-grid"></div>
+      <svg class="system" viewBox="0 0 1200 720">
+        <g class="wires" fill="none" stroke-linecap="round">
+          <path class="wire" pathLength="1" d="M120 300C280 300 430 350 600 372"/>
+          <path class="wire" pathLength="1" d="M300 168C410 190 500 270 600 372"/>
+          <path class="wire" pathLength="1" d="M230 540C360 520 480 450 600 372"/>
+          <path class="wire" pathLength="1" d="M470 250C520 290 560 330 600 372"/>
+          <path class="wire spine" pathLength="1" d="M600 372C760 372 900 372 1040 372"/>
+          <path class="pulse" d="M600 372C760 372 900 372 1040 372"/>
+        </g>
+        <circle class="ghost g1" cx="78" cy="140" r="2.2" style="--dx:18px;--dy:-14px"/>
+        <circle class="ghost g2" cx="430" cy="96" r="2" style="--dx:-16px;--dy:12px"/>
+        <circle class="ghost g3" cx="96" cy="600" r="2.2" style="--dx:14px;--dy:16px"/>
+        <circle class="ghost g4" cx="740" cy="150" r="1.8" style="--dx:-12px;--dy:-18px"/>
+        <circle class="ghost g5" cx="880" cy="560" r="2" style="--dx:20px;--dy:10px"/>
+        <circle class="ghost g6" cx="1120" cy="210" r="1.8" style="--dx:-14px;--dy:14px"/>
+        <circle class="hub" cx="600" cy="372" r="3.2"/>
+        <g class="node n-lead" style="--dx:-34px;--dy:22px">
+          <circle class="ring" cx="120" cy="300" r="20"/>
+          <circle class="dot" cx="120" cy="300" r="4"/>
+          <text x="120" y="262">Lead</text>
+        </g>
+        <g class="node n-call" style="--dx:26px;--dy:-24px">
+          <circle class="ring" cx="300" cy="168" r="20"/>
+          <circle class="dot" cx="300" cy="168" r="4"/>
+          <text x="300" y="130">Call</text>
+        </g>
+        <g class="node n-form" style="--dx:-22px;--dy:30px">
+          <circle class="ring" cx="230" cy="540" r="20"/>
+          <circle class="dot" cx="230" cy="540" r="4"/>
+          <text x="230" y="502">Form</text>
+        </g>
+        <g class="node n-tool" style="--dx:24px;--dy:-16px">
+          <circle class="ring" cx="470" cy="250" r="20"/>
+          <circle class="dot" cx="470" cy="250" r="4"/>
+          <text x="470" y="212">Tool</text>
+        </g>
+        <g class="node n-booked" style="--dx:16px;--dy:12px">
+          <circle class="halo" cx="1040" cy="372" r="78"/>
+          <circle class="ring acid" cx="1040" cy="372" r="20"/>
+          <circle class="dot acid" cx="1040" cy="372" r="4.5"/>
+          <text class="acid" x="1040" y="334">Booked</text>
+          <text class="eg" x="1040" y="424">Example</text>
+        </g>
+      </svg>
+      <div class="sweep"></div>
+      <div class="hero-wash"></div>
+    </div>
     <div class="hero-copy wrap">
       <h1 id="hero-title">Get more from the business you <em>already have.</em></h1>
       <p class="lede">Software and systems for demand you already have.</p>
@@ -106,6 +146,20 @@
             <div class="device"><span class="device-top" aria-hidden="true"><i></i><i></i><i></i></span><img src="/home-v2/real-rank.webp" width="1440" height="900" alt="Real-Rank.ai homepage" decoding="async" loading="lazy"></div>
             <div class="cap"><h3>Real-Rank.ai</h3><span>Search visibility</span></div>
           </a>
+        </article>
+        <article class="piece piece-reel">
+          <div class="device">
+            <span class="device-top" aria-hidden="true"><i></i><i></i><i></i></span>
+            <div class="reel-frame">
+              <video class="work-vid" muted loop playsinline preload="none" poster="/home-v2/poster_16x9.webp" data-src="/home-v2/1ststep-reel-v4.mp4" width="1280" height="720" aria-label="1stStep studio reel"></video>
+              <button class="reel-sound" type="button" aria-pressed="false" aria-label="Tap for sound">
+                <svg class="ico-off" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3.5 9.2v5.6h3.4L12 19.2V4.8L6.9 9.2H3.5z"/><path d="M15.2 9.2a3.6 3.6 0 010 5.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+                <svg class="ico-on" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3.5 9.2v5.6h3.4L12 19.2V4.8L6.9 9.2H3.5z"/><path d="M16 9.2l4.6 5.6M20.6 9.2L16 14.8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+                <span>Tap for sound</span>
+              </button>
+            </div>
+          </div>
+          <div class="cap"><h3>Studio reel</h3><span>Cartoon ad</span></div>
         </article>
       </div>
     </div>

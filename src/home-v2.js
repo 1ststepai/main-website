@@ -1,7 +1,17 @@
 (() => {
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const video = document.querySelector('.hero-vid');
+  const hero = document.querySelector('.hero');
+  const video = document.querySelector('.work-vid');
   const button = document.querySelector('.reel-sound');
+
+  if (hero && !reduced && 'IntersectionObserver' in window) {
+    new IntersectionObserver(([entry]) => {
+      hero.classList.toggle('is-on', entry.isIntersecting);
+    }, { threshold: 0.12 }).observe(hero);
+  } else if (hero && reduced) {
+    hero.classList.remove('is-on');
+  }
+
   if (!video || !button) return;
 
   const paintSound = (on) => {
@@ -22,18 +32,28 @@
 
   const conn = navigator.connection;
   const slow = conn && (conn.saveData || /2g/.test(conn.effectiveType || ''));
-  if (!slow) {
-    const play = () => {
-      arm();
+  const play = () => {
+    const first = !video.getAttribute('src');
+    arm();
+    if (first) video.muted = true;
+    const attempt = video.play();
+    if (attempt) attempt.catch(() => {
       video.muted = true;
+      paintSound(false);
       video.play().catch(() => {});
-    };
-    const afterPaint = () => {
-      const wait = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
-      wait.then(() => setTimeout(play, 600));
-    };
-    if (document.readyState === 'complete') afterPaint();
-    else addEventListener('load', afterPaint, { once: true });
+    });
+  };
+
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) {
+        if (video.getAttribute('src')) video.pause();
+        return;
+      }
+      if (!slow || video.getAttribute('src')) play();
+    }, { rootMargin: '240px 0px' }).observe(video);
+  } else if (!slow) {
+    play();
   }
 
   button.addEventListener('click', () => {

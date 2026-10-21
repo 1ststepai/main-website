@@ -63,8 +63,9 @@ test("selected work shows first-party products without invented metrics", async 
   const home = await source("index.html");
   const work = home.slice(home.indexOf('id="work"'), home.indexOf('id="example"'));
   assert.equal((work.match(/class="piece"/g)||[]).length, 5);
+  assert.equal((work.match(/class="piece piece-reel"/g)||[]).length, 1);
   let at = 0;
-  for (const project of ["DaySetGo", "SwingTradePros", "Job Agent", "SkillSprout", "Real-Rank.ai"]) {
+  for (const project of ["DaySetGo", "SwingTradePros", "Job Agent", "SkillSprout", "Real-Rank.ai", "Studio reel"]) {
     const next = work.indexOf(project, at);
     assert.ok(next > at, project);
     at = next;
