@@ -152,6 +152,27 @@ test("public subpages use the v2 chrome and drop the navy and lavender theme", a
   }
 });
 
+test("the integrations row uses approved marks, pauses, and states the trademark limit", async () => {
+  const html = await source("index.html");
+  const css = await source("src/integrations.css");
+  const works = html.slice(html.indexOf('id="works"'), html.indexOf('id="how"'));
+  assert.match(works, /Works with the tools/);
+  assert.match(works, /Logos are trademarks of their respective owners\. 1stStep\.ai connects with these tools and is not affiliated with or endorsed by them\./);
+  assert.doesNotMatch(works, /partner/i);
+  for (const name of ["Zapier", "Make", "n8n", "Calendly", "Square", "Supabase"]) {
+    assert.match(works, new RegExp(`alt="${name}"`));
+  }
+  for (const banned of ["GoHighLevel", "QuickBooks", "ManyChat", "Gmail", "Outlook", "Slack", "Stripe", "Shopify", "HubSpot", "Salesforce", "Follow Up Boss", "Twilio", "OpenAI", "WhatsApp", "Mailchimp", "Notion", "Vercel", "Facebook", "Instagram"]) {
+    assert.doesNotMatch(works, new RegExp(banned, "i"));
+  }
+  assert.match(css, /animation-play-state:\s*paused/);
+  assert.match(css, /prefers-reduced-motion:\s*reduce/);
+  assert.match(css, /ul\[aria-hidden="true"\]\{display:none\}/);
+  for (const file of ["websites", "revenue-systems", "app-builds", "mvp-builds", "internal-tools"]) {
+    assert.match(await source(`services/${file}.html`), /id="works"/);
+  }
+});
+
 test("homepage does not publish FAQ structured data without a visible FAQ", async () => {
   const html = await source("index.html");
   assert.equal(jsonLdBlocks(html).some((block) => block["@type"] === "FAQPage"), false);

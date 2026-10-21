@@ -31,7 +31,9 @@ test("the homepage leads with the v2 offer and keeps products distinct", async (
 
 test("the homepage sections stay in the v2 order and service pages keep their own destinations", async () => {
   const html = await source("index.html");
-  for (const anchor of ["makeover", "flow", "work", "paths", "how", "book"]) assert.match(html, new RegExp('id="' + anchor + '"'));
+  for (const anchor of ["makeover", "flow", "work", "paths", "works", "how", "book"]) assert.match(html, new RegExp('id="' + anchor + '"'));
+  const worksAt = html.indexOf('id="works"');
+  assert.ok(html.indexOf('id="paths"') < worksAt && worksAt < html.indexOf('id="how"'));
   assert.equal((html.match(/href="\/book\/"/g) || []).length, 3);
   for (const path of ["websites", "internal-tools", "revenue-systems", "mvp-builds"]) {
     assert.match(await source(`services/${path}.html`), /<h1/);

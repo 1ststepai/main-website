@@ -1,5 +1,14 @@
 # Architecture Decision Log
 
+## 2026-10-21: Integrations row uses only marks the brands allow
+
+- **Status / owner:** Evan asked for a “works with” logo row on the homepage preview, after the paths section, and on the service pages when that was straightforward. Preview only. No production deploy.
+- **Decision:** Show Zapier, Make, n8n, Calendly, Square, and Supabase. The marks are the Simple Icons 16.35.0 paths, unmodified, filled with each brand’s published hex. None of those six icons carries a non-CC0 license note. They sit on cream plates so a dark mark stays legible without recoloring it. The row loops, pauses on hover and focus, and becomes a static wrap when the visitor asks for reduced motion. The line under it is: “Logos are trademarks of their respective owners. 1stStep.ai connects with these tools and is not affiliated with or endorsed by them.” The word “partner” is not used.
+- **Excluded:** GoHighLevel (brand kit is for their agencies and team, not an unaffiliated site). QuickBooks and Mailchimp (Intuit forbids product logos without a written license). ManyChat (no Simple Icons mark and no public license for this use). Google Workspace, Gmail, and Google Calendar (Google forbids its logos in business marketing). Microsoft 365 and Outlook (a license is required for third-party marketing use of the marks). Slack and Salesforce (Salesforce forbids altering its marks or passing on rights to them; Simple Icons removed both). Shopify and HubSpot (written permission required before a logo goes on a website). Follow Up Boss (press-kit files only, no license for this page). Twilio (the logo requires written permission). OpenAI (do not use the logo without permission; Simple Icons removed it when that permission was not obtained). Meta, Facebook, Instagram, and WhatsApp (only their own brand-center files, which forbid recoloring and logos taken from anywhere else). Notion (logo use has to be an approved mark, and the required credit says it is used with permission). Airtable (compatibility mentions are allowed, but the logo may not be redrawn, and the approved file was not a public SVG). Stripe (the mark is only for the part of a site that directly handles Stripe, such as checkout). Vercel (marks are not for marketing collateral of a commercial service).
+- **Rationale:** A compatibility row is useful. A logo the owner forbids is not.
+- **Affected systems:** Homepage after the paths section, the five service pages, `src/integrations.css`, `public/integrations/`.
+- **Rollback:** Remove the section, the stylesheet link, and the SVG files.
+
 ## 2026-10-21: Public subpages use the homepage v2 theme
 
 - **Status / owner:** Evan asked for this on the homepage v2 preview branch, after the reel soundtrack. Preview only. No production deploy.
