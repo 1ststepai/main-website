@@ -1,5 +1,13 @@
 # Architecture Decision Log
 
+## 2026-10-21: Homepage reel is the approved v4 cut
+
+- **Status / owner:** Evan approved `1ststep_reel_16x9_v4_web` for the homepage preview. Preview only. No production deploy.
+- **Decision:** The hero and the cartoon-ad cinema play `public/home-v2/1ststep-reel-v4.mp4`, the supplied file copied without re-encoding. Phone and desktop use that same file. Posters are a frame at two seconds: the full 16:9 frame, and a center 9:16 crop for the phone still. Autoplay stays muted and looping, with playsinline. “Tap for sound” still unmutes, restarts at the beginning, and mutes again. The homepage footer credits Kevin MacLeod’s “Happy Boy Theme” under CC BY 4.0, and notes BigSoundBank for the sound effects. The old `reel_16x9.mp4` and `reel_9x16.mp4` files are removed. This supersedes the soundtrack file named in the earlier reel entry.
+- **Rationale:** The v4 cut is the reel Evan approved. The phone should not keep playing the previous film.
+- **Affected systems:** Homepage hero, cartoon-ad cinema, posters, homepage footer.
+- **Rollback:** Restore the previous reel files and posters, and remove the music credit.
+
 ## 2026-10-21: The homepage founder photo is Evan’s real headshot
 
 - **Status / owner:** Evan supplied a 400×400 headshot for the homepage v2 preview. Preview only. No production deploy.

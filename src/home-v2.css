@@ -135,7 +135,7 @@ section{position:relative}
 .cta{padding:120px 40px 120px;text-align:center}
 .giant{font:900 clamp(60px,12vw,230px)/.85 var(--disp);font-variation-settings:"wdth" 68;text-transform:uppercase;letter-spacing:-.04em;margin:0 0 56px}
 .giant span{display:block}.giant em{text-transform:none;font-size:.9em}
-footer{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:30px 40px 40px;border-top:1px solid var(--line);font-size:14px;color:var(--mute)}footer a{text-decoration:none}footer a:hover{color:var(--cream)}footer nav{display:flex;flex-wrap:wrap;gap:8px 18px}
+footer{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px;padding:30px 40px 40px;border-top:1px solid var(--line);font-size:14px;color:var(--mute)}footer a{text-decoration:none}footer a:hover{color:var(--cream)}footer nav{display:flex;flex-wrap:wrap;gap:8px 18px}.music-credit{flex:1 1 100%;margin:4px 0 0;max-width:78ch;color:var(--mute);font-size:13px;line-height:1.5}.music-credit a{color:var(--cream);text-decoration:underline;text-underline-offset:2px}
 /* mobile */
 @media (max-width:900px){
  .work-intro{background:none;margin:0;padding:0}
