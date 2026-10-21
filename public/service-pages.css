@@ -4,40 +4,40 @@ html{scroll-behavior:smooth}
 body{
   min-height:100vh;
   background:
-    radial-gradient(52% 42% at 88% 0%,rgba(104,84,255,.18),transparent 68%),
-    radial-gradient(42% 34% at 4% 8%,rgba(61,184,255,.12),transparent 72%),
+    radial-gradient(52% 42% at 88% 0%,rgba(212,255,58,.18),transparent 68%),
+    radial-gradient(42% 34% at 4% 8%,rgba(212,255,58,.12),transparent 72%),
     linear-gradient(rgba(255,255,255,.02) 1px,transparent 1px),
     linear-gradient(90deg,rgba(255,255,255,.02) 1px,transparent 1px),
-    #070912;
+    #0D0C0A;
   background-size:auto,auto,48px 48px,48px 48px,auto;
-  color:#f7f8ff;
+  color:#F1EADB;
 }
 .wrap{width:min(1120px,calc(100% - 48px))}
 .nav{position:relative;padding:20px 0}
 .nav::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:rgba(255,255,255,.08)}
-.brand{font-size:20px;background:linear-gradient(100deg,#b39cff,#79a7ff 55%,#65e7ff);-webkit-background-clip:text;background-clip:text;color:transparent}
-.btn{border-radius:999px;padding:13px 22px;background:linear-gradient(100deg,#8b7cff,#4f8cff 52%,#56ddff);box-shadow:0 18px 38px -18px rgba(79,140,255,.7)}
-.ghost{background:rgba(255,255,255,.055);color:#f7f8ff;border:1px solid rgba(255,255,255,.15);box-shadow:none;backdrop-filter:blur(12px)}
-.ghost:hover{background:rgba(255,255,255,.1);border-color:rgba(121,167,255,.5);color:#fff}
-main{margin:42px auto 72px;padding:clamp(38px,6vw,72px);border:1px solid rgba(255,255,255,.1);border-radius:30px;background:linear-gradient(145deg,rgba(16,19,34,.94),rgba(8,11,21,.96));box-shadow:0 55px 130px -70px rgba(79,140,255,.7);position:relative;overflow:hidden}
-main::before{content:"";position:absolute;width:420px;height:420px;right:-180px;top:-210px;border-radius:50%;background:rgba(111,89,255,.18);filter:blur(34px);pointer-events:none}
-.eyebrow{color:#9d91ff;position:relative}
-h1{font-size:clamp(44px,6.2vw,76px);max-width:16ch;color:#f7f8ff;position:relative}
-p,li{color:#aeb4c9}
+.brand{font-size:20px;background:linear-gradient(100deg,#D4FF3A,#D4FF3A 55%,#D4FF3A);-webkit-background-clip:text;background-clip:text;color:transparent}
+.btn{border-radius:999px;padding:13px 22px;background:linear-gradient(100deg,#D4FF3A,#D4FF3A 52%,#D4FF3A);box-shadow:0 18px 38px -18px rgba(212,255,58,.7)}
+.ghost{background:rgba(255,255,255,.055);color:#F1EADB;border:1px solid rgba(255,255,255,.15);box-shadow:none;backdrop-filter:blur(12px)}
+.ghost:hover{background:rgba(255,255,255,.1);border-color:rgba(212,255,58,.5);color:#fff}
+main{margin:42px auto 72px;padding:clamp(38px,6vw,72px);border:1px solid rgba(255,255,255,.1);border-radius:30px;background:linear-gradient(145deg,rgba(13,12,10,.94),rgba(13,12,10,.96));box-shadow:0 55px 130px -70px rgba(212,255,58,.7);position:relative;overflow:hidden}
+main::before{content:"";position:absolute;width:420px;height:420px;right:-180px;top:-210px;border-radius:50%;background:rgba(212,255,58,.18);filter:blur(34px);pointer-events:none}
+.eyebrow{color:#D4FF3A;position:relative}
+h1{font-size:clamp(44px,6.2vw,76px);max-width:16ch;color:#F1EADB;position:relative}
+p,li{color:#A39B8C}
 .lede{font-size:clamp(17px,2vw,20px);max-width:720px;position:relative}
 .hero-actions,.cta-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .hero-actions{margin-top:28px}
-.assurance{margin:13px 0 0;color:#7f899f;font-size:12px;line-height:1.55}
+.assurance{margin:13px 0 0;color:#A39B8C;font-size:12px;line-height:1.55}
 .grid{gap:18px;margin:42px 0}
-.card{min-height:210px;border:1px solid rgba(255,255,255,.09);border-radius:22px;padding:26px;background:linear-gradient(160deg,rgba(24,28,48,.9),rgba(13,16,29,.94));box-shadow:0 28px 70px -42px #000}
-.card:hover{box-shadow:0 38px 90px -48px rgba(79,140,255,.65)}
-.card h2{color:#f7f8ff}
-.cta{padding:clamp(28px,4vw,42px);border:1px solid rgba(139,124,255,.26);background:radial-gradient(circle at 100% 0%,rgba(86,221,255,.16),transparent 48%),linear-gradient(135deg,#201b47,#11182d 58%,#101b2d);box-shadow:0 38px 90px -54px rgba(93,101,255,.8)}
+.card{min-height:210px;border:1px solid rgba(255,255,255,.09);border-radius:22px;padding:26px;background:linear-gradient(160deg,rgba(13,12,10,.9),rgba(13,12,10,.94));box-shadow:0 28px 70px -42px #000}
+.card:hover{box-shadow:0 38px 90px -48px rgba(212,255,58,.65)}
+.card h2{color:#F1EADB}
+.cta{padding:clamp(28px,4vw,42px);border:1px solid rgba(212,255,58,.26);background:radial-gradient(circle at 100% 0%,rgba(212,255,58,.16),transparent 48%),linear-gradient(135deg,#0D0C0A,#0D0C0A 58%,#0D0C0A);box-shadow:0 38px 90px -54px rgba(212,255,58,.8)}
 .cta-actions{margin-top:18px}
-.cta .btn{margin-top:0;background:#fff;color:#7163ff}
+.cta .btn{margin-top:0;background:#fff;color:#0D0C0A}
 .cta .btn.ghost{background:rgba(255,255,255,.06);color:#fff;border-color:rgba(255,255,255,.2)}
-footer{border-top-color:rgba(255,255,255,.08);color:#788097}
-a:focus-visible{outline:2px solid #65e7ff;outline-offset:4px}
+footer{border-top-color:rgba(255,255,255,.08);color:#A39B8C}
+a:focus-visible{outline:2px solid #D4FF3A;outline-offset:4px}
 @media(max-width:760px){
   .wrap{width:calc(100% - 28px)}
   .nav{align-items:center;flex-direction:row}
@@ -50,9 +50,9 @@ a:focus-visible{outline:2px solid #65e7ff;outline-offset:4px}
   .card{min-height:0}
 }
 .faq{margin:48px 0 0;padding-top:36px;border-top:1px solid rgba(255,255,255,.08)}
-.faq h2{margin:0 0 18px;font-size:clamp(26px,3.4vw,36px);letter-spacing:-.03em;color:#f7f8ff}
+.faq h2{margin:0 0 18px;font-size:clamp(26px,3.4vw,36px);letter-spacing:-.03em;color:#F1EADB}
 .faq-list{display:grid;gap:12px;margin:0}
-.faq-list>div{padding:20px 22px;border:1px solid rgba(255,255,255,.09);border-radius:16px;background:rgba(16,20,36,.72)}
-.faq-list dt{margin:0 0 8px;color:#f7f8ff;font-size:17px;font-weight:700}
-.faq-list dd{margin:0;color:#aeb4c9;line-height:1.65}
+.faq-list>div{padding:20px 22px;border:1px solid rgba(255,255,255,.09);border-radius:16px;background:rgba(13,12,10,.72)}
+.faq-list dt{margin:0 0 8px;color:#F1EADB;font-size:17px;font-weight:700}
+.faq-list dd{margin:0;color:#A39B8C;line-height:1.65}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.btn,.card{transition:none}}

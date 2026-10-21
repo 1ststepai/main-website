@@ -7,28 +7,27 @@
     <meta name="description" content="Terms of service for 1stStep.ai, a premium website, web application, and iOS product studio." />
     <meta name="robots" content="index,follow" />
     <link rel="canonical" href="https://www.1ststep.ai/terms.html" />
-    <meta name="theme-color" content="#080b16" />
+    <meta name="theme-color" content="#0D0C0A" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
     <style>
-      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap");
-      :root {
-        --black: #ffffff;
-        --panel: #f6f7fb;
-        --line: rgba(16,20,45,0.10);
-        --steel: #565d75;
-        --blue: #6d5efc;
-        --violet-soft: #4d7cff;
-        --white: #0b1020;
+:root {
+        --black: #F1EADB;
+        --panel: #F1EADB;
+        --line: rgba(13,12,10,0.10);
+        --steel: #A39B8C;
+        --blue: #D4FF3A;
+        --violet-soft: #D4FF3A;
+        --white: #F1EADB;
       }
       * { box-sizing: border-box; }
       body {
         margin: 0;
-        background: radial-gradient(circle at 28% -6%, rgba(109,94,252,0.10), transparent 42%), radial-gradient(circle at 92% 4%, rgba(77,124,255,0.08), transparent 46%), var(--black);
+        background: radial-gradient(circle at 28% -6%, rgba(212,255,58,0.10), transparent 42%), radial-gradient(circle at 92% 4%, rgba(212,255,58,0.08), transparent 46%), var(--black);
         color: var(--white);
-        font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+        font-family:"Archivo", ui-sans-serif, system-ui, sans-serif;
       }
       a { color: inherit; }
       .container { width: min(100% - 32px, 900px); margin: 0 auto; }
@@ -37,7 +36,7 @@
       footer { border-top: 1px solid var(--line); padding: 26px 0; color: var(--steel); }
       .brand { font-size: 28px; font-weight: 800; text-decoration: none; }
       .brand span {
-        background: linear-gradient(135deg, #8f2cff, #b78cff);
+        background: linear-gradient(135deg, #D4FF3A, #D4FF3A);
         -webkit-background-clip: text;
         background-clip: text;
         color: transparent;
@@ -65,17 +64,25 @@
       .footer-links { display: flex; gap: 16px; flex-wrap: wrap; }
     </style>
     <link rel="stylesheet" href="/legal-pages.css" />
-  </head>
-  <body>
-    <header>
-      <div class="container legal-nav">
-        <a class="brand" href="/" aria-label="1stStep.ai home"><img src="/assets/firststep-logo-transparent-cleaned.png" alt="1stStep.ai" /></a>
-        <div class="legal-actions">
-          <a class="legal-link" href="/#portfolio">Selected Work</a>
-          <a class="legal-link" href="/app-idea-viability-checker.html">Check Your App Idea</a>
-        </div>
-      </div>
-    </header>
+  
+  <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/fonts/instrument-serif-italic-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="/src/v2-site.css" />
+</head>
+  <body class="v2">
+    <header class="nav" id="top">
+  <a class="logo" href="/" aria-label="1stStep.ai home"><img src="/assets/firststep-logo-transparent-cleaned.png" width="1147" height="946" alt="" /></a>
+  <div class="nav-blend">
+    <a class="wordmark" href="/">1stStep<i>.ai</i></a>
+    <nav aria-label="Primary">
+      <a href="/#work">Work</a>
+      <a href="/tools/">Tools</a>
+      <a href="/journey/">Journey</a>
+      <a href="/services/websites.html">Websites</a>
+    </nav>
+    <a class="pill" href="/book/" data-fsai-placement="site_header">Book a 20-min call</a>
+  </div>
+</header>
     <main class="container">
       <div class="kicker">Terms of Service</div>
       <h1>Terms of Service</h1>
@@ -151,11 +158,18 @@
       </section>
     </main>
     <footer>
-      <div class="container footer-links">
-        <a href="/">Home</a>
-        <a href="privacy.html">Privacy</a>
-        <a href="/#portfolio">Selected Work</a>
-      </div>
-    </footer>
+  <span>© 2026 1stStep.ai</span>
+  <span>Led by Evan Pancis</span>
+  <nav aria-label="Footer">
+    <a href="/journey/">Begin Your Journey</a>
+    <a href="/fit-check/">Project request</a>
+    <a href="/tools/">Tools</a>
+    <a href="/app-idea-viability-checker.html">App Idea Checker</a>
+    <a href="mailto:evan@1ststep.ai">Contact</a>
+    <a href="/privacy.html">Privacy</a>
+    <a href="/terms.html">Terms</a>
+    <a href="#top">Back to top ↑</a>
+  </nav>
+</footer>
   </body>
 </html>

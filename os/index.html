@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#070912" />
+  <meta name="theme-color" content="#0D0C0A" />
   <meta name="description" content="1stStep OS is a public AI engineering concept. Cycle 1 of the free core is on GitHub: clone, run locally, and export a Project OS markdown ZIP. Not a hosted product." />
   <link rel="canonical" href="https://www.1ststep.ai/os" />
   <meta property="og:type" content="website" />
@@ -16,26 +16,33 @@
   <meta property="og:image:height" content="630" />
   <title>1stStep OS — An Operating System for AI Engineering</title>
   <link rel="icon" href="/favicon.ico" sizes="any" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/os/os.css" />
+<link rel="stylesheet" href="/os/os.css" />
   <link rel="stylesheet" href="/os/os-expanded.css" />
   <link rel="stylesheet" href="/os/os-details.css" />
   <link rel="stylesheet" href="/os/os-positioning.css" />
   <script type="module" src="/os/os.js"></script>
   <script type="module" src="/src/site-analytics.js"></script>
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"1stStep OS","description":"Public concept for an AI Engineering Operating System. Cycle 1 of the free core is cloneable for a local idea-to-markdown-ZIP demo. Not a hosted product.","url":"https://www.1ststep.ai/os","sameAs":["https://github.com/1ststepai/1ststep-os","https://www.1ststep.ai/tools/1ststep-os/"],"isPartOf":{"@type":"WebSite","name":"1stStep.ai","url":"https://www.1ststep.ai/"}}</script>
+
+  <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/fonts/instrument-serif-italic-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="/src/v2-site.css" />
 </head>
-<body data-fsai-page-event="os_page_view" data-fsai-audience="product">
+<body class="v2" data-fsai-page-event="os_page_view" data-fsai-audience="product">
   <a class="skip-link" href="#main">Skip to content</a>
-  <header class="site-header">
-    <div class="container header-inner">
-      <a class="brand" href="/" aria-label="1stStep.ai home"><img src="/assets/firststep-logo-transparent-cleaned.png" alt="" width="41" height="34" /><span>1stStep.ai</span></a>
-      <nav class="desktop-nav" aria-label="Primary"><a href="#authority">Engineering system</a><a href="#system">Project OS</a><a href="#audit">Audit</a><a href="#paths">Use cases</a></nav>
-      <a class="header-cta" href="/journey/" data-fsai-event="os_final_cta_click" data-fsai-placement="header">Begin Your Journey <span aria-hidden="true">↗</span></a>
-    </div>
-  </header>
+  <header class="nav" id="top">
+  <a class="logo" href="/" aria-label="1stStep.ai home"><img src="/assets/firststep-logo-transparent-cleaned.png" width="1147" height="946" alt="" /></a>
+  <div class="nav-blend">
+    <a class="wordmark" href="/">1stStep<i>.ai</i></a>
+    <nav aria-label="Primary">
+      <a href="/#work">Work</a>
+      <a href="/tools/">Tools</a>
+      <a href="/journey/">Journey</a>
+      <a href="/services/websites.html">Websites</a>
+    </nav>
+    <a class="pill" href="/book/" data-fsai-placement="site_header">Book a 20-min call</a>
+  </div>
+</header>
 
   <main id="main">
     <section class="hero container" aria-labelledby="hero-title">
@@ -161,6 +168,19 @@
 
     <section class="section final-section" id="idea" aria-labelledby="idea-title"><div class="container final-grid"><div><p class="eyebrow">YOUR FIRST STEP</p><h2 id="idea-title">What's your idea?</h2><p>Tell us what you're trying to build, fix, automate, or grow. Preview a starting path right here; no text leaves this page.</p><p class="final-status">This prompt is an illustrative path preview. Cycle 1 idea &rarr; profile &rarr; ZIP runs locally from the <a href="https://github.com/1ststepai/1ststep-os">public GitHub repo</a>, not as a hosted generator on this page.</p></div><div class="prompt-shell" id="idea-form"><fieldset class="intent-options"><legend>Where are you starting?</legend><label><input type="radio" name="intent" value="new" checked /><span>Build</span></label><label><input type="radio" name="intent" value="audit" /><span>Fix</span></label><label><input type="radio" name="intent" value="automate" /><span>Automate</span></label><label><input type="radio" name="intent" value="grow" /><span>Grow</span></label></fieldset><label for="idea-prompt">Your idea or current challenge</label><textarea id="idea-prompt" rows="4" required minlength="8" maxlength="1000" placeholder="I want to build an app that helps parents find things to do with their kids…"></textarea><div class="prompt-foot"><span>Local preview only · your text is not submitted or saved</span><button type="button" id="idea-preview-button" disabled>Take the 1st Step <span aria-hidden="true">↗</span></button></div><noscript><p class="no-script-note">The local path preview needs JavaScript. No idea text is submitted.</p></noscript><div class="idea-result" id="idea-result" hidden tabindex="-1" aria-live="polite"><span>YOUR STARTING PATH / PREVIEW</span><h3 id="idea-result-title">Start with the idea.</h3><p id="idea-result-copy">Clarify the person, problem, and first useful outcome before deciding what to build.</p><small>Illustrative guidance only. No AI, account, or project has been created.</small><a id="idea-result-link" href="/app-idea-viability-checker.html">Explore the current 1stStep.ai App Idea Checker <span aria-hidden="true">↗</span></a></div></div></div></section>
   </main>
-  <footer class="site-footer"><div class="container footer-inner"><a class="brand" href="/" aria-label="1stStep.ai home"><img src="/assets/firststep-logo-transparent-cleaned.png" alt="" width="36" height="30" /><span>1stStep.ai</span></a><span>Ideas need a system.</span><div><a href="#main">Back to top</a><a href="/tools/1ststep-os/">Local Cycle 1</a><a href="https://github.com/1ststepai/1ststep-os" target="_blank" rel="noopener">GitHub</a><a href="/">1stStep.ai</a></div></div></footer>
+  <footer>
+  <span>© 2026 1stStep.ai</span>
+  <span>Led by Evan Pancis</span>
+  <nav aria-label="Footer">
+    <a href="/journey/">Begin Your Journey</a>
+    <a href="/fit-check/">Project request</a>
+    <a href="/tools/">Tools</a>
+    <a href="/app-idea-viability-checker.html">App Idea Checker</a>
+    <a href="mailto:evan@1ststep.ai">Contact</a>
+    <a href="/privacy.html">Privacy</a>
+    <a href="/terms.html">Terms</a>
+    <a href="#top">Back to top ↑</a>
+  </nav>
+</footer>
 </body>
 </html>

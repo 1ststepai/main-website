@@ -114,6 +114,44 @@ test("homepage first screen books the Website Strategy Call and offers reel soun
   assert.match(html, /property="og:image" content="https:\/\/www\.1ststep\.ai\/assets\/og-home\.png"/);
 });
 
+test("public subpages use the v2 chrome and drop the navy and lavender theme", async () => {
+  const pages = [
+    "tools/index.html",
+    "tools/auto-model-router/index.html",
+    "tools/1ststep-os/index.html",
+    "tools/1ststep-os-audit/index.html",
+    "app-idea-viability-checker.html",
+    "services/websites.html",
+    "services/revenue-systems.html",
+    "services/app-builds.html",
+    "services/mvp-builds.html",
+    "services/internal-tools.html",
+    "journey/index.html",
+    "fit-check/index.html",
+    "book/index.html",
+    "book/confirmed/index.html",
+    "os/index.html",
+    "privacy.html",
+    "terms.html",
+    "startup-launch-checker/index.html",
+    "campaigns/morris-county-free-website/index.html",
+    "campaigns/outgrown-website/index.html",
+  ];
+  for (const file of pages) {
+    const html = await source(file);
+    assert.match(html, /class="v2/, file);
+    assert.match(html, /href="\/src\/v2-site\.css"/, file);
+    assert.match(html, /firststep-logo-transparent-cleaned\.png/, file);
+    assert.doesNotMatch(html, /fonts\.googleapis\.com|Space Grotesk|#070912|#6d5efc|#8b7cff/, file);
+  }
+  const home = await source("index.html");
+  assert.doesNotMatch(home, /v2-site\.css/);
+  for (const file of ["tools/1ststep-os/index.html", "tools/1ststep-os-audit/index.html"]) {
+    const html = await source(file);
+    assert.doesNotMatch(html, /class="pill"|href="\/book\/"|href="\/journey\/"/, file);
+  }
+});
+
 test("homepage does not publish FAQ structured data without a visible FAQ", async () => {
   const html = await source("index.html");
   assert.equal(jsonLdBlocks(html).some((block) => block["@type"] === "FAQPage"), false);

@@ -15,19 +15,29 @@
   <meta property="og:image" content="https://www.1ststep.ai/assets/banner-1ststep-og.png" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:image" content="https://www.1ststep.ai/assets/banner-1ststep-og.png" />
-  <meta name="theme-color" content="#070912" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" />
-  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <meta name="theme-color" content="#0D0C0A" />
+<link rel="icon" href="/favicon.ico" sizes="any" />
   <link rel="stylesheet" href="/src/commercial-intake.css" />
+
+  <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/fonts/instrument-serif-italic-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="/src/v2-site.css" />
 </head>
-<body data-fsai-page-event="commercial_intake_view" data-fsai-audience="commercial_intake">
+<body class="v2" data-fsai-page-event="commercial_intake_view" data-fsai-audience="commercial_intake">
   <a class="skip-link" href="#intake-form">Skip to the project form</a>
-  <header class="wrap nav">
-    <a class="brand" href="/" aria-label="1stStep.ai home"><img src="/assets/firststep-logo-transparent-cleaned.png" alt=""><span>1stStep.ai</span></a>
-    <a class="back" href="/">&larr; Back to 1stStep.ai</a>
-  </header>
+  <header class="nav" id="top">
+  <a class="logo" href="/" aria-label="1stStep.ai home"><img src="/assets/firststep-logo-transparent-cleaned.png" width="1147" height="946" alt="" /></a>
+  <div class="nav-blend">
+    <a class="wordmark" href="/">1stStep<i>.ai</i></a>
+    <nav aria-label="Primary">
+      <a href="/#work">Work</a>
+      <a href="/tools/">Tools</a>
+      <a href="/journey/">Journey</a>
+      <a href="/services/websites.html">Websites</a>
+    </nav>
+    <a class="pill" href="/book/" data-fsai-placement="site_header">Book a 20-min call</a>
+  </div>
+</header>
 
   <main class="wrap layout">
     <section class="intro" aria-labelledby="intake-title">
@@ -86,7 +96,20 @@
       <p class="fallback">If the form cannot send, email <a href="mailto:evan@1ststep.ai?subject=1stStep.ai%20project%20request">evan@1ststep.ai</a>. The form keeps your answers on screen after an error.</p>
     </section>
   </main>
-  <footer class="wrap legal"><span>&copy; 2026 1stStep.ai. Built by Evan Pancis.</span><nav aria-label="Legal links"><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></nav></footer>
+  <footer>
+  <span>© 2026 1stStep.ai</span>
+  <span>Led by Evan Pancis</span>
+  <nav aria-label="Footer">
+    <a href="/journey/">Begin Your Journey</a>
+    <a href="/fit-check/">Project request</a>
+    <a href="/tools/">Tools</a>
+    <a href="/app-idea-viability-checker.html">App Idea Checker</a>
+    <a href="mailto:evan@1ststep.ai">Contact</a>
+    <a href="/privacy.html">Privacy</a>
+    <a href="/terms.html">Terms</a>
+    <a href="#top">Back to top ↑</a>
+  </nav>
+</footer>
   <script type="module" src="/src/site-analytics.js"></script>
   <script type="module" src="/src/commercial-intake.js"></script>
 </body>

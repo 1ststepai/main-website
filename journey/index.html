@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#070912" />
+  <meta name="theme-color" content="#0D0C0A" />
   <title>Begin Your Journey | 1stStep.ai</title>
   <meta name="description" content="Map your business goal, current tools, bottleneck, and 90-day outcome. Leave with a useful first systems diagnosis and next action." />
   <link rel="canonical" href="https://www.1ststep.ai/journey/" />
@@ -14,15 +14,28 @@
   <meta property="og:url" content="https://www.1ststep.ai/journey/" />
   <meta property="og:image" content="https://www.1ststep.ai/assets/og-home.png" />
   <link rel="icon" href="/favicon.ico" sizes="any" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" />
-  <link rel="stylesheet" href="/journey/journey.css" />
+<link rel="stylesheet" href="/journey/journey.css" />
   <script type="module" src="/journey/journey.js"></script>
+
+  <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/fonts/instrument-serif-italic-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="/src/v2-site.css" />
 </head>
-<body data-fsai-page-event="journey_view" data-fsai-audience="systems_architecture">
+<body class="v2" data-fsai-page-event="journey_view" data-fsai-audience="systems_architecture">
   <a class="skip-link" href="#main">Skip to questions</a>
-  <header class="site-header"><div class="wrap header-inner"><a class="brand" href="/" aria-label="1stStep.ai home"><img src="/assets/firststep-logo-transparent-cleaned.png" width="1147" height="946" alt="" /><span>1stStep.ai</span></a><a class="back-link" href="/">← Back to 1stStep.ai</a></div></header>
+  <header class="nav" id="top">
+  <a class="logo" href="/" aria-label="1stStep.ai home"><img src="/assets/firststep-logo-transparent-cleaned.png" width="1147" height="946" alt="" /></a>
+  <div class="nav-blend">
+    <a class="wordmark" href="/">1stStep<i>.ai</i></a>
+    <nav aria-label="Primary">
+      <a href="/#work">Work</a>
+      <a href="/tools/">Tools</a>
+      <a href="/journey/">Journey</a>
+      <a href="/services/websites.html">Websites</a>
+    </nav>
+    <a class="pill" href="/book/" data-fsai-placement="site_header">Book a 20-min call</a>
+  </div>
+</header>
   <main id="main" class="wrap layout">
     <div class="intro"><p class="eyebrow">Begin Your Journey / Systems diagnosis</p><h1>Start with the <em>actual bottleneck.</em></h1><p>Answer six focused questions. You’ll get a short first-pass diagnosis and a next action based on what you tell us.</p><div class="journey-flow" aria-label="Business, goal, stack, bottleneck, outcome, team, diagnosis"><span>Business</span><i></i><span>Goal</span><i></i><span>Stack</span><i></i><span>Bottleneck</span><i></i><span>Outcome</span><i></i><span>Team</span><i></i><span>Diagnosis</span></div><p class="privacy-note">Your answers stay in this browser unless you choose to open a prefilled email to Evan. No account or AI request is created.</p></div>
     <div class="wizard-shell">
@@ -42,7 +55,20 @@
       <noscript><p class="no-script">The interactive diagnosis needs JavaScript. You can <a href="mailto:evan@1ststep.ai?subject=1stStep%20System%20Audit">email Evan about a system audit</a> instead.</p></noscript>
     </div>
   </main>
-  <footer class="wrap footer"><span>© 2026 1stStep.ai</span><nav aria-label="Footer"><a href="/services/revenue-systems.html">System audit</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></nav></footer>
+  <footer>
+  <span>© 2026 1stStep.ai</span>
+  <span>Led by Evan Pancis</span>
+  <nav aria-label="Footer">
+    <a href="/journey/">Begin Your Journey</a>
+    <a href="/fit-check/">Project request</a>
+    <a href="/tools/">Tools</a>
+    <a href="/app-idea-viability-checker.html">App Idea Checker</a>
+    <a href="mailto:evan@1ststep.ai">Contact</a>
+    <a href="/privacy.html">Privacy</a>
+    <a href="/terms.html">Terms</a>
+    <a href="#top">Back to top ↑</a>
+  </nav>
+</footer>
   <script type="module" src="/src/site-analytics.js"></script>
 </body>
 </html>

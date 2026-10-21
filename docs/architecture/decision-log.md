@@ -1,5 +1,14 @@
 # Architecture Decision Log
 
+## 2026-10-21: Public subpages use the homepage v2 theme
+
+- **Status / owner:** Evan asked for this on the homepage v2 preview branch, after the reel soundtrack. Preview only. No production deploy.
+- **Decision:** Tools, the App Idea Checker, services, journey, fit-check, booking, campaigns, startup checker, legal pages, and the public `/os` concept use the homepage v2 system: ink `#0D0C0A`, cream `#F1EADB`, lime `#D4FF3A`, self-hosted Archivo and Instrument Serif, the shared header and footer, outline “Book a 20-min call” pills, and lime primary buttons. Copy, forms, and routes stay as they were. Shared rules live in `src/v2-site.css`.
+- **Exceptions:** The 1stStep OS and OS Audit tool pages keep the same header and footer look without “Book a 20-min call,” Begin Your Journey, or `/book/`, because those pages stay listings, not hire-us intake. The five service pages omit the footer link to the App Idea Checker so website and systems visitors stay on their own paths. The homepage is unchanged. Fictional makeover pages, admin, demos, Foundry, and OG render sources keep their own artwork.
+- **Rationale:** Leftover navy and lavender made the rest of the site look like a different brand from the approved homepage.
+- **Affected systems:** Public HTML routes listed above, their CSS, and `src/v2-site.css`. Status colors for scores and errors stay green, amber, and red.
+- **Rollback:** Remove `src/v2-site.css` and restore the previous page headers, footers, and color values. Do not alias the preview to production.
+
 ## 2026-10-21: Homepage cartoon reel plays with sound on request
 
 - **Status / owner:** Evan supplied a web-ready 16:9 reel with an AAC track and asked for it on the homepage preview. Preview only. No production deploy.
