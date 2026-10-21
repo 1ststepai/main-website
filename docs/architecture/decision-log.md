@@ -1,5 +1,13 @@
 # Architecture Decision Log
 
+## 2026-10-21: The homepage founder photo is Evan’s real headshot
+
+- **Status / owner:** Evan supplied a 400×400 headshot for the homepage v2 preview. Preview only. No production deploy.
+- **Decision:** Replace the “Evan photo here” slot with that photograph, square, uncropped, and without a color filter. Serve AVIF and WebP, with JPEG as the fallback, and use the JPEG URL as the Person image on the homepage Organization founder. Testimonials and the client sample reel stay empty. This supersedes only the photo clause in the homepage v2 honesty note below.
+- **Rationale:** The placeholder was waiting on a real photo. The supplied file is that photo.
+- **Affected systems:** Homepage founder section, `public/home-v2/evan-pancis.*`, homepage JSON-LD.
+- **Rollback:** Restore the dashed photo slot and remove the image files and the schema image URL. Leave testimonials and the client reel untouched.
+
 ## 2026-10-21: Homepage cursor dot follows the pointer with no ease
 
 - **Status / owner:** Evan asked for this on the homepage v2 preview. Preview only. No production deploy.

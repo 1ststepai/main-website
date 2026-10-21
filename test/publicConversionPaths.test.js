@@ -145,14 +145,19 @@ test("commercial intake preserves intent and attribution without personal analyt
   assert.match(analytics, /commercial_intake_path_click/);
 });
 
-test("homepage testimonials, photo, and client reel stay empty placeholders", async () => {
+test("homepage testimonials and client reel stay empty, and the founder photo is Evan's", async () => {
   const html = await source("index.html");
   assert.match(html, /Real, named quotes go here/);
   assert.match(html, /Needed from Evan/);
-  assert.match(html, /Evan photo here/);
   assert.match(html, /Client sample reel slot/);
   assert.match(html, /1stStep's own products, not paid client case studies/);
-  assert.doesNotMatch(html, /David William|Sara E Ford|★★★★★/);
+  assert.doesNotMatch(html, /David William|Sara E Ford|★★★★★|Evan photo here/);
+  assert.match(html, /srcset="\/home-v2\/evan-pancis\.avif"/);
+  assert.match(html, /srcset="\/home-v2\/evan-pancis\.webp"/);
+  assert.match(html, /src="\/home-v2\/evan-pancis\.jpg"/);
+  assert.match(html, /alt="Evan Pancis, founder of 1stStep\.ai"/);
+  assert.match(html, /width="400" height="400"/);
+  assert.match(html, /"image":"https:\/\/www\.1ststep\.ai\/home-v2\/evan-pancis\.jpg"/);
 });
 
 test("the Morris County campaign is focused, transparent, and locally qualified", async () => {

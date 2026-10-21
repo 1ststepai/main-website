@@ -35,7 +35,7 @@
   {
     "@context":"https://schema.org",
     "@graph":[
-      {"@type":"Organization","@id":"https://www.1ststep.ai/#organization","name":"1stStep.ai","url":"https://www.1ststep.ai/","logo":"https://www.1ststep.ai/assets/firststep-logo-transparent-cleaned.png","founder":{"@type":"Person","name":"Evan Pancis"},"sameAs":["https://github.com/1ststepai","https://www.linkedin.com/company/1ststep-ai/","https://www.instagram.com/1ststepdotai/"]},
+      {"@type":"Organization","@id":"https://www.1ststep.ai/#organization","name":"1stStep.ai","url":"https://www.1ststep.ai/","logo":"https://www.1ststep.ai/assets/firststep-logo-transparent-cleaned.png","founder":{"@type":"Person","name":"Evan Pancis","image":"https://www.1ststep.ai/home-v2/evan-pancis.jpg"},"sameAs":["https://github.com/1ststepai","https://www.linkedin.com/company/1ststep-ai/","https://www.instagram.com/1ststepdotai/"]},
       {"@type":"WebSite","@id":"https://www.1ststep.ai/#website","name":"1stStep.ai","url":"https://www.1ststep.ai/","publisher":{"@id":"https://www.1ststep.ai/#organization"}},
       {"@type":"WebPage","@id":"https://www.1ststep.ai/#homepage","url":"https://www.1ststep.ai/","name":"Build the system your business is missing","description":"Custom software, automation and AI for service businesses. Led by Evan Pancis.","isPartOf":{"@id":"https://www.1ststep.ai/#website"},"about":[{"@id":"https://www.1ststep.ai/os#concept"},{"@id":"https://app.1ststep.ai/#job-agent"}]},
       {"@type":"CreativeWork","@id":"https://www.1ststep.ai/os#concept","name":"1stStep OS","url":"https://www.1ststep.ai/os","description":"Public concept for an AI Engineering Operating System with explicit authority, isolated work, evidence, audits, and release gates.","creator":{"@id":"https://www.1ststep.ai/#organization"}},
@@ -229,7 +229,13 @@
 </section>
 
 <section class="founder" id="founder">
-  <div class="ph">Evan photo here</div>
+  <figure class="ph">
+    <picture>
+      <source srcset="/home-v2/evan-pancis.avif" type="image/avif" />
+      <source srcset="/home-v2/evan-pancis.webp" type="image/webp" />
+      <img src="/home-v2/evan-pancis.jpg" alt="Evan Pancis, founder of 1stStep.ai" width="400" height="400" decoding="async" loading="lazy" />
+    </picture>
+  </figure>
   <div>
     <p class="tag">Led by Evan Pancis</p>
     <h2 class="h2">You talk to the person <em>who builds it.</em></h2>
