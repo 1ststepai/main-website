@@ -147,10 +147,10 @@ test("homepage metadata and assets identify the systems consultancy", async () =
   const data = JSON.parse(jsonLd);
 
   assert.match(html, /<link rel="canonical" href="https:\/\/www\.1ststep\.ai\/"/);
-  assert.match(html, /og-home\.png/);
+  assert.match(html, /og-home-v2\.png/);
   assert.match(html, /<meta name="description" content="Software, automation, and websites for a business that already has demand/);
   assert.deepEqual(data["@graph"].map((item) => item["@type"]), ["Organization", "WebSite", "WebPage", "CreativeWork", "SoftwareApplication"]);
-  assert.equal((await stat(new URL("public/assets/og-home.png", root))).size > 5000, true);
+  assert.equal((await stat(new URL("public/assets/og-home-v2.png", root))).size > 5000, true);
 });
 
 test("the website service page keeps website visitors on website-intent paths", async () => {
