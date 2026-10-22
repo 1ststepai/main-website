@@ -170,3 +170,16 @@
   video.addEventListener("pause", () => wrap.classList.remove("is-playing"));
   video.addEventListener("ended", () => { wrap.classList.remove("is-playing"); video.currentTime = 0; });
 })();
+
+// Meet Evan intro video: no autoplay; tap to play with sound and captions.
+document.querySelectorAll(".vp").forEach((wrap) => {
+  const video = wrap.querySelector("video");
+  const play = wrap.querySelector(".vp-play");
+  if (!video || !play) return;
+  const start = () => { video.muted = false; video.play().catch(() => {}); };
+  play.addEventListener("click", start);
+  video.addEventListener("click", () => (video.paused ? start() : video.pause()));
+  video.addEventListener("play", () => wrap.classList.add("is-playing"));
+  video.addEventListener("pause", () => wrap.classList.remove("is-playing"));
+  video.addEventListener("ended", () => { wrap.classList.remove("is-playing"); video.currentTime = 0; });
+});

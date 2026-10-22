@@ -461,3 +461,18 @@ footer a:hover{color:var(--cream)}
 .rv-by span{font-weight:400;color:var(--mute)}
 @media (max-width:980px){.rv-list{grid-template-columns:repeat(2,1fr)}}
 @media (max-width:720px){.rv{margin-top:48px;text-align:left}.rv-list{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;padding:0 0 8px;scrollbar-width:none}.rv-list::-webkit-scrollbar{display:none}.rv-card{flex:0 0 82%;scroll-snap-align:start}}
+
+/* Meet Evan intro video */
+.intro{padding:72px 0;border-top:1px solid var(--line)}
+.intro-row{display:flex;align-items:center;justify-content:center;gap:48px}
+.intro-card{position:relative;flex:none;width:min(260px,62vw);aspect-ratio:9/16;border-radius:24px;overflow:hidden;border:1px solid var(--line);background:var(--ink2);box-shadow:0 20px 60px rgba(0,0,0,.45)}
+.vp-video{display:block;width:100%;height:100%;object-fit:cover;cursor:pointer}
+.vp-video::cue{font:500 14px/1.35 var(--disp);background:rgba(13,12,10,.82);color:var(--cream)}
+.vp-play{position:absolute;inset:0;margin:auto;width:64px;height:64px;border-radius:50%;border:0;background:var(--cream);color:var(--ink);display:grid;place-items:center;cursor:pointer;box-shadow:0 8px 30px rgba(0,0,0,.45);transition:transform .2s ease}
+.vp-play svg{width:26px;height:26px;margin-left:3px;fill:currentColor}
+.vp-play:hover{transform:scale(1.06)}
+.vp-play:focus-visible{outline:2px solid var(--acid);outline-offset:4px}
+.vp.is-playing .vp-play{opacity:0;pointer-events:none}
+.intro-copy h2{margin:0;font-weight:520;letter-spacing:-.045em;line-height:1;font-size:clamp(2.4rem,5vw,4rem)}
+.intro-copy p{margin:12px 0 0;color:var(--mute);font:500 15px/1.4 var(--disp)}
+@media (max-width:720px){.intro{padding:56px 0}.intro-row{flex-direction:column;gap:22px;text-align:center}}
