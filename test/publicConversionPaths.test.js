@@ -520,17 +520,9 @@ test("the homepage shows six verbatim Google reviews before the booking band", a
   assert.doesNotMatch(html, /burak|buys low, sells high|T Shares|1manshow|AggregateRating/);
 });
 
-test("the homepage has a click-to-play Meet Evan intro video with captions", async () => {
+test("the Meet Evan intro is hidden from the homepage but its assets are kept", async () => {
   const html = await source("index.html");
-  const at = html.indexOf('id="meet-evan"');
-  assert.ok(at > html.indexOf('id="top"') && at < html.indexOf('id="problem"'));
-  assert.match(html, /src="\/intro\/evan-intro\.mp4"/);
-  assert.match(html, /<track kind="captions" src="\/intro\/evan-intro\.en\.vtt" srclang="en" label="English" default \/>/);
-  assert.doesNotMatch(html.slice(at, html.indexOf('id="problem"')), /autoplay/);
+  assert.doesNotMatch(html, /meet-evan|evan-intro|Meet Evan/);
   const vtt = await source("public/intro/evan-intro.en.vtt");
   assert.match(vtt, /^WEBVTT/);
-  assert.match(vtt, /Hi, my name is Evan Pancis\./);
-  assert.match(vtt, /I started 1stStep\.ai to help/);
-  assert.match(vtt, /save times, spend more time with family,/);
-  assert.match(vtt, /help each other\.\n?$/);
 });
