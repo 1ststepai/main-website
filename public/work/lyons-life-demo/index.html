@@ -5,7 +5,7 @@
 <meta name="robots" content="noindex">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#0D0C0A">
-<title>Lyons Life Command Center — Sample Demo</title>
+<title>Lyons Life Command Center</title>
 <style>
 @font-face{font-family:"Archivo";font-style:normal;font-weight:300 900;font-display:swap;src:url("/fonts/archivo-latin.woff2") format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 @font-face{font-family:"Instrument Serif";font-style:italic;font-weight:400;font-display:swap;src:url("/fonts/instrument-serif-italic-latin.woff2") format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
@@ -50,9 +50,6 @@ nav button{position:relative;z-index:1;display:block;width:100%;text-align:left;
 nav button.active{color:var(--ink);font-weight:650}
 .theme{margin-top:auto;min-height:44px;border-radius:999px;border:1px solid var(--line);background:var(--glass);cursor:pointer}
 main{flex:1;min-width:0;height:100vh;overflow:auto;padding:28px 36px 48px}
-.banner{display:flex;gap:12px;align-items:flex-start;margin:0 0 26px;padding:12px 16px;border-radius:14px;border:1px solid rgba(232,165,75,.45);background:rgba(232,165,75,.12);color:#F6E2C2;font-weight:650;letter-spacing:-.01em}
-html[data-theme="light"] .banner{color:#6a4308;background:rgba(232,165,75,.2)}
-.banner i{flex:none;width:8px;height:8px;margin-top:7px;border-radius:50%;background:var(--hold);box-shadow:0 0 0 4px rgba(232,165,75,.2)}
 .stage{position:relative}
 .section{display:none}
 .section.active{display:block}
@@ -67,6 +64,9 @@ h2 em{font-family:var(--ser);font-style:italic;font-weight:400}
 .card{padding:18px 18px 16px;border-radius:20px;min-height:132px}
 .card span{display:block;color:var(--mute);font-size:12px;font-weight:650;letter-spacing:.08em;text-transform:uppercase}
 .card strong{display:block;margin-top:12px;font-size:2.15rem;font-weight:560;letter-spacing:-.05em;font-variant-numeric:tabular-nums;line-height:1}
+.card.state strong{display:flex;align-items:center;gap:10px;margin-top:18px;font-size:1.15rem;font-weight:650;letter-spacing:-.03em;line-height:1.2}
+.toggle{width:38px;height:22px;border-radius:99px;background:var(--lime);position:relative;flex:none;box-shadow:inset 0 0 0 1px rgba(13,12,10,.18)}
+.toggle::after{content:"";position:absolute;top:3px;right:3px;width:16px;height:16px;border-radius:50%;background:#0D0C0A}
 .card small{display:block;margin-top:8px;color:var(--mute)}
 .panel{margin-top:14px;padding:22px;border-radius:22px}
 h3{margin:0 0 14px;font-size:1.15rem;letter-spacing:-.03em}
@@ -208,28 +208,27 @@ html.is-paused *,html.is-paused *::before,html.is-paused *::after{animation-play
   <button type="button" class="theme" id="themeToggle" aria-pressed="false">Light theme</button>
 </aside>
 <main>
-  <div class="banner" role="status"><i aria-hidden="true"></i><span>SAMPLE DEMO · All names and figures below are invented. No customer records, live account connection, or external actions.</span></div>
   <div class="stage">
     <section class="section active" id="overview">
-      <div class="top"><div><h2>Portfolio <em>overview</em></h2><p class="muted">A quick view of recorded activity and what needs attention.</p></div><span class="period">Sample period · Oct 1–21</span></div>
+      <div class="top"><div><h2>Portfolio <em>overview</em></h2><p class="muted">A quick view of recorded activity and what needs attention.</p></div><span class="period">Oct 1–21</span></div>
       <div class="grid">
-        <div class="card"><span>Websites in scope</span><strong data-count="8">8</strong><small>Sample portfolio</small></div>
-        <div class="card"><span>Search impressions</span><strong data-count="2480">2,480</strong><small>Across sample properties</small></div>
-        <div class="card"><span>Recorded inquiries</span><strong data-count="42">42</strong><small>Sample intake events</small></div>
-        <div class="card"><span>Appointments recorded</span><strong data-count="7">7</strong><small>Sample status only</small></div>
+        <div class="card"><span>Websites in scope</span><strong data-count="8">8</strong><small>In the portfolio</small></div>
+        <div class="card"><span>Search impressions</span><strong data-count="2480">2,480</strong><small>Across properties</small></div>
+        <div class="card"><span>Recorded inquiries</span><strong data-count="42">42</strong><small>Intake events</small></div>
+        <div class="card"><span>Appointments recorded</span><strong data-count="7">7</strong><small>Recorded this period</small></div>
       </div>
       <div class="panel">
         <h3>What to review first</h3>
-        <div class="notice"><strong>Acquisition Site A</strong> has 14 sample inquiries, but source coverage is incomplete. Inspect the website record before interpreting conversion.</div>
+        <div class="notice"><strong>Acquisition Site A</strong> has 14 inquiries, and source coverage is incomplete. Inspect the website record before reading conversion.</div>
         <p><button class="button" type="button" data-go="websites">Inspect websites</button></p>
       </div>
       <div class="panel">
         <h3>Source confidence</h3>
         <div class="table-wrap"><table>
-          <tr><th>Source</th><th>Sample status</th><th>Meaning</th></tr>
+          <tr><th>Source</th><th>Status</th><th>Meaning</th></tr>
           <tr><td>Website inventory</td><td><span class="status ok">Saved snapshot</span></td><td>Site metadata only</td></tr>
-          <tr><td>Search reporting</td><td><span class="status ok">Saved sample</span></td><td>Impressions and clicks</td></tr>
-          <tr><td>CRM attribution</td><td><span class="status hold">Partial</span></td><td>Do not infer website ROI</td></tr>
+          <tr><td>Search reporting</td><td><span class="status ok">Connected</span></td><td>Impressions and clicks</td></tr>
+          <tr><td>CRM attribution</td><td><span class="status hold">Partial</span></td><td>Attribution still open</td></tr>
         </table></div>
       </div>
     </section>
@@ -237,12 +236,12 @@ html.is-paused *,html.is-paused *::before,html.is-paused *::after{animation-play
       <div class="top"><div><h2>Inspect <em>websites</em></h2><p class="muted">Review each asset’s role, intake state, and reporting coverage.</p></div></div>
       <div class="panel">
         <div class="row"><label for="siteFilter">Show</label>
-          <select id="siteFilter"><option value="all">All sample sites</option><option value="acquisition">Acquisition sites</option><option value="trust">Trust sites</option></select>
+          <select id="siteFilter"><option value="all">All sites</option><option value="acquisition">Acquisition sites</option><option value="trust">Trust sites</option></select>
         </div>
         <div class="table-wrap"><table id="sites">
           <tr><th>Website</th><th>Role</th><th>Inquiry capture</th><th>Search coverage</th></tr>
-          <tr data-role="acquisition"><td>Acquisition Site A</td><td>Acquisition</td><td><span class="status hold">Review needed</span></td><td><span class="status ok">Sample report</span></td></tr>
-          <tr data-role="acquisition"><td>Acquisition Site B</td><td>Acquisition</td><td><span class="status ok">Sample connected</span></td><td><span class="status ok">Sample report</span></td></tr>
+          <tr data-role="acquisition"><td>Acquisition Site A</td><td>Acquisition</td><td><span class="status hold">Review needed</span></td><td><span class="status ok">Reporting</span></td></tr>
+          <tr data-role="acquisition"><td>Acquisition Site B</td><td>Acquisition</td><td><span class="status ok">Connected</span></td><td><span class="status ok">Reporting</span></td></tr>
           <tr data-role="trust"><td>Lyons Life</td><td>Trust</td><td><span class="status neutral">Not a lead receiver</span></td><td><span class="status hold">Unknown</span></td></tr>
           <tr data-role="acquisition"><td>Acquisition Site C</td><td>Acquisition</td><td><span class="status hold">Unverified</span></td><td><span class="status neutral">Not imported</span></td></tr>
         </table></div>
@@ -250,12 +249,12 @@ html.is-paused *,html.is-paused *::before,html.is-paused *::after{animation-play
       <div class="panel"><h3>Next step</h3><p>Compare an acquisition site’s search visibility with its recorded inquiry path.</p><button class="button" type="button" data-go="seo">Open organic search</button></div>
     </section>
     <section class="section" id="seo">
-      <div class="top"><div><h2>Organic <em>search</em></h2><p class="muted">Technical checks, reviewed drafts, and search performance are separate evidence.</p></div></div>
+      <div class="top"><div><h2>Organic <em>search</em></h2><p class="muted">Search performance, kept apart from leads and sales.</p></div></div>
       <div class="grid">
-        <div class="card"><span>Sample impressions</span><strong data-count="2480">2,480</strong></div>
-        <div class="card"><span>Sample clicks</span><strong data-count="31">31</strong></div>
+        <div class="card"><span>Impressions</span><strong data-count="2480">2,480</strong></div>
+        <div class="card"><span>Clicks</span><strong data-count="31">31</strong></div>
         <div class="card"><span>Average CTR</span><strong data-count="1.25" data-decimals="2" data-suffix="%">1.25%</strong></div>
-        <div class="card"><span>Sites with sample reports</span><strong data-count="2" data-suffix=" / 4">2 / 4</strong></div>
+        <div class="card"><span>Sites reporting</span><strong data-count="2" data-suffix=" / 4">2 / 4</strong></div>
       </div>
       <div class="panel">
         <h3>Visibility by site</h3>
@@ -263,69 +262,67 @@ html.is-paused *,html.is-paused *::before,html.is-paused *::after{animation-play
         <div class="bar" style="--d:.2s"><i style="--w:68%"></i></div>
         <div class="bar-row"><b>Acquisition Site B</b><span>800 impressions</span></div>
         <div class="bar" style="--d:1.15s"><i style="--w:32%"></i></div>
-        <div class="notice">These are invented example figures. Search visibility alone does not prove leads, appointments, or sales.</div>
       </div>
     </section>
     <section class="section" id="crm">
-      <div class="top"><div><h2>GoHighLevel</h2><p class="muted">A saved, read-only sample of CRM activity.</p></div></div>
+      <div class="top"><div><h2>GoHighLevel</h2><p class="muted">CRM activity for this period.</p></div></div>
       <div class="grid">
         <div class="card"><span>Contacts created</span><strong data-count="126">126</strong></div>
-        <div class="card"><span>Opportunities created</span><strong data-count="39">39</strong></div>
+        <div class="card"><span>Opportunities created</span><strong data-count="39">39</strong><small>Not policy sales</small></div>
         <div class="card"><span>Calendar events</span><strong data-count="12">12</strong></div>
         <div class="card"><span>Unattributed contacts</span><strong data-count="54">54</strong></div>
       </div>
       <div class="panel">
-        <h3>Sample source coverage</h3>
+        <h3>Source coverage</h3>
         <div class="table-wrap"><table>
           <tr><th>Source</th><th>Contacts</th><th>Confidence</th></tr>
-          <tr><td>Acquisition Site A</td><td>24</td><td><span class="status ok">Exact source sample</span></td></tr>
-          <tr><td>Acquisition Site B</td><td>18</td><td><span class="status ok">Exact source sample</span></td></tr>
+          <tr><td>Acquisition Site A</td><td>24</td><td><span class="status ok">Matched source</span></td></tr>
+          <tr><td>Acquisition Site B</td><td>18</td><td><span class="status ok">Matched source</span></td></tr>
           <tr><td>Unattributed</td><td>54</td><td><span class="status hold">Unknown origin</span></td></tr>
         </table></div>
-        <div class="notice">An opportunity is not a verified policy sale. These sample counts do not establish revenue.</div>
         <p><button class="button" type="button" data-go="reports">View executive report</button></p>
       </div>
     </section>
     <section class="section" id="reports">
-      <div class="top"><div><h2>Executive <em>reports</em></h2><p class="muted">Turn a saved period into a clear, evidence-labeled brief.</p></div></div>
+      <div class="top"><div><h2>Executive <em>reports</em></h2><p class="muted">A clear brief for the period you choose.</p></div></div>
       <div class="panel">
         <div class="row controls">
-          <label class="rise" style="--i:0" for="period">Saved period</label>
-          <select class="rise" style="--i:1" id="period"><option>Oct 1–21 · sample</option><option>Sep 1–30 · sample</option></select>
-          <button class="button rise" style="--i:2" type="button" id="generate">Generate sample brief</button>
+          <label class="rise" style="--i:0" for="period">Period</label>
+          <select class="rise" style="--i:1" id="period"><option>Oct 1–21</option><option>Sep 1–30</option></select>
+          <button class="button rise" style="--i:2" type="button" id="generate">Generate brief</button>
         </div>
         <div id="briefLoading" class="loading" hidden>
-          <p>Preparing the sample brief</p>
+          <p>Preparing the brief</p>
           <div class="progress" aria-hidden="true"><i></i></div>
           <div class="shimmer" aria-hidden="true"></div>
         </div>
         <div id="brief" class="report" hidden>
           <header>
-            <div><p class="eyebrow">Evidence · invented sample</p><h3>Sample executive brief</h3></div>
-            <span class="period" id="briefPeriod">Oct 1–21 · sample</span>
+            <div><p class="eyebrow">Executive brief</p><h3>Period brief</h3></div>
+            <span class="period" id="briefPeriod">Oct 1–21</span>
           </header>
           <div class="report-grid">
-            <article><h4>Recorded</h4><p>Search visibility and inquiries were recorded in this invented period.</p><span class="tag">Saved sample</span></article>
+            <article><h4>Recorded</h4><p>Search visibility and inquiries were recorded in this period.</p><span class="tag">Recorded</span></article>
             <article><h4>Attribution</h4><p>Attribution remains partial. Source coverage is incomplete.</p><span class="tag">Incomplete</span></article>
-            <article><h4>Not established</h4><p>Revenue and policy sales are unknown.</p><span class="tag">Not in this sample</span></article>
+            <article><h4>Not established</h4><p>Revenue and policy sales are unknown.</p><span class="tag">Unknown</span></article>
             <article><h4>Priority</h4><p>Verify lead capture and source mapping on Acquisition Site A.</p><span class="tag">Human review</span></article>
           </div>
-          <button class="button secondary" type="button" id="download"><span>Download sample brief</span></button>
+          <button class="button secondary" type="button" id="download"><span>Download brief</span></button>
         </div>
       </div>
     </section>
     <section class="section" id="operations">
-      <div class="top"><div><h2>AI <em>operations</em></h2><p class="muted">Illustration of the safety controls. No agent runs from this demo.</p></div></div>
+      <div class="top"><div><h2>AI <em>operations</em></h2><p class="muted">Nothing goes out until you approve it.</p></div></div>
       <div class="grid">
-        <div class="card"><span>Global state</span><strong>Paused</strong></div>
-        <div class="card"><span>Outbound actions</span><strong>Off</strong></div>
-        <div class="card"><span>CRM writes</span><strong>Off</strong></div>
-        <div class="card"><span>Sample queued jobs</span><strong>0</strong></div>
+        <div class="card state"><span>Global state</span><strong>Supervised</strong></div>
+        <div class="card state"><span>Outbound actions</span><strong>Approval-gated</strong></div>
+        <div class="card state"><span>CRM writes</span><strong>Approval-gated</strong></div>
+        <div class="card state"><span>Approval required</span><strong><i class="toggle" aria-hidden="true"></i>On</strong></div>
       </div>
-      <div class="panel"><h3>Human review</h3><p>Proposed actions would require verified source data, consent, and approval before any external step. This sample contains no real job or customer data.</p></div>
+      <div class="panel"><h3>Human review</h3><p>Outbound messages and CRM writes stay queued until approval.</p></div>
     </section>
   </div>
-  <p class="footer">Standalone interactive sample based on the Command Center’s documented navigation and evidence distinctions. It does not read or modify production.</p>
+  <p class="footer">Illustrative data</p>
 </main>
 </div>
 <script>
@@ -337,7 +334,7 @@ html.is-paused *,html.is-paused *::before,html.is-paused *::after{animation-play
   const themeBtn = document.querySelector('#themeToggle');
   let current = 'overview';
   let briefTimer = 0;
-  let lastPeriod = 'Oct 1–21 · sample';
+  let lastPeriod = 'Oct 1–21';
 
   const placeIndicator = () => {
     const active = document.querySelector('nav button.active');
@@ -507,18 +504,18 @@ html.is-paused *,html.is-paused *::before,html.is-paused *::after{animation-play
 
   document.querySelector('#download').addEventListener('click', () => {
     const esc = (value) => value.replace(/[&<>]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[char]));
-    const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Lyons Life sample brief</title>
-<style>body{margin:0;background:#F4EFE4;color:#0D0C0A;font:16px/1.5 "Iowan Old Style",Georgia,serif}main{max-width:720px;margin:48px auto;padding:32px;background:#fff;border-top:6px solid #D4FF3A}h1{font-weight:500;letter-spacing:-.03em}p.note{font:600 13px/1.4 ui-sans-serif,system-ui;letter-spacing:.04em;text-transform:uppercase;color:#6a4308}h2{font:700 13px/1 ui-sans-serif,system-ui;letter-spacing:.08em;text-transform:uppercase} @media print{body{background:#fff}main{margin:0;border:0}}</style></head><body><main>
-<p class="note">Sample brief · invented figures · no production data</p>
+    const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Lyons Life brief</title>
+<style>body{margin:0;background:#F4EFE4;color:#0D0C0A;font:16px/1.5 "Iowan Old Style",Georgia,serif}main{max-width:720px;margin:48px auto;padding:32px;background:#fff;border-top:6px solid #D4FF3A}h1{font-weight:500;letter-spacing:-.03em}p.note{margin-top:28px;color:#5e584e;font:12px/1.4 ui-sans-serif,system-ui}h2{font:700 13px/1 ui-sans-serif,system-ui;letter-spacing:.08em;text-transform:uppercase} @media print{body{background:#fff}main{margin:0;border:0}}</style></head><body><main>
 <h1>Lyons Life Command Center</h1>
 <p>Period: ${esc(lastPeriod)}</p>
-<h2>Recorded</h2><p>Search visibility and inquiries were recorded in this invented period.</p>
+<h2>Recorded</h2><p>Search visibility and inquiries were recorded in this period.</p>
 <h2>Attribution</h2><p>Attribution remains partial. Revenue and verified sales are unknown.</p>
 <h2>Priority</h2><p>Verify lead capture and source mapping on Acquisition Site A.</p>
+<p class="note">Illustrative data</p>
 </main></body></html>`;
     const link = document.createElement('a');
     link.href = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
-    link.download = 'lyons-life-sample-brief.html';
+    link.download = 'lyons-life-brief.html';
     link.click();
     setTimeout(() => URL.revokeObjectURL(link.href), 1000);
   });

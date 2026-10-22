@@ -108,8 +108,8 @@ test("homepage first screen books the call beside an example desk", async () => 
   assert.match(hero, /Websites, integrations, automations, and custom apps/);
   assert.match(hero, /See our work/);
   assert.match(hero, /Pause animation/);
-  assert.match(hero, /SIMULATED/);
-  assert.match(hero, /EXAMPLE/);
+  assert.match(hero, /Illustrative data/);
+  assert.doesNotMatch(hero, /SIMULATED|EXAMPLE/);
   assert.match(hero, /Leads in/);
   assert.match(hero, /Replies sent/);
   assert.match(hero, /Today’s leads/);

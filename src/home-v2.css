@@ -131,6 +131,7 @@ em{font-family:var(--ser);font-style:italic;font-weight:400;letter-spacing:-.02e
 .cap .line{color:var(--mute);font-size:.95rem}
 .example{padding:120px 0;border-top:1px solid var(--line)}
 .ex{margin:0 0 12px;color:var(--acid);font-size:12px;font-weight:650;letter-spacing:.16em;text-transform:uppercase}
+.fine{margin:16px 0 0;color:var(--mute);font-size:12px;letter-spacing:.02em}
 .example h2{font-size:clamp(2.8rem,6vw,5rem);max-width:10em}
 .split{display:grid;grid-template-columns:1fr 72px 1fr;gap:20px;align-items:stretch;margin-top:48px}
 .panel{min-height:460px;padding:36px 36px 20px;border-radius:28px;border:1px solid var(--line);background:#12110f}

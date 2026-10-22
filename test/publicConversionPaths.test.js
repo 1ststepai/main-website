@@ -42,7 +42,8 @@ test("the homepage keeps a short section order and service pages keep their own 
   assert.match(html, /id="agents"/);
   assert.ok(html.indexOf('id="example"') < html.indexOf('id="agents"') && html.indexOf('id="agents"') < html.indexOf('id="book"'));
   assert.match(html, /AI agents that work for your business, with you in control\./);
-  assert.match(html, /Example console, simulated/);
+  assert.match(html, /Illustrative data/);
+  assert.doesNotMatch(html, /Example console, simulated|SIMULATED|SAMPLE DEMO/);
   assert.match(html, /Needs your approval/);
   const demo = await source("public/work/lyons-life-demo/index.html");
   assert.doesNotMatch(demo, /Florida Private Health|Self Employed Health|ACA Florida/);
@@ -50,7 +51,12 @@ test("the homepage keeps a short section order and service pages keep their own 
   assert.match(demo, /Acquisition Site B/);
   assert.match(demo, /Acquisition Site C/);
   assert.match(demo, /Lyons Life/);
-  assert.match(demo, /SAMPLE DEMO/);
+  assert.match(demo, /Illustrative data/);
+  assert.match(demo, /Generate brief/);
+  assert.match(demo, /Download brief/);
+  assert.match(demo, /Supervised/);
+  assert.match(demo, /Approval-gated/);
+  assert.doesNotMatch(demo, /SAMPLE DEMO|Generate sample brief|No agent runs|Saved sample|Sample status only/);
   assert.match(demo, /id="siteFilter"/);
   assert.match(demo, /id="generate"/);
   assert.match(demo, /id="download"/);
@@ -95,8 +101,7 @@ test("selected work shows first-party products without invented metrics", async 
     assert.ok(next > at, project);
     at = next;
   }
-  assert.match(home, /No made-up numbers/);
-  assert.match(home, /not paid client case studies/);
+  assert.match(home, /Products we built/);
   const skill = work.slice(work.indexOf("SkillSprout"), work.indexOf("Real-Rank.ai"));
   assert.doesNotMatch(skill, /\d[\d,]*\+|\$|%/);
   assert.doesNotMatch(home, /TradingView|<iframe|<canvas|three\/|scene\.js|the.?spot|spot.?cafe/i);
@@ -184,7 +189,7 @@ test("commercial intake preserves intent and attribution without personal analyt
 
 test("the homepage has no testimonials and shows Evan's headshot", async () => {
   const html = await source("index.html");
-  assert.match(html, /1stStep's own products, not paid client case studies/);
+  assert.match(html, /Products we built/);
   assert.doesNotMatch(html, /Real, named quotes go here|Needed from Evan|Client sample reel slot|David William|Sara E Ford|★★★★★|Evan photo here/);
   assert.match(html, /srcset="\/home-v2\/evan-pancis\.avif"/);
   assert.match(html, /srcset="\/home-v2\/evan-pancis\.webp"/);

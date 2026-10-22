@@ -1,5 +1,13 @@
 # Architecture Decision Log
 
+## 2026-10-22: One quiet disclosure on each showcase
+
+- **Status / owner:** Evan asked for premium copy on the site, the Lyons Life demo, and the AI console. Preview only. No production deploy.
+- **Decision:** Repeated sample, example, and simulated badges come off the hero, the lost-to-booked path, the AI console, and the Lyons Life demo. Each of those showcases keeps one muted line, “Illustrative data.” Lyons safety states read Supervised, Approval-gated, and Approval required, with the approval control drawn on. The brief buttons are Generate brief and Download brief. Selected work now says “Products we built.” The App Idea Checker preview keeps one quiet “Illustrative data” line beside the sample score. Concept-versus-live labels on 1stStep OS and the Auto Model Router stay, because those pages are not presenting invented results as a product demo.
+- **Rationale:** A showcase should feel finished. The numbers are still not real results, so one quiet line carries that, instead of a badge on every panel.
+- **Affected systems:** `index.html`, `src/home-v2.css`, `public/work/lyons-life-demo/index.html`, `public/home-v2/lyons-life.webp`, `public/llms.txt`, `app-idea-viability-checker.html`.
+- **Rollback:** Restore the previous badge copy and the sample banner.
+
 ## 2026-10-22: Lyons Life sample motion stays cheap and stops offscreen
 
 - **Status / owner:** Evan asked for staggered section motion and an ambient background on the hosted sample. Preview only. No production deploy.
