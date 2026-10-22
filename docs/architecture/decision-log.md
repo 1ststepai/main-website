@@ -1,5 +1,13 @@
 # Architecture Decision Log
 
+## 2026-10-22: Lyons Life sample uses a dark command center
+
+- **Status / owner:** Evan asked for a premium redesign of the hosted sample. Preview only. No production deploy.
+- **Decision:** `/work/lyons-life-demo/` is a dark cinematic command center with a light theme control. Panels are glass, accents are lime and blue, and motion is fade, slide, count-up, row, and bar fill. Reduced motion shows the finished states with no pulse and no count-up. Tab switching, the site filter, Generate sample brief, and download stay. The sample banner stays. Site labels stay Acquisition Site A, B, and C, plus Lyons Life. The homepage card image is a new shot of that dark Overview.
+- **Rationale:** The sample should look like a product a visitor would want built, without adding names or claims.
+- **Affected systems:** `public/work/lyons-life-demo/index.html`, `public/home-v2/lyons-life.webp`, `index.html`, `public/llms.txt`.
+- **Rollback:** Restore the previous light demo file and card image.
+
 ## 2026-10-22: Generic demo site labels, and an example AI console
 
 - **Status / owner:** Evan asked for a privacy pass on the hosted Lyons Life demo and a new homepage AI operations section. Preview only. No production deploy.

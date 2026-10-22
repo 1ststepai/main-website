@@ -50,6 +50,12 @@ test("the homepage keeps a short section order and service pages keep their own 
   assert.match(demo, /Acquisition Site B/);
   assert.match(demo, /Acquisition Site C/);
   assert.match(demo, /Lyons Life/);
+  assert.match(demo, /SAMPLE DEMO/);
+  assert.match(demo, /id="siteFilter"/);
+  assert.match(demo, /id="generate"/);
+  assert.match(demo, /id="download"/);
+  assert.match(demo, /id="themeToggle"/);
+  assert.match(demo, /prefers-reduced-motion:\s*reduce/);
   for (const path of ["websites", "internal-tools", "revenue-systems", "mvp-builds"]) {
     assert.match(await source(`services/${path}.html`), /<h1/);
   }
