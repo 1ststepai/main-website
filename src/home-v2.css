@@ -425,3 +425,23 @@ footer a:hover{color:var(--cream)}
   .close img{width:96px;height:96px;border-radius:20px}
   .cap{align-items:flex-start;flex-direction:column;gap:4px}
 }
+
+/* Client video testimonial */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.quotes{padding:88px 0;border-top:1px solid var(--line)}
+.tm{display:flex;align-items:center;justify-content:center;gap:56px}
+.tm-bubble{position:relative;flex:none;width:min(300px,72vw);aspect-ratio:1;border-radius:50%;padding:5px;background:conic-gradient(from 200deg,var(--acid),rgba(212,255,58,.15) 45%,var(--acid))}
+.tm-video{display:block;width:100%;height:100%;border-radius:50%;object-fit:cover;background:var(--ink);transform:scale(1.001)}
+.tm-video::cue{font:500 15px/1.35 var(--disp);background:rgba(13,12,10,.82);color:var(--cream)}
+.tm-play{position:absolute;inset:0;margin:auto;width:68px;height:68px;border-radius:50%;border:0;background:var(--cream);color:var(--ink);display:grid;place-items:center;cursor:pointer;box-shadow:0 8px 30px rgba(0,0,0,.45);transition:transform .2s ease}
+.tm-play svg{width:28px;height:28px;margin-left:3px;fill:currentColor}
+.tm-play:hover{transform:scale(1.06)}
+.tm-play:focus-visible{outline:2px solid var(--acid);outline-offset:4px}
+.tm.is-playing .tm-play{opacity:0;pointer-events:none}
+.tm-copy{margin:0;max-width:420px}
+.tm-copy blockquote{margin:0}
+.tm-copy p{margin:0;font:400 clamp(1.9rem,3.6vw,2.75rem)/1.1 var(--ser);color:var(--cream);letter-spacing:-.01em;text-wrap:balance}
+.tm-copy figcaption{margin-top:18px;font:500 14px/1.4 var(--disp);color:var(--mute)}
+.tm-copy a{color:var(--soft);text-underline-offset:3px}
+.tm-copy a:hover{color:var(--acid)}
+@media (max-width:720px){.quotes{padding:64px 0}.tm{flex-direction:column;gap:28px;text-align:center}.tm-bubble{width:min(260px,70vw)}}

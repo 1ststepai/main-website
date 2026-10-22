@@ -155,3 +155,18 @@
     paintSound(true);
   });
 })();
+
+// Client video testimonial: no autoplay; tap to play with sound.
+(() => {
+  const wrap = document.querySelector(".tm");
+  if (!wrap) return;
+  const video = wrap.querySelector(".tm-video");
+  const play = wrap.querySelector(".tm-play");
+  if (!video || !play) return;
+  const start = () => { video.muted = false; video.play().catch(() => {}); };
+  play.addEventListener("click", start);
+  video.addEventListener("click", () => (video.paused ? start() : video.pause()));
+  video.addEventListener("play", () => wrap.classList.add("is-playing"));
+  video.addEventListener("pause", () => wrap.classList.remove("is-playing"));
+  video.addEventListener("ended", () => { wrap.classList.remove("is-playing"); video.currentTime = 0; });
+})();
