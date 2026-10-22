@@ -40,6 +40,15 @@
     ]
   }
   </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+    {"@type":"Question","name":"What does it cost?","acceptedAnswer":{"@type":"Answer","text":"Starting ranges are on this page. A Business & Bottleneck Audit is $750–$1,500 flat and is credited toward the build. A website starts at $3,500. Automations start at $2,500 per workflow. An app starts at $10,000 for an MVP. Build rescue starts with a $1,000 code review. Consulting is $150–$200/hr, or a retainer from $1,500/mo. Every project is scoped on a free call."}},
+    {"@type":"Question","name":"How long does it take?","acceptedAnswer":{"@type":"Answer","text":"The timeline follows the scope. A focused site or one workflow is shorter than an app or a rescue. The free call is where the timeline gets named."}},
+    {"@type":"Question","name":"I already started a build, can you finish it?","acceptedAnswer":{"@type":"Answer","text":"Yes. Build Rescue & Handoff starts with a $1,000 code review, then a plan to finish what a vibe coder or you started."}},
+    {"@type":"Question","name":"I don't know what I need, where do I start?","acceptedAnswer":{"@type":"Answer","text":"Begin Your Journey is six questions in the browser, and it does not create an account. Or book the free 20-min call. A paid audit is the deeper first pass, and it is credited toward the build."}},
+    {"@type":"Question","name":"Do you work with my tools?","acceptedAnswer":{"@type":"Answer","text":"Yes. The build connects the website, CRM, calendar, and the other tools you already run. The call is where that stack gets named."}}
+  ]}
+  </script>
 </head>
 <body data-fsai-page-event="home_view" data-fsai-audience="systems_architecture">
 <a class="skip-link" href="#main">Skip to content</a>
@@ -47,8 +56,8 @@
   <a class="logo" href="/" aria-label="1stStep.ai home"><img src="/assets/firststep-logo-transparent-cleaned.png" width="1147" height="946" alt="" decoding="async" fetchpriority="low" /></a>
   <a class="wordmark" href="/">1stStep<i>.ai</i></a>
   <nav aria-label="Primary">
-    <a href="#work">Work</a>
-    <a href="#example">Example</a>
+    <a href="/work/">Work</a>
+    <a href="/pricing/">Pricing</a>
   </nav>
   <a class="pill" href="/book/" data-fsai-placement="header">Book a call</a>
 </header>
@@ -165,8 +174,8 @@
       <h1 id="hero-title">Get more from the business you <em>already have.</em></h1>
       <p class="lede">Websites, integrations, automations, and custom apps.</p>
       <div class="hero-actions">
-        <a class="btn" href="/book/" data-fsai-placement="hero">Book a call</a>
-        <a class="btn ghost" href="#work">See our work</a>
+        <a class="btn" href="/book/" data-fsai-placement="hero">Book a free 20-min call</a>
+        <a class="text-link" href="#pricing">See pricing</a>
       </div>
       <p class="fine">Illustrative data</p>
     </div>
@@ -197,175 +206,110 @@
     </div>
     <button class="hero-pause" type="button" aria-pressed="false">Pause animation</button>
   </section>
-  <section class="work" id="work">
+  <section class="pains" id="problem" aria-labelledby="problem-title">
     <div class="wrap">
-      <header class="sec">
-        <h2>Selected work</h2>
-        <p>Products we built.</p>
-      </header>
-      <div class="pieces">
-        <article class="piece">
-          <a href="https://daysetgo.ai/" target="_blank" rel="noopener">
-            <div class="tilt">
-              <div class="device"><span class="device-top" aria-hidden="true"><i></i><i></i><i></i></span><img src="/home-v2/daysetgo.webp" width="1440" height="1000" alt="DaySetGo day planner" decoding="async" loading="lazy"></div>
-              <div class="cap"><h3>DaySetGo</h3><span class="line">Family day plans</span></div>
-            </div>
-          </a>
+      <h2 id="problem-title">Where the work breaks.</h2>
+      <div class="pain-grid">
+        <article class="card">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v8H4z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 18l4-4 4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <h3>Leads slip through the cracks</h3>
+          <p>An inquiry comes in, and nobody follows up.</p>
         </article>
-        <article class="piece">
-          <a href="https://swingtradepros.com" target="_blank" rel="noopener">
-            <div class="tilt">
-              <div class="device"><span class="device-top" aria-hidden="true"><i></i><i></i><i></i></span><img src="/home-v2/swingtradepros.webp" width="1280" height="780" alt="SwingTradePros homepage" decoding="async" loading="lazy"></div>
-              <div class="cap"><h3>SwingTradePros</h3><span class="line">Alerts and Node AI</span></div>
-            </div>
-          </a>
+        <article class="card">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="8" r="2.2" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="18" cy="8" r="2.2" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="17" r="2.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 9.2l2.6 5.2M16 9.2l-2.6 5.2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-dasharray="2.2 2.4"/></svg>
+          <h3>Too many tools that don't talk</h3>
+          <p>The website, the CRM, and the calendar each hold a different version.</p>
         </article>
-        <article class="piece">
-          <a href="https://app.1ststep.ai/" target="_blank" rel="noopener">
-            <div class="tilt">
-              <div class="device"><span class="device-top" aria-hidden="true"><i></i><i></i><i></i></span><img src="/home-v2/job-agent.webp" width="1440" height="1000" alt="Job Agent entry page" decoding="async" loading="lazy"></div>
-              <div class="cap"><h3>Job Agent</h3><span class="line">Review before send</span></div>
-            </div>
-          </a>
-        </article>
-        <article class="piece">
-          <a href="https://skillsprout.1ststep.ai" target="_blank" rel="noopener">
-            <div class="tilt">
-              <div class="device"><span class="device-top" aria-hidden="true"><i></i><i></i><i></i></span><img src="/home-v2/skillsprout.webp" width="1600" height="1000" alt="SkillSprout worksheet builder with a validated preview" decoding="async" loading="lazy"></div>
-              <div class="cap"><h3>SkillSprout</h3><span class="line">K–6 worksheets</span></div>
-            </div>
-          </a>
-        </article>
-        <article class="piece">
-          <a href="https://real-rank.ai/" target="_blank" rel="noopener">
-            <div class="tilt">
-              <div class="device"><span class="device-top" aria-hidden="true"><i></i><i></i><i></i></span><img src="/home-v2/real-rank.webp" width="1440" height="900" alt="Real-Rank.ai homepage" decoding="async" loading="lazy"></div>
-              <div class="cap"><h3>Real-Rank.ai</h3><span class="line">Search visibility</span></div>
-            </div>
-          </a>
-        </article>
-        <article class="piece piece-lyons">
-          <a href="/work/lyons-life-demo/">
-            <div class="tilt">
-              <div class="device">
-                <span class="device-top" aria-hidden="true"><i></i><i></i><i></i></span>
-                <img src="/home-v2/lyons-life.webp" width="2880" height="2000" alt="Lyons Life Command Center" decoding="async" loading="lazy">
-              </div>
-              <div class="cap"><h3>Lyons Life Command Center</h3><span class="line">Try the interactive demo</span></div>
-              <p class="piece-note">A command center for an insurance agency's website portfolio: websites, organic search, GoHighLevel CRM activity, executive reports and agent operations with human-approval safety controls, in one place.</p>
-            </div>
-          </a>
-        </article>
-        <article class="piece piece-reel">
-          <div class="tilt">
-            <div class="device">
-              <span class="device-top" aria-hidden="true"><i></i><i></i><i></i></span>
-              <div class="reel-frame">
-                <video class="work-vid" muted loop playsinline preload="none" poster="/home-v2/poster_16x9.webp" data-src="/home-v2/1ststep-reel-v4.mp4" width="1280" height="720" aria-label="1stStep studio reel"></video>
-                <button class="reel-sound" type="button" aria-pressed="false" aria-label="Tap for sound">
-                  <svg class="ico-off" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3.5 9.2v5.6h3.4L12 19.2V4.8L6.9 9.2H3.5z"/><path d="M15.2 9.2a3.6 3.6 0 010 5.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
-                  <svg class="ico-on" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3.5 9.2v5.6h3.4L12 19.2V4.8L6.9 9.2H3.5z"/><path d="M16 9.2l4.6 5.6M20.6 9.2L16 14.8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
-                  <span>Tap for sound</span>
-                </button>
-              </div>
-            </div>
-            <div class="cap"><h3>Studio reel</h3><span class="line">Cartoon ad</span></div>
-          </div>
+        <article class="card">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 8v4.5l3 2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          <h3>No time to fix it</h3>
+          <p>The repair sits beside the jobs you already have to deliver.</p>
         </article>
       </div>
     </div>
   </section>
 
-  <section class="example" id="example" aria-labelledby="example-title">
+  <section class="process" id="process" aria-labelledby="process-title">
     <div class="wrap">
-      <h2 id="example-title">Lost, then booked.</h2>
-      <div class="split">
-        <div class="panel lost">
-          <h3>Lost</h3>
-          <ol>
-            <li><i></i><span>Inquiry</span></li>
-            <li><i></i><span>No follow-up</span></li>
-            <li><i></i><span>Unbooked</span></li>
-          </ol>
-        </div>
-        <div class="to" aria-hidden="true"></div>
-        <div class="panel booked">
-          <h3>Booked</h3>
-          <ol>
-            <li><i></i><span>Captured</span></li>
-            <li><i></i><span>Follow-up</span></li>
-            <li><i></i><span>Booked</span></li>
-          </ol>
-        </div>
-      </div>
-      <p class="fine">Illustrative data</p>
+      <h2 id="process-title">How it works</h2>
+      <ol class="step-grid">
+        <li class="card"><span>01</span><h3>Audit</h3><p>Find the bottleneck. The audit is credited toward your build.</p></li>
+        <li class="card"><span>02</span><h3>Build</h3><p>Ship the website, workflow, or app that bottleneck needs.</p></li>
+        <li class="card"><span>03</span><h3>Grow</h3><p>Leave the system in your hands, with support when you want it.</p></li>
+      </ol>
     </div>
   </section>
 
-  <section class="ops" id="agents" aria-labelledby="agents-title">
+  <section class="prices" id="pricing" aria-labelledby="pricing-title">
     <div class="wrap">
-      <div class="ops-head">
+      <h2 id="pricing-title">Services &amp; pricing</h2>
+      <div class="price-grid">
+        <article class="card">
+          <h3>Business &amp; Bottleneck Audit</h3>
+          <p class="amt">$750–$1,500 flat</p>
+          <p class="blurb">Credited toward your build.</p>
+          <a class="btn" href="/book/" data-fsai-placement="home_pricing_audit" aria-label="Book a call about a Business and Bottleneck Audit">Book a call</a>
+        </article>
+        <article class="card">
+          <h3>Website Build</h3>
+          <p class="amt">from $3,500</p>
+          <p class="blurb">A site for a business that already has demand.</p>
+          <a class="btn" href="/book/" data-fsai-placement="home_pricing_website" aria-label="Book a call about a Website Build">Book a call</a>
+        </article>
+        <article class="card">
+          <h3>Automations &amp; Integrations</h3>
+          <p class="amt">from $2,500 per workflow</p>
+          <p class="blurb">One workflow, connected to the tools you already use.</p>
+          <a class="btn" href="/book/" data-fsai-placement="home_pricing_automation" aria-label="Book a call about Automations and Integrations">Book a call</a>
+        </article>
+        <article class="card">
+          <h3>App Development</h3>
+          <p class="amt">from $10,000 (MVP)</p>
+          <p class="blurb">A first version of the product.</p>
+          <a class="btn" href="/book/" data-fsai-placement="home_pricing_app" aria-label="Book a call about App Development">Book a call</a>
+        </article>
+        <article class="card">
+          <h3>Build Rescue &amp; Handoff</h3>
+          <p class="amt">Starts with a $1,000 code review</p>
+          <p class="blurb">Finish what a vibe coder or you started.</p>
+          <a class="btn" href="/book/" data-fsai-placement="home_pricing_rescue" aria-label="Book a call about Build Rescue and Handoff">Book a call</a>
+        </article>
+        <article class="card">
+          <h3>Consulting &amp; Support</h3>
+          <p class="amt">$150–$200/hr or retainers from $1,500/mo</p>
+          <p class="blurb">Direct time, by the hour or the month.</p>
+          <a class="btn" href="/book/" data-fsai-placement="home_pricing_support" aria-label="Book a call about Consulting and Support">Book a call</a>
+        </article>
+      </div>
+      <p class="scope-note">Every project is scoped on a free call.</p>
+    </div>
+  </section>
+
+  <section class="proof" id="proof" aria-labelledby="proof-title">
+    <div class="wrap">
+      <h2 id="proof-title">Proof</h2>
+      <a class="featured card" href="/work/lyons-life-demo/">
+        <img src="/home-v2/lyons-life.webp" width="2880" height="2000" alt="Lyons Life Command Center" decoding="async" loading="lazy">
         <div>
-          <h2 id="agents-title">Agents that work for your business, with you in control.</h2>
+          <h3>Lyons Life Command Center</h3>
+          <p>A command center for an insurance agency's website portfolio: websites, organic search, GoHighLevel CRM activity, executive reports and agent operations with human-approval safety controls, in one place.</p>
+          <span class="text-link">Try the interactive demo</span>
         </div>
-        <a class="btn" href="/book/" data-fsai-placement="home_agents">Book a call</a>
-      </div>
-      <div class="ops-board" aria-hidden="true">
-        <div class="ops-agents">
-          <article class="agent" style="--d:0s">
-            <span class="dot"></span>
-            <div><strong>Lead Responder</strong><em>Answers new inquiries</em>
-              <span class="phases"><i class="idle">Idle</i><i class="work">Working</i><i class="done">Done</i></span>
-            </div>
-          </article>
-          <article class="agent" style="--d:3.4s">
-            <span class="dot"></span>
-            <div><strong>Follow-up</strong><em>Writes the next text</em>
-              <span class="phases"><i class="idle">Idle</i><i class="work">Working</i><i class="done">Done</i></span>
-            </div>
-          </article>
-          <article class="agent" style="--d:1.2s">
-            <span class="dot"></span>
-            <div><strong>Reporting</strong><em>Prepares the daily brief</em>
-              <span class="phases"><i class="idle">Idle</i><i class="work">Working</i><i class="done">Done</i></span>
-            </div>
-          </article>
-          <article class="agent" style="--d:2.4s">
-            <span class="dot"></span>
-            <div><strong>Scheduler</strong><em>Holds an open time</em>
-              <span class="phases"><i class="idle">Idle</i><i class="work">Working</i><i class="done">Done</i></span>
-            </div>
-          </article>
-        </div>
-        <div class="ops-stage">
-          <div class="ops-prompt">
-            <p class="kicker">Prompt</p>
-            <p class="ops-type"><i style="--i:0">F</i><i style="--i:1">o</i><i style="--i:2">l</i><i style="--i:3">l</i><i style="--i:4">o</i><i style="--i:5">w</i><i style="--i:6">&nbsp;</i><i style="--i:7">u</i><i style="--i:8">p</i><i style="--i:9">&nbsp;</i><i style="--i:10">w</i><i style="--i:11">i</i><i style="--i:12">t</i><i style="--i:13">h</i><i style="--i:14">&nbsp;</i><i style="--i:15">e</i><i style="--i:16">v</i><i style="--i:17">e</i><i style="--i:18">r</i><i style="--i:19">y</i><i style="--i:20">&nbsp;</i><i style="--i:21">m</i><i style="--i:22">i</i><i style="--i:23">s</i><i style="--i:24">s</i><i style="--i:25">e</i><i style="--i:26">d</i><i style="--i:27">&nbsp;</i><i style="--i:28">c</i><i style="--i:29">a</i><i style="--i:30">l</i><i style="--i:31">l</i><i style="--i:32">&nbsp;</i><i style="--i:33">t</i><i style="--i:34">o</i><i style="--i:35">d</i><i style="--i:36">a</i><i style="--i:37">y</i><b class="caret"></b></p>
-            <p class="ops-pick">Picked up by Follow-up</p>
-            <ol class="ops-steps">
-              <li class="s1"><i class="tick"></i><span>Read the missed calls</span></li>
-              <li class="s2"><i class="tick"></i><span>Draft the text</span></li>
-              <li class="s3"><i class="tick"></i><span>Needs your approval</span><b class="chip">Approve</b></li>
-            </ol>
-          </div>
-          <div class="ops-feed">
-            <p class="kicker">Task feed</p>
-            <ul>
-              <li class="row a"><span class="who">Lead Responder</span><span class="what">Answer the new inquiry</span><span class="track"><i></i></span><i class="tick"></i></li>
-              <li class="row b"><span class="who">Reporting</span><span class="what">Prepare today's report</span><span class="track"><i></i></span><i class="tick"></i></li>
-              <li class="row c"><span class="who">Scheduler</span><span class="what">Hold an open time</span><span class="track"><i></i></span><i class="tick"></i></li>
-            </ul>
-          </div>
-        </div>
-      </div>
-      <p class="fine">Illustrative data</p>
-      <button class="ops-pause" type="button" aria-pressed="false">Pause animation</button>
+      </a>
+      <ul class="thumbs listing">
+        <li><a href="/work/#daysetgo"><img src="/home-v2/daysetgo.webp" width="1440" height="1000" alt="" decoding="async" loading="lazy"><span>DaySetGo</span></a></li>
+        <li><a href="/work/#swing"><img src="/home-v2/swingtradepros.webp" width="1280" height="780" alt="" decoding="async" loading="lazy"><span>SwingTradePros</span></a></li>
+        <li><a href="/work/#job-agent"><img src="/home-v2/job-agent.webp" width="1440" height="1000" alt="" decoding="async" loading="lazy"><span>Job Agent</span></a></li>
+        <li><a href="/work/#skillsprout"><img src="/home-v2/skillsprout.webp" width="1600" height="1000" alt="" decoding="async" loading="lazy"><span>SkillSprout</span></a></li>
+        <li><a href="/work/#real-rank"><img src="/home-v2/real-rank.webp" width="1440" height="900" alt="" decoding="async" loading="lazy"><span>Real-Rank.ai</span></a></li>
+        <li><a href="/work/#reel"><img src="/home-v2/poster_16x9.webp" width="1280" height="720" alt="" decoding="async" loading="lazy"><span>Studio reel</span></a></li>
+      </ul>
     </div>
   </section>
 
-  <section class="close" id="book">
+  <section class="close founder" id="founder">
     <div class="wrap close-row">
-      <figure id="founder">
+      <figure>
         <picture>
           <source srcset="/home-v2/evan-pancis.avif" type="image/avif" />
           <source srcset="/home-v2/evan-pancis.webp" type="image/webp" />
@@ -374,16 +318,62 @@
       </figure>
       <div>
         <h2>Evan Pancis</h2>
-        <a class="btn xl" href="/book/" data-fsai-placement="home_final">Book a call</a>
+        <p class="place">Based in Morris Plains, NJ.</p>
+        <p class="role">I build the systems between the leads, tools, and follow-up you already have.</p>
       </div>
     </div>
   </section>
+
+  <section class="quotes" id="quotes" hidden>
+    <div class="wrap">
+      <h2>What owners say</h2>
+      <div class="quote-list" data-testimonials="pending"></div>
+    </div>
+  </section>
+
+  <section class="faq" id="faq" aria-labelledby="faq-title">
+    <div class="wrap">
+      <h2 id="faq-title">Questions</h2>
+      <div class="faq-list">
+        <details class="card">
+          <summary>What does it cost?</summary>
+          <p>Starting ranges are on this page. A Business &amp; Bottleneck Audit is $750–$1,500 flat and is credited toward the build. A website starts at $3,500. Automations start at $2,500 per workflow. An app starts at $10,000 for an MVP. Build rescue starts with a $1,000 code review. Consulting is $150–$200/hr, or a retainer from $1,500/mo. Every project is scoped on a free call.</p>
+        </details>
+        <details class="card">
+          <summary>How long does it take?</summary>
+          <p>The timeline follows the scope. A focused site or one workflow is shorter than an app or a rescue. The free call is where the timeline gets named.</p>
+        </details>
+        <details class="card">
+          <summary>I already started a build, can you finish it?</summary>
+          <p>Yes. Build Rescue &amp; Handoff starts with a $1,000 code review, then a plan to finish what a vibe coder or you started.</p>
+        </details>
+        <details class="card">
+          <summary>I don't know what I need, where do I start?</summary>
+          <p><a href="/journey/">Begin Your Journey</a> is six questions in the browser, and it does not create an account. Or book the free 20-min call. A paid audit is the deeper first pass, and it is credited toward the build.</p>
+        </details>
+        <details class="card">
+          <summary>Do you work with my tools?</summary>
+          <p>Yes. The build connects the website, CRM, calendar, and the other tools you already run. The call is where that stack gets named.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="book" aria-labelledby="book-title">
+    <div class="wrap band-row">
+      <h2 id="book-title">Start with the call.</h2>
+      <a class="btn xl" href="/book/" data-fsai-placement="home_final">Book a call</a>
+    </div>
+  </section>
 </main>
+<a class="book-bar" href="/book/" data-fsai-placement="home_sticky">Book a call</a>
 <footer>
   <span>© 2026 1stStep.ai</span>
   <span>Led by Evan Pancis</span>
   <nav aria-label="Footer">
     <a href="/journey/">Begin Your Journey</a>
+    <a href="/work/">Work</a>
+    <a href="/pricing/">Pricing</a>
     <a href="/fit-check/">Project request</a>
     <a href="/tools/">Tools</a>
     <a href="/app-idea-viability-checker.html">App Idea Checker</a>

@@ -25,6 +25,18 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://www.1ststep.ai/work/</loc>
+    <lastmod>2026-10-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.1ststep.ai/pricing/</loc>
+    <lastmod>2026-10-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://www.1ststep.ai/fit-check/</loc>
     <lastmod>2026-09-20</lastmod>
     <changefreq>monthly</changefreq>

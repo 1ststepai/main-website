@@ -8,22 +8,24 @@ const source = (path) => readFile(new URL(path, root), "utf8");
 test("the homepage leads with the studio offer and keeps products distinct", async () => {
   const html = await source("index.html");
   const llms = await source("public/llms.txt");
-  const work = html.slice(html.indexOf('id="work"'), html.indexOf('id="example"'));
+  const work = await source("work/index.html");
   assert.match(html, /Get more from the business you <em>already have\.<\/em>/);
   assert.match(work, /Node AI/);
   assert.doesNotMatch(work, /8,000\+|4,000\+|TradingView/);
   assert.match(html, /href="\/tools\/"/);
   assert.match(html, /href="\/journey\/"/);
   assert.match(html, /firststep-logo-transparent-cleaned\.png/);
-  assert.equal((html.match(/Book a call/g) || []).length, 4);
-  assert.equal((html.match(/href="\/book\/"/g) || []).length, 4);
+  assert.equal((html.match(/Book a call/g) || []).length, 15);
+  assert.equal((html.match(/href="\/book\/"/g) || []).length, 10);
+  assert.match(html, /Book a free 20-min call/);
   assert.doesNotMatch(html, /Book a 20-min call/);
   assert.match(llms, /Get more from the business you already have/);
   assert.match(llms, /1stStep OS/);
   assert.match(llms, /1stStep Job Agent/);
   assert.doesNotMatch(html, /TradingView|guaranteed revenue|A website that undersells the business|\$3,250&ndash;\$12,000|Watch with sound|TODO: connect the 20-minute booking link|Example makeover/);
-  assert.match(html, /data-src="\/home-v2\/1ststep-reel-v4\.mp4"/);
-  assert.match(html, /poster="\/home-v2\/poster_16x9\.webp"/);
+  assert.match(work, /data-src="\/home-v2\/1ststep-reel-v4\.mp4"/);
+  assert.match(work, /poster="\/home-v2\/poster_16x9\.webp"/);
+  assert.doesNotMatch(html, /class="piece"|data-src="\/home-v2\/1ststep-reel-v4\.mp4"/);
   assert.match(html, /Happy Boy Theme/);
   assert.match(html, /Kevin MacLeod/);
   assert.match(html, /https:\/\/creativecommons\.org\/licenses\/by\/4\.0\//);
@@ -35,16 +37,29 @@ test("the homepage leads with the studio offer and keeps products distinct", asy
 
 test("the homepage keeps a short section order and service pages keep their own destinations", async () => {
   const html = await source("index.html");
-  for (const anchor of ["work", "example", "founder", "book"]) assert.match(html, new RegExp('id="' + anchor + '"'));
-  assert.ok(html.indexOf('id="work"') < html.indexOf('id="example"') && html.indexOf('id="example"') < html.indexOf('id="book"'));
-  assert.doesNotMatch(html, /id="makeover"|id="flow"|id="paths"|id="works"|id="how"/);
-  assert.equal((html.match(/href="\/book\/"/g) || []).length, 4);
-  assert.match(html, /id="agents"/);
-  assert.ok(html.indexOf('id="example"') < html.indexOf('id="agents"') && html.indexOf('id="agents"') < html.indexOf('id="book"'));
-  assert.match(html, /Agents that work for your business, with you in control\./);
+  const order = ["problem", "process", "pricing", "proof", "founder", "faq", "book"];
+  let at = -1;
+  for (const anchor of order) {
+    const next = html.indexOf('id="' + anchor + '"');
+    assert.ok(next > at, anchor);
+    at = next;
+  }
+  assert.match(html, /Leads slip through the cracks/);
+  assert.match(html, /Too many tools that don't talk/);
+  assert.match(html, /No time to fix it/);
+  assert.match(html, /<h3>Audit<\/h3>/);
+  assert.match(html, /<h3>Build<\/h3>/);
+  assert.match(html, /<h3>Grow<\/h3>/);
+  assert.match(html, /The audit is credited toward your build\./);
+  assert.match(html, /Based in Morris Plains, NJ\./);
+  assert.match(html, /id="quotes" hidden/);
+  assert.match(html, /data-testimonials="pending"/);
+  assert.doesNotMatch(html.slice(html.indexOf('id="quotes"'), html.indexOf('id="faq"')), /<blockquote|★★|said/);
+  assert.match(html, /class="book-bar"/);
+  assert.doesNotMatch(html, /id="makeover"|id="flow"|id="paths"|id="works"|id="how"|id="example"|id="agents"/);
+  assert.equal((html.match(/href="\/book\/"/g) || []).length, 10);
   assert.match(html, /Illustrative data/);
   assert.doesNotMatch(html, /Example console, simulated|SIMULATED|SAMPLE DEMO/);
-  assert.match(html, /Needs your approval/);
   const demo = await source("public/work/lyons-life-demo/index.html");
   assert.doesNotMatch(demo, /Florida Private Health|Self Employed Health|ACA Florida/);
   assert.match(demo, /Acquisition Site A/);
@@ -84,7 +99,7 @@ test("the journey gives a local diagnosis and only opens email by choice", async
 
 test("selected work shows first-party products without invented metrics", async () => {
   const home = await source("index.html");
-  const work = home.slice(home.indexOf('id="work"'), home.indexOf('id="example"'));
+  const work = await source("work/index.html");
   assert.equal((work.match(/class="piece"/g)||[]).length, 5);
   assert.equal((work.match(/class="piece piece-reel"/g)||[]).length, 1);
   assert.equal((work.match(/class="piece piece-lyons"/g)||[]).length, 1);
@@ -101,7 +116,7 @@ test("selected work shows first-party products without invented metrics", async 
     assert.ok(next > at, project);
     at = next;
   }
-  assert.match(home, /Products we built/);
+  assert.match(work, /Products we built/);
   const skill = work.slice(work.indexOf("SkillSprout"), work.indexOf("Real-Rank.ai"));
   assert.doesNotMatch(skill, /\d[\d,]*\+|\$|%/);
   assert.doesNotMatch(home, /TradingView|<iframe|<canvas|three\/|scene\.js|the.?spot|spot.?cafe/i);
@@ -189,8 +204,8 @@ test("commercial intake preserves intent and attribution without personal analyt
 
 test("the homepage has no testimonials and shows Evan's headshot", async () => {
   const html = await source("index.html");
-  assert.match(html, /Products we built/);
-  assert.doesNotMatch(html, /Real, named quotes go here|Needed from Evan|Client sample reel slot|David William|Sara E Ford|★★★★★|Evan photo here/);
+  assert.match(html, /id="quotes" hidden/);
+  assert.doesNotMatch(html, /Real, named quotes go here|Needed from Evan|Client sample reel slot|David William|Sara E Ford|★★★★★|Evan photo here|<blockquote/);
   assert.match(html, /srcset="\/home-v2\/evan-pancis\.avif"/);
   assert.match(html, /srcset="\/home-v2\/evan-pancis\.webp"/);
   assert.match(html, /src="\/home-v2\/evan-pancis\.jpg"/);
@@ -412,4 +427,60 @@ test("the 1stStep OS tools listing is a public free core with a local Cycle 1 ZI
   assert.match(os, /href="\/tools\/1ststep-os\/"/);
   assert.match(os, /illustrative/);
   assert.match(os, /not a hosted product/i);
+});
+
+test("pricing publishes the approved starting ranges and books a call", async () => {
+  const home = await source("index.html");
+  const page = await source("pricing/index.html");
+  const config = await source("vite.config.js");
+  const vercel = await source("vercel.json");
+  const sitemap = await source("public/sitemap.xml");
+  const rootMap = await source("sitemap.xml");
+  const css = await source("src/home-v2.css");
+  const section = home.slice(home.indexOf('id="pricing"'), home.indexOf('id="proof"'));
+  const lines = [
+    "Business &amp; Bottleneck Audit",
+    "$750–$1,500 flat",
+    "Credited toward your build.",
+    "Website Build",
+    "from $3,500",
+    "A site for a business that already has demand.",
+    "Automations &amp; Integrations",
+    "from $2,500 per workflow",
+    "One workflow, connected to the tools you already use.",
+    "App Development",
+    "from $10,000 (MVP)",
+    "A first version of the product.",
+    "Build Rescue &amp; Handoff",
+    "Starts with a $1,000 code review",
+    "Finish what a vibe coder or you started.",
+    "Consulting &amp; Support",
+    "$150–$200/hr or retainers from $1,500/mo",
+    "Direct time, by the hour or the month.",
+    "Every project is scoped on a free call.",
+  ];
+  for (const line of lines) {
+    const pattern = new RegExp(line.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+    assert.match(section, pattern, line);
+    assert.match(page, pattern, line);
+  }
+  assert.equal((section.match(/Book a call/g) || []).length, 12);
+  assert.equal((section.match(/href="\/book\/"/g) || []).length, 6);
+  assert.equal((page.match(/Book a call/g) || []).length, 13);
+  assert.match(home, /<nav aria-label="Primary">[\s\S]*href="\/pricing\/">Pricing<\/a>/);
+  assert.match(page, /aria-current="page">Pricing<\/a>/);
+  assert.match(home, /<nav aria-label="Footer"[\s\S]*href="\/pricing\/">Pricing<\/a>/);
+  assert.doesNotMatch(section, /cartoon|Cartoon ad|studio reel/i);
+  assert.doesNotMatch(page, /cartoon|Cartoon ad/i);
+  assert.match(css, /\.price-grid \.card:hover,\.price-grid \.card:focus-within\{transform:translateY\(-10px\)\}/);
+  assert.match(css, /prefers-reduced-motion:\s*reduce/);
+  assert.doesNotMatch(css, /backdrop-filter/);
+  assert.match(config, /pricing: "pricing\/index.html"/);
+  assert.match(config, /["']\/pricing["']/);
+  assert.match(vercel, /"source": "\/pricing"/);
+  assert.match(sitemap, /www\.1ststep\.ai\/pricing\//);
+  assert.match(rootMap, /www\.1ststep\.ai\/pricing\//);
+  assert.ok(home.indexOf('id="process"') < home.indexOf('id="pricing"') && home.indexOf('id="pricing"') < home.indexOf('id="proof"'));
+  assert.match(config, /work: "work\/index.html"/);
+  assert.match(sitemap, /www\.1ststep\.ai\/work\//);
 });

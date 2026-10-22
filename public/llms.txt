@@ -2,7 +2,7 @@
 
 1stStep.ai builds custom apps, agent systems, automations, internal tools, and websites. Work is designed, built, launched, documented, and organized for client control.
 
-Primary positioning: Get more from the business you already have. The homepage leads with that line. Its “Book a call” buttons go to the Website Strategy Call at https://www.1ststep.ai/book/. Begin Your Journey and Fit Check stay available from the footer. Longer service detail lives on the service pages.
+Primary positioning: Get more from the business you already have. The homepage leads with that line and one primary button, Book a free 20-min call, to the Website Strategy Call at https://www.1ststep.ai/book/. The page then names the bottleneck, three steps (Audit, Build, Grow; the audit is credited toward the build), services and starting ranges, a compact proof strip, the founder, a hidden testimonial slot with no quotes, an FAQ, and a final Book a call. The full portfolio is at https://www.1ststep.ai/work/. Begin Your Journey and Fit Check stay available from the footer. Longer service detail lives on the service pages.
 
 Products and paths:
 - Consultancy homepage: https://www.1ststep.ai/ — headline, subline, and Book a call sit beside an example desk scene. The monitor shows a desk dashboard with sparklines and example labels only, and no client names or metrics. One line under the hero says Illustrative data. Selected work is large screenshots of 1stStep's own products (DaySetGo, SwingTradePros, Job Agent, SkillSprout, Real-Rank.ai), a Lyons Life Command Center card that links to an interactive demo, plus a smaller studio reel. The homepage does not repeat figures from that demo. The demo’s only disclosure is a footer line, Illustrative data. Its websites are labeled Acquisition Site A, B, and C, plus Lyons Life. The hosted demo is a dark command center with a light theme. An agent console on the homepage shows agents, a task feed, and a human approval step, with one Illustrative data line and no client names or metrics. A lost-to-booked path has the same single line. No invented metrics, testimonials, or clients. SkillSprout has no public numbers. SwingTradePros is described with Node AI and no performance claim.
@@ -18,6 +18,8 @@ Products and paths:
 - Other focused services: https://www.1ststep.ai/services/websites.html, https://www.1ststep.ai/services/mvp-builds.html, https://www.1ststep.ai/services/app-builds.html, https://www.1ststep.ai/services/internal-tools.html
 - Commercial project intake: https://www.1ststep.ai/fit-check/ — one form for a new build, an existing build, or business automation. A success response means the approved delivery provider accepted the request; it does not prove inbox delivery, a read, or CRM creation.
 - Website Strategy Call: https://www.1ststep.ai/book/ — 30-minute website-intent conversation. Not a systems-audit booking.
+- Work: https://www.1ststep.ai/work/ — full portfolio. The homepage keeps a compact proof strip and links the Lyons Life Command Center demo directly.
+- Pricing: https://www.1ststep.ai/pricing/ — published starting ranges. Business & Bottleneck Audit $750–$1,500 flat, credited toward the build. Website Build from $3,500. Automations & Integrations from $2,500 per workflow. App Development from $10,000 (MVP). Build Rescue & Handoff starts with a $1,000 code review. Consulting & Support $150–$200/hr or retainers from $1,500/mo. Every project is scoped on a free call. The Book a call buttons go to the Website Strategy Call.
 
 Official profiles:
 - LinkedIn: https://www.linkedin.com/company/1ststep-ai/
@@ -76,6 +78,7 @@ FAQ for search and chat assistants:
 - Are results guaranteed? No. 1stStep.ai does not guarantee revenue, rankings, funding, or app success.
 - Is Begin Your Journey a sales form? No. Answers stay in the browser unless the visitor chooses to open a prefilled email.
 - Is the /book/ calendar a systems audit? No. It is a Website Strategy Call. System Audit requests go to evan@1ststep.ai.
+- Where are prices listed? https://www.1ststep.ai/pricing/ Starting ranges only. Every project is scoped on a free call, which is the Website Strategy Call at /book/.
 
 Contact:
 - Evan Pancis, founder
