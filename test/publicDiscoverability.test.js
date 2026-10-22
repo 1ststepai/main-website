@@ -129,7 +129,7 @@ test("homepage first screen books the call beside an example desk", async () => 
   assert.doesNotMatch(html, /TODO: connect the 20-minute booking link|class="sound"/);
   assert.doesNotMatch(html, /id="how"|id="paths"/);
   assert.match(html, /<link rel="canonical" href="https:\/\/www\.1ststep\.ai\/"/);
-  assert.match(html, /property="og:image" content="https:\/\/www\.1ststep\.ai\/assets\/og-home\.png"/);
+  assert.match(html, /property="og:image" content="https:\/\/www\.1ststep\.ai\/assets\/og-home-v2\.png"/);
 });
 
 test("the homepage uses the system cursor and does not hijack scroll", async () => {
@@ -239,7 +239,7 @@ test("service page H1s use search language and carry basic OG", async () => {
     const html = await source(path);
     assert.match(html, heading);
     assert.match(html, /<link rel="canonical" href="https:\/\/www\.1ststep\.ai\//);
-    assert.match(html, /property="og:image" content="https:\/\/www\.1ststep\.ai\/assets\/og-home\.png"/);
+    assert.match(html, /property="og:image" content="https:\/\/www\.1ststep\.ai\/assets\/og-home-v2\.png"/);
     assert.match(html, /property="og:site_name" content="1stStep\.ai"/);
     assert.match(html, /name="twitter:card" content="summary_large_image"/);
   }
