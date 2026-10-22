@@ -1,15 +1,32 @@
 (() => {
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const hero = document.querySelector('.hero');
+  const pauseBtn = document.querySelector('.hero-pause');
   const video = document.querySelector('.work-vid');
   const button = document.querySelector('.reel-sound');
+  let userPaused = false;
+  let inView = true;
+  const syncHero = () => {
+    if (!hero) return;
+    hero.classList.toggle('is-paused', userPaused);
+    hero.classList.toggle('is-on', inView && !userPaused && !reduced);
+  };
 
-  if (hero && !reduced && 'IntersectionObserver' in window) {
-    new IntersectionObserver(([entry]) => {
-      hero.classList.toggle('is-on', entry.isIntersecting);
-    }, { threshold: 0.12 }).observe(hero);
-  } else if (hero && reduced) {
+  if (hero && reduced) {
     hero.classList.remove('is-on');
+  } else if (hero && 'IntersectionObserver' in window) {
+    new IntersectionObserver(([entry]) => {
+      inView = entry.isIntersecting;
+      syncHero();
+    }, { threshold: 0.12 }).observe(hero);
+  }
+  if (pauseBtn && !reduced) {
+    pauseBtn.addEventListener('click', () => {
+      userPaused = !userPaused;
+      pauseBtn.setAttribute('aria-pressed', userPaused ? 'true' : 'false');
+      pauseBtn.textContent = userPaused ? 'Play animation' : 'Pause animation';
+      syncHero();
+    });
   }
 
   if (!video || !button) return;

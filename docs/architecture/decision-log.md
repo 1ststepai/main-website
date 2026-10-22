@@ -1,5 +1,13 @@
 # Architecture Decision Log
 
+## 2026-10-22: Homepage hero matches the Swing Trade Pros desk composition
+
+- **Status / owner:** Evan sent a screenshot of the Swing Trade Pros homepage and asked for that composition on 1stStep. Preview only. No production deploy. This supersedes the node-diagram hero.
+- **Decision:** The first screen keeps the headline “Get more from the business you already have.” The subline is “Websites, integrations, automations, and custom apps.” Book a call still goes to `/book/`. A second control, “See our work,” goes to `#work`. The right side is a dark desk with a monitor. The screen is a live HTML dashboard: sidebar, new-lead rows, automation toggles, booked-today cards, and a small assistant thread. Every panel is marked EXAMPLE or SIMULATED. There are no counts, prices, or client names. The mug uses the canonical logo file. Notebook and book-spine words are HTML. A feature strip sits along the bottom, with the line “Start with what you have. We’ll build the rest.” Motion is transform and opacity. It runs only while the hero is on screen, and Pause animation freezes it. Reduced motion shows the populated scene still and hides the pause control. The header logo stays `firststep-logo-transparent-cleaned.png`, at 48px tall with the 1147:946 ratio locked so the mark is not squeezed. The reel stays a smaller selected-work card.
+- **Rationale:** Evan wanted the Swing Trade Pros hero’s layout and life, in the 1stStep palette, without trading content or invented results.
+- **Affected systems:** `index.html`, `src/home-v2.css`, `src/home-v2.js`, `public/home-v2/desk-scene.webp`, `public/llms.txt`.
+- **Rollback:** Restore the node-diagram hero. Leave the reel card, the music credit, and the canonical logo file in place.
+
 ## 2026-10-21: Homepage hero is a quiet system diagram, and the reel is a work card
 
 - **Status / owner:** Evan asked to take the cartoon reel out of the first screen and to match the feel of the Swing Trade Pros homepage hero, adapted to 1stStep. Preview only. No production deploy.

@@ -98,15 +98,18 @@ test("llms.txt names the owner offer, start paths, and canonical www host", asyn
   assert.match(llms, /does not guarantee billing or token savings/);
 });
 
-test("homepage first screen books the Website Strategy Call over a system diagram", async () => {
+test("homepage first screen books the call beside an example desk", async () => {
   const html = await source("index.html");
   const heroStart = html.indexOf('<section class="hero');
   const hero = html.slice(heroStart, html.indexOf("</section>", heroStart));
   const work = html.slice(html.indexOf('id="work"'), html.indexOf('id="example"'));
   assert.match(hero, /Get more from the business you/);
   assert.match(hero, /href="\/book\/"[^>]*>Book a call/);
-  assert.match(hero, />Lead</);
-  assert.match(hero, />Booked</);
+  assert.match(hero, /Websites, integrations, automations, and custom apps/);
+  assert.match(hero, /See our work/);
+  assert.match(hero, /Pause animation/);
+  assert.match(hero, /SIMULATED/);
+  assert.match(hero, /EXAMPLE/);
   assert.doesNotMatch(hero, /Tap for sound|poster_16x9|<video|Watch with sound|href="\/fit-check\//);
   assert.match(work, /Tap for sound/);
   assert.match(work, /poster="\/home-v2\/poster_16x9\.webp"/);
