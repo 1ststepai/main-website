@@ -218,8 +218,8 @@ test("service page H1s use search language and carry basic OG", async () => {
   const pages = {
     "services/websites.html": /<h1>A business website that gets leads\.<\/h1>/,
     "services/mvp-builds.html": /<h1>Build an MVP people can actually use\.<\/h1>/,
-    "services/internal-tools.html": /<h1>Internal tools and AI automation\.<\/h1>/,
-    "services/revenue-systems.html": /<h1>AI automation for <span class="gradient">lead capture and follow-up\.<\/span><\/h1>/,
+    "services/internal-tools.html": /<h1>Internal tools and automation\.<\/h1>/,
+    "services/revenue-systems.html": /<h1>Automation for <span class="gradient">lead capture and follow-up\.<\/span><\/h1>/,
   };
   for (const [path, heading] of Object.entries(pages)) {
     const html = await source(path);

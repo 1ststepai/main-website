@@ -1,5 +1,13 @@
 # Architecture Decision Log
 
+## 2026-10-22: Visible copy drops the standalone word AI
+
+- **Status / owner:** Evan asked for the word AI to leave user-visible copy, on the same preview branch. No production deploy.
+- **Decision:** Nav, headings, buttons, and body copy use agents, automation, assistant, or team training instead of the standalone word AI. Named swaps: Agent Operations, Assistant, Agents that work for your business, with you in control, and Team Training. 1stStep.ai stays, including the blue .ai wordmark. File names, URLs, schema organization name, and non-visible keys such as `ai-system-agent` and `genome-ai` stay.
+- **Rationale:** The brand already carries .ai. Repeating AI in the interface made the copy sound generic.
+- **Affected systems:** Homepage, Lyons Life demo, service pages, `/os`, tools listings, fit check, journey, app idea checker, foundry labels, admin labels, `public/llms.txt`.
+- **Rollback:** Restore the previous visible labels. Do not rename 1stStep.ai while rolling back.
+
 ## 2026-10-22: One quiet disclosure on each showcase
 
 - **Status / owner:** Evan asked for premium copy on the site, the Lyons Life demo, and the AI console. Preview only. No production deploy.

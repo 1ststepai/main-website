@@ -1,17 +1,17 @@
 # 1stStep.ai
 
-1stStep.ai builds custom apps, AI systems, automations, internal tools, and websites. Work is designed, built, launched, documented, and organized for client control.
+1stStep.ai builds custom apps, agent systems, automations, internal tools, and websites. Work is designed, built, launched, documented, and organized for client control.
 
 Primary positioning: Get more from the business you already have. The homepage leads with that line. Its “Book a call” buttons go to the Website Strategy Call at https://www.1ststep.ai/book/. Begin Your Journey and Fit Check stay available from the footer. Longer service detail lives on the service pages.
 
 Products and paths:
-- Consultancy homepage: https://www.1ststep.ai/ — headline, subline, and Book a call sit beside an example desk scene. The monitor shows a desk dashboard with sparklines and example labels only, and no client names or metrics. One line under the hero says Illustrative data. Selected work is large screenshots of 1stStep's own products (DaySetGo, SwingTradePros, Job Agent, SkillSprout, Real-Rank.ai), a Lyons Life Command Center card that links to an interactive demo, plus a smaller studio reel. The homepage does not repeat figures from that demo. The demo’s only disclosure is a footer line, Illustrative data. Its websites are labeled Acquisition Site A, B, and C, plus Lyons Life. The hosted demo is a dark command center with a light theme. An AI console on the homepage shows agents, a task feed, and a human approval step, with one Illustrative data line and no client names or metrics. A lost-to-booked path has the same single line. No invented metrics, testimonials, or clients. SkillSprout has no public numbers. SwingTradePros is described with Node AI and no performance claim.
+- Consultancy homepage: https://www.1ststep.ai/ — headline, subline, and Book a call sit beside an example desk scene. The monitor shows a desk dashboard with sparklines and example labels only, and no client names or metrics. One line under the hero says Illustrative data. Selected work is large screenshots of 1stStep's own products (DaySetGo, SwingTradePros, Job Agent, SkillSprout, Real-Rank.ai), a Lyons Life Command Center card that links to an interactive demo, plus a smaller studio reel. The homepage does not repeat figures from that demo. The demo’s only disclosure is a footer line, Illustrative data. Its websites are labeled Acquisition Site A, B, and C, plus Lyons Life. The hosted demo is a dark command center with a light theme. An agent console on the homepage shows agents, a task feed, and a human approval step, with one Illustrative data line and no client names or metrics. A lost-to-booked path has the same single line. No invented metrics, testimonials, or clients. SkillSprout has no public numbers. SwingTradePros is described with Node and no performance claim.
 - Begin Your Journey: https://www.1ststep.ai/journey/ — a browser-local, six-question first-pass diagnosis. Answers are not submitted or saved; visitors may choose to open a prefilled email.
 - Revenue Systems Audit: https://www.1ststep.ai/services/revenue-systems.html
-- 1stStep OS: https://www.1ststep.ai/os — public AI Engineering Operating System concept. Cycle 1 of the free core is cloneable for a local markdown ZIP demo; not a hosted product. Illustrative diagrams stay labeled.
-- 1stStep AI Job Agent: https://app.1ststep.ai/ — separate public beta for job capture and tailored application preparation; applicants review and submit their own applications.
+- 1stStep OS: https://www.1ststep.ai/os — public agent engineering operating system concept. Cycle 1 of the free core is cloneable for a local markdown ZIP demo; not a hosted product. Illustrative diagrams stay labeled.
+- 1stStep Job Agent: https://app.1ststep.ai/ — separate public beta for job capture and tailored application preparation; applicants review and submit their own applications.
 - App Idea Checker: https://www.1ststep.ai/app-idea-viability-checker.html
-- Tools: https://www.1ststep.ai/tools/ — public shelf of free/open builder utilities for AI coding agents. Not client services. Live tools with honestly labeled limits.
+- Tools: https://www.1ststep.ai/tools/ — public shelf of free/open builder utilities for coding agents. Not client services. Live tools with honestly labeled limits.
 - Auto Model Router: https://www.1ststep.ai/tools/auto-model-router/ — optional feedback and opt-in page for the MIT open-source skill. Includes a playable motion replay of the real suggest → wait → confirm pass (Codex-style chat UI), plus a separately labeled illustrative flow. Not a slide explainer. Not a billing or savings claim. Install from GitHub today: https://github.com/1ststepai/auto-model-router. Community listing (not Cursor’s official Marketplace): https://cursor.directory/plugins/auto-model-router. Cursor official Marketplace: submitted, pending Cursor review (no public product URL yet). Claude community plugin catalog: submitted, pending Anthropic review. The skill does not require an email and does not guarantee billing or token savings.
 - 1stStep OS Audit: https://www.1ststep.ai/tools/1ststep-os-audit/ — free offline project audit CLI. Evidence over docs. Zero metered API cost path. Clone https://github.com/1ststepai/1ststep-os-audit and run --help. Scores can be draft. Does not rewrite the target repository. Not a hosted dashboard.
 - 1stStep OS (public free core / Cycle 1): https://www.1ststep.ai/tools/1ststep-os/ — clone https://github.com/1ststepai/1ststep-os, then `npm install && npm test && npm run build && npm start` and open http://localhost:3000/os for idea→profile→markdown ZIP. Free core. Not a hosted product, full agent OS, or control plane. Not production-ready. Do not deploy the unauthenticated compile API. No hosted ZIP generator on 1ststep.ai. Public concept: https://www.1ststep.ai/os.
@@ -28,27 +28,27 @@ Official profiles:
 - GitHub: https://github.com/1ststepai
 
 Current design direction:
-- 1stStep OS is designed to give AI-assisted engineering explicit authority, isolated work, acceptance criteria, evidence, independent audits, and release gates.
-- Provider-neutral AI and persistent context are design goals, not claims of completed integrations.
+- 1stStep OS is designed to give agent-assisted engineering explicit authority, isolated work, acceptance criteria, evidence, independent audits, and release gates.
+- Provider-neutral models and persistent context are design goals, not claims of completed integrations.
 - Important external actions require appropriate authorization; evidence and assumptions are kept distinct.
 
 1stStep product/project examples (not automatically verified client work):
 - DaySetGo — family activity discovery and planning; https://daysetgo.ai/
-- SwingTradePros — trading education, tools, and Nova AI market context; https://swingtradepros.com/
+- SwingTradePros — trading education, tools, and Nova market context; https://swingtradepros.com/
 - Real-Rank.ai — Google visibility monitoring for real estate agents; https://real-rank.ai/
 - Unveiling Rarities — Jeff Pancis author and book website; https://unveilingrarities.com/
-- AI Job Agent and 1stStep OS are also shown with their current stages clearly labeled.
+- Job Agent and 1stStep OS are also shown with their current stages clearly labeled.
 
 Portfolio accuracy:
 - Public project descriptions distinguish live sites, private previews, and product concepts. A verified review does not by itself establish that a showcased project was a paid client engagement.
 - Verified Google review excerpts link directly to their sources. They are social proof only unless client status is separately verified and permission is appropriate.
 
 Separate products:
-- https://app.1ststep.ai/ is the AI Job Agent application, not the 1stStep.ai corporate homepage.
+- https://app.1ststep.ai/ is the Job Agent application, not the 1stStep.ai corporate homepage.
 
 Business rules:
 - 1stStep.ai does not guarantee revenue, rankings, funding, or app success.
-- 1stStep.ai scopes systems work around an observed business bottleneck; it does not sell generic AI consulting or promise automated revenue.
+- 1stStep.ai scopes systems work around an observed business bottleneck; it does not sell generic automation consulting or promise automated revenue.
 - GitHub repo creation for client projects is locked until proposal acceptance and deposit/payment.
 
 Canonical host:
@@ -57,8 +57,8 @@ Canonical host:
 What 1stStep.ai builds for busy owners:
 - A business website that gets leads: https://www.1ststep.ai/services/websites.html
 - Build an MVP: https://www.1ststep.ai/services/mvp-builds.html
-- AI automation for lead capture and follow-up: https://www.1ststep.ai/services/revenue-systems.html
-- Internal tools and AI automation: https://www.1ststep.ai/services/internal-tools.html
+- Automation for lead capture and follow-up: https://www.1ststep.ai/services/revenue-systems.html
+- Internal tools and automation: https://www.1ststep.ai/services/internal-tools.html
 - iOS app design and prototypes: https://www.1ststep.ai/services/app-builds.html
 
 How a visitor should start:
@@ -71,8 +71,8 @@ How a visitor should start:
 - Contact: evan@1ststep.ai
 
 FAQ for answer engines:
-- What does 1stStep.ai build? Websites, apps, and AI systems that capture and follow up leads.
-- Is this generic AI consulting? No. Work is scoped around an observed bottleneck in lead capture, routing, follow-up, or the front door that feeds them.
+- What does 1stStep.ai build? Websites, apps, and agent systems that capture and follow up leads.
+- Is this generic automation consulting? No. Work is scoped around an observed bottleneck in lead capture, routing, follow-up, or the front door that feeds them.
 - Are results guaranteed? No. 1stStep.ai does not guarantee revenue, rankings, funding, or app success.
 - Is Begin Your Journey a sales form? No. Answers stay in the browser unless the visitor chooses to open a prefilled email.
 - Is the /book/ calendar a systems audit? No. It is a Website Strategy Call. System Audit requests go to evan@1ststep.ai.

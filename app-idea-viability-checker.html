@@ -1880,7 +1880,7 @@
               { label: "Client/customer portal", value: "Client/customer portal", ideaType: "Web app / SaaS", simplicity: 15, path: "Focused client portal with one clear customer workflow." },
               { label: "Booking or quote tool", value: "Booking or quote tool", ideaType: "Business website", simplicity: 18, revenue: 14, path: "Booking or quote tool tied to lead capture and follow-up." },
               { label: "SaaS app", value: "SaaS app", ideaType: "Web app / SaaS", simplicity: 12, revenue: 14, path: "Narrow SaaS MVP with only the core workflow." },
-              { label: "AI assistant/tool", value: "AI assistant/tool", ideaType: "AI tool", simplicity: 11, path: "AI-assisted workflow prototype before a large AI product build." },
+              { label: "Assistant or tool", value: "Assistant or tool", ideaType: "Agent tool", simplicity: 11, path: "An agent workflow prototype before a large product build." },
               { label: "Mobile-friendly web app", value: "Mobile-friendly web app", ideaType: "Web app / SaaS", simplicity: 15, path: "Mobile-friendly web MVP before native app development." },
               { label: "Not sure yet", value: "Not sure yet", ideaType: "Not sure yet", simplicity: 8, path: "Strategy map, validation plan, and scope options before building." }
             ]
@@ -2043,7 +2043,7 @@
 
         function inferBuildType(text) {
           if (hasAny(text, ["automation", "automate", "workflow", "follow up", "spreadsheet", "internal"])) return "Internal automation";
-          if (hasAny(text, ["ai", "assistant", "chatbot", "gpt"])) return "AI tool";
+          if (hasAny(text, ["ai", "assistant", "chatbot", "gpt"])) return "Agent tool";
           if (hasAny(text, ["saas", "portal", "dashboard", "platform", "app"])) return "Web app / SaaS";
           if (hasAny(text, ["website", "landing", "site", "page"])) return "Business website";
           if (hasAny(text, ["mobile", "ios", "android"])) return "Mobile-friendly web app";
@@ -2146,7 +2146,7 @@
 
         function buildPathForType(type) {
           if (type === "Internal automation") return "Workflow map plus a lightweight internal dashboard or automation.";
-          if (type === "AI tool") return "AI-assisted prototype around one repeatable task before a full AI product.";
+          if (type === "Agent tool") return "An agent prototype around one repeatable task before a full product.";
           if (type === "Business website") return "Landing page or service workflow with lead capture and proof tracking.";
           if (type === "Mobile-friendly web app") return "Mobile-friendly web MVP before native app development.";
           if (type === "Web app / SaaS") return "Focused MVP with only the core workflow.";
@@ -2156,7 +2156,7 @@
         function generateMockupPreview(report) {
           var type = report.ideaType || inferBuildType(ideaText);
           var problem = report.problemType || "core workflow";
-          var title = "First-Version " + (type === "Business website" ? "Lead System" : type === "Internal automation" ? "Workflow Dashboard" : type === "AI tool" ? "AI Tool" : "MVP");
+          var title = "First-Version " + (type === "Business website" ? "Lead System" : type === "Internal automation" ? "Workflow Dashboard" : type === "Agent tool" ? "Agent tool" : "MVP");
           var firstScreen = "Intake and status dashboard";
           var screens = ["Intake", "Dashboard", "Details"];
           var features = ["Capture the request", "Track status", "Show next action"];
@@ -2180,10 +2180,10 @@
             flow = ["Work enters", "Status updates", "Owner assigned", "Follow-up triggered"];
             buildFirst = ["Dashboard", "Status workflow", "Notification/reminder logic"];
             skipForNow = ["Full ERP", "Every edge case", "Advanced permissions"];
-          } else if (type === "AI tool") {
-            title = "AI Tool Prototype Preview";
+          } else if (type === "Agent tool") {
+            title = "Agent tool preview";
             firstScreen = "Prompt input with structured result and review step";
-            screens = ["Input", "AI result", "Saved output"];
+            screens = ["Input", "Generated result", "Saved output"];
             features = ["Guided input", "Generated draft", "Human review"];
             flow = ["User submits context", "Tool drafts output", "User edits", "Result saved"];
             buildFirst = ["Repeatable prompt flow", "Result editor", "Saved history"];

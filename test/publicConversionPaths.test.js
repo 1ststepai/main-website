@@ -10,7 +10,7 @@ test("the homepage leads with the studio offer and keeps products distinct", asy
   const llms = await source("public/llms.txt");
   const work = html.slice(html.indexOf('id="work"'), html.indexOf('id="example"'));
   assert.match(html, /Get more from the business you <em>already have\.<\/em>/);
-  assert.match(work, /Node AI/);
+  assert.match(work, /Alerts and Node/);
   assert.doesNotMatch(work, /8,000\+|4,000\+|TradingView/);
   assert.match(html, /href="\/tools\/"/);
   assert.match(html, /href="\/journey\/"/);
@@ -20,7 +20,7 @@ test("the homepage leads with the studio offer and keeps products distinct", asy
   assert.doesNotMatch(html, /Book a 20-min call/);
   assert.match(llms, /Get more from the business you already have/);
   assert.match(llms, /1stStep OS/);
-  assert.match(llms, /AI Job Agent/);
+  assert.match(llms, /1stStep Job Agent/);
   assert.doesNotMatch(html, /TradingView|guaranteed revenue|A website that undersells the business|\$3,250&ndash;\$12,000|Watch with sound|TODO: connect the 20-minute booking link|Example makeover/);
   assert.match(html, /data-src="\/home-v2\/1ststep-reel-v4\.mp4"/);
   assert.match(html, /poster="\/home-v2\/poster_16x9\.webp"/);
@@ -41,7 +41,7 @@ test("the homepage keeps a short section order and service pages keep their own 
   assert.equal((html.match(/href="\/book\/"/g) || []).length, 4);
   assert.match(html, /id="agents"/);
   assert.ok(html.indexOf('id="example"') < html.indexOf('id="agents"') && html.indexOf('id="agents"') < html.indexOf('id="book"'));
-  assert.match(html, /AI agents that work for your business, with you in control\./);
+  assert.match(html, /Agents that work for your business, with you in control\./);
   assert.match(html, /Illustrative data/);
   assert.doesNotMatch(html, /Example console, simulated|SIMULATED|SAMPLE DEMO/);
   assert.match(html, /Needs your approval/);
@@ -74,7 +74,7 @@ test("the journey gives a local diagnosis and only opens email by choice", async
   const sitemap = await source("public/sitemap.xml");
   assert.equal((html.match(/class="step" data-step=/g) || []).length, 6);
   assert.match(html, /INITIAL FIT SIGNAL/);
-  assert.match(html, /No account or AI request is created/);
+  assert.match(html, /No account or model request is created/);
   assert.match(script, /document\.createElement\('dd'\)/);
   assert.match(script, /encodeURIComponent\(emailBody\)/);
   assert.doesNotMatch(script, /fetch\(|localStorage|sessionStorage/);
