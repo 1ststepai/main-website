@@ -1,5 +1,13 @@
 # Architecture Decision Log
 
+## 2026-10-22: Header wordmark “.ai” uses the logo blue
+
+- **Status / owner:** Evan asked for the nav “.ai” to leave lime and use the blue from the canonical logo, with readable contrast on the dark header. Preview only. No production deploy.
+- **Decision:** `.wordmark i` is `#007BF8` on the homepage and on every `body.v2` header. That hex is an opaque pixel in `public/assets/firststep-logo-transparent-cleaned.png` (105 pixels). The most common bright-blue pixel in that file is `#006EEC`, which measures 4.14:1 against header ink `#0D0C0A`. The homepage wordmark is 18px and the mobile size is 16px, so the text needs 4.5:1. `#007BF8` is the nearest common exact logo blue that clears it, at 4.83:1. Lime stays on buttons, eyebrows, and example labels. The logo file is unchanged.
+- **Rationale:** The “.ai” should match the logo’s blue and stay readable on `#0D0C0A`.
+- **Affected systems:** `src/home-v2.css`, `src/v2-site.css`.
+- **Rollback:** Set `.wordmark i` back to `var(--acid)` on the homepage and `#D4FF3A` on `body.v2`.
+
 ## 2026-10-22: Homepage hero matches the Swing Trade Pros desk composition
 
 - **Status / owner:** Evan sent a screenshot of the Swing Trade Pros homepage and asked for that composition on 1stStep. Preview only. No production deploy. This supersedes the node-diagram hero.

@@ -17,7 +17,7 @@ body.v2 header.nav .logo{display:inline-flex;align-items:center;flex:none;text-d
 body.v2 header.nav .logo img{height:46px;width:auto;display:block;filter:none;max-width:none}
 body.v2 .nav-blend{display:flex;align-items:center;gap:32px;flex:1;min-width:0}
 body.v2 .wordmark{font:800 24px "Archivo",system-ui,sans-serif;text-decoration:none;letter-spacing:-.02em;color:#F1EADB;background:none;-webkit-text-fill-color:#F1EADB}
-body.v2 .wordmark i{font-style:normal;color:#D4FF3A;font-family:"Archivo",system-ui,sans-serif}
+body.v2 .wordmark i{font-style:normal;color:#007BF8;-webkit-text-fill-color:#007BF8;font-family:"Archivo",system-ui,sans-serif}
 body.v2 header.nav nav{margin-left:auto;display:flex;gap:30px;font-size:15px;font-weight:500}
 body.v2 header.nav nav a{color:#F1EADB;text-decoration:none;opacity:.85}
 body.v2 header.nav nav a:hover,body.v2 header.nav nav a[aria-current="page"]{opacity:1;color:#F1EADB}
