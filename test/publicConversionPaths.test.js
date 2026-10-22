@@ -52,9 +52,8 @@ test("the homepage keeps a short section order and service pages keep their own 
   assert.match(html, /<h3>Grow<\/h3>/);
   assert.match(html, /The audit is credited toward your build\./);
   assert.match(html, /Based in Morris Plains, NJ\./);
-  assert.match(html, /id="quotes" hidden/);
-  assert.match(html, /data-testimonials="pending"/);
-  assert.doesNotMatch(html.slice(html.indexOf('id="quotes"'), html.indexOf('id="faq"')), /<blockquote|★★|said/);
+  assert.doesNotMatch(html, /id="quotes" hidden|data-testimonials="pending"/);
+  assert.ok(html.indexOf('id="quotes"') < html.indexOf('id="book"'));
   assert.match(html, /class="book-bar"/);
   assert.doesNotMatch(html, /id="makeover"|id="flow"|id="paths"|id="works"|id="how"|id="example"|id="agents"/);
   assert.equal((html.match(/href="\/book\/"/g) || []).length, 10);
@@ -219,10 +218,14 @@ test("commercial intake preserves intent and attribution without personal analyt
   assert.match(analytics, /commercial_intake_path_click/);
 });
 
-test("the homepage has no testimonials and shows Evan's headshot", async () => {
+test("the homepage has one real video testimonial and shows Evan's headshot", async () => {
   const html = await source("index.html");
-  assert.match(html, /id="quotes" hidden/);
-  assert.doesNotMatch(html, /Real, named quotes go here|Needed from Evan|Client sample reel slot|David William|Sara E Ford|★★★★★|Evan photo here|<blockquote/);
+  assert.doesNotMatch(html, /Real, named quotes go here|Needed from Evan|Client sample reel slot|David William|Sara E Ford|★★★★★|Evan photo here/);
+  assert.equal((html.match(/<blockquote/g) || []).length, 1);
+  assert.match(html, /He knows what he&rsquo;s doing&hellip; So, book a consult\./);
+  assert.match(html, /Alon Bendory, <a href="https:\/\/yibble\.co\/"[^>]*>Yibble<\/a>/);
+  assert.match(html, /<track kind="captions" src="\/testimonials\/alon-bendory\.en\.vtt"/);
+  assert.doesNotMatch(html, /<video[^>]*autoplay/);
   assert.match(html, /srcset="\/home-v2\/evan-pancis\.avif"/);
   assert.match(html, /srcset="\/home-v2\/evan-pancis\.webp"/);
   assert.match(html, /src="\/home-v2\/evan-pancis\.jpg"/);
