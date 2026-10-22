@@ -29,6 +29,45 @@
     });
   }
 
+  const scene = document.querySelector('.hero-scene');
+  const fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
+  if (scene && hero && fine && !reduced) {
+    let last = 0;
+    hero.addEventListener('pointermove', (event) => {
+      if (!hero.classList.contains('is-on') || hero.classList.contains('is-paused')) return;
+      const now = performance.now();
+      if (now - last < 40) return;
+      last = now;
+      const rect = hero.getBoundingClientRect();
+      scene.style.setProperty('--px', ((event.clientX - rect.left) / rect.width - 0.5).toFixed(3));
+      scene.style.setProperty('--py', ((event.clientY - rect.top) / rect.height - 0.5).toFixed(3));
+    });
+  }
+  if (scene && hero && !reduced) {
+    let lit = false;
+    let ticking = false;
+    const lightOnce = () => {
+      if (lit || !inView) return;
+      lit = true;
+      hero.classList.add('is-lit');
+    };
+    const applyScroll = () => {
+      ticking = false;
+      const top = hero.getBoundingClientRect().top;
+      const y = Math.max(-280, Math.min(280, -top));
+      scene.style.setProperty('--bg-y', (y * 0.05).toFixed(2) + 'px');
+      scene.style.setProperty('--prop-y', (y * 0.11).toFixed(2) + 'px');
+      scene.style.setProperty('--mon-y', (y * 0.17).toFixed(2) + 'px');
+      lightOnce();
+    };
+    window.addEventListener('scroll', () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(applyScroll);
+    }, { passive: true });
+    requestAnimationFrame(applyScroll);
+  }
+
   if (!video || !button) return;
 
   const paintSound = (on) => {

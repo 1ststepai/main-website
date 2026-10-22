@@ -56,8 +56,10 @@
   <section class="hero is-on" id="top">
     <div class="hero-scene">
       <img class="desk-photo" src="/home-v2/desk-scene.webp" width="1280" height="720" alt="" decoding="async">
+      <div class="lamp" aria-hidden="true"></div>
       <div class="desk-shade"></div>
       <div class="lime-glow" aria-hidden="true"></div>
+      <div class="key-glow" aria-hidden="true"></div>
       <div class="monitor" aria-hidden="true">
         <div class="bezel">
           <div class="ui">
@@ -72,51 +74,92 @@
               <span>Integrations</span>
             </div>
             <div class="ui-main">
-              <div class="ui-top"><strong>Today</strong><em>EXAMPLE</em></div>
-              <div class="tiles">
-                <div class="tile">
-                  <div class="tile-h">New leads <i>SIMULATED</i></div>
+              <div class="ui-top">
+                <p><strong>Today</strong><span>Thu · Example</span></p>
+                <p>Follow-up that gets booked. <em>EXAMPLE</em></p>
+              </div>
+              <div class="snap">
+                <div>
+                  <span>Leads in <i>SIMULATED</i></span>
+                  <span class="spark a" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+                </div>
+                <div>
+                  <span>Replies sent <i>SIMULATED</i></span>
+                  <span class="spark b" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+                </div>
+                <div>
+                  <span>Booked <i>SIMULATED</i></span>
+                  <span class="spark c" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+                </div>
+              </div>
+              <div class="ui-body">
+                <div class="tile leads">
+                  <div class="tile-h">Today’s leads <i>SIMULATED</i></div>
                   <ol>
-                    <li class="pop" style="--d:0s"><strong>Missed call</strong><span>Instant text sent</span></li>
-                    <li class="pop" style="--d:.55s"><strong>Web form</strong><span>Added to CRM</span></li>
-                    <li class="pop" style="--d:1.1s"><strong>Instagram DM</strong><span>Replied</span></li>
+                    <li class="lead-in">
+                      <span class="av">M<i class="ping"></i></span>
+                      <span class="who"><strong>Missed call</strong><small>Phone</small></span>
+                      <em class="chip">Text sent</em>
+                      <span class="spark mini a" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+                    </li>
+                    <li>
+                      <span class="av">W</span>
+                      <span class="who"><strong>Web form</strong><small>Site</small></span>
+                      <em class="chip">In CRM</em>
+                      <span class="spark mini b" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+                    </li>
+                    <li>
+                      <span class="av">I</span>
+                      <span class="who"><strong>Instagram</strong><small>DM</small></span>
+                      <em class="chip">Replied</em>
+                      <span class="spark mini c" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+                    </li>
+                    <li>
+                      <span class="av">E</span>
+                      <span class="who"><strong>Email</strong><small>Inbox</small></span>
+                      <em class="chip">New</em>
+                      <span class="spark mini a" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+                    </li>
+                    <li>
+                      <span class="av">C</span>
+                      <span class="who"><strong>Chat</strong><small>Site</small></span>
+                      <em class="chip">Example</em>
+                      <span class="spark mini b" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+                    </li>
                   </ol>
                 </div>
-                <div class="tile">
-                  <div class="tile-h">Automations running <i>SIMULATED</i></div>
-                  <div class="auto"><span>Missed call to text</span><i class="switch"><i></i></i><b class="flow" style="--d:.2s"></b></div>
-                  <div class="auto"><span>Form into CRM</span><i class="switch"><i></i></i><b class="flow" style="--d:.8s"></b></div>
-                  <div class="auto"><span>DM reply</span><i class="switch"><i></i></i><b class="flow" style="--d:1.4s"></b></div>
-                </div>
-                <div class="tile">
-                  <div class="tile-h">Booked today <i>EXAMPLE</i></div>
-                  <div class="card pop" style="--d:1.6s"><strong>Website strategy call</strong><span>Example</span></div>
-                  <div class="card pop" style="--d:2.15s"><strong>Follow-up</strong><span>Example</span></div>
-                </div>
-                <div class="tile">
-                  <div class="tile-h">AI assistant <i>SIMULATED</i></div>
-                  <p class="bubble pop" style="--d:2.5s">Form came in.</p>
-                  <p class="bubble out pop" style="--d:3.1s">Text sent. A time is held.</p>
+                <div class="rail">
+                  <div class="tile">
+                    <div class="tile-h">Automations <i>SIMULATED</i><i class="switch" aria-hidden="true"><i></i></i></div>
+                    <div class="steps">
+                      <b class="track"></b>
+                      <span><i></i>Lead in</span>
+                      <span><i></i>Text sent</span>
+                      <span><i></i>Added to CRM</span>
+                      <span><i></i>Booked</span>
+                    </div>
+                  </div>
+                  <div class="tile">
+                    <div class="tile-h">AI assistant <i>SIMULATED</i></div>
+                    <p class="bubble">Someone just called.</p>
+                    <p class="typing" aria-hidden="true"><i></i><i></i><i></i></p>
+                    <p class="bubble out reply">Text sent. A time is held.</p>
+                  </div>
+                  <div class="tile books">
+                    <div class="tile-h">Booked <i>EXAMPLE</i></div>
+                    <div class="bk book-in"><strong>Website strategy call</strong><span>Example</span><i class="book-glow"></i></div>
+                    <div class="bk book-in2"><strong>Follow-up</strong><span>Example</span></div>
+                  </div>
                 </div>
               </div>
             </div>
+            <div class="sheen" aria-hidden="true"></div>
+            <div class="scan" aria-hidden="true"></div>
+            <div class="sweep" aria-hidden="true"></div>
           </div>
         </div>
       </div>
-      <div class="props" aria-hidden="true">
-        <div class="spines">
-          <span>SAVE TIME</span>
-          <span>GROW</span>
-          <span>FOLLOW UP</span>
-        </div>
-        <div class="mug"><img src="/assets/firststep-logo-transparent-cleaned.png" width="1147" height="946" alt=""></div>
-        <div class="notebook">
-          <span>Plan</span>
-          <span>Automate</span>
-          <span>Book</span>
-          <span>Grow</span>
-        </div>
-      </div>
+      <div class="mug-mark" aria-hidden="true"><img src="/assets/firststep-logo-transparent-cleaned.png" width="1147" height="946" alt=""></div>
     </div>
     <div class="hero-copy wrap">
       <h1 id="hero-title">Get more from the business you <em>already have.</em></h1>

@@ -1,5 +1,13 @@
 # Architecture Decision Log
 
+## 2026-10-22: Homepage desk hero is lit and the example dashboard moves
+
+- **Status / owner:** Evan asked for the desk hero to come more to life, closer to the Swing Trade Pros homepage density, without trading content. Preview only. No production deploy.
+- **Decision:** The background plate is a brighter photographic desk. The monitor is still HTML. It holds a business snapshot with sparklines, five example leads, an automation flow, an assistant thread, and booked cards. A 12 second loop slides in a lead, lights the flow, flicks a toggle, slides in a booking, and types a reply. Motion is transform and opacity. It pauses offscreen and when Pause animation is pressed. Reduced motion shows the populated screen still. Scroll moves the photo, the desk props, and the monitor at three small rates, throttled with one animation frame. A diagonal light sweeps the dashboard once, for 1.2 seconds, when the hero enters view. A small pointer parallax shifts the plate and the monitor. There is no custom cursor and no scroll library. Every panel stays labelled EXAMPLE or SIMULATED. There are no client names, prices, or result counts.
+- **Rationale:** The previous screen was too dark and the panels sat still. The reference is a full, lit monitor with things arriving.
+- **Affected systems:** `index.html`, `src/home-v2.css`, `src/home-v2.js`, `public/home-v2/desk-scene.webp`, `public/llms.txt`.
+- **Rollback:** Restore the previous desk hero markup and the darker plate. Leave the wordmark blue and the reel card in place.
+
 ## 2026-10-22: Header wordmark “.ai” uses the logo blue
 
 - **Status / owner:** Evan asked for the nav “.ai” to leave lime and use the blue from the canonical logo, with readable contrast on the dark header. Preview only. No production deploy.

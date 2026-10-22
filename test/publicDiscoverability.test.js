@@ -110,6 +110,12 @@ test("homepage first screen books the call beside an example desk", async () => 
   assert.match(hero, /Pause animation/);
   assert.match(hero, /SIMULATED/);
   assert.match(hero, /EXAMPLE/);
+  assert.match(hero, /Leads in/);
+  assert.match(hero, /Replies sent/);
+  assert.match(hero, /Today’s leads/);
+  assert.match(hero, /Lead in/);
+  assert.match(hero, /Added to CRM/);
+  assert.doesNotMatch(hero, /SPY|AAPL|TSLA|NVDA|\+0\.|\$/);
   assert.doesNotMatch(hero, /Tap for sound|poster_16x9|<video|Watch with sound|href="\/fit-check\//);
   assert.match(work, /Tap for sound/);
   assert.match(work, /poster="\/home-v2\/poster_16x9\.webp"/);
@@ -127,7 +133,10 @@ test("the homepage uses the system cursor and does not hijack scroll", async () 
   const css = await source("src/home-v2.css");
   const site = await source("src/v2-site.css");
   assert.doesNotMatch(html, /class="cursor"|lenis\.min\.js|gsap\.min\.js|ScrollTrigger/);
-  assert.doesNotMatch(js, /new Lenis|requestAnimationFrame|pointermove|ScrollTrigger|gsap/);
+  assert.doesNotMatch(js, /new Lenis|ScrollTrigger|gsap/);
+  assert.match(js, /pointermove/);
+  assert.match(js, /requestAnimationFrame/);
+  assert.match(js, /addEventListener\('scroll'/);
   assert.match(js, /prefers-reduced-motion: reduce/);
   assert.match(js, /IntersectionObserver/);
   assert.match(css, /animation-play-state:\s*paused/);
