@@ -220,8 +220,8 @@ test("commercial intake preserves intent and attribution without personal analyt
 
 test("the homepage has one real video testimonial and shows Evan's headshot", async () => {
   const html = await source("index.html");
-  assert.doesNotMatch(html, /Real, named quotes go here|Needed from Evan|Client sample reel slot|David William|Sara E Ford|★★★★★|Evan photo here/);
-  assert.equal((html.match(/<blockquote/g) || []).length, 1);
+  assert.doesNotMatch(html, /Real, named quotes go here|Needed from Evan|Client sample reel slot|Sara E Ford|Evan photo here/);
+  assert.equal((html.match(/<blockquote/g) || []).length, 7);
   assert.match(html, /He knows what he&rsquo;s doing&hellip; So, book a consult\./);
   assert.match(html, /Alon Bendory, <a href="https:\/\/yibble\.co\/"[^>]*>Yibble<\/a>/);
   assert.match(html, /<track kind="captions" src="\/testimonials\/alon-bendory\.en\.vtt"/);
@@ -503,4 +503,19 @@ test("pricing publishes the approved starting ranges and books a call", async ()
   assert.ok(home.indexOf('id="process"') < home.indexOf('id="pricing"') && home.indexOf('id="pricing"') < home.indexOf('id="proof"'));
   assert.match(config, /work: "work\/index.html"/);
   assert.match(sitemap, /www\.1ststep\.ai\/work\//);
+});
+
+test("the homepage shows six verbatim Google reviews before the booking band", async () => {
+  const html = await source("index.html");
+  const start = html.indexOf('class="wrap rv"');
+  assert.ok(start > html.indexOf('id="quotes"') && start < html.indexOf('id="book"'));
+  assert.match(html, /href="https:\/\/www\.google\.com\/search\?kgmid=\/g\/11nbwvpwjm&amp;q=1ststep\.ai"/);
+  assert.match(html, /<strong>5\.0<\/strong>/);
+  assert.match(html, /9 Google reviews/);
+  assert.equal((html.match(/class="rv-card"/g) || []).length, 6);
+  for (const name of ["Steven Bunker", "Rob Green", "David Williams", "Shawon E", "Sazzad Hossain", "Alon Bendory"]) assert.match(html, new RegExp(name + " <span>· Google</span>"));
+  assert.match(html, /I tried other companies nd each one of them failed\./);
+  assert.match(html, /high-quality online store<\/p>/);
+  assert.match(html, /you just can’t figure out how to use it/);
+  assert.doesNotMatch(html, /burak|buys low, sells high|T Shares|1manshow|AggregateRating/);
 });

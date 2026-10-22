@@ -445,3 +445,19 @@ footer a:hover{color:var(--cream)}
 .tm-copy a{color:var(--soft);text-underline-offset:3px}
 .tm-copy a:hover{color:var(--acid)}
 @media (max-width:720px){.quotes{padding:64px 0}.tm{flex-direction:column;gap:28px;text-align:center}.tm-bubble{width:min(260px,70vw)}}
+
+/* Google reviews */
+.rv{margin-top:64px}
+.rv-head{display:inline-flex;align-items:center;gap:10px;color:var(--cream);text-decoration:none;font:500 15px/1 var(--disp)}
+.rv-head strong{font-weight:650}
+.rv-head span:last-child{color:var(--soft);text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--line)}
+.rv-head:hover span:last-child{color:var(--acid)}
+.rv-stars{color:var(--acid);letter-spacing:2px;font-size:14px}
+.rv-list{list-style:none;margin:22px 0 0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.rv-card{display:flex;flex-direction:column;gap:14px;padding:22px;border:1px solid var(--line);border-radius:18px;background:var(--ink2)}
+.rv-card blockquote{margin:0;flex:1}
+.rv-card blockquote p{margin:0;color:var(--soft);font:400 15px/1.55 var(--disp)}
+.rv-by{margin:0;font:600 14px/1.3 var(--disp);color:var(--cream)}
+.rv-by span{font-weight:400;color:var(--mute)}
+@media (max-width:980px){.rv-list{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:720px){.rv{margin-top:48px;text-align:left}.rv-list{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;padding:0 0 8px;scrollbar-width:none}.rv-list::-webkit-scrollbar{display:none}.rv-card{flex:0 0 82%;scroll-snap-align:start}}
