@@ -7,9 +7,12 @@ const source = (path) => readFile(new URL(path, root), "utf8");
 
 const wwwPages = [
   "/",
+  "/work/",
+  "/work/universal-relocations/",
   "/os",
   "/journey/",
   "/book/",
+  "/pricing/",
   "/fit-check/",
   "/campaigns/outgrown-website/",
   "/campaigns/morris-county-free-website/",
@@ -102,11 +105,12 @@ test("homepage first screen books the call beside an example desk", async () => 
   const html = await source("index.html");
   const heroStart = html.indexOf('<section class="hero');
   const hero = html.slice(heroStart, html.indexOf("</section>", heroStart));
-  const work = html.slice(html.indexOf('id="work"'), html.indexOf('id="example"'));
+  const work = await source("work/index.html");
   assert.match(hero, /Get more from the business you/);
-  assert.match(hero, /href="\/book\/"[^>]*>Book a call/);
+  assert.match(hero, /href="\/book\/"[^>]*>Book a free 20-min call/);
   assert.match(hero, /Websites, integrations, automations, and custom apps/);
-  assert.match(hero, /See our work/);
+  assert.match(hero, /See pricing/);
+  assert.doesNotMatch(hero, /See our work|btn ghost/);
   assert.match(hero, /Pause animation/);
   assert.match(hero, /Illustrative data/);
   assert.doesNotMatch(hero, /SIMULATED|EXAMPLE/);
@@ -120,7 +124,8 @@ test("homepage first screen books the call beside an example desk", async () => 
   assert.match(work, /Tap for sound/);
   assert.match(work, /poster="\/home-v2\/poster_16x9\.webp"/);
   assert.match(work, /class="work-vid"/);
-  assert.equal((html.match(/class="reel-sound"/g) || []).length, 1);
+  assert.equal((work.match(/class="reel-sound"/g) || []).length, 1);
+  assert.doesNotMatch(html, /class="reel-sound"|class="work-vid"/);
   assert.doesNotMatch(html, /TODO: connect the 20-minute booking link|class="sound"/);
   assert.doesNotMatch(html, /id="how"|id="paths"/);
   assert.match(html, /<link rel="canonical" href="https:\/\/www\.1ststep\.ai\/"/);
@@ -208,10 +213,19 @@ test("the integrations row uses approved marks, pauses, and states the trademark
   }
 });
 
-test("homepage does not publish FAQ structured data without a visible FAQ", async () => {
+test("homepage FAQ copy matches the visible accordion", async () => {
   const html = await source("index.html");
-  assert.equal(jsonLdBlocks(html).some((block) => block["@type"] === "FAQPage"), false);
-  assert.doesNotMatch(html, /<summary>/);
+  const names = faqNames(html);
+  for (const question of [
+    "What does it cost?",
+    "How long does it take?",
+    "I already started a build, can you finish it?",
+    "I don't know what I need, where do I start?",
+    "Do you work with my tools?",
+  ]) {
+    assert.ok(names.includes(question), question);
+    assert.match(html, new RegExp("<summary>" + question.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "</summary>"));
+  }
 });
 
 test("service page H1s use search language and carry basic OG", async () => {

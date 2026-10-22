@@ -1,5 +1,29 @@
 # Architecture Decision Log
 
+## 2026-10-22: Universal Relocations origin demo
+
+- **Status / owner:** Evan asked for the Origin Service US overview on the pricing preview branch. No production deploy.
+- **Decision:** `/work/universal-relocations/` hosts the staff portal for the U.S. origin leg. The only disclosure is one muted line: fictional placeholders, and nothing on the page is a quote or a rate. The homepage proof strip places it beside Lyons Life. `/work/` includes the same case. No metrics are added.
+- **Rationale:** The portal is a real piece of work. The names and lanes in the walk-through are placeholders, so the page says that once.
+- **Affected systems:** `public/work/universal-relocations/index.html`, `index.html`, `work/index.html`, `src/home-v2.css`, `public/home-v2/universal-relocations.webp`, sitemap, `public/llms.txt`, Vite routes, `vercel.json`.
+- **Rollback:** Remove the page, the proof card, the portfolio piece, and the sitemap entry.
+
+## 2026-10-22: Homepage conversion order
+
+- **Status / owner:** Evan approved a conversion-focused homepage restructure on the pricing preview branch. No production deploy.
+- **Decision:** Homepage order is hero, problem, how it works, services and pricing, proof, founder, a hidden testimonial slot, FAQ, then a final call band. The hero has one primary button, Book a free 20-min call, and a text link, See pricing. The full portfolio, including the studio reel, lives at `/work/`. The homepage proof strip features the Lyons Life Command Center and small thumbnails. The testimonial slot is in the page and hidden, with no quotes. A mobile bar says Book a call. The website-strategy calendar is still `/book/`.
+- **Rationale:** Pricing and the next step should sit high. The large portfolio was pushing them down. Empty testimonial slots should not invent quotes.
+- **Affected systems:** `index.html`, `work/index.html`, `pricing/index.html`, `src/home-v2.css`, shared Work links, sitemap, `public/llms.txt`, Vite input, `vercel.json`.
+- **Rollback:** Restore the previous homepage section order and point Work links at `/#work`. Do not merge this branch unless Evan asks.
+
+## 2026-10-22: Published starting ranges
+
+- **Status / owner:** Evan listed the ranges and asked for a homepage Pricing section plus `/pricing/`, preview only. No production deploy.
+- **Decision:** The homepage and `/pricing/` show six cards: Business & Bottleneck Audit $750–$1,500 flat, credited toward the build; Website Build from $3,500; Automations & Integrations from $2,500 per workflow; App Development from $10,000 (MVP); Build Rescue & Handoff starts with a $1,000 code review; Consulting & Support $150–$200/hr or retainers from $1,500/mo. Each card links to `/book/` with the label Book a call. The note is “Every project is scoped on a free call.” The primary nav says Pricing. The studio reel is not a priced offer.
+- **Rationale:** Visitors should see the real starting ranges without a cartoon-ad price or a claim that the website-strategy calendar is a systems audit.
+- **Affected systems:** `index.html`, `pricing/index.html`, `src/home-v2.css`, `src/motion.css`, shared primary nav, sitemap, `public/llms.txt`, Vite input, `vercel.json`.
+- **Rollback:** Remove the section, page, nav link, and sitemap entry. Do not merge this branch to production unless Evan asks.
+
 ## 2026-10-22: Product names restored before production
 
 - **Status / owner:** Evan approved production and asked for the product names and awkward swaps to be corrected first. Preview, then merge of PR #19.

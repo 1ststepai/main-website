@@ -30,6 +30,11 @@ html.motion .reveal.is-in {
 .pieces .piece:nth-child(5) { transition-delay: .24s; }
 .pieces .piece:nth-child(6) { transition-delay: .3s; }
 .pieces .piece:nth-child(7) { transition-delay: .36s; }
+.price-grid .card:nth-child(2) { transition-delay: .06s; }
+.price-grid .card:nth-child(3) { transition-delay: .12s; }
+.price-grid .card:nth-child(4) { transition-delay: .18s; }
+.price-grid .card:nth-child(5) { transition-delay: .24s; }
+.price-grid .card:nth-child(6) { transition-delay: .3s; }
 .grid .card:nth-child(2),
 .process-grid > li:nth-child(2) { transition-delay: .07s; }
 .grid .card:nth-child(3),
