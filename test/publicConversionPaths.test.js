@@ -64,6 +64,11 @@ test("selected work shows first-party products without invented metrics", async 
   const work = home.slice(home.indexOf('id="work"'), home.indexOf('id="example"'));
   assert.equal((work.match(/class="piece"/g)||[]).length, 5);
   assert.equal((work.match(/class="piece piece-reel"/g)||[]).length, 1);
+  assert.equal((work.match(/class="piece piece-soon"/g)||[]).length, 1);
+  assert.match(work, /Lyons Life Command Center/);
+  assert.match(work, /Case study coming soon/);
+  const lyons = work.slice(work.indexOf("Lyons Life Command Center"), work.indexOf("Studio reel"));
+  assert.doesNotMatch(lyons, /\$|%|\d[\d,]*\+|clients say|revenue/);
   let at = 0;
   for (const project of ["DaySetGo", "SwingTradePros", "Job Agent", "SkillSprout", "Real-Rank.ai", "Studio reel"]) {
     const next = work.indexOf(project, at);

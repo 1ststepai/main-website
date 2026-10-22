@@ -1,0 +1,60 @@
+@view-transition { navigation: auto; }
+::view-transition-old(root) { animation: 220ms ease both vt-out; }
+::view-transition-new(root) { animation: 280ms ease both vt-in; }
+@keyframes vt-out { to { opacity: 0 } }
+@keyframes vt-in { from { opacity: 0 } }
+@keyframes pageIn { from { opacity: 0 } to { opacity: 1 } }
+@supports not (view-transition-name: none) {
+  @media (prefers-reduced-motion: no-preference) {
+    html { animation: pageIn .32s ease; }
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: none; }
+  ::view-transition-old(root),
+  ::view-transition-new(root) { animation: none !important; }
+}
+
+html.motion .reveal {
+  opacity: 0;
+  transform: translateY(28px) scale(.975);
+}
+html.motion .reveal.is-in {
+  opacity: 1;
+  transform: none;
+  transition: opacity .7s ease, transform .75s cubic-bezier(.22,.61,.36,1);
+}
+.pieces .piece:nth-child(2) { transition-delay: .06s; }
+.pieces .piece:nth-child(3) { transition-delay: .12s; }
+.pieces .piece:nth-child(4) { transition-delay: .18s; }
+.pieces .piece:nth-child(5) { transition-delay: .24s; }
+.pieces .piece:nth-child(6) { transition-delay: .3s; }
+.pieces .piece:nth-child(7) { transition-delay: .36s; }
+.grid .card:nth-child(2),
+.process-grid > li:nth-child(2) { transition-delay: .07s; }
+.grid .card:nth-child(3),
+.process-grid > li:nth-child(3) { transition-delay: .14s; }
+.grid .card:nth-child(4),
+.process-grid > li:nth-child(4),
+.faq-list > div:nth-child(2) { transition-delay: .21s; }
+.faq-list > div:nth-child(3) { transition-delay: .28s; }
+
+.section-glow { position: relative; }
+.section-glow::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 8%;
+  right: 8%;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(212,255,58,.55), rgba(0,123,248,.5), transparent);
+  box-shadow: 0 0 18px rgba(212,255,58,.28);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .section-glow::before { animation: glowHair 7s ease-in-out infinite; }
+}
+@keyframes glowHair { 0%, 100% { opacity: .4 } 50% { opacity: 1 } }
+@media (prefers-reduced-motion: reduce) {
+  html.motion .reveal { opacity: 1; transform: none; transition: none; }
+}

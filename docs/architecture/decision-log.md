@@ -1,5 +1,14 @@
 # Architecture Decision Log
 
+## 2026-10-22: Portfolio and pages share a light motion layer
+
+- **Status / owner:** Evan asked for the rest of the site to feel as considered as the hero, with the current layout and the blue “.ai” kept. Preview only. No production deploy.
+- **Decision:** Work cards rise and scale in as they enter, staggered. Hover tilts the card a few degrees, lifts it, zooms the image, lights a lime and blue edge, and reveals the existing one-line caption. Lyons Life Command Center is an empty slot labeled “Case study coming soon.” No facts were added because there are no assets. Other headings, cards, and panels use the same reveal. Section breaks carry a thin lime-to-blue line. Page changes use a cross-document fade where the browser supports it, and a short fade-in otherwise. Reduced motion leaves everything still. Nothing hijacks scroll.
+- **Rationale:** The hero was moving and the rest of the site was not. The new card has a place ready without inventing a case study.
+- **Affected systems:** `index.html`, `src/home-v2.css`, `src/motion.css`, `src/motion.js`, `vite.config.js`.
+- **Evidence:** Local production preview, mobile Lighthouse performance 91 (FCP 1.1s, LCP 3.5s, TBT 0, CLS 0). Cards start hidden and rise only on the way in. Hover on a fine pointer lifts, tilts, zooms, and lights the edge. Touch keeps the caption visible. Reduced motion adds no reveal class.
+- **Rollback:** Remove the motion stylesheet and script injection. Remove the Lyons card and the tilt wrappers.
+
 ## 2026-10-22: Homepage desk hero is lit and the example dashboard moves
 
 - **Status / owner:** Evan asked for the desk hero to come more to life, closer to the Swing Trade Pros homepage density, without trading content. Preview only. No production deploy.

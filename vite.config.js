@@ -1,6 +1,28 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
+const motion = {
+  name: "firststep-motion",
+  transformIndexHtml: {
+    order: "pre",
+    handler(html, ctx) {
+      const file = `${ctx?.path || ""} ${ctx?.filename || ""}`;
+      if (file.includes("/admin/") || file.includes("\\admin\\")) return html;
+      if (html.includes('name="firststep-no-motion"')) return html;
+      if (!html.includes('data-fsai-motion')) {
+        html = html.replace(
+          "</head>",
+          '  <link rel="stylesheet" href="/src/motion.css" />\n  <script data-fsai-motion>try{if(!matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.classList.add("motion")}catch(e){}</script>\n</head>'
+        );
+      }
+      if (!html.includes('src="/src/motion.js"')) {
+        html = html.replace("</body>", '  <script type="module" src="/src/motion.js"></script>\n</body>');
+      }
+      return html;
+    },
+  },
+};
+
 const siteAnalytics = {
   name: "firststep-site-analytics",
   transformIndexHtml: {
@@ -30,7 +52,7 @@ function serveExactIndexPaths(server) {
 
 export default defineConfig({
   define: { __FOUNDRY_RD__: JSON.stringify(process.env.VERCEL_ENV !== "production") },
-  plugins: [react(), siteAnalytics, {
+  plugins: [react(), siteAnalytics, motion, {
     name: "firststep-exact-index-paths",
     configureServer: serveExactIndexPaths,
     configurePreviewServer: serveExactIndexPaths,

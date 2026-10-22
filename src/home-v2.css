@@ -118,13 +118,18 @@ em{font-family:var(--ser);font-style:italic;font-weight:400;letter-spacing:-.02e
 .sec p,.note{margin:14px 0 0;max-width:36rem;color:var(--soft);font-size:1.05rem}
 .pieces{display:flex;flex-direction:column;gap:120px}
 .piece a{display:block;color:inherit;text-decoration:none}
-.device{overflow:hidden;border-radius:22px;border:1px solid var(--line);background:var(--ink2);box-shadow:0 24px 50px rgba(0,0,0,.28)}
+.tilt{position:relative;display:grid;transform:perspective(1100px) rotateX(var(--ry, 0deg)) rotateY(var(--rx, 0deg));transition:transform .55s cubic-bezier(.22,.61,.36,1);transform-origin:center center}
+.tilt::after{content:"";grid-area:1/1;z-index:2;border-radius:22px;pointer-events:none;opacity:0;box-shadow:inset 0 0 0 1px rgba(212,255,58,.75),0 0 0 1px rgba(0,123,248,.45),0 0 36px rgba(0,123,248,.42),0 0 64px rgba(212,255,58,.16);transition:opacity .45s ease}
+.device{grid-area:1/1;position:relative;z-index:1;overflow:hidden;border-radius:22px;border:1px solid var(--line);background:var(--ink2);box-shadow:0 24px 50px rgba(0,0,0,.28)}
+.cap{grid-area:2/1}
 .device-top{display:flex;gap:7px;align-items:center;height:40px;padding:0 16px}
 .device-top i{width:8px;height:8px;border-radius:50%;background:rgba(241,234,219,.28)}
-.device img{display:block;width:100%;height:auto}
-.cap{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding-top:16px}
+.device img,.work-vid{display:block;width:100%;height:auto}
+.soon-plate{min-height:320px;display:flex;flex-direction:column;background:radial-gradient(ellipse at 25% 15%,rgba(0,123,248,.2),transparent 55%),radial-gradient(ellipse at 80% 90%,rgba(212,255,58,.14),transparent 50%),#141311}
+.soon-plate p{margin:auto;padding:0 24px 36px;font-family:var(--ser);font-style:italic;font-size:clamp(1.6rem,2.4vw,2.2rem);letter-spacing:-.02em;color:var(--soft)}
+.cap{display:flex;justify-content:space-between;align-items:baseline;gap:16px;min-height:2.4rem;padding-top:16px}
 .cap h3{margin:0;font-size:clamp(1.6rem,2.4vw,2rem);font-weight:560;letter-spacing:-.04em}
-.cap span{color:var(--mute);font-size:.95rem}
+.cap .line{color:var(--mute);font-size:.95rem}
 .example{padding:120px 0;border-top:1px solid var(--line)}
 .ex{margin:0 0 12px;color:var(--acid);font-size:12px;font-weight:650;letter-spacing:.16em;text-transform:uppercase}
 .example h2{font-size:clamp(2.8rem,6vw,5rem);max-width:10em}
@@ -160,8 +165,12 @@ footer a:hover{color:var(--cream)}
 .music-credit{flex:1 0 100%;margin:8px 0 0;line-height:1.5}
 .music-credit a{color:var(--cream);text-decoration:underline;text-underline-offset:2px}
 @media (hover:hover) and (prefers-reduced-motion:no-preference){
+  .piece:hover .tilt,.piece:focus-within .tilt{transform:perspective(1100px) rotateX(var(--ry, 0deg)) rotateY(var(--rx, 0deg)) translateY(-10px);transition-duration:.12s}
+  .piece:hover .tilt::after,.piece:focus-within .tilt::after{opacity:1}
   .device img,.work-vid{transition:transform .7s cubic-bezier(.22,.61,.36,1)}
-  .piece:hover .device img,.piece:focus-within .device img,.piece:hover .work-vid,.piece:focus-within .work-vid{transform:scale(1.025)}
+  .piece:hover .device img,.piece:focus-within .device img,.piece:hover .work-vid,.piece:focus-within .work-vid{transform:scale(1.045)}
+  .cap .line{opacity:0;transform:translateY(8px);transition:opacity .4s ease,transform .45s cubic-bezier(.22,.61,.36,1)}
+  .piece:hover .cap .line,.piece:focus-within .cap .line{opacity:1;transform:none}
 }
 @media (prefers-reduced-motion:no-preference){
   html{scroll-behavior:smooth}
@@ -169,14 +178,7 @@ footer a:hover{color:var(--cream)}
   .hero .lede{animation-delay:.08s}
   .hero .btn{animation-delay:.16s}
 }
-@supports (animation-timeline:view()){
-  @media (prefers-reduced-motion:no-preference){
-    .piece,.panel{animation-name:rise;animation-duration:auto;animation-timing-function:linear;animation-fill-mode:both;animation-timeline:view();animation-range:entry 0% entry 48%}
-    .device{animation-name:drift;animation-duration:auto;animation-timing-function:linear;animation-fill-mode:both;animation-timeline:view();animation-range:cover 5% cover 95%}
-  }
-}
 @keyframes rise{from{opacity:0;transform:translateY(36px)}to{opacity:1;transform:none}}
-@keyframes drift{from{transform:translateY(28px)}to{transform:translateY(-28px)}}
 @media (prefers-reduced-motion:no-preference){
   .hero.is-lit .sweep{animation:sweep 1.2s cubic-bezier(.22,.61,.36,1) both}
 }
