@@ -1,5 +1,13 @@
 # Architecture Decision Log
 
+## 2026-10-22: Lyons Life sample motion stays cheap and stops offscreen
+
+- **Status / owner:** Evan asked for staggered section motion and an ambient background on the hosted sample. Preview only. No production deploy.
+- **Decision:** Website rows slide in with a stagger, and the green and amber status dots pulse. Organic search numbers count up from zero in order, then the visibility bars fill one after the other. On Executive reports, the period control, Generate button, and brief sections arrive in sequence, and Download has a repeating shine. A slow gradient drift and a few particles sit behind the demo. They use transform and opacity, pause while the browser tab is hidden, and stay still under reduced motion.
+- **Rationale:** The sample should feel alive without a canvas loop or a cost while the visitor is in another tab.
+- **Affected systems:** `public/work/lyons-life-demo/index.html`.
+- **Rollback:** Remove the ambient layer, the pause class, and the staggered delays.
+
 ## 2026-10-22: Lyons Life sample uses a dark command center
 
 - **Status / owner:** Evan asked for a premium redesign of the hosted sample. Preview only. No production deploy.
