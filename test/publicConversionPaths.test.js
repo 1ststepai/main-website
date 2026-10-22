@@ -15,8 +15,8 @@ test("the homepage leads with the studio offer and keeps products distinct", asy
   assert.match(html, /href="\/tools\/"/);
   assert.match(html, /href="\/journey\/"/);
   assert.match(html, /firststep-logo-transparent-cleaned\.png/);
-  assert.equal((html.match(/Book a call/g) || []).length, 3);
-  assert.equal((html.match(/href="\/book\/"/g) || []).length, 3);
+  assert.equal((html.match(/Book a call/g) || []).length, 4);
+  assert.equal((html.match(/href="\/book\/"/g) || []).length, 4);
   assert.doesNotMatch(html, /Book a 20-min call/);
   assert.match(llms, /Get more from the business you already have/);
   assert.match(llms, /1stStep OS/);
@@ -38,7 +38,18 @@ test("the homepage keeps a short section order and service pages keep their own 
   for (const anchor of ["work", "example", "founder", "book"]) assert.match(html, new RegExp('id="' + anchor + '"'));
   assert.ok(html.indexOf('id="work"') < html.indexOf('id="example"') && html.indexOf('id="example"') < html.indexOf('id="book"'));
   assert.doesNotMatch(html, /id="makeover"|id="flow"|id="paths"|id="works"|id="how"/);
-  assert.equal((html.match(/href="\/book\/"/g) || []).length, 3);
+  assert.equal((html.match(/href="\/book\/"/g) || []).length, 4);
+  assert.match(html, /id="agents"/);
+  assert.ok(html.indexOf('id="example"') < html.indexOf('id="agents"') && html.indexOf('id="agents"') < html.indexOf('id="book"'));
+  assert.match(html, /AI agents that work for your business, with you in control\./);
+  assert.match(html, /Example console, simulated/);
+  assert.match(html, /Needs your approval/);
+  const demo = await source("public/work/lyons-life-demo/index.html");
+  assert.doesNotMatch(demo, /Florida Private Health|Self Employed Health|ACA Florida/);
+  assert.match(demo, /Acquisition Site A/);
+  assert.match(demo, /Acquisition Site B/);
+  assert.match(demo, /Acquisition Site C/);
+  assert.match(demo, /Lyons Life/);
   for (const path of ["websites", "internal-tools", "revenue-systems", "mvp-builds"]) {
     assert.match(await source(`services/${path}.html`), /<h1/);
   }

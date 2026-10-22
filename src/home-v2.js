@@ -68,6 +68,30 @@
     requestAnimationFrame(applyScroll);
   }
 
+  const ops = document.querySelector('.ops');
+  const opsPause = document.querySelector('.ops-pause');
+  let opsPaused = false;
+  let opsIn = false;
+  const syncOps = () => {
+    if (!ops) return;
+    ops.classList.toggle('is-paused', opsPaused);
+    ops.classList.toggle('is-on', opsIn && !opsPaused && !reduced);
+  };
+  if (ops && !reduced && 'IntersectionObserver' in window) {
+    new IntersectionObserver(([entry]) => {
+      opsIn = entry.isIntersecting;
+      syncOps();
+    }, { threshold: 0.28 }).observe(ops);
+  }
+  if (opsPause && !reduced) {
+    opsPause.addEventListener('click', () => {
+      opsPaused = !opsPaused;
+      opsPause.setAttribute('aria-pressed', opsPaused ? 'true' : 'false');
+      opsPause.textContent = opsPaused ? 'Play animation' : 'Pause animation';
+      syncOps();
+    });
+  }
+
   if (!video || !button) return;
 
   const paintSound = (on) => {

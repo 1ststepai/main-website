@@ -111,7 +111,7 @@ em{font-family:var(--ser);font-style:italic;font-weight:400;letter-spacing:-.02e
 .reel-sound[aria-pressed="true"] .ico-on{display:block}
 .work{padding:112px 0 40px}
 .work .wrap{width:min(1280px,calc(100% - 64px))}
-#work,#example,#book{scroll-margin-top:88px}
+#work,#example,#agents,#book{scroll-margin-top:88px}
 .sec{margin-bottom:64px}
 .sec h2,.example h2,.close h2{margin:0;font-weight:520;letter-spacing:-.045em;line-height:1;text-wrap:balance}
 .sec h2{font-size:clamp(2.4rem,5vw,4.25rem)}
@@ -220,9 +220,105 @@ footer a:hover{color:var(--cream)}
 @keyframes keys{0%,100%{opacity:.28}50%{opacity:.85}}
 @keyframes glow{0%,100%{opacity:.45}50%{opacity:1}}
 @keyframes sweep{0%{opacity:0;transform:translate3d(-52%,26%,0)}22%{opacity:1}100%{opacity:0;transform:translate3d(46%,-22%,0)}}
+.ops{padding:108px 0 88px;border-top:1px solid var(--line)}
+.ops-head{display:flex;align-items:flex-end;justify-content:space-between;gap:28px}
+.ops h2{margin:0;font-size:clamp(1.7rem,2.15vw,2.4rem);font-weight:520;letter-spacing:-.045em;line-height:1.05;white-space:nowrap}
+.ops-head .btn{flex:none}
+.ops-board{margin-top:36px;padding:22px;border-radius:28px;border:1px solid var(--line);background:#12110f;box-shadow:0 24px 60px rgba(0,0,0,.28)}
+.ops-agents{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.agent{display:flex;gap:12px;align-items:flex-start;min-height:108px;padding:16px;border-radius:16px;border:1px solid var(--line);background:#0D0C0A}
+.agent strong{display:block;font-size:1rem;font-weight:620;letter-spacing:-.03em}
+.agent em{display:block;margin-top:4px;font-style:normal;color:var(--mute);font-size:.86rem}
+.dot{flex:none;width:9px;height:9px;margin-top:6px;border-radius:50%;background:var(--acid);box-shadow:0 0 0 4px rgba(212,255,58,.12)}
+.phases{position:relative;display:block;height:1.15em;margin-top:8px}
+.phases i{position:absolute;left:0;top:0;font-style:normal;font-size:11px;font-weight:650;letter-spacing:.12em;text-transform:uppercase}
+.phases .idle{color:var(--mute);opacity:0}
+.phases .work{color:#007BF8;opacity:0}
+.phases .done{color:var(--acid);opacity:1}
+.ops-stage{display:grid;grid-template-columns:1.2fr .8fr;gap:16px;margin-top:16px}
+.ops-prompt,.ops-feed{padding:18px;border-radius:18px;border:1px solid var(--line);background:#0D0C0A}
+.kicker{margin:0 0 12px;color:var(--mute);font-size:11px;font-weight:650;letter-spacing:.14em;text-transform:uppercase}
+.ops-type{min-height:1.4em;margin:0;font-family:var(--ser);font-style:italic;font-size:clamp(1.35rem,2vw,1.8rem);letter-spacing:-.02em;line-height:1.2}
+.ops-type i{font-style:normal}
+.caret{display:inline-block;width:2px;height:.85em;margin-left:2px;background:var(--acid);transform:translateY(2px);opacity:0;vertical-align:baseline}
+.ops-pick{margin:12px 0 0;color:var(--soft);font-size:.92rem}
+.ops-steps{list-style:none;margin:16px 0 0;padding:0}
+.ops-steps li{display:flex;align-items:center;gap:10px;min-height:40px;font-size:.98rem}
+.tick{flex:none;width:16px;height:16px;border-radius:50%;border:1.5px solid var(--acid);position:relative}
+.tick::after{content:"";position:absolute;left:4px;top:2px;width:4px;height:7px;border-right:1.5px solid var(--ink);border-bottom:1.5px solid var(--ink);transform:rotate(45deg);opacity:0}
+.ops-steps .tick,.ops-feed .tick{background:var(--acid)}
+.ops-steps .tick::after,.ops-feed .tick::after{opacity:1}
+.chip{margin-left:auto;display:inline-flex;align-items:center;min-height:28px;padding:0 10px;border-radius:99px;background:var(--acid);color:var(--ink);font-size:12px;font-weight:700;letter-spacing:-.01em}
+.ops-feed ul{list-style:none;margin:0;padding:0}
+.ops-feed li{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"who tick" "what what" "bar bar";gap:6px 10px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+.ops-feed li:first-child{border-top:0;padding-top:0}
+.ops-feed .who{grid-area:who;color:var(--soft);font-size:.82rem;font-weight:650}
+.ops-feed .what{grid-area:what;font-size:.98rem;letter-spacing:-.02em}
+.ops-feed .track{grid-area:bar;display:block;height:4px;border-radius:99px;background:rgba(241,234,219,.12);overflow:hidden}
+.ops-feed .track i{display:block;height:100%;width:100%;background:var(--acid);transform:scaleX(1);transform-origin:left center}
+.ops-feed .tick{grid-area:tick}
+.ops-pause{display:block;margin:16px 0 0 auto;min-height:36px;padding:0 12px;border-radius:8px;border:1px solid rgba(241,234,219,.32);background:#0D0C0A;color:var(--cream);font:600 12px/1 var(--disp);cursor:pointer}
+@media (max-width:980px){
+  .ops h2{white-space:normal}
+  .ops-head{display:block}
+  .ops-head .btn{margin-top:18px}
+  .ops-agents,.ops-stage{grid-template-columns:1fr 1fr}
+  .ops-stage{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:no-preference){
+  .ops .agent{animation:opsAgent 14s linear infinite;animation-play-state:paused}
+  .ops .agent:nth-child(2){animation-delay:.12s}
+  .ops .agent:nth-child(3){animation-delay:.24s}
+  .ops .agent:nth-child(4){animation-delay:.36s}
+  .ops .dot,.ops .phases i{animation-duration:14s;animation-timing-function:linear;animation-iteration-count:infinite;animation-play-state:paused;animation-delay:var(--d,0s)}
+  .ops .dot{animation-name:opsDot}
+  .ops .idle{animation-name:opsIdle}
+  .ops .work{animation-name:opsWork}
+  .ops .done{animation-name:opsDone}
+  .ops-type i{animation:opsType 14s linear infinite;animation-play-state:paused;animation-delay:calc(var(--i) * .05s)}
+  .caret{animation:opsCaret 14s linear infinite;animation-play-state:paused}
+  .ops-pick{animation:opsPick 14s linear infinite;animation-play-state:paused}
+  .s1 .tick{animation:opsTick1 14s linear infinite;animation-play-state:paused}
+  .s2 .tick{animation:opsTick2 14s linear infinite;animation-play-state:paused}
+  .s3 .tick{animation:opsTick3 14s linear infinite;animation-play-state:paused}
+  .chip{animation:opsChip 14s linear infinite;animation-play-state:paused}
+  .row.a .track i{animation:opsBarA 14s linear infinite;animation-play-state:paused}
+  .row.b .track i{animation:opsBarB 14s linear infinite;animation-play-state:paused}
+  .row.c .track i{animation:opsBarC 14s linear infinite;animation-play-state:paused}
+  .row.a .tick{animation:opsTickA 14s linear infinite;animation-play-state:paused}
+  .row.b .tick{animation:opsTickB 14s linear infinite;animation-play-state:paused}
+  .row.c .tick{animation:opsTickC 14s linear infinite;animation-play-state:paused}
+  .ops.is-on:not(.is-paused) .agent,
+  .ops.is-on:not(.is-paused) .dot,
+  .ops.is-on:not(.is-paused) .phases i,
+  .ops.is-on:not(.is-paused) .ops-type i,
+  .ops.is-on:not(.is-paused) .caret,
+  .ops.is-on:not(.is-paused) .ops-pick,
+  .ops.is-on:not(.is-paused) .tick,
+  .ops.is-on:not(.is-paused) .chip,
+  .ops.is-on:not(.is-paused) .track i{animation-play-state:running}
+}
+@keyframes opsAgent{0%{opacity:0;transform:translateY(16px) scale(.98)}10%,92%{opacity:1;transform:none}100%{opacity:0;transform:translateY(10px)}}
+@keyframes opsDot{0%,14%{opacity:.28;transform:scale(.75)}18%{opacity:1;transform:scale(1)}24%{opacity:.4;transform:scale(.85)}30%{opacity:1;transform:scale(1)}36%{opacity:.45;transform:scale(.85)}42%,90%{opacity:1;transform:scale(1)}100%{opacity:.28;transform:scale(.75)}}
+@keyframes opsIdle{0%,14%{opacity:1}20%,90%{opacity:0}100%{opacity:1}}
+@keyframes opsWork{0%,16%{opacity:0}20%{opacity:1}26%{opacity:.35}32%{opacity:1}38%{opacity:.4}44%,100%{opacity:0}}
+@keyframes opsDone{0%,42%{opacity:0}48%,90%{opacity:1}100%{opacity:0}}
+@keyframes opsType{0%,16%{opacity:0}22%,88%{opacity:1}96%,100%{opacity:0}}
+@keyframes opsCaret{0%,16%{opacity:0}18%{opacity:1}22%{opacity:0}26%{opacity:1}32%{opacity:0}38%{opacity:1}44%,100%{opacity:0}}
+@keyframes opsPick{0%,38%{opacity:0;transform:translateY(6px)}46%,92%{opacity:1;transform:none}100%{opacity:0;transform:none}}
+@keyframes opsTick1{0%,44%{opacity:0;transform:scale(.7)}50%,92%{opacity:1;transform:none}100%{opacity:0;transform:scale(.7)}}
+@keyframes opsTick2{0%,54%{opacity:0;transform:scale(.7)}60%,92%{opacity:1;transform:none}100%{opacity:0;transform:scale(.7)}}
+@keyframes opsTick3{0%,76%{opacity:0;transform:scale(.7)}82%,92%{opacity:1;transform:none}100%{opacity:0;transform:scale(.7)}}
+@keyframes opsChip{0%,64%{opacity:0;transform:translateY(8px) scale(.96)}72%,92%{opacity:1;transform:none}100%{opacity:0;transform:translateY(6px)}}
+@keyframes opsBarA{0%,12%{transform:scaleX(0)}36%,92%{transform:scaleX(1)}100%{transform:scaleX(0)}}
+@keyframes opsBarB{0%,20%{transform:scaleX(0)}50%,92%{transform:scaleX(1)}100%{transform:scaleX(0)}}
+@keyframes opsBarC{0%,28%{transform:scaleX(0)}60%,92%{transform:scaleX(1)}100%{transform:scaleX(0)}}
+@keyframes opsTickA{0%,34%{opacity:0;transform:scale(.7)}40%,92%{opacity:1;transform:none}100%{opacity:0;transform:scale(.7)}}
+@keyframes opsTickB{0%,48%{opacity:0;transform:scale(.7)}54%,92%{opacity:1;transform:none}100%{opacity:0;transform:scale(.7)}}
+@keyframes opsTickC{0%,58%{opacity:0;transform:scale(.7)}64%,92%{opacity:1;transform:none}100%{opacity:0;transform:scale(.7)}}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
-  .reel-sound,.hero-pause{display:none!important}
+  .reel-sound,.hero-pause,.ops-pause{display:none!important}
   html{scroll-behavior:auto}
   .lost li:nth-child(2){transform:none}
 }
@@ -251,7 +347,8 @@ footer a:hover{color:var(--cream)}
   .hero-pause{position:static;order:4;margin:0 16px 16px;align-self:flex-end}
   .work{padding-top:72px}
   .pieces{gap:72px}
-  .example,.close{padding:72px 0}
+  .example,.close,.ops{padding:72px 0}
+  .ops-agents{grid-template-columns:1fr}
   .split{grid-template-columns:1fr;gap:16px}
   .to{width:2px;height:36px;justify-self:center;background:linear-gradient(180deg,rgba(163,155,140,.4),var(--acid))}
   .to::after{right:auto;left:50%;top:auto;bottom:-4px;transform:translateX(-50%) rotate(135deg)}

@@ -1,5 +1,13 @@
 # Architecture Decision Log
 
+## 2026-10-22: Generic demo site labels, and an example AI console
+
+- **Status / owner:** Evan asked for a privacy pass on the hosted Lyons Life demo and a new homepage AI operations section. Preview only. No production deploy.
+- **Decision:** Florida Private Health, Self Employed Health, and ACA Florida in the sample demo are now Acquisition Site A, B, and C. Lyons Life stays. The homepage gains an example console between the lost-to-booked path and the closing call. The headline is “AI agents that work for your business, with you in control.” Book a call goes to `/book/`. Four agents, a task feed, a typed prompt, and an Approve chip run a 14 second loop of transform and opacity. It plays only while the section is in view. Reduced motion shows the approval frame still and hides Pause animation. The board is marked “Example console, simulated” and names no clients and no results.
+- **Rationale:** The sample names looked like real agency sites. The console should show human control without inventing a customer or a metric.
+- **Affected systems:** `public/work/lyons-life-demo/index.html`, `public/home-v2/lyons-life.webp`, `index.html`, `src/home-v2.css`, `src/home-v2.js`, `public/llms.txt`.
+- **Rollback:** Restore the previous demo names and remove the `#agents` section.
+
 ## 2026-10-22: Lyons Life Command Center card links to Evan's sample demo
 
 - **Status / owner:** Evan supplied a self-contained interactive sample and asked for it on the Selected work card. Preview only. No production deploy. This supersedes the empty-slot sentence in the motion-layer entry below.
