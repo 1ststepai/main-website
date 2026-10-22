@@ -10,7 +10,7 @@ test("the homepage leads with the studio offer and keeps products distinct", asy
   const llms = await source("public/llms.txt");
   const work = html.slice(html.indexOf('id="work"'), html.indexOf('id="example"'));
   assert.match(html, /Get more from the business you <em>already have\.<\/em>/);
-  assert.match(work, /Alerts and Node/);
+  assert.match(work, /Node AI/);
   assert.doesNotMatch(work, /8,000\+|4,000\+|TradingView/);
   assert.match(html, /href="\/tools\/"/);
   assert.match(html, /href="\/journey\/"/);

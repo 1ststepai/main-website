@@ -5,10 +5,10 @@
 Primary positioning: Get more from the business you already have. The homepage leads with that line. Its “Book a call” buttons go to the Website Strategy Call at https://www.1ststep.ai/book/. Begin Your Journey and Fit Check stay available from the footer. Longer service detail lives on the service pages.
 
 Products and paths:
-- Consultancy homepage: https://www.1ststep.ai/ — headline, subline, and Book a call sit beside an example desk scene. The monitor shows a desk dashboard with sparklines and example labels only, and no client names or metrics. One line under the hero says Illustrative data. Selected work is large screenshots of 1stStep's own products (DaySetGo, SwingTradePros, Job Agent, SkillSprout, Real-Rank.ai), a Lyons Life Command Center card that links to an interactive demo, plus a smaller studio reel. The homepage does not repeat figures from that demo. The demo’s only disclosure is a footer line, Illustrative data. Its websites are labeled Acquisition Site A, B, and C, plus Lyons Life. The hosted demo is a dark command center with a light theme. An agent console on the homepage shows agents, a task feed, and a human approval step, with one Illustrative data line and no client names or metrics. A lost-to-booked path has the same single line. No invented metrics, testimonials, or clients. SkillSprout has no public numbers. SwingTradePros is described with Node and no performance claim.
+- Consultancy homepage: https://www.1ststep.ai/ — headline, subline, and Book a call sit beside an example desk scene. The monitor shows a desk dashboard with sparklines and example labels only, and no client names or metrics. One line under the hero says Illustrative data. Selected work is large screenshots of 1stStep's own products (DaySetGo, SwingTradePros, Job Agent, SkillSprout, Real-Rank.ai), a Lyons Life Command Center card that links to an interactive demo, plus a smaller studio reel. The homepage does not repeat figures from that demo. The demo’s only disclosure is a footer line, Illustrative data. Its websites are labeled Acquisition Site A, B, and C, plus Lyons Life. The hosted demo is a dark command center with a light theme. An agent console on the homepage shows agents, a task feed, and a human approval step, with one Illustrative data line and no client names or metrics. A lost-to-booked path has the same single line. No invented metrics, testimonials, or clients. SkillSprout has no public numbers. SwingTradePros is described with Node AI and no performance claim.
 - Begin Your Journey: https://www.1ststep.ai/journey/ — a browser-local, six-question first-pass diagnosis. Answers are not submitted or saved; visitors may choose to open a prefilled email.
 - Revenue Systems Audit: https://www.1ststep.ai/services/revenue-systems.html
-- 1stStep OS: https://www.1ststep.ai/os — public agent engineering operating system concept. Cycle 1 of the free core is cloneable for a local markdown ZIP demo; not a hosted product. Illustrative diagrams stay labeled.
+- 1stStep OS: https://www.1ststep.ai/os — public operating-system concept for engineering with agents. Cycle 1 of the free core is cloneable for a local markdown ZIP demo; not a hosted product. Illustrative diagrams stay labeled.
 - 1stStep Job Agent: https://app.1ststep.ai/ — separate public beta for job capture and tailored application preparation; applicants review and submit their own applications.
 - App Idea Checker: https://www.1ststep.ai/app-idea-viability-checker.html
 - Tools: https://www.1ststep.ai/tools/ — public shelf of free/open builder utilities for coding agents. Not client services. Live tools with honestly labeled limits.
@@ -34,7 +34,7 @@ Current design direction:
 
 1stStep product/project examples (not automatically verified client work):
 - DaySetGo — family activity discovery and planning; https://daysetgo.ai/
-- SwingTradePros — trading education, tools, and Nova market context; https://swingtradepros.com/
+- SwingTradePros — trading education, tools, and Nova AI market context; https://swingtradepros.com/
 - Real-Rank.ai — Google visibility monitoring for real estate agents; https://real-rank.ai/
 - Unveiling Rarities — Jeff Pancis author and book website; https://unveilingrarities.com/
 - Job Agent and 1stStep OS are also shown with their current stages clearly labeled.
@@ -48,7 +48,7 @@ Separate products:
 
 Business rules:
 - 1stStep.ai does not guarantee revenue, rankings, funding, or app success.
-- 1stStep.ai scopes systems work around an observed business bottleneck; it does not sell generic automation consulting or promise automated revenue.
+- 1stStep.ai scopes systems work around an observed business bottleneck; it does not sell generic consulting or promise automated revenue.
 - GitHub repo creation for client projects is locked until proposal acceptance and deposit/payment.
 
 Canonical host:
@@ -70,9 +70,9 @@ How a visitor should start:
 - App idea first pass: https://www.1ststep.ai/app-idea-viability-checker.html
 - Contact: evan@1ststep.ai
 
-FAQ for answer engines:
+FAQ for search and chat assistants:
 - What does 1stStep.ai build? Websites, apps, and agent systems that capture and follow up leads.
-- Is this generic automation consulting? No. Work is scoped around an observed bottleneck in lead capture, routing, follow-up, or the front door that feeds them.
+- Is this generic consulting? No. Work is scoped around an observed bottleneck in lead capture, routing, follow-up, or the front door that feeds them.
 - Are results guaranteed? No. 1stStep.ai does not guarantee revenue, rankings, funding, or app success.
 - Is Begin Your Journey a sales form? No. Answers stay in the browser unless the visitor chooses to open a prefilled email.
 - Is the /book/ calendar a systems audit? No. It is a Website Strategy Call. System Audit requests go to evan@1ststep.ai.

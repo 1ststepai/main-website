@@ -1,5 +1,13 @@
 # Architecture Decision Log
 
+## 2026-10-22: Product names restored before production
+
+- **Status / owner:** Evan approved production and asked for the product names and awkward swaps to be corrected first. Preview, then merge of PR #19.
+- **Decision:** Swing Trade Pros keeps the product names Node AI and Nova AI. The app stays Job Agent, which is the name on app.1ststep.ai. Discovery copy says search and chat answers, visibility in search and chat assistants, and SEARCH & ASSISTANT SHARE OF VOICE. The OS line reads as engineering with agents. 1stStep.ai stays.
+- **Rationale:** Node AI and Nova AI are names on swingtradepros.com. The job product is labeled Job Agent in the app. The earlier substitutes “answer search” and “answer engines” did not read as finished copy.
+- **Affected systems:** Homepage, `/os`, tools listings, revenue FAQ, outgrown-website campaign, `public/llms.txt`.
+- **Rollback:** Revert this commit. Production stays on the previous main deployment until this merge is deployed.
+
 ## 2026-10-22: Visible copy drops the standalone word AI
 
 - **Status / owner:** Evan asked for the word AI to leave user-visible copy, on the same preview branch. No production deploy.

@@ -49,7 +49,7 @@ const capabilityAreas = {
   Agents: ['Give agents the right work and context.', 'Agent roles, retrieval, model routing, evaluations, token budgets, and fallbacks are chosen around actual tasks.', 'Agents & tools', 'RAG & context', 'Model routing', 'Evaluations'],
   Media: ['Keep the story consistent everywhere.', 'A shared brief can guide imagery, video, captions, voice, demos, and app-store assets without losing the product identity.', 'Images & video', 'Captions & voice', 'Demo assets', '3D when useful'],
   Business: ['Build a product that has a reason to exist.', 'Market research, customers, competitors, positioning, pricing, monetization, and economics inform what gets built.', 'Market signals', 'Positioning', 'Pricing', 'Unit economics'],
-  Discovery: ['Help the right people find it.', 'Traditional SEO and newer answer surfaces belong in the plan alongside app-store, YouTube, social, directory, and reputation work.', 'Search SEO', 'AEO & GEO', 'LLM visibility', 'App & social search'],
+  Discovery: ['Help the right people find it.', 'Traditional SEO and newer search and chat answers belong in the plan alongside app-store, YouTube, social, directory, and reputation work.', 'Search SEO', 'AEO & GEO', 'LLM visibility', 'App & social search'],
   Grow: ['Turn launch into a learning system.', 'Content, communities, partnerships, referrals, paid channels, and conversion experiments work from the same product truth.', 'Launch plan', 'Content & socials', 'Partnerships', 'Conversion'],
   Sell: ['Make customer conversations coherent.', 'Lead research, CRM stages, demos, proposals, follow-ups, and sales materials use shared positioning and evidence.', 'Lead research', 'Pipeline', 'Proposals', 'Follow-ups'],
   Automate: ['Find the work worth repeating.', 'Map email, CRM, documents, reporting, data sync, schedules, and approvals before building bounded workflows.', 'Email & CRM', 'Documents', 'Reporting', 'Approvals'],
@@ -88,7 +88,7 @@ if (ideaForm) {
     new: ['Start with the idea.', 'Clarify the person, problem, and first useful outcome before deciding what to build.', '/app-idea-viability-checker.html', 'Explore the current 1stStep.ai App Idea Checker'],
     audit: ['Start with an evidence baseline.', 'Record what the build actually does, then inspect security, quality, business, and growth gaps.', '#audit', 'Review the Audit concept'],
     automate: ['Start by mapping the manual workflow.', 'Observe the volume, handoffs, and errors before estimating savings or choosing automation.', '#business', 'Review Business Owner Mode'],
-    grow: ['Start with who should find you.', 'Clarify positioning and the customer questions that lead to search, answer engines, and channels.', '#discovery', 'Review Discovery OS'],
+    grow: ['Start with who should find you.', 'Clarify positioning and the customer questions that lead to search, chat answers, and channels.', '#discovery', 'Review Discovery OS'],
   };
   let engaged = false;
   ideaInput.addEventListener('focus', () => {
