@@ -8,6 +8,7 @@ const source = (path) => readFile(new URL(path, root), "utf8");
 const wwwPages = [
   "/",
   "/work/",
+  "/work/universal-relocations/",
   "/os",
   "/journey/",
   "/book/",

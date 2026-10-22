@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Origin Service US | Universal Relocations</title>
+  <meta name="description" content="A staff workspace for quoting and preparing the U.S. origin leg of international household moves. Fictional placeholders. No rates.">
+  <meta name="theme-color" content="#0D0C0A">
+  <link rel="canonical" href="https://www.1ststep.ai/work/universal-relocations/">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <style>
+    @font-face{font-family:"Archivo";font-style:normal;font-weight:300 900;font-display:swap;src:url("/fonts/archivo-latin.woff2") format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+    :root {
+      --ink: #0D0C0A;
+      --ink2: #171512;
+      --cream: #F1EADB;
+      --soft: #D6CEBE;
+      --muted: #A39B8C;
+      --line: rgba(241,234,219,.14);
+      --lime: #D4FF3A;
+      --blue: #007BF8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--cream);
+      background: var(--ink);
+      font: 16px/1.55 Archivo, ui-sans-serif, system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    button, a { font: inherit; }
+    button { cursor: pointer; }
+    :focus-visible { outline: 2px solid var(--lime); outline-offset: 3px; }
+    .topline { height: 1px; background: linear-gradient(90deg, transparent, rgba(212,255,58,.7), rgba(0,123,248,.55), transparent); }
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 0 22px 72px; }
+    header { padding: 36px 0 6px; }
+    .eyebrow {
+      margin: 0;
+      color: var(--lime);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+    h1 {
+      margin: 8px 0 10px;
+      max-width: 16ch;
+      font-size: clamp(34px, 5vw, 54px);
+      font-weight: 520;
+      line-height: 1.02;
+      letter-spacing: -.045em;
+    }
+    .lede { max-width: 66ch; margin: 0; color: var(--soft); font-size: 18px; }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 22px 0 6px; }
+    .primary, .secondary, .desk { border-radius: 999px; border: 1px solid transparent; }
+    .primary { background: var(--lime); color: var(--ink); padding: 12px 18px; font-weight: 700; }
+    .secondary { background: transparent; color: var(--cream); border-color: rgba(241,234,219,.4); padding: 12px 16px; text-decoration: none; }
+    .section-label {
+      margin: 28px 0 10px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .portal {
+      display: grid;
+      grid-template-columns: 230px 1fr;
+      min-height: 560px;
+      background: var(--ink2);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      overflow: hidden;
+    }
+    .nav { background: #0D0C0A; color: var(--soft); padding: 18px 12px; border-right: 1px solid var(--line); }
+    .brand { display: flex; gap: 10px; align-items: center; padding: 4px 8px 16px; color: var(--cream); font-weight: 700; }
+    .mark { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 10px; background: var(--blue); color: white; font-size: 12px; }
+    .brand small { display: block; color: var(--muted); font-weight: 600; font-size: 12px; }
+    .desk { display: block; width: 100%; text-align: left; color: var(--soft); background: transparent; padding: 9px 10px; margin: 2px 0; }
+    .desk[aria-current="page"] { background: rgba(212,255,58,.14); color: var(--lime); }
+    .stage { padding: 22px; }
+    .stage h2 { margin: 0 0 6px; font-size: 26px; font-weight: 560; letter-spacing: -.03em; }
+    .stage p { margin: 0 0 14px; color: var(--muted); }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .chip { border-radius: 999px; padding: 4px 10px; font-size: 12px; font-weight: 700; background: rgba(241,234,219,.08); color: var(--soft); }
+    .chip.ok { background: rgba(212,255,58,.14); color: var(--lime); }
+    .chip.wait { background: rgba(242,170,61,.16); color: #f2c56b; }
+    .chip.info { background: rgba(0,123,248,.16); color: #8ec4ff; }
+    .steps { display: flex; gap: 6px; margin: 4px 0 16px; }
+    .step-dot { flex: 1; height: 6px; border: 0; border-radius: 99px; background: rgba(241,234,219,.16); padding: 0; }
+    .step-dot.on { background: var(--lime); }
+    .step-dot.done { background: rgba(0,123,248,.7); }
+    .facts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 0; }
+    .facts div, .card { background: #0D0C0A; border: 1px solid var(--line); border-radius: 12px; padding: 12px; }
+    .facts dt { color: var(--muted); font-size: 12px; }
+    .facts dd { margin: 2px 0 0; font-weight: 700; color: var(--cream); }
+    .grid { display: grid; grid-template-columns: 1.2fr .8fr; gap: 12px; }
+    .card h3 { margin: 0 0 8px; font-size: 15px; }
+    .card p { margin: 0 0 10px; color: var(--soft); }
+    .choice { display: flex; flex-direction: column; gap: 8px; }
+    .choice button { text-align: left; background: #0D0C0A; color: var(--cream); border: 1px solid var(--line); border-radius: 12px; padding: 12px; }
+    .choice button span { color: var(--muted); }
+    .choice button[aria-pressed="true"] { border-color: var(--lime); background: rgba(212,255,58,.08); }
+    .locked {
+      border: 1px dashed rgba(241,234,219,.28);
+      border-radius: 12px;
+      padding: 14px;
+      color: var(--muted);
+      background: repeating-linear-gradient(-45deg, #12110f, #12110f 8px, #171512 8px, #171512 16px);
+    }
+    .actions { display: flex; gap: 8px; align-items: center; margin-top: 16px; }
+    .done-box { padding: 16px; border-radius: 14px; background: rgba(212,255,58,.1); color: var(--cream); border: 1px solid rgba(212,255,58,.28); }
+    .done-box strong { display: block; font-size: 18px; margin-bottom: 4px; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--line); }
+    th { color: var(--muted); font-size: 12px; font-weight: 600; }
+    .note { margin: 16px 0 0; color: var(--muted); font-size: 13px; letter-spacing: .01em; }
+    #live { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+    @media (max-width: 800px) {
+      .portal, .grid, .facts { grid-template-columns: 1fr; }
+      .nav { display: flex; gap: 6px; overflow: auto; border-right: 0; border-bottom: 1px solid var(--line); }
+      .brand { display: none; }
+      .desk { width: auto; white-space: nowrap; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="topline"></div>
+  <div class="wrap">
+    <header>
+      <p class="eyebrow">1stStep · Universal Relocations</p>
+      <h1>Origin Service US.</h1>
+      <p class="lede">
+        Staff prepare the U.S. origin leg of an international household move: pickup, load port, and the services Universal performs before the shipment leaves the country. The customer sees Origin Service. The working file stays with the team.
+      </p>
+      <div class="hero-actions">
+        <button class="primary" id="start" type="button">Walk a sample origin quote</button>
+      </div>
+    </header>
+    <p class="section-label" id="demo">Sample workspace</p>
+    <div class="portal">
+      <nav class="nav" aria-label="Origin Service US">
+        <div class="brand"><span class="mark">US</span><span>Origin Service<small>Sample workspace</small></span></div>
+        <button class="desk" type="button" data-view="queue">Quote queue</button>
+        <button class="desk" type="button" data-view="quote">Origin quote</button>
+      </nav>
+      <main class="stage" id="stage"></main>
+    </div>
+    <p class="note">Fictional placeholders only: Alex Johnson, Houston to a sample U.S. port, discharge Dubai. Nothing here is a quote or a rate.</p>
+    <div id="live" aria-live="polite"></div>
+  </div>
+  <script>
+    const steps = [
+      {
+        id: "lane",
+        name: "Lane",
+        title: "Set the U.S. origin lane",
+        text: "Pickup and port of loading are in the United States. Port of discharge is the international destination and does not reprice the origin leg.",
+        facts: [
+          ["Pickup", "Houston, TX"],
+          ["Port of loading", "Sample U.S. port"],
+          ["Port of discharge", "Dubai, UAE"],
+          ["Shipper", "Alex Johnson"]
+        ],
+        next: "Confirm the origin leg"
+      },
+      {
+        id: "leg",
+        name: "Origin leg",
+        title: "Origin distance stays in the U.S.",
+        text: "Haulage follows the pickup to the port of loading. Changing Dubai does not change that leg.",
+        facts: [
+          ["Distance", "Pickup to load port"],
+          ["Haulage", "U.S. origin only"],
+          ["Commodity", "Household goods"],
+          ["Mode", "Ocean"]
+        ],
+        next: "Choose packing"
+      },
+      {
+        id: "pack",
+        name: "Packing",
+        title: "Choose the packing service",
+        text: "Full, partial, or no packing. This public demo records the choice and does not show a price.",
+        packing: true,
+        next: "Review the customer page"
+      },
+      {
+        id: "preview",
+        name: "Customer page",
+        title: "Customer page shows Origin Service",
+        text: "Packing is included in Origin Service. Supplier detail and the working calculation stay off the customer page.",
+        preview: true,
+        next: "Save the draft"
+      },
+      {
+        id: "done",
+        name: "Draft",
+        title: "Draft is ready for a person",
+        text: "The origin file can be reopened later. Sending it is a separate human action. This demo sends nothing.",
+        done: true
+      }
+    ];
+
+    const packingChoices = [
+      ["full", "Full packing", "Universal packs the shipment."],
+      ["partial", "Partial packing", "Universal packs part. The customer packs the rest."],
+      ["none", "No packing", "Universal does not pack. A loading crew is the service."]
+    ];
+
+    const stage = document.getElementById("stage");
+    const live = document.getElementById("live");
+    const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let view = "queue";
+    let step = 0;
+    let packing = "full";
+
+    function chip(label, kind) {
+      return `<span class="chip ${kind || ""}">${label}</span>`;
+    }
+
+    function renderQueue() {
+      const rows = [
+        ["SMP-1042", "Houston → sample U.S. port", "In review"],
+        ["SMP-1038", "Anytown → sample U.S. port", "Missing pickup"],
+        ["SMP-1031", "Sample Street → sample U.S. port", "Draft"]
+      ].map((row) => `<tr><td>${row[0]}</td><td>${row[1]}</td><td>${chip(row[2], row[2].includes("Missing") ? "wait" : "ok")}</td></tr>`).join("");
+      stage.innerHTML = `
+        <h2>Origin quote queue</h2>
+        <p>Open U.S. origin files. Counts and references are samples.</p>
+        <div class="chips">${chip("Origin Service US", "info")}${chip("3 sample files")}</div>
+        <table><thead><tr><th>Sample ref</th><th>Origin lane</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table>
+        <div class="actions"><button class="primary" type="button" id="walk">Open SMP-1042</button></div>`;
+    }
+
+    function renderQuote() {
+      const current = steps[step];
+      const dots = steps.map((item, index) => {
+        const cls = index === step ? "on" : index < step ? "done" : "";
+        return `<button class="step-dot ${cls}" type="button" data-step="${index}" aria-label="${item.name}"></button>`;
+      }).join("");
+      let body = "";
+      if (current.done) {
+        const label = packingChoices.find((item) => item[0] === packing)[1];
+        body = `<div class="done-box"><strong>Sample origin file SMP-1042 is a draft.</strong>Houston to a sample U.S. port, discharge Dubai, packing set to ${label.toLowerCase()}. No email was sent.</div>`;
+      } else if (current.preview) {
+        const label = packingChoices.find((item) => item[0] === packing)[1];
+        body = `<div class="grid">
+          <div class="card"><h3>What the customer sees</h3><p>Origin Service for a move from Houston. ${label} is included. No internal calculation is on this page.</p>${chip("Draft", "info")}</div>
+          <div class="locked">Staff working file. Hidden in this public demo.</div>
+        </div>`;
+      } else if (current.packing) {
+        body = `<div class="choice">${packingChoices.map(([id, title, copy]) =>
+          `<button type="button" data-pack="${id}" aria-pressed="${packing === id}">
+            <strong>${title}</strong><br><span>${copy}</span>
+          </button>`).join("")}</div>`;
+      } else {
+        body = `<dl class="facts">${current.facts.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join("")}</dl>`;
+      }
+      const back = step > 0 ? `<button class="secondary" type="button" id="back">Back</button>` : "";
+      const next = current.done
+        ? `<button class="primary" type="button" id="restart">Start again</button>`
+        : `<button class="primary" type="button" id="next">${current.next}</button>`;
+      stage.innerHTML = `<h2>${current.title}</h2><p>${current.text}</p><div class="chips">${chip("SMP-1042", "info")}${chip(current.name, "ok")}</div><div class="steps">${dots}</div>${body}<div class="actions">${next}${back}</div>`;
+    }
+
+    function render() {
+      document.querySelectorAll(".desk").forEach((button) => {
+        if (button.dataset.view === view) button.setAttribute("aria-current", "page");
+        else button.removeAttribute("aria-current");
+      });
+      if (view === "queue") renderQueue();
+      else renderQuote();
+      live.textContent = stage.querySelector("h2").textContent;
+    }
+
+    function openQuote(at) {
+      view = "quote";
+      step = at;
+      render();
+    }
+
+    document.querySelector(".nav").addEventListener("click", (event) => {
+      const button = event.target.closest(".desk");
+      if (!button) return;
+      view = button.dataset.view;
+      if (view === "quote") step = 0;
+      render();
+    });
+
+    stage.addEventListener("click", (event) => {
+      const target = event.target.closest("button");
+      if (!target) return;
+      if (target.id === "walk") openQuote(0);
+      if (target.id === "next") openQuote(Math.min(steps.length - 1, step + 1));
+      if (target.id === "back") openQuote(Math.max(0, step - 1));
+      if (target.id === "restart") openQuote(0);
+      if (target.dataset.step != null) openQuote(Number(target.dataset.step));
+      if (target.dataset.pack) {
+        packing = target.dataset.pack;
+        renderQuote();
+        document.querySelectorAll(".desk").forEach((button) => {
+          if (button.dataset.view === "quote") button.setAttribute("aria-current", "page");
+          else button.removeAttribute("aria-current");
+        });
+      }
+    });
+
+    document.getElementById("start").addEventListener("click", () => {
+      openQuote(0);
+      document.getElementById("demo").scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" });
+    });
+
+    render();
+  </script>
+</body>
+</html>

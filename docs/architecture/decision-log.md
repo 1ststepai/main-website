@@ -1,5 +1,13 @@
 # Architecture Decision Log
 
+## 2026-10-22: Universal Relocations origin demo
+
+- **Status / owner:** Evan asked for the Origin Service US overview on the pricing preview branch. No production deploy.
+- **Decision:** `/work/universal-relocations/` hosts the staff portal for the U.S. origin leg. The only disclosure is one muted line: fictional placeholders, and nothing on the page is a quote or a rate. The homepage proof strip places it beside Lyons Life. `/work/` includes the same case. No metrics are added.
+- **Rationale:** The portal is a real piece of work. The names and lanes in the walk-through are placeholders, so the page says that once.
+- **Affected systems:** `public/work/universal-relocations/index.html`, `index.html`, `work/index.html`, `src/home-v2.css`, `public/home-v2/universal-relocations.webp`, sitemap, `public/llms.txt`, Vite routes, `vercel.json`.
+- **Rollback:** Remove the page, the proof card, the portfolio piece, and the sitemap entry.
+
 ## 2026-10-22: Homepage conversion order
 
 - **Status / owner:** Evan approved a conversion-focused homepage restructure on the pricing preview branch. No production deploy.
