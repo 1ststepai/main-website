@@ -26,7 +26,7 @@
     <meta name="twitter:description" content="Get a free viability score, MVP recommendation, and focused path for what to build first." />
     <meta name="twitter:image" content="https://www.1ststep.ai/assets/firststep-checker-social-preview-v1.jpg" />
     <meta name="twitter:image:alt" content="Free 1stStep.ai App Idea Viability Checker with an MVP readiness score and focused build path." />
-    <meta name="theme-color" content="#080b16" />
+    <meta name="theme-color" content="#0D0C0A" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -83,35 +83,34 @@
       */
       body.aivc-standalone-page {
         margin: 0;
-        background: #ffffff;
+        background: #F1EADB;
       }
 
       #aivc-root {
-        --aivc-bg: #ffffff; /* Change main background color here */
-        --aivc-bg-2: #f6f7fb;
-        --aivc-panel: #ffffff;
-        --aivc-panel-strong: #ffffff;
-        --aivc-line: rgba(16,20,45,0.10);
-        --aivc-line-strong: rgba(109,94,252,0.30);
-        --aivc-text: #0b1020;
-        --aivc-muted: #565d75;
-        --aivc-soft: #1c2236;
-        --aivc-blue: #6d5efc; /* Change primary brand color here */
-        --aivc-cyan: #4d7cff; /* Change accent color here */
-        --aivc-purple: #8f6bff; /* Change gradient accent here */
+        --aivc-bg: #F1EADB; /* Change main background color here */
+        --aivc-bg-2: #F1EADB;
+        --aivc-panel: #F1EADB;
+        --aivc-panel-strong: #F1EADB;
+        --aivc-line: rgba(13,12,10,0.10);
+        --aivc-line-strong: rgba(212,255,58,0.30);
+        --aivc-text: #F1EADB;
+        --aivc-muted: #A39B8C;
+        --aivc-soft: #0D0C0A;
+        --aivc-blue: #D4FF3A; /* Change primary brand color here */
+        --aivc-cyan: #D4FF3A; /* Change accent color here */
+        --aivc-purple: #D4FF3A; /* Change gradient accent here */
         --aivc-green: #12b981;
         --aivc-yellow: #d99a1a;
         --aivc-red: #ef4d68;
-        --aivc-shadow: 0 26px 60px -30px rgba(38,34,90,0.22);
+        --aivc-shadow: 0 26px 60px -30px rgba(13,12,10,0.22);
         --aivc-radius: 28px;
         color: var(--aivc-text);
         background:
-          radial-gradient(circle at 18% 8%, rgba(36, 146, 255, 0.2), transparent 28%),
-          radial-gradient(circle at 86% 18%, rgba(139, 92, 246, 0.22), transparent 28%),
-          radial-gradient(circle at 62% 75%, rgba(40, 215, 255, 0.12), transparent 32%),
+          radial-gradient(circle at 18% 8%, rgba(212,255,58, 0.2), transparent 28%),
+          radial-gradient(circle at 86% 18%, rgba(212,255,58, 0.22), transparent 28%),
+          radial-gradient(circle at 62% 75%, rgba(212,255,58,0.12), transparent 32%),
           linear-gradient(180deg, var(--aivc-bg), var(--aivc-bg-2));
-        font-family:
-          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        font-family:"Archivo", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
           sans-serif;
         line-height: 1.5;
         min-height: 100vh;
@@ -140,8 +139,8 @@
         inset: 0;
         z-index: -2;
         background:
-          linear-gradient(rgba(16, 20, 45, 0.028) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(16, 20, 45, 0.028) 1px, transparent 1px);
+          linear-gradient(rgba(13,12,10,0.028) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(13,12,10,0.028) 1px, transparent 1px);
         background-size: 54px 54px;
         mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.95), transparent 78%);
         pointer-events: none;
@@ -179,7 +178,7 @@
         position: relative;
         padding: 4px 8px;
         border-radius: 20px;
-        background: radial-gradient(circle at 50% 50%, rgba(36, 146, 255, 0.16), rgba(139, 92, 246, 0.06) 52%, transparent 74%);
+        background: radial-gradient(circle at 50% 50%, rgba(212,255,58, 0.16), rgba(212,255,58, 0.06) 52%, transparent 74%);
       }
 
       .aivc-brand-mark {
@@ -188,7 +187,7 @@
         height: 78px;
         max-width: min(280px, 34vw);
         object-fit: contain;
-        filter: drop-shadow(0 16px 38px rgba(36, 146, 255, 0.30)) drop-shadow(0 0 20px rgba(125, 211, 252, 0.12));
+        filter: drop-shadow(0 16px 38px rgba(212,255,58, 0.30)) drop-shadow(0 0 20px rgba(212,255,58,0.12));
       }
 
       .aivc-brand-copy strong {
@@ -196,7 +195,7 @@
         font-size: 24px;
         line-height: 1.1;
         letter-spacing: -0.04em;
-        background: linear-gradient(135deg, #6d5efc 10%, #4d7cff 55%, #8f6bff 100%);
+        background: linear-gradient(135deg, #D4FF3A 10%, #D4FF3A 55%, #D4FF3A 100%);
         -webkit-background-clip: text;
         background-clip: text;
         color: transparent;
@@ -219,7 +218,7 @@
         border-radius: 999px;
         color: var(--aivc-soft);
         text-decoration: none;
-        background: rgba(16, 20, 45, 0.035);
+        background: rgba(13,12,10,0.035);
         backdrop-filter: blur(14px);
         transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
       }
@@ -227,7 +226,7 @@
       .aivc-nav-link:hover {
         transform: translateY(-1px);
         border-color: var(--aivc-line-strong);
-        background: rgba(16, 20, 45, 0.07);
+        background: rgba(13,12,10,0.07);
       }
 
       .aivc-nav-actions {
@@ -253,11 +252,11 @@
         width: fit-content;
         margin: 0 0 18px;
         padding: 8px 12px;
-        border: 1px solid rgba(125, 211, 252, 0.28);
+        border: 1px solid rgba(212,255,58,0.28);
         border-radius: 999px;
-        color: #0e7490;
+        color: #171512;
         background: rgba(255,255,255,0.92);
-        box-shadow: inset 0 1px 0 rgba(16, 20, 45, 0.08);
+        box-shadow: inset 0 1px 0 rgba(13,12,10,0.08);
         font-size: 13px;
         font-weight: 700;
       }
@@ -315,11 +314,11 @@
         place-items: center;
         color: var(--aivc-cyan);
         background:
-          radial-gradient(circle at 35% 22%, rgba(40, 215, 255, 0.25), transparent 45%),
-          linear-gradient(135deg, rgba(36,146,255,.16), rgba(139,92,246,.16)),
-          rgba(16, 20, 45,.045);
-        border: 1px solid rgba(125, 211, 252, 0.18);
-        box-shadow: inset 0 1px rgba(16, 20, 45,.08), 0 18px 46px rgba(36,146,255,.12);
+          radial-gradient(circle at 35% 22%, rgba(212,255,58,0.25), transparent 45%),
+          linear-gradient(135deg, rgba(212,255,58,.16), rgba(212,255,58,.16)),
+          rgba(13,12,10,.045);
+        border: 1px solid rgba(212,255,58,0.18);
+        box-shadow: inset 0 1px rgba(13,12,10,.08), 0 18px 46px rgba(212,255,58,.12);
       }
 
       .aivc-benefit-icon {
@@ -368,7 +367,7 @@
 
       .aivc-benefit strong {
         display: block;
-        color: #0b1020;
+        color: #F1EADB;
         font-size: 14px;
         margin-bottom: 6px;
       }
@@ -418,25 +417,25 @@
       .aivc-option:focus-visible,
       .aivc-input:focus-visible,
       .aivc-textarea:focus-visible {
-        outline: 3px solid rgba(40, 215, 255, 0.42);
+        outline: 3px solid rgba(212,255,58,0.42);
         outline-offset: 3px;
       }
 
       .aivc-btn-primary {
-        background: linear-gradient(135deg, var(--aivc-blue), #5a8cff 52%, #b833f4);
+        background: linear-gradient(135deg, var(--aivc-blue), #D4FF3A 52%, #D4FF3A);
         color: #fff;
-        box-shadow: 0 20px 60px rgba(36, 146, 255, 0.34);
+        box-shadow: 0 20px 60px rgba(212,255,58, 0.34);
       }
 
       .aivc-btn-secondary {
         border-color: var(--aivc-line);
-        background: rgba(16, 20, 45, 0.06);
+        background: rgba(13,12,10,0.06);
         backdrop-filter: blur(16px);
       }
 
       .aivc-btn-ghost {
-        border-color: rgba(16, 20, 45, 0.2);
-        background: rgba(16, 20, 45, 0.04);
+        border-color: rgba(13,12,10,0.2);
+        background: rgba(13,12,10,0.04);
       }
 
       .aivc-btn[disabled] {
@@ -457,7 +456,7 @@
         border: 1px solid var(--aivc-line);
         border-radius: var(--aivc-radius);
         background:
-          linear-gradient(145deg, rgba(16, 20, 45, 0.09), rgba(16, 20, 45, 0.025)),
+          linear-gradient(145deg, rgba(13,12,10,0.09), rgba(13,12,10,0.025)),
           var(--aivc-panel);
         box-shadow: var(--aivc-shadow);
         backdrop-filter: blur(22px);
@@ -467,8 +466,8 @@
         position: relative;
         overflow: hidden;
         padding: 34px;
-        border-color: rgba(139, 92, 246, 0.42);
-        box-shadow: 0 32px 110px rgba(36, 146, 255, 0.18), 0 0 80px rgba(139, 92, 246, 0.12);
+        border-color: rgba(212,255,58, 0.42);
+        box-shadow: 0 32px 110px rgba(212,255,58, 0.18), 0 0 80px rgba(212,255,58, 0.12);
       }
 
       .aivc-preview-card:before {
@@ -476,8 +475,8 @@
         position: absolute;
         inset: 0;
         background:
-          radial-gradient(circle at 20% 20%, rgba(40, 215, 255, 0.18), transparent 26%),
-          radial-gradient(circle at 80% 0%, rgba(139, 92, 246, 0.22), transparent 24%);
+          radial-gradient(circle at 20% 20%, rgba(212,255,58,0.18), transparent 26%),
+          radial-gradient(circle at 80% 0%, rgba(212,255,58, 0.22), transparent 24%);
         pointer-events: none;
       }
 
@@ -501,9 +500,9 @@
         height: 168px;
         border-radius: 50%;
         background:
-          conic-gradient(from 0deg, var(--aivc-purple), #b833f4 20%, var(--aivc-blue) 58%, rgba(16, 20, 45, 0.08) 74%),
-          rgba(16, 20, 45, 0.05);
-        box-shadow: 0 0 80px rgba(36, 146, 255, 0.24);
+          conic-gradient(from 0deg, var(--aivc-purple), #D4FF3A 20%, var(--aivc-blue) 58%, rgba(13,12,10,0.08) 74%),
+          rgba(13,12,10,0.05);
+        box-shadow: 0 0 80px rgba(212,255,58, 0.24);
       }
 
       .aivc-score-ring span {
@@ -523,6 +522,13 @@
         font-size: 13px;
         font-weight: 800;
         text-transform: uppercase;
+      }
+
+      .aivc-quiet {
+        font-size: 12px;
+        font-weight: 500;
+        letter-spacing: 0.02em;
+        text-transform: none;
       }
 
       .aivc-score-ring small {
@@ -563,7 +569,7 @@
         width: 20px;
         height: 20px;
         border-radius: 50%;
-        color: #eef1f8;
+        color: #F1EADB;
         background: var(--aivc-cyan);
         font-size: 13px;
         font-weight: 950;
@@ -581,29 +587,29 @@
         align-items: center;
         min-height: 30px;
         padding: 0 11px;
-        border: 1px solid rgba(16, 20, 45, 0.16);
+        border: 1px solid rgba(13,12,10,0.16);
         border-radius: 999px;
-        color: #1c2236;
-        background: rgba(16, 20, 45, 0.055);
+        color: #0D0C0A;
+        background: rgba(13,12,10,0.055);
         font-size: 12px;
         font-weight: 750;
       }
 
       .aivc-pill.aivc-pill-green { color: #0f9d6e; border-color: rgba(41,241,162,.25); background: rgba(41,241,162,.09); }
-      .aivc-pill.aivc-pill-blue { color: #2563eb; border-color: rgba(36,146,255,.28); background: rgba(36,146,255,.10); }
+      .aivc-pill.aivc-pill-blue { color: #D4FF3A; border-color: rgba(212,255,58,.28); background: rgba(212,255,58,.10); }
       .aivc-pill.aivc-pill-yellow { color: #a86a10; border-color: rgba(248,195,91,.28); background: rgba(248,195,91,.10); }
-      .aivc-pill.aivc-pill-purple { color: #6d5efc; border-color: rgba(139,92,246,.30); background: rgba(139,92,246,.12); }
+      .aivc-pill.aivc-pill-purple { color: #D4FF3A; border-color: rgba(212,255,58,.30); background: rgba(212,255,58,.12); }
 
       .aivc-preview-meaning {
         padding: 20px;
-        border: 1px solid rgba(16, 20, 45,.14);
+        border: 1px solid rgba(13,12,10,.14);
         border-radius: 18px;
-        background: rgba(16, 20, 45,.035);
+        background: rgba(13,12,10,.035);
       }
 
       .aivc-preview-meaning h3 {
         margin: 0 0 14px;
-        color: #4d7cff;
+        color: #D4FF3A;
         font-size: 13px;
         text-transform: uppercase;
         letter-spacing: .08em;
@@ -615,11 +621,11 @@
 
       .aivc-panel {
         overflow: hidden;
-        border-color: rgba(148,170,255,.20);
+        border-color: rgba(212,255,58,.20);
         background:
-          radial-gradient(circle at 5% 0%, rgba(73,184,255,.12), transparent 30%),
-          radial-gradient(circle at 92% 12%, rgba(139,92,246,.12), transparent 32%),
-          linear-gradient(145deg, rgba(16, 20, 45,0.08), rgba(16, 20, 45,0.025)),
+          radial-gradient(circle at 5% 0%, rgba(212,255,58,.12), transparent 30%),
+          radial-gradient(circle at 92% 12%, rgba(212,255,58,.12), transparent 32%),
+          linear-gradient(145deg, rgba(13,12,10,0.08), rgba(13,12,10,0.025)),
           var(--aivc-panel);
       }
 
@@ -630,7 +636,7 @@
         gap: 18px;
         padding: 24px;
         border-bottom: 1px solid var(--aivc-line);
-        background: rgba(16, 20, 45, 0.03);
+        background: rgba(13,12,10,0.03);
       }
 
       .aivc-panel-title {
@@ -644,11 +650,11 @@
         width: 58px;
         height: 58px;
         object-fit: contain;
-        border: 1px solid rgba(125,211,252,.25);
+        border: 1px solid rgba(212,255,58,.25);
         border-radius: 16px;
-        background: radial-gradient(circle at 50% 0%, rgba(125,211,252,.14), transparent 50%), rgba(16, 20, 45,.045);
+        background: radial-gradient(circle at 50% 0%, rgba(212,255,58,.14), transparent 50%), rgba(13,12,10,.045);
         padding: 8px;
-        box-shadow: 0 18px 48px rgba(36,146,255,.16);
+        box-shadow: 0 18px 48px rgba(212,255,58,.16);
       }
 
       .aivc-panel-header h2 {
@@ -669,7 +675,7 @@
         border: 1px solid var(--aivc-line);
         border-radius: 999px;
         color: var(--aivc-soft);
-        background: rgba(16, 20, 45, 0.045);
+        background: rgba(13,12,10,0.045);
         font-size: 13px;
         font-weight: 850;
         text-align: center;
@@ -677,7 +683,7 @@
 
       .aivc-progress-wrap {
         height: 4px;
-        background: rgba(16, 20, 45, 0.07);
+        background: rgba(13,12,10,0.07);
       }
 
       .aivc-progress {
@@ -717,7 +723,7 @@
         right: 44px;
         top: 39px;
         height: 2px;
-        background: linear-gradient(90deg, var(--aivc-blue), var(--aivc-purple), rgba(16, 20, 45,.12));
+        background: linear-gradient(90deg, var(--aivc-blue), var(--aivc-purple), rgba(13,12,10,.12));
       }
 
       .aivc-step-item {
@@ -741,20 +747,20 @@
       }
 
       .aivc-step-item strong {
-        color: #0b1020;
+        color: #F1EADB;
         font-size: 13px;
       }
 
       .aivc-side-panel {
         align-self: start;
-        border: 1px solid rgba(148,170,255,.18);
+        border: 1px solid rgba(212,255,58,.18);
         border-radius: 22px;
         background:
-          radial-gradient(circle at 0% 0%, rgba(40,215,255,.10), transparent 34%),
-          linear-gradient(145deg, rgba(16, 20, 45,.06), rgba(16, 20, 45,.02)),
+          radial-gradient(circle at 0% 0%, rgba(212,255,58,.10), transparent 34%),
+          linear-gradient(145deg, rgba(13,12,10,.06), rgba(13,12,10,.02)),
           rgba(255,255,255,0.92);
         padding: 24px;
-        box-shadow: inset 0 1px rgba(16, 20, 45,.06);
+        box-shadow: inset 0 1px rgba(13,12,10,.06);
       }
 
       .aivc-side-panel h3 {
@@ -774,7 +780,7 @@
         gap: 12px;
         align-items: center;
         padding-bottom: 15px;
-        border-bottom: 1px solid rgba(16, 20, 45,.07);
+        border-bottom: 1px solid rgba(13,12,10,.07);
       }
 
       .aivc-area:last-child {
@@ -791,7 +797,7 @@
 
       .aivc-area strong {
         display: block;
-        color: #0b1020;
+        color: #F1EADB;
         font-size: 14px;
       }
 
@@ -805,10 +811,10 @@
       .aivc-question-card {
         min-height: 390px;
         padding: 30px;
-        border: 1px solid rgba(125, 211, 252, 0.16);
+        border: 1px solid rgba(212,255,58,0.16);
         border-radius: 22px;
         background:
-          radial-gradient(circle at 0% 0%, rgba(36,146,255,.13), transparent 34%),
+          radial-gradient(circle at 0% 0%, rgba(212,255,58,.13), transparent 34%),
           rgba(255,255,255,0.85);
         opacity: 1;
         transform: translateY(0);
@@ -852,11 +858,11 @@
         width: 100%;
         min-height: 180px;
         resize: vertical;
-        border: 1px solid rgba(125, 211, 252, 0.24);
+        border: 1px solid rgba(212,255,58,0.24);
         border-radius: 22px;
         color: var(--aivc-text);
         background: rgba(255,255,255,0);
-        box-shadow: inset 0 1px 0 rgba(16, 20, 45, 0.06);
+        box-shadow: inset 0 1px 0 rgba(13,12,10,0.06);
         font: inherit;
         line-height: 1.55;
         padding: 18px;
@@ -877,7 +883,7 @@
       }
 
       .aivc-textarea::placeholder {
-        color: rgba(174, 188, 205, 0.72);
+        color: rgba(163,155,140,0.72);
       }
 
       .aivc-snapshot-grid {
@@ -917,11 +923,11 @@
         width: 100%;
         min-height: 72px;
         padding: 16px 17px;
-        border: 1px solid rgba(16, 20, 45, 0.15);
+        border: 1px solid rgba(13,12,10,0.15);
         border-radius: 18px;
         color: var(--aivc-soft);
         cursor: pointer;
-        background: rgba(16, 20, 45, 0.045);
+        background: rgba(13,12,10,0.045);
         font: inherit;
         font-weight: 760;
         text-align: left;
@@ -934,17 +940,17 @@
 
       .aivc-option:hover {
         transform: translateY(-1px);
-        border-color: rgba(125, 211, 252, 0.42);
-        background: rgba(16, 20, 45, 0.07);
+        border-color: rgba(212,255,58,0.42);
+        background: rgba(13,12,10,0.07);
       }
 
       .aivc-option.aivc-selected {
-        color: #1c2236;
-        border-color: rgba(40, 215, 255, 0.78);
+        color: #0D0C0A;
+        border-color: rgba(212,255,58,0.78);
         background:
-          linear-gradient(135deg, rgba(36, 146, 255, 0.24), rgba(139, 92, 246, 0.18)),
-          rgba(16, 20, 45, 0.08);
-        box-shadow: 0 16px 52px rgba(36, 146, 255, 0.18);
+          linear-gradient(135deg, rgba(212,255,58, 0.24), rgba(212,255,58, 0.18)),
+          rgba(13,12,10,0.08);
+        box-shadow: 0 16px 52px rgba(212,255,58, 0.18);
       }
 
       .aivc-controls {
@@ -994,8 +1000,8 @@
       .aivc-lead-card {
         border: 1px solid var(--aivc-line);
         border-radius: 22px;
-        background: rgba(16, 20, 45, 0.048);
-        box-shadow: inset 0 1px 0 rgba(16, 20, 45, 0.06);
+        background: rgba(13,12,10,0.048);
+        box-shadow: inset 0 1px 0 rgba(13,12,10,0.06);
       }
 
       .aivc-result-card {
@@ -1022,10 +1028,10 @@
         min-height: 34px;
         margin-top: 18px;
         padding: 0 12px;
-        border: 1px solid rgba(40, 215, 255, 0.42);
+        border: 1px solid rgba(212,255,58,0.42);
         border-radius: 999px;
-        color: #0e7490;
-        background: rgba(40, 215, 255, 0.1);
+        color: #171512;
+        background: rgba(212,255,58,0.1);
         font-weight: 900;
       }
 
@@ -1053,11 +1059,11 @@
       .aivc-mockup-card {
         margin-top: 18px;
         padding: 22px;
-        border: 1px solid rgba(125, 211, 252, 0.18);
+        border: 1px solid rgba(212,255,58,0.18);
         border-radius: 24px;
         background:
-          radial-gradient(circle at 12% 0%, rgba(125, 211, 252, 0.12), transparent 36%),
-          linear-gradient(135deg, rgba(16, 20, 45,0.07), rgba(16, 20, 45,0.025));
+          radial-gradient(circle at 12% 0%, rgba(212,255,58,0.12), transparent 36%),
+          linear-gradient(135deg, rgba(13,12,10,0.07), rgba(13,12,10,0.025));
       }
 
       .aivc-mockup-grid {
@@ -1069,10 +1075,10 @@
 
       .aivc-wireframe {
         min-height: 320px;
-        border: 1px solid rgba(148, 170, 255, 0.18);
+        border: 1px solid rgba(212,255,58,0.18);
         border-radius: 22px;
         overflow: hidden;
-        background: #0b1020;
+        background: #0D0C0A;
         box-shadow: 0 24px 80px rgba(0,0,0,0.26);
       }
 
@@ -1082,14 +1088,14 @@
         justify-content: space-between;
         gap: 12px;
         padding: 13px 15px;
-        border-bottom: 1px solid rgba(16, 20, 45,0.08);
-        color: #1c2236;
+        border-bottom: 1px solid rgba(13,12,10,0.08);
+        color: #0D0C0A;
         font-size: 13px;
         font-weight: 850;
       }
 
       .aivc-wireframe-dots { display: flex; gap: 5px; }
-      .aivc-wireframe-dots span { width: 8px; height: 8px; border-radius: 50%; background: rgba(125, 211, 252, 0.7); }
+      .aivc-wireframe-dots span { width: 8px; height: 8px; border-radius: 50%; background: rgba(212,255,58,0.7); }
 
       .aivc-wireframe-body {
         display: grid;
@@ -1099,15 +1105,15 @@
 
       .aivc-wireframe-nav {
         padding: 14px 10px;
-        border-right: 1px solid rgba(16, 20, 45,0.08);
-        background: rgba(16, 20, 45,0.025);
+        border-right: 1px solid rgba(13,12,10,0.08);
+        background: rgba(13,12,10,0.025);
       }
 
       .aivc-wireframe-pill,
       .aivc-wireframe-line {
         display: block;
         border-radius: 999px;
-        background: rgba(16, 20, 45, 0.18);
+        background: rgba(13,12,10,0.18);
       }
 
       .aivc-wireframe-pill { height: 10px; margin: 0 0 12px; }
@@ -1117,9 +1123,9 @@
       .aivc-wireframe-pill:nth-child(4) { width: 48%; }
 
       .aivc-wireframe-main { padding: 16px; }
-      .aivc-wireframe-heading { width: 62%; height: 18px; margin-bottom: 12px; border-radius: 999px; background: rgba(16, 20, 45,0.18); }
+      .aivc-wireframe-heading { width: 62%; height: 18px; margin-bottom: 12px; border-radius: 999px; background: rgba(13,12,10,0.18); }
       .aivc-wireframe-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
-      .aivc-wireframe-mini { min-height: 62px; border: 1px solid rgba(125, 211, 252, 0.14); border-radius: 14px; background: rgba(16, 20, 45,0.045); padding: 10px; }
+      .aivc-wireframe-mini { min-height: 62px; border: 1px solid rgba(212,255,58,0.14); border-radius: 14px; background: rgba(13,12,10,0.045); padding: 10px; }
       .aivc-wireframe-line { height: 8px; margin-bottom: 8px; }
       .aivc-wireframe-line.short { width: 54%; }
       .aivc-wireframe-line.med { width: 76%; }
@@ -1127,11 +1133,11 @@
 
       .aivc-wireframe-panel {
         min-height: 96px;
-        border: 1px solid rgba(148, 170, 255, 0.14);
+        border: 1px solid rgba(212,255,58,0.14);
         border-radius: 16px;
         background:
-          linear-gradient(135deg, rgba(125,211,252,0.12), rgba(139,92,246,0.08)),
-          rgba(16, 20, 45,0.035);
+          linear-gradient(135deg, rgba(212,255,58,0.12), rgba(212,255,58,0.08)),
+          rgba(13,12,10,0.035);
         padding: 14px;
       }
 
@@ -1145,7 +1151,7 @@
         padding: 18px;
         border: 1px solid var(--aivc-line);
         border-radius: 20px;
-        background: rgba(16, 20, 45, 0.035);
+        background: rgba(13,12,10,0.035);
       }
 
       .aivc-metrics {
@@ -1176,8 +1182,8 @@
         margin-top: 18px;
         padding: 22px;
         background:
-          linear-gradient(135deg, rgba(36, 146, 255, 0.12), rgba(139, 92, 246, 0.1)),
-          rgba(16, 20, 45, 0.048);
+          linear-gradient(135deg, rgba(212,255,58, 0.12), rgba(212,255,58, 0.1)),
+          rgba(13,12,10,0.048);
       }
 
       .aivc-lead-card p {
@@ -1203,7 +1209,7 @@
       .aivc-input {
         width: 100%;
         min-height: 48px;
-        border: 1px solid rgba(16, 20, 45, 0.18);
+        border: 1px solid rgba(13,12,10,0.18);
         border-radius: 14px;
         color: var(--aivc-text);
         background: rgba(255,255,255,0);
@@ -1212,7 +1218,7 @@
       }
 
       .aivc-input::placeholder {
-        color: rgba(174, 188, 205, 0.72);
+        color: rgba(163,155,140,0.72);
       }
 
       .aivc-lead-actions {
@@ -1228,9 +1234,9 @@
         grid-template-columns: minmax(0, 1.2fr) repeat(3, minmax(0, 1fr));
         gap: 0;
         margin: 0 24px 24px;
-        border: 1px solid rgba(148,170,255,.18);
+        border: 1px solid rgba(212,255,58,.18);
         border-radius: 20px;
-        background: rgba(16, 20, 45,.035);
+        background: rgba(13,12,10,.035);
         overflow: hidden;
       }
 
@@ -1241,8 +1247,8 @@
         align-items: center;
         min-height: 72px;
         padding: 14px 18px;
-        border-right: 1px solid rgba(16, 20, 45,.08);
-        color: #0b1020;
+        border-right: 1px solid rgba(13,12,10,.08);
+        color: #F1EADB;
         font-size: 13px;
         font-weight: 850;
       }
@@ -1268,7 +1274,7 @@
 
       .aivc-success.aivc-error {
         border-color: rgba(255, 102, 132, 0.42);
-        color: #ffe8ee;
+        color: #F1EADB;
         background: rgba(255, 75, 114, 0.1);
       }
 
@@ -1342,7 +1348,7 @@
 
         .aivc-trust-item {
           border-right: 0;
-          border-bottom: 1px solid rgba(16, 20, 45,.08);
+          border-bottom: 1px solid rgba(13,12,10,.08);
         }
 
         .aivc-trust-item:last-child {
@@ -1468,36 +1474,36 @@
       /* Premium 1stStep.ai studio theme. Kept inline so this checker remains self-contained. */
       body.aivc-standalone-page {
         color-scheme: dark;
-        background: #070914;
+        background: #0D0C0A;
       }
 
       #aivc-root {
-        --aivc-bg: #070914;
-        --aivc-bg-2: #0a0d19;
-        --aivc-panel: rgba(14, 18, 32, 0.9);
-        --aivc-panel-strong: #111528;
-        --aivc-line: rgba(176, 188, 255, 0.15);
-        --aivc-line-strong: rgba(120, 112, 255, 0.48);
-        --aivc-text: #f7f8ff;
-        --aivc-muted: #aab1c7;
-        --aivc-soft: #d9dded;
-        --aivc-blue: #7568ff;
-        --aivc-cyan: #42d4ff;
-        --aivc-purple: #a45cff;
+        --aivc-bg: #0D0C0A;
+        --aivc-bg-2: #0D0C0A;
+        --aivc-panel: rgba(13,12,10,0.9);
+        --aivc-panel-strong: #0D0C0A;
+        --aivc-line: rgba(212,255,58,0.15);
+        --aivc-line-strong: rgba(212,255,58,0.48);
+        --aivc-text: #F1EADB;
+        --aivc-muted: #A39B8C;
+        --aivc-soft: #F1EADB;
+        --aivc-blue: #D4FF3A;
+        --aivc-cyan: #D4FF3A;
+        --aivc-purple: #D4FF3A;
         --aivc-green: #49d7a5;
         --aivc-yellow: #f5bd69;
         --aivc-red: #ff7088;
-        --aivc-shadow: 0 32px 90px -40px rgba(0, 0, 0, 0.9), 0 0 72px rgba(103, 91, 255, 0.1);
+        --aivc-shadow: 0 32px 90px -40px rgba(0, 0, 0, 0.9), 0 0 72px rgba(212,255,58,0.1);
         background:
-          radial-gradient(circle at 15% 4%, rgba(41, 139, 255, 0.16), transparent 28%),
-          radial-gradient(circle at 88% 15%, rgba(142, 78, 255, 0.18), transparent 31%),
-          linear-gradient(180deg, #070914 0%, #0a0d19 48%, #070914 100%);
+          radial-gradient(circle at 15% 4%, rgba(212,255,58,0.16), transparent 28%),
+          radial-gradient(circle at 88% 15%, rgba(212,255,58,0.18), transparent 31%),
+          linear-gradient(180deg, #0D0C0A 0%, #0D0C0A 48%, #0D0C0A 100%);
       }
 
       #aivc-root .aivc-shell::before {
         background:
-          linear-gradient(rgba(156, 173, 255, 0.045) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(156, 173, 255, 0.045) 1px, transparent 1px);
+          linear-gradient(rgba(212,255,58,0.045) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(212,255,58,0.045) 1px, transparent 1px);
         background-size: 52px 52px;
       }
 
@@ -1506,7 +1512,7 @@
         padding: 10px 14px;
         border: 1px solid var(--aivc-line);
         border-radius: 22px;
-        background: rgba(8, 11, 22, 0.72);
+        background: rgba(13,12,10,0.72);
         box-shadow: 0 16px 50px rgba(0, 0, 0, 0.24);
         backdrop-filter: blur(20px);
       }
@@ -1519,7 +1525,7 @@
       #aivc-root .aivc-brand-mark {
         height: 54px;
         max-width: min(190px, 34vw);
-        filter: drop-shadow(0 10px 28px rgba(51, 181, 255, 0.26));
+        filter: drop-shadow(0 10px 28px rgba(212,255,58,0.26));
       }
 
       #aivc-root .aivc-nav-link,
@@ -1534,7 +1540,7 @@
       #aivc-root .aivc-btn-secondary:hover,
       #aivc-root .aivc-btn-ghost:hover {
         border-color: var(--aivc-line-strong);
-        background: rgba(117, 104, 255, 0.11);
+        background: rgba(212,255,58,0.11);
       }
 
       #aivc-root .aivc-hero {
@@ -1543,15 +1549,15 @@
         border: 1px solid var(--aivc-line);
         border-radius: 32px;
         background:
-          radial-gradient(circle at 82% 15%, rgba(154, 83, 255, 0.14), transparent 34%),
+          radial-gradient(circle at 82% 15%, rgba(212,255,58,0.14), transparent 34%),
           linear-gradient(145deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.018));
         box-shadow: var(--aivc-shadow);
       }
 
       #aivc-root .aivc-eyebrow {
-        color: #bcb7ff;
-        border-color: rgba(151, 134, 255, 0.34);
-        background: rgba(117, 104, 255, 0.1);
+        color: #F1EADB;
+        border-color: rgba(212,255,58,0.34);
+        background: rgba(212,255,58,0.1);
         box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
       }
 
@@ -1559,16 +1565,16 @@
 
       #aivc-root .aivc-preview-card,
       #aivc-root .aivc-panel {
-        border-color: rgba(156, 143, 255, 0.24);
+        border-color: rgba(212,255,58,0.24);
         background:
-          radial-gradient(circle at 8% 0%, rgba(66, 212, 255, 0.09), transparent 30%),
-          radial-gradient(circle at 96% 8%, rgba(164, 92, 255, 0.11), transparent 32%),
+          radial-gradient(circle at 8% 0%, rgba(212,255,58,0.09), transparent 30%),
+          radial-gradient(circle at 96% 8%, rgba(212,255,58,0.11), transparent 32%),
           linear-gradient(145deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.018)),
-          #0c101d;
+          #0D0C0A;
       }
 
       #aivc-root .aivc-preview-card { box-shadow: var(--aivc-shadow); }
-      #aivc-root .aivc-score-ring span { background: #0c1020; }
+      #aivc-root .aivc-score-ring span { background: #0D0C0A; }
       #aivc-root .aivc-preview-meaning,
       #aivc-root .aivc-panel-header,
       #aivc-root .aivc-step-count,
@@ -1596,7 +1602,7 @@
       #aivc-root .aivc-mockup-card {
         border-color: var(--aivc-line);
         background:
-          radial-gradient(circle at 0% 0%, rgba(66, 212, 255, 0.075), transparent 34%),
+          radial-gradient(circle at 0% 0%, rgba(212,255,58,0.075), transparent 34%),
           rgba(255, 255, 255, 0.028);
         box-shadow: inset 0 1px rgba(255, 255, 255, 0.035);
       }
@@ -1611,26 +1617,26 @@
       }
 
       #aivc-root .aivc-option:hover {
-        border-color: rgba(66, 212, 255, 0.42);
-        background: rgba(66, 212, 255, 0.07);
+        border-color: rgba(212,255,58,0.42);
+        background: rgba(212,255,58,0.07);
       }
 
       #aivc-root .aivc-option.aivc-selected {
         color: var(--aivc-text);
-        border-color: rgba(66, 212, 255, 0.72);
-        background: linear-gradient(135deg, rgba(117, 104, 255, 0.24), rgba(66, 212, 255, 0.12));
+        border-color: rgba(212,255,58,0.72);
+        background: linear-gradient(135deg, rgba(212,255,58,0.24), rgba(212,255,58,0.12));
       }
 
       #aivc-root .aivc-textarea,
       #aivc-root .aivc-input {
         color: var(--aivc-text);
         border-color: var(--aivc-line);
-        background: rgba(4, 7, 15, 0.62);
+        background: rgba(13,12,10,0.62);
         box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
       }
 
       #aivc-root .aivc-textarea::placeholder,
-      #aivc-root .aivc-input::placeholder { color: #747d98; }
+      #aivc-root .aivc-input::placeholder { color: #A39B8C; }
 
       #aivc-root .aivc-pill {
         color: var(--aivc-soft);
@@ -1642,12 +1648,12 @@
       #aivc-root .aivc-wireframe-nav { border-right-color: var(--aivc-line); background: rgba(255, 255, 255, 0.025); }
       #aivc-root .aivc-wireframe-line,
       #aivc-root .aivc-wireframe-pill,
-      #aivc-root .aivc-wireframe-heading { background: rgba(195, 203, 235, 0.19); }
+      #aivc-root .aivc-wireframe-heading { background: rgba(163,155,140,0.19); }
       #aivc-root .aivc-wireframe-mini,
       #aivc-root .aivc-wireframe-panel { background: rgba(255, 255, 255, 0.035); }
 
-      #aivc-root .aivc-category { color: #8be8ff; }
-      #aivc-root .aivc-preview-meaning h3 { color: #8baeff; }
+      #aivc-root .aivc-category { color: #F1EADB; }
+      #aivc-root .aivc-preview-meaning h3 { color: #D4FF3A; }
 
       @media (max-width: 760px) {
         #aivc-root .aivc-shell { padding: 14px 12px 44px; }
@@ -1666,8 +1672,25 @@
         }
       }
     </style>
-  </head>
-  <body class="aivc-standalone-page">
+  
+  <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/fonts/instrument-serif-italic-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="/src/v2-site.css" />
+</head>
+  <body class="v2 aivc-standalone-page">
+<header class="nav" id="top">
+  <a class="logo" href="/" aria-label="1stStep.ai home"><img src="/assets/firststep-logo-transparent-cleaned.png" width="1147" height="946" alt="" /></a>
+  <div class="nav-blend">
+    <a class="wordmark" href="/">1stStep<i>.ai</i></a>
+    <nav aria-label="Primary">
+      <a href="/#work">Work</a>
+      <a href="/tools/">Tools</a>
+      <a href="/journey/">Journey</a>
+      <a href="/services/websites.html">Websites</a>
+    </nav>
+    <a class="pill" href="/book/" data-fsai-placement="site_header">Book a 20-min call</a>
+  </div>
+</header>
     <section id="aivc-root" aria-label="App Idea Viability Checker">
       <div class="aivc-shell">
         <div class="aivc-container">
@@ -1712,7 +1735,7 @@
                   <div class="aivc-score-preview">
                     <div class="aivc-score-ring"><span><strong>82</strong><small>Strong Score</small></span></div>
                     <div>
-                      <p class="aivc-preview-kicker">Sample output</p>
+                      <p class="aivc-preview-kicker aivc-quiet">Illustrative data</p>
                       <h2 class="aivc-preview-title">Strong MVP Candidate</h2>
                       <p style="margin:10px 0 0;color:var(--aivc-soft);line-height:1.5;">High potential with a clear problem and a feasible path to launch.</p>
                       <div class="aivc-pill-row">
@@ -1857,7 +1880,7 @@
               { label: "Client/customer portal", value: "Client/customer portal", ideaType: "Web app / SaaS", simplicity: 15, path: "Focused client portal with one clear customer workflow." },
               { label: "Booking or quote tool", value: "Booking or quote tool", ideaType: "Business website", simplicity: 18, revenue: 14, path: "Booking or quote tool tied to lead capture and follow-up." },
               { label: "SaaS app", value: "SaaS app", ideaType: "Web app / SaaS", simplicity: 12, revenue: 14, path: "Narrow SaaS MVP with only the core workflow." },
-              { label: "AI assistant/tool", value: "AI assistant/tool", ideaType: "AI tool", simplicity: 11, path: "AI-assisted workflow prototype before a large AI product build." },
+              { label: "Assistant or tool", value: "Assistant or tool", ideaType: "Agent tool", simplicity: 11, path: "An agent workflow prototype before a large product build." },
               { label: "Mobile-friendly web app", value: "Mobile-friendly web app", ideaType: "Web app / SaaS", simplicity: 15, path: "Mobile-friendly web MVP before native app development." },
               { label: "Not sure yet", value: "Not sure yet", ideaType: "Not sure yet", simplicity: 8, path: "Strategy map, validation plan, and scope options before building." }
             ]
@@ -1919,7 +1942,7 @@
               "<": "&lt;",
               ">": "&gt;",
               '"': "&quot;",
-              "'": "&#039;"
+              "'": "&#171512;"
             }[char];
           });
         }
@@ -2020,7 +2043,7 @@
 
         function inferBuildType(text) {
           if (hasAny(text, ["automation", "automate", "workflow", "follow up", "spreadsheet", "internal"])) return "Internal automation";
-          if (hasAny(text, ["ai", "assistant", "chatbot", "gpt"])) return "AI tool";
+          if (hasAny(text, ["ai", "assistant", "chatbot", "gpt"])) return "Agent tool";
           if (hasAny(text, ["saas", "portal", "dashboard", "platform", "app"])) return "Web app / SaaS";
           if (hasAny(text, ["website", "landing", "site", "page"])) return "Business website";
           if (hasAny(text, ["mobile", "ios", "android"])) return "Mobile-friendly web app";
@@ -2123,7 +2146,7 @@
 
         function buildPathForType(type) {
           if (type === "Internal automation") return "Workflow map plus a lightweight internal dashboard or automation.";
-          if (type === "AI tool") return "AI-assisted prototype around one repeatable task before a full AI product.";
+          if (type === "Agent tool") return "An agent prototype around one repeatable task before a full product.";
           if (type === "Business website") return "Landing page or service workflow with lead capture and proof tracking.";
           if (type === "Mobile-friendly web app") return "Mobile-friendly web MVP before native app development.";
           if (type === "Web app / SaaS") return "Focused MVP with only the core workflow.";
@@ -2133,7 +2156,7 @@
         function generateMockupPreview(report) {
           var type = report.ideaType || inferBuildType(ideaText);
           var problem = report.problemType || "core workflow";
-          var title = "First-Version " + (type === "Business website" ? "Lead System" : type === "Internal automation" ? "Workflow Dashboard" : type === "AI tool" ? "AI Tool" : "MVP");
+          var title = "First-Version " + (type === "Business website" ? "Lead System" : type === "Internal automation" ? "Workflow Dashboard" : type === "Agent tool" ? "Agent tool" : "MVP");
           var firstScreen = "Intake and status dashboard";
           var screens = ["Intake", "Dashboard", "Details"];
           var features = ["Capture the request", "Track status", "Show next action"];
@@ -2157,10 +2180,10 @@
             flow = ["Work enters", "Status updates", "Owner assigned", "Follow-up triggered"];
             buildFirst = ["Dashboard", "Status workflow", "Notification/reminder logic"];
             skipForNow = ["Full ERP", "Every edge case", "Advanced permissions"];
-          } else if (type === "AI tool") {
-            title = "AI Tool Prototype Preview";
+          } else if (type === "Agent tool") {
+            title = "Agent tool preview";
             firstScreen = "Prompt input with structured result and review step";
-            screens = ["Input", "AI result", "Saved output"];
+            screens = ["Input", "Generated result", "Saved output"];
             features = ["Guided input", "Generated draft", "Human review"];
             flow = ["User submits context", "Tool drafts output", "User edits", "Result saved"];
             buildFirst = ["Repeatable prompt flow", "Result editor", "Saved history"];
@@ -2650,5 +2673,19 @@
         renderIdeaStart();
       })();
     </script>
-  </body>
+  <footer>
+  <span>© 2026 1stStep.ai</span>
+  <span>Led by Evan Pancis</span>
+  <nav aria-label="Footer">
+    <a href="/journey/">Begin Your Journey</a>
+    <a href="/fit-check/">Project request</a>
+    <a href="/tools/">Tools</a>
+    <a href="/app-idea-viability-checker.html">App Idea Checker</a>
+    <a href="mailto:evan@1ststep.ai">Contact</a>
+    <a href="/privacy.html">Privacy</a>
+    <a href="/terms.html">Terms</a>
+    <a href="#top">Back to top ↑</a>
+  </nav>
+</footer>
+</body>
 </html>

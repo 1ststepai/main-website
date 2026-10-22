@@ -7,49 +7,17 @@ const root = new URL("../", import.meta.url);
 const source = (path) => readFile(new URL(path, root), "utf8");
 const RESOLVED = ["repair", "signal", ...STAGES, "loop"];
 
-test("the hero explains the offer and converts in plain HTML, before any script runs", async () => {
+test("the homepage states the offer in HTML and leaves the signal-path figure unmounted", async () => {
   const html = await source("index.html");
   const hero = html.slice(html.indexOf('<section class="hero'), html.indexOf("</section>"));
-  assert.match(hero, /<h1 id="hero-title">Build the system <br>your business <br><em>is missing\.<\/em><\/h1>/);
-  assert.match(hero, /<a class="button button-primary" href="\/fit-check\/" data-fsai-placement="hero">/);
-  // Every stage of the Signal Path is readable, crawlable text, not only SVG or animation frames.
-  const stages = [...hero.matchAll(/<li data-stage="(\w+)"><button[^>]*><span>\d\d<\/span> ([^<]+)<\/button>[\s\S]*?<p class="sp-desc">([^<]+)<\/p><\/li>/g)];
-  assert.deepEqual(stages.map((m) => m[1]), STAGES);
-  assert.deepEqual(stages.map((m) => m[2]), ["Capture", "Qualify", "Route", "Follow up", "Convert", "Measure"]);
-  for (const m of stages) assert.ok(m[3].length > 30, `${m[1]} needs a real description`);
-  assert.match(hero, /<figure class="workflow-figure signal-path[^"]*" id="signal-path" aria-labelledby="sp-title">/);
-  assert.match(hero, /<svg class="sp-map"[^>]*aria-hidden="true"/);
-  assert.match(hero, /ILLUSTRATIVE WORKFLOW · NOT LIVE DATA/);
-  assert.match(hero, /<p class="sp-announce" aria-live="polite"><\/p>/);
-});
-
-test("Fit Check stays primary and Begin Your Journey is a visible secondary path", async () => {
-  const html = await source("index.html");
-  const hero = html.slice(html.indexOf('<section class="hero'), html.indexOf("</section>"));
-  const primary = hero.indexOf('class="button button-primary" href="/fit-check/"');
-  const journey = hero.indexOf('href="/journey/"');
-  assert.ok(primary > -1 && journey > primary, "Journey follows the primary CTA");
-  assert.match(hero, /<p class="hero-secondary">Need to understand what&rsquo;s broken first\? <a href="\/journey\/" data-fsai-event="journey_start_click" data-fsai-placement="hero_secondary">Begin Your Journey/);
-  assert.equal((html.match(/class="button button-primary"/g) || []).length, 2, "only the hero and final Fit Check CTAs are primary buttons");
-  assert.doesNotMatch(html, /class="button[^"]*" href="\/journey\/"/);
-  const closing = html.slice(html.indexOf('<section class="closing"'));
-  assert.match(closing, /href="\/fit-check\/" data-fsai-placement="home_final"[\s\S]*href="\/journey\/"[^>]*data-fsai-placement="home_final_secondary"/);
-  assert.doesNotMatch(html, /Deploy Our OS/i);
-});
-
-test("the figure ships resolved, and a failed or slow animation returns to the resolved system", async () => {
-  const html = await source("index.html");
-  const figureClass = html.match(/<figure class="([^"]+)" id="signal-path"/)[1].split(" ");
-  for (const name of RESOLVED) assert.ok(figureClass.includes(`reach-${name}`), `no-JS markup includes reach-${name}`);
-  const start = html.search(/<\/figure>\r?\n<script>/);
-  assert.ok(start > -1, "the pending-frame script sits directly after the figure");
-  const inline = html.slice(start, html.indexOf("</script>", start));
-  assert.match(inline, /prefers-reduced-motion: reduce\)'\)\.matches\) return;/, "reduced motion never enters the pending frame");
-  assert.match(inline, /setTimeout\(function \(\) \{ if \(figure\.hasAttribute\('data-pending'\)\) \{ figure\.className = resolved;/);
-  const home = await source("src/outcome-home.js");
-  assert.match(home, /import\('\.\/signal-path\.js'\)/);
-  assert.match(home, /\.catch\(\(\) => \{[\s\S]*figure\.classList\.add\(\.\.\.RESOLVED\.split\(' '\)\)/);
-  for (const name of RESOLVED) assert.match(home, new RegExp(`reach-${name}\\b`));
+  assert.match(hero, /id="hero-title"/);
+  assert.match(hero, /Get more from the business you <em>already have\.<\/em>/);
+  assert.match(hero, /Book a call/);
+  assert.doesNotMatch(html, /id="signal-path"|Deploy Our OS/i);
+  assert.doesNotMatch(html, /<h4>Capture<\/h4>|Illustrative example, not a client's data/);
+  const js = await source("src/home-v2.js");
+  assert.match(js, /prefers-reduced-motion: reduce/);
+  assert.doesNotMatch(js, /staticFallback|new Lenis/);
 });
 
 test("reduced motion is a designed static state with step-through, not a disabled animation", async () => {

@@ -1,6 +1,28 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
+const motion = {
+  name: "firststep-motion",
+  transformIndexHtml: {
+    order: "pre",
+    handler(html, ctx) {
+      const file = `${ctx?.path || ""} ${ctx?.filename || ""}`;
+      if (file.includes("/admin/") || file.includes("\\admin\\")) return html;
+      if (html.includes('name="firststep-no-motion"')) return html;
+      if (!html.includes('data-fsai-motion')) {
+        html = html.replace(
+          "</head>",
+          '  <link rel="stylesheet" href="/src/motion.css" />\n  <script data-fsai-motion>try{if(!matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.classList.add("motion")}catch(e){}</script>\n</head>'
+        );
+      }
+      if (!html.includes('src="/src/motion.js"')) {
+        html = html.replace("</body>", '  <script type="module" src="/src/motion.js"></script>\n</body>');
+      }
+      return html;
+    },
+  },
+};
+
 const siteAnalytics = {
   name: "firststep-site-analytics",
   transformIndexHtml: {
@@ -17,12 +39,13 @@ const siteAnalytics = {
 };
 
 function serveExactIndexPaths(server) {
-  const routes = ["/os", "/tools", "/tools/auto-model-router", "/tools/1ststep-os-audit", "/tools/1ststep-os"];
+  const routes = ["/os", "/tools", "/tools/auto-model-router", "/tools/1ststep-os-audit", "/tools/1ststep-os", "/work/lyons-life-demo", "/work/lyons-life-demo/"];
   server.middlewares.use((request, _response, next) => {
     const url = request.url || "";
     const path = url.split("?")[0];
     if (routes.includes(path)) {
-      request.url = url.replace(path, `${path}/index.html`);
+      const clean = path.endsWith("/") ? path.slice(0, -1) : path;
+      request.url = url.replace(path, `${clean}/index.html`);
     }
     next();
   });
@@ -30,7 +53,7 @@ function serveExactIndexPaths(server) {
 
 export default defineConfig({
   define: { __FOUNDRY_RD__: JSON.stringify(process.env.VERCEL_ENV !== "production") },
-  plugins: [react(), siteAnalytics, {
+  plugins: [react(), siteAnalytics, motion, {
     name: "firststep-exact-index-paths",
     configureServer: serveExactIndexPaths,
     configurePreviewServer: serveExactIndexPaths,

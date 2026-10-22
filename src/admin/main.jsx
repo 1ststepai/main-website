@@ -1392,7 +1392,7 @@ function QuoteBriefAssistant({ workspace, quote, updateQuote, pricingLocked }) {
           <h2>Turn a project brief into a quote</h2>
           <p>Paste a client message or describe what you are building. The assistant uses your saved price book and agreement library.</p>
         </div>
-        <small>Private · no AI credits</small>
+        <small>Private · no model credits</small>
       </div>
       <div className="brief-assistant-input">
         <textarea

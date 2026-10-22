@@ -33,7 +33,7 @@ export function createFoundry(host, {tier="balanced", onSlow=()=>{}, started=per
  }
  const signal=new T.MeshBasicMaterial({color:0x91e5fa});
  
- const labels=['UI','DATA','AUTH','AI','AUTOMATION','INTEGRATIONS','ANALYTICS','DEPLOYMENT','EVIDENCE','DOCUMENTATION'];
+ const labels=['UI','DATA','AUTH','AGENTS','AUTOMATION','INTEGRATIONS','ANALYTICS','DEPLOYMENT','EVIDENCE','DOCUMENTATION'];
  const labelBatch=createLabels(scene,[...labels,'OWNER','SOURCE','INFRASTRUCTURE','ACCESS','HANDOFF DATA','HANDOFF DOCUMENTATION','HANDOFF EVIDENCE','HUMAN CONTROL']);
  textures.push(labelBatch.texture);
  function label(text,size=.2){return labelBatch.label(text,size)}

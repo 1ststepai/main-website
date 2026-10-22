@@ -21,26 +21,26 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Startup Launch Readiness Checker | 1stStep.ai" />
     <meta name="twitter:image" content="https://www.1ststep.ai/assets/firststep-social-preview-v3.jpg" />
-    <meta name="theme-color" content="#080b16" />
+    <meta name="theme-color" content="#0D0C0A" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
     <style>
       :root {
         color-scheme: dark;
-        --bg: #ffffff;
-        --panel: #ffffff;
-        --panel-strong: #ffffff;
-        --line: rgba(16,20,45,0.10);
-        --line-bright: rgba(109,94,252,0.35);
-        --text: #0b1020;
-        --muted: #565d75;
-        --subtle: #8a90a6;
-        --blue: #4d7cff;
-        --indigo: #6d5efc;
+        --bg: #F1EADB;
+        --panel: #F1EADB;
+        --panel-strong: #F1EADB;
+        --line: rgba(13,12,10,0.10);
+        --line-bright: rgba(212,255,58,0.35);
+        --text: #F1EADB;
+        --muted: #A39B8C;
+        --subtle: #A39B8C;
+        --blue: #D4FF3A;
+        --indigo: #D4FF3A;
         --green: #12b981;
         --amber: #d99a1a;
         --rose: #ef4d68;
-        --shadow: 0 26px 60px -30px rgba(38,34,90,0.22);
+        --shadow: 0 26px 60px -30px rgba(13,12,10,0.22);
       }
 
       * {
@@ -55,12 +55,11 @@
         margin: 0;
         min-height: 100vh;
         background:
-          radial-gradient(circle at 14% 12%, rgba(94, 231, 255, 0.18), transparent 28rem),
-          radial-gradient(circle at 88% 2%, rgba(124, 140, 255, 0.16), transparent 30rem),
-          linear-gradient(180deg, #ffffff 0%, #07101e 42%, #ffffff 100%);
+          radial-gradient(circle at 14% 12%, rgba(212,255,58,0.18), transparent 28rem),
+          radial-gradient(circle at 88% 2%, rgba(212,255,58,0.16), transparent 30rem),
+          linear-gradient(180deg, #F1EADB 0%, #0D0C0A 42%, #F1EADB 100%);
         color: var(--text);
-        font-family:
-          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        font-family:"Archivo", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
           sans-serif;
         line-height: 1.5;
       }
@@ -71,8 +70,8 @@
         inset: 0;
         pointer-events: none;
         background-image:
-          linear-gradient(rgba(148, 163, 184, 0.055) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(148, 163, 184, 0.055) 1px, transparent 1px);
+          linear-gradient(rgba(163,155,140,0.055) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(163,155,140,0.055) 1px, transparent 1px);
         background-size: 42px 42px;
         mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.82), transparent 72%);
       }
@@ -119,8 +118,8 @@
         place-items: center;
         border: 1px solid var(--line-bright);
         border-radius: 12px;
-        background: linear-gradient(135deg, rgba(94, 231, 255, 0.18), rgba(124, 140, 255, 0.14));
-        box-shadow: 0 16px 40px rgba(94, 231, 255, 0.12);
+        background: linear-gradient(135deg, rgba(212,255,58,0.18), rgba(212,255,58,0.14));
+        box-shadow: 0 16px 40px rgba(212,255,58,0.12);
       }
 
       .nav-links {
@@ -139,7 +138,7 @@
 
       .nav-link:hover {
         color: var(--text);
-        background: rgba(16, 20, 45, 0.055);
+        background: rgba(13,12,10,0.055);
       }
 
       .hero {
@@ -157,10 +156,10 @@
         align-items: center;
         gap: 9px;
         padding: 8px 12px;
-        border: 1px solid rgba(94, 231, 255, 0.24);
+        border: 1px solid rgba(212,255,58,0.24);
         border-radius: 999px;
-        background: rgba(94, 231, 255, 0.08);
-        color: #0e7490;
+        background: rgba(212,255,58,0.08);
+        color: #171512;
         font-size: 0.82rem;
         font-weight: 700;
         text-transform: uppercase;
@@ -176,7 +175,7 @@
 
       .hero h1 span {
         color: transparent;
-        background: linear-gradient(90deg, var(--blue), #c7d2fe 48%, var(--green));
+        background: linear-gradient(90deg, var(--blue), #F1EADB 48%, var(--green));
         -webkit-background-clip: text;
         background-clip: text;
       }
@@ -210,14 +209,14 @@
       .button.primary {
         padding: 0 20px;
         background: linear-gradient(135deg, var(--blue), var(--indigo));
-        color: #ffffff;
-        box-shadow: 0 18px 40px -12px rgba(109, 94, 252, 0.5);
+        color: #F1EADB;
+        box-shadow: 0 18px 40px -12px rgba(212,255,58, 0.5);
       }
 
       .button.secondary {
         padding: 0 18px;
         border: 1px solid var(--line);
-        background: rgba(16, 20, 45, 0.05);
+        background: rgba(13,12,10,0.05);
         color: var(--text);
       }
 
@@ -233,7 +232,7 @@
         padding: 8px 10px;
         border: 1px solid var(--line);
         border-radius: 12px;
-        background: rgba(16, 20, 45, 0.045);
+        background: rgba(13,12,10,0.045);
         font-size: 0.9rem;
       }
 
@@ -241,7 +240,7 @@
         border: 1px solid var(--line-bright);
         border-radius: 28px;
         background:
-          linear-gradient(180deg, rgba(16, 20, 45, 0.12), rgba(16, 20, 45, 0.035)),
+          linear-gradient(180deg, rgba(13,12,10,0.12), rgba(13,12,10,0.035)),
           rgba(255,255,255,0.92);
         box-shadow: var(--shadow);
         overflow: hidden;
@@ -265,7 +264,7 @@
         width: 10px;
         height: 10px;
         border-radius: 50%;
-        background: rgba(16, 20, 45, 0.28);
+        background: rgba(13,12,10,0.28);
       }
 
       .product-body {
@@ -280,7 +279,7 @@
         padding: 18px;
         border: 1px solid var(--line);
         border-radius: 22px;
-        background: rgba(16, 20, 45, 0.05);
+        background: rgba(13,12,10,0.05);
       }
 
       .ring {
@@ -290,9 +289,9 @@
         place-items: center;
         border-radius: 50%;
         background:
-          radial-gradient(circle at center, #07101e 0 54%, transparent 55%),
-          conic-gradient(var(--green) 0 68%, rgba(16, 20, 45, 0.12) 68% 100%);
-        box-shadow: inset 0 0 0 1px rgba(16, 20, 45, 0.05);
+          radial-gradient(circle at center, #0D0C0A 0 54%, transparent 55%),
+          conic-gradient(var(--green) 0 68%, rgba(13,12,10,0.12) 68% 100%);
+        box-shadow: inset 0 0 0 1px rgba(13,12,10,0.05);
       }
 
       .ring strong {
@@ -312,9 +311,9 @@
         gap: 10px;
         align-items: start;
         padding: 13px;
-        border: 1px solid rgba(148, 163, 184, 0.16);
+        border: 1px solid rgba(163,155,140,0.16);
         border-radius: 16px;
-        background: rgba(16, 20, 45, 0.04);
+        background: rgba(13,12,10,0.04);
       }
 
       .check {
@@ -373,7 +372,7 @@
 
       label,
       legend {
-        color: #1c2236;
+        color: #0D0C0A;
         font-weight: 800;
       }
 
@@ -385,7 +384,7 @@
       textarea,
       select {
         width: 100%;
-        border: 1px solid rgba(148, 163, 184, 0.28);
+        border: 1px solid rgba(163,155,140,0.28);
         border-radius: 15px;
         background: rgba(255,255,255,0.9);
         color: var(--text);
@@ -394,8 +393,8 @@
 
       textarea:focus,
       select:focus {
-        border-color: rgba(94, 231, 255, 0.72);
-        box-shadow: 0 0 0 4px rgba(94, 231, 255, 0.12);
+        border-color: rgba(212,255,58,0.72);
+        box-shadow: 0 0 0 4px rgba(212,255,58,0.12);
       }
 
       textarea {
@@ -428,9 +427,9 @@
         gap: 9px;
         min-height: 44px;
         padding: 10px;
-        border: 1px solid rgba(148, 163, 184, 0.2);
+        border: 1px solid rgba(163,155,140,0.2);
         border-radius: 13px;
-        background: rgba(16, 20, 45, 0.04);
+        background: rgba(13,12,10,0.04);
         color: var(--muted);
         font-weight: 650;
       }
@@ -462,7 +461,7 @@
         border: 1px solid var(--line-bright);
         border-radius: 22px;
         background:
-          radial-gradient(circle at top left, rgba(94, 231, 255, 0.16), transparent 20rem),
+          radial-gradient(circle at top left, rgba(212,255,58,0.16), transparent 20rem),
           var(--panel-strong);
       }
 
@@ -474,8 +473,8 @@
         place-items: center;
         border-radius: 50%;
         background:
-          radial-gradient(circle at center, #08111f 0 56%, transparent 57%),
-          conic-gradient(var(--score-color, var(--amber)) 0 var(--score-angle), rgba(16, 20, 45, 0.1) var(--score-angle) 100%);
+          radial-gradient(circle at center, #0D0C0A 0 56%, transparent 57%),
+          conic-gradient(var(--score-color, var(--amber)) 0 var(--score-angle), rgba(13,12,10,0.1) var(--score-angle) 100%);
       }
 
       .score-ring span {
@@ -497,7 +496,7 @@
         width: fit-content;
         padding: 7px 10px;
         border-radius: 999px;
-        background: rgba(16, 20, 45, 0.08);
+        background: rgba(13,12,10,0.08);
         color: #0f9d6e;
         font-size: 0.82rem;
         font-weight: 800;
@@ -516,9 +515,9 @@
 
       .result-block {
         padding: 18px;
-        border: 1px solid rgba(148, 163, 184, 0.17);
+        border: 1px solid rgba(163,155,140,0.17);
         border-radius: 18px;
-        background: rgba(16, 20, 45, 0.045);
+        background: rgba(13,12,10,0.045);
       }
 
       .result-block h4 {
@@ -549,14 +548,14 @@
         height: 26px;
         place-items: center;
         border-radius: 8px;
-        background: rgba(94, 231, 255, 0.1);
+        background: rgba(212,255,58,0.1);
         color: var(--blue);
         font-size: 0.78rem;
         font-weight: 900;
       }
 
       .flag-dot {
-        background: rgba(255, 122, 144, 0.12);
+        background: rgba(212,255,58,0.12);
         color: var(--rose);
       }
 
@@ -577,7 +576,7 @@
         padding: 18px;
         border: 1px solid var(--line);
         border-radius: 20px;
-        background: rgba(16, 20, 45, 0.045);
+        background: rgba(13,12,10,0.045);
       }
 
       .metric strong,
@@ -687,33 +686,33 @@
     <style>
       :root {
         color-scheme: dark;
-        --bg: #070914;
-        --panel: rgba(14, 18, 32, 0.92);
-        --panel-strong: #111528;
-        --line: rgba(176, 188, 255, 0.15);
-        --line-bright: rgba(117, 104, 255, 0.48);
-        --text: #f7f8ff;
-        --muted: #aab1c7;
-        --subtle: #7e879f;
-        --blue: #7568ff;
-        --indigo: #a45cff;
+        --bg: #0D0C0A;
+        --panel: rgba(13,12,10,0.92);
+        --panel-strong: #0D0C0A;
+        --line: rgba(212,255,58,0.15);
+        --line-bright: rgba(212,255,58,0.48);
+        --text: #F1EADB;
+        --muted: #A39B8C;
+        --subtle: #A39B8C;
+        --blue: #D4FF3A;
+        --indigo: #D4FF3A;
         --green: #49d7a5;
         --amber: #f5bd69;
         --rose: #ff7088;
-        --shadow: 0 32px 90px -40px rgba(0, 0, 0, 0.9), 0 0 72px rgba(103, 91, 255, 0.1);
+        --shadow: 0 32px 90px -40px rgba(0, 0, 0, 0.9), 0 0 72px rgba(212,255,58,0.1);
       }
 
       body {
         background:
-          radial-gradient(circle at 14% 8%, rgba(41, 139, 255, 0.16), transparent 29rem),
-          radial-gradient(circle at 88% 3%, rgba(142, 78, 255, 0.18), transparent 31rem),
-          linear-gradient(180deg, #070914 0%, #0a0d19 48%, #070914 100%);
+          radial-gradient(circle at 14% 8%, rgba(212,255,58,0.16), transparent 29rem),
+          radial-gradient(circle at 88% 3%, rgba(212,255,58,0.18), transparent 31rem),
+          linear-gradient(180deg, #0D0C0A 0%, #0D0C0A 48%, #0D0C0A 100%);
       }
 
       body::before {
         background-image:
-          linear-gradient(rgba(156, 173, 255, 0.045) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(156, 173, 255, 0.045) 1px, transparent 1px);
+          linear-gradient(rgba(212,255,58,0.045) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(212,255,58,0.045) 1px, transparent 1px);
         background-size: 52px 52px;
       }
 
@@ -722,7 +721,7 @@
         padding: 10px 14px;
         border: 1px solid var(--line);
         border-radius: 22px;
-        background: rgba(8, 11, 22, 0.72);
+        background: rgba(13,12,10,0.72);
         box-shadow: 0 16px 50px rgba(0, 0, 0, 0.24);
         backdrop-filter: blur(20px);
       }
@@ -732,11 +731,11 @@
         height: 48px;
         max-width: 176px;
         object-fit: contain;
-        filter: drop-shadow(0 10px 28px rgba(51, 181, 255, 0.26));
+        filter: drop-shadow(0 10px 28px rgba(212,255,58,0.26));
       }
 
       .nav-link { color: var(--muted); }
-      .nav-link:hover { color: var(--text); background: rgba(117, 104, 255, 0.1); }
+      .nav-link:hover { color: var(--text); background: rgba(212,255,58,0.1); }
 
       .hero {
         min-height: auto;
@@ -745,19 +744,19 @@
         border: 1px solid var(--line);
         border-radius: 32px;
         background:
-          radial-gradient(circle at 82% 15%, rgba(154, 83, 255, 0.14), transparent 34%),
+          radial-gradient(circle at 82% 15%, rgba(212,255,58,0.14), transparent 34%),
           linear-gradient(145deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.018));
         box-shadow: var(--shadow);
       }
 
       .eyebrow {
-        color: #bcb7ff;
-        border-color: rgba(151, 134, 255, 0.34);
-        background: rgba(117, 104, 255, 0.1);
+        color: #F1EADB;
+        border-color: rgba(212,255,58,0.34);
+        background: rgba(212,255,58,0.1);
       }
 
       .hero h1 span {
-        background: linear-gradient(90deg, #8b81ff, #42d4ff 52%, #a45cff);
+        background: linear-gradient(90deg, #D4FF3A, #D4FF3A 52%, #D4FF3A);
         -webkit-background-clip: text;
         background-clip: text;
       }
@@ -769,16 +768,16 @@
         background: rgba(255, 255, 255, 0.045);
       }
 
-      .button.secondary:hover { border-color: var(--line-bright); background: rgba(117, 104, 255, 0.1); }
+      .button.secondary:hover { border-color: var(--line-bright); background: rgba(212,255,58,0.1); }
 
       .product-shell,
       .panel {
-        border-color: rgba(156, 143, 255, 0.24);
+        border-color: rgba(212,255,58,0.24);
         background:
-          radial-gradient(circle at 8% 0%, rgba(66, 212, 255, 0.08), transparent 30%),
-          radial-gradient(circle at 96% 8%, rgba(164, 92, 255, 0.1), transparent 32%),
+          radial-gradient(circle at 8% 0%, rgba(212,255,58,0.08), transparent 30%),
+          radial-gradient(circle at 96% 8%, rgba(212,255,58,0.1), transparent 32%),
           linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.016)),
-          #0c101d;
+          #0D0C0A;
         box-shadow: var(--shadow);
       }
 
@@ -792,9 +791,9 @@
         background: rgba(255, 255, 255, 0.035);
       }
 
-      .window-dots i { background: rgba(190, 198, 225, 0.48); }
-      .ring { background: radial-gradient(circle at center, #0b1020 0 54%, transparent 55%), conic-gradient(var(--green) 0 68%, rgba(255, 255, 255, 0.1) 68% 100%); }
-      .score-ring { background: radial-gradient(circle at center, #0b1020 0 56%, transparent 57%), conic-gradient(var(--score-color, var(--amber)) 0 var(--score-angle), rgba(255, 255, 255, 0.1) var(--score-angle) 100%); }
+      .window-dots i { background: rgba(163,155,140,0.48); }
+      .ring { background: radial-gradient(circle at center, #0D0C0A 0 54%, transparent 55%), conic-gradient(var(--green) 0 68%, rgba(255, 255, 255, 0.1) 68% 100%); }
+      .score-ring { background: radial-gradient(circle at center, #0D0C0A 0 56%, transparent 57%), conic-gradient(var(--score-color, var(--amber)) 0 var(--score-angle), rgba(255, 255, 255, 0.1) var(--score-angle) 100%); }
       .status-pill { color: #7ee2bb; background: rgba(73, 215, 165, 0.1); }
 
       label,
@@ -804,12 +803,12 @@
       select {
         color: var(--text);
         border-color: var(--line);
-        background: rgba(4, 7, 15, 0.62);
+        background: rgba(13,12,10,0.62);
       }
 
-      select option { color: var(--text); background: #101426; }
+      select option { color: var(--text); background: #0D0C0A; }
       .check-option { border-color: var(--line); background: rgba(255, 255, 255, 0.035); }
-      .result-hero { border-color: var(--line-bright); background: radial-gradient(circle at top left, rgba(66, 212, 255, 0.09), transparent 20rem), var(--panel-strong); }
+      .result-hero { border-color: var(--line-bright); background: radial-gradient(circle at top left, rgba(212,255,58,0.09), transparent 20rem), var(--panel-strong); }
 
       @media (max-width: 980px) {
         .hero { margin-top: 20px; }
@@ -830,19 +829,26 @@
         }
       }
     </style>
-  </head>
-  <body>
+  
+  <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/fonts/instrument-serif-italic-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="/src/v2-site.css" />
+</head>
+  <body class="v2">
     <div class="shell">
-      <nav class="nav" aria-label="Primary navigation">
-        <a class="brand" href="/" aria-label="1stStep.ai home">
-          <img class="brand-logo" src="/assets/firststep-logo-transparent-cleaned.png" alt="1stStep.ai" />
-        </a>
-        <div class="nav-links">
-          <a class="nav-link" href="/app-idea-viability-checker.html">App Idea Checker</a>
-          <a class="nav-link" href="/#portfolio">Portfolio</a>
-          <a class="nav-link" href="/#contact">Contact</a>
-        </div>
-      </nav>
+      <header class="nav" id="top">
+  <a class="logo" href="/" aria-label="1stStep.ai home"><img src="/assets/firststep-logo-transparent-cleaned.png" width="1147" height="946" alt="" /></a>
+  <div class="nav-blend">
+    <a class="wordmark" href="/">1stStep<i>.ai</i></a>
+    <nav aria-label="Primary">
+      <a href="/#work">Work</a>
+      <a href="/tools/">Tools</a>
+      <a href="/journey/">Journey</a>
+      <a href="/services/websites.html">Websites</a>
+    </nav>
+    <a class="pill" href="/book/" data-fsai-placement="site_header">Book a 20-min call</a>
+  </div>
+</header>
 
       <header class="hero">
         <div>
@@ -1045,7 +1051,7 @@
           <div class="notes-grid">
             <article class="note"><strong>Problem</strong><p>Early-stage founders are overwhelmed by company setup, payments, legal, tools, and next steps.</p></article>
             <article class="note"><strong>Target user</strong><p>First-time founders and solo operators trying to get from idea to first customers.</p></article>
-            <article class="note"><strong>Product hypothesis</strong><p>A guided AI-assisted launch plan improves founder clarity and increases completion of setup actions.</p></article>
+            <article class="note"><strong>Product hypothesis</strong><p>A guided agent-assisted launch plan improves founder clarity and increases completion of setup actions.</p></article>
             <article class="note"><strong>MVP scope</strong><p>Intake, readiness score, prioritized checklist, weekly action plan, and risk flags.</p></article>
             <article class="note"><strong>What I would test next</strong><p>Onboarding completion, checklist conversion, repeated blocker patterns, and founder confidence.</p></article>
           </div>
@@ -1053,9 +1059,17 @@
       </section>
     </main>
 
-    <footer class="shell footer">
-      <span>1stStep.ai product prototype. Independent planning tool, not legal, tax, financial, or investment advice.</span>
-    </footer>
+    <footer>
+  <span>© 2026 1stStep.ai</span>
+  <span>1stStep.ai product prototype. Independent planning tool, not legal, tax, financial, or investment advice.</span>
+  <nav aria-label="Footer">
+    <a href="/journey/">Begin Your Journey</a>
+    <a href="/app-idea-viability-checker.html">App Idea Checker</a>
+    <a href="/privacy.html">Privacy</a>
+    <a href="/terms.html">Terms</a>
+    <a href="#top">Back to top ↑</a>
+  </nav>
+</footer>
 
     <script>
       const setupItems = {

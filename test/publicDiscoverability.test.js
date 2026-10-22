@@ -98,39 +98,128 @@ test("llms.txt names the owner offer, start paths, and canonical www host", asyn
   assert.match(llms, /does not guarantee billing or token savings/);
 });
 
-test("homepage first screen exposes the three commercial paths and services", async () => {
+test("homepage first screen books the call beside an example desk", async () => {
   const html = await source("index.html");
-  const hero = html.slice(html.indexOf('class="hero'), html.indexOf("</section>", html.indexOf('class="hero')));
-  for (const intent of ["build_new", "finish_build", "automate_business"]) assert.match(hero, new RegExp(`href="/fit-check/\\?intent=${intent}"`));
-  assert.equal((hero.match(/button button-primary/g) || []).length, 1);
-  // Owner decision 2026-09-26: Journey returns as the secondary path, never an equal-weight button.
-  assert.equal((hero.match(/href="\/journey\/"/g) || []).length, 1);
-  assert.match(hero, /<p class="hero-secondary">[^<]*<a href="\/journey\/"/);
-  assert.doesNotMatch(hero, /href="\/book\/"/);
-  assert.match(hero, /Custom software, AI systems, and automation/);
-  assert.match(hero, /Tell us what you need built/);
-  assert.match(html, /id="problems"/);
-  assert.match(html, /id="how"/);
-  assert.match(html, /From the bottleneck<br><em>to the handoff/);
+  const heroStart = html.indexOf('<section class="hero');
+  const hero = html.slice(heroStart, html.indexOf("</section>", heroStart));
+  const work = html.slice(html.indexOf('id="work"'), html.indexOf('id="example"'));
+  assert.match(hero, /Get more from the business you/);
+  assert.match(hero, /href="\/book\/"[^>]*>Book a call/);
+  assert.match(hero, /Websites, integrations, automations, and custom apps/);
+  assert.match(hero, /See our work/);
+  assert.match(hero, /Pause animation/);
+  assert.match(hero, /Illustrative data/);
+  assert.doesNotMatch(hero, /SIMULATED|EXAMPLE/);
+  assert.match(hero, /Leads in/);
+  assert.match(hero, /Replies sent/);
+  assert.match(hero, /Today’s leads/);
+  assert.match(hero, /Lead in/);
+  assert.match(hero, /Added to CRM/);
+  assert.doesNotMatch(hero, /SPY|AAPL|TSLA|NVDA|\+0\.|\$/);
+  assert.doesNotMatch(hero, /Tap for sound|poster_16x9|<video|Watch with sound|href="\/fit-check\//);
+  assert.match(work, /Tap for sound/);
+  assert.match(work, /poster="\/home-v2\/poster_16x9\.webp"/);
+  assert.match(work, /class="work-vid"/);
+  assert.equal((html.match(/class="reel-sound"/g) || []).length, 1);
+  assert.doesNotMatch(html, /TODO: connect the 20-minute booking link|class="sound"/);
+  assert.doesNotMatch(html, /id="how"|id="paths"/);
   assert.match(html, /<link rel="canonical" href="https:\/\/www\.1ststep\.ai\/"/);
   assert.match(html, /property="og:image" content="https:\/\/www\.1ststep\.ai\/assets\/og-home\.png"/);
 });
 
-test("homepage FAQ JSON-LD matches visible questions", async () => {
+test("the homepage uses the system cursor and does not hijack scroll", async () => {
   const html = await source("index.html");
-  const names = faqNames(html);
-  for (const name of names) {
-    assert.match(html, new RegExp(`<summary>${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}</summary>`));
+  const js = await source("src/home-v2.js");
+  const css = await source("src/home-v2.css");
+  const site = await source("src/v2-site.css");
+  assert.doesNotMatch(html, /class="cursor"|lenis\.min\.js|gsap\.min\.js|ScrollTrigger/);
+  assert.doesNotMatch(js, /new Lenis|ScrollTrigger|gsap/);
+  assert.match(js, /pointermove/);
+  assert.match(js, /requestAnimationFrame/);
+  assert.match(js, /addEventListener\('scroll'/);
+  assert.match(js, /prefers-reduced-motion: reduce/);
+  assert.match(js, /IntersectionObserver/);
+  assert.match(css, /animation-play-state:\s*paused/);
+  assert.match(css, /\.hero\.is-on/);
+  assert.doesNotMatch(css, /cursor:\s*none|backdrop-filter|\.grain|lenis/);
+  assert.match(css, /prefers-reduced-motion:\s*reduce/);
+  assert.doesNotMatch(site, /backdrop-filter/);
+});
+
+test("public subpages use the v2 chrome and drop the navy and lavender theme", async () => {
+  const pages = [
+    "tools/index.html",
+    "tools/auto-model-router/index.html",
+    "tools/1ststep-os/index.html",
+    "tools/1ststep-os-audit/index.html",
+    "app-idea-viability-checker.html",
+    "services/websites.html",
+    "services/revenue-systems.html",
+    "services/app-builds.html",
+    "services/mvp-builds.html",
+    "services/internal-tools.html",
+    "journey/index.html",
+    "fit-check/index.html",
+    "book/index.html",
+    "book/confirmed/index.html",
+    "os/index.html",
+    "privacy.html",
+    "terms.html",
+    "startup-launch-checker/index.html",
+    "campaigns/morris-county-free-website/index.html",
+    "campaigns/outgrown-website/index.html",
+  ];
+  for (const file of pages) {
+    const html = await source(file);
+    assert.match(html, /class="v2/, file);
+    assert.match(html, /href="\/src\/v2-site\.css"/, file);
+    assert.match(html, /firststep-logo-transparent-cleaned\.png/, file);
+    assert.doesNotMatch(html, /fonts\.googleapis\.com|Space Grotesk|#070912|#6d5efc|#8b7cff/, file);
   }
-  assert.ok(names.includes("Do you guarantee leads, rankings, or revenue?"));
+  const home = await source("index.html");
+  assert.doesNotMatch(home, /v2-site\.css/);
+  for (const file of ["tools/1ststep-os/index.html", "tools/1ststep-os-audit/index.html"]) {
+    const html = await source(file);
+    assert.doesNotMatch(html, /class="pill"|href="\/book\/"|href="\/journey\/"/, file);
+  }
+});
+
+test("the integrations row uses approved marks, pauses, and states the trademark limit", async () => {
+  const home = await source("index.html");
+  assert.doesNotMatch(home, /id="works"|Works with the tools|integrations\.css/);
+  const html = await source("services/websites.html");
+  const css = await source("src/integrations.css");
+  const start = html.indexOf('id="works"');
+  const works = html.slice(start, html.indexOf("</section>", start));
+  assert.match(works, /Works with the tools/);
+  assert.match(works, /Logos are trademarks of their respective owners\. 1stStep\.ai connects with these tools and is not affiliated with or endorsed by them\./);
+  assert.doesNotMatch(works, /partner/i);
+  for (const name of ["Zapier", "Make", "n8n", "Calendly", "Square", "Supabase"]) {
+    assert.match(works, new RegExp(`alt="${name}"`));
+  }
+  for (const banned of ["GoHighLevel", "QuickBooks", "ManyChat", "Gmail", "Outlook", "Slack", "Stripe", "Shopify", "HubSpot", "Salesforce", "Follow Up Boss", "Twilio", "OpenAI", "WhatsApp", "Mailchimp", "Notion", "Vercel", "Facebook", "Instagram"]) {
+    assert.doesNotMatch(works, new RegExp(banned, "i"));
+  }
+  assert.match(css, /animation-play-state:\s*paused/);
+  assert.match(css, /prefers-reduced-motion:\s*reduce/);
+  assert.match(css, /ul\[aria-hidden="true"\]\{display:none\}/);
+  for (const file of ["websites", "revenue-systems", "app-builds", "mvp-builds", "internal-tools"]) {
+    assert.match(await source(`services/${file}.html`), /id="works"/);
+  }
+});
+
+test("homepage does not publish FAQ structured data without a visible FAQ", async () => {
+  const html = await source("index.html");
+  assert.equal(jsonLdBlocks(html).some((block) => block["@type"] === "FAQPage"), false);
+  assert.doesNotMatch(html, /<summary>/);
 });
 
 test("service page H1s use search language and carry basic OG", async () => {
   const pages = {
     "services/websites.html": /<h1>A business website that gets leads\.<\/h1>/,
     "services/mvp-builds.html": /<h1>Build an MVP people can actually use\.<\/h1>/,
-    "services/internal-tools.html": /<h1>Internal tools and AI automation\.<\/h1>/,
-    "services/revenue-systems.html": /<h1>AI automation for <span class="gradient">lead capture and follow-up\.<\/span><\/h1>/,
+    "services/internal-tools.html": /<h1>Internal tools and automation\.<\/h1>/,
+    "services/revenue-systems.html": /<h1>Automation for <span class="gradient">lead capture and follow-up\.<\/span><\/h1>/,
   };
   for (const [path, heading] of Object.entries(pages)) {
     const html = await source(path);

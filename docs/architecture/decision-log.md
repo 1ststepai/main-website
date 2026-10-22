@@ -1,5 +1,188 @@
 # Architecture Decision Log
 
+## 2026-10-22: Product names restored before production
+
+- **Status / owner:** Evan approved production and asked for the product names and awkward swaps to be corrected first. Preview, then merge of PR #19.
+- **Decision:** Swing Trade Pros keeps the product names Node AI and Nova AI. The app stays Job Agent, which is the name on app.1ststep.ai. Discovery copy says search and chat answers, visibility in search and chat assistants, and SEARCH & ASSISTANT SHARE OF VOICE. The OS line reads as engineering with agents. 1stStep.ai stays.
+- **Rationale:** Node AI and Nova AI are names on swingtradepros.com. The job product is labeled Job Agent in the app. The earlier substitutes “answer search” and “answer engines” did not read as finished copy.
+- **Affected systems:** Homepage, `/os`, tools listings, revenue FAQ, outgrown-website campaign, `public/llms.txt`.
+- **Rollback:** Revert this commit. Production stays on the previous main deployment until this merge is deployed.
+
+## 2026-10-22: Visible copy drops the standalone word AI
+
+- **Status / owner:** Evan asked for the word AI to leave user-visible copy, on the same preview branch. No production deploy.
+- **Decision:** Nav, headings, buttons, and body copy use agents, automation, assistant, or team training instead of the standalone word AI. Named swaps: Agent Operations, Assistant, Agents that work for your business, with you in control, and Team Training. 1stStep.ai stays, including the blue .ai wordmark. File names, URLs, schema organization name, and non-visible keys such as `ai-system-agent` and `genome-ai` stay.
+- **Rationale:** The brand already carries .ai. Repeating AI in the interface made the copy sound generic.
+- **Affected systems:** Homepage, Lyons Life demo, service pages, `/os`, tools listings, fit check, journey, app idea checker, foundry labels, admin labels, `public/llms.txt`.
+- **Rollback:** Restore the previous visible labels. Do not rename 1stStep.ai while rolling back.
+
+## 2026-10-22: One quiet disclosure on each showcase
+
+- **Status / owner:** Evan asked for premium copy on the site, the Lyons Life demo, and the AI console. Preview only. No production deploy.
+- **Decision:** Repeated sample, example, and simulated badges come off the hero, the lost-to-booked path, the AI console, and the Lyons Life demo. Each of those showcases keeps one muted line, “Illustrative data.” Lyons safety states read Supervised, Approval-gated, and Approval required, with the approval control drawn on. The brief buttons are Generate brief and Download brief. Selected work now says “Products we built.” The App Idea Checker preview keeps one quiet “Illustrative data” line beside the sample score. Concept-versus-live labels on 1stStep OS and the Auto Model Router stay, because those pages are not presenting invented results as a product demo.
+- **Rationale:** A showcase should feel finished. The numbers are still not real results, so one quiet line carries that, instead of a badge on every panel.
+- **Affected systems:** `index.html`, `src/home-v2.css`, `public/work/lyons-life-demo/index.html`, `public/home-v2/lyons-life.webp`, `public/llms.txt`, `app-idea-viability-checker.html`.
+- **Rollback:** Restore the previous badge copy and the sample banner.
+
+## 2026-10-22: Lyons Life sample motion stays cheap and stops offscreen
+
+- **Status / owner:** Evan asked for staggered section motion and an ambient background on the hosted sample. Preview only. No production deploy.
+- **Decision:** Website rows slide in with a stagger, and the green and amber status dots pulse. Organic search numbers count up from zero in order, then the visibility bars fill one after the other. On Executive reports, the period control, Generate button, and brief sections arrive in sequence, and Download has a repeating shine. A slow gradient drift and a few particles sit behind the demo. They use transform and opacity, pause while the browser tab is hidden, and stay still under reduced motion.
+- **Rationale:** The sample should feel alive without a canvas loop or a cost while the visitor is in another tab.
+- **Affected systems:** `public/work/lyons-life-demo/index.html`.
+- **Rollback:** Remove the ambient layer, the pause class, and the staggered delays.
+
+## 2026-10-22: Lyons Life sample uses a dark command center
+
+- **Status / owner:** Evan asked for a premium redesign of the hosted sample. Preview only. No production deploy.
+- **Decision:** `/work/lyons-life-demo/` is a dark cinematic command center with a light theme control. Panels are glass, accents are lime and blue, and motion is fade, slide, count-up, row, and bar fill. Reduced motion shows the finished states with no pulse and no count-up. Tab switching, the site filter, Generate sample brief, and download stay. The sample banner stays. Site labels stay Acquisition Site A, B, and C, plus Lyons Life. The homepage card image is a new shot of that dark Overview.
+- **Rationale:** The sample should look like a product a visitor would want built, without adding names or claims.
+- **Affected systems:** `public/work/lyons-life-demo/index.html`, `public/home-v2/lyons-life.webp`, `index.html`, `public/llms.txt`.
+- **Rollback:** Restore the previous light demo file and card image.
+
+## 2026-10-22: Generic demo site labels, and an example AI console
+
+- **Status / owner:** Evan asked for a privacy pass on the hosted Lyons Life demo and a new homepage AI operations section. Preview only. No production deploy.
+- **Decision:** Florida Private Health, Self Employed Health, and ACA Florida in the sample demo are now Acquisition Site A, B, and C. Lyons Life stays. The homepage gains an example console between the lost-to-booked path and the closing call. The headline is “AI agents that work for your business, with you in control.” Book a call goes to `/book/`. Four agents, a task feed, a typed prompt, and an Approve chip run a 14 second loop of transform and opacity. It plays only while the section is in view. Reduced motion shows the approval frame still and hides Pause animation. The board is marked “Example console, simulated” and names no clients and no results.
+- **Rationale:** The sample names looked like real agency sites. The console should show human control without inventing a customer or a metric.
+- **Affected systems:** `public/work/lyons-life-demo/index.html`, `public/home-v2/lyons-life.webp`, `index.html`, `src/home-v2.css`, `src/home-v2.js`, `public/llms.txt`.
+- **Rollback:** Restore the previous demo names and remove the `#agents` section.
+
+## 2026-10-22: Lyons Life Command Center card links to Evan's sample demo
+
+- **Status / owner:** Evan supplied a self-contained interactive sample and asked for it on the Selected work card. Preview only. No production deploy. This supersedes the empty-slot sentence in the motion-layer entry below.
+- **Decision:** The card is named Lyons Life Command Center. Its visible description is the portfolio sentence Evan supplied. The one-line reveal says “Try the interactive demo” and the card links to `/work/lyons-life-demo/`. The demo file is UTF-8, titled Lyons Life, and keeps the banner that all names and figures are invented. The homepage does not repeat those figures. The card image is a screenshot of the Overview tab inside the existing device frame. The page is `noindex` so the sample counts are not a search result. Directory requests rewrite to `index.html`.
+- **Rationale:** The demo is the asset. Its counts are labeled as invented, so they stay inside the demo and off the marketing card.
+- **Affected systems:** `index.html`, `src/home-v2.css`, `public/work/lyons-life-demo/index.html`, `public/home-v2/lyons-life.webp`, `public/llms.txt`, `vite.config.js`, `vercel.json`.
+- **Rollback:** Point the card back at the empty slot and remove the demo page, the screenshot, and the rewrite.
+
+## 2026-10-22: Portfolio and pages share a light motion layer
+
+- **Status / owner:** Evan asked for the rest of the site to feel as considered as the hero, with the current layout and the blue “.ai” kept. Preview only. No production deploy.
+- **Decision:** Work cards rise and scale in as they enter, staggered. Hover tilts the card a few degrees, lifts it, zooms the image, lights a lime and blue edge, and reveals the existing one-line caption. Lyons Life Command Center is an empty slot labeled “Case study coming soon.” No facts were added because there are no assets. Other headings, cards, and panels use the same reveal. Section breaks carry a thin lime-to-blue line. Page changes use a cross-document fade where the browser supports it, and a short fade-in otherwise. Reduced motion leaves everything still. Nothing hijacks scroll.
+- **Rationale:** The hero was moving and the rest of the site was not. The new card has a place ready without inventing a case study.
+- **Affected systems:** `index.html`, `src/home-v2.css`, `src/motion.css`, `src/motion.js`, `vite.config.js`.
+- **Evidence:** Local production preview, mobile Lighthouse performance 91 (FCP 1.1s, LCP 3.5s, TBT 0, CLS 0). Cards start hidden and rise only on the way in. Hover on a fine pointer lifts, tilts, zooms, and lights the edge. Touch keeps the caption visible. Reduced motion adds no reveal class.
+- **Rollback:** Remove the motion stylesheet and script injection. Remove the Lyons card and the tilt wrappers.
+
+## 2026-10-22: Homepage desk hero is lit and the example dashboard moves
+
+- **Status / owner:** Evan asked for the desk hero to come more to life, closer to the Swing Trade Pros homepage density, without trading content. Preview only. No production deploy.
+- **Decision:** The background plate is a brighter photographic desk. The monitor is still HTML. It holds a business snapshot with sparklines, five example leads, an automation flow, an assistant thread, and booked cards. A 12 second loop slides in a lead, lights the flow, flicks a toggle, slides in a booking, and types a reply. Motion is transform and opacity. It pauses offscreen and when Pause animation is pressed. Reduced motion shows the populated screen still. Scroll moves the photo, the desk props, and the monitor at three small rates, throttled with one animation frame. A diagonal light sweeps the dashboard once, for 1.2 seconds, when the hero enters view. A small pointer parallax shifts the plate and the monitor. There is no custom cursor and no scroll library. Every panel stays labelled EXAMPLE or SIMULATED. There are no client names, prices, or result counts.
+- **Rationale:** The previous screen was too dark and the panels sat still. The reference is a full, lit monitor with things arriving.
+- **Affected systems:** `index.html`, `src/home-v2.css`, `src/home-v2.js`, `public/home-v2/desk-scene.webp`, `public/llms.txt`.
+- **Rollback:** Restore the previous desk hero markup and the darker plate. Leave the wordmark blue and the reel card in place.
+
+## 2026-10-22: Header wordmark “.ai” uses the logo blue
+
+- **Status / owner:** Evan asked for the nav “.ai” to leave lime and use the blue from the canonical logo, with readable contrast on the dark header. Preview only. No production deploy.
+- **Decision:** `.wordmark i` is `#007BF8` on the homepage and on every `body.v2` header. That hex is an opaque pixel in `public/assets/firststep-logo-transparent-cleaned.png` (105 pixels). The most common bright-blue pixel in that file is `#006EEC`, which measures 4.14:1 against header ink `#0D0C0A`. The homepage wordmark is 18px and the mobile size is 16px, so the text needs 4.5:1. `#007BF8` is the nearest common exact logo blue that clears it, at 4.83:1. Lime stays on buttons, eyebrows, and example labels. The logo file is unchanged.
+- **Rationale:** The “.ai” should match the logo’s blue and stay readable on `#0D0C0A`.
+- **Affected systems:** `src/home-v2.css`, `src/v2-site.css`.
+- **Rollback:** Set `.wordmark i` back to `var(--acid)` on the homepage and `#D4FF3A` on `body.v2`.
+
+## 2026-10-22: Homepage hero matches the Swing Trade Pros desk composition
+
+- **Status / owner:** Evan sent a screenshot of the Swing Trade Pros homepage and asked for that composition on 1stStep. Preview only. No production deploy. This supersedes the node-diagram hero.
+- **Decision:** The first screen keeps the headline “Get more from the business you already have.” The subline is “Websites, integrations, automations, and custom apps.” Book a call still goes to `/book/`. A second control, “See our work,” goes to `#work`. The right side is a dark desk with a monitor. The screen is a live HTML dashboard: sidebar, new-lead rows, automation toggles, booked-today cards, and a small assistant thread. Every panel is marked EXAMPLE or SIMULATED. There are no counts, prices, or client names. The mug uses the canonical logo file. Notebook and book-spine words are HTML. A feature strip sits along the bottom, with the line “Start with what you have. We’ll build the rest.” Motion is transform and opacity. It runs only while the hero is on screen, and Pause animation freezes it. Reduced motion shows the populated scene still and hides the pause control. The header logo stays `firststep-logo-transparent-cleaned.png`, at 48px tall with the 1147:946 ratio locked so the mark is not squeezed. The reel stays a smaller selected-work card.
+- **Rationale:** Evan wanted the Swing Trade Pros hero’s layout and life, in the 1stStep palette, without trading content or invented results.
+- **Affected systems:** `index.html`, `src/home-v2.css`, `src/home-v2.js`, `public/home-v2/desk-scene.webp`, `public/llms.txt`.
+- **Rollback:** Restore the node-diagram hero. Leave the reel card, the music credit, and the canonical logo file in place.
+
+## 2026-10-21: Homepage hero is a quiet system diagram, and the reel is a work card
+
+- **Status / owner:** Evan asked to take the cartoon reel out of the first screen and to match the feel of the Swing Trade Pros homepage hero, adapted to 1stStep. Preview only. No production deploy.
+- **Decision:** The hero is the headline “Get more from the business you already have.”, one subline, and Book a call to `/book/`, over a low-contrast diagram. Scattered nodes labeled Lead, Call, Form, and Tool drift, then lines draw into one path that ends at Booked. The word Example sits on that end node. The loop is about 12 seconds. It runs only while the hero is on screen (`is-on` via IntersectionObserver, the same pause idea as Swing Trade Pros’ `.desk-is-running`). Reduced motion shows the connected diagram still, with no draw and no drift. The approved v4 reel moves into Selected work as a smaller card: muted, looping, playsinline, with one Tap for sound control that restarts at the beginning. The card loads when it nears the viewport and pauses when it leaves. The footer music credit stays. Reference studied: the live hero at https://swingtradepros.com/ (`header.animated-desk-hero`). Its scene uses a CSS wipe (`.desk-chart-wipe`, `desk-fixed-chart-reveal`, 12s, scaleX) and a faint scanline, paused until `.desk-is-running`, and hidden under `prefers-reduced-motion`. No Swing Trade Pros source repository was available from this environment. This supersedes the full-bleed reel placement in the entry below. The headline, `/book/`, the reel file, the music credit, the headshot, and the honesty rules stay.
+- **Rationale:** The film was in front of the offer. The first screen should read as the offer, with motion that shows a system coming together and does not compete with the type.
+- **Affected systems:** `index.html`, `src/home-v2.css`, `src/home-v2.js`, `public/llms.txt`.
+- **Rollback:** Restore the full-bleed reel hero from the previous homepage commit. Leave the reel file and the music credit in place.
+
+## 2026-10-21: Homepage leads with the reel and the product frames
+
+- **Status / owner:** Evan said the short studio page had too much text and was not impressive enough. Preview only. No production deploy.
+- **Decision:** The first screen is the approved v4 reel, full bleed, with the headline “Get more from the business you already have.” and Book a call. Selected work is five device frames: DaySetGo, SwingTradePros, Job Agent, SkillSprout, and Real-Rank.ai. Captions are labels. A before/after board shows a lost lead beside a booked lead and is marked “Example, not a client's data.” It has no counts and no client name. The founder photograph sits with the closing Book a call. Motion is a hero reveal, a scroll-in, a short parallax on the frames, and a hover scale. Those use transform and opacity, driven by CSS, with no scroll library and no custom cursor. Reduced motion leaves the reel on its poster and shows the boards in place. The video file waits until the browser is idle, and it does not autoplay on a slow or data-saver connection. This supersedes the section density in the short-studio-page entry. The headline, `/book/`, the reel credit, the headshot, and the honesty rules stay.
+- **Rationale:** The page should show the film and the shipped products, and stay smooth.
+- **Affected systems:** `index.html`, `src/home-v2.css`, `src/home-v2.js`, `public/llms.txt`.
+- **Rollback:** Restore the previous short studio homepage.
+
+## 2026-10-21: Homepage is a short studio page, and the custom cursor is gone
+
+- **Status / owner:** Evan replaced the long homepage brief and asked to keep the cursor and performance cleanup. Preview only. No production deploy.
+- **Decision:** The homepage is five parts: a hero (“Get more from the business you already have.”, one subline, Book a call), selected work, what we do, a short founder strip, and a closing Book a call. Selected work is DaySetGo, SwingTradePros, Job Agent, SkillSprout, Real-Rank.ai (a capture of the public homepage), and the approved v4 reel. Book a call still goes to `/book/`. The label is “Book a call”. The custom cursor, Lenis, GSAP, ScrollTrigger, the grain layer, and the long homepage sections are removed. Motion is a hero reveal, a scroll-in on each work piece, and a hover scale on the work image. Those use transform and opacity. Reduced motion turns them off and leaves the reel on its poster, with the sound control hidden. The fixed header on subpages uses a solid ink background instead of a blur. The integrations row stays on the five service pages. This supersedes the long v2 section order, the custom-cursor entry below, and the empty testimonial and client-reel slots. Those slots are removed, not filled. The v4 reel file, its poster, the music credit, the founder photograph, and the locked logo stay.
+- **Rationale:** Evan asked for a cleaner page that shows the design work, and for the pointer lag to stop.
+- **Affected systems:** `index.html`, `src/home-v2.css`, `src/home-v2.js`, the fixed header in `src/v2-site.css`, `public/home-v2/real-rank.webp`, `public/llms.txt`.
+- **Rollback:** Restore the previous homepage files, the cursor, and the header blur. Leave the service-page integrations in place.
+
+## 2026-10-21: Homepage reel is the approved v4 cut
+
+- **Status / owner:** Evan approved `1ststep_reel_16x9_v4_web` for the homepage preview. Preview only. No production deploy.
+- **Decision:** The hero and the cartoon-ad cinema play `public/home-v2/1ststep-reel-v4.mp4`, the supplied file copied without re-encoding. Phone and desktop use that same file. Posters are a frame at two seconds: the full 16:9 frame, and a center 9:16 crop for the phone still. Autoplay stays muted and looping, with playsinline. “Tap for sound” still unmutes, restarts at the beginning, and mutes again. The homepage footer credits Kevin MacLeod’s “Happy Boy Theme” under CC BY 4.0, and notes BigSoundBank for the sound effects. The old `reel_16x9.mp4` and `reel_9x16.mp4` files are removed. This supersedes the soundtrack file named in the earlier reel entry.
+- **Rationale:** The v4 cut is the reel Evan approved. The phone should not keep playing the previous film.
+- **Affected systems:** Homepage hero, cartoon-ad cinema, posters, homepage footer.
+- **Rollback:** Restore the previous reel files and posters, and remove the music credit.
+
+## 2026-10-21: The homepage founder photo is Evan’s real headshot
+
+- **Status / owner:** Evan supplied a 400×400 headshot for the homepage v2 preview. Preview only. No production deploy.
+- **Decision:** Replace the “Evan photo here” slot with that photograph, square, uncropped, and without a color filter. Serve AVIF and WebP, with JPEG as the fallback, and use the JPEG URL as the Person image on the homepage Organization founder. Testimonials and the client sample reel stay empty. This supersedes only the photo clause in the homepage v2 honesty note below.
+- **Rationale:** The placeholder was waiting on a real photo. The supplied file is that photo.
+- **Affected systems:** Homepage founder section, `public/home-v2/evan-pancis.*`, homepage JSON-LD.
+- **Rollback:** Restore the dashed photo slot and remove the image files and the schema image URL. Leave testimonials and the client reel untouched.
+
+## 2026-10-21: Homepage cursor dot follows the pointer with no ease
+
+- **Status / owner:** Evan asked for this on the homepage v2 preview. Preview only. No production deploy.
+- **Decision:** The main cursor dot is positioned in the pointer event, with no duration and no lerp. The ring eases at 0.65 per frame and snaps once it is within half a pixel. While the ring is the visible cursor (the hover label), it uses the same instant position as the dot. The system cursor stays visible until that first placement, and stays visible on touch and when reduced motion is requested. The custom cursor does not run in those cases.
+- **Rationale:** Hiding the system cursor while the replacement eases behind the pointer reads as lag.
+- **Affected systems:** Homepage cursor in `src/home-v2.js` and `src/home-v2.css`.
+- **Rollback:** Restore the previous quickTo durations and show the custom cursor on load for any fine pointer.
+
+## 2026-10-21: Integrations row uses only marks the brands allow
+
+- **Status / owner:** Evan asked for a “works with” logo row on the homepage preview, after the paths section, and on the service pages when that was straightforward. Preview only. No production deploy.
+- **Decision:** Show Zapier, Make, n8n, Calendly, Square, and Supabase. The marks are the Simple Icons 16.35.0 paths, unmodified, filled with each brand’s published hex. None of those six icons carries a non-CC0 license note. They sit on cream plates so a dark mark stays legible without recoloring it. The row loops, pauses on hover and focus, and becomes a static wrap when the visitor asks for reduced motion. The line under it is: “Logos are trademarks of their respective owners. 1stStep.ai connects with these tools and is not affiliated with or endorsed by them.” The word “partner” is not used.
+- **Excluded:** GoHighLevel (brand kit is for their agencies and team, not an unaffiliated site). QuickBooks and Mailchimp (Intuit forbids product logos without a written license). ManyChat (no Simple Icons mark and no public license for this use). Google Workspace, Gmail, and Google Calendar (Google forbids its logos in business marketing). Microsoft 365 and Outlook (a license is required for third-party marketing use of the marks). Slack and Salesforce (Salesforce forbids altering its marks or passing on rights to them; Simple Icons removed both). Shopify and HubSpot (written permission required before a logo goes on a website). Follow Up Boss (press-kit files only, no license for this page). Twilio (the logo requires written permission). OpenAI (do not use the logo without permission; Simple Icons removed it when that permission was not obtained). Meta, Facebook, Instagram, and WhatsApp (only their own brand-center files, which forbid recoloring and logos taken from anywhere else). Notion (logo use has to be an approved mark, and the required credit says it is used with permission). Airtable (compatibility mentions are allowed, but the logo may not be redrawn, and the approved file was not a public SVG). Stripe (the mark is only for the part of a site that directly handles Stripe, such as checkout). Vercel (marks are not for marketing collateral of a commercial service).
+- **Rationale:** A compatibility row is useful. A logo the owner forbids is not.
+- **Affected systems:** Homepage after the paths section, the five service pages, `src/integrations.css`, `public/integrations/`.
+- **Rollback:** Remove the section, the stylesheet link, and the SVG files.
+
+## 2026-10-21: Public subpages use the homepage v2 theme
+
+- **Status / owner:** Evan asked for this on the homepage v2 preview branch, after the reel soundtrack. Preview only. No production deploy.
+- **Decision:** Tools, the App Idea Checker, services, journey, fit-check, booking, campaigns, startup checker, legal pages, and the public `/os` concept use the homepage v2 system: ink `#0D0C0A`, cream `#F1EADB`, lime `#D4FF3A`, self-hosted Archivo and Instrument Serif, the shared header and footer, outline “Book a 20-min call” pills, and lime primary buttons. Copy, forms, and routes stay as they were. Shared rules live in `src/v2-site.css`.
+- **Exceptions:** The 1stStep OS and OS Audit tool pages keep the same header and footer look without “Book a 20-min call,” Begin Your Journey, or `/book/`, because those pages stay listings, not hire-us intake. The five service pages omit the footer link to the App Idea Checker so website and systems visitors stay on their own paths. The homepage is unchanged. Fictional makeover pages, admin, demos, Foundry, and OG render sources keep their own artwork.
+- **Rationale:** Leftover navy and lavender made the rest of the site look like a different brand from the approved homepage.
+- **Affected systems:** Public HTML routes listed above, their CSS, and `src/v2-site.css`. Status colors for scores and errors stay green, amber, and red.
+- **Rollback:** Remove `src/v2-site.css` and restore the previous page headers, footers, and color values. Do not alias the preview to production.
+
+## 2026-10-21: Homepage cartoon reel plays with sound on request
+
+- **Status / owner:** Evan supplied a web-ready 16:9 reel with an AAC track and asked for it on the homepage preview. Preview only. No production deploy.
+- **Decision:** Replace `public/home-v2/reel_16x9.mp4` with that file everywhere the 16:9 reel is used (hero desktop and the cartoon-ad cinema). Keep the existing poster. Autoplay stays muted. A “Tap for sound” control on the hero and on the cinema unmutes that copy, restarts it at the beginning, and switches to a mute icon. The portrait hero file keeps its video frames and now carries the same AAC track, copied rather than re-encoded, so the phone hero can unmute too. This supersedes the “reels have no audio” note in the homepage v2 entry.
+- **Rationale:** Browsers block audible autoplay. The soundtrack is part of the reel Evan delivered, and the portrait crop is the same film.
+- **Affected systems:** Homepage hero, cartoon-ad cinema, `public/home-v2/reel_16x9.mp4`, `public/home-v2/reel_9x16.mp4`.
+- **Rollback:** Restore the previous silent reel files and remove the sound controls.
+
+## 2026-10-21: Homepage “Book a 20-min call” uses the Website Strategy Call
+
+- **Status / owner:** Evan directed this on the v2 homepage preview branch. Preview only. No production deploy.
+- **Decision:** Every homepage control labeled “Book a 20-min call” links to `/book/`, the existing LeadConnector Website Strategy Call. Remove the visible booking TODO. Remove “Watch with sound” because the reel files have no audio track; the hero still plays muted. The three path rows and “Ask about a cartoon ad” still scroll to the closing section. This supersedes the booking bullet in the homepage v2 entry below.
+- **Rationale:** Evan named `/book/` as the destination. The calendar page keeps its own Website Strategy Call label.
+- **Affected systems:** Homepage header, hero, and closing CTA; `public/llms.txt`; homepage tests.
+- **Rollback:** Point those three controls back to an approved booking URL, or restore the TODO, without relabeling `/book/` itself.
+
+## 2026-10-21: Homepage v2 replaces the Signal Path first screen on a preview branch
+
+- **Status / owner:** Implementing on `cursor/homepage-v2-1b3b` from the approved v2 handoff. Evan owns the design. This change is preview-only. It does not authorize a production deploy or any change to the live `1ststep.ai` / `www.1ststep.ai` domains.
+- **Decision:** Rebuild the public homepage from the v2 static prototype (ink `#0D0C0A`, cream `#F1EADB`, acid `#D4FF3A`, Archivo + Instrument Serif, film grain, reel hero, pinned fictional makeover, pinned lead-to-booked flow, horizontal portfolio, three paths, cartoon-ads cinema, founder, CTA). Keep the Vite multi-page app, the existing routes, SEO head (canonical `https://www.1ststep.ai/`, OG image, Organization JSON-LD), the locked logo, and the LeadConnector calendar on `/book/`. Self-host Archivo and Instrument Serif. Vendor GSAP 3.12.5, ScrollTrigger, and Lenis. Do not mount the Signal Path figure on the homepage. Leave `src/signal-path.js` in the repo, unmounted, so the previous motion model can be restored.
+- **Booking:** The v2 copy says “Book a 20-min call.” `/book/` is the 30-minute Website Strategy Call, so the homepage button does not use it. The control scrolls to a visible TODO until Evan names the destination. Footer links keep `/journey/` and `/fit-check/` reachable.
+- **Honesty:** Bramblewick is labeled “Example makeover · fictional business,” and `/makeover/before.html` and `/makeover/after.html` are `noindex`. SkillSprout has no metrics. SwingTradePros shows only 8,000+ Discord members, 4,000+ YouTube subscribers, and the name Node AI. No TradingView mention and no performance claim. The Evan photo, testimonials, and client sample reel stay empty placeholders. The lead flow is labeled illustrative.
+- **Fixes in this pass:** A heavier lower scrim sits behind the hero type so burned-in reel captions do not read through the subtext. Makeover tiles are clipped with `overflow: hidden` and `clip-path: inset(0)` on the browser viewport. Hero and cinema video stay off until needed. Below-fold stills are WebP with `loading="lazy"`. Reels were re-encoded at CRF 27 (SSIM about 0.987 and 0.990) and have no audio track.
+- **CSP:** Homepage fonts, scripts, images, and video are same-origin, which the existing policy already allows. Google Fonts stays allowed for the fictional makeover pages and the rest of the site. The homepage does not embed the LeadConnector frame.
+- **Alternatives:** Point the new CTA at `/book/` or `/fit-check/`; rewrite the page as React; delete the Signal Path module.
+- **Verification:** Local build, existing route tests updated for the homepage contract, and browser checks at 1440 and 390. Preview URL when Vercel provides one. Production verification is out of scope.
+- **Rollback:** Revert this branch. Do not alias the preview to production. The previous production homepage remains the live site until a separate release decision.
+
 ## 2026-09-21: 1stStep OS Cycle 1 is a public free core, not a hosted product
 
 - **Status / owner:** Approved by Evan via the public-site update request; implemented on `/tools/1ststep-os/`, `/tools/`, and `/os`. Evan retains authority for claiming a hosted OS product, deploying a compile API, or offering a ZIP generator on Vercel or 1ststep.ai.

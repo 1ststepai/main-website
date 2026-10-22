@@ -1,0 +1,47 @@
+@font-face{font-family:"Archivo";font-style:normal;font-weight:300 900;font-stretch:62% 125%;font-display:swap;src:url("/fonts/archivo-latin.woff2") format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Instrument Serif";font-style:italic;font-weight:400;font-display:swap;src:url("/fonts/instrument-serif-italic-latin.woff2") format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+:root{--ink:#0D0C0A;--ink2:#171512;--cream:#F1EADB;--mute:#A39B8C;--acid:#D4FF3A;--line:rgba(241,234,219,.14);--disp:"Archivo",system-ui,sans-serif;--ser:"Instrument Serif",Georgia,serif}
+body.v2{margin:0;padding-top:96px;background:#0D0C0A!important;background-image:none!important;color:#F1EADB;font:400 18px/1.6 "Archivo",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+body.v2::before,body.v2::after{background:none!important}
+body.v2 :where(button,input,select,textarea){font-family:"Archivo",system-ui,sans-serif}
+body.v2 :where(code,pre,.cmd,kbd){font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+body.v2 :where(h1,h2,h3,h4){color:#F1EADB;font-family:"Archivo",system-ui,sans-serif;font-weight:800;letter-spacing:-.03em}
+body.v2 :where(p,li,dd,figcaption,small){color:#D6CEBE}
+body.v2 :where(h1,h2,h3,h4) em,body.v2 :where(.gradient,.aivc-gradient-text){background:none!important;-webkit-text-fill-color:#D4FF3A;color:#D4FF3A!important;font-family:"Instrument Serif",Georgia,serif;font-style:italic;font-weight:400}
+body.v2 :where(.eyebrow,.kicker,.tag,.aivc-eyebrow,.listing-kicker,.badge){color:#D4FF3A!important;font-family:"Archivo",system-ui,sans-serif;letter-spacing:.16em;text-transform:uppercase}
+body.v2 .skip-link,body.v2 .skip{position:absolute;left:16px;top:12px;z-index:120;transform:translateY(-160%);background:#D4FF3A;color:#0D0C0A;font-weight:800;text-decoration:none;padding:10px 14px;border-radius:99px}
+body.v2 .skip-link:focus,body.v2 .skip:focus{transform:none}
+body.v2 :focus-visible{outline:2px solid #D4FF3A;outline-offset:3px}
+body.v2 header.nav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;gap:14px;width:auto;max-width:none;margin:0;padding:18px 40px!important;border:0;border-bottom:1px solid rgba(241,234,219,.14);border-radius:0;background:#0D0C0A;box-shadow:none}
+body.v2 header.nav .logo{display:inline-flex;align-items:center;flex:none;text-decoration:none}
+body.v2 header.nav .logo img{height:46px;width:auto;display:block;filter:none;max-width:none}
+body.v2 .nav-blend{display:flex;align-items:center;gap:32px;flex:1;min-width:0}
+body.v2 .wordmark{font:800 24px "Archivo",system-ui,sans-serif;text-decoration:none;letter-spacing:-.02em;color:#F1EADB;background:none;-webkit-text-fill-color:#F1EADB}
+body.v2 .wordmark i{font-style:normal;color:#007BF8;-webkit-text-fill-color:#007BF8;font-family:"Archivo",system-ui,sans-serif}
+body.v2 header.nav nav{margin-left:auto;display:flex;gap:30px;font-size:15px;font-weight:500}
+body.v2 header.nav nav a{color:#F1EADB;text-decoration:none;opacity:.85}
+body.v2 header.nav nav a:hover,body.v2 header.nav nav a[aria-current="page"]{opacity:1;color:#F1EADB}
+body.v2 .btn,body.v2 .button,body.v2 .button-primary,body.v2 .chip-primary,body.v2 .submit,body.v2 .aivc-btn-primary,body.v2 a.primary,body.v2 .button.primary,body.v2 .nav-cta{display:inline-flex;align-items:center;justify-content:center;gap:10px;background:#D4FF3A!important;color:#0D0C0A!important;-webkit-text-fill-color:#0D0C0A!important;border:0!important;border-radius:99px!important;box-shadow:none!important;font:800 15px/1 "Archivo",system-ui,sans-serif;text-decoration:none;padding:12px 18px}
+body.v2 header.nav .pill{display:inline-flex;align-items:center;margin-left:0;padding:10px 20px;background:transparent!important;color:#F1EADB!important;-webkit-text-fill-color:#F1EADB!important;border:1.5px solid #F1EADB!important;border-radius:99px!important;box-shadow:none!important;font:700 15px/1 "Archivo",system-ui,sans-serif;text-decoration:none}
+body.v2 .ghost,body.v2 .button-secondary,body.v2 .chip:not(.chip-primary),body.v2 .button.secondary,body.v2 .aivc-btn-secondary,body.v2 .legal-link{background:transparent!important;color:#F1EADB!important;-webkit-text-fill-color:#F1EADB!important;border:1.5px solid rgba(241,234,219,.45)!important;border-radius:99px!important;box-shadow:none!important}
+body.v2 :where(.card,.listing,.form-card,.side-card,.wizard-shell,.panel,.system-card,.faq-list>div,.process-grid li,.install-cmds,.honest,.signal div,.calendar-card,.intro-card){background:#171512!important;background-image:none!important;color:#F1EADB;border-color:rgba(241,234,219,.14)!important;box-shadow:none!important}
+body.v2 :where(input,select,textarea){background:#0D0C0A;color:#F1EADB;border:1px solid rgba(241,234,219,.28);border-radius:12px}
+body.v2 :where(input,select,textarea)::placeholder{color:#A39B8C}
+body.v2 :where(input,select,textarea):focus{border-color:#D4FF3A;box-shadow:0 0 0 3px rgba(212,255,58,.18)}
+body.v2 > footer{display:flex;justify-content:space-between;align-items:center;gap:20px;width:auto;max-width:none;margin:0;padding:30px 40px 40px;border:0;border-top:1px solid rgba(241,234,219,.14);border-radius:0;background:#0D0C0A;color:#A39B8C;font-size:14px;box-shadow:none}
+body.v2 > footer a{color:#A39B8C;text-decoration:none}
+body.v2 > footer a:hover{color:#F1EADB}
+body.v2 > footer nav{display:flex;flex-wrap:wrap;gap:8px 18px}
+body.v2 .aivc-nav{display:none}
+body.v2 #aivc-root{background:#0D0C0A!important;background-image:none!important;color:#F1EADB;overflow:visible}
+body.v2 .aivc-shell:before,body.v2 .aivc-shell:after{display:none}
+@media(max-width:900px){
+  body.v2{padding-top:78px}
+  body.v2 header.nav{padding:14px 18px!important;gap:10px}
+  body.v2 header.nav .logo img{height:38px}
+  body.v2 .nav-blend{gap:12px}
+  body.v2 header.nav nav{display:none}
+  body.v2 header.nav .pill{margin-left:auto;font-size:13px;padding:8px 14px}
+  body.v2 > footer{padding:24px 18px;flex-wrap:wrap}
+}
+@media(prefers-reduced-motion:reduce){body.v2 *{scroll-behavior:auto!important}}

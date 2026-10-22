@@ -13,18 +13,15 @@
   <meta property="og:description" content="Clone https://github.com/1ststepai/1ststep-os, run locally, open localhost:3000/os, download a markdown ZIP. Free core. Not a hosted product." />
   <meta property="og:url" content="https://www.1ststep.ai/tools/1ststep-os/" />
   <meta property="og:image" content="https://www.1ststep.ai/assets/banner-1ststep-og.png" />
-  <meta name="theme-color" content="#070912" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" />
-  <link rel="stylesheet" href="/tools/tools-shelf.css" />
+  <meta name="theme-color" content="#0D0C0A" />
+<link rel="stylesheet" href="/tools/tools-shelf.css" />
   <link rel="icon" href="/favicon.ico" sizes="any" />
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "SoftwareSourceCode",
       "name": "1stStep OS",
-      "description": "Public free core for AI-assisted engineering. Cycle 1: clone, run locally, idea to project profile to markdown ZIP. Not a hosted product, full agent OS, or production control plane.",
+      "description": "Public free core for agent-assisted engineering. Cycle 1: clone, run locally, idea to project profile to markdown ZIP. Not a hosted product, full agent OS, or production control plane.",
       "codeRepository": "https://github.com/1ststepai/1ststep-os",
       "programmingLanguage": "TypeScript",
       "url": "https://www.1ststep.ai/tools/1ststep-os/",
@@ -36,21 +33,29 @@
       }
     }
   </script>
+
+  <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/fonts/instrument-serif-italic-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="/src/v2-site.css" />
 </head>
-<body data-fsai-page-event="os_foundation_tool_view" data-fsai-audience="oss_tools">
-  <header class="wrap nav">
-    <a class="brand" href="/" aria-label="1stStep.ai home"><img src="/assets/firststep-logo-transparent-cleaned.png" alt=""><span>1stStep.ai</span></a>
-    <nav class="nav-links" aria-label="Primary navigation">
-      <a href="/tools/">All tools</a>
-      <a href="/os">Concept page</a>
-      <a href="https://github.com/1ststepai/1ststep-os" target="_blank" rel="noopener">GitHub</a>
+<body class="v2" data-fsai-page-event="os_foundation_tool_view" data-fsai-audience="oss_tools">
+  <header class="nav" id="top">
+  <a class="logo" href="/" aria-label="1stStep.ai home"><img src="/assets/firststep-logo-transparent-cleaned.png" width="1147" height="946" alt="" /></a>
+  <div class="nav-blend">
+    <a class="wordmark" href="/">1stStep<i>.ai</i></a>
+    <nav aria-label="Primary">
+      <a href="/">Home</a>
+      <a href="/tools/">Tools</a>
+      <a href="/os">OS concept</a>
     </nav>
-  </header>
+    
+  </div>
+</header>
 
   <main class="wrap">
     <section class="intro" aria-labelledby="os-title">
       <p class="eyebrow">Foundation · Cycle 1 · free core · local only</p>
-      <h1 id="os-title">An OS for AI engineering. <span class="gradient">Cycle 1 runs locally.</span></h1>
+      <h1 id="os-title">An OS for engineering with agents. <span class="gradient">Cycle 1 runs locally.</span></h1>
       <p class="lede">1stStep OS is the open-source foundation around explicit authority, isolated work, evidence, and release gates. Cycle 1 is live as a public free core: clone the repo, run it on your machine, paste an idea, and download a Project OS markdown ZIP. This is not a hosted product, not a full agent OS, and not a control plane.</p>
       <div class="links">
         <a class="chip chip-primary" href="https://github.com/1ststepai/1ststep-os" target="_blank" rel="noopener">Open GitHub &rarr;</a>
@@ -125,9 +130,16 @@ Node 22 or newer. Local only.</pre>
     </div>
   </main>
 
-  <footer class="wrap legal">
-    <span>&copy; 2026 1stStep.ai. Built by Evan Pancis.</span>
-    <nav aria-label="Legal links"><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></nav>
-  </footer>
+  <footer>
+  <span>© 2026 1stStep.ai</span>
+  <span>Led by Evan Pancis</span>
+  <nav aria-label="Footer">
+    <a href="/tools/">Tools</a>
+    <a href="/os">OS concept</a>
+    <a href="/privacy.html">Privacy</a>
+    <a href="/terms.html">Terms</a>
+    <a href="#top">Back to top ↑</a>
+  </nav>
+</footer>
 </body>
 </html>
