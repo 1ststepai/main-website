@@ -39,12 +39,13 @@ const siteAnalytics = {
 };
 
 function serveExactIndexPaths(server) {
-  const routes = ["/os", "/tools", "/tools/auto-model-router", "/tools/1ststep-os-audit", "/tools/1ststep-os"];
+  const routes = ["/os", "/tools", "/tools/auto-model-router", "/tools/1ststep-os-audit", "/tools/1ststep-os", "/work/lyons-life-demo", "/work/lyons-life-demo/"];
   server.middlewares.use((request, _response, next) => {
     const url = request.url || "";
     const path = url.split("?")[0];
     if (routes.includes(path)) {
-      request.url = url.replace(path, `${path}/index.html`);
+      const clean = path.endsWith("/") ? path.slice(0, -1) : path;
+      request.url = url.replace(path, `${clean}/index.html`);
     }
     next();
   });

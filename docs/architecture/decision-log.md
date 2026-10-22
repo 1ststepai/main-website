@@ -1,5 +1,13 @@
 # Architecture Decision Log
 
+## 2026-10-22: Lyons Life Command Center card links to Evan's sample demo
+
+- **Status / owner:** Evan supplied a self-contained interactive sample and asked for it on the Selected work card. Preview only. No production deploy. This supersedes the empty-slot sentence in the motion-layer entry below.
+- **Decision:** The card is named Lyons Life Command Center. Its visible description is the portfolio sentence Evan supplied. The one-line reveal says “Try the interactive demo” and the card links to `/work/lyons-life-demo/`. The demo file is UTF-8, titled Lyons Life, and keeps the banner that all names and figures are invented. The homepage does not repeat those figures. The card image is a screenshot of the Overview tab inside the existing device frame. The page is `noindex` so the sample counts are not a search result. Directory requests rewrite to `index.html`.
+- **Rationale:** The demo is the asset. Its counts are labeled as invented, so they stay inside the demo and off the marketing card.
+- **Affected systems:** `index.html`, `src/home-v2.css`, `public/work/lyons-life-demo/index.html`, `public/home-v2/lyons-life.webp`, `public/llms.txt`, `vite.config.js`, `vercel.json`.
+- **Rollback:** Point the card back at the empty slot and remove the demo page, the screenshot, and the rewrite.
+
 ## 2026-10-22: Portfolio and pages share a light motion layer
 
 - **Status / owner:** Evan asked for the rest of the site to feel as considered as the hero, with the current layout and the blue “.ai” kept. Preview only. No production deploy.
