@@ -26,6 +26,7 @@ import {
   ScrollText,
   Search,
   Settings,
+  Share2,
   ShieldCheck,
   Sparkles,
   Trash2,
@@ -54,6 +55,7 @@ import {
   paymentScheduleForQuote,
 } from "../../lib/admin/paymentPlans.js";
 import { draftQuoteFromBrief } from "../../lib/admin/quoteBriefAssistant.js";
+import SocialDesk from "./SocialDesk.jsx";
 import "./admin.css";
 
 const DEFAULT_TEMPLATES = DEFAULT_CONTRACT_TEMPLATES;
@@ -72,6 +74,7 @@ const EMPTY_WORKSPACE = {
 const NAVIGATION = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
   { id: "job-agent", label: "Job Agent", icon: Activity },
+  { id: "social", label: "Social", icon: Share2 },
   { id: "clients", label: "Clients", icon: Users },
   { id: "quotes", label: "Quotes", icon: FileText },
   { id: "pricing", label: "Pricing", icon: CircleDollarSign },
@@ -1693,10 +1696,18 @@ function QuotePreview({ quote, client, onClose, onSend, previewMode }) {
   );
 }
 
+function initialStudioPage(previewMode) {
+  if (typeof window !== "undefined") {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("page") === "social" || params.get("social_oauth")) return "social";
+  }
+  return previewMode ? "quote-editor" : "overview";
+}
+
 function StudioApp({ previewMode = false }) {
   const [workspace, setWorkspace] = useState(previewMode ? previewWorkspace() : EMPTY_WORKSPACE);
   const [workspaceLoading, setWorkspaceLoading] = useState(!previewMode);
-  const [page, setPage] = useState(previewMode ? "quote-editor" : "overview");
+  const [page, setPage] = useState(() => initialStudioPage(previewMode));
   const [selectedQuoteId, setSelectedQuoteId] = useState(previewMode ? workspace.quotes[0]?.id : null);
   const [previewQuoteId, setPreviewQuoteId] = useState(null);
   const [dirty, setDirty] = useState(false);
@@ -1919,6 +1930,7 @@ function StudioApp({ previewMode = false }) {
   let pageContent;
   if (page === "overview") pageContent = <Overview workspace={workspace} onEditQuote={editQuote} onNewQuote={newQuote} />;
   if (page === "job-agent") pageContent = <JobAgentOperationsPage previewMode={previewMode} />;
+  if (page === "social") pageContent = <SocialDesk previewMode={previewMode} request={api} />;
   if (page === "clients") pageContent = <ClientsPage workspace={workspace} updateWorkspace={updateWorkspace} />;
   if (page === "quotes") pageContent = <QuotesPage workspace={workspace} onEditQuote={editQuote} onNewQuote={newQuote} />;
   if (page === "pricing") pageContent = <PricingPage workspace={workspace} updateWorkspace={updateWorkspace} onStartQuote={newQuote} />;
@@ -1949,7 +1961,7 @@ function StudioApp({ previewMode = false }) {
             <>
               {message && <span className="save-message" role="status">{message}</span>}
               {page === "quote-editor" && <button className="button ghost" onClick={() => setPage("quotes")}><ArrowLeft size={16} />All quotes</button>}
-              {page !== "job-agent" && <button className="button" onClick={save} disabled={saving || (!dirty && !previewMode)}><Save size={16} />{saving ? "Saving…" : dirty ? "Save draft" : "Saved"}</button>}
+              {page !== "job-agent" && page !== "social" && <button className="button" onClick={save} disabled={saving || (!dirty && !previewMode)}><Save size={16} />{saving ? "Saving…" : dirty ? "Save draft" : "Saved"}</button>}
               {editorActions && <button className="button primary" disabled={saving} onClick={() => openPreview(selectedQuote.id)}><Eye size={17} />{dirty ? "Save, preview & send" : "Preview & send"}</button>}
             </>
           )}

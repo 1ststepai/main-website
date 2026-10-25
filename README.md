@@ -192,6 +192,8 @@ Quotes can be previewed and printed or saved as PDF. Agreement structures are
 editable drafting starters and should be reviewed by qualified counsel before
 client use.
 
+The Social page in the studio is a multi-brand draft queue. Setup, env var names, and the disabled cron are in `docs/SOCIAL_POSTING.md`. It reuses the KV store above and adds `SOCIAL_TOKEN_ENC_KEY`, `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`, `GOOGLE_OAUTH_REDIRECT_URI`, `SOCIAL_CRON_SECRET`, and `BLOB_READ_WRITE_TOKEN`.
+
 Saved quotes can also be sent through the authenticated backend using the
 existing `RESEND_API_KEY`. The sender and Reply-To are fixed to
 `Evan at 1stStep.ai <evan@1ststep.ai>`; recipients come only from the saved
