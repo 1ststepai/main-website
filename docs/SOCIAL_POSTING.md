@@ -14,7 +14,7 @@ Adding a brand is one new object in that file, then a deploy. Tokens, connection
 
 - **KV** (existing `KV_REST_API_URL` and `KV_REST_API_TOKEN`): posts, token hashes, audit events, upload grants, and OAuth nonces. Keys start with `social:v1:` and are separate from the studio workspace document.
 - **Encrypted in that KV**, with `SOCIAL_TOKEN_ENC_KEY` only: YouTube refresh tokens, access tokens, and resumable upload session URIs.
-- **Vercel Blob** (`BLOB_READ_WRITE_TOKEN`): private video and thumbnail bytes. The browser or content agent uploads directly. Functions never accept the file body.
+- **Vercel Blob** (`BLOB_READ_WRITE_TOKEN`): a short-lived transit buffer only, never the home of the media. The browser or content agent uploads directly, so functions never take the file body. Each file is deleted as soon as the platform has it (see "Platform drafts").
 
 Brand API tokens are stored as SHA-256 hashes. The plaintext is returned once from the studio and is not written to KV.
 
@@ -112,6 +112,25 @@ In `/admin/` → Social:
 
 `POST /api/social/cron` with `Authorization: Bearer $SOCIAL_CRON_SECRET` runs one of those slices. It is optional. Nothing in `vercel.json` calls it. Vercel Cron's automatic `CRON_SECRET` header is not accepted on purpose, so a cron stays off until you send `SOCIAL_CRON_SECRET` yourself.
 
+## Platform drafts (media lives on the platform, not here)
+
+| Platform | Draft mechanism | Temp Blob lifetime | Status in this PR |
+| --- | --- | --- | --- |
+| YouTube | Resumable upload with `privacyStatus=private`, forced, whatever the post's privacy setting says. After approval, `videos.update` applies the final title, description, tags, and visibility. | Video blob deleted once YouTube returns the video id; thumbnail blob deleted after `thumbnails.set`. Usually minutes. | Wired |
+| TikTok | Content Posting API **inbox** upload (`/v2/post/publish/inbox/video/init/`, scope `video.upload`), not direct post. The creator finishes the post in the TikTok app. | None needed. The `upload_url` PUT carries no bearer token, so the agent can send bytes straight to TikTok. | Builder + tests only (no TikTok OAuth yet) |
+| Facebook Page | `POST /{page_id}/videos` with `published=false` | Needed: chunked `transfer` requires the Page token on each chunk, so we use `file_url`. Delete the blob after Facebook returns an id. | Builder + tests only (no Page OAuth yet) |
+| Instagram, X | No draft API | Deleted right after a successful post, and on reject | Not implemented |
+
+Flow for YouTube: agent uploads to Blob → agent confirms → the next cron or "Publish due" call with nothing due uploads the file as a **private** YouTube video and deletes both blobs. The post stays `ready_for_review`. Owner approval, the vidIQ gate, and scheduling are unchanged. At the due time the publish step runs only `videos.update`. If a post is approved and due before its draft exists, the same pipeline uploads private first and then updates.
+
+Reject is the cancel path. It deletes any temp blobs. A YouTube draft already uploaded stays private on the channel; delete it in YouTube Studio if you don't want it.
+
+Orphan sweeper: `/api/social/cron` (already present and triggered externally with `SOCIAL_CRON_SECRET`) also deletes `social/` blobs older than 24h that no open post references, at most once an hour. No new scheduled job was added. If nothing external calls the cron endpoint, the sweeper never runs, and leftovers are bounded only by the reject and publish deletes.
+
+Why bytes still pass through Blob for YouTube: Google's resumable-upload docs show the OAuth bearer on every chunk PUT. Handing an unauthenticated session URI to an agent or browser is not documented, so we don't rely on it.
+
+Docs: https://developers.google.com/youtube/v3/guides/using_resumable_upload_protocol · https://developers.google.com/youtube/v3/docs/videos/update · https://developers.tiktok.com/doc/content-posting-api-reference-upload-video · https://developers.tiktok.com/doc/content-posting-api-media-transfer-guide · https://developers.facebook.com/docs/graph-api/reference/page/videos/
+
 ## Known limits
 
 - Rate limits are in memory on each function instance. They are not a global counter.
@@ -120,7 +139,8 @@ In `/admin/` → Social:
 - Publish needs Blob range reads. If a range read is not honored, the upload stops instead of pulling the whole file into the function.
 - A long video takes many Publish due or cron calls. One call does not upload the whole file.
 - YouTube category is `22`. `selfDeclaredMadeForKids` is false.
-- Unaudited Google projects force `privacyStatus=private`.
+- Unaudited Google projects force `privacyStatus=private`, so `videos.update` to public may be overridden by Google until the API project passes audit.
+- Facebook `file_url` must be reachable by Facebook. The Blob store is private, so a short-lived signed URL or proxy is required before Facebook can be wired.
 - The OAuth callback relies on a signed one-time state because the studio cookie is `SameSite=Strict` and is not sent on the return from Google. The code is single use. Host access logs may still record the callback query string; this app does not log it.
 - The server does not call vidIQ, Instagram, Facebook, TikTok, or X.
 

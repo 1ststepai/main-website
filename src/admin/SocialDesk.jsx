@@ -338,6 +338,7 @@ export default function SocialDesk({ previewMode = false, request }) {
                 <div><dt>Keywords</dt><dd className="keyword-row">{(selected.keywords || []).length ? selected.keywords.map((keyword) => <span key={keyword}>{keyword}</span>) : "None yet"}</dd></div>
                 <div><dt>vidIQ</dt><dd>Title {selected.title_score ?? "—"} · Thumbnail {selected.thumbnail_score ?? "—"} · Checked {selected.checked_at ? new Date(selected.checked_at).toLocaleString() : "—"}</dd></div>
                 <div><dt>Files</dt><dd>Video {selected.video_asset ? `${selected.video_asset.content_type} · ${selected.video_asset.size} bytes` : "missing"} · Thumbnail {selected.thumbnail_asset ? selected.thumbnail_asset.content_type : "missing"}</dd></div>
+                <div><dt>Platform draft</dt><dd>{selected.platform_draft?.status === "ready" ? `Private on ${selected.platform} (${selected.platform_draft.video_id})` : selected.platform_draft?.status === "failed" ? `Failed: ${selected.platform_draft.error || "upload error"}` : selected.platform_draft?.status === "uploading" ? "Uploading as private draft…" : "Not uploaded yet"}</dd></div>
                 {selected.published_url && <div><dt>Live URL</dt><dd><a href={selected.published_url}>{selected.published_url}</a></dd></div>}
                 {selected.error && <div><dt>Note</dt><dd>{selected.error}</dd></div>}
               </dl>

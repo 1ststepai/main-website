@@ -2,7 +2,7 @@ import { timingSafeEqual } from "node:crypto";
 import { socialError } from "../../lib/social/errors.js";
 import { enforceRateLimit, runSocial, sendJson } from "../../lib/social/http.js";
 import { getRequestHeader } from "../../lib/http/cors.js";
-import { publishDueSlice } from "../../lib/social/service.js";
+import { publishDueSlice, sweepOrphanBlobs } from "../../lib/social/service.js";
 
 function secretMatches(provided) {
   const expected = String(process.env.SOCIAL_CRON_SECRET || "");
@@ -28,6 +28,12 @@ export default async function handler(req, res) {
       throw socialError(401, "unauthorized", "Cron secret is required.");
     }
     const progress = await publishDueSlice({ actor: "cron" });
-    sendJson(res, 200, { ok: true, ...progress });
+    let sweep = { swept: 0, skipped: true };
+    try {
+      sweep = await sweepOrphanBlobs();
+    } catch {
+      sweep = { swept: 0, skipped: true, error: "sweep_failed" };
+    }
+    sendJson(res, 200, { ok: true, ...progress, sweep });
   });
 }

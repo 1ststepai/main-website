@@ -303,6 +303,9 @@ test.describe("social posting", { concurrency: false }, () => {
               headers: { location: "https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&upload_id=test-session" },
             });
           }
+          if (init.method === "PUT" && href.startsWith("https://www.googleapis.com/youtube/v3/videos?")) {
+            return response({ payload: { id: "vid123" } });
+          }
           if (init.method === "PUT") {
             const range = init.headers["content-range"];
             const match = /bytes (\d+)-(\d+)\/(\d+)/.exec(range);
@@ -362,15 +365,21 @@ test.describe("social posting", { concurrency: false }, () => {
           updated_at: new Date().toISOString(),
         }, "social-connection"));
 
+        const deleted = [];
         let progress = { continued: true };
         for (let step = 0; step < 5 && progress.continued; step += 1) {
           progress = await publishDueSlice({
             fetchImpl,
             readRange: async (_pathname, start, end) => Buffer.alloc(end - start + 1, 1),
             budgetMs: 60_000,
+            deleteAsset: async (pathname) => { deleted.push(pathname); },
           });
         }
         assert.equal(progress.status, "published");
+        assert.deepEqual(deleted.sort(), [thumb.pathname, video.pathname].sort());
+        const update = calls.find((call) => call.method === "PUT" && call.href.startsWith("https://www.googleapis.com/youtube/v3/videos?"));
+        assert.ok(update, "approved draft is finalized with videos.update");
+        assert.match(update.body, /"privacyStatus":"private"/);
         assert.equal(progress.published_url, "https://www.youtube.com/watch?v=vid123");
         const init = calls.find((call) => call.method === "POST" && call.href.includes("/videos"));
         assert.match(init.body, /"privacyStatus":"private"/);
@@ -449,5 +458,135 @@ test.describe("social posting", { concurrency: false }, () => {
     const last = nextChunkRange(YOUTUBE_CHUNK_BYTES, YOUTUBE_CHUNK_BYTES + 10);
     assert.equal(last.size, 10);
     assert.equal(nextChunkRange(20, 20), null);
+  });
+  test("youtube video becomes a private platform draft before approval and temp blobs are deleted", async () => {
+    const saved = ["SOCIAL_TOKEN_ENC_KEY", "GOOGLE_OAUTH_CLIENT_ID", "GOOGLE_OAUTH_CLIENT_SECRET", "GOOGLE_OAUTH_REDIRECT_URI"]
+      .map((name) => [name, process.env[name]]);
+    process.env.SOCIAL_TOKEN_ENC_KEY = KEY;
+    process.env.GOOGLE_OAUTH_CLIENT_ID = "google-client";
+    process.env.GOOGLE_OAUTH_CLIENT_SECRET = "google-secret";
+    process.env.GOOGLE_OAUTH_REDIRECT_URI = "https://www.1ststep.ai/api/social/oauth/callback";
+    try {
+      await withStore(async () => {
+        const svc = await import("../lib/social/service.js");
+        const calls = [];
+        const total = 20;
+        const reply = ({ status = 200, payload = {}, headers = {} }) => ({
+          ok: status >= 200 && status < 300,
+          status,
+          headers: { get: (name) => headers[name.toLowerCase()] || null },
+          text: async () => JSON.stringify(payload),
+        });
+        const fetchImpl = async (url, init = {}) => {
+          const href = String(url);
+          calls.push({ href, method: init.method, body: typeof init.body === "string" ? init.body : "" });
+          if (href.includes("/upload/youtube/v3/videos") && init.method === "POST") {
+            return reply({ headers: { location: "https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&upload_id=s2" } });
+          }
+          if (href.startsWith("https://www.googleapis.com/youtube/v3/videos?")) return reply({ payload: { id: "vidDraft" } });
+          if (href.includes("upload_id=s2")) return reply({ status: 201, payload: { id: "vidDraft" } });
+          if (href.includes("thumbnails")) return reply({});
+          throw new Error(`unexpected ${href}`);
+        };
+        const created = await svc.createApiToken("swingtradepros", "agent");
+        const token = await svc.authenticateAgentToken(created.secret);
+        const draft = await svc.createPostForToken(token, {
+          platform: "youtube", title: "Draft me", status: "ready_for_review",
+          title_score: 95, thumbnail_score: 95, keywords: ["swing"],
+        });
+        const issue = (kind, type, size) => svc.issueUploadForToken(token, { post_id: draft.id, kind, content_type: type, size }, { issueToken: async () => "vercel_blob_client_test" });
+        const video = await issue("video", "video/mp4", total);
+        const thumb = await issue("thumbnail", "image/jpeg", 8);
+        const statBlob = async (pathname) => ({ pathname, size: pathname.includes("/video-") ? total : 8, contentType: pathname.includes("/video-") ? "video/mp4" : "image/jpeg" });
+        await svc.updatePostForToken(token, draft.id, { confirm_upload: { kind: "video", pathname: video.pathname } }, { statBlob });
+        await svc.updatePostForToken(token, draft.id, { confirm_upload: { kind: "thumbnail", pathname: thumb.pathname } }, { statBlob });
+        await saveConnectionEnvelope("swingtradepros", "youtube", encryptSocialJson({
+          refresh_token: "r", access_token: "ya29.X", expires_at: new Date(Date.now() + 3600_000).toISOString(),
+        }, "social-connection"));
+        const deleted = [];
+        const deps = { fetchImpl, readRange: async (_p, a, b) => Buffer.alloc(b - a + 1), budgetMs: 60_000, deleteAsset: async (p) => { deleted.push(p); } };
+        const drafted = await svc.publishDueSlice(deps);
+        assert.equal(drafted.draft_status, "ready");
+        assert.equal(drafted.status, "ready_for_review", "draft upload never approves or publishes");
+        assert.deepEqual(deleted.sort(), [thumb.pathname, video.pathname].sort());
+        const init = calls.find((call) => call.method === "POST" && call.href.includes("/upload/youtube/v3/videos"));
+        assert.match(init.body, /"privacyStatus":"private"/);
+        assert.equal(calls.some((call) => call.href.startsWith("https://www.googleapis.com/youtube/v3/videos?")), false);
+
+        await svc.setPostPrivacy(draft.id, "public");
+        await svc.approvePost(draft.id);
+        await svc.schedulePost(draft.id, new Date().toISOString());
+        const before = calls.length;
+        const published = await svc.publishDueSlice(deps);
+        assert.equal(published.status, "published");
+        const after = calls.slice(before);
+        assert.equal(after.length, 1, "publishing only flips the existing draft");
+        assert.match(after[0].body, /"privacyStatus":"public"/);
+      });
+    } finally {
+      for (const [name, value] of saved) restore(name, value);
+    }
+  });
+
+  test("rejecting a post deletes its temporary media", async () => {
+    await withStore(async () => {
+      const svc = await import("../lib/social/service.js");
+      const created = await svc.createApiToken("swingtradepros", "agent");
+      const token = await svc.authenticateAgentToken(created.secret);
+      const draft = await svc.createPostForToken(token, { platform: "instagram", title: "IG", status: "ready_for_review" });
+      const up = await svc.issueUploadForToken(token, { post_id: draft.id, kind: "video", content_type: "video/mp4", size: 10 }, { issueToken: async () => "vercel_blob_client_test" });
+      await svc.updatePostForToken(token, draft.id, { confirm_upload: { kind: "video", pathname: up.pathname } }, {
+        statBlob: async (pathname) => ({ pathname, size: 10, contentType: "video/mp4" }),
+      });
+      const deleted = [];
+      const rejected = await svc.rejectPost(draft.id, "no", Date.now(), { deleteAsset: async (p) => { deleted.push(p); } });
+      assert.deepEqual(deleted, [up.pathname]);
+      assert.equal(rejected.video_asset.pathname, null);
+    });
+  });
+
+  test("orphan sweeper deletes only unreferenced blobs older than 24h and is throttled", async () => {
+    await withStore(async () => {
+      const svc = await import("../lib/social/service.js");
+      const now = Date.now();
+      const old = new Date(now - 25 * 3600_000).toISOString();
+      const fresh = new Date(now - 3600_000).toISOString();
+      const deleted = [];
+      const marks = new Map();
+      const deps = {
+        now,
+        kvGet: async (k) => marks.get(k) || null,
+        kvSet: async (k, v) => { marks.set(k, v); },
+        listBlobs: async () => ({ blobs: [
+          { pathname: "social/swingtradepros/p1/video-a.mp4", uploadedAt: old },
+          { pathname: "social/swingtradepros/p2/video-b.mp4", uploadedAt: fresh },
+        ], cursor: null }),
+        deleteAsset: async (p) => { deleted.push(p); },
+      };
+      assert.deepEqual(await svc.sweepOrphanBlobs(deps), { swept: 1, skipped: false });
+      assert.deepEqual(deleted, ["social/swingtradepros/p1/video-a.mp4"]);
+      assert.equal((await svc.sweepOrphanBlobs(deps)).skipped, true);
+    });
+  });
+
+  test("tiktok inbox and facebook unpublished request builders", async () => {
+    const tiktok = await import("../lib/social/publishers/tiktok.js");
+    const facebook = await import("../lib/social/publishers/facebook.js");
+    assert.deepEqual(tiktok.tiktokChunkPlan(1000), { video_size: 1000, chunk_size: 1000, total_chunk_count: 1 });
+    const big = 200 * 1024 * 1024;
+    assert.equal(tiktok.tiktokChunkPlan(big, 10 * 1024 * 1024).total_chunk_count, 20);
+    let sent;
+    const out = await tiktok.initTikTokInboxUpload({
+      accessToken: "act", videoSize: 1000,
+      fetchImpl: async (url, init) => { sent = { url, body: JSON.parse(init.body) }; return { ok: true, status: 200, json: async () => ({ data: { publish_id: "p", upload_url: "https://open-upload.tiktokapis.com/x" }, error: { code: "ok" } }) }; },
+    });
+    assert.equal(sent.url, tiktok.TIKTOK_INIT_URL);
+    assert.equal(sent.body.source_info.source, "FILE_UPLOAD");
+    assert.equal(out.publish_id, "p");
+    assert.equal(tiktok.tiktokChunkHeaders({ start: 0, end: 9, total: 10, contentType: "video/mp4" })["content-range"], "bytes 0-9/10");
+    assert.throws(() => tiktok.tiktokChunkHeaders({ start: 0, end: 9, total: 10, contentType: "video/x-msvideo" }));
+    const params = facebook.facebookUnpublishedVideoParams({ fileUrl: "https://example.com/v.mp4", title: "t" });
+    assert.equal(params.get("published"), "false");
+    assert.throws(() => facebook.facebookUnpublishedVideoParams({ fileUrl: "http://example.com/v.mp4" }));
   });
 });
