@@ -1,5 +1,14 @@
 # Architecture Decision Log
 
+## 2026-10-26: Social publishers and the Swing Trade Pros owner path
+
+- **Status / owner:** Evan asked to finish the studio social queue on PR #29. Review only. No production deploy and no production env changes.
+- **Decision:** The studio at `/admin/` remains the control plane. One short can be queued for YouTube, Instagram, Facebook, and TikTok with separate copy. YouTube still uploads private first and still requires vidIQ scores or a typed override; this server does not call vidIQ. Swing Trade Pros YouTube must be channel `UC86s7HqMAR-FSfxuv1N1Pwg` and Instagram must be `28230105726692205`, or the connection is refused. Instagram `media_publish` runs only when privacy is public. Facebook private finishes as an unpublished Page Reel (`handed_off`). TikTok uses the inbox upload and is not marked published. X stays unimplemented.
+- **Rationale:** Those are the platform APIs that can run with the permissions we can request. Marking a builder as published would be false. The known STP account ids are the ownership check.
+- **Affected systems:** `lib/social/`, `api/social/`, `src/admin/SocialDesk.jsx`, `docs/SOCIAL_POSTING.md`, `docs/SOCIAL_OWNER_HANDOFF.md`.
+- **Verification:** `test/socialPosting.test.js`. No live platform upload in this change. The Bitcoin short file is not in this repository.
+- **Rollback:** Revert this PR. Disconnect the brand in the studio, then delete `social:v1:` KV keys and the private Blob prefix `social/`. Do not add the new env vars to Production as part of this work.
+
 ## 2026-10-25: Multi-brand social queue, YouTube first
 
 - **Status / owner:** Evan asked for a lean v1 inside the existing studio. Review PR only. No production deploy and no production env changes.

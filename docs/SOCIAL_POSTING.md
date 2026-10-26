@@ -1,6 +1,6 @@
 # Social queue
 
-Owner-reviewed posting for more than one brand. YouTube is the only publisher. Instagram, Facebook, TikTok, and X are interfaces with no implementation.
+Owner-reviewed posting for more than one brand. YouTube, Instagram Reels, and Facebook Page Reels call the platform APIs. TikTok is an inbox handoff, not a direct post. X is not implemented.
 
 This is not enabled in production by this repository change. Add the env vars to the Vercel **Preview** environment first. Do not turn on a cron in `vercel.json`.
 
@@ -30,6 +30,12 @@ New:
 | `GOOGLE_OAUTH_REDIRECT_URI` | Full callback URL ending in `/api/social/oauth/callback`. Set the Preview value to the Preview origin. |
 | `SOCIAL_CRON_SECRET` | Bearer secret for `POST /api/social/cron`. At least 24 characters. |
 | `BLOB_READ_WRITE_TOKEN` | Vercel Blob read-write token for private media. |
+| `META_APP_ID` | Meta app id for Facebook Login. One consent connects the Page and the linked Instagram professional account. |
+| `META_APP_SECRET` | Meta app secret. |
+| `META_OAUTH_REDIRECT_URI` | Full callback URL ending in `/api/social/oauth/callback`. |
+| `TIKTOK_CLIENT_KEY` | TikTok Login Kit client key. Scope is `video.upload` only. |
+| `TIKTOK_CLIENT_SECRET` | TikTok client secret. |
+| `TIKTOK_OAUTH_REDIRECT_URI` | Full callback URL ending in `/api/social/oauth/callback`. |
 
 Already used by the studio, and required here too: `KV_REST_API_URL`, `KV_REST_API_TOKEN`.
 
@@ -104,6 +110,7 @@ List is `GET /api/social/posts` and returns only `draft` and `ready_for_review` 
 
 In `/admin/` → Social:
 
+- Queue one short from the studio: pick the platforms, write each caption, choose the video and a YouTube thumbnail. The file uploads straight to private Blob. The same video is copied onto each platform post in that brand only.
 - Switch brand and filter the queue.
 - Approve, reject, or schedule. Approve is disabled for YouTube when the title score is under 90, the thumbnail score is under 90, or keywords are empty. Override requires a typed reason and is audited.
 - Privacy defaults to private and can be changed before publish.
@@ -114,12 +121,13 @@ In `/admin/` → Social:
 
 ## Platform drafts (media lives on the platform, not here)
 
-| Platform | Draft mechanism | Temp Blob lifetime | Status in this PR |
+| Platform | What this studio does | Temp Blob lifetime | Status |
 | --- | --- | --- | --- |
-| YouTube | Resumable upload with `privacyStatus=private`, forced, whatever the post's privacy setting says. After approval, `videos.update` applies the final title, description, tags, and visibility. | Video blob deleted once YouTube returns the video id; thumbnail blob deleted after `thumbnails.set`. Usually minutes. | Wired |
-| TikTok | Content Posting API **inbox** upload (`/v2/post/publish/inbox/video/init/`, scope `video.upload`), not direct post. The creator finishes the post in the TikTok app. | None needed. The `upload_url` PUT carries no bearer token, so the agent can send bytes straight to TikTok. | Builder + tests only (no TikTok OAuth yet) |
-| Facebook Page | `POST /{page_id}/videos` with `published=false` | Needed: chunked `transfer` requires the Page token on each chunk, so we use `file_url`. Delete the blob after Facebook returns an id. | Builder + tests only (no Page OAuth yet) |
-| Instagram, X | No draft API | Deleted right after a successful post, and on reject | Not implemented |
+| YouTube | Resumable upload with `privacyStatus=private`. Shorts (`format: short`) append `#Shorts` when the description does not already contain it. After approval, `videos.update` applies the final title, description, tags, and visibility. | Video blob deleted once YouTube returns the video id; thumbnail blob deleted after `thumbnails.set`. | Wired. Direct publish after approval. |
+| Instagram Reels | Resumable container upload to `rupload.facebook.com`. `media_publish` runs only when privacy is `public`. A private post stops and stays failed until you set public and retry. | Deleted after the Reel is published. | Wired. There is no private Instagram post. |
+| Facebook Page | Page Reels upload to `rupload.facebook.com`. Privacy other than public finishes as `video_state=DRAFT` and the studio status is `handed_off`. Public finishes as `PUBLISHED`. | Deleted when Facebook accepts the finish call. | Wired. A draft is not a public Reel. |
+| TikTok | Content Posting API inbox upload (`video.upload`, `FILE_UPLOAD`). Status becomes `handed_off`. The creator finishes in the TikTok app. | Deleted after TikTok accepts the bytes. | Wired as a handoff. Not a direct post. `video.publish` is not called. |
+| X | None | Deleted on reject | Not implemented. |
 
 Flow for YouTube: agent uploads to Blob → agent confirms → the next cron or "Publish due" call with nothing due uploads the file as a **private** YouTube video and deletes both blobs. The post stays `ready_for_review`. Owner approval, the vidIQ gate, and scheduling are unchanged. At the due time the publish step runs only `videos.update`. If a post is approved and due before its draft exists, the same pipeline uploads private first and then updates.
 
@@ -142,7 +150,12 @@ Docs: https://developers.google.com/youtube/v3/guides/using_resumable_upload_pro
 - Unaudited Google projects force `privacyStatus=private`, so `videos.update` to public may be overridden by Google until the API project passes audit.
 - Facebook `file_url` must be reachable by Facebook. The Blob store is private, so a short-lived signed URL or proxy is required before Facebook can be wired.
 - The OAuth callback relies on a signed one-time state because the studio cookie is `SameSite=Strict` and is not sent on the return from Google. The code is single use. Host access logs may still record the callback query string; this app does not log it.
-- The server does not call vidIQ, Instagram, Facebook, TikTok, or X.
+- The server does not call vidIQ. Scores are whatever the owner or the agent recorded.
+- X is not implemented. TikTok is an inbox handoff, not a direct post.
+- Instagram cannot publish a private Reel. A private Instagram post stops before `media_publish`.
+- Swing Trade Pros refuses a YouTube channel other than `UC86s7HqMAR-FSfxuv1N1Pwg` and an Instagram account other than `28230105726692205`.
+- TikTok files at or under 64MB are one chunk, which is TikTok's rule. A 12MB short is one request.
+- Meta and TikTok publishing need the new env vars and a successful connect. Until then those posts fail closed with "not connected".
 
 ## Test plan
 

@@ -696,7 +696,11 @@ button, select { cursor: pointer; }
 .social-heading-actions, .social-actions, .social-toolbar, .social-token-form { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; }
 .social-toolbar { margin-bottom: 18px; }
 .social-toolbar .field, .social-actions .field, .social-token-form .field { min-width: 180px; }
-.social-tools { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+.social-tools { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 18px; margin-bottom: 18px; }
+.social-account { display: flex; justify-content: space-between; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.social-account p { margin: 2px 0; }
+.social-compose { display: grid; gap: 10px; margin-bottom: 18px; }
+.social-compose-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .social-card h3, .social-audit h3 { margin: 0 0 8px; font-size: 16px; }
 .social-card p, .social-note { margin: 8px 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
 .social-warning { display: flex; gap: 8px; align-items: flex-start; margin: 10px 0; color: #ffc979; font-size: 12px; line-height: 1.45; }
@@ -722,6 +726,6 @@ button, select { cursor: pointer; }
 .status.ready_for_review, .status.publishing { color: var(--cyan); border-color: rgba(86, 221, 255, .3); background: rgba(86, 221, 255, .08); }
 
 @media (max-width: 720px) {
-  .social-tools { grid-template-columns: 1fr; }
+  .social-tools, .social-compose-grid { grid-template-columns: 1fr; }
   .social-page { width: calc(100% - 26px); }
 }

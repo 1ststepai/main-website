@@ -8,17 +8,24 @@ import {
 } from "../../lib/social/http.js";
 import {
   approvePost,
+  beginMetaConnect,
+  beginTikTokConnect,
   beginYouTubeConnect,
+  confirmOwnerUpload,
   createApiToken,
   disconnectPlatform,
+  issueOwnerUpload,
   loadDesk,
   publishDueSlice,
+  queueOwnerShort,
+  recordOwnerScores,
   rejectPost,
   restartUpload,
   retryPost,
   revokeApiToken,
   schedulePost,
   setPostPrivacy,
+  updateOwnerCopy,
 } from "../../lib/social/service.js";
 import { socialError } from "../../lib/social/errors.js";
 
@@ -56,6 +63,39 @@ export default async function handler(req, res) {
     if (action === "connect_youtube") {
       const connection = await beginYouTubeConnect(body.brand_id);
       return deskResponse(res, body.brand_id, connection);
+    }
+    if (action === "connect_meta") {
+      const connection = await beginMetaConnect(body.brand_id);
+      return deskResponse(res, body.brand_id, connection);
+    }
+    if (action === "connect_tiktok") {
+      const connection = await beginTikTokConnect(body.brand_id);
+      return deskResponse(res, body.brand_id, connection);
+    }
+    if (action === "queue_short") {
+      const queued = await queueOwnerShort({
+        brandId: body.brand_id,
+        platforms: body.platforms,
+        copies: body.copies,
+        privacy: body.privacy_status,
+      });
+      return deskResponse(res, body.brand_id, queued);
+    }
+    if (action === "issue_upload") {
+      const upload = await issueOwnerUpload(body.post_id, body);
+      return deskResponse(res, body.brand_id, { upload });
+    }
+    if (action === "confirm_upload") {
+      const post = await confirmOwnerUpload(body.post_id, body.confirm_upload);
+      return deskResponse(res, body.brand_id || post.brand_id, { post });
+    }
+    if (action === "update_copy") {
+      const post = await updateOwnerCopy(body.post_id, body);
+      return deskResponse(res, body.brand_id || post.brand_id, { post });
+    }
+    if (action === "record_scores") {
+      const post = await recordOwnerScores(body.post_id, body);
+      return deskResponse(res, body.brand_id || post.brand_id, { post });
     }
     if (action === "approve") {
       const post = await approvePost(body.post_id, body.override_reason);

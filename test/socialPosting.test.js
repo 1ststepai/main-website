@@ -427,7 +427,7 @@ test.describe("social posting", { concurrency: false }, () => {
               },
             });
           }
-          return response({ payload: { items: [{ id: "UC999", snippet: { customUrl: "@SwingTradePros" } }] } });
+          return response({ payload: { items: [{ id: "UC86s7HqMAR-FSfxuv1N1Pwg", snippet: { customUrl: "@SwingTradePros" } }] } });
         };
         const brandId = await completeYouTubeOAuth({ code: "auth-code", state, fetchImpl });
         assert.equal(brandId, "swingtradepros");
@@ -436,9 +436,14 @@ test.describe("social posting", { concurrency: false }, () => {
         assert.equal(stored.includes("refresh-secret-value"), false);
         assert.equal(stored.includes("ya29.OAUTHACCESS"), false);
         assert.equal(stored.includes("auth-code"), false);
-        await assert.rejects(() => publishers.instagram.publishSlice(), (error) => error.code === "publisher_not_implemented");
-        assert.equal(publishers.facebook.implemented, false);
-        assert.equal(publishers.tiktok.implemented, false);
+        await assert.rejects(() => publishers.x.publishSlice(), (error) => error.code === "publisher_not_implemented");
+        assert.equal(publishers.instagram.implemented, true);
+        assert.equal(publishers.instagram.privateDraft, false);
+        assert.equal(publishers.facebook.implemented, true);
+        assert.equal(publishers.facebook.mode, "page_reel");
+        assert.equal(publishers.tiktok.implemented, true);
+        assert.equal(publishers.tiktok.mode, "inbox_handoff");
+        assert.equal(publishers.tiktok.directPost, false);
         assert.equal(publishers.x.implemented, false);
         assert.equal(publishers.youtube.implemented, true);
       });
@@ -588,5 +593,242 @@ test.describe("social posting", { concurrency: false }, () => {
     const params = facebook.facebookUnpublishedVideoParams({ fileUrl: "https://example.com/v.mp4", title: "t" });
     assert.equal(params.get("published"), "false");
     assert.throws(() => facebook.facebookUnpublishedVideoParams({ fileUrl: "http://example.com/v.mp4" }));
+  });
+
+  test("the wrong YouTube channel is refused and nothing is stored", async () => {
+    const saved = ["SOCIAL_TOKEN_ENC_KEY", "GOOGLE_OAUTH_CLIENT_ID", "GOOGLE_OAUTH_CLIENT_SECRET", "GOOGLE_OAUTH_REDIRECT_URI"]
+      .map((name) => [name, process.env[name]]);
+    process.env.SOCIAL_TOKEN_ENC_KEY = KEY;
+    process.env.GOOGLE_OAUTH_CLIENT_ID = "google-client";
+    process.env.GOOGLE_OAUTH_CLIENT_SECRET = "google-secret";
+    process.env.GOOGLE_OAUTH_REDIRECT_URI = "https://www.1ststep.ai/api/social/oauth/callback";
+    try {
+      await withStore(async (kv) => {
+        const svc = await import("../lib/social/service.js");
+        const started = await svc.beginYouTubeConnect("swingtradepros");
+        const state = new URL(started.authorization_url).searchParams.get("state");
+        const fetchImpl = async (url) => {
+          if (String(url).includes("oauth2.googleapis.com/token")) {
+            return response({ payload: { access_token: "ya29.WRONG", refresh_token: "refresh-wrong", expires_in: 3600 } });
+          }
+          return response({ payload: { items: [{ id: "UC999", snippet: { customUrl: "@someone" } }] } });
+        };
+        await assert.rejects(
+          () => svc.completeYouTubeOAuth({ code: "auth-code", state, fetchImpl }),
+          (error) => error.code === "account_mismatch",
+        );
+        const stored = JSON.stringify(kv.snapshot());
+        assert.equal(stored.includes("refresh-wrong"), false);
+        assert.equal(stored.includes("ya29.WRONG"), false);
+      });
+    } finally {
+      for (const [name, value] of saved) restore(name, value);
+    }
+  });
+
+  test("Meta connect keeps only the Swing Trade Pros Instagram account", async () => {
+    const saved = ["SOCIAL_TOKEN_ENC_KEY", "META_APP_ID", "META_APP_SECRET", "META_OAUTH_REDIRECT_URI"]
+      .map((name) => [name, process.env[name]]);
+    process.env.SOCIAL_TOKEN_ENC_KEY = KEY;
+    process.env.META_APP_ID = "meta-app";
+    process.env.META_APP_SECRET = "meta-secret";
+    process.env.META_OAUTH_REDIRECT_URI = "https://www.1ststep.ai/api/social/oauth/callback";
+    try {
+      await withStore(async (kv) => {
+        const svc = await import("../lib/social/service.js");
+        const started = await svc.beginMetaConnect("swingtradepros");
+        assert.equal(started.authorization_url.includes("meta-secret"), false);
+        assert.match(started.authorization_url, /instagram_content_publish/);
+        const state = new URL(started.authorization_url).searchParams.get("state");
+        const pages = [{
+          id: "111",
+          name: "Other",
+          access_token: "page-secret",
+          instagram_business_account: { id: "999", username: "other" },
+        }];
+        const fetchImpl = async (url) => {
+          const href = String(url);
+          if (href.includes("/oauth/access_token")) return response({ payload: { access_token: "user-secret", expires_in: 3600 } });
+          return response({ payload: { data: pages } });
+        };
+        await assert.rejects(
+          () => svc.completeMetaOAuth({ code: "meta-code", state, fetchImpl }),
+          (error) => error.code === "account_mismatch",
+        );
+        assert.equal(JSON.stringify(kv.snapshot()).includes("page-secret"), false);
+      });
+    } finally {
+      for (const [name, value] of saved) restore(name, value);
+    }
+  });
+
+  test("Instagram stays unpublished until privacy is public, and TikTok is only an inbox handoff", async () => {
+    const names = ["SOCIAL_TOKEN_ENC_KEY", "META_APP_ID", "META_APP_SECRET", "META_OAUTH_REDIRECT_URI", "TIKTOK_CLIENT_KEY", "TIKTOK_CLIENT_SECRET", "TIKTOK_OAUTH_REDIRECT_URI"];
+    const saved = names.map((name) => [name, process.env[name]]);
+    process.env.SOCIAL_TOKEN_ENC_KEY = KEY;
+    process.env.META_APP_ID = "meta-app";
+    process.env.META_APP_SECRET = "meta-secret";
+    process.env.META_OAUTH_REDIRECT_URI = "https://www.1ststep.ai/api/social/oauth/callback";
+    process.env.TIKTOK_CLIENT_KEY = "tiktok-key";
+    process.env.TIKTOK_CLIENT_SECRET = "tiktok-secret";
+    process.env.TIKTOK_OAUTH_REDIRECT_URI = "https://www.1ststep.ai/api/social/oauth/callback";
+    try {
+      await withStore(async () => {
+        const svc = await import("../lib/social/service.js");
+        const { youtubeDescription } = await import("../lib/social/publishers/youtube.js");
+        assert.match(youtubeDescription({ format: "short", description: "Hello" }), /#Shorts/);
+        assert.equal(youtubeDescription({ format: "short", description: "Already #Shorts" }).split("#Shorts").length - 1, 1);
+        const reply = (payload, status = 200) => ({
+          ok: status >= 200 && status < 300,
+          status,
+          headers: { get: () => null },
+          text: async () => JSON.stringify(payload),
+          json: async () => payload,
+        });
+        const created = await svc.createApiToken("swingtradepros", "agent");
+        const token = await svc.authenticateAgentToken(created.secret);
+        const draft = await svc.createPostForToken(token, {
+          platform: "instagram", title: "Bitcoin in six months", description: "Closest prediction wins six months in the STP Discord.", status: "ready_for_review",
+        });
+        const video = await svc.issueUploadForToken(token, { post_id: draft.id, kind: "video", content_type: "video/mp4", size: 8 }, { issueToken: async () => "vercel_blob_client_test" });
+        await svc.updatePostForToken(token, draft.id, { confirm_upload: { kind: "video", pathname: video.pathname } }, {
+          statBlob: async (pathname) => ({ pathname, size: 8, contentType: "video/mp4" }),
+        });
+        await saveConnectionEnvelope("swingtradepros", "instagram", encryptSocialJson({
+          instagram_id: "28230105726692205",
+          access_token: "page-token",
+          expires_at: new Date(Date.now() + 3600_000).toISOString(),
+        }, "social-connection"));
+        const calls = [];
+        const fetchImpl = async (url, init = {}) => {
+          const href = String(url);
+          calls.push(href + " " + (init.method || "GET"));
+          if (href.endsWith("/media") && init.method === "POST") {
+            return reply({ id: "container1", uri: "https://rupload.facebook.com/ig-api-upload/v22.0/container1" });
+          }
+          if (href.includes("rupload.facebook.com")) return reply({ success: true });
+          if (href.includes("status_code")) return reply({ status_code: "FINISHED" });
+          if (href.includes("media_publish")) return reply({ id: "media1" });
+          if (href.includes("permalink")) return reply({ permalink: "https://www.instagram.com/reel/media1/" });
+          return reply({});
+        };
+        await svc.approvePost(draft.id);
+        await svc.schedulePost(draft.id, new Date().toISOString());
+        const held = await svc.publishDueSlice({
+          fetchImpl,
+          readRange: async (_p, a, b) => Buffer.alloc(b - a + 1),
+          budgetMs: 60_000,
+          deleteAsset: async () => {},
+        });
+        assert.equal(held.status, "failed");
+        assert.match(held.message, /public/);
+        assert.equal(calls.some((call) => call.includes("media_publish")), false);
+        await svc.setPostPrivacy(draft.id, "public");
+        await svc.retryPost(draft.id);
+        const live = await svc.publishDueSlice({
+          fetchImpl,
+          readRange: async (_p, a, b) => Buffer.alloc(b - a + 1),
+          budgetMs: 60_000,
+          deleteAsset: async () => {},
+        });
+        assert.equal(live.status, "published");
+        assert.equal(live.published_url, "https://www.instagram.com/reel/media1/");
+
+        const tiktok = await svc.createPostForToken(token, { platform: "tiktok", title: "Bitcoin in six months", status: "ready_for_review" });
+        const tiktokFile = await svc.issueUploadForToken(token, { post_id: tiktok.id, kind: "video", content_type: "video/mp4", size: 8 }, { issueToken: async () => "vercel_blob_client_test" });
+        await svc.updatePostForToken(token, tiktok.id, { confirm_upload: { kind: "video", pathname: tiktokFile.pathname } }, {
+          statBlob: async (pathname) => ({ pathname, size: 8, contentType: "video/mp4" }),
+        });
+        await saveConnectionEnvelope("swingtradepros", "tiktok", encryptSocialJson({
+          access_token: "tiktok-token",
+          refresh_token: "tiktok-refresh",
+          expires_at: new Date(Date.now() + 3600_000).toISOString(),
+        }, "social-connection"));
+        await svc.approvePost(tiktok.id);
+        await svc.schedulePost(tiktok.id, new Date().toISOString());
+        const handed = await svc.publishDueSlice({
+          fetchImpl: async (url, init = {}) => {
+            const href = String(url);
+            if (href.includes("/inbox/video/init")) {
+              return reply({ data: { publish_id: "inbox1", upload_url: "https://open-upload.tiktokapis.com/upload/1" }, error: { code: "ok" } });
+            }
+            if (init.method === "PUT") return reply({});
+            return reply({});
+          },
+          readRange: async (_p, a, b) => Buffer.alloc(b - a + 1),
+          budgetMs: 60_000,
+          deleteAsset: async () => {},
+        });
+        assert.equal(handed.status, "handed_off");
+        assert.equal(handed.published_url, null);
+        assert.match(handed.message, /TikTok app/);
+      });
+    } finally {
+      for (const [name, value] of saved) restore(name, value);
+    }
+  });
+
+  test("an owner short stays on its brand and Facebook private is an unpublished reel", async () => {
+    const names = ["SOCIAL_TOKEN_ENC_KEY", "META_APP_ID", "META_APP_SECRET", "META_OAUTH_REDIRECT_URI"];
+    const saved = names.map((name) => [name, process.env[name]]);
+    process.env.SOCIAL_TOKEN_ENC_KEY = KEY;
+    process.env.META_APP_ID = "meta-app";
+    process.env.META_APP_SECRET = "meta-secret";
+    process.env.META_OAUTH_REDIRECT_URI = "https://www.1ststep.ai/api/social/oauth/callback";
+    try {
+      await withStore(async () => {
+        const svc = await import("../lib/social/service.js");
+        const queued = await svc.queueOwnerShort({
+          brandId: "swingtradepros",
+          platforms: ["youtube", "facebook"],
+          copies: {
+            youtube: { title: "Where is Bitcoin in six months?", description: "Closest prediction wins six months in the Swing Trade Pros Discord.", tags: ["bitcoin"] },
+            facebook: { title: "Where is Bitcoin in six months?", description: "Closest prediction wins six months in the Swing Trade Pros Discord." },
+          },
+        });
+        assert.equal(queued.posts.length, 2);
+        assert.equal(queued.posts.every((post) => post.brand_id === "swingtradepros" && post.privacy_status === "private"), true);
+        const other = await svc.loadDesk("1ststep");
+        assert.equal(other.posts.length, 0);
+        const youtube = queued.posts.find((post) => post.platform === "youtube");
+        const upload = await svc.issueOwnerUpload(youtube.id, { kind: "video", content_type: "video/mp4", size: 12 }, { issueToken: async () => "vercel_blob_client_test" });
+        const copied = [];
+        await svc.confirmOwnerUpload(youtube.id, { kind: "video", pathname: upload.pathname }, {
+          statBlob: async (pathname) => ({ pathname, size: 12, contentType: "video/mp4", url: "https://example.private.blob.vercel-storage.com/v" }),
+          copyBlob: async ({ pathname }) => { copied.push(pathname); return { pathname, url: "https://example.private.blob.vercel-storage.com/c" }; },
+        });
+        assert.equal(copied.length, 1);
+        const facebook = queued.posts.find((post) => post.platform === "facebook");
+        await svc.recordOwnerScores(youtube.id, { title_score: 91, thumbnail_score: 93, keywords: ["bitcoin"] });
+        await svc.approvePost(youtube.id);
+        await svc.approvePost(facebook.id);
+        await saveConnectionEnvelope("swingtradepros", "facebook", encryptSocialJson({
+          page_id: "12345",
+          access_token: "page-token",
+          expires_at: new Date(Date.now() + 3600_000).toISOString(),
+        }, "social-connection"));
+        await svc.schedulePost(facebook.id, new Date().toISOString());
+        let finishBody = "";
+        const result = await svc.publishDueSlice({
+          fetchImpl: async (url, init = {}) => {
+            const href = String(url);
+            if (href.includes("/video_reels") && String(init.body || "").includes("upload_phase=start")) {
+              return { ok: true, status: 200, text: async () => JSON.stringify({ video_id: "reel1", upload_url: "https://rupload.facebook.com/video-upload/v22.0/reel1" }) };
+            }
+            if (href.includes("rupload.facebook.com")) return { ok: true, status: 200, text: async () => "{}" };
+            finishBody = String(init.body || "");
+            return { ok: true, status: 200, text: async () => JSON.stringify({ success: true }) };
+          },
+          readRange: async (_p, a, b) => Buffer.alloc(b - a + 1),
+          budgetMs: 60_000,
+          deleteAsset: async () => {},
+        });
+        assert.equal(result.status, "handed_off");
+        assert.match(finishBody, /video_state=DRAFT/);
+        assert.equal(result.published_url, null);
+      });
+    } finally {
+      for (const [name, value] of saved) restore(name, value);
+    }
   });
 });

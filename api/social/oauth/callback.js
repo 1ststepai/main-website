@@ -1,5 +1,5 @@
 import { enforceRateLimit, requestQuery } from "../../../lib/social/http.js";
-import { completeYouTubeOAuth } from "../../../lib/social/service.js";
+import { completeSocialOAuth } from "../../../lib/social/service.js";
 
 function redirect(res, params) {
   const search = new URLSearchParams(params);
@@ -23,7 +23,7 @@ export default async function handler(req, res) {
     if (query.get("error")) {
       return redirect(res, { page: "social", social_oauth: "error", reason: "access_denied" });
     }
-    const brandId = await completeYouTubeOAuth({
+    const brandId = await completeSocialOAuth({
       code: query.get("code"),
       state: query.get("state"),
     });
