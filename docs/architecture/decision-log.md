@@ -387,3 +387,9 @@
 - **Live Lighthouse, median of 3 (before -> after):** mobile perf 69 -> 71, LCP 7.20s -> 6.14s, CLS 0.105 -> 0.106. Desktop perf 96 -> 96, LCP 1.37s -> 1.38s, CLS 0.005 -> 0.009.
 - **Rollback:** Vercel instant rollback to `dpl_5uV2cw18AL1uRUmfJPWaeP9aa4wo` (`main-website-repo-75gz2vvt8-1ststep.vercel.app`, content `8af9397`).
 - **Still open:** `main` (324e589) does not contain `8af9397` or this slice. A Production deploy built from `main` would roll the live homepage back. Fast-forward `main` to `caa1468` (it contains all of `main`) before any main-based deploy.
+
+## 2026-10-26 — PR #29 independent readiness audit (draft proposal)
+
+Owner: Evan (release/publishing); audit branch: `audit/social-pr29`; feature implementation: existing Cursor PR #29. Status: locally verified draft fixes; release blocked. Baseline `3761af3fbc9a631a5da97fa6617ee5a422faa5de`.
+
+Add atomic OAuth nonce consumption, fail-closed Redis errors, request the scope required by YouTube's final metadata update, and checkpoint encrypted YouTube sessions before sending bytes or deleting temporary media. Rationale: reproduce nonce replay and unrecoverable/duplicate-upload failure windows without changing owner publishing authority. No credentials, scheduler, production posting, merge or deployment were activated. Reconnect is required for the scope change. Queue/index CAS, worker fencing, shared limits and scheduled delivery remain unresolved release dependencies. See `docs/SOCIAL_PR29_READINESS_AUDIT.md` for exact failures, tests, Preview prerequisites and rollback. This does not approve broader OAuth consent or a production release.
