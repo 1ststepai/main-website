@@ -787,6 +787,13 @@ test.describe("social posting", { concurrency: false }, () => {
           },
         });
         assert.equal(queued.posts.length, 2);
+        const edited = await svc.updateOwnerCopy(queued.posts[0].id, {
+          title: "Where is Bitcoin in six months?",
+          description: "Closest prediction wins six months in the Swing Trade Pros Discord.",
+          caption: "",
+          tags: ["bitcoin"],
+        });
+        assert.equal(edited.title, "Where is Bitcoin in six months?");
         assert.equal(queued.posts.every((post) => post.brand_id === "swingtradepros" && post.privacy_status === "private"), true);
         const other = await svc.loadDesk("1ststep");
         assert.equal(other.posts.length, 0);

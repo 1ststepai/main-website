@@ -131,6 +131,7 @@ export default function SocialDesk({ previewMode = false, request }) {
   const [scoreTitle, setScoreTitle] = useState("");
   const [scoreThumb, setScoreThumb] = useState("");
   const [scoreKeywords, setScoreKeywords] = useState("");
+  const [editCopy, setEditCopy] = useState({ title: "", description: "", caption: "", tags: "" });
   const [secret, setSecret] = useState("");
   const [message, setMessage] = useState(oauth.get("social_oauth") ? (OAUTH_COPY[oauth.get("reason")] || OAUTH_COPY[oauth.get("social_oauth")] || "") : "");
   const [error, setError] = useState("");
@@ -156,6 +157,17 @@ export default function SocialDesk({ previewMode = false, request }) {
     void load(brandId);
   }, []);
 
+  useEffect(() => {
+    const post = (desk?.posts || []).find((item) => item.id === selectedId);
+    if (!post) return;
+    setEditCopy({
+      title: post.title || "",
+      description: post.description || "",
+      caption: post.caption || "",
+      tags: (post.tags || []).join(", "),
+    });
+  }, [desk, selectedId]);
+
   async function act(body) {
     setBusy(true);
     setError("");
@@ -172,6 +184,15 @@ export default function SocialDesk({ previewMode = false, request }) {
             if (body.action === "schedule") return { ...post, status: "scheduled", scheduled_at: body.scheduled_at };
             if (body.action === "reject") return { ...post, status: "rejected", error: body.reason || "Rejected by owner." };
             if (body.action === "set_privacy") return { ...post, privacy_status: body.privacy_status };
+            if (body.action === "update_copy") {
+              return {
+                ...post,
+                title: body.title,
+                description: body.description,
+                caption: body.caption,
+                tags: Array.isArray(body.tags) ? body.tags : post.tags,
+              };
+            }
             return post;
           }),
         }));
@@ -511,6 +532,37 @@ export default function SocialDesk({ previewMode = false, request }) {
                 </div>
                 <span className={`status ${selected.status}`}>{statusLabel(selected.status)}</span>
               </div>
+              {!["publishing", "published"].includes(selected.status) && (
+                <div className="social-compose-grid">
+                  <label className="field">Title
+                    <input value={editCopy.title} maxLength={100} onChange={(event) => setEditCopy((current) => ({ ...current, title: event.target.value }))} />
+                  </label>
+                  <label className="field">Description
+                    <textarea value={editCopy.description} rows={3} maxLength={5000} onChange={(event) => setEditCopy((current) => ({ ...current, description: event.target.value }))} />
+                  </label>
+                  <label className="field">Caption
+                    <textarea value={editCopy.caption} rows={3} maxLength={2200} onChange={(event) => setEditCopy((current) => ({ ...current, caption: event.target.value }))} />
+                  </label>
+                  <label className="field">Tags
+                    <input value={editCopy.tags} onChange={(event) => setEditCopy((current) => ({ ...current, tags: event.target.value }))} placeholder="comma separated" />
+                  </label>
+                  <button
+                    className="button"
+                    type="button"
+                    disabled={busy || !editCopy.title.trim()}
+                    onClick={() => { void act({
+                      action: "update_copy",
+                      post_id: selected.id,
+                      title: editCopy.title,
+                      description: editCopy.description,
+                      caption: editCopy.caption,
+                      tags: editCopy.tags.split(",").map((item) => item.trim()).filter(Boolean),
+                    }); }}
+                  >
+                    Save copy
+                  </button>
+                </div>
+              )}
               <dl className="social-meta">
                 <div><dt>Description</dt><dd>{selected.description || "—"}</dd></div>
                 <div><dt>Tags</dt><dd>{(selected.tags || []).join(", ") || "—"}</dd></div>

@@ -9,7 +9,7 @@ From `/admin/` → Social → Swing Trade Pros, the owner can:
 - See connection status for YouTube, Instagram, Facebook, TikTok, and X.
 - Start Google, Meta, or TikTok OAuth. Swing Trade Pros stores a YouTube connection only when the channel is `UC86s7HqMAR-FSfxuv1N1Pwg`, and a Meta connection only when the linked Instagram account is `28230105726692205`.
 - Queue one short with separate copy for YouTube, Instagram, Facebook, and TikTok. The video uploads to private Blob and is copied to the other posts in that brand.
-- Review, record vidIQ scores by hand, approve, override with a typed reason, schedule, and run Publish due.
+- Review and save each platform's title, description, caption, and tags before approval. Record vidIQ scores by hand, approve, override with a typed reason, schedule, and run Publish due.
 - YouTube: private resumable upload, then `videos.update` after approval. A short description gets `#Shorts` if it is missing.
 - Instagram: resumable Reel upload. `media_publish` runs only when privacy is public.
 - Facebook: Page Reel. Private finishes as an unpublished draft (`handed_off`). Public publishes.
