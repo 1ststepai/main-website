@@ -83,6 +83,17 @@ social-mcp connect <id>    CLI fallback
 
 `status`, `upsert_profile`, `list_accounts`, `connect_accounts`, `connect_bluesky`, `create_draft`, `update_draft`, `schedule_post`, `publish_post`, `publish_due`, `list_posts`, `get_post_status`
 
+### Publishing skill (Cursor)
+
+Skill: [`skills/postpath-publishing/SKILL.md`](./skills/postpath-publishing/SKILL.md)  
+Also in the repo at `.cursor/skills/postpath-publishing/` and `.agents/skills/firststep/postpath-publishing/`.  
+Handoff: [`docs/POSTPATH_PUBLISHING_SKILL.md`](../../docs/POSTPATH_PUBLISHING_SKILL.md).
+
+Safe local demo (no live publish):
+
+```bash
+node ./scripts/safe-publishing-demo.js
+```
 ## Security
 
 - Desk and OAuth bind to `127.0.0.1` only
