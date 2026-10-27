@@ -144,7 +144,7 @@ export function createOAuthRuntime({ store, env = process.env, fetchImpl = fetch
     return url;
   }
 
-  async function connectAccounts(profileId, { platforms } = {}) {
+  async function connectAccounts(profileId, { platforms, open = true } = {}) {
     const profile = store.getProfile(profileId);
     if (!profile) throw mcpError("unknown_profile", "Create the profile first with upsert_profile.");
     await ensureListening();
@@ -176,7 +176,7 @@ export function createOAuthRuntime({ store, env = process.env, fetchImpl = fetch
       };
     }
     const [first, ...rest] = filtered;
-    const url = await beginProvider(profileId, first, rest, { open: true });
+    const url = await beginProvider(profileId, first, rest, { open });
     return {
       profile_id: profileId,
       status: "pending",
@@ -184,7 +184,9 @@ export function createOAuthRuntime({ store, env = process.env, fetchImpl = fetch
       remaining: rest,
       authorize_url: url,
       redirect_uri: redirectUri,
-      message: "Browser opened for sign-in. Finish each consent screen; the chain continues automatically.",
+      message: open
+        ? "Browser opened for sign-in. Finish each consent screen; the chain continues automatically."
+        : "Open authorize_url to sign in. Finish each consent screen; the chain continues automatically.",
     };
   }
 

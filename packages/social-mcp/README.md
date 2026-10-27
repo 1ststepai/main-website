@@ -1,106 +1,80 @@
-# Social MCP
+# Social Connector
 
-Local-first connector so **any AI** (Cursor, Claude, Codex, custom agents) can connect social accounts, draft posts, schedule, and publish — without a monthly social-API SaaS bill.
+Local desktop + MCP connector. Connect YouTube, Instagram, Facebook, and TikTok once on your machine — then any AI (Cursor, Claude, Codex) can draft, schedule, and publish. No monthly social-API middleman.
 
-Tokens live on the user’s machine under `~/.social-mcp`, encrypted with AES-256-GCM. Profiles are arbitrary brands or users. Studio on `1ststep.ai` stays optional.
+## Windows (recommended)
 
-## Why this exists
+1. Install [Node.js 20+](https://nodejs.org)
+2. Open this folder: `packages\social-mcp`
+3. Double-click `scripts\Open-SocialConnector.bat`  
+   (or in PowerShell:)
 
-Tools like Ayrshare charge recurring fees to sit between you and YouTube / Meta / TikTok. The hard part is OAuth + a stable agent interface. This package is that interface as an MCP server you run locally.
+```powershell
+cd path\to\main-website\packages\social-mcp
+npm install
+node .\bin\social-mcp.js app
+```
 
-## Platforms (v0.1)
+That opens the **Social Connector** desk in an app window.
 
-| Platform | Connect | Publish |
-| --- | --- | --- |
-| YouTube | Google OAuth | Local `media_path` under `~/.social-mcp/media` |
-| Instagram | Meta OAuth (with Page) | Requires `media_url` (https) |
-| Facebook Page | Meta OAuth | Requires `media_url` (https) |
-| TikTok | TikTok Login Kit | Local `media_path` under media dir → creator inbox |
+### In the desk
 
-Local video files must live inside the vault media directory (`status.media_dir`). That keeps path traversal closed and is the supported agent workflow: copy or save the clip there, then pass that path.
+1. Paste Google / Meta / TikTok app credentials (one time) → **Save credentials**
+2. Register this redirect on every developer console:
 
-## Quick start
+   `http://127.0.0.1:47831/oauth/callback`
+
+3. Enter a brand name → **Connect accounts** (browser chain: YouTube → Meta → TikTok)
+4. Click **Enable in Cursor** → restart Cursor
+
+No MCP JSON paste. No `&&` in chat.
+
+## macOS / Linux
 
 ```bash
 cd packages/social-mcp
 npm install
-node ./bin/social-mcp.js init
+node ./bin/social-mcp.js app
 ```
 
-Create developer apps and set env vars (shell or MCP config):
+## What the product is
 
-```bash
-export GOOGLE_OAUTH_CLIENT_ID=...
-export GOOGLE_OAUTH_CLIENT_SECRET=...
-export META_APP_ID=...
-export META_APP_SECRET=...
-export TIKTOK_CLIENT_KEY=...
-export TIKTOK_CLIENT_SECRET=...
-```
+| Piece | Role |
+| --- | --- |
+| Desk UI (`social-mcp app`) | Human face: connect, credentials, Enable in Cursor |
+| Local vault `~/.social-mcp` | Encrypted tokens + oauth.env + media |
+| MCP stdio server | What Cursor/Claude call for draft / schedule / publish |
 
-Register this redirect URI on **each** provider:
+## Platforms
+
+| Platform | Connect | Publish |
+| --- | --- | --- |
+| YouTube | Google OAuth | `media_path` under vault `media/` |
+| Instagram | Meta OAuth | https `media_url` |
+| Facebook | Meta OAuth | https `media_url` |
+| TikTok | Login Kit | `media_path` → creator inbox |
+
+## CLI reference
 
 ```text
-http://127.0.0.1:47831/oauth/callback
+social-mcp app             Desktop Connect UI (default product path)
+social-mcp                 stdio MCP server
+social-mcp install-cursor  write ~/.cursor/mcp.json
+social-mcp init            create vault
+social-mcp status
+social-mcp connect <id>    CLI fallback
 ```
 
-Connect a profile from the CLI (opens the browser chain):
+## MCP tools (for agents)
 
-```bash
-node ./bin/social-mcp.js connect acme "Acme Co"
-```
+`status`, `upsert_profile`, `list_accounts`, `connect_accounts`, `create_draft`, `update_draft`, `schedule_post`, `publish_post`, `publish_due`, `list_posts`, `get_post_status`
 
-Or let the AI call `upsert_profile` → `connect_accounts`.
+## Security
 
-## Cursor MCP config
-
-Add to Cursor MCP settings (path adjusted for your machine):
-
-```json
-{
-  "mcpServers": {
-    "social-mcp": {
-      "command": "node",
-      "args": ["/ABS/PATH/to/main-website/packages/social-mcp/bin/social-mcp.js"],
-      "env": {
-        "GOOGLE_OAUTH_CLIENT_ID": "",
-        "GOOGLE_OAUTH_CLIENT_SECRET": "",
-        "META_APP_ID": "",
-        "META_APP_SECRET": "",
-        "TIKTOK_CLIENT_KEY": "",
-        "TIKTOK_CLIENT_SECRET": ""
-      }
-    }
-  }
-}
-```
-
-## MCP tools
-
-- `status` — home path, profiles, connections, redirect URI
-- `upsert_profile` — create/update a brand or user
-- `list_accounts` — connected networks
-- `connect_accounts` — YouTube → Meta → TikTok browser chain
-- `create_draft` / `update_draft` — local drafts (`media_path` must be under the media dir)
-- `schedule_post` — ISO schedule time
-- `publish_post` — publish now (`force` for early scheduled)
-- `publish_due` — flush due scheduled posts
-- `list_posts` / `get_post_status`
-
-## Agent flow
-
-1. `upsert_profile` with a stable id  
-2. `connect_accounts` once per profile  
-3. `create_draft` with copy + `media_path` (and `media_url` for Meta)  
-4. `schedule_post` or `publish_post`  
-5. `publish_due` on a timer or when the user asks  
-
-## Product shape
-
-- **Free / local:** this MCP on the user’s laptop  
-- **Sellable later:** multi-seat approvals, hosted relay for people who will not run Node, analytics, team vaults  
-
-Website studio social queue remains the hosted owner desk for 1stStep brands. This package is the portable product surface for any AI and any brand.
+- Desk and OAuth bind to `127.0.0.1` only
+- Secrets in `~/.social-mcp/oauth.env` (mode 0600) and encrypted connection envelopes
+- Media paths must stay under `~/.social-mcp/media`
+- Do not commit the vault
 
 ## Tests
 
@@ -108,13 +82,6 @@ Website studio social queue remains the hosted owner desk for 1stStep brands. Th
 npm test
 ```
 
-## Security notes
-
-- Vault directory mode `0700`; `master.key` mode `0600`  
-- Connection secrets are encrypted envelopes in `db.json`  
-- OAuth callback binds to `127.0.0.1` only  
-- Do not commit `~/.social-mcp` or real client secrets  
-
 ## License
 
-Proprietary / UNLICENSED until product packaging is decided.
+Proprietary / UNLICENSED until packaging is decided.

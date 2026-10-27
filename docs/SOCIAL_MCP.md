@@ -1,24 +1,46 @@
-# Social MCP (local product)
+# Social Connector (local desktop + MCP)
 
-Standalone MCP connector in `packages/social-mcp`. Any AI client that speaks MCP can manage social accounts for any profile without routing through the website admin or a paid aggregator.
+Product package: `packages/social-mcp`.
 
-See the package README for install, Cursor config, tools, and security notes:
+Humans use the **desk UI**. Agents use the **MCP server**. Both share the encrypted vault on disk.
 
-[`packages/social-mcp/README.md`](../packages/social-mcp/README.md)
+## Open the desk
 
-## Relationship to studio social queue
+**Windows:** double-click `packages/social-mcp/scripts/Open-SocialConnector.bat`
+
+```powershell
+cd packages\social-mcp
+npm install
+node .\bin\social-mcp.js app
+```
+
+**macOS / Linux:**
+
+```bash
+cd packages/social-mcp && npm install && node ./bin/social-mcp.js app
+```
+
+Desk: `http://127.0.0.1:47830/`  
+OAuth callback: `http://127.0.0.1:47831/oauth/callback`
+
+## Product loop
+
+1. Save Google / Meta / TikTok app credentials in the desk (stored in `~/.social-mcp/oauth.env`)
+2. **Connect accounts** — browser chain YouTube → Meta → TikTok
+3. **Enable in Cursor** — merges `social-mcp` into `~/.cursor/mcp.json`
+4. Restart Cursor — agents can draft / schedule / publish
+
+## Relationship to studio
 
 | Surface | Role |
 | --- | --- |
-| `/admin/` Social Desk | Hosted owner control plane for 1stStep brands (KV, Blob transit, score gates) |
-| `packages/social-mcp` | Local product: encrypted vault on disk, browser OAuth chain, MCP tools for any agent |
+| `/admin/` Social Desk | Hosted owner control plane for 1stStep brands |
+| Social Connector package | Portable product for any brand / any AI on the user’s machine |
 
-They share platform knowledge (YouTube / Meta / TikTok) but not storage. Do not point the MCP at production KV.
+They do not share KV or Blob. Do not point the connector at production website storage.
 
-## Redirect URI
+## Media paths
 
-```text
-http://127.0.0.1:47831/oauth/callback
-```
+YouTube and TikTok publish only accept files under `~/.social-mcp/media`.
 
-Override port with `SOCIAL_MCP_OAUTH_PORT` if needed, and update every developer console to match.
+Full tool list and security notes: [`packages/social-mcp/README.md`](../packages/social-mcp/README.md)

@@ -1,5 +1,14 @@
 # Architecture Decision Log
 
+## 2026-10-27: Social Connector desk is the human product surface
+
+- **Status / owner:** Evan rejected chat/CLI MCP setup friction and asked to fully build desktop + MCP connectors. Same branch `cursor/social-local-mcp-c683`. No production website deploy.
+- **Decision:** The product entrypoint is `social-mcp app` (Windows: `scripts/Open-SocialConnector.bat`). A local desk on `127.0.0.1:47830` handles profile naming, OAuth app credentials (`oauth.env`), Connect accounts, and **Enable in Cursor** (merges `~/.cursor/mcp.json`). MCP stdio remains the agent interface and loads `oauth.env` automatically. Humans should not paste MCP JSON into chat.
+- **Rationale:** MCP is plumbing. A sellable connector needs a one-window connect path on the user’s OS.
+- **Affected systems:** `packages/social-mcp/src/desk/`, `bin/social-mcp.js`, Windows launchers, `docs/SOCIAL_MCP.md`.
+- **Verification:** `cd packages/social-mcp && npm test` including desk HTTP tests.
+- **Rollback:** Remove desk/launcher files; CLI/MCP server can remain.
+
 ## 2026-10-26: Local Social MCP as a sellable connector product
 
 - **Status / owner:** Evan asked to build a local desktop/MCP connector so any AI can connect socials for any brand/user, draft, schedule, and publish — instead of paying social-API SaaS aggregators. Scaffold on branch `cursor/social-local-mcp-c683`. No production website deploy.

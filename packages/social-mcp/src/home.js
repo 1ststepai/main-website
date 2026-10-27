@@ -5,6 +5,7 @@ import { join } from "node:path";
 export const PLATFORMS = ["youtube", "instagram", "facebook", "tiktok"];
 export const CONNECT_ORDER = ["youtube", "meta", "tiktok"];
 export const DEFAULT_OAUTH_PORT = 47831;
+export const DEFAULT_DESK_PORT = 47830;
 
 export function resolveHome(env = process.env) {
   const override = String(env.SOCIAL_MCP_HOME || "").trim();
@@ -30,6 +31,7 @@ export function paths(home = resolveHome()) {
     keyFile: join(root, "master.key"),
     dbFile: join(root, "db.json"),
     mediaDir: join(root, "media"),
+    oauthEnv: join(root, "oauth.env"),
     envExample: join(root, "oauth.env.example"),
   };
 }

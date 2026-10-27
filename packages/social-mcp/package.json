@@ -1,7 +1,7 @@
 {
   "name": "@1ststep/social-mcp",
   "version": "0.1.0",
-  "description": "Local MCP connector: connect YouTube, Instagram, Facebook, and TikTok once, then let any AI draft, schedule, and publish. Tokens stay on your machine.",
+  "description": "Social Connector: local desktop desk + MCP server so any AI can connect social accounts, draft, schedule, and publish. Tokens stay on your machine.",
   "private": true,
   "type": "module",
   "bin": {
@@ -13,7 +13,9 @@
     "./engine": "./src/engine.js"
   },
   "scripts": {
-    "start": "node ./bin/social-mcp.js",
+    "start": "node ./bin/social-mcp.js app",
+    "app": "node ./bin/social-mcp.js app",
+    "mcp": "node ./bin/social-mcp.js serve",
     "test": "node --test test/*.test.js",
     "check": "npm test"
   },

@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Social Connector</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/app.css" />
+  </head>
+  <body>
+    <div class="atmosphere" aria-hidden="true"></div>
+    <main class="shell">
+      <header class="hero">
+        <p class="brand">Social Connector</p>
+        <h1>Connect once. Any AI can post.</h1>
+        <p class="lede">
+          Link YouTube, Instagram, Facebook, and TikTok on this machine. Cursor and other MCP clients use the same vault — no monthly aggregator.
+        </p>
+        <form id="connect-form" class="connect-form">
+          <label class="field">
+            <span>Brand or profile</span>
+            <input id="profile-name" name="name" type="text" placeholder="Acme Co" autocomplete="organization" required />
+          </label>
+          <label class="field">
+            <span>Profile id</span>
+            <input id="profile-id" name="id" type="text" placeholder="acme" pattern="[a-zA-Z0-9][a-zA-Z0-9_-]{1,63}" required />
+          </label>
+          <div class="cta-row">
+            <button type="submit" class="btn primary" id="connect-btn">Connect accounts</button>
+            <button type="button" class="btn ghost" id="cursor-btn">Enable in Cursor</button>
+          </div>
+          <p class="hint" id="connect-hint">One click opens Google → Meta → TikTok. Leave this window open.</p>
+        </form>
+      </header>
+
+      <section class="panel" aria-labelledby="status-title">
+        <div class="panel-head">
+          <h2 id="status-title">Status</h2>
+          <button type="button" class="btn tiny" id="refresh-btn">Refresh</button>
+        </div>
+        <ul class="network-list" id="network-list"></ul>
+        <p class="meta" id="path-meta"></p>
+      </section>
+
+      <section class="panel" aria-labelledby="apps-title">
+        <div class="panel-head">
+          <h2 id="apps-title">App credentials</h2>
+          <p class="panel-note">One-time setup from Google / Meta / TikTok developer consoles.</p>
+        </div>
+        <p class="redirect">
+          Redirect URI for every app:
+          <code id="redirect-uri">http://127.0.0.1:47831/oauth/callback</code>
+          <button type="button" class="btn tiny" id="copy-redirect">Copy</button>
+        </p>
+        <form id="oauth-form" class="oauth-form">
+          <fieldset>
+            <legend>Google / YouTube</legend>
+            <label>Client ID <input name="GOOGLE_OAUTH_CLIENT_ID" autocomplete="off" /></label>
+            <label>Client secret <input name="GOOGLE_OAUTH_CLIENT_SECRET" type="password" autocomplete="off" /></label>
+          </fieldset>
+          <fieldset>
+            <legend>Meta / Instagram + Facebook</legend>
+            <label>App ID <input name="META_APP_ID" autocomplete="off" /></label>
+            <label>App secret <input name="META_APP_SECRET" type="password" autocomplete="off" /></label>
+          </fieldset>
+          <fieldset>
+            <legend>TikTok</legend>
+            <label>Client key <input name="TIKTOK_CLIENT_KEY" autocomplete="off" /></label>
+            <label>Client secret <input name="TIKTOK_CLIENT_SECRET" type="password" autocomplete="off" /></label>
+          </fieldset>
+          <button type="submit" class="btn secondary">Save credentials</button>
+        </form>
+      </section>
+
+      <p class="toast" id="toast" hidden></p>
+      <footer class="foot">
+        <span>Local vault on this computer</span>
+        <span class="dot" aria-hidden="true"></span>
+        <span>by 1stStep.ai</span>
+      </footer>
+    </main>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

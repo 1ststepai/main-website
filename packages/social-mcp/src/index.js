@@ -3,7 +3,9 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 import { createEngine } from "./engine.js";
 import { formatToolError, formatToolResult } from "./errors.js";
-import { PLATFORMS } from "./home.js";
+import { paths, PLATFORMS } from "./home.js";
+import { loadOAuthEnvFile } from "./envFile.js";
+import { createDeskServer } from "./desk/server.js";
 
 function tool(handler) {
   return async (args) => {
@@ -16,6 +18,7 @@ function tool(handler) {
 }
 
 export function createSocialMcpServer({ engine } = {}) {
+  if (!engine) loadOAuthEnvFile(paths(), process.env);
   const eng = engine || createEngine();
   const server = new McpServer({
     name: "social-mcp",
@@ -155,4 +158,4 @@ export async function startStdioServer(options = {}) {
   return { server, engine };
 }
 
-export { createEngine };
+export { createEngine, createDeskServer };
