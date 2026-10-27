@@ -4,11 +4,13 @@ Marketing site: [postpath.1ststep.ai](https://postpath.1ststep.ai/)
 
 Local desktop + MCP connector. Connect major social networks once on your machine — then any AI (Cursor, Claude, Codex) can draft, schedule, and publish. No monthly social-API middleman.
 
-Package path stays `packages/social-mcp` for now; the product name is **PostPath**.
+Package path stays `packages/social-mcp` for now; the product name is **PostPath**. CLI aliases: `social-mcp` and `postpath`.
 
-## Windows (recommended)
+## First run — Windows
 
-1. Install [Node.js 20+](https://nodejs.org)
+**Requirement:** [Node.js 20+](https://nodejs.org) (LTS). The launcher checks the version and opens nodejs.org if Node is missing or too old.
+
+1. Install Node.js 20+ from https://nodejs.org
 2. Open this folder: `packages\social-mcp`
 3. Double-click `scripts\Open-PostPath.bat`  
    (or in PowerShell:)
@@ -16,12 +18,13 @@ Package path stays `packages/social-mcp` for now; the product name is **PostPath
 ```powershell
 cd path\to\main-website\packages\social-mcp
 npm install
-node .\bin\social-mcp.js app
+npx postpath app
+# same as: node .\bin\social-mcp.js app
 ```
 
 That opens the **PostPath** desk in an app window.
 
-### In the desk
+### In the desk (Windows)
 
 1. Paste developer-app credentials for the networks you use → **Save credentials**
 2. Register this redirect on every OAuth console:
@@ -34,19 +37,47 @@ That opens the **PostPath** desk in an app window.
 
 No MCP JSON paste. No `&&` in chat.
 
-## macOS / Linux
+## First run — macOS / Linux
+
+**Requirement:** [Node.js 20+](https://nodejs.org) (LTS). On macOS you can double-click `scripts/Open-PostPath.command` (right-click → Open the first time if Gatekeeper prompts). The launcher opens nodejs.org if Node is missing or older than 20.
 
 ```bash
 cd packages/social-mcp
+# option A — double-click / run the launcher
+./scripts/Open-PostPath.command
+
+# option B — terminal
 npm install
-node ./bin/social-mcp.js app
+npx postpath app
+# same as: node ./bin/social-mcp.js app
 ```
+
+### In the desk (macOS / Linux)
+
+1. Paste developer-app credentials → **Save credentials**
+2. Register this redirect on every OAuth console:
+
+   `http://127.0.0.1:47831/oauth/callback`
+
+3. Enter a brand name → **Connect accounts**
+4. Bluesky: handle + app password form
+5. Click **Enable in Cursor** → restart Cursor
+
+## Download zips (optional)
+
+From the repo root (after `npm` tooling is available):
+
+```bash
+bash packages/social-mcp/scripts/build-downloads.sh
+```
+
+Writes `PostPath-macOS.zip` and `PostPath-Windows.zip` under `public/downloads/postpath/`. Each zip includes a first-run launcher that unpacks into `~/.postpath/app` (or `%USERPROFILE%\.postpath\app`).
 
 ## What the product is
 
 | Piece | Role |
 | --- | --- |
-| Desk UI (`social-mcp app`) | Human face: connect, credentials, Enable in Cursor |
+| Desk UI (`postpath app` / `social-mcp app`) | Human face: connect, credentials, Enable in Cursor |
 | Local vault `~/.social-mcp` | Encrypted tokens + oauth.env + media |
 | MCP server key `postpath` | What Cursor/Claude call for draft / schedule / publish |
 
@@ -71,12 +102,12 @@ node ./bin/social-mcp.js app
 ## CLI reference
 
 ```text
-social-mcp app             Desktop Connect UI (default product path)
-social-mcp                 stdio MCP server
-social-mcp install-cursor  write ~/.cursor/mcp.json (server key: postpath)
-social-mcp init            create vault
+postpath app / social-mcp app   Desktop Connect UI (default product path)
+postpath / social-mcp           stdio MCP server
+social-mcp install-cursor       write ~/.cursor/mcp.json (server key: postpath)
+social-mcp init                 create vault
 social-mcp status
-social-mcp connect <id>    CLI fallback
+social-mcp connect <id>         CLI fallback
 ```
 
 ## MCP tools (for agents)
