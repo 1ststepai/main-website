@@ -1,6 +1,21 @@
 import assert from "node:assert/strict";
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { test } from "node:test";
+import { createEngine } from "../src/engine.js";
 import { assertProfileAllowed, getLicenseState } from "../src/license.js";
+
+async function withTempEngine(env, fn) {
+  const home = mkdtempSync(join(tmpdir(), "social-mcp-lic-"));
+  const engine = createEngine({ home, env, now: () => Date.UTC(2026, 9, 27, 12) });
+  try {
+    return await fn(engine);
+  } finally {
+    await engine.oauth.stop();
+    rmSync(home, { recursive: true, force: true });
+  }
+}
 
 test("default state is free, unenforced, unlimited profiles", () => {
   const state = getLicenseState({});
@@ -115,4 +130,20 @@ test("assertProfileAllowed rejects invalid counts", () => {
     () => assertProfileAllowed(Number.NaN, state),
     (error) => error.code === "license_invalid_count",
   );
+});
+
+test("upsertProfile license gate stays off by default and enforces via env", async () => {
+  await withTempEngine({}, async (engine) => {
+    await engine.upsertProfile({ id: "one", name: "One" });
+    await engine.upsertProfile({ id: "two", name: "Two" });
+  });
+
+  await withTempEngine({ POSTPATH_LICENSE_ENFORCE: "true", POSTPATH_TIER: "solo" }, async (engine) => {
+    await engine.upsertProfile({ id: "solo", name: "Solo" });
+    await engine.upsertProfile({ id: "solo", name: "Solo Renamed" });
+    await assert.rejects(
+      () => engine.upsertProfile({ id: "second", name: "Second" }),
+      /license_profile_limit|Profile limit/i,
+    );
+  });
 });
