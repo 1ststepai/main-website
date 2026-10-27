@@ -357,7 +357,9 @@ html.is-paused *,html.is-paused *::before,html.is-paused *::after{animation-play
       el.textContent = el.dataset.final;
       return;
     }
-    const token = String(Date.now() + Math.random());
+    const randomPart = new Uint32Array(1);
+    crypto.getRandomValues(randomPart);
+    const token = String(Date.now()) + "-" + randomPart[0].toString(16);
     el.dataset.token = token;
     el.textContent = fmt(0, decimals) + suffix;
     const begin = performance.now();

@@ -2514,7 +2514,9 @@
             }, 15000);
             var idempotencyKey = window.crypto && typeof window.crypto.randomUUID === "function"
               ? window.crypto.randomUUID()
-              : "aivc-" + Date.now() + "-" + Math.random().toString(16).slice(2);
+              : "aivc-" + Date.now() + "-" + (window.crypto && window.crypto.getRandomValues
+                ? Array.prototype.map.call(window.crypto.getRandomValues(new Uint32Array(2)), function (value) { return value.toString(16); }).join("")
+                : Date.now().toString(16));
             return window.fetch(CONFIG.webhookUrl, {
               method: "POST",
               headers: {
