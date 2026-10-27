@@ -36,33 +36,39 @@ function formatWhen(iso) {
   }
 }
 
-function escapeHtml(value) {
-  return String(value || "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;");
-}
-
 function renderScheduled(posts) {
+  scheduledList.replaceChildren();
   const rows = Array.isArray(posts) ? posts : [];
   if (!rows.length) {
-    scheduledList.innerHTML = `<li class="empty">No scheduled posts.</li>`;
+    const empty = document.createElement("li");
+    empty.className = "empty";
+    empty.textContent = "No scheduled posts.";
+    scheduledList.append(empty);
     return;
   }
-  scheduledList.innerHTML = rows
-    .map((post) => {
-      const title = post.title || post.caption || post.description || post.id;
-      const platform = post.platform || "unknown";
-      return `<li data-post-id="${post.id}">
-      <div>
-        <strong>${escapeHtml(title)}</strong>
-        <div class="when">${escapeHtml(platform)} · ${escapeHtml(formatWhen(post.scheduled_at))}</div>
-      </div>
-      <button type="button" class="btn danger cancel-scheduled" data-post-id="${post.id}">Cancel</button>
-    </li>`;
-    })
-    .join("");
+  for (const post of rows) {
+    const title = post.title || post.caption || post.description || post.id;
+    const platform = post.platform || "unknown";
+    const item = document.createElement("li");
+    item.dataset.postId = String(post.id || "");
+
+    const copy = document.createElement("div");
+    const strong = document.createElement("strong");
+    strong.textContent = String(title || "");
+    const when = document.createElement("div");
+    when.className = "when";
+    when.textContent = `${platform} · ${formatWhen(post.scheduled_at)}`;
+    copy.append(strong, when);
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "btn danger cancel-scheduled";
+    button.dataset.postId = String(post.id || "");
+    button.textContent = "Cancel";
+
+    item.append(copy, button);
+    scheduledList.append(item);
+  }
 }
 
 function showToast(message, isError = false) {
@@ -165,7 +171,7 @@ document.getElementById("refresh-btn").addEventListener("click", () => {
 scheduledList.addEventListener("click", async (event) => {
   const button = event.target.closest(".cancel-scheduled");
   if (!button) return;
-  const postId = button.getAttribute("data-post-id");
+  const postId = button.dataset.postId;
   if (!postId) return;
   button.disabled = true;
   try {
