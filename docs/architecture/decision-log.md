@@ -1,5 +1,14 @@
 # Architecture Decision Log
 
+## 2026-10-27: PostPath marketing site on postpath.1ststep.ai
+
+- **Status / owner:** Evan named the product URL `postpath.1ststep.ai` and asked for a conversion-focused marketing site with live demo. Implemented on `cursor/social-local-mcp-c683`. Preview/PR only until domain is attached and deploy is approved.
+- **Decision:** Ship `postpath/index.html` as the PostPath marketing site. Canonical host is `https://postpath.1ststep.ai/`. Same page is available at `https://www.1ststep.ai/postpath/`. Vercel host rewrites map `postpath.1ststep.ai` to `/postpath/*`. Early access uses a prefilled mailto to `evan@1ststep.ai` (nothing stored on the page). The on-page desk is a simulated interactive demo, labeled as such. No fake testimonials or metrics. Parent homepage CTA stays Begin Your Journey / Book a call—PostPath is a product subdomain.
+- **Rationale:** The sellable connector needs its own conversion surface without stealing the consultancy homepage.
+- **Affected systems:** `postpath/`, `vercel.json`, Vite input, sitemaps, `public/llms.txt`, discoverability test.
+- **Verification:** `npm test` discoverability; visual screenshot of `/postpath/`. DNS + Vercel domain `postpath.1ststep.ai` still require Evan to attach in the Vercel project.
+- **Rollback:** Remove `postpath/` route and host rewrites; drop sitemap entries.
+
 ## 2026-10-27: Product name is PostPath by 1stStep.ai
 
 - **Status / owner:** Evan chose the name. Same branch `cursor/social-local-mcp-c683`. No production website deploy.

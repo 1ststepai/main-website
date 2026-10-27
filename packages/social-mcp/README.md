@@ -1,5 +1,7 @@
 # PostPath by 1stStep.ai
 
+Marketing site: [postpath.1ststep.ai](https://postpath.1ststep.ai/)
+
 Local desktop + MCP connector. Connect YouTube, Instagram, Facebook, and TikTok once on your machine — then any AI (Cursor, Claude, Codex) can draft, schedule, and publish. No monthly social-API middleman.
 
 Package path stays `packages/social-mcp` for now; the product name is **PostPath**.

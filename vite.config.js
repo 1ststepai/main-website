@@ -67,6 +67,7 @@ export default defineConfig({
         main: "index.html",
         foundry: "foundry/index.html",
         os: "os/index.html",
+        postpath: "postpath/index.html",
         journey: "journey/index.html",
         book: "book/index.html",
         pricing: "pricing/index.html",

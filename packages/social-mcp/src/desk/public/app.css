@@ -1,16 +1,16 @@
 :root {
-  --ink: #0e1210;
-  --panel: rgba(20, 28, 24, 0.82);
-  --line: rgba(214, 232, 210, 0.12);
-  --text: #eef4ec;
-  --muted: #9aab9c;
-  --accent: #c8f05e;
-  --accent-ink: #14200a;
-  --warm: #f0d7a8;
-  --danger: #ff8d7a;
+  --ink: #0b1020;
+  --panel: rgba(31, 41, 55, 0.82);
+  --line: rgba(148, 163, 184, 0.2);
+  --text: #f8fafc;
+  --muted: #94a3b8;
+  --accent: #3b82f6;
+  --accent-ink: #eff6ff;
+  --warm: #a78bfa;
+  --danger: #ff6b6b;
   --radius: 18px;
-  --font: "Manrope", "Segoe UI", sans-serif;
-  --display: "Instrument Serif", Georgia, serif;
+  --font: Inter, "Segoe UI", sans-serif;
+  --display: Sora, Inter, sans-serif;
 }
 
 * {
@@ -36,9 +36,9 @@ body {
   position: fixed;
   inset: 0;
   background:
-    radial-gradient(ellipse 80% 55% at 15% -10%, rgba(200, 240, 94, 0.18), transparent 55%),
-    radial-gradient(ellipse 60% 45% at 90% 10%, rgba(240, 215, 168, 0.12), transparent 50%),
-    linear-gradient(165deg, #121816 0%, #0e1210 42%, #101612 100%);
+    radial-gradient(ellipse 80% 55% at 15% -10%, rgba(59, 130, 246, 0.28), transparent 55%),
+    radial-gradient(ellipse 60% 45% at 90% 10%, rgba(139, 92, 246, 0.2), transparent 50%),
+    linear-gradient(165deg, #111827 0%, #0b1020 42%, #0f172a 100%);
   pointer-events: none;
   z-index: 0;
 }
@@ -80,27 +80,37 @@ body {
 
 .brand {
   margin: 0;
-  font-size: 0.78rem;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--accent);
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-family: var(--display);
+  font-size: 1.35rem;
+  letter-spacing: -0.03em;
+  text-transform: none;
+  color: var(--text);
   font-weight: 700;
+}
+
+.brand img {
+  width: 32px;
+  height: 32px;
+  filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.45));
 }
 
 .byline {
   margin: 0.35rem 0 1rem;
   font-size: 0.92rem;
-  color: var(--warm);
-  letter-spacing: 0.04em;
+  color: var(--muted);
+  letter-spacing: 0.02em;
 }
 
 .hero h1 {
   margin: 0 0 0.85rem;
   font-family: var(--display);
-  font-weight: 400;
-  font-size: clamp(2.4rem, 7vw, 3.6rem);
-  line-height: 0.98;
-  letter-spacing: -0.02em;
+  font-weight: 700;
+  font-size: clamp(2.2rem, 6vw, 3.2rem);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
 }
 
 .lede {
@@ -143,8 +153,8 @@ input {
 }
 
 input:focus {
-  border-color: rgba(200, 240, 94, 0.55);
-  box-shadow: 0 0 0 3px rgba(200, 240, 94, 0.12);
+  border-color: rgba(59, 130, 246, 0.7);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
 }
 
 .cta-row {
@@ -180,8 +190,8 @@ input:focus {
 }
 
 .btn.primary {
-  background: var(--accent);
-  color: var(--accent-ink);
+  background: linear-gradient(120deg, #2563eb, #3b82f6 45%, #8b5cf6);
+  color: #fff;
 }
 
 .btn.secondary {
@@ -341,8 +351,8 @@ legend {
   margin: 1.25rem 0 0;
   padding: 0.85rem 1rem;
   border-radius: 12px;
-  background: rgba(200, 240, 94, 0.12);
-  border: 1px solid rgba(200, 240, 94, 0.35);
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.4);
   color: var(--text);
 }
 

@@ -1,6 +1,18 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "postpath.1ststep.ai" }],
+      "destination": "/postpath/index.html"
+    },
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "postpath.1ststep.ai" }],
+      "destination": "/postpath/:path*"
+    },
+    { "source": "/postpath", "destination": "/postpath/index.html" },
+    { "source": "/postpath/", "destination": "/postpath/index.html" },
     { "source": "/os", "destination": "/os/index.html" },
     { "source": "/pricing", "destination": "/pricing/index.html" },
     { "source": "/work", "destination": "/work/index.html" },

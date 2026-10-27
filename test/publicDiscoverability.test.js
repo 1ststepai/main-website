@@ -10,6 +10,7 @@ const wwwPages = [
   "/work/",
   "/work/universal-relocations/",
   "/os",
+  "/postpath/",
   "/journey/",
   "/book/",
   "/pricing/",
@@ -52,6 +53,8 @@ test("sitemaps use www, stay complete, and refresh lastmod on converted URLs", a
     assert.match(publicMap, new RegExp(`https://www\\.1ststep\\.ai${path.replaceAll("/", "\\/")}`));
     assert.match(rootMap, new RegExp(`https://www\\.1ststep\\.ai${path.replaceAll("/", "\\/")}`));
   }
+  assert.match(publicMap, /https:\/\/postpath\.1ststep\.ai\//);
+  assert.match(rootMap, /https:\/\/postpath\.1ststep\.ai\//);
   for (const path of ["/", "/book/", "/fit-check/", "/services/websites.html", "/services/mvp-builds.html", "/services/internal-tools.html", "/services/revenue-systems.html"]) {
     assert.match(publicMap, new RegExp(`${path.replaceAll("/", "\\/")}[\\s\\S]*?<lastmod>2026-09-20</lastmod>`));
   }
@@ -85,6 +88,8 @@ test("llms.txt names the owner offer, start paths, and canonical www host", asyn
   assert.match(llms, /Tools: https:\/\/www\.1ststep\.ai\/tools\//);
   assert.match(llms, /Auto Model Router: https:\/\/www\.1ststep\.ai\/tools\/auto-model-router\//);
   assert.match(llms, /1stStep OS Audit: https:\/\/www\.1ststep\.ai\/tools\/1ststep-os-audit\//);
+  assert.match(llms, /PostPath: https:\/\/postpath\.1ststep\.ai\//);
+  assert.match(llms, /www\.1ststep\.ai\/postpath\//);
   assert.match(llms, /1stStep OS \(public free core \/ Cycle 1\): https:\/\/www\.1ststep\.ai\/tools\/1ststep-os\//);
   assert.match(llms, /https:\/\/github.com\/1ststepai\/1ststep-os-audit/);
   assert.match(llms, /https:\/\/github.com\/1ststepai\/1ststep-os/);
