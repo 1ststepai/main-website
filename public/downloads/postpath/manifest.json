@@ -1,0 +1,19 @@
+{
+  "version": "0.1.0",
+  "gitSha": "6cc649f6585bf34861e5c2433f362f436c12c842",
+  "nodeRequirement": ">=20",
+  "signed": false,
+  "kind": "developer-preview",
+  "artifacts": [
+    {
+      "filename": "PostPath-0.1.0-macOS-developer-preview.zip",
+      "platform": "macOS",
+      "sha256": "67df7d27539d4124546dd0fda5c1051a5b40561deb804612ca8ef4f920859199"
+    },
+    {
+      "filename": "PostPath-0.1.0-Windows-developer-preview.zip",
+      "platform": "Windows",
+      "sha256": "6f608298581b1210848d6bf78861803203e2626e8369a7384c720cadd4e41a6b"
+    }
+  ]
+}

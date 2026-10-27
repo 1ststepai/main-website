@@ -6,7 +6,8 @@
   "main": "electron/main.js",
   "scripts": {
     "start": "electron .",
-    "desk": "node ../social-mcp/bin/social-mcp.js app --no-open"
+    "desk": "node ../social-mcp/bin/social-mcp.js app --no-open",
+    "test": "node --test test/*.test.cjs"
   },
   "engines": {
     "node": ">=20"
