@@ -71,7 +71,13 @@ From the repo root (after `npm` tooling is available):
 bash packages/social-mcp/scripts/build-downloads.sh
 ```
 
-Writes `PostPath-macOS.zip` and `PostPath-Windows.zip` under `public/downloads/postpath/`. Each zip includes a first-run launcher that unpacks into `~/.postpath/app` (or `%USERPROFILE%\.postpath\app`).
+Writes versioned, unsigned developer-preview archives under `public/downloads/postpath/`:
+
+- `PostPath-0.1.0-macOS-developer-preview.zip`
+- `PostPath-0.1.0-Windows-developer-preview.zip`
+- `SHA256SUMS.txt` and `manifest.json` (`signed: false`, `kind: developer-preview`)
+
+These are not one-click installers. Each requires Node.js 20+ and unpacks into `~/.postpath/app` (or `%USERPROFILE%\.postpath\app`). The marketing page does not link them. `manifest.gitSha` is the commit the script read while packing, which can differ from the later commit that stores the zip bytes.
 
 ## What the product is
 

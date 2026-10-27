@@ -83,12 +83,14 @@ cd ../postpath-desktop && npm install && npm start
 
 ## Handoff
 
-`docs/POSTPATH.md` and `packages/social-mcp/README.md` still name the unversioned `PostPath-macOS.zip` and `PostPath-Windows.zip` paths. This lane did not edit those files. The files this script publishes are versioned:
+`packages/social-mcp/README.md` names the versioned archives. The files this script publishes are:
 
 - `public/downloads/postpath/PostPath-0.1.0-macOS-developer-preview.zip`
 - `public/downloads/postpath/PostPath-0.1.0-Windows-developer-preview.zip`
 - `public/downloads/postpath/SHA256SUMS.txt`
-- `public/downloads/postpath/manifest.json` (`gitSha` `6cc649f6585bf34861e5c2433f362f436c12c842`, the commit the builder read)
+- `public/downloads/postpath/manifest.json` (`gitSha` `74c726c7d952a67143504f7a32e6979e50d90321`, the commit the builder read)
+
+The unsigned developer-preview label is the accepted description. These are not finished consumer installers.
 
 ## Verification
 
@@ -96,26 +98,29 @@ Executed on this Linux host (Node v22.23.4). macOS GUI, Gatekeeper, and double-c
 
 ### Checksums
 
+Rebuilt from source `74c726c7d952a67143504f7a32e6979e50d90321` so the payload includes the publish claim, `needs_review` hold, vault lock, and entitlement gate. The earlier checksums for `6cc649f` are retired.
+
 ```
-67df7d27539d4124546dd0fda5c1051a5b40561deb804612ca8ef4f920859199  PostPath-0.1.0-macOS-developer-preview.zip
-6f608298581b1210848d6bf78861803203e2626e8369a7384c720cadd4e41a6b  PostPath-0.1.0-Windows-developer-preview.zip
+c62f961db4acc0ccbe23e22b15165c46812b6f2cf8d83c4d2aaf3592e4f53162  PostPath-0.1.0-macOS-developer-preview.zip
+5de455fb7ea35266161f04ad72c56bb585ee61aeee53eff730f191898d1b72d7  PostPath-0.1.0-Windows-developer-preview.zip
 ```
 
-`sha256sum -c SHA256SUMS.txt` reported both archives OK. `node --test` in `packages/postpath-desktop` passed (manifest checksums, launcher credential scan, navigation policy, log redaction). Zip text entries had no credential literals. The packed tree excludes `node_modules`, `test`, and env files.
+`sha256sum -c SHA256SUMS.txt` reported both archives OK. The Mac and Windows `postpath-app.tgz` payloads are the same hash (`0085918b098243a2f74f0d3aaa1821b3ae49760fa7b5424f781490e313564941`). A scan of the packed tree found no private-key or token-shaped literals and no `.env` files.
 
-### Linux zip path (ran)
+### Linux zip path (re-ran on the rebuilt archives)
 
-Unpacked `PostPath-0.1.0-macOS-developer-preview.zip` into a temporary directory and ran `Open PostPath.command` with `HOME` set to that temporary directory and `POSTPATH_NO_OPEN=1`. That exercises the bash launcher on Linux. It is not a macOS test.
+Unpacked the rebuilt `PostPath-0.1.0-macOS-developer-preview.zip` into a temporary directory and ran `Open PostPath.command` with `HOME` set to that temporary directory and `POSTPATH_NO_OPEN=1`. Node was v22.23.4. That exercises the bash launcher on Linux. It is not a macOS test. The Windows `.bat` and `.ps1` were not executed.
 
-- Fresh install printed `First run: unpacking PostPath developer preview 0.1.0 and installing dependencies...`, ran `npm install --omit=dev`, then served `http://127.0.0.1:47830/` (HTTP 200, title `PostPath by 1stStep.ai`).
+- Fresh install printed `First run: unpacking PostPath developer preview 0.1.0 and installing dependencies...`, then served `http://127.0.0.1:47830/` (HTTP 200, title `PostPath by 1stStep.ai`).
 - App files landed in `$HOME/.postpath/app` (`bin/social-mcp.js` present).
-- The vault was created at `$HOME/.social-mcp` (`master.key` and `media/`). The real login home was not used.
+- The vault was created at `$HOME/.social-mcp` (`master.key` present). The real login home was not used.
 - Stopped the process. Port 47830 closed.
 - Relaunch printed `Relaunch: using existing app at .../.postpath/app` and served HTTP 200 again without a second install.
 - Uninstall removed the unzipped folder and `$HOME/.postpath`. `$HOME/.social-mcp/master.key` was still there afterward.
-- Launcher logs did not contain token, secret, password, authorization, api_key, or oauth lines.
+- Launcher logs did not contain `access_token`, `refresh_token`, `api_key`, `authorization:`, or `password=`.
+- The temporary home was deleted after the check.
 
-### Electron on Linux (ran, narrow)
+### Electron on Linux (earlier pass, not re-run on this rebuild)
 
 `npm install` inside `packages/postpath-desktop` downloaded Electron 37.10.3 only (binary about 192 MB; no extra browser or certificate tooling). `xvfb-run -a ./node_modules/.bin/electron .` with a temporary `HOME` started the shell, spawned `node .../social-mcp.js app --no-open`, and the desk returned HTTP 200. Stdout used the `[postpath-desk]` prefix and did not contain credential assignments. Chromium logged a GPU-process init error and missing system D-Bus; the window process stayed up anyway. No clicks, OAuth, or external-link navigation were performed. macOS and Windows Electron GUIs were **NOT TESTED**.
 

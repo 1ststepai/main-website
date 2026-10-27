@@ -1,5 +1,14 @@
 # Architecture Decision Log
 
+## 2026-10-27: Unsigned developer preview stays the install label; PR #51 stays unmerged
+
+- **Status / owner:** Review boundary for the PostPath candidate. Not deployed. Evan owns the protected-preview look, Mac and Windows execution, the first real account, and any merge.
+- **Decision:** Keep PR #51 unmerged. The Mac and Windows archives stay an unsigned Node.js 20+ developer preview. They are not consumer installers and are not linked from the marketing page. Payment provider, prices, and CRM stay deferred. A live publish waits for one named account and one approved test post. The archives packed for this review contain source commit `74c726c7d952a67143504f7a32e6979e50d90321`.
+- **Rationale:** The previous archives were packed at `6cc649f`, before the publish claim, `needs_review` hold, vault lock, and entitlement gate.
+- **Affected systems:** `public/downloads/postpath/`, `packages/social-mcp/README.md`, `docs/postpath-lanes/02-desktop.md`, `docs/postpath-lanes/06-qa.md`.
+- **Verification:** `sha256sum -c` on the new archives. Linux launcher smoke only (fresh install, relaunch, vault kept after app removal). macOS and Windows execution are not done. This agent could not read the Vercel preview (team visible, deployment lookup 404).
+- **Rollback:** Leave the pull request unmerged. Production stays on main.
+
 ## 2026-10-27: PostPath customer path is Request early access
 
 - **Status / owner:** Supersedes the “Download for Mac” nav label in the marketing-site decision below. Requested for the early-access release candidate. Not deployed.
