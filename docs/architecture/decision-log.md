@@ -1,5 +1,14 @@
 # Architecture Decision Log
 
+## 2026-10-26: Local Social MCP as a sellable connector product
+
+- **Status / owner:** Evan asked to build a local desktop/MCP connector so any AI can connect socials for any brand/user, draft, schedule, and publish — instead of paying social-API SaaS aggregators. Scaffold on branch `cursor/social-local-mcp-c683`. No production website deploy.
+- **Decision:** Ship `packages/social-mcp` as a local-first MCP server (`@1ststep/social-mcp`). Profiles are arbitrary brands/users. OAuth callback listens on `127.0.0.1:47831`. Connection tokens are AES-256-GCM encrypted under `~/.social-mcp`. Connect chain is YouTube → Meta (Facebook Page + Instagram) → TikTok. YouTube and TikTok publish from a local `media_path`; Instagram/Facebook require an https `media_url` because Meta’s APIs do. The hosted studio queue on `1ststep.ai/admin` remains the owner desk for 1stStep brands; this package is the portable product surface.
+- **Rationale:** The paid SaaS middlemen mostly sell OAuth + a stable API. MCP is that API for agents. Keeping tokens on-device is the trust wedge and removes the recurring micro-subscription for the core loop.
+- **Affected systems:** `packages/social-mcp/`, this decision log, `docs/SOCIAL_MCP.md`.
+- **Verification:** `cd packages/social-mcp && npm test`. No live platform upload in CI.
+- **Rollback:** Remove `packages/social-mcp`. Users delete `~/.social-mcp` locally. No production env change.
+
 ## 2026-10-26: Social publishers and the Swing Trade Pros owner path
 
 - **Status / owner:** Evan asked to finish the studio social queue on PR #29. Review only. No production deploy and no production env changes.

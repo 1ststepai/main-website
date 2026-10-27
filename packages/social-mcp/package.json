@@ -1,0 +1,38 @@
+{
+  "name": "@1ststep/social-mcp",
+  "version": "0.1.0",
+  "description": "Local MCP connector: connect YouTube, Instagram, Facebook, and TikTok once, then let any AI draft, schedule, and publish. Tokens stay on your machine.",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "social-mcp": "./bin/social-mcp.js"
+  },
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./engine": "./src/engine.js"
+  },
+  "scripts": {
+    "start": "node ./bin/social-mcp.js",
+    "test": "node --test test/*.test.js",
+    "check": "npm test"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "mcp",
+    "social",
+    "youtube",
+    "instagram",
+    "facebook",
+    "tiktok",
+    "oauth",
+    "local-first"
+  ],
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "zod": "^4.6.7"
+  }
+}
