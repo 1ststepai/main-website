@@ -1,0 +1,98 @@
+import { readFileSync, statSync } from "node:fs";
+import { mcpError } from "../errors.js";
+import { resolveSafeMediaPath } from "../mediaPath.js";
+
+const TOKEN_URL = "https://open.tiktokapis.com/v2/oauth/token/";
+
+async function readJson(response) {
+  const text = typeof response.text === "function" ? await response.text() : "";
+  if (!text) return {};
+  try {
+    return JSON.parse(text);
+  } catch {
+    return {};
+  }
+}
+
+async function ensureAccess({ secrets, oauth, fetchImpl, now = Date.now() }) {
+  if (secrets.access_token && secrets.expires_at && Date.parse(secrets.expires_at) > now + 60_000) {
+    return secrets;
+  }
+  if (!secrets.refresh_token) throw mcpError("tiktok_not_connected", "Reconnect TikTok.", 409);
+  const response = await fetchImpl(TOKEN_URL, {
+    method: "POST",
+    headers: { "content-type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      client_key: oauth.clientKey,
+      client_secret: oauth.clientSecret,
+      grant_type: "refresh_token",
+      refresh_token: secrets.refresh_token,
+    }),
+  });
+  const payload = await readJson(response);
+  const token = payload.access_token || payload.data?.access_token;
+  if (!response.ok || !token) throw mcpError("tiktok_auth_failed", "TikTok needs to be connected again.", 502);
+  return {
+    ...secrets,
+    access_token: token,
+    refresh_token: payload.refresh_token || payload.data?.refresh_token || secrets.refresh_token,
+    expires_at: new Date(now + (Number(payload.expires_in || payload.data?.expires_in) || 86400) * 1000).toISOString(),
+  };
+}
+
+export async function publishTikTokInboxFromFile({
+  post,
+  mediaRoot,
+  secrets,
+  oauth,
+  fetchImpl = fetch,
+  onSecrets,
+}) {
+  const filePath = resolveSafeMediaPath(post.media_path, mediaRoot);
+  const fresh = await ensureAccess({ secrets, oauth, fetchImpl });
+  if (onSecrets && fresh !== secrets) await onSecrets(fresh);
+  const stat = statSync(filePath);
+
+  const init = await fetchImpl("https://open.tiktokapis.com/v2/post/publish/inbox/video/init/", {
+    method: "POST",
+    headers: {
+      authorization: `Bearer ${fresh.access_token}`,
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      source_info: {
+        source: "FILE_UPLOAD",
+        video_size: stat.size,
+        chunk_size: stat.size,
+        total_chunk_count: 1,
+      },
+    }),
+  });
+  const initPayload = await readJson(init);
+  const uploadUrl = initPayload.data?.upload_url;
+  const publishId = initPayload.data?.publish_id;
+  if (!init.ok || !uploadUrl || !publishId) {
+    throw mcpError("tiktok_upload_failed", initPayload?.error?.message || "TikTok did not start the inbox upload.", 502);
+  }
+
+  const bytes = readFileSync(filePath);
+  const upload = await fetchImpl(uploadUrl, {
+    method: "PUT",
+    headers: {
+      "content-type": post.media_content_type || "video/mp4",
+      "content-length": String(bytes.length),
+      "content-range": `bytes 0-${bytes.length - 1}/${bytes.length}`,
+    },
+    body: bytes,
+  });
+  if (!upload.ok) {
+    throw mcpError("tiktok_upload_failed", "TikTok rejected the video upload.", 502);
+  }
+
+  return {
+    platform_post_id: String(publishId),
+    published_url: null,
+    handoff: "tiktok_inbox",
+    note: "Video is in the TikTok inbox for the creator to finish posting in the app.",
+  };
+}

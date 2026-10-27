@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 140" role="img" aria-label="PostPath by 1stStep.ai">
+  <title>PostPath by 1stStep.ai</title>
+  <defs>
+    <linearGradient id="ppGlassL" x1="20" y1="8" x2="112" y2="118" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#60A5FA"/>
+      <stop offset="22%" stop-color="#3B82F6"/>
+      <stop offset="48%" stop-color="#8B5CF6"/>
+      <stop offset="72%" stop-color="#F472B6"/>
+      <stop offset="100%" stop-color="#FF6B6B"/>
+    </linearGradient>
+    <linearGradient id="ppStemL" x1="34" y1="16" x2="58" y2="112" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#93C5FD"/>
+      <stop offset="40%" stop-color="#3B82F6"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+    <radialGradient id="ppCoreL" cx="68" cy="34" r="28" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#E0F2FE" stop-opacity="0.55"/>
+      <stop offset="55%" stop-color="#8B5CF6" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#0B1020" stop-opacity="0.85"/>
+    </radialGradient>
+    <linearGradient id="ppPathText" x1="250" y1="40" x2="430" y2="90" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#BFDBFE"/>
+      <stop offset="100%" stop-color="#38BDF8"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(0,8) scale(0.9)">
+    <path
+      d="M38 16 C38 16 42 8 62 8 C92 8 110 22 110 40 C110 58 94 72 68 72 L56 72 L56 112 C56 116 52 120 46 118 L40 114 C36 111 36 106 36 102 L36 24 C36 20 36 16 38 16 Z"
+      fill="url(#ppGlassL)"
+    />
+    <path d="M36 24 L52 20 L52 104 L44 110 C40 112 36 110 36 104 Z" fill="url(#ppStemL)"/>
+    <path
+      d="M56 22 C56 22 72 18 82 18 C96 18 102 26 102 36 C102 48 92 56 76 56 L56 56 Z"
+      fill="url(#ppCoreL)"
+    />
+    <path d="M68 28 L86 38 L68 48 Z" fill="#F8FAFC"/>
+  </g>
+  <g font-family="Sora, Inter, Arial, sans-serif">
+    <text x="132" y="72" fill="#F8FAFC" font-size="52" font-weight="700" letter-spacing="-1.5">Post</text>
+    <text x="260" y="72" fill="url(#ppPathText)" font-size="52" font-weight="700" letter-spacing="-1.5">Path</text>
+    <text x="134" y="102" fill="rgba(248,250,252,0.72)" font-size="18" font-weight="500">by 1stStep.ai</text>
+  </g>
+</svg>

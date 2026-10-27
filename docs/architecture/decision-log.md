@@ -1,5 +1,41 @@
 # Architecture Decision Log
 
+## 2026-10-27: PostPath marketing site on postpath.1ststep.ai
+
+- **Status / owner:** Evan named the product URL `postpath.1ststep.ai` and asked for a conversion-focused marketing site with live demo. Implemented on `cursor/social-local-mcp-c683`. Preview/PR only until domain is attached and deploy is approved.
+- **Decision:** Ship `postpath/index.html` as the PostPath marketing site. Canonical host is `https://postpath.1ststep.ai/`. Same page is available at `https://www.1ststep.ai/postpath/`. Vercel host rewrites map `postpath.1ststep.ai` to `/postpath/*`. Visual system copies the approved PostPath brand kit (`postpath-brand-board.png` + `postpath-hero-banner.png`): Midnight `#0B1020`, Electric `#3B82F6`, Violet `#8B5CF6`, Sunrise `#FF6B6B`, Sora + Inter, 3D glass P+play mark, neon rings/light trails, laptop Connected Accounts hero, capability icons, keyword pills, glowing social tiles, nav “Download for Mac”. Early access uses a prefilled mailto to `evan@1ststep.ai` (nothing stored on the page). The on-page desk is a simulated interactive demo, labeled as such. No fake testimonials or metrics. Parent homepage CTA stays Begin Your Journey / Book a call—PostPath is a product subdomain. The locked 1stStep logo is never replaced.
+- **Rationale:** The sellable connector needs its own conversion surface without stealing the consultancy homepage.
+- **Affected systems:** `postpath/`, `vercel.json`, Vite input, sitemaps, `public/llms.txt`, discoverability test.
+- **Verification:** `npm test` discoverability; visual screenshot of `/postpath/`. DNS + Vercel domain `postpath.1ststep.ai` still require Evan to attach in the Vercel project.
+- **Rollback:** Remove `postpath/` route and host rewrites; drop sitemap entries.
+
+## 2026-10-27: Product name is PostPath by 1stStep.ai
+
+- **Status / owner:** Evan chose the name. Same branch `cursor/social-local-mcp-c683`. No production website deploy.
+- **Decision:** The sellable connector is named **PostPath by 1stStep.ai**. UI, docs, and launchers use that name. MCP server key in Cursor is `postpath`. Technical package path remains `packages/social-mcp` and vault dir `~/.social-mcp` for continuity.
+- **Rationale:** Consumer name should not say MCP. PostPath is clear and brandable under 1stStep.ai.
+- **Affected systems:** `packages/social-mcp` brand strings, desk UI, Windows `Open-PostPath` launchers, docs.
+- **Verification:** Desk status `product` is `PostPath`; tests updated.
+- **Rollback:** Revert brand string commit.
+
+## 2026-10-27: PostPath desk is the human product surface
+
+- **Status / owner:** Evan rejected chat/CLI MCP setup friction and asked to fully build desktop + MCP connectors. Same branch `cursor/social-local-mcp-c683`. No production website deploy.
+- **Decision:** The product entrypoint is `social-mcp app` (Windows: `scripts/Open-PostPath.bat`). A local desk on `127.0.0.1:47830` handles profile naming, OAuth app credentials (`oauth.env`), Connect accounts, and **Enable in Cursor** (merges `~/.cursor/mcp.json`). MCP stdio remains the agent interface and loads `oauth.env` automatically. Humans should not paste MCP JSON into chat.
+- **Rationale:** MCP is plumbing. A sellable connector needs a one-window connect path on the user’s OS.
+- **Affected systems:** `packages/social-mcp/src/desk/`, `bin/social-mcp.js`, Windows launchers, `docs/SOCIAL_MCP.md`.
+- **Verification:** `cd packages/social-mcp && npm test` including desk HTTP tests.
+- **Rollback:** Remove desk/launcher files; CLI/MCP server can remain.
+
+## 2026-10-26: Local Social MCP as a sellable connector product
+
+- **Status / owner:** Evan asked to build a local desktop/MCP connector so any AI can connect socials for any brand/user, draft, schedule, and publish — instead of paying social-API SaaS aggregators. Scaffold on branch `cursor/social-local-mcp-c683`. No production website deploy.
+- **Decision:** Ship `packages/social-mcp` as a local-first MCP server (`@1ststep/social-mcp`). Profiles are arbitrary brands/users. OAuth callback listens on `127.0.0.1:47831`. Connection tokens are AES-256-GCM encrypted under `~/.social-mcp`. Connect chain is YouTube → Meta (Facebook Page + Instagram) → TikTok. YouTube and TikTok publish from a local `media_path`; Instagram/Facebook require an https `media_url` because Meta’s APIs do. The hosted studio queue on `1ststep.ai/admin` remains the owner desk for 1stStep brands; this package is the portable product surface.
+- **Rationale:** The paid SaaS middlemen mostly sell OAuth + a stable API. MCP is that API for agents. Keeping tokens on-device is the trust wedge and removes the recurring micro-subscription for the core loop.
+- **Affected systems:** `packages/social-mcp/`, this decision log, `docs/SOCIAL_MCP.md`.
+- **Verification:** `cd packages/social-mcp && npm test`. No live platform upload in CI.
+- **Rollback:** Remove `packages/social-mcp`. Users delete `~/.social-mcp` locally. No production env change.
+
 ## 2026-10-26: Social publishers and the Swing Trade Pros owner path
 
 - **Status / owner:** Evan asked to finish the studio social queue on PR #29. Review only. No production deploy and no production env changes.

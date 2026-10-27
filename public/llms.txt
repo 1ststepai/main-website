@@ -9,6 +9,7 @@ Products and paths:
 - Begin Your Journey: https://www.1ststep.ai/journey/ — a browser-local, six-question first-pass diagnosis. Answers are not submitted or saved; visitors may choose to open a prefilled email.
 - Revenue Systems Audit: https://www.1ststep.ai/services/revenue-systems.html
 - 1stStep OS: https://www.1ststep.ai/os — public operating-system concept for engineering with agents. Cycle 1 of the free core is cloneable for a local markdown ZIP demo; not a hosted product. Illustrative diagrams stay labeled.
+- PostPath: https://postpath.1ststep.ai/ (also https://www.1ststep.ai/postpath/) — local desktop + MCP social connector by 1stStep.ai. Connect YouTube, Instagram, Facebook, and TikTok once; tokens stay on the user’s machine; MCP clients such as Cursor can draft, schedule, and publish. Early access via email to evan@1ststep.ai. Not a hosted social SaaS; installer is forthcoming. Live demo on the page is simulated.
 - 1stStep Job Agent: https://app.1ststep.ai/ — separate public beta for job capture and tailored application preparation; applicants review and submit their own applications.
 - App Idea Checker: https://www.1ststep.ai/app-idea-viability-checker.html
 - Tools: https://www.1ststep.ai/tools/ — public shelf of free/open builder utilities for coding agents. Not client services. Live tools with honestly labeled limits.

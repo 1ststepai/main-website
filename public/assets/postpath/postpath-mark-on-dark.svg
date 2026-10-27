@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="PostPath">
+  <title>PostPath</title>
+  <defs>
+    <linearGradient id="ppTile" x1="0" y1="0" x2="128" y2="128" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#151B2E"/>
+      <stop offset="100%" stop-color="#0B1020"/>
+    </linearGradient>
+    <linearGradient id="ppGlassD" x1="20" y1="8" x2="112" y2="118" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#60A5FA"/>
+      <stop offset="22%" stop-color="#3B82F6"/>
+      <stop offset="48%" stop-color="#8B5CF6"/>
+      <stop offset="72%" stop-color="#F472B6"/>
+      <stop offset="100%" stop-color="#FF6B6B"/>
+    </linearGradient>
+    <linearGradient id="ppStemD" x1="34" y1="16" x2="58" y2="112" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#93C5FD"/>
+      <stop offset="40%" stop-color="#3B82F6"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+    <linearGradient id="ppShineD" x1="40" y1="12" x2="96" y2="54" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.85"/>
+      <stop offset="55%" stop-color="#C4B5FD" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#FF6B6B" stop-opacity="0.15"/>
+    </linearGradient>
+    <radialGradient id="ppCoreD" cx="68" cy="34" r="28" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#E0F2FE" stop-opacity="0.55"/>
+      <stop offset="55%" stop-color="#8B5CF6" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#0B1020" stop-opacity="0.85"/>
+    </radialGradient>
+    <filter id="ppSoftD" x="-35%" y="-35%" width="170%" height="170%">
+      <feGaussianBlur stdDeviation="1.6" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="128" height="128" rx="30" fill="url(#ppTile)"/>
+  <rect x="1" y="1" width="126" height="126" rx="29" fill="none" stroke="rgba(248,250,252,0.14)" stroke-width="1.5"/>
+  <g transform="translate(2,2) scale(0.97)" filter="url(#ppSoftD)">
+    <path
+      d="M38 16 C38 16 42 8 62 8 C92 8 110 22 110 40 C110 58 94 72 68 72 L56 72 L56 112 C56 116 52 120 46 118 L40 114 C36 111 36 106 36 102 L36 24 C36 20 36 16 38 16 Z"
+      fill="url(#ppGlassD)"
+      opacity="0.95"
+    />
+    <path d="M36 24 L52 20 L52 104 L44 110 C40 112 36 110 36 104 Z" fill="url(#ppStemD)"/>
+    <path
+      d="M56 22 C56 22 72 18 82 18 C96 18 102 26 102 36 C102 48 92 56 76 56 L56 56 Z"
+      fill="url(#ppCoreD)"
+    />
+    <path
+      d="M44 20 C52 12 74 10 90 16 C102 22 106 32 104 42"
+      fill="none"
+      stroke="url(#ppShineD)"
+      stroke-width="3.2"
+      stroke-linecap="round"
+    />
+    <path
+      d="M52 58 L70 58 C86 58 96 48 96 36"
+      fill="none"
+      stroke="#FF6B6B"
+      stroke-opacity="0.55"
+      stroke-width="2.4"
+      stroke-linecap="round"
+    />
+    <path d="M68 28 L86 38 L68 48 Z" fill="#F8FAFC"/>
+  </g>
+</svg>

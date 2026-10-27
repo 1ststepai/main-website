@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>PostPath logo studio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&display=swap" rel="stylesheet" />
+  <style>
+    body { margin: 0; background: #05080f; color: #f8fafc; font-family: Sora, sans-serif; }
+    .sheet { width: 1400px; padding: 48px; display: grid; gap: 36px; }
+    .panel {
+      background: #0b1020;
+      border: 1px solid rgba(148,163,184,0.2);
+      border-radius: 24px;
+      padding: 40px;
+    }
+    .panel.light { background: #f8fafc; color: #0b1020; }
+    .label { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #94a3b8; margin-bottom: 20px; }
+    .panel.light .label { color: #64748b; }
+    .lockup { display: flex; align-items: center; gap: 20px; }
+    .word strong { font-size: 56px; letter-spacing: -0.04em; }
+    .word strong i {
+      font-style: normal;
+      background: linear-gradient(120deg, #93c5fd, #38bdf8 55%, #a78bfa);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .panel.light .word strong i {
+      background: linear-gradient(120deg, #2563eb, #7c3aed);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .word span { display: block; margin-top: 4px; font-size: 18px; opacity: 0.7; font-weight: 500; }
+    .marks { display: flex; gap: 28px; align-items: end; }
+    .marks img { display: block; }
+  </style>
+</head>
+<body>
+  <div class="sheet" id="kit">
+    <div class="panel">
+      <div class="label">Primary lockup · dark</div>
+      <div class="lockup">
+        <img src="/assets/postpath/postpath-mark-3d.png" width="96" height="96" alt="" />
+        <div class="word"><strong>Post<i>Path</i></strong><span>by 1stStep.ai</span></div>
+      </div>
+    </div>
+    <div class="panel light">
+      <div class="label">Primary lockup · light</div>
+      <div class="lockup">
+        <img src="/assets/postpath/postpath-mark-3d.png" width="96" height="96" alt="" />
+        <div class="word"><strong>Post<i>Path</i></strong><span>by 1stStep.ai</span></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="label">Mark · app icon · sizes</div>
+      <div class="marks">
+        <img src="/assets/postpath/postpath-mark-512.png" width="128" height="128" alt="" />
+        <img src="/assets/postpath/postpath-mark-3d.png" width="72" height="72" alt="" />
+        <img src="/assets/postpath/postpath-mark-3d.png" width="40" height="40" alt="" />
+        <img src="/assets/postpath/postpath-lockup.svg" width="360" height="90" alt="" />
+      </div>
+    </div>
+  </div>
+</body>
+</html>
