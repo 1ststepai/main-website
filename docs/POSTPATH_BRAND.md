@@ -30,6 +30,10 @@ The marketing site at `/postpath/` copies the kit: Midnight canvas, Electric/Vio
 
 `CONNECT ONCE. ANY AI CAN POST.` — with **ANY AI** in cyan.
 
+## Public claims
+
+The tagline is the product line. Marketing pages still name three groups: networks built into the local app, restricted names (Snapchat and WhatsApp, text only, not send targets), and planned CRM names (HubSpot, Salesforce, GoHighLevel, Pipedrive). Do not treat a network logo as proof of accepted live publishing. Real-account acceptance is not claimed. CRM names are planned and are not in the app.
+
 ## Palette
 
 | Token | Hex | Role |
