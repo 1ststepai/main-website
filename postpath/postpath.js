@@ -1,4 +1,4 @@
-const channels = [...document.querySelectorAll(".channel")];
+const channels = [...document.querySelectorAll(".account")];
 const runBtn = document.getElementById("run-demo");
 const result = document.getElementById("result");
 const timeline = document.getElementById("timeline");

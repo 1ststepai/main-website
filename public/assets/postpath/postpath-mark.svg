@@ -1,65 +1,89 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="PostPath">
   <title>PostPath</title>
   <defs>
-    <linearGradient id="ppRibbon" x1="18" y1="8" x2="118" y2="120" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#38bdf8"/>
-      <stop offset="28%" stop-color="#3b82f6"/>
-      <stop offset="55%" stop-color="#8b5cf6"/>
-      <stop offset="78%" stop-color="#ec4899"/>
-      <stop offset="100%" stop-color="#ff8a4c"/>
+    <linearGradient id="ppGlass" x1="20" y1="8" x2="112" y2="118" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#60A5FA"/>
+      <stop offset="22%" stop-color="#3B82F6"/>
+      <stop offset="48%" stop-color="#8B5CF6"/>
+      <stop offset="72%" stop-color="#F472B6"/>
+      <stop offset="100%" stop-color="#FF6B6B"/>
     </linearGradient>
-    <linearGradient id="ppRibbonEdge" x1="20" y1="10" x2="90" y2="110" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#e0f2fe" stop-opacity="0.95"/>
-      <stop offset="45%" stop-color="#c4b5fd" stop-opacity="0.55"/>
-      <stop offset="100%" stop-color="#fda4af" stop-opacity="0.35"/>
+    <linearGradient id="ppStem" x1="34" y1="16" x2="58" y2="112" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#93C5FD"/>
+      <stop offset="40%" stop-color="#3B82F6"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
     </linearGradient>
-    <filter id="ppGlow" x="-30%" y="-30%" width="160%" height="160%">
-      <feGaussianBlur stdDeviation="2.2" result="b"/>
+    <linearGradient id="ppShine" x1="40" y1="12" x2="96" y2="54" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.85"/>
+      <stop offset="55%" stop-color="#C4B5FD" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#FF6B6B" stop-opacity="0.15"/>
+    </linearGradient>
+    <radialGradient id="ppCore" cx="68" cy="34" r="28" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#E0F2FE" stop-opacity="0.55"/>
+      <stop offset="55%" stop-color="#8B5CF6" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#0B1020" stop-opacity="0.85"/>
+    </radialGradient>
+    <filter id="ppSoft" x="-35%" y="-35%" width="170%" height="170%">
+      <feGaussianBlur stdDeviation="1.8" result="b"/>
       <feMerge>
         <feMergeNode in="b"/>
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
   </defs>
-  <!-- Folded ribbon P stem + bowl -->
-  <g filter="url(#ppGlow)">
+  <g filter="url(#ppSoft)">
+    <!-- Outer glass ribbon bowl -->
     <path
-      d="M34 18
-         C34 18 34 108 34 108
-         C34 114 40 118 46 114
-         L58 106
-         C62 103 62 97 58 93
-         L46 84
-         C42 81 40 78 40 74
-         L40 58
-         C40 52 44 48 50 48
-         L68 48
-         C90 48 104 34 104 18
-         C104 4 88 -2 68 2
-         L46 8
-         C38 10 34 14 34 18 Z"
-      fill="url(#ppRibbon)"
+      d="M38 16
+         C38 16 42 8 62 8
+         C92 8 110 22 110 40
+         C110 58 94 72 68 72
+         L56 72
+         L56 112
+         C56 116 52 120 46 118
+         L40 114
+         C36 111 36 106 36 102
+         L36 24
+         C36 20 36 16 38 16 Z"
+      fill="url(#ppGlass)"
+      opacity="0.95"
     />
-    <!-- Inner cut for bowl / glass layer -->
+    <!-- Folded stem face -->
     <path
-      d="M52 20
-         C52 20 70 16 78 16
-         C90 16 96 22 96 28
-         C96 36 88 42 74 42
-         L52 42 Z"
-      fill="#0b1020"
-      opacity="0.55"
+      d="M36 24
+         L52 20
+         L52 104
+         L44 110
+         C40 112 36 110 36 104 Z"
+      fill="url(#ppStem)"
     />
-    <!-- Highlight ribbon edge -->
+    <!-- Inner glass cavity for play -->
     <path
-      d="M40 22 C42 14 58 10 74 12 C92 14 100 24 98 34"
+      d="M56 22
+         C56 22 72 18 82 18
+         C96 18 102 26 102 36
+         C102 48 92 56 76 56
+         L56 56 Z"
+      fill="url(#ppCore)"
+    />
+    <!-- Edge highlight -->
+    <path
+      d="M44 20 C52 12 74 10 90 16 C102 22 106 32 104 42"
       fill="none"
-      stroke="url(#ppRibbonEdge)"
-      stroke-width="3.5"
+      stroke="url(#ppShine)"
+      stroke-width="3.2"
       stroke-linecap="round"
-      opacity="0.9"
     />
-    <!-- Play triangle in the P bowl -->
-    <path d="M62 24 L78 33 L62 42 Z" fill="#f8fafc"/>
+    <!-- Secondary ribbon fold -->
+    <path
+      d="M52 58 L70 58 C86 58 96 48 96 36"
+      fill="none"
+      stroke="#FF6B6B"
+      stroke-opacity="0.55"
+      stroke-width="2.4"
+      stroke-linecap="round"
+    />
+    <!-- Play triangle -->
+    <path d="M68 28 L86 38 L68 48 Z" fill="#F8FAFC"/>
   </g>
 </svg>

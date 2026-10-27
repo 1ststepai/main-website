@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#0b1020" />
+  <meta name="theme-color" content="#0B1020" />
   <meta name="description" content="PostPath by 1stStep.ai — connect YouTube, Instagram, Facebook, and TikTok once on your machine. Any MCP-compatible AI can draft, schedule, and publish. Local-first. No monthly social-API middleman." />
   <link rel="canonical" href="https://postpath.1ststep.ai/" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="PostPath by 1stStep.ai" />
   <meta property="og:title" content="PostPath — Connect once. Any AI can post." />
-  <meta property="og:description" content="Local social connector for AI-assisted publishing. Tokens stay on your machine. Cursor and other MCP clients share the same vault." />
+  <meta property="og:description" content="Connect your social accounts locally, then let any MCP-compatible AI draft, schedule, and publish — on your terms." />
   <meta property="og:url" content="https://postpath.1ststep.ai/" />
   <meta property="og:image" content="https://www.1ststep.ai/assets/postpath/postpath-mark-on-dark.svg" />
   <meta name="twitter:card" content="summary_large_image" />
@@ -17,7 +17,7 @@
   <link rel="icon" href="/assets/postpath/postpath-mark-on-dark.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Sora:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Sora:wght@500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/postpath/postpath.css" />
   <meta name="firststep-no-motion" content="1" />
   <script type="application/ld+json">
@@ -29,76 +29,145 @@
 </head>
 <body data-fsai-page-event="postpath_page_view" data-fsai-audience="product">
   <a class="skip-link" href="#main">Skip to content</a>
+  <div class="aurora" aria-hidden="true">
+    <div class="aurora-ring r1"></div>
+    <div class="aurora-ring r2"></div>
+    <div class="aurora-ring r3"></div>
+    <div class="aurora-wave"></div>
+  </div>
+
   <div class="wrap">
     <header class="nav">
       <a class="brand" href="https://postpath.1ststep.ai/" aria-label="PostPath home">
         <img src="/assets/postpath/postpath-mark.svg" width="128" height="128" alt="" />
         <span class="brand-text">
-          <strong>Post<i>Path</i></strong>
-          <span>by 1stStep.ai</span>
+          <strong>Post<span>Path</span></strong>
+          <em>by 1stStep.ai</em>
         </span>
       </a>
       <nav class="links" aria-label="Primary">
-        <a href="#how">How it works</a>
-        <a href="#difference">Why local</a>
-        <a href="#faq">FAQ</a>
-        <a class="btn tiny" href="#access">Get PostPath</a>
+        <a href="#features">Features</a>
+        <a href="#how">How It Works</a>
+        <a href="#integrations">Integrations</a>
+        <a href="#pricing">Pricing</a>
       </nav>
+      <a class="btn tiny nav-cta" href="#access" data-fsai-event="postpath_early_access_click" data-fsai-placement="nav">Get PostPath</a>
     </header>
 
     <main id="main">
       <section class="hero" id="top" aria-labelledby="hero-title">
-        <div>
-          <img class="hero-mark" src="/assets/postpath/postpath-mark.svg" width="128" height="128" alt="PostPath logo" />
-          <p class="eyebrow">Local-first · MCP ready</p>
-          <h1 id="hero-title">Connect once.<br /><em>Any AI can post.</em></h1>
+        <div class="hero-copy">
+          <h1 id="hero-title">Connect once. <span class="accent">Any AI</span> can post.</h1>
           <p class="hero-lede">
             Connect your YouTube, Instagram, Facebook, and TikTok accounts locally, then let any MCP-compatible AI draft, schedule, and publish — on your terms.
           </p>
           <div class="actions">
             <a class="btn" href="#access" data-fsai-event="postpath_early_access_click" data-fsai-placement="hero">Get PostPath</a>
-            <a class="btn secondary" href="#demo" data-fsai-event="postpath_demo_click" data-fsai-placement="hero">▶ Watch demo</a>
+            <a class="btn secondary" href="#demo" data-fsai-event="postpath_demo_click" data-fsai-placement="hero">
+              <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 2.2v9.6L12 7 3 2.2z" fill="currentColor"/></svg>
+              Watch Demo
+            </a>
           </div>
-          <div class="props" aria-label="Product strengths">
-            <span class="prop">Local First</span>
-            <span class="prop">MCP Compatible</span>
-            <span class="prop">Encrypted Credentials</span>
-            <span class="prop">No Monthly API Fees</span>
-          </div>
+          <ul class="trust" aria-label="Product strengths">
+            <li>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-2.9 8.4-7 10-4.1-1.6-7-5.5-7-10V6l7-3z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+              Local First
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8h8v8H8zM4 12h4M16 12h4M12 4v4M12 16v4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+              MCP Compatible
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-2.9 8.4-7 10-4.1-1.6-7-5.5-7-10V6l7-3zM9.5 12l1.8 1.8L15 10" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+              Encrypted Credentials
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h10M4 17h13" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+              No Monthly API Fees
+            </li>
+          </ul>
         </div>
 
-        <div class="desk" id="demo" aria-label="Interactive PostPath demo">
-          <div class="desk-top">
-            <div class="desk-brand">
-              <img src="/assets/postpath/postpath-mark.svg" width="20" height="20" alt="" />
-              PostPath desk
+        <div class="hero-visual" aria-hidden="false">
+          <div class="laptop">
+            <div class="laptop-screen">
+              <div class="desk" id="demo" aria-label="Interactive PostPath demo">
+                <aside class="desk-side">
+                  <div class="desk-logo">
+                    <img src="/assets/postpath/postpath-mark.svg" width="20" height="20" alt="" />
+                    <span>PostPath</span>
+                  </div>
+                  <button type="button" class="side-link active">Accounts</button>
+                  <button type="button" class="side-link">Compose</button>
+                  <button type="button" class="side-link">Schedule</button>
+                  <button type="button" class="side-link">MCP</button>
+                </aside>
+                <div class="desk-main">
+                  <div class="desk-top">
+                    <div>
+                      <p class="eyebrow">Connected Accounts</p>
+                      <h3>Your vault</h3>
+                    </div>
+                    <span class="demo-tag">LIVE DEMO</span>
+                  </div>
+                  <div class="account-list" aria-label="Choose simulated channels">
+                    <button type="button" class="account active" data-channel="YouTube" aria-pressed="true">
+                      <span class="soc yt">YT</span>
+                      <span class="acc-meta"><strong>YouTube</strong><small>Local OAuth</small></span>
+                      <span class="toggle" aria-hidden="true"></span>
+                    </button>
+                    <button type="button" class="account active" data-channel="Instagram" aria-pressed="true">
+                      <span class="soc ig">IG</span>
+                      <span class="acc-meta"><strong>Instagram</strong><small>Local OAuth</small></span>
+                      <span class="toggle" aria-hidden="true"></span>
+                    </button>
+                    <button type="button" class="account" data-channel="Facebook" aria-pressed="false">
+                      <span class="soc fb">FB</span>
+                      <span class="acc-meta"><strong>Facebook</strong><small>Local OAuth</small></span>
+                      <span class="toggle" aria-hidden="true"></span>
+                    </button>
+                    <button type="button" class="account" data-channel="TikTok" aria-pressed="false">
+                      <span class="soc tt">TT</span>
+                      <span class="acc-meta"><strong>TikTok</strong><small>Local OAuth</small></span>
+                      <span class="toggle" aria-hidden="true"></span>
+                    </button>
+                  </div>
+                  <div class="prompt">
+                    <label for="prompt">Prompt to your AI</label>
+                    <textarea id="prompt">Turn my latest video into a short announcing what I learned this week.</textarea>
+                  </div>
+                  <button type="button" class="demo-action" id="run-demo">Preview the workflow →</button>
+                  <div class="timeline" id="timeline" hidden>
+                    <div class="t-step" data-step="connect"><div>Connect accounts on your machine</div><span>Connect</span></div>
+                    <div class="t-step" data-step="create"><div>AI shapes channel-ready drafts</div><span>Create</span></div>
+                    <div class="t-step" data-step="distribute"><div>Route to selected networks</div><span>Distribute</span></div>
+                    <div class="t-step" data-step="review"><div>You review before anything goes live</div><span>Review</span></div>
+                  </div>
+                  <div class="result" id="result" role="status"></div>
+                  <p class="fine">Illustrative only · no AI request or social account connection</p>
+                </div>
+              </div>
             </div>
-            <span class="demo-tag">LIVE DEMO</span>
+            <div class="laptop-chin"></div>
+            <div class="laptop-base"></div>
           </div>
-          <div class="desk-body">
-            <p class="eyebrow">Try a workflow</p>
-            <h3>Where should this idea go?</h3>
-            <p>Pick channels, edit the prompt, preview the path. Simulation only — nothing connects or publishes.</p>
-            <div class="prompt">
-              <label for="prompt">Your prompt</label>
-              <textarea id="prompt">Turn my latest video into a short announcing what I learned this week.</textarea>
-            </div>
-            <div class="channels" aria-label="Choose simulated channels">
-              <button type="button" class="channel active" data-channel="YouTube" aria-pressed="true">YouTube</button>
-              <button type="button" class="channel active" data-channel="Instagram" aria-pressed="true">Instagram</button>
-              <button type="button" class="channel" data-channel="Facebook" aria-pressed="false">Facebook</button>
-              <button type="button" class="channel" data-channel="TikTok" aria-pressed="false">TikTok</button>
-            </div>
-            <button type="button" class="demo-action" id="run-demo">Preview the workflow →</button>
-            <div class="timeline" id="timeline" hidden>
-              <div class="t-step" data-step="connect"><div>Connect accounts on your machine</div><span>Connect</span></div>
-              <div class="t-step" data-step="create"><div>AI shapes channel-ready drafts</div><span>Create</span></div>
-              <div class="t-step" data-step="distribute"><div>Route to selected networks</div><span>Distribute</span></div>
-              <div class="t-step" data-step="review"><div>You review before anything goes live</div><span>Review</span></div>
-            </div>
-            <div class="result" id="result" role="status"></div>
-            <p class="fine" style="margin:0.85rem 0 0">Illustrative only · no AI request or social account connection</p>
-          </div>
+        </div>
+      </section>
+
+      <section class="section keywords" id="features" aria-labelledby="features-title">
+        <div class="section-head center">
+          <p class="eyebrow">Built for builders</p>
+          <h2 class="section-title" id="features-title">The path from idea<br /><em>to every channel.</em></h2>
+        </div>
+        <div class="keyword-grid">
+          <article class="kw"><span class="kw-dot violet"></span><h3>Effortless</h3><p>Connect once. Keep creating in the AI tools you already use.</p></article>
+          <article class="kw"><span class="kw-dot cyan"></span><h3>Secure</h3><p>Encrypted credentials stay on your machine — not our cloud.</p></article>
+          <article class="kw"><span class="kw-dot blue"></span><h3>AI-Ready</h3><p>MCP tools for Cursor and any compatible client.</p></article>
+          <article class="kw"><span class="kw-dot pink"></span><h3>Connect Once</h3><p>One local vault powers every agent and desk session.</p></article>
+          <article class="kw"><span class="kw-dot blue"></span><h3>Multi-Platform</h3><p>YouTube, Instagram, Facebook, and TikTok — same path.</p></article>
+          <article class="kw"><span class="kw-dot orange"></span><h3>Publish Faster</h3><p>Draft, schedule, and move to publish without tab-hopping.</p></article>
+          <article class="kw"><span class="kw-dot cyan"></span><h3>Creator-Friendly</h3><p>You review before anything is intended to go live.</p></article>
+          <article class="kw"><span class="kw-dot violet"></span><h3>Built for Builders</h3><p>Local desk for humans. MCP for agents. Same product.</p></article>
         </div>
       </section>
 
@@ -111,21 +180,61 @@
           <p>PostPath is a desktop connector that gives your AI tools a path to your social channels. Keep credentials local. Keep creation in the tools you already use.</p>
         </div>
         <div class="steps">
-          <article class="step">
+          <article class="step glass">
+            <div class="icon-chip">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 007.07 0l2.12-2.12a5 5 0 00-7.07-7.07L11 5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M14 11a5 5 0 00-7.07 0L4.8 13.12a5 5 0 007.07 7.07L13 19" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>
+            </div>
             <div class="num">01 · CONNECT</div>
             <h3>Bring your accounts</h3>
             <p>YouTube, Instagram, Facebook, and TikTok — linked on your machine. Tokens stay encrypted in your vault.</p>
           </article>
-          <article class="step">
+          <article class="step glass">
+            <div class="icon-chip">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l3.5-9L14 4l6 6-7 6.5L4 20zM14 4l3 3" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>
+            </div>
             <div class="num">02 · CREATE</div>
             <h3>Work with your AI</h3>
             <p>Cursor and other MCP clients use PostPath tools to draft and schedule inside the chat you already live in.</p>
           </article>
-          <article class="step">
+          <article class="step glass">
+            <div class="icon-chip">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h10M14 12l6-5v10l-6-5zM4 7v10" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>
+            </div>
             <div class="num">03 · DISTRIBUTE</div>
             <h3>Move toward publish</h3>
             <p>Publish when you’re ready. Platform permissions still apply — PostPath doesn’t pretend otherwise.</p>
           </article>
+        </div>
+      </section>
+
+      <section class="section" id="integrations" aria-labelledby="int-title">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Integrations</p>
+            <h2 class="section-title" id="int-title">Your channels.<br /><em>Your AI clients.</em></h2>
+          </div>
+          <p>Social platforms on one side. MCP-compatible agents on the other. PostPath is the local path between them.</p>
+        </div>
+        <div class="int-grid">
+          <div class="int-block glass">
+            <p class="eyebrow">Social</p>
+            <div class="soc-row">
+              <span class="soc-tile yt">YouTube</span>
+              <span class="soc-tile ig">Instagram</span>
+              <span class="soc-tile tt">TikTok</span>
+              <span class="soc-tile fb">Facebook</span>
+              <span class="soc-tile x">X</span>
+            </div>
+          </div>
+          <div class="int-block glass">
+            <p class="eyebrow">AI / MCP</p>
+            <ul class="mcp-list">
+              <li>Cursor</li>
+              <li>Claude Desktop</li>
+              <li>Any MCP-compatible client</li>
+              <li>PostPath desk (local UI)</li>
+            </ul>
+          </div>
         </div>
       </section>
 
@@ -136,11 +245,11 @@
           <p class="copy">Most aggregators are a hosted dashboard you rent monthly. PostPath is a local connector: MCP in, social APIs out, vault on disk.</p>
           <div class="callout">Less context switching. A clearer path from your creative workflow to your channels — without the micro-subscription tax.</div>
         </div>
-        <div class="flow" aria-label="Illustrative PostPath workflow">
+        <div class="flow glass" aria-label="Illustrative PostPath workflow">
           <div class="flowrow"><strong>Your AI client</strong><span>CREATE</span></div>
           <div class="flowline" aria-hidden="true"></div>
           <div class="flowrow hot">
-            <strong style="display:flex;gap:0.5rem;align-items:center">
+            <strong class="flow-brand">
               <img src="/assets/postpath/postpath-mark.svg" width="18" height="18" alt="" />
               PostPath on your machine
             </strong>
@@ -148,20 +257,20 @@
           </div>
           <div class="flowline" aria-hidden="true"></div>
           <div class="flowrow"><strong>Your social accounts</strong><span>DISTRIBUTE</span></div>
-          <p class="fine" style="margin:1.1rem 0 0">Illustrative architecture. Platform permissions vary.</p>
+          <p class="fine">Illustrative architecture. Platform permissions vary.</p>
         </div>
       </section>
 
-      <section class="section" id="compare" aria-labelledby="compare-title">
+      <section class="section" id="pricing" aria-labelledby="pricing-title">
         <div class="section-head">
           <div>
-            <p class="eyebrow">The trade</p>
-            <h2 class="section-title" id="compare-title">Stop renting<br /><em>the pipe.</em></h2>
+            <p class="eyebrow">Pricing</p>
+            <h2 class="section-title" id="pricing-title">Own the connector.<br /><em>Skip the rent.</em></h2>
           </div>
           <p>Typical social API aggregators charge roughly $29–$149/mo to hold your tokens. PostPath flips the model: own the connector, pay later for multi-brand and team convenience.</p>
         </div>
         <div class="compare">
-          <div class="compare-col">
+          <div class="compare-col glass">
             <h3>Rented aggregator</h3>
             <ul>
               <li>Monthly fee for OAuth + glue</li>
@@ -170,7 +279,7 @@
               <li>Per-brand pricing stacks</li>
             </ul>
           </div>
-          <div class="compare-col win">
+          <div class="compare-col win glass">
             <h3>PostPath</h3>
             <ul>
               <li>Local encrypted vault</li>
@@ -183,10 +292,10 @@
       </section>
 
       <section class="section" id="access" aria-labelledby="access-title">
-        <div class="access">
+        <div class="access glass">
           <p class="eyebrow">Early access</p>
           <h2 class="section-title" id="access-title">Get PostPath<br /><em>on your desk.</em></h2>
-          <p class="copy" style="margin-top:0.75rem">Tell us your OS and whether you want the local preview, the installer waitlist, or multi-brand. We reply from 1stStep.ai.</p>
+          <p class="copy access-copy">Tell us your OS and whether you want the local preview, the installer waitlist, or multi-brand. We reply from 1stStep.ai.</p>
           <form class="access-form" id="access-form">
             <label>Name <input name="name" required autocomplete="name" placeholder="Alex" /></label>
             <label>Email <input name="email" type="email" required autocomplete="email" placeholder="alex@studio.com" /></label>
@@ -230,11 +339,11 @@
         </details>
       </section>
 
-      <section class="section" style="border:0;padding-top:1rem" aria-labelledby="final-title">
+      <section class="section final-sec" aria-labelledby="final-title">
         <div class="end">
           <div>
             <p class="eyebrow">Next step</p>
-            <h2 class="section-title" id="final-title">Make your ideas<br /><em>go further.</em></h2>
+            <h2 class="section-title" id="final-title">Connect once.<br /><em>Any AI can post.</em></h2>
             <p>Own the path from AI draft to social distribution.</p>
           </div>
           <a class="btn" href="#access">Get PostPath →</a>
@@ -246,12 +355,12 @@
       <a class="brand" href="#top">
         <img src="/assets/postpath/postpath-mark.svg" width="30" height="30" alt="" />
         <span class="brand-text">
-          <strong>Post<i>Path</i></strong>
-          <span>by 1stStep.ai</span>
+          <strong>Post<span>Path</span></strong>
+          <em>by 1stStep.ai</em>
         </span>
       </a>
       <div>Connect once. Any AI can post.</div>
-      <div style="display:flex;gap:1rem;flex-wrap:wrap">
+      <div class="footer-links">
         <a href="https://www.1ststep.ai/">1stStep.ai</a>
         <a href="mailto:evan@1ststep.ai?subject=PostPath%20inquiry">Contact →</a>
       </div>

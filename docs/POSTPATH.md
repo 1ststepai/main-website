@@ -3,6 +3,7 @@
 - **Product URL:** https://postpath.1ststep.ai/
 - **Also:** https://www.1ststep.ai/postpath/
 - **Source:** `postpath/index.html`
+- **Brand board:** `public/assets/postpath/postpath-brand-board.png` (visual source of truth)
 
 ## Domain
 

@@ -2,11 +2,13 @@
 
 PostPath has its **own product logo and system**. It does not replace the locked 1stStep.ai logo.
 
-Canonical inspiration board: `public/assets/postpath/postpath-brand-board.png`
+Canonical brand board (source of truth for the marketing site): `public/assets/postpath/postpath-brand-board.png`
+
+The live site at `/postpath/` follows that board: Midnight canvas, Electric/Violet/Sunrise glass, Sora + Inter, neon ring hero, laptop Connected Accounts desk, and tagline **Connect once. Any AI can post.**
 
 ## Mark
 
-Ribbon **P** with a play triangle in the bowl — glass / light-path feel.
+Glass ribbon **P** with a white play triangle in the bowl — blue → violet → sunrise.
 
 | File | Use |
 | --- | --- |
