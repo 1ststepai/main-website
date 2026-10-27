@@ -1,5 +1,14 @@
 # Architecture Decision Log
 
+## 2026-10-26: Studio handoffs read the existing bridge
+
+- **Status / owner:** Implementing on `cursor/studio-agent-handoff-5fec`. No production deploy and no production env changes.
+- **Decision:** Private handoff projects live in their own encrypted KV record, `firststep_admin:agent_handoffs:v1`, behind the existing Studio session. Each project stores its own business, brand notes, tools, budget, decisions, and tasks. Studio reads `agent-handoff-bridge` 0.5.0 through `/health` and authenticated MCP `tools/call` when `AGENT_HANDOFF_BRIDGE_URL` and `AGENT_HANDOFF_BRIDGE_READ_TOKEN` are set on the server. Proof levels are owner-recorded. A bridge completion, a tested SHA, or a production-verified label is not treated as a fresh test run or a live deployment check. Cursor and OpenAI Dot stay blocked for automatic setup: the bridge has no Cursor actor, and ChatGPT has no setup API here. Codex and Grok can be verified only after a live credential probe and, on the bridge host, a CLI that confirms the connector. A stored token is setup needed, not connected. Tool choice prefers an owned or already-running fit, asks before a new charge or an over-budget charge, and does not invent savings when a price is unknown.
+- **Rationale:** A second task service would duplicate the bridge and could add a subscription. The bridge binds to localhost, speaks MCP, and does not issue a Cursor credential, so Studio has to say so.
+- **Affected systems:** `lib/admin/agentHandoff.js`, `lib/admin/toolChoice.js`, `lib/admin/agentHandoffBridge.js`, `lib/admin/handoffConnections.js`, `lib/admin/agentHandoffStore.js`, `api/admin-handoffs.js`, `api/admin-handoff-connections.js`, `src/admin/HandoffDesk.jsx`, `scripts/connect-handoff-agent.mjs`.
+- **Verification:** `test/adminHandoffs.test.js`. The live bridge at `127.0.0.1:8787` was not running in this environment. Codex, Grok, and Cursor CLIs were not installed here.
+- **Rollback:** Remove the routes, library, Studio page, and the KV key `firststep_admin:agent_handoffs:v1`. No production env was changed by this work.
+
 ## 2026-10-26: Social publishers and the Swing Trade Pros owner path
 
 - **Status / owner:** Evan asked to finish the studio social queue on PR #29. Review only. No production deploy and no production env changes.

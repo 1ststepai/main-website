@@ -47,6 +47,15 @@ The recovery command privately asks for the saved owner password twice, preserve
 - With password authentication, the browser must send the password once in the HTTPS login request. HTTPS protects it in transit, but developer tools on that same device can inspect the request payload. Client-side password hashing does not fix this because the visible hash becomes a replayable password equivalent.
 - Eliminating password transmission requires a WebAuthn/passkey login flow. A passkey still cannot protect a session from someone who controls the unlocked browser or device.
 
+## Agent handoffs
+
+Handoff projects are a separate encrypted KV record from the client workspace. The same owner session and same-origin write rule apply.
+
+- `AGENT_HANDOFF_BRIDGE_URL` and `AGENT_HANDOFF_BRIDGE_READ_TOKEN` are server-only. The browser never receives the token, and handoff text is rejected if it contains a credential.
+- Bridge task and checkpoint text is redacted before it is sent to Studio. A bridge health check is not a verified read. A stored product token is not a connected app.
+- Cursor and OpenAI Dot are not marked connected. The bridge has no Cursor actor, and this server cannot create a ChatGPT MCP app.
+- Proof labels are recorded by the owner. Saving “tested” or “production-verified” does not mean Studio re-ran tests or opened the live site.
+
 ## Social queue
 
 Brand tokens, YouTube refresh tokens, and resumable upload sessions are separate from the studio workspace and from Stripe.

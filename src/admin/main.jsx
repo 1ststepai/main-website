@@ -27,6 +27,7 @@ import {
   Search,
   Settings,
   Share2,
+  ListChecks,
   ShieldCheck,
   Sparkles,
   Trash2,
@@ -56,6 +57,7 @@ import {
 } from "../../lib/admin/paymentPlans.js";
 import { draftQuoteFromBrief } from "../../lib/admin/quoteBriefAssistant.js";
 import SocialDesk from "./SocialDesk.jsx";
+import HandoffDesk from "./HandoffDesk.jsx";
 import "./admin.css";
 
 const DEFAULT_TEMPLATES = DEFAULT_CONTRACT_TEMPLATES;
@@ -73,6 +75,7 @@ const EMPTY_WORKSPACE = {
 
 const NAVIGATION = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
+  { id: "handoffs", label: "Handoffs", icon: ListChecks },
   { id: "job-agent", label: "Job Agent", icon: Activity },
   { id: "social", label: "Social", icon: Share2 },
   { id: "clients", label: "Clients", icon: Users },
@@ -1929,6 +1932,7 @@ function StudioApp({ previewMode = false }) {
 
   let pageContent;
   if (page === "overview") pageContent = <Overview workspace={workspace} onEditQuote={editQuote} onNewQuote={newQuote} />;
+  if (page === "handoffs") pageContent = <HandoffDesk previewMode={previewMode} request={api} />;
   if (page === "job-agent") pageContent = <JobAgentOperationsPage previewMode={previewMode} />;
   if (page === "social") pageContent = <SocialDesk previewMode={previewMode} request={api} />;
   if (page === "clients") pageContent = <ClientsPage workspace={workspace} updateWorkspace={updateWorkspace} />;
@@ -1961,7 +1965,7 @@ function StudioApp({ previewMode = false }) {
             <>
               {message && <span className="save-message" role="status">{message}</span>}
               {page === "quote-editor" && <button className="button ghost" onClick={() => setPage("quotes")}><ArrowLeft size={16} />All quotes</button>}
-              {page !== "job-agent" && page !== "social" && <button className="button" onClick={save} disabled={saving || (!dirty && !previewMode)}><Save size={16} />{saving ? "Saving…" : dirty ? "Save draft" : "Saved"}</button>}
+              {page !== "job-agent" && page !== "social" && page !== "handoffs" && <button className="button" onClick={save} disabled={saving || (!dirty && !previewMode)}><Save size={16} />{saving ? "Saving…" : dirty ? "Save draft" : "Saved"}</button>}
               {editorActions && <button className="button primary" disabled={saving} onClick={() => openPreview(selectedQuote.id)}><Eye size={17} />{dirty ? "Save, preview & send" : "Preview & send"}</button>}
             </>
           )}
