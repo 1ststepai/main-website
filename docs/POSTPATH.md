@@ -27,9 +27,18 @@ Use the same CNAME target as `www.1ststep.ai` (currently `0366bb615042ced3.verce
    - `https://postpath.1ststep.ai/` loads the PostPath marketing page
    - `https://www.1ststep.ai/postpath/` still works
 
+## Downloads
+
+Mac and Windows local preview zips (Node.js 20+ required):
+
+- `/downloads/postpath/PostPath-macOS.zip`
+- `/downloads/postpath/PostPath-Windows.zip`
+
+Rebuild with `packages/social-mcp/scripts/build-downloads.sh`.
+
 ## Conversion
 
-Early access form opens a prefilled email to `evan@1ststep.ai`. No waitlist database on this page yet.
+Primary CTAs download the local preview. Multi-brand / packaged installer requests still go to `evan@1ststep.ai`.
 
 ## Related
 

@@ -54,7 +54,10 @@
         <a href="#integrations">Integrations</a>
         <a href="#pricing">Pricing</a>
       </nav>
-      <a class="btn tiny nav-cta" href="#access" data-fsai-event="postpath_early_access_click" data-fsai-placement="nav">Download for Mac</a>
+      <div class="nav-downloads" aria-label="Downloads">
+        <a class="btn tiny nav-cta" href="/downloads/postpath/PostPath-macOS.zip" data-fsai-event="postpath_download_mac" data-fsai-placement="nav">Mac</a>
+        <a class="btn tiny secondary nav-cta" href="/downloads/postpath/PostPath-Windows.zip" data-fsai-event="postpath_download_windows" data-fsai-placement="nav">Windows</a>
+      </div>
     </header>
 
     <main id="main">
@@ -65,7 +68,8 @@
             Connect your social accounts locally — YouTube, Instagram, TikTok, LinkedIn, X, and more — then let any MCP-compatible AI draft, schedule, and publish on your terms.
           </p>
           <div class="actions">
-            <a class="btn" href="#access" data-fsai-event="postpath_early_access_click" data-fsai-placement="hero">Get PostPath</a>
+            <a class="btn" href="/downloads/postpath/PostPath-macOS.zip" data-fsai-event="postpath_download_mac" data-fsai-placement="hero">Download for Mac</a>
+            <a class="btn secondary" href="/downloads/postpath/PostPath-Windows.zip" data-fsai-event="postpath_download_windows" data-fsai-placement="hero">Download for Windows</a>
             <a class="btn secondary" href="#demo" data-fsai-event="postpath_demo_click" data-fsai-placement="hero">
               <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 2.2v9.6L12 7 3 2.2z" fill="currentColor"/></svg>
               Watch Demo
@@ -390,12 +394,17 @@
 
       <section class="section" id="access" aria-labelledby="access-title">
         <div class="access glass">
-          <p class="eyebrow">Early access</p>
+          <p class="eyebrow">Download</p>
           <h2 class="section-title" id="access-title">Get PostPath<br /><em>on your desk.</em></h2>
-          <p class="copy access-copy">Tell us your OS and whether you want the local preview, the installer waitlist, or multi-brand. We reply from 1stStep.ai.</p>
-          <form class="access-form" id="access-form">
-            <label>Name <input name="name" required autocomplete="name" placeholder="Alex" /></label>
-            <label>Email <input name="email" type="email" required autocomplete="email" placeholder="alex@studio.com" /></label>
+          <p class="copy access-copy">Local preview for Mac and Windows. Requires <a href="https://nodejs.org" rel="noopener">Node.js 20+</a>. Open the zip, run the launcher, then connect accounts in the desk.</p>
+          <div class="download-row">
+            <a class="btn" href="/downloads/postpath/PostPath-macOS.zip" data-fsai-event="postpath_download_mac" data-fsai-placement="access">Download for Mac</a>
+            <a class="btn secondary" href="/downloads/postpath/PostPath-Windows.zip" data-fsai-event="postpath_download_windows" data-fsai-placement="access">Download for Windows</a>
+          </div>
+          <p class="access-note">Need multi-brand or a packaged installer next? Email <a href="mailto:evan@1ststep.ai?subject=PostPath%20early%20access">evan@1ststep.ai</a>.</p>
+          <form class="access-form" id="access-form" hidden aria-hidden="true">
+            <label>Name <input name="name" autocomplete="name" placeholder="Alex" /></label>
+            <label>Email <input name="email" type="email" autocomplete="email" placeholder="alex@studio.com" /></label>
             <label>What do you need first?
               <input name="need" list="need-options" placeholder="Windows installer / local preview / agency" />
               <datalist id="need-options">
@@ -407,7 +416,6 @@
             </label>
             <button class="btn" type="submit" data-fsai-event="postpath_access_submit" data-fsai-placement="access">Request early access →</button>
           </form>
-          <p class="access-note" id="access-note">Opens a prefilled email to <a href="mailto:evan@1ststep.ai">evan@1ststep.ai</a>. Nothing is stored on this page.</p>
         </div>
       </section>
 
@@ -443,7 +451,10 @@
             <h2 class="section-title" id="final-title">Connect once.<br /><em>Any AI can post.</em></h2>
             <p class="tagline-caps">CONNECT ONCE. <span>ANY AI</span> CAN POST.</p>
           </div>
-          <a class="btn" href="#access">Get PostPath →</a>
+          <div class="download-row end-downloads">
+            <a class="btn" href="/downloads/postpath/PostPath-macOS.zip" data-fsai-event="postpath_download_mac" data-fsai-placement="final">Download for Mac</a>
+            <a class="btn secondary" href="/downloads/postpath/PostPath-Windows.zip" data-fsai-event="postpath_download_windows" data-fsai-placement="final">Download for Windows</a>
+          </div>
         </div>
       </section>
     </main>
