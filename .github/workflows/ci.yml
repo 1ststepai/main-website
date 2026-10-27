@@ -20,6 +20,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci --ignore-scripts
+      - run: npm ci --ignore-scripts --prefix packages/social-mcp
       - run: npm rebuild esbuild
       - run: npm test
       - run: npm run build
