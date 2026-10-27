@@ -37,6 +37,10 @@ Returns `{ status: 'ok'|'warning'|'error', ok, profileCount, profileLimit, messa
 
 Throws `license_profile_limit` (403) **only** when `state.enforce` is true and `profileCount` is over the hard limit.
 
+## Engine wiring
+
+`upsert_profile` / `engine.upsertProfile` calls `assertProfileAllowed` when creating a **new** profile. Existing profile updates are always allowed. With defaults (`enforce=false`) this is a no-op and profiles stay unlimited.
+
 ## Paid verification (not implemented)
 
 Wiring real paid license checks (Stripe, LemonSqueezy, signed keys, etc.) needs **Evan's approval** before any network client, secret, or billing dependency is added.
