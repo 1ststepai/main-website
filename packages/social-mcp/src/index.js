@@ -130,12 +130,21 @@ export function createSocialMcpServer({ engine } = {}) {
 
   server.tool(
     "schedule_post",
-    "Schedule a local draft for a future ISO time. Use publish_due later (or publish_post with force) to send it.",
+    "Schedule a local draft for a future ISO time. While the PostPath desk/app is running, publish_due runs on an interval; or call publish_due / publish_post(force) yourself.",
     {
       post_id: z.string().min(8),
       scheduled_at: z.string().describe("ISO-8601 timestamp"),
     },
     tool(async (args) => eng.schedulePost(args)),
+  );
+
+  server.tool(
+    "cancel_scheduled_post",
+    "Cancel a scheduled post: sets status back to draft and clears scheduled_at.",
+    {
+      post_id: z.string().min(8),
+    },
+    tool(async (args) => eng.cancelScheduledPost(args)),
   );
 
   server.tool(
@@ -150,7 +159,7 @@ export function createSocialMcpServer({ engine } = {}) {
 
   server.tool(
     "publish_due",
-    "Publish scheduled posts whose scheduled_at is due.",
+    "Publish scheduled posts whose scheduled_at is due. The desk/app also calls this periodically while running.",
     {
       profile_id: z.string().min(2).max(64).optional(),
       limit: z.number().int().min(1).max(20).optional(),

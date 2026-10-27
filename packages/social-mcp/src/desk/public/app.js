@@ -16,6 +16,7 @@ const NETWORKS = [
 
 const toastEl = document.getElementById("toast");
 const networkList = document.getElementById("network-list");
+const scheduledList = document.getElementById("scheduled-list");
 const pathMeta = document.getElementById("path-meta");
 const redirectUri = document.getElementById("redirect-uri");
 const connectHint = document.getElementById("connect-hint");
@@ -23,6 +24,46 @@ const profileName = document.getElementById("profile-name");
 const profileId = document.getElementById("profile-id");
 const oauthForm = document.getElementById("oauth-form");
 const blueskyForm = document.getElementById("bluesky-form");
+
+function formatWhen(iso) {
+  if (!iso) return "No time set";
+  const ms = Date.parse(iso);
+  if (!Number.isFinite(ms)) return String(iso);
+  try {
+    return new Date(ms).toLocaleString();
+  } catch {
+    return String(iso);
+  }
+}
+
+function escapeHtml(value) {
+  return String(value || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
+}
+
+function renderScheduled(posts) {
+  const rows = Array.isArray(posts) ? posts : [];
+  if (!rows.length) {
+    scheduledList.innerHTML = `<li class="empty">No scheduled posts.</li>`;
+    return;
+  }
+  scheduledList.innerHTML = rows
+    .map((post) => {
+      const title = post.title || post.caption || post.description || post.id;
+      const platform = post.platform || "unknown";
+      return `<li data-post-id="${post.id}">
+      <div>
+        <strong>${escapeHtml(title)}</strong>
+        <div class="when">${escapeHtml(platform)} · ${escapeHtml(formatWhen(post.scheduled_at))}</div>
+      </div>
+      <button type="button" class="btn danger cancel-scheduled" data-post-id="${post.id}">Cancel</button>
+    </li>`;
+    })
+    .join("");
+}
 
 function showToast(message, isError = false) {
   toastEl.hidden = false;
@@ -107,6 +148,8 @@ function renderStatus(data) {
   } else {
     connectHint.textContent = "Connect opens each configured OAuth provider in order. Bluesky uses the form below.";
   }
+
+  renderScheduled(data.scheduled_posts);
 }
 
 async function refresh() {
@@ -117,6 +160,25 @@ async function refresh() {
 
 document.getElementById("refresh-btn").addEventListener("click", () => {
   refresh().catch((error) => showToast(error.message, true));
+});
+
+scheduledList.addEventListener("click", async (event) => {
+  const button = event.target.closest(".cancel-scheduled");
+  if (!button) return;
+  const postId = button.getAttribute("data-post-id");
+  if (!postId) return;
+  button.disabled = true;
+  try {
+    const data = await api("/api/cancel-scheduled", {
+      method: "POST",
+      body: JSON.stringify({ post_id: postId }),
+    });
+    renderStatus(data);
+    showToast("Schedule cancelled — post is a draft again");
+  } catch (error) {
+    showToast(error.message, true);
+    button.disabled = false;
+  }
 });
 
 document.getElementById("copy-redirect").addEventListener("click", async () => {
