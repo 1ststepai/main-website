@@ -149,7 +149,7 @@ export function createSocialMcpServer({ engine } = {}) {
 
   server.tool(
     "publish_post",
-    "Publish now. YouTube/TikTok use media_path. Instagram/Facebook/Pinterest need media_url. Text platforms use caption/title. Reddit uses tags[0] as subreddit. Snapchat/WhatsApp return honest API-restricted errors. Scheduled posts require force=true before their time.",
+    "Publish now after local preflight validation (hard errors block; length overages are warnings). YouTube/TikTok use media_path. Instagram/Facebook/Pinterest need media_url. Text platforms use caption/title. Reddit uses tags[0] as subreddit. Snapchat/WhatsApp return honest API-restricted errors. Scheduled posts require force=true before their time.",
     {
       post_id: z.string().min(8),
       force: z.boolean().optional(),

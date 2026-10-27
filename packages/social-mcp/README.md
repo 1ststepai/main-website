@@ -99,11 +99,9 @@ social-mcp connect <id>    CLI fallback
 
 ## Pre-publish validation
 
-Pure helper: `src/publish/validate.js` → `validateDraftForPublish(post)`.
+`src/publish/validate.js` → `validateDraftForPublish(post)` runs inside `publish_post` / `publish_due` before network calls.
 
-Returns `{ ok, warnings[], errors[] }` with no live API calls and no engine side effects. Platform rules match current publish modules (X ~280, LinkedIn/Threads/Bluesky/Google Business text caps, YouTube/TikTok `media_path`, Instagram/Facebook/Pinterest https `media_url`, Reddit `tags[0]` + title, Snapchat/WhatsApp API-restricted errors). Over-limit captions are **warnings** (publish truncates); missing required fields and restricted APIs are **errors** (`ok === false`).
-
-Wiring into `engine.js` / `publish_post` is pending — call this module from the parent integration pass when ready.
+Returns `{ ok, warnings[], errors[] }` with no live API calls. Hard **errors** throw `validation_failed` and block publish. Length overages are **warnings** returned on success (publish still truncates). Platform rules match current publish modules (X ~280, LinkedIn/Threads/Bluesky/Google Business text caps, YouTube/TikTok `media_path`, Instagram/Facebook/Pinterest https `media_url`, Reddit `tags[0]` + title, Snapchat/WhatsApp API-restricted).
 
 ## Tests
 

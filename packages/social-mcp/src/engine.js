@@ -15,6 +15,7 @@ import { connectBlueskyAccount, publishBlueskyPost } from "./publish/bluesky.js"
 import { publishGoogleBusinessPost } from "./publish/google_business.js";
 import { publishRedditPost } from "./publish/reddit.js";
 import { publishSnapchatScaffold, publishWhatsAppScaffold } from "./publish/restricted.js";
+import { validateDraftForPublish } from "./publish/validate.js";
 
 const POST_STATUSES = ["draft", "scheduled", "publishing", "published", "handed_off", "failed"];
 
@@ -277,6 +278,13 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
     if (!post) throw mcpError("not_found", "Post not found.", 404);
     assertPublishable(post, force);
 
+    const validation = validateDraftForPublish(post);
+    if (!validation.ok) {
+      const error = mcpError("validation_failed", validation.errors.join(" "), 400);
+      error.details = { errors: validation.errors, warnings: validation.warnings };
+      throw error;
+    }
+
     const connection = store.getConnection(post.profile_id, post.platform);
     if (!connection) throw mcpError("not_connected", `${post.platform} is not connected for this profile.`, 409);
     const secrets = store.readSecrets(post.profile_id, post.platform);
@@ -304,7 +312,7 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
         post_id: post.id,
         detail: result.note || post.published_url || post.platform_post_id,
       });
-      return { post, result };
+      return { post, result, warnings: validation.warnings };
     } catch (error) {
       post.status = "failed";
       post.error = { code: error.code || "publish_failed", message: error.message || "Publish failed." };
