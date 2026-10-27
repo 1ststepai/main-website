@@ -1,19 +1,9 @@
 import { readFileSync, statSync } from "node:fs";
 import { mcpError } from "../errors.js";
 import { resolveSafeMediaPath } from "../mediaPath.js";
-import { invalidGrantError, isInvalidGrantPayload, sendWithRefresh } from "./authRetry.js";
+import { invalidGrantError, isInvalidGrantPayload, readJson, sendWithRefresh } from "./authRetry.js";
 
 const TOKEN_URL = "https://open.tiktokapis.com/v2/oauth/token/";
-
-async function readJson(response) {
-  const text = typeof response.text === "function" ? await response.text() : "";
-  if (!text) return {};
-  try {
-    return JSON.parse(text);
-  } catch {
-    return {};
-  }
-}
 
 async function refreshAccess({ secrets, oauth, fetchImpl, now = Date.now() }) {
   if (!secrets.refresh_token) throw mcpError("tiktok_not_connected", "Reconnect TikTok.", 409);

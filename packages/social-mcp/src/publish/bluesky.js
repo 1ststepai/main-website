@@ -1,17 +1,7 @@
 import { mcpError } from "../errors.js";
-import { invalidGrantError, isInvalidGrantPayload, sendWithRefresh } from "./authRetry.js";
+import { invalidGrantError, isInvalidGrantPayload, readJson, sendWithRefresh } from "./authRetry.js";
 
 const PDS = "https://bsky.social";
-
-async function readJson(response) {
-  const text = typeof response.text === "function" ? await response.text() : "";
-  if (!text) return {};
-  try {
-    return JSON.parse(text);
-  } catch {
-    return {};
-  }
-}
 
 async function createSession({ identifier, appPassword, fetchImpl }) {
   const response = await fetchImpl(`${PDS}/xrpc/com.atproto.server.createSession`, {

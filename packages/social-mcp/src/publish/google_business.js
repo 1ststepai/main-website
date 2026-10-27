@@ -1,15 +1,5 @@
 import { mcpError } from "../errors.js";
-import { invalidGrantError, isInvalidGrantPayload, sendWithRefresh } from "./authRetry.js";
-
-async function readJson(response) {
-  const text = typeof response.text === "function" ? await response.text() : "";
-  if (!text) return {};
-  try {
-    return JSON.parse(text);
-  } catch {
-    return {};
-  }
-}
+import { invalidGrantError, isInvalidGrantPayload, readJson, sendWithRefresh } from "./authRetry.js";
 
 async function refreshAccess({ secrets, oauth, fetchImpl, now = Date.now() }) {
   if (!secrets.refresh_token) throw mcpError("gbp_not_connected", "Reconnect Google Business.", 409);

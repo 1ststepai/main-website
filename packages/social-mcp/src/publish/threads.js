@@ -1,17 +1,7 @@
 import { mcpError } from "../errors.js";
-import { invalidGrantError, isInvalidGrantPayload, sendWithRefresh } from "./authRetry.js";
+import { invalidGrantError, isInvalidGrantPayload, readJson, sendWithRefresh } from "./authRetry.js";
 
 const THREADS_GRAPH = "https://graph.threads.net/v1.0";
-
-async function readJson(response) {
-  const text = typeof response.text === "function" ? await response.text() : "";
-  if (!text) return {};
-  try {
-    return JSON.parse(text);
-  } catch {
-    return {};
-  }
-}
 
 async function refreshAccess({ secrets, fetchImpl, now = Date.now() }) {
   if (!secrets.access_token) throw mcpError("threads_not_connected", "Reconnect Threads.", 409);

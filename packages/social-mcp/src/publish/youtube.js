@@ -1,20 +1,10 @@
 import { createReadStream, statSync } from "node:fs";
 import { mcpError } from "../errors.js";
 import { resolveSafeMediaPath } from "../mediaPath.js";
-import { invalidGrantError, isInvalidGrantPayload, sendWithRefresh } from "./authRetry.js";
+import { invalidGrantError, isInvalidGrantPayload, readJson, sendWithRefresh } from "./authRetry.js";
 
 const TOKEN_URL = "https://oauth2.googleapis.com/token";
 const CHUNK = 2 * 1024 * 1024;
-
-async function readJson(response) {
-  const text = typeof response.text === "function" ? await response.text() : "";
-  if (!text) return {};
-  try {
-    return JSON.parse(text);
-  } catch {
-    return { raw: String(text).slice(0, 180) };
-  }
-}
 
 async function refreshAccess({ secrets, oauth, fetchImpl, now = Date.now() }) {
   if (!secrets.refresh_token) throw mcpError("youtube_not_connected", "Reconnect YouTube.", 409);

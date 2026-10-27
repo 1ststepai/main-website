@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { test } from "node:test";
 import { createEngine } from "../src/engine.js";
 import { createSocialMcpServer } from "../src/index.js";
+import { createStore } from "../src/store.js";
 
 const NOW = Date.parse("2026-01-15T00:00:00.000Z");
 
@@ -486,6 +487,35 @@ test("scheduled_at requires an offset and stores distinct DST instants", async (
       (error) => error.code === "duplicate_schedule",
     );
     await engine.oauth.stop();
+  } finally {
+    rmSync(home, { recursive: true, force: true });
+  }
+});
+
+test("a second vault process cannot claim a post the first process already claimed", () => {
+  const home = mkdtempSync(join(tmpdir(), "social-mcp-rel-"));
+  try {
+    const first = createStore({ home, now: () => NOW });
+    const postId = "postcross01";
+    first.savePost(
+      {
+        id: postId,
+        profile_id: "acme",
+        platform: "x",
+        status: "scheduled",
+        scheduled_at: "2026-02-01T15:00:00.000Z",
+        updated_at: "2026-01-15T00:00:00.000Z",
+      },
+      { create: true },
+    );
+    const second = createStore({ home, now: () => NOW });
+    const claimed = first.claimPost(postId, ["scheduled"]);
+    const raced = second.claimPost(postId, ["scheduled"]);
+    assert.equal(claimed.ok, true);
+    assert.equal(claimed.post.status, "publishing");
+    assert.equal(raced.ok, false);
+    assert.equal(raced.status, "publishing");
+    assert.equal(second.getPost(postId).status, "publishing");
   } finally {
     rmSync(home, { recursive: true, force: true });
   }

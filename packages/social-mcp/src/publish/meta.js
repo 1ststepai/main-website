@@ -1,17 +1,7 @@
 import { mcpError } from "../errors.js";
-import { sendWithRefresh } from "./authRetry.js";
+import { readJson, sendWithRefresh } from "./authRetry.js";
 
 const META_GRAPH = "https://graph.facebook.com/v22.0";
-
-async function readJson(response) {
-  const text = typeof response.text === "function" ? await response.text() : "";
-  if (!text) return {};
-  try {
-    return JSON.parse(text);
-  } catch {
-    return {};
-  }
-}
 
 /**
  * Meta page tokens are not refresh tokens. A 401 marks the connection

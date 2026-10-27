@@ -1,5 +1,15 @@
 import { mcpError } from "../errors.js";
 
+export async function readJson(response) {
+  const text = typeof response.text === "function" ? await response.text() : "";
+  if (!text) return {};
+  try {
+    return JSON.parse(text);
+  } catch {
+    return {};
+  }
+}
+
 export function isInvalidGrantPayload(payload) {
   const parts = [];
   const visit = (value) => {
