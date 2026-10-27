@@ -1,5 +1,23 @@
 # Architecture Decision Log
 
+## 2026-10-26: Social publishers and the Swing Trade Pros owner path
+
+- **Status / owner:** Evan asked to finish the studio social queue on PR #29. Review only. No production deploy and no production env changes.
+- **Decision:** The studio at `/admin/` remains the control plane. One short can be queued for YouTube, Instagram, Facebook, and TikTok with separate copy. YouTube still uploads private first and still requires vidIQ scores or a typed override; this server does not call vidIQ. Swing Trade Pros YouTube must be channel `UC86s7HqMAR-FSfxuv1N1Pwg` and Instagram must be `28230105726692205`, or the connection is refused. Instagram `media_publish` runs only when privacy is public. Facebook private finishes as an unpublished Page Reel (`handed_off`). TikTok uses the inbox upload and is not marked published. X stays unimplemented.
+- **Rationale:** Those are the platform APIs that can run with the permissions we can request. Marking a builder as published would be false. The known STP account ids are the ownership check.
+- **Affected systems:** `lib/social/`, `api/social/`, `src/admin/SocialDesk.jsx`, `docs/SOCIAL_POSTING.md`, `docs/SOCIAL_OWNER_HANDOFF.md`.
+- **Verification:** `test/socialPosting.test.js`. No live platform upload in this change. The Bitcoin short file is not in this repository.
+- **Rollback:** Revert this PR. Disconnect the brand in the studio, then delete `social:v1:` KV keys and the private Blob prefix `social/`. Do not add the new env vars to Production as part of this work.
+
+## 2026-10-25: Multi-brand social queue, YouTube first
+
+- **Status / owner:** Evan asked for a lean v1 inside the existing studio. Review PR only. No production deploy and no production env changes.
+- **Decision:** Brands live in `lib/social/brands.js`. Posts, hashed brand tokens, the audit log, and encrypted YouTube connections are records in the existing Vercel KV store, under `social:v1:` keys, separate from the studio workspace. Video and thumbnail bytes go to a private Vercel Blob store through a client upload token. Serverless functions never receive the file body. The owner approves from `/admin/`. A YouTube post cannot be approved unless the title score and thumbnail score are at least 90 and keywords are present, unless the owner types an override reason that is written to the audit log. Brand tokens can draft only for their own brand. The server does not call vidIQ. Instagram, Facebook, TikTok, and X have publisher stubs only. Scheduled posts move through a manual Publish due action and `POST /api/social/cron` with `SOCIAL_CRON_SECRET`. No cron is declared in `vercel.json`.
+- **Rationale:** The studio already has owner auth and KV. Blob client uploads are the path that survives the function body limit. A separate encryption key keeps YouTube refresh tokens away from the studio and payment keys.
+- **Affected systems:** `lib/social/`, `api/social/`, `src/admin/SocialDesk.jsx`, studio navigation, `docs/SOCIAL_POSTING.md`.
+- **Verification:** `test/socialPosting.test.js` covers token hashing, encryption round trip, brand scope, the score gate, owner override, and that agents cannot approve.
+- **Rollback:** Remove the social routes, library, and studio page. KV keys under `social:v1:` and the Blob store can be deleted. No production env was changed by this work.
+
 ## 2026-10-22: Universal Relocations origin demo
 
 - **Status / owner:** Evan asked for the Origin Service US overview on the pricing preview branch. No production deploy.

@@ -47,6 +47,17 @@ The recovery command privately asks for the saved owner password twice, preserve
 - With password authentication, the browser must send the password once in the HTTPS login request. HTTPS protects it in transit, but developer tools on that same device can inspect the request payload. Client-side password hashing does not fix this because the visible hash becomes a replayable password equivalent.
 - Eliminating password transmission requires a WebAuthn/passkey login flow. A passkey still cannot protect a session from someone who controls the unlocked browser or device.
 
+## Social queue
+
+Brand tokens, YouTube refresh tokens, and resumable upload sessions are separate from the studio workspace and from Stripe.
+
+- Brand tokens are shown once and stored only as a SHA-256 hash. A token can draft and request upload URLs for its own brand. It cannot approve, schedule, or publish.
+- YouTube refresh tokens and resumable session URIs are encrypted with `SOCIAL_TOKEN_ENC_KEY`. That key is not the studio data key and is not read by the payment code.
+- Video bytes upload directly to a private Vercel Blob store. The API validates the path and never accepts the video body.
+- YouTube approval is blocked below a title score of 90, a thumbnail score of 90, or an empty keyword list unless the owner submits a typed override. The reason is stored on the post and in the audit log.
+- Application code does not log tokens, OAuth codes, or session URIs.
+- `POST /api/social/cron` requires `SOCIAL_CRON_SECRET`. The repo does not enable that cron.
+
 ## Key rotation
 
 1. Generate a new 64-character hexadecimal encryption key.
@@ -61,7 +72,7 @@ The previous key is intentionally decrypt-only.
 ## If compromise is suspected
 
 1. Disable the production deployment or protect it at the Vercel project level.
-2. Rotate the admin password hash, session secret, TOTP secret, data-encryption key, KV token, Resend key, and Stripe key.
+2. Rotate the admin password hash, session secret, TOTP secret, data-encryption key, `SOCIAL_TOKEN_ENC_KEY`, Google OAuth client secret, `SOCIAL_CRON_SECRET`, Blob read-write token, KV token, Resend key, and Stripe key. Revoke brand tokens and YouTube connections from the studio.
 3. Revoke suspicious Stripe payment links and inspect Resend, Stripe, KV, and Vercel access logs.
 4. Restore only from a known-good encrypted backup.
 5. Notify affected clients and follow applicable breach-notification requirements after legal review.
