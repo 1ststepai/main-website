@@ -29,7 +29,17 @@ Use the same CNAME target as `www.1ststep.ai` (currently `0366bb615042ced3.verce
 
 ## Conversion
 
-Early access form opens a prefilled email to `evan@1ststep.ai`. No waitlist database on this page yet.
+The customer path is a visitor-initiated email to `evan@1ststep.ai`. The form opens that mailto. Nothing is stored on this page. There is no Mac or Windows zip on the marketing page, and the primary button is **Request early access**.
+
+## Platform claims
+
+Public copy uses three groups:
+
+- Built in the local app, real-account acceptance not claimed: X, LinkedIn, Bluesky, YouTube, Instagram, Facebook, TikTok (inbox handoff), Reddit, Google Business, Threads, Pinterest.
+- Restricted, and not a send target: Snapchat, WhatsApp. Use text labels, not their logos.
+- Planned, and not in the app: HubSpot, Salesforce, GoHighLevel, Pipedrive. Text only. No CRM account login is offered.
+
+A logo on the page is not a claim that production publishing works. The on-page desk is a simulated demo and is labeled Simulated.
 
 ## Related
 
