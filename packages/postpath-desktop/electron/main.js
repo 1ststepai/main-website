@@ -4,6 +4,7 @@ const { spawn } = require("node:child_process");
 const http = require("node:http");
 const path = require("node:path");
 const { app, BrowserWindow, shell } = require("electron");
+const { decideNavigation, createRedactingWriter } = require("./shellPolicy.js");
 
 const DESK_HOST = "127.0.0.1";
 const DESK_PORT = Number(process.env.SOCIAL_MCP_DESK_PORT || 47830);
@@ -55,6 +56,21 @@ async function waitForDesk(timeoutMs = READY_TIMEOUT_MS) {
   );
 }
 
+function pipeDeskOutput(child) {
+  const stdout = createRedactingWriter((text) => {
+    process.stdout.write(`[postpath-desk] ${text}`);
+  });
+  const stderr = createRedactingWriter((text) => {
+    process.stderr.write(`[postpath-desk] ${text}`);
+  });
+  child.stdout?.on("data", (chunk) => stdout.push(chunk));
+  child.stderr?.on("data", (chunk) => stderr.push(chunk));
+  child.on("exit", () => {
+    stdout.flush();
+    stderr.flush();
+  });
+}
+
 function spawnDesk() {
   const bin = socialMcpBin();
   const node = nodeCommand();
@@ -64,12 +80,7 @@ function spawnDesk() {
     stdio: ["ignore", "pipe", "pipe"],
   });
 
-  child.stdout?.on("data", (chunk) => {
-    process.stdout.write(`[postpath-desk] ${chunk}`);
-  });
-  child.stderr?.on("data", (chunk) => {
-    process.stderr.write(`[postpath-desk] ${chunk}`);
-  });
+  pipeDeskOutput(child);
   child.on("exit", (code, signal) => {
     deskChild = null;
     if (!shuttingDown && code && code !== 0) {
@@ -107,6 +118,45 @@ function resolveIcon() {
   return undefined;
 }
 
+function openExternalUrl(url) {
+  try {
+    const result = shell.openExternal(url);
+    if (result && typeof result.catch === "function") {
+      result.catch(() => {});
+    }
+  } catch {
+    // best effort; do not log the URL (it may carry OAuth material)
+  }
+}
+
+/**
+ * will-navigate and setWindowOpenHandler share decideNavigation:
+ * desk origin stays in this window; other http(s) go to the system browser.
+ */
+function attachNavigationGuards(win) {
+  const contents = win.webContents;
+
+  contents.setWindowOpenHandler(({ url }) => {
+    const decision = decideNavigation(url, DESK_URL);
+    if (decision === "allow") {
+      contents.loadURL(url).catch(() => {});
+    } else if (decision === "external") {
+      openExternalUrl(url);
+    }
+    return { action: "deny" };
+  });
+
+  const onNavigate = (event, url) => {
+    const decision = decideNavigation(url, DESK_URL);
+    if (decision === "allow") return;
+    event.preventDefault();
+    if (decision === "external") openExternalUrl(url);
+  };
+
+  contents.on("will-navigate", onNavigate);
+  contents.on("will-redirect", onNavigate);
+}
+
 function createWindow() {
   const icon = resolveIcon();
   mainWindow = new BrowserWindow({
@@ -124,19 +174,15 @@ function createWindow() {
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true,
+      webSecurity: true,
+      allowRunningInsecureContent: false,
     },
   });
 
+  attachNavigationGuards(mainWindow);
+
   mainWindow.once("ready-to-show", () => {
     mainWindow?.show();
-  });
-
-  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-    // OAuth and external docs open in the system browser, not a new Electron window.
-    if (/^https?:\/\//i.test(url)) {
-      shell.openExternal(url);
-    }
-    return { action: "deny" };
   });
 
   mainWindow.on("closed", () => {

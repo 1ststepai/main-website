@@ -1,6 +1,8 @@
 # PostPath desktop shell
 
-Thin **Electron** wrapper around the existing PostPath desk in `packages/social-mcp`.
+Developer preview. This is **not** a one-click installer and it is **not** signed.
+
+Thin **Electron** wrapper around the existing PostPath desk in `packages/social-mcp`. It still needs **Node.js 20+** and a checkout (or the versioned download zip) of `packages/social-mcp`. It does not bundle a notarized Mac app or an Authenticode-signed Windows installer.
 
 This package does **not** fork connect / vault / publish / MCP logic. It only:
 
@@ -13,9 +15,11 @@ Shell chrome uses the PostPath **Midnight** canvas (`#0B1020`). Product UI remai
 
 ## Prerequisites
 
-- Node.js 20+
+- Node.js 20+ (this remains a developer preview until that requirement is gone)
 - `packages/social-mcp` installable (`npm install` in that package)
 - Electron (optionalDependency — install when you want the native window)
+
+Versioned Mac and Windows developer-preview zips are built by `packages/social-mcp/scripts/build-downloads.sh`. They are the same kind of preview: Node.js 20+, unsigned, not a one-click installer. Install, relaunch, upgrade, vault, and uninstall for that zip layout are documented in `docs/postpath-lanes/02-desktop.md`.
 
 ## How to run
 
@@ -56,9 +60,16 @@ npm run desk
 
 If `npm start` fails with “Cannot find module 'electron'”, run `npm install` in this package (Electron is an `optionalDependency` so lightweight CI/agents can skip the download).
 
+## Shell security
+
+- `contextIsolation: true`, `nodeIntegration: false`, `sandbox: true`, `webSecurity: true`
+- The window may navigate only to the local desk origin (`http://127.0.0.1:47830/` unless `SOCIAL_MCP_DESK_PORT` is set)
+- `will-navigate`, `will-redirect`, and `setWindowOpenHandler` use the same rule: other `http:` / `https:` URLs go to `shell.openExternal`; anything else is dropped. New Electron windows are not created
+- Desk stdout/stderr lines containing `token`, `secret`, `password`, `authorization`, `api_key`, or `oauth` are redacted before they are written
+
 ## Vault (unchanged)
 
-Credentials and tokens stay local in **`~/.social-mcp`** (override with `SOCIAL_MCP_HOME`). This shell does not move or re-encrypt the vault.
+Credentials and tokens stay local in **`~/.social-mcp`** (override with `SOCIAL_MCP_HOME`). This shell does not move, re-encrypt, or delete the vault. Uninstalling the zip layout or this checkout does not remove `~/.social-mcp`.
 
 ## This does not replace MCP
 
@@ -70,9 +81,22 @@ Credentials and tokens stay local in **`~/.social-mcp`** (override with `SOCIAL_
 
 Agents continue to use the MCP server. The desktop shell is optional chrome for humans.
 
+## Signing
+
+Blocked in this environment. There is no Apple Developer ID and no Windows Authenticode certificate here. Do not treat Gatekeeper or SmartScreen warnings as something this package bypasses.
+
+## Tests
+
+```bash
+cd packages/postpath-desktop
+npm test
+```
+
+The node tests do not launch Electron. They check navigation/redaction policy, that the download manifest checksums match the zip bytes, and that launchers do not contain credential literals.
+
 ## Out of scope (future)
 
-- Code signing / notarization
+- Code signing / notarization (no certificate in this environment)
 - Auto-update
 - Paid distribution infra
 - Forking desk or engine business logic into this package
