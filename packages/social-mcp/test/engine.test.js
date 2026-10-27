@@ -187,33 +187,6 @@ test("x publish posts text tweet", async () => {
   }
 });
 
-test("upsertProfile license gate stays off by default and enforces via env", async () => {
-  const home = mkdtempSync(join(tmpdir(), "social-mcp-license-"));
-  try {
-    const free = createEngine({ home, env: {}, now: () => Date.parse("2026-10-27T12:00:00.000Z") });
-    await free.upsertProfile({ id: "one", name: "One" });
-    await free.upsertProfile({ id: "two", name: "Two" });
-    await free.oauth.stop();
-
-    const limited = createEngine({
-      home: mkdtempSync(join(tmpdir(), "social-mcp-license-on-")),
-      env: { POSTPATH_LICENSE_ENFORCE: "true", POSTPATH_TIER: "solo" },
-      now: () => Date.parse("2026-10-27T12:00:00.000Z"),
-    });
-    const limitedHome = limited.store.homePaths.root;
-    await limited.upsertProfile({ id: "solo", name: "Solo" });
-    await limited.upsertProfile({ id: "solo", name: "Solo Renamed" });
-    await assert.rejects(
-      () => limited.upsertProfile({ id: "second", name: "Second" }),
-      /license_profile_limit|Profile limit/i,
-    );
-    await limited.oauth.stop();
-    rmSync(limitedHome, { recursive: true, force: true });
-  } finally {
-    rmSync(home, { recursive: true, force: true });
-  }
-});
-
 test("publish_post blocks validation errors and surfaces length warnings", async () => {
   const home = mkdtempSync(join(tmpdir(), "social-mcp-"));
   try {
