@@ -1,5 +1,6 @@
 import { readFileSync, statSync } from "node:fs";
 import { mcpError } from "../errors.js";
+import { resolveSafeMediaPath } from "../mediaPath.js";
 
 const TOKEN_URL = "https://open.tiktokapis.com/v2/oauth/token/";
 
@@ -41,16 +42,16 @@ async function ensureAccess({ secrets, oauth, fetchImpl, now = Date.now() }) {
 
 export async function publishTikTokInboxFromFile({
   post,
-  filePath,
+  mediaRoot,
   secrets,
   oauth,
   fetchImpl = fetch,
   onSecrets,
 }) {
+  const filePath = resolveSafeMediaPath(post.media_path, mediaRoot);
   const fresh = await ensureAccess({ secrets, oauth, fetchImpl });
   if (onSecrets && fresh !== secrets) await onSecrets(fresh);
   const stat = statSync(filePath);
-  if (!stat.size) throw mcpError("invalid_media", "Video file is empty.");
 
   const init = await fetchImpl("https://open.tiktokapis.com/v2/post/publish/inbox/video/init/", {
     method: "POST",

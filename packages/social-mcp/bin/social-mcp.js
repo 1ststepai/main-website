@@ -32,6 +32,7 @@ TIKTOK_CLIENT_SECRET=
     // Touch vault key + db through engine construction.
     createEngine();
     console.log(`Social MCP ready at ${homePaths.root}`);
+    console.log(`Media directory: ${homePaths.mediaDir}`);
     console.log(`OAuth env template: ${homePaths.envExample}`);
     console.log("Redirect URI: http://127.0.0.1:47831/oauth/callback");
     return;
@@ -49,7 +50,8 @@ TIKTOK_CLIENT_SECRET=
     const name = args[2] || profileId;
     if (!profileId) {
       console.error("Usage: social-mcp connect <profile_id> [display_name]");
-      process.exit(1);
+      process.exitCode = 1;
+      return;
     }
     const engine = createEngine();
     await engine.upsertProfile({ id: profileId, name });
@@ -68,10 +70,12 @@ Usage:
   social-mcp status          # show profiles/connections
   social-mcp connect <id>    # open browser connect chain
 `);
-  process.exit(1);
+  process.exitCode = 1;
 }
 
-main().catch((error) => {
+try {
+  await main();
+} catch (error) {
   console.error(error.message || error);
-  process.exit(1);
-});
+  process.exitCode = 1;
+}

@@ -28,21 +28,22 @@ function requireEnv(env, name, label) {
   return value;
 }
 
-export function oauthConfig(env = process.env, redirectUri) {
+export function oauthConfig(env, redirectUri) {
+  const source = env || process.env;
   return {
     google: {
-      clientId: String(env.GOOGLE_OAUTH_CLIENT_ID || "").trim(),
-      clientSecret: String(env.GOOGLE_OAUTH_CLIENT_SECRET || "").trim(),
+      clientId: String(source.GOOGLE_OAUTH_CLIENT_ID || "").trim(),
+      clientSecret: String(source.GOOGLE_OAUTH_CLIENT_SECRET || "").trim(),
       redirectUri,
     },
     meta: {
-      appId: String(env.META_APP_ID || "").trim(),
-      appSecret: String(env.META_APP_SECRET || "").trim(),
+      appId: String(source.META_APP_ID || "").trim(),
+      appSecret: String(source.META_APP_SECRET || "").trim(),
       redirectUri,
     },
     tiktok: {
-      clientKey: String(env.TIKTOK_CLIENT_KEY || "").trim(),
-      clientSecret: String(env.TIKTOK_CLIENT_SECRET || "").trim(),
+      clientKey: String(source.TIKTOK_CLIENT_KEY || "").trim(),
+      clientSecret: String(source.TIKTOK_CLIENT_SECRET || "").trim(),
       redirectUri,
     },
   };
@@ -115,107 +116,110 @@ async function readJson(response) {
   }
 }
 
-export async function exchangeCode(provider, { code, config, fetchImpl = fetch }) {
-  assertProviderConfigured(provider, config);
-  if (provider === "youtube") {
-    const response = await fetchImpl(GOOGLE_TOKEN, {
-      method: "POST",
-      headers: { "content-type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        code,
-        client_id: config.google.clientId,
-        client_secret: config.google.clientSecret,
-        redirect_uri: config.google.redirectUri,
-        grant_type: "authorization_code",
-      }),
-    });
-    const payload = await readJson(response);
-    if (!response.ok || !payload.refresh_token || !payload.access_token) {
-      throw mcpError("oauth_failed", "Google did not return a refresh token. Allow offline access and try again.", 502);
-    }
-    const channel = await fetchYouTubeChannel(payload.access_token, fetchImpl);
-    return {
-      platforms: {
-        youtube: {
-          record: {
-            platform: "youtube",
-            account_label: channel.account_label,
-            channel_id: channel.channel_id,
-          },
-          secrets: {
-            refresh_token: payload.refresh_token,
-            access_token: payload.access_token,
-            expires_at: new Date(Date.now() + (Number(payload.expires_in) || 3600) * 1000).toISOString(),
-            scope: String(payload.scope || ""),
-          },
+async function exchangeGoogleCode(code, config, fetchImpl) {
+  const response = await fetchImpl(GOOGLE_TOKEN, {
+    method: "POST",
+    headers: { "content-type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      code,
+      client_id: config.google.clientId,
+      client_secret: config.google.clientSecret,
+      redirect_uri: config.google.redirectUri,
+      grant_type: "authorization_code",
+    }),
+  });
+  const payload = await readJson(response);
+  if (!response.ok || !payload.refresh_token || !payload.access_token) {
+    throw mcpError("oauth_failed", "Google did not return a refresh token. Allow offline access and try again.", 502);
+  }
+  const channel = await fetchYouTubeChannel(payload.access_token, fetchImpl);
+  return {
+    platforms: {
+      youtube: {
+        record: {
+          platform: "youtube",
+          account_label: channel.account_label,
+          channel_id: channel.channel_id,
+        },
+        secrets: {
+          refresh_token: payload.refresh_token,
+          access_token: payload.access_token,
+          expires_at: new Date(Date.now() + (Number(payload.expires_in) || 3600) * 1000).toISOString(),
+          scope: String(payload.scope || ""),
         },
       },
-    };
-  }
+    },
+  };
+}
 
-  if (provider === "meta") {
-    const short = await fetchImpl(`${META_GRAPH}/oauth/access_token`, {
-      method: "POST",
-      headers: { "content-type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        client_id: config.meta.appId,
-        client_secret: config.meta.appSecret,
-        redirect_uri: config.meta.redirectUri,
-        code,
-      }),
-    });
-    const shortPayload = await readJson(short);
-    if (!short.ok || !shortPayload.access_token) {
-      throw mcpError("oauth_failed", "Meta did not return an access token.", 502);
-    }
-    const exchange = new URLSearchParams({
-      grant_type: "fb_exchange_token",
+function metaSecrets(pageToken, userToken, expiresIn) {
+  return {
+    page_access_token: pageToken,
+    user_access_token: userToken,
+    expires_at: new Date(Date.now() + expiresIn * 1000).toISOString(),
+  };
+}
+
+async function exchangeMetaCode(code, config, fetchImpl) {
+  const short = await fetchImpl(`${META_GRAPH}/oauth/access_token`, {
+    method: "POST",
+    headers: { "content-type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
       client_id: config.meta.appId,
       client_secret: config.meta.appSecret,
-      fb_exchange_token: shortPayload.access_token,
-    });
-    const longLived = await fetchImpl(`${META_GRAPH}/oauth/access_token?${exchange}`);
-    const longPayload = await readJson(longLived);
-    const userToken = longLived.ok && longPayload.access_token ? longPayload.access_token : shortPayload.access_token;
-    const expiresIn = Number(longPayload.expires_in || shortPayload.expires_in) || 60 * 24 * 60 * 60;
-    const pages = await fetchMetaPages(userToken, fetchImpl);
-    if (!pages.length) {
-      throw mcpError("oauth_failed", "No Facebook Pages were found for that Meta login.", 502);
-    }
-    const page = pages[0];
-    const platforms = {
-      facebook: {
-        record: {
-          platform: "facebook",
-          account_label: page.name,
-          page_id: page.id,
-          instagram_id: page.instagram_id || null,
-        },
-        secrets: {
-          page_access_token: page.access_token,
-          user_access_token: userToken,
-          expires_at: new Date(Date.now() + expiresIn * 1000).toISOString(),
-        },
-      },
-    };
-    if (page.instagram_id) {
-      platforms.instagram = {
-        record: {
-          platform: "instagram",
-          account_label: page.instagram_username ? `@${page.instagram_username}` : page.instagram_id,
-          instagram_id: page.instagram_id,
-          page_id: page.id,
-        },
-        secrets: {
-          page_access_token: page.access_token,
-          user_access_token: userToken,
-          expires_at: new Date(Date.now() + expiresIn * 1000).toISOString(),
-        },
-      };
-    }
-    return { platforms, meta_pages: pages.map((item) => ({ id: item.id, name: item.name, instagram_id: item.instagram_id })) };
+      redirect_uri: config.meta.redirectUri,
+      code,
+    }),
+  });
+  const shortPayload = await readJson(short);
+  if (!short.ok || !shortPayload.access_token) {
+    throw mcpError("oauth_failed", "Meta did not return an access token.", 502);
   }
+  const exchange = new URLSearchParams({
+    grant_type: "fb_exchange_token",
+    client_id: config.meta.appId,
+    client_secret: config.meta.appSecret,
+    fb_exchange_token: shortPayload.access_token,
+  });
+  const longLived = await fetchImpl(`${META_GRAPH}/oauth/access_token?${exchange}`);
+  const longPayload = await readJson(longLived);
+  const userToken = longLived.ok && longPayload.access_token ? longPayload.access_token : shortPayload.access_token;
+  const expiresIn = Number(longPayload.expires_in || shortPayload.expires_in) || 60 * 24 * 60 * 60;
+  const pages = await fetchMetaPages(userToken, fetchImpl);
+  if (!pages.length) {
+    throw mcpError("oauth_failed", "No Facebook Pages were found for that Meta login.", 502);
+  }
+  const page = pages[0];
+  const secrets = metaSecrets(page.access_token, userToken, expiresIn);
+  const platforms = {
+    facebook: {
+      record: {
+        platform: "facebook",
+        account_label: page.name,
+        page_id: page.id,
+        instagram_id: page.instagram_id || null,
+      },
+      secrets,
+    },
+  };
+  if (page.instagram_id) {
+    platforms.instagram = {
+      record: {
+        platform: "instagram",
+        account_label: page.instagram_username ? `@${page.instagram_username}` : page.instagram_id,
+        instagram_id: page.instagram_id,
+        page_id: page.id,
+      },
+      secrets,
+    };
+  }
+  return {
+    platforms,
+    meta_pages: pages.map((item) => ({ id: item.id, name: item.name, instagram_id: item.instagram_id })),
+  };
+}
 
+async function exchangeTikTokCode(code, config, fetchImpl) {
   const response = await fetchImpl(TIKTOK_TOKEN, {
     method: "POST",
     headers: { "content-type": "application/x-www-form-urlencoded" },
@@ -251,6 +255,14 @@ export async function exchangeCode(provider, { code, config, fetchImpl = fetch }
       },
     },
   };
+}
+
+export async function exchangeCode(provider, { code, config, fetchImpl = fetch }) {
+  assertProviderConfigured(provider, config);
+  if (provider === "youtube") return exchangeGoogleCode(code, config, fetchImpl);
+  if (provider === "meta") return exchangeMetaCode(code, config, fetchImpl);
+  if (provider === "tiktok") return exchangeTikTokCode(code, config, fetchImpl);
+  throw mcpError("invalid_provider", "Unknown OAuth provider.");
 }
 
 async function fetchYouTubeChannel(accessToken, fetchImpl) {

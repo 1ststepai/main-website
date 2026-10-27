@@ -12,10 +12,12 @@ Tools like Ayrshare charge recurring fees to sit between you and YouTube / Meta 
 
 | Platform | Connect | Publish |
 | --- | --- | --- |
-| YouTube | Google OAuth | Local `media_path` resumable upload |
+| YouTube | Google OAuth | Local `media_path` under `~/.social-mcp/media` |
 | Instagram | Meta OAuth (with Page) | Requires `media_url` (https) |
 | Facebook Page | Meta OAuth | Requires `media_url` (https) |
-| TikTok | TikTok Login Kit | Local `media_path` → creator inbox |
+| TikTok | TikTok Login Kit | Local `media_path` under media dir → creator inbox |
+
+Local video files must live inside the vault media directory (`status.media_dir`). That keeps path traversal closed and is the supported agent workflow: copy or save the clip there, then pass that path.
 
 ## Quick start
 
@@ -79,7 +81,7 @@ Add to Cursor MCP settings (path adjusted for your machine):
 - `upsert_profile` — create/update a brand or user
 - `list_accounts` — connected networks
 - `connect_accounts` — YouTube → Meta → TikTok browser chain
-- `create_draft` / `update_draft` — local drafts
+- `create_draft` / `update_draft` — local drafts (`media_path` must be under the media dir)
 - `schedule_post` — ISO schedule time
 - `publish_post` — publish now (`force` for early scheduled)
 - `publish_due` — flush due scheduled posts

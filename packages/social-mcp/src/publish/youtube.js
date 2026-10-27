@@ -1,5 +1,6 @@
 import { createReadStream, statSync } from "node:fs";
 import { mcpError } from "../errors.js";
+import { resolveSafeMediaPath } from "../mediaPath.js";
 
 const TOKEN_URL = "https://oauth2.googleapis.com/token";
 const CHUNK = 2 * 1024 * 1024;
@@ -42,17 +43,17 @@ async function ensureAccess({ secrets, oauth, fetchImpl, now = Date.now() }) {
 
 export async function publishYouTubeFromFile({
   post,
-  filePath,
+  mediaRoot,
   secrets,
   oauth,
   fetchImpl = fetch,
   onSecrets,
 }) {
+  const filePath = resolveSafeMediaPath(post.media_path, mediaRoot);
   const fresh = await ensureAccess({ secrets, oauth, fetchImpl });
   if (onSecrets && fresh !== secrets) await onSecrets(fresh);
 
   const stat = statSync(filePath);
-  if (!stat.size) throw mcpError("invalid_media", "Video file is empty.");
 
   const metadata = {
     snippet: {

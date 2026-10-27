@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
@@ -15,7 +15,9 @@ test("missingProviders reports youtube meta tiktok gaps", () => {
 
 test("draft schedule and due publish path for youtube", async () => {
   const home = mkdtempSync(join(tmpdir(), "social-mcp-"));
-  const media = join(home, "clip.mp4");
+  const mediaDir = join(home, "media");
+  mkdirSync(mediaDir, { recursive: true });
+  const media = join(mediaDir, "clip.mp4");
   writeFileSync(media, Buffer.alloc(2048, 1));
   const calls = [];
   const fetchImpl = async (url, init = {}) => {
@@ -84,6 +86,7 @@ test("draft schedule and due publish path for youtube", async () => {
       privacy_status: "private",
     });
     assert.equal(post.status, "draft");
+    assert.equal(post.media_path, media);
     const scheduled = await engine.schedulePost({
       post_id: post.id,
       scheduled_at: "2026-10-27T12:05:00.000Z",
@@ -92,7 +95,6 @@ test("draft schedule and due publish path for youtube", async () => {
 
     await assert.rejects(() => engine.publishPost({ post_id: post.id }), /scheduled for later/);
 
-    // Jump clock past schedule.
     const dueEngine = createEngine({
       home,
       env: {
@@ -108,6 +110,28 @@ test("draft schedule and due publish path for youtube", async () => {
     assert.equal(published.results[0].post.platform_post_id, "vid123");
     assert.ok(calls.some((call) => call.url.includes("uploadType=resumable")));
     await dueEngine.oauth.stop();
+    await engine.oauth.stop();
+  } finally {
+    rmSync(home, { recursive: true, force: true });
+  }
+});
+
+test("rejects media_path outside the vault media directory", async () => {
+  const home = mkdtempSync(join(tmpdir(), "social-mcp-"));
+  const outside = join(home, "outside.mp4");
+  writeFileSync(outside, Buffer.alloc(64, 1));
+  try {
+    const engine = createEngine({ home, now: () => Date.parse("2026-10-27T12:00:00.000Z") });
+    await engine.upsertProfile({ id: "acme", name: "Acme" });
+    await assert.rejects(
+      () =>
+        engine.createDraft({
+          profile_id: "acme",
+          platform: "youtube",
+          media_path: outside,
+        }),
+      /media directory/,
+    );
     await engine.oauth.stop();
   } finally {
     rmSync(home, { recursive: true, force: true });
@@ -133,7 +157,6 @@ test("meta publish requires https media_url", async () => {
       profile_id: "acme",
       platform: "instagram",
       caption: "hello",
-      media_path: join(home, "missing.mp4"),
     });
     await assert.rejects(() => engine.publishPost({ post_id: post.id }), /media_url/);
     await engine.oauth.stop();

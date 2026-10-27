@@ -14,6 +14,26 @@ function emptyDb() {
   };
 }
 
+function connectionKey(profileId, platform) {
+  return `${profileId}:${platform}`;
+}
+
+function normalizeProfileId(id) {
+  const raw = String(id || "").trim().toLowerCase();
+  let out = "";
+  for (const ch of raw) {
+    if ((ch >= "a" && ch <= "z") || (ch >= "0" && ch <= "9") || ch === "_" || ch === "-") {
+      out += ch;
+    } else if (out && !out.endsWith("-")) {
+      out += "-";
+    }
+    if (out.length >= 64) break;
+  }
+  while (out.startsWith("-")) out = out.slice(1);
+  while (out.endsWith("-")) out = out.slice(0, -1);
+  return out.slice(0, 64);
+}
+
 export function createStore({ home, env = process.env, now = () => Date.now() } = {}) {
   const homePaths = paths(home);
   const key = loadOrCreateKey(homePaths, env);
@@ -34,13 +54,8 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
   }
 
   function upsertProfile({ id, name }) {
-    const profileId = String(id || "")
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z0-9_-]+/g, "-")
-      .replace(/^-+|-+$/g, "")
-      .slice(0, 64);
-    if (!/^[a-z0-9][a-z0-9_-]{1,63}$/.test(profileId)) {
+    const profileId = normalizeProfileId(id);
+    if (profileId.length < 2 || !/^[a-z0-9]/.test(profileId)) {
       throw mcpError("invalid_profile", "Profile id must be 2–64 chars: letters, numbers, _ or -.");
     }
     const stamp = new Date(now()).toISOString();
@@ -54,10 +69,6 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
     db.profiles[profileId] = profile;
     persist();
     return profile;
-  }
-
-  function connectionKey(profileId, platform) {
-    return `${profileId}:${platform}`;
   }
 
   function listConnections(profileId) {

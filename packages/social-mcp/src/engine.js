@@ -1,7 +1,6 @@
-import { existsSync } from "node:fs";
-import { resolve } from "node:path";
 import { PLATFORMS } from "./home.js";
 import { mcpError } from "./errors.js";
+import { resolveSafeMediaPath } from "./mediaPath.js";
 import { createStore } from "./store.js";
 import { createOAuthRuntime } from "./oauth/server.js";
 import { oauthConfig } from "./oauth/providers.js";
@@ -11,9 +10,15 @@ import { publishMetaReel } from "./publish/meta.js";
 
 const POST_STATUSES = ["draft", "scheduled", "publishing", "published", "handed_off", "failed"];
 
+function optionalMediaPath(value, mediaRoot) {
+  if (value === undefined || value === null || value === "") return null;
+  return resolveSafeMediaPath(String(value), mediaRoot);
+}
+
 export function createEngine({ home, env = process.env, fetchImpl = fetch, now = () => Date.now() } = {}) {
   const store = createStore({ home, env, now });
   const oauth = createOAuthRuntime({ store, env, fetchImpl });
+  const mediaRoot = store.homePaths.mediaDir;
 
   function requireProfile(profileId) {
     const profile = store.getProfile(profileId);
@@ -24,6 +29,7 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
   function publicStatus() {
     return {
       home: store.homePaths.root,
+      media_dir: mediaRoot,
       profiles: store.listProfiles(),
       connections: store.listConnections(),
       oauth_redirect_uri: oauth.redirectUri,
@@ -70,7 +76,7 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
       caption: String(input.caption || input.description || "").slice(0, 2200),
       tags: Array.isArray(input.tags) ? input.tags.map((tag) => String(tag).slice(0, 40)).slice(0, 30) : [],
       privacy_status: ["private", "unlisted", "public"].includes(input.privacy_status) ? input.privacy_status : "private",
-      media_path: input.media_path ? resolve(String(input.media_path)) : null,
+      media_path: optionalMediaPath(input.media_path, mediaRoot),
       media_url: input.media_url ? String(input.media_url).slice(0, 2000) : null,
       media_content_type: String(input.media_content_type || "video/mp4").slice(0, 80),
       scheduled_at: null,
@@ -98,13 +104,13 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
     if (!["draft", "scheduled", "failed"].includes(post.status)) {
       throw mcpError("invalid_status", "Only draft, scheduled, or failed posts can be edited.", 409);
     }
-    const fields = ["title", "description", "caption", "privacy_status", "media_path", "media_url", "media_content_type"];
-    for (const field of fields) {
-      if (input[field] === undefined) continue;
-      if (field === "media_path") post.media_path = input.media_path ? resolve(String(input.media_path)) : null;
-      else if (field === "tags" && Array.isArray(input.tags)) post.tags = input.tags.map((tag) => String(tag).slice(0, 40)).slice(0, 30);
-      else post[field] = input[field];
-    }
+    if (input.title !== undefined) post.title = String(input.title).slice(0, 100);
+    if (input.description !== undefined) post.description = String(input.description).slice(0, 5000);
+    if (input.caption !== undefined) post.caption = String(input.caption).slice(0, 2200);
+    if (input.privacy_status !== undefined) post.privacy_status = input.privacy_status;
+    if (input.media_content_type !== undefined) post.media_content_type = String(input.media_content_type).slice(0, 80);
+    if (input.media_url !== undefined) post.media_url = input.media_url ? String(input.media_url).slice(0, 2000) : null;
+    if (input.media_path !== undefined) post.media_path = optionalMediaPath(input.media_path, mediaRoot);
     if (Array.isArray(input.tags)) {
       post.tags = input.tags.map((tag) => String(tag).slice(0, 40)).slice(0, 30);
     }
@@ -145,15 +151,53 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
     return { posts: store.listPosts({ profileId: input.profile_id, status: input.status }) };
   }
 
-  async function publishPost({ post_id, force = false }) {
-    const post = store.getPost(post_id);
-    if (!post) throw mcpError("not_found", "Post not found.", 404);
+  function assertPublishable(post, force) {
     if (!force && post.status === "scheduled" && post.scheduled_at && Date.parse(post.scheduled_at) > now()) {
       throw mcpError("not_due", "Post is scheduled for later. Pass force=true to publish now.", 409);
     }
     if (!["draft", "scheduled", "failed"].includes(post.status)) {
       throw mcpError("invalid_status", `Cannot publish from status ${post.status}.`, 409);
     }
+  }
+
+  async function dispatchPublish(post, connection, secrets, config) {
+    if (post.platform === "youtube") {
+      return publishYouTubeFromFile({
+        post,
+        mediaRoot,
+        secrets,
+        oauth: config.google,
+        fetchImpl,
+        onSecrets: async (next) => store.updateSecrets(post.profile_id, "youtube", next),
+      });
+    }
+    if (post.platform === "tiktok") {
+      return publishTikTokInboxFromFile({
+        post,
+        mediaRoot,
+        secrets,
+        oauth: config.tiktok,
+        fetchImpl,
+        onSecrets: async (next) => store.updateSecrets(post.profile_id, "tiktok", next),
+      });
+    }
+    if (post.platform === "instagram" || post.platform === "facebook") {
+      return publishMetaReel({
+        post,
+        platform: post.platform,
+        connection,
+        secrets,
+        fetchImpl,
+      });
+    }
+    throw mcpError("unsupported_platform", "Platform is not supported yet.");
+  }
+
+  async function publishPost({ post_id, force = false }) {
+    const post = store.getPost(post_id);
+    if (!post) throw mcpError("not_found", "Post not found.", 404);
+    assertPublishable(post, force);
+
     const connection = store.getConnection(post.profile_id, post.platform);
     if (!connection) throw mcpError("not_connected", `${post.platform} is not connected for this profile.`, 409);
     const secrets = store.readSecrets(post.profile_id, post.platform);
@@ -166,43 +210,7 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
 
     const config = oauthConfig(env, oauth.redirectUri);
     try {
-      let result;
-      if (post.platform === "youtube") {
-        if (!post.media_path || !existsSync(post.media_path)) {
-          throw mcpError("media_missing", "Set media_path to a local video file before publishing YouTube.");
-        }
-        result = await publishYouTubeFromFile({
-          post,
-          filePath: post.media_path,
-          secrets,
-          oauth: config.google,
-          fetchImpl,
-          onSecrets: async (next) => store.updateSecrets(post.profile_id, "youtube", next),
-        });
-      } else if (post.platform === "tiktok") {
-        if (!post.media_path || !existsSync(post.media_path)) {
-          throw mcpError("media_missing", "Set media to a local video file before publishing TikTok.");
-        }
-        result = await publishTikTokInboxFromFile({
-          post,
-          filePath: post.media_path,
-          secrets,
-          oauth: config.tiktok,
-          fetchImpl,
-          onSecrets: async (next) => store.updateSecrets(post.profile_id, "tiktok", next),
-        });
-      } else if (post.platform === "instagram" || post.platform === "facebook") {
-        result = await publishMetaReel({
-          post,
-          platform: post.platform,
-          connection,
-          secrets,
-          fetchImpl,
-        });
-      } else {
-        throw mcpError("unsupported_platform", "Platform is not supported yet.");
-      }
-
+      const result = await dispatchPublish(post, connection, secrets, config);
       post.platform_post_id = result.platform_post_id || null;
       post.published_url = result.published_url || null;
       post.status = result.handoff ? "handed_off" : "published";
@@ -232,14 +240,14 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
       .listPosts({ profileId: profile_id, status: "scheduled" })
       .filter((post) => post.scheduled_at && Date.parse(post.scheduled_at) <= now())
       .slice(0, Math.max(1, Math.min(20, Number(limit) || 5)));
-    const results = [];
-    for (const post of due) {
-      try {
-        results.push(await publishPost({ post_id: post.id, force: true }));
-      } catch (error) {
-        results.push({ post_id: post.id, error: { code: error.code, message: error.message } });
-      }
-    }
+    const settled = await Promise.allSettled(due.map((post) => publishPost({ post_id: post.id, force: true })));
+    const results = settled.map((item, index) => {
+      if (item.status === "fulfilled") return item.value;
+      return {
+        post_id: due[index].id,
+        error: { code: item.reason?.code || "publish_failed", message: item.reason?.message || "Publish failed." },
+      };
+    });
     return { count: results.length, results };
   }
 

@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import { createServer } from "node:http";
 import { spawn } from "node:child_process";
 import { CONNECT_ORDER, DEFAULT_OAUTH_PORT } from "../home.js";
@@ -17,14 +18,29 @@ function htmlPage(title, body) {
 <body><main><h1>${title}</h1>${body}</main></body></html>`;
 }
 
+const BROWSER_OPENERS = {
+  darwin: "/usr/bin/open",
+  linux: "/usr/bin/xdg-open",
+  win32: process.env.SystemRoot ? `${process.env.SystemRoot}\\System32\\cmd.exe` : "",
+};
+
 function openBrowser(url) {
-  const platform = process.platform;
   try {
-    if (platform === "darwin") spawn("open", [url], { detached: true, stdio: "ignore" }).unref();
-    else if (platform === "win32") spawn("cmd", ["/c", "start", "", url], { detached: true, stdio: "ignore" }).unref();
-    else spawn("xdg-open", [url], { detached: true, stdio: "ignore" }).unref();
+    if (!/^https:\/\//i.test(url) && !/^http:\/\/127\.0\.0\.1(?::\d+)?\//i.test(url)) return;
+    const platform = process.platform;
+    if (platform === "darwin" && existsSync(BROWSER_OPENERS.darwin)) {
+      spawn(BROWSER_OPENERS.darwin, [url], { detached: true, stdio: "ignore" }).unref();
+      return;
+    }
+    if (platform === "linux" && existsSync(BROWSER_OPENERS.linux)) {
+      spawn(BROWSER_OPENERS.linux, [url], { detached: true, stdio: "ignore" }).unref();
+      return;
+    }
+    if (platform === "win32" && BROWSER_OPENERS.win32 && existsSync(BROWSER_OPENERS.win32)) {
+      spawn(BROWSER_OPENERS.win32, ["/c", "start", "", url], { detached: true, stdio: "ignore" }).unref();
+    }
   } catch {
-    // User can open the URL manually.
+    // Caller still returns authorize_url for manual open.
   }
 }
 
