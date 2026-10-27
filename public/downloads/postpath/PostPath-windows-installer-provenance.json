@@ -1,0 +1,13 @@
+{
+  "filename": "PostPath-0.1.0-windows-unsigned-internal-preview.exe",
+  "version": "0.1.0",
+  "gitSha": "87745d180b03136a6e059b5b8a26f0ec7587e2fb",
+  "sha256": "3c79455c8ad4b9329a276ab30ace075e729cb9bebe8cd6fe99c09185d27b3eb5",
+  "bytes": 98703443,
+  "signed": false,
+  "kind": "unsigned-internal-preview",
+  "platform": "Windows",
+  "runtime": "Electron bundled; system Node.js is not required",
+  "smartScreen": "Leave SmartScreen enabled. Windows will warn because this build is unsigned.",
+  "testedOnWindows": false
+}
