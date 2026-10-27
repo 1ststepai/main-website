@@ -40,7 +40,7 @@ Not in this lane: payment SDKs, prices, checkout URLs, seat counts beyond the ex
 
 `true` is case-insensitive for enforce and revocation. Revocation wins over expiry. An unparseable expiry wins over a past instant. Blank expiry is unset. Early access stays usable whenever enforce is off.
 
-`assertActionAllowed("create_profile" | "publish", entitlement)` is the action gate. Unknown actions throw `license_unknown_action` (400). Profile counts stay on `assertProfileAllowed`, so a disabled stub can still reject a new profile there while `assertActionAllowed` allows the action.
+`assertActionAllowed("create_profile" | "publish", entitlement)` is the action gate. Unknown actions throw `license_unknown_action` (400). Profile counts stay on `assertProfileAllowed`, so a disabled stub can still reject a new profile there while `assertActionAllowed` allows the action. The engine calls `create_profile` before a new profile is saved and `publish` before `claimPost`. Defaults still allow both.
 
 ## Offline
 

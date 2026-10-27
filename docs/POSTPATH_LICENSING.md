@@ -89,11 +89,11 @@ When `entitlement.enforce` is false, both actions are allowed, including revoked
 
 When enforce is true, `revoked` throws `license_revoked` (403), `expired` throws `license_expired` (403), and `invalid` throws `license_invalid_expiry` (403). `active_stub` is allowed here; profile caps remain on `assertProfileAllowed`.
 
-`assertActionAllowed` is exported for a later integrator. The engine does not call it yet.
+`engine.upsertProfile` calls `assertActionAllowed("create_profile")` before the profile cap when the profile is new. `engine.publishPost` calls `assertActionAllowed("publish")` before it claims the post, so a blocked entitlement does not start dispatch. With the default (`enforce=false`) both calls allow the action.
 
 ## Engine wiring
 
-`upsert_profile` / `engine.upsertProfile` calls `assertProfileAllowed` when creating a **new** profile. Existing profile updates are always allowed. With defaults (`enforce=false`) this is a no-op and profiles stay unlimited.
+`upsert_profile` / `engine.upsertProfile` calls `assertActionAllowed("create_profile")` and then `assertProfileAllowed` when creating a **new** profile. Existing profile updates are always allowed. `publishPost` calls `assertActionAllowed("publish")` before `claimPost`. With defaults (`enforce=false`) these checks allow the action and profiles stay unlimited.
 
 ## Evan dependency
 

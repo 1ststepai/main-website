@@ -16,7 +16,7 @@ import { publishGoogleBusinessPost } from "./publish/google_business.js";
 import { publishRedditPost } from "./publish/reddit.js";
 import { publishSnapchatScaffold, publishWhatsAppScaffold } from "./publish/restricted.js";
 import { validateDraftForPublish } from "./publish/validate.js";
-import { assertProfileAllowed, getLicenseState } from "./license.js";
+import { assertActionAllowed, assertProfileAllowed, getEntitlement } from "./license.js";
 
 const ISO_OFFSET = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$/i;
 const DISPATCH_STARTED_MESSAGE =
@@ -120,8 +120,9 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
     const profiles = store.listProfiles();
     const existing = store.getProfile(normalizeProfileId(input?.id));
     if (!existing) {
-      const license = getLicenseState(env);
-      assertProfileAllowed(profiles.length + 1, license);
+      const entitlement = getEntitlement(env);
+      assertActionAllowed("create_profile", entitlement);
+      assertProfileAllowed(profiles.length + 1, entitlement);
     }
     const profile = store.upsertProfile(input);
     store.appendAudit({
@@ -490,6 +491,7 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
   async function publishPost({ post_id, force = false, acknowledge = false, claimFrom = null } = {}) {
     const post = store.getPost(post_id);
     if (!post) throw mcpError("not_found", "Post not found.", 404);
+    assertActionAllowed("publish", getEntitlement(env));
     assertPublishable(post, force, acknowledge);
     if (claimFrom && !claimFrom.includes(post.status)) {
       return { post, skipped: "cancelled_before_dispatch" };

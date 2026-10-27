@@ -368,6 +368,49 @@ test("assertActionAllowed allows known actions when enforce is false and rejects
   );
 });
 
+test("enforced revocation blocks publish before fetch and blocks a new profile", async () => {
+  const env = { X_CLIENT_ID: "xid", X_CLIENT_SECRET: "xsecret" };
+  let fetches = 0;
+  const home = mkdtempSync(join(tmpdir(), "social-mcp-lic-pub-"));
+  const engine = createEngine({
+    home,
+    env,
+    fetchImpl: async () => {
+      fetches += 1;
+      return {
+        ok: true,
+        status: 201,
+        headers: { get: () => "" },
+        text: async () => JSON.stringify({ data: { id: "should-not-send" } }),
+      };
+    },
+    now: () => Date.parse("2026-01-15T00:00:00.000Z"),
+  });
+  try {
+    await engine.upsertProfile({ id: "acme", name: "Acme" });
+    engine.store.saveConnection(
+      { profile_id: "acme", platform: "x", account_label: "@acme", user_id: "1" },
+      { access_token: "token-a", refresh_token: "refresh-a", expires_at: "2099-01-01T00:00:00.000Z" },
+    );
+    const { post } = await engine.createDraft({ profile_id: "acme", platform: "x", caption: "hello" });
+    env.POSTPATH_LICENSE_ENFORCE = "true";
+    env.POSTPATH_LICENSE_REVOKED = "true";
+    await assert.rejects(
+      () => engine.publishPost({ post_id: post.id }),
+      (error) => error.code === "license_revoked",
+    );
+    assert.equal(fetches, 0);
+    assert.equal(engine.store.getPost(post.id).status, "draft");
+    await assert.rejects(
+      () => engine.upsertProfile({ id: "second", name: "Second" }),
+      (error) => error.code === "license_revoked",
+    );
+  } finally {
+    await engine.oauth.stop();
+    rmSync(home, { recursive: true, force: true });
+  }
+});
+
 test("license evaluation is offline and uses only the env object", () => {
   const source = readFileSync(new URL("../src/license.js", import.meta.url), "utf8");
   assert.equal(/\bfetch\b/.test(source), false);
