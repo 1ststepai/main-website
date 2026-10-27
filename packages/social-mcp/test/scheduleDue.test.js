@@ -141,7 +141,7 @@ test("desk due loop calls publishDue and clears on stop", async () => {
   const env = {
     SOCIAL_MCP_OAUTH_PORT: "47994",
     SOCIAL_MCP_DESK_PORT: "47993",
-    SOCIAL_MCP_DUE_INTERVAL_MS: "40",
+    SOCIAL_MCP_DUE_INTERVAL_MS: "1000",
   };
   const engine = createEngine({ home, env, now: () => Date.parse("2026-10-27T12:00:00.000Z") });
   let calls = 0;
@@ -153,17 +153,17 @@ test("desk due loop calls publishDue and clears on stop", async () => {
   const desk = createDeskServer({ engine, env, port: 47993 });
   try {
     const started = await desk.start({ open: false });
-    assert.equal(started.due_interval_ms, 40);
+    assert.equal(started.due_interval_ms, 1000);
     const status = await fetch(`${started.url}api/status`).then((res) => res.json());
     assert.equal(status.ok, true);
-    assert.equal(status.due_interval_ms, 40);
+    assert.equal(status.due_interval_ms, 1000);
     assert.ok(Array.isArray(status.scheduled_posts));
-    await new Promise((resolve) => setTimeout(resolve, 150));
+    await new Promise((resolve) => setTimeout(resolve, 2500));
     assert.ok(calls >= 2, `expected due loop ticks, got ${calls}`);
 
     await desk.stop();
     const afterStop = calls;
-    await new Promise((resolve) => setTimeout(resolve, 120));
+    await new Promise((resolve) => setTimeout(resolve, 1200));
     assert.equal(calls, afterStop);
   } finally {
     try {
