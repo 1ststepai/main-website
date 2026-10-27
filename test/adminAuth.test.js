@@ -156,13 +156,14 @@ test("mobile TOTP-only admin login is mobile-scoped and can be disabled", () => 
   }
 });
 
-test("local admin styles can load while the production response keeps inline styles blocked", () => {
+test("admin studio content security policy blocks inline styles", () => {
   const adminHtml = readFileSync(new URL("../admin/index.html", import.meta.url), "utf8");
   const vercel = JSON.parse(readFileSync(new URL("../vercel.json", import.meta.url), "utf8"));
   const adminHeaders = vercel.headers.find((entry) => entry.source === "/admin/(.*)")?.headers || [];
   const productionCsp = adminHeaders.find((header) => header.key === "Content-Security-Policy")?.value || "";
 
-  assert.match(adminHtml, /style-src 'self' 'unsafe-inline'/);
+  assert.match(adminHtml, /style-src 'self'/);
+  assert.doesNotMatch(adminHtml, /style-src[^;]*'unsafe-inline'/);
   assert.match(productionCsp, /style-src 'self'/);
   assert.doesNotMatch(productionCsp, /style-src[^;]*'unsafe-inline'/);
 });

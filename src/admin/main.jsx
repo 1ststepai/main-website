@@ -969,9 +969,15 @@ function JobAgentOperationsPage({ previewMode }) {
   }
 
   useEffect(() => {
-    loadOperations();
+    const refreshOperations = () => {
+      loadOperations().catch((error) => {
+        console.error(error);
+        setError(error?.message || "Live Job Agent operations are temporarily unavailable.");
+      });
+    };
+    refreshOperations();
     if (previewMode) return undefined;
-    const timer = window.setInterval(loadOperations, 60_000);
+    const timer = window.setInterval(refreshOperations, 60_000);
     return () => window.clearInterval(timer);
   }, [previewMode]);
 
@@ -2006,7 +2012,15 @@ function Root() {
     }
   }
 
-  useEffect(() => { if (!previewMode) checkSession(); }, [previewMode]);
+  useEffect(() => {
+    if (previewMode) return undefined;
+    checkSession().catch((error) => {
+      console.error(error);
+      setAuthenticated(false);
+      setMobileTotpLoginAllowed(false);
+    });
+    return undefined;
+  }, [previewMode]);
   useEffect(() => {
     if (previewMode) return undefined;
     const handleSessionExpired = () => {
