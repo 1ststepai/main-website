@@ -11,10 +11,12 @@
   <meta property="og:title" content="PostPath — Connect once. Any AI can post." />
   <meta property="og:description" content="Connect your social accounts locally, then let any MCP-compatible AI draft, schedule, and publish — on your terms." />
   <meta property="og:url" content="https://postpath.1ststep.ai/" />
-  <meta property="og:image" content="https://www.1ststep.ai/assets/postpath/postpath-mark-on-dark.svg" />
+  <meta property="og:image" content="https://www.1ststep.ai/assets/postpath/postpath-hero-banner.png" />
   <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://www.1ststep.ai/assets/postpath/postpath-hero-banner.png" />
   <title>PostPath by 1stStep.ai — Connect once. Any AI can post.</title>
-  <link rel="icon" href="/assets/postpath/postpath-mark-on-dark.svg" type="image/svg+xml" />
+  <link rel="icon" href="/assets/postpath/postpath-mark-512.png" type="image/png" />
+  <link rel="apple-touch-icon" href="/assets/postpath/postpath-mark-512.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Sora:wght@500;600;700;800&display=swap" rel="stylesheet" />
@@ -29,17 +31,18 @@
 </head>
 <body data-fsai-page-event="postpath_page_view" data-fsai-audience="product">
   <a class="skip-link" href="#main">Skip to content</a>
-  <div class="aurora" aria-hidden="true">
-    <div class="aurora-ring r1"></div>
-    <div class="aurora-ring r2"></div>
-    <div class="aurora-ring r3"></div>
-    <div class="aurora-wave"></div>
+  <div class="bg" aria-hidden="true">
+    <div class="bg-grid"></div>
+    <div class="bg-glow g1"></div>
+    <div class="bg-glow g2"></div>
+    <div class="bg-glow g3"></div>
+    <div class="bg-rings"></div>
   </div>
 
   <div class="wrap">
     <header class="nav">
       <a class="brand" href="https://postpath.1ststep.ai/" aria-label="PostPath home">
-        <img src="/assets/postpath/postpath-mark.svg" width="128" height="128" alt="" />
+        <img src="/assets/postpath/postpath-mark-3d.png" width="512" height="512" alt="" />
         <span class="brand-text">
           <strong>Post<span>Path</span></strong>
           <em>by 1stStep.ai</em>
@@ -51,7 +54,7 @@
         <a href="#integrations">Integrations</a>
         <a href="#pricing">Pricing</a>
       </nav>
-      <a class="btn tiny nav-cta" href="#access" data-fsai-event="postpath_early_access_click" data-fsai-placement="nav">Get PostPath</a>
+      <a class="btn tiny nav-cta" href="#access" data-fsai-event="postpath_early_access_click" data-fsai-placement="nav">Download for Mac</a>
     </header>
 
     <main id="main">
@@ -70,37 +73,47 @@
           </div>
           <ul class="trust" aria-label="Product strengths">
             <li>
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-2.9 8.4-7 10-4.1-1.6-7-5.5-7-10V6l7-3z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+              <span class="trust-ico" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M12 3l8 3.2v5.3c0 5-3.4 9.4-8 10.5C7.4 20.9 4 16.5 4 11.5V6.2L12 3z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+              </span>
               Local First
             </li>
             <li>
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8h8v8H8zM4 12h4M16 12h4M12 4v4M12 16v4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+              <span class="trust-ico" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M8 8h8v8H8zM3.5 12H8M16 12h4.5M12 3.5V8M12 16v4.5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+              </span>
               MCP Compatible
             </li>
             <li>
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-2.9 8.4-7 10-4.1-1.6-7-5.5-7-10V6l7-3zM9.5 12l1.8 1.8L15 10" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+              <span class="trust-ico" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M12 3l8 3.2v5.3c0 5-3.4 9.4-8 10.5C7.4 20.9 4 16.5 4 11.5V6.2L12 3zM9.2 12.1l1.9 1.9 3.8-3.9" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+              </span>
               Encrypted Credentials
             </li>
             <li>
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h10M4 17h13" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+              <span class="trust-ico" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h11M4 17h14" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+              </span>
               No Monthly API Fees
             </li>
           </ul>
         </div>
 
-        <div class="hero-visual" aria-hidden="false">
+        <div class="hero-visual">
+          <div class="trail" aria-hidden="true"></div>
           <div class="laptop">
-            <div class="laptop-screen">
+            <div class="laptop-bezel">
               <div class="desk" id="demo" aria-label="Interactive PostPath demo">
                 <aside class="desk-side">
                   <div class="desk-logo">
-                    <img src="/assets/postpath/postpath-mark.svg" width="20" height="20" alt="" />
+                    <img src="/assets/postpath/postpath-mark-3d.png" width="20" height="20" alt="" />
                     <span>PostPath</span>
                   </div>
-                  <button type="button" class="side-link active">Accounts</button>
-                  <button type="button" class="side-link">Compose</button>
+                  <button type="button" class="side-link">Dashboard</button>
+                  <button type="button" class="side-link">Create</button>
                   <button type="button" class="side-link">Schedule</button>
-                  <button type="button" class="side-link">MCP</button>
+                  <button type="button" class="side-link active">Accounts</button>
+                  <button type="button" class="side-link">Settings</button>
                 </aside>
                 <div class="desk-main">
                   <div class="desk-top">
@@ -112,23 +125,23 @@
                   </div>
                   <div class="account-list" aria-label="Choose simulated channels">
                     <button type="button" class="account active" data-channel="YouTube" aria-pressed="true">
-                      <span class="soc yt">YT</span>
+                      <span class="soc yt" aria-hidden="true"></span>
                       <span class="acc-meta"><strong>YouTube</strong><small>Local OAuth</small></span>
                       <span class="toggle" aria-hidden="true"></span>
                     </button>
                     <button type="button" class="account active" data-channel="Instagram" aria-pressed="true">
-                      <span class="soc ig">IG</span>
+                      <span class="soc ig" aria-hidden="true"></span>
                       <span class="acc-meta"><strong>Instagram</strong><small>Local OAuth</small></span>
                       <span class="toggle" aria-hidden="true"></span>
                     </button>
-                    <button type="button" class="account" data-channel="Facebook" aria-pressed="false">
-                      <span class="soc fb">FB</span>
-                      <span class="acc-meta"><strong>Facebook</strong><small>Local OAuth</small></span>
+                    <button type="button" class="account" data-channel="TikTok" aria-pressed="false">
+                      <span class="soc tt" aria-hidden="true"></span>
+                      <span class="acc-meta"><strong>TikTok</strong><small>Local OAuth</small></span>
                       <span class="toggle" aria-hidden="true"></span>
                     </button>
-                    <button type="button" class="account" data-channel="TikTok" aria-pressed="false">
-                      <span class="soc tt">TT</span>
-                      <span class="acc-meta"><strong>TikTok</strong><small>Local OAuth</small></span>
+                    <button type="button" class="account" data-channel="Facebook" aria-pressed="false">
+                      <span class="soc fb" aria-hidden="true"></span>
+                      <span class="acc-meta"><strong>Facebook</strong><small>Local OAuth</small></span>
                       <span class="toggle" aria-hidden="true"></span>
                     </button>
                   </div>
@@ -148,26 +161,49 @@
                 </div>
               </div>
             </div>
-            <div class="laptop-chin"></div>
             <div class="laptop-base"></div>
+          </div>
+          <div class="float-socials" aria-hidden="true">
+            <span class="float yt"></span>
+            <span class="float ig"></span>
+            <span class="float tt"></span>
+            <span class="float fb"></span>
+            <span class="float x"></span>
           </div>
         </div>
       </section>
 
-      <section class="section keywords" id="features" aria-labelledby="features-title">
+      <section class="banner-sec" aria-label="PostPath brand">
+        <img class="brand-banner" src="/assets/postpath/postpath-hero-banner.png" width="981" height="259" alt="PostPath by 1stStep.ai — Connect once. Any AI can post." />
+      </section>
+
+      <section class="section" id="features" aria-labelledby="features-title">
         <div class="section-head center">
-          <p class="eyebrow">Built for builders</p>
-          <h2 class="section-title" id="features-title">The path from idea<br /><em>to every channel.</em></h2>
+          <p class="eyebrow">Brand system</p>
+          <h2 class="section-title" id="features-title">Built from the<br /><em>PostPath kit.</em></h2>
+          <p class="section-sub">Midnight canvas. Electric, Violet, and Sunrise glass. Sora for impact. Inter for clarity.</p>
         </div>
+
+        <div class="icon-strip" aria-label="Product capabilities">
+          <div class="icon-item"><span class="glow-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.07 0l2.1-2.1a5 5 0 10-7.07-7.07L11 5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M14 11a5 5 0 00-7.07 0L4.8 13.1a5 5 0 107.07 7.07L13 19" fill="none" stroke="currentColor" stroke-width="1.7"/></svg></span><span>Connect</span></div>
+          <div class="icon-item"><span class="glow-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 20l3.2-8.5L14 4l6 6-6.8 6.8L4 20zM14 4l3.2 3.2" fill="none" stroke="currentColor" stroke-width="1.7"/></svg></span><span>Create</span></div>
+          <div class="icon-item"><span class="glow-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M8 3v4M16 3v4M4 10h16" fill="none" stroke="currentColor" stroke-width="1.7"/></svg></span><span>Schedule</span></div>
+          <div class="icon-item"><span class="glow-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 12h11M15 12l5-4.5v9L15 12z" fill="none" stroke="currentColor" stroke-width="1.7"/></svg></span><span>Publish</span></div>
+          <div class="icon-item"><span class="glow-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 19V10M10 19V5M15 19v-7M20 19V8" fill="none" stroke="currentColor" stroke-width="1.7"/></svg></span><span>Track</span></div>
+          <div class="icon-item"><span class="glow-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 3v2.2M12 18.8V21M3 12h2.2M18.8 12H21M5.6 5.6l1.6 1.6M16.8 16.8l1.6 1.6M18.4 5.6l-1.6 1.6M7.2 16.8l-1.6 1.6" fill="none" stroke="currentColor" stroke-width="1.7"/></svg></span><span>Automate</span></div>
+          <div class="icon-item"><span class="glow-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3l8 3.2v5.3c0 5-3.4 9.4-8 10.5C7.4 20.9 4 16.5 4 11.5V6.2L12 3z" fill="none" stroke="currentColor" stroke-width="1.7"/></svg></span><span>Secure</span></div>
+          <div class="icon-item"><span class="glow-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 8h8v8H8zM4 12h4M16 12h4M12 4v4M12 16v4" fill="none" stroke="currentColor" stroke-width="1.7"/></svg></span><span>MCP Ready</span></div>
+        </div>
+
         <div class="keyword-grid">
-          <article class="kw"><span class="kw-dot violet"></span><h3>Effortless</h3><p>Connect once. Keep creating in the AI tools you already use.</p></article>
-          <article class="kw"><span class="kw-dot cyan"></span><h3>Secure</h3><p>Encrypted credentials stay on your machine — not our cloud.</p></article>
-          <article class="kw"><span class="kw-dot blue"></span><h3>AI-Ready</h3><p>MCP tools for Cursor and any compatible client.</p></article>
-          <article class="kw"><span class="kw-dot pink"></span><h3>Connect Once</h3><p>One local vault powers every agent and desk session.</p></article>
-          <article class="kw"><span class="kw-dot blue"></span><h3>Multi-Platform</h3><p>YouTube, Instagram, Facebook, and TikTok — same path.</p></article>
-          <article class="kw"><span class="kw-dot orange"></span><h3>Publish Faster</h3><p>Draft, schedule, and move to publish without tab-hopping.</p></article>
-          <article class="kw"><span class="kw-dot cyan"></span><h3>Creator-Friendly</h3><p>You review before anything is intended to go live.</p></article>
-          <article class="kw"><span class="kw-dot violet"></span><h3>Built for Builders</h3><p>Local desk for humans. MCP for agents. Same product.</p></article>
+          <article class="kw"><span class="kw-ico violet" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 10-14h-7l0-6z" fill="currentColor"/></svg></span><h3>Effortless</h3><p>Connect once. Keep creating in the AI tools you already use.</p></article>
+          <article class="kw"><span class="kw-ico cyan" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3l8 3.2v5.3c0 5-3.4 9.4-8 10.5C7.4 20.9 4 16.5 4 11.5V6.2L12 3z" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></span><h3>Secure</h3><p>Encrypted credentials stay on your machine — not our cloud.</p></article>
+          <article class="kw"><span class="kw-ico blue" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="currentColor"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6L17 7M7 17l-1.4 1.4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></span><h3>AI-Ready</h3><p>MCP tools for Cursor and any compatible client.</p></article>
+          <article class="kw"><span class="kw-ico pink" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.07 0l2.1-2.1a5 5 0 00-7.07-7.07L11 5M14 11a5 5 0 00-7.07 0L4.8 13.1a5 5 0 007.07 7.07L13 19" fill="none" stroke="currentColor" stroke-width="1.7"/></svg></span><h3>Connect Once</h3><p>One local vault powers every agent and desk session.</p></article>
+          <article class="kw"><span class="kw-ico blue" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="7" width="12" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="8" y="4" width="12" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/></svg></span><h3>Multi-Platform</h3><p>YouTube, Instagram, Facebook, and TikTok — same path.</p></article>
+          <article class="kw"><span class="kw-ico orange" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 19c8-1.5 11-7 12-14-3 3-6 4.5-9 5 3-.2 5.5-2 7-5-4 1-8 5.5-10 14z" fill="none" stroke="currentColor" stroke-width="1.7"/></svg></span><h3>Publish Faster</h3><p>Draft, schedule, and move to publish without tab-hopping.</p></article>
+          <article class="kw"><span class="kw-ico cyan" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M10 9v6l5-3-5-3z" fill="currentColor"/></svg></span><h3>Creator-Friendly</h3><p>You review before anything is intended to go live.</p></article>
+          <article class="kw"><span class="kw-ico violet" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M5 20c1.5-4 4-6 7-6s5.5 2 7 6M16 4.5l1 .5.5 1L17 7l-1 .5-.5-1L16 4.5z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></span><h3>Built for Builders</h3><p>Local desk for humans. MCP for agents. Same product.</p></article>
         </div>
       </section>
 
@@ -181,24 +217,24 @@
         </div>
         <div class="steps">
           <article class="step glass">
-            <div class="icon-chip">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 007.07 0l2.12-2.12a5 5 0 00-7.07-7.07L11 5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M14 11a5 5 0 00-7.07 0L4.8 13.12a5 5 0 007.07 7.07L13 19" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>
+            <div class="icon-chip" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.07 0l2.1-2.1a5 5 0 10-7.07-7.07L11 5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M14 11a5 5 0 00-7.07 0L4.8 13.1a5 5 0 107.07 7.07L13 19" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>
             </div>
             <div class="num">01 · CONNECT</div>
             <h3>Bring your accounts</h3>
             <p>YouTube, Instagram, Facebook, and TikTok — linked on your machine. Tokens stay encrypted in your vault.</p>
           </article>
           <article class="step glass">
-            <div class="icon-chip">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l3.5-9L14 4l6 6-7 6.5L4 20zM14 4l3 3" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>
+            <div class="icon-chip" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M4 20l3.2-8.5L14 4l6 6-6.8 6.8L4 20z" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>
             </div>
             <div class="num">02 · CREATE</div>
             <h3>Work with your AI</h3>
             <p>Cursor and other MCP clients use PostPath tools to draft and schedule inside the chat you already live in.</p>
           </article>
           <article class="step glass">
-            <div class="icon-chip">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h10M14 12l6-5v10l-6-5zM4 7v10" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>
+            <div class="icon-chip" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M4 12h11M15 12l5-4.5v9L15 12z" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>
             </div>
             <div class="num">03 · DISTRIBUTE</div>
             <h3>Move toward publish</h3>
@@ -219,11 +255,11 @@
           <div class="int-block glass">
             <p class="eyebrow">Social</p>
             <div class="soc-row">
-              <span class="soc-tile yt">YouTube</span>
-              <span class="soc-tile ig">Instagram</span>
-              <span class="soc-tile tt">TikTok</span>
-              <span class="soc-tile fb">Facebook</span>
-              <span class="soc-tile x">X</span>
+              <span class="soc-tile yt"><i></i>YouTube</span>
+              <span class="soc-tile ig"><i></i>Instagram</span>
+              <span class="soc-tile tt"><i></i>TikTok</span>
+              <span class="soc-tile fb"><i></i>Facebook</span>
+              <span class="soc-tile x"><i></i>X</span>
             </div>
           </div>
           <div class="int-block glass">
@@ -250,7 +286,7 @@
           <div class="flowline" aria-hidden="true"></div>
           <div class="flowrow hot">
             <strong class="flow-brand">
-              <img src="/assets/postpath/postpath-mark.svg" width="18" height="18" alt="" />
+              <img src="/assets/postpath/postpath-mark-3d.png" width="18" height="18" alt="" />
               PostPath on your machine
             </strong>
             <span>CONNECT</span>
@@ -344,7 +380,7 @@
           <div>
             <p class="eyebrow">Next step</p>
             <h2 class="section-title" id="final-title">Connect once.<br /><em>Any AI can post.</em></h2>
-            <p>Own the path from AI draft to social distribution.</p>
+            <p class="tagline-caps">CONNECT ONCE. <span>ANY AI</span> CAN POST.</p>
           </div>
           <a class="btn" href="#access">Get PostPath →</a>
         </div>
@@ -353,7 +389,7 @@
 
     <footer class="footer">
       <a class="brand" href="#top">
-        <img src="/assets/postpath/postpath-mark.svg" width="30" height="30" alt="" />
+        <img src="/assets/postpath/postpath-mark-3d.png" width="30" height="30" alt="" />
         <span class="brand-text">
           <strong>Post<span>Path</span></strong>
           <em>by 1stStep.ai</em>

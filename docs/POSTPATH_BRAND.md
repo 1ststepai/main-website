@@ -2,30 +2,33 @@
 
 PostPath has its **own product logo and system**. It does not replace the locked 1stStep.ai logo.
 
-Canonical brand board (source of truth for the marketing site): `public/assets/postpath/postpath-brand-board.png`
-
-The live site at `/postpath/` follows that board: Midnight canvas, Electric/Violet/Sunrise glass, Sora + Inter, neon ring hero, laptop Connected Accounts desk, and tagline **Connect once. Any AI can post.**
-
-## Mark
-
-Glass ribbon **P** with a white play triangle in the bowl — blue → violet → sunrise.
+## Source of truth
 
 | File | Use |
 | --- | --- |
-| `public/assets/postpath/postpath-mark.svg` | Primary mark (transparent) |
-| `public/assets/postpath/postpath-mark-on-dark.svg` | App icon tile |
-| `public/assets/postpath/postpath-lockup.svg` | Mark + wordmark |
-| `public/assets/postpath/postpath-brand-board.png` | Full brand kit reference |
+| `public/assets/postpath/postpath-brand-board.png` | Full brand kit (palette, type, icons, hero concept) |
+| `public/assets/postpath/postpath-hero-banner.png` | Horizontal brand banner (3D mark + wordmark + social path) |
+| `public/assets/postpath/postpath-mark-3d.png` | Primary 3D glass P+play mark (from kit) |
+| `public/assets/postpath/postpath-mark-512.png` | App icon tile |
+| `public/assets/postpath/postpath-mark.svg` | Lightweight SVG fallback |
+| `public/assets/postpath/postpath-mark-on-dark.svg` | SVG app-icon fallback |
+| `public/assets/postpath/postpath-lockup.svg` | SVG lockup fallback |
+
+The marketing site at `/postpath/` copies the kit: Midnight canvas, Electric/Violet/Sunrise glass, Sora + Inter, neon rings + light trails, laptop Connected Accounts hero, capability icons, keyword pills, glowing social tiles, and tagline **Connect once. Any AI can post.**
+
+## Mark
+
+3D glass ribbon **P** with a play triangle in the bowl — blue → violet → sunrise, cyan edge light.
 
 ## Wordmark
 
 - **Post** — cloud white (`#F8FAFC`)
-- **Path** — blue gradient (`#93C5FD` → `#38BDF8`)
-- Byline — `by 1stStep.ai`
+- **Path** — soft violet/blue gradient
+- Byline — `by 1stStep.ai` (lowercase)
 
 ## Tagline
 
-`Connect once. Any AI can post.`
+`CONNECT ONCE. ANY AI CAN POST.` — with **ANY AI** in cyan.
 
 ## Palette
 
