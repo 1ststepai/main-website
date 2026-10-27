@@ -3,6 +3,15 @@ const NETWORKS = [
   { key: "instagram", label: "Instagram" },
   { key: "facebook", label: "Facebook" },
   { key: "tiktok", label: "TikTok" },
+  { key: "linkedin", label: "LinkedIn" },
+  { key: "x", label: "X" },
+  { key: "threads", label: "Threads" },
+  { key: "pinterest", label: "Pinterest" },
+  { key: "bluesky", label: "Bluesky" },
+  { key: "google_business", label: "Google Business" },
+  { key: "reddit", label: "Reddit" },
+  { key: "snapchat", label: "Snapchat", limited: true },
+  { key: "whatsapp", label: "WhatsApp Channels", limited: true },
 ];
 
 const toastEl = document.getElementById("toast");
@@ -13,6 +22,7 @@ const connectHint = document.getElementById("connect-hint");
 const profileName = document.getElementById("profile-name");
 const profileId = document.getElementById("profile-id");
 const oauthForm = document.getElementById("oauth-form");
+const blueskyForm = document.getElementById("bluesky-form");
 
 function showToast(message, isError = false) {
   toastEl.hidden = false;
@@ -55,14 +65,19 @@ function renderStatus(data) {
   const byPlatform = new Map((data.connections || []).map((row) => [row.platform, row]));
   networkList.innerHTML = NETWORKS.map((network) => {
     const row = byPlatform.get(network.key);
-    const detail = row ? row.account_label || "Connected" : "Not connected";
+    const detail = row
+      ? row.account_label || "Connected"
+      : network.limited
+        ? "API approval required"
+        : "Not connected";
     const on = Boolean(row);
+    const pill = on ? "Live" : network.limited ? "Limited" : "Needed";
     return `<li>
       <div>
         <strong>${network.label}</strong>
         <div class="meta" style="margin:0.2rem 0 0">${detail}</div>
       </div>
-      <span class="pill ${on ? "on" : "off"}">${on ? "Live" : "Needed"}</span>
+      <span class="pill ${on ? "on" : "off"}">${pill}</span>
     </li>`;
   }).join("");
 
@@ -86,11 +101,11 @@ function renderStatus(data) {
   }
 
   if (data.next_step === "save_apps") {
-    connectHint.textContent = "Save app credentials below once, then connect.";
+    connectHint.textContent = "Save at least one provider’s credentials below, then connect.";
   } else if (data.cursor && !data.cursor.installed) {
     connectHint.textContent = "Connect accounts, then click Enable in Cursor so any AI can use them.";
   } else {
-    connectHint.textContent = "One click opens Google → Meta → TikTok. Leave this window open.";
+    connectHint.textContent = "Connect opens each configured OAuth provider in order. Bluesky uses the form below.";
   }
 }
 
@@ -163,6 +178,26 @@ oauthForm.addEventListener("submit", async (event) => {
     });
     renderStatus(data);
     showToast("Credentials saved to the local vault");
+  } catch (error) {
+    showToast(error.message, true);
+  }
+});
+
+blueskyForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const form = new FormData(blueskyForm);
+  try {
+    const data = await api("/api/connect-bluesky", {
+      method: "POST",
+      body: JSON.stringify({
+        id: profileId.value.trim(),
+        name: profileName.value.trim() || profileId.value.trim(),
+        handle: String(form.get("handle") || ""),
+        app_password: String(form.get("app_password") || ""),
+      }),
+    });
+    renderStatus(data);
+    showToast(data.connect?.message || "Bluesky connected");
   } catch (error) {
     showToast(error.message, true);
   }

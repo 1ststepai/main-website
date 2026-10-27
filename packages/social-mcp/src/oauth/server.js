@@ -4,7 +4,7 @@ import { spawn } from "node:child_process";
 import { CONNECT_ORDER, DEFAULT_OAUTH_PORT } from "../home.js";
 import { signState, verifyState } from "../crypto.js";
 import { mcpError } from "../errors.js";
-import { authorizationUrl, exchangeCode, missingProviders, oauthConfig } from "./providers.js";
+import { authorizationUrl, createPkcePair, exchangeCode, missingProviders, oauthConfig } from "./providers.js";
 
 function htmlPage(title, body) {
   return `<!doctype html>
@@ -23,6 +23,33 @@ const BROWSER_OPENERS = {
   linux: "/usr/bin/xdg-open",
   win32: process.env.SystemRoot ? `${process.env.SystemRoot}\\System32\\cmd.exe` : "",
 };
+
+const PROVIDER_ALIASES = {
+  instagram: "meta",
+  facebook: "meta",
+  google_business: "google_business",
+};
+
+function normalizeProvider(item) {
+  const key = String(item || "").trim();
+  if (PROVIDER_ALIASES[key]) return PROVIDER_ALIASES[key];
+  return key;
+}
+
+function providerStillNeeded(provider, connections) {
+  const have = (platform) => connections.some((row) => row.platform === platform);
+  if (provider === "youtube") return !have("youtube");
+  if (provider === "tiktok") return !have("tiktok");
+  if (provider === "meta") return !(have("facebook") && have("instagram"));
+  if (provider === "linkedin") return !have("linkedin");
+  if (provider === "x") return !have("x");
+  if (provider === "threads") return !have("threads");
+  if (provider === "pinterest") return !have("pinterest");
+  if (provider === "google_business") return !have("google_business");
+  if (provider === "reddit") return !have("reddit");
+  if (provider === "snapchat") return !have("snapchat");
+  return true;
+}
 
 function openBrowser(url) {
   try {
@@ -76,7 +103,12 @@ export function createOAuthRuntime({ store, env = process.env, fetchImpl = fetch
           throw mcpError("invalid_state", "The connection attempt expired. Start again.");
         }
         const config = oauthConfig(env, redirectUri);
-        const exchanged = await exchangeCode(state.provider, { code, config, fetchImpl });
+        const exchanged = await exchangeCode(state.provider, {
+          code,
+          config,
+          fetchImpl,
+          codeVerifier: state.code_verifier || "",
+        });
         for (const [platform, bundle] of Object.entries(exchanged.platforms || {})) {
           store.saveConnection(
             {
@@ -129,6 +161,7 @@ export function createOAuthRuntime({ store, env = process.env, fetchImpl = fetch
   async function beginProvider(profileId, provider, remainingChain = [], { open = true } = {}) {
     await ensureListening();
     const config = oauthConfig(env, redirectUri);
+    const pkce = provider === "x" ? createPkcePair() : null;
     const state = signState(
       {
         profile_id: profileId,
@@ -136,10 +169,11 @@ export function createOAuthRuntime({ store, env = process.env, fetchImpl = fetch
         chain: remainingChain,
         ts: Date.now(),
         nonce: store.newId("nonce"),
+        code_verifier: pkce?.verifier || "",
       },
       store.key,
     );
-    const url = authorizationUrl(provider, { state, config });
+    const url = authorizationUrl(provider, { state, config, pkce });
     if (open) openBrowser(url);
     return url;
   }
@@ -149,24 +183,15 @@ export function createOAuthRuntime({ store, env = process.env, fetchImpl = fetch
     if (!profile) throw mcpError("unknown_profile", "Create the profile first with upsert_profile.");
     await ensureListening();
     const connections = store.listConnections(profileId);
-    const missing = platforms?.length
-      ? platforms.filter((item) => CONNECT_ORDER.includes(item) || item === "youtube" || item === "meta" || item === "tiktok")
+    const requested = platforms?.length
+      ? platforms.map(normalizeProvider).filter((item) => CONNECT_ORDER.includes(item))
       : missingProviders(connections);
-    // Normalize aliases
     const steps = [];
-    for (const item of missing.length ? missing : CONNECT_ORDER) {
-      const provider = item === "instagram" || item === "facebook" ? "meta" : item;
+    for (const item of requested.length ? requested : CONNECT_ORDER) {
+      const provider = normalizeProvider(item);
       if (!steps.includes(provider) && CONNECT_ORDER.includes(provider)) steps.push(provider);
     }
-    // Skip already satisfied providers
-    const filtered = steps.filter((provider) => {
-      if (provider === "youtube") return !connections.some((row) => row.platform === "youtube");
-      if (provider === "tiktok") return !connections.some((row) => row.platform === "tiktok");
-      if (provider === "meta") {
-        return !(connections.some((row) => row.platform === "facebook") && connections.some((row) => row.platform === "instagram"));
-      }
-      return true;
-    });
+    const filtered = steps.filter((provider) => providerStillNeeded(provider, connections));
     if (!filtered.length) {
       return {
         profile_id: profileId,

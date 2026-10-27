@@ -6,11 +6,35 @@ import { test } from "node:test";
 import { createEngine } from "../src/engine.js";
 import { missingProviders } from "../src/oauth/providers.js";
 
-test("missingProviders reports youtube meta tiktok gaps", () => {
-  assert.deepEqual(missingProviders([]), ["youtube", "meta", "tiktok"]);
-  assert.deepEqual(missingProviders([{ platform: "youtube" }, { platform: "facebook" }, { platform: "instagram" }]), [
+test("missingProviders reports full OAuth chain gaps", () => {
+  assert.deepEqual(missingProviders([]), [
+    "youtube",
+    "meta",
     "tiktok",
+    "linkedin",
+    "x",
+    "threads",
+    "pinterest",
+    "google_business",
+    "reddit",
+    "snapchat",
   ]);
+  assert.deepEqual(
+    missingProviders([
+      { platform: "youtube" },
+      { platform: "facebook" },
+      { platform: "instagram" },
+      { platform: "tiktok" },
+      { platform: "linkedin" },
+      { platform: "x" },
+      { platform: "threads" },
+      { platform: "pinterest" },
+      { platform: "google_business" },
+      { platform: "reddit" },
+      { platform: "snapchat" },
+    ]),
+    [],
+  );
 });
 
 test("draft schedule and due publish path for youtube", async () => {
@@ -159,6 +183,108 @@ test("meta publish requires https media_url", async () => {
       caption: "hello",
     });
     await assert.rejects(() => engine.publishPost({ post_id: post.id }), /media_url/);
+    await engine.oauth.stop();
+  } finally {
+    rmSync(home, { recursive: true, force: true });
+  }
+});
+
+test("x publish posts text tweet", async () => {
+  const home = mkdtempSync(join(tmpdir(), "social-mcp-"));
+  const fetchImpl = async (url, init = {}) => {
+    if (String(url).includes("api.twitter.com/2/tweets") && init.method === "POST") {
+      return {
+        ok: true,
+        status: 201,
+        headers: { get: () => "" },
+        text: async () => JSON.stringify({ data: { id: "tw123" } }),
+      };
+    }
+    return { ok: false, status: 500, headers: { get: () => "" }, text: async () => "{}" };
+  };
+  try {
+    const engine = createEngine({
+      home,
+      env: { X_CLIENT_ID: "xid", X_CLIENT_SECRET: "xsecret" },
+      fetchImpl,
+      now: () => Date.parse("2026-10-27T12:00:00.000Z"),
+    });
+    await engine.upsertProfile({ id: "acme", name: "Acme" });
+    engine.store.saveConnection(
+      { profile_id: "acme", platform: "x", account_label: "@acme", user_id: "1" },
+      {
+        access_token: "xa",
+        refresh_token: "xr",
+        expires_at: "2099-01-01T00:00:00.000Z",
+      },
+    );
+    const { post } = await engine.createDraft({
+      profile_id: "acme",
+      platform: "x",
+      caption: "hello from postpath",
+    });
+    const published = await engine.publishPost({ post_id: post.id });
+    assert.equal(published.post.status, "published");
+    assert.equal(published.post.platform_post_id, "tw123");
+    await engine.oauth.stop();
+  } finally {
+    rmSync(home, { recursive: true, force: true });
+  }
+});
+
+test("snapchat and whatsapp publish stay honestly restricted", async () => {
+  const home = mkdtempSync(join(tmpdir(), "social-mcp-"));
+  try {
+    const engine = createEngine({ home, now: () => Date.parse("2026-10-27T12:00:00.000Z") });
+    await engine.upsertProfile({ id: "acme", name: "Acme" });
+    engine.store.saveConnection(
+      { profile_id: "acme", platform: "snapchat", account_label: "Snapchat" },
+      { access_token: "s" },
+    );
+    engine.store.saveConnection(
+      { profile_id: "acme", platform: "whatsapp", account_label: "WhatsApp" },
+      { access_token: "w" },
+    );
+    const snap = await engine.createDraft({ profile_id: "acme", platform: "snapchat", caption: "hi" });
+    const wa = await engine.createDraft({ profile_id: "acme", platform: "whatsapp", caption: "hi" });
+    await assert.rejects(() => engine.publishPost({ post_id: snap.post.id }), /Marketing API/);
+    await assert.rejects(() => engine.publishPost({ post_id: wa.post.id }), /Channels/);
+    await engine.oauth.stop();
+  } finally {
+    rmSync(home, { recursive: true, force: true });
+  }
+});
+
+test("bluesky connect stores app password session", async () => {
+  const home = mkdtempSync(join(tmpdir(), "social-mcp-"));
+  const fetchImpl = async (url) => {
+    if (String(url).includes("createSession")) {
+      return {
+        ok: true,
+        status: 200,
+        headers: { get: () => "" },
+        text: async () =>
+          JSON.stringify({
+            accessJwt: "jwt",
+            refreshJwt: "rjwt",
+            did: "did:plc:acme",
+            handle: "acme.bsky.social",
+          }),
+      };
+    }
+    return { ok: false, status: 500, headers: { get: () => "" }, text: async () => "{}" };
+  };
+  try {
+    const engine = createEngine({ home, fetchImpl, now: () => Date.parse("2026-10-27T12:00:00.000Z") });
+    await engine.upsertProfile({ id: "acme", name: "Acme" });
+    const result = await engine.connectBluesky("acme", {
+      handle: "acme.bsky.social",
+      app_password: "xxxx-xxxx-xxxx-xxxx",
+    });
+    assert.equal(result.status, "complete");
+    assert.equal(result.connection.platform, "bluesky");
+    const secrets = engine.store.readSecrets("acme", "bluesky");
+    assert.equal(secrets.identifier, "acme.bsky.social");
     await engine.oauth.stop();
   } finally {
     rmSync(home, { recursive: true, force: true });

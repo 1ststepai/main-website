@@ -24,7 +24,7 @@
         <p class="byline">by 1stStep.ai</p>
         <h1>Connect once. Any AI can post.</h1>
         <p class="lede">
-          Link YouTube, Instagram, Facebook, and TikTok on this machine. Cursor and other MCP clients use the same vault — no monthly aggregator.
+          Link YouTube, Instagram, TikTok, LinkedIn, X, Threads, Pinterest, Bluesky, Google Business, Reddit, and more on this machine. Cursor and other MCP clients use the same vault.
         </p>
         <form id="connect-form" class="connect-form">
           <label class="field">
@@ -39,7 +39,7 @@
             <button type="submit" class="btn primary" id="connect-btn">Connect accounts</button>
             <button type="button" class="btn ghost" id="cursor-btn">Enable in Cursor</button>
           </div>
-          <p class="hint" id="connect-hint">One click opens Google → Meta → TikTok. Leave this window open.</p>
+          <p class="hint" id="connect-hint">One click opens each configured OAuth provider. Leave this window open.</p>
         </form>
       </header>
 
@@ -52,10 +52,22 @@
         <p class="meta" id="path-meta"></p>
       </section>
 
+      <section class="panel" aria-labelledby="bluesky-title">
+        <div class="panel-head">
+          <h2 id="bluesky-title">Bluesky</h2>
+          <p class="panel-note">App password — not browser OAuth.</p>
+        </div>
+        <form id="bluesky-form" class="oauth-form">
+          <label>Handle <input name="handle" placeholder="you.bsky.social" autocomplete="off" /></label>
+          <label>App password <input name="app_password" type="password" autocomplete="off" /></label>
+          <button type="submit" class="btn secondary">Connect Bluesky</button>
+        </form>
+      </section>
+
       <section class="panel" aria-labelledby="apps-title">
         <div class="panel-head">
           <h2 id="apps-title">App credentials</h2>
-          <p class="panel-note">One-time setup from Google / Meta / TikTok developer consoles.</p>
+          <p class="panel-note">One-time setup from each developer console. Save only the networks you use.</p>
         </div>
         <p class="redirect">
           Redirect URI for every app:
@@ -64,12 +76,12 @@
         </p>
         <form id="oauth-form" class="oauth-form">
           <fieldset>
-            <legend>Google / YouTube</legend>
+            <legend>Google / YouTube + Business</legend>
             <label>Client ID <input name="GOOGLE_OAUTH_CLIENT_ID" autocomplete="off" /></label>
             <label>Client secret <input name="GOOGLE_OAUTH_CLIENT_SECRET" type="password" autocomplete="off" /></label>
           </fieldset>
           <fieldset>
-            <legend>Meta / Instagram + Facebook</legend>
+            <legend>Meta / Instagram + Facebook + Threads</legend>
             <label>App ID <input name="META_APP_ID" autocomplete="off" /></label>
             <label>App secret <input name="META_APP_SECRET" type="password" autocomplete="off" /></label>
           </fieldset>
@@ -77,6 +89,31 @@
             <legend>TikTok</legend>
             <label>Client key <input name="TIKTOK_CLIENT_KEY" autocomplete="off" /></label>
             <label>Client secret <input name="TIKTOK_CLIENT_SECRET" type="password" autocomplete="off" /></label>
+          </fieldset>
+          <fieldset>
+            <legend>LinkedIn</legend>
+            <label>Client ID <input name="LINKEDIN_CLIENT_ID" autocomplete="off" /></label>
+            <label>Client secret <input name="LINKEDIN_CLIENT_SECRET" type="password" autocomplete="off" /></label>
+          </fieldset>
+          <fieldset>
+            <legend>X</legend>
+            <label>Client ID <input name="X_CLIENT_ID" autocomplete="off" /></label>
+            <label>Client secret <input name="X_CLIENT_SECRET" type="password" autocomplete="off" /></label>
+          </fieldset>
+          <fieldset>
+            <legend>Pinterest</legend>
+            <label>App ID <input name="PINTEREST_APP_ID" autocomplete="off" /></label>
+            <label>App secret <input name="PINTEREST_APP_SECRET" type="password" autocomplete="off" /></label>
+          </fieldset>
+          <fieldset>
+            <legend>Reddit</legend>
+            <label>Client ID <input name="REDDIT_CLIENT_ID" autocomplete="off" /></label>
+            <label>Client secret <input name="REDDIT_CLIENT_SECRET" type="password" autocomplete="off" /></label>
+          </fieldset>
+          <fieldset>
+            <legend>Snapchat (Marketing API approval)</legend>
+            <label>Client ID <input name="SNAPCHAT_CLIENT_ID" autocomplete="off" /></label>
+            <label>Client secret <input name="SNAPCHAT_CLIENT_SECRET" type="password" autocomplete="off" /></label>
           </fieldset>
           <button type="submit" class="btn secondary">Save credentials</button>
         </form>

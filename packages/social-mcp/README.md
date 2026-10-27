@@ -2,7 +2,7 @@
 
 Marketing site: [postpath.1ststep.ai](https://postpath.1ststep.ai/)
 
-Local desktop + MCP connector. Connect YouTube, Instagram, Facebook, and TikTok once on your machine — then any AI (Cursor, Claude, Codex) can draft, schedule, and publish. No monthly social-API middleman.
+Local desktop + MCP connector. Connect major social networks once on your machine — then any AI (Cursor, Claude, Codex) can draft, schedule, and publish. No monthly social-API middleman.
 
 Package path stays `packages/social-mcp` for now; the product name is **PostPath**.
 
@@ -23,13 +23,14 @@ That opens the **PostPath** desk in an app window.
 
 ### In the desk
 
-1. Paste Google / Meta / TikTok app credentials (one time) → **Save credentials**
-2. Register this redirect on every developer console:
+1. Paste developer-app credentials for the networks you use → **Save credentials**
+2. Register this redirect on every OAuth console:
 
    `http://127.0.0.1:47831/oauth/callback`
 
-3. Enter a brand name → **Connect accounts** (browser chain: YouTube → Meta → TikTok)
-4. Click **Enable in Cursor** → restart Cursor
+3. Enter a brand name → **Connect accounts** (browser chain for configured providers)
+4. Bluesky: use the Bluesky form (handle + app password)
+5. Click **Enable in Cursor** → restart Cursor
 
 No MCP JSON paste. No `&&` in chat.
 
@@ -57,6 +58,15 @@ node ./bin/social-mcp.js app
 | Instagram | Meta OAuth | https `media_url` |
 | Facebook | Meta OAuth | https `media_url` |
 | TikTok | Login Kit | `media_path` → creator inbox |
+| LinkedIn | LinkedIn OAuth | text (`caption` / `description`) |
+| X | X OAuth (PKCE) | text tweet |
+| Threads | Threads OAuth (Meta app) | text and/or https `media_url` |
+| Pinterest | Pinterest OAuth | https `media_url` pin |
+| Bluesky | App password | text post |
+| Google Business | Google OAuth (`business.manage`) | local post text |
+| Reddit | Reddit OAuth | title + text; `tags[0]` = subreddit |
+| Snapchat | OAuth scaffold | API-restricted until Marketing API approval |
+| WhatsApp Channels | — | API-restricted (no free third-party publish path) |
 
 ## CLI reference
 
@@ -71,7 +81,7 @@ social-mcp connect <id>    CLI fallback
 
 ## MCP tools (for agents)
 
-`status`, `upsert_profile`, `list_accounts`, `connect_accounts`, `create_draft`, `update_draft`, `schedule_post`, `publish_post`, `publish_due`, `list_posts`, `get_post_status`
+`status`, `upsert_profile`, `list_accounts`, `connect_accounts`, `connect_bluesky`, `create_draft`, `update_draft`, `schedule_post`, `publish_post`, `publish_due`, `list_posts`, `get_post_status`
 
 ## Security
 

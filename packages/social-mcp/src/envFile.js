@@ -8,6 +8,16 @@ const OAUTH_KEYS = [
   "META_APP_SECRET",
   "TIKTOK_CLIENT_KEY",
   "TIKTOK_CLIENT_SECRET",
+  "LINKEDIN_CLIENT_ID",
+  "LINKEDIN_CLIENT_SECRET",
+  "X_CLIENT_ID",
+  "X_CLIENT_SECRET",
+  "PINTEREST_APP_ID",
+  "PINTEREST_APP_SECRET",
+  "REDDIT_CLIENT_ID",
+  "REDDIT_CLIENT_SECRET",
+  "SNAPCHAT_CLIENT_ID",
+  "SNAPCHAT_CLIENT_SECRET",
   "SOCIAL_MCP_OAUTH_PORT",
 ];
 
@@ -80,13 +90,14 @@ export function saveOAuthEnvFile(input, homePaths = paths()) {
   return { file, values: next };
 }
 
+function mask(value) {
+  const text = String(value || "");
+  if (!text) return "";
+  if (text.length <= 8) return "••••••••";
+  return `${text.slice(0, 4)}••••${text.slice(-4)}`;
+}
+
 export function publicOAuthConfig(values = {}) {
-  const mask = (value) => {
-    const text = String(value || "");
-    if (!text) return "";
-    if (text.length <= 8) return "••••••••";
-    return `${text.slice(0, 4)}••••${text.slice(-4)}`;
-  };
   return {
     GOOGLE_OAUTH_CLIENT_ID: values.GOOGLE_OAUTH_CLIENT_ID || "",
     GOOGLE_OAUTH_CLIENT_SECRET: values.GOOGLE_OAUTH_CLIENT_SECRET ? mask(values.GOOGLE_OAUTH_CLIENT_SECRET) : "",
@@ -94,9 +105,24 @@ export function publicOAuthConfig(values = {}) {
     META_APP_SECRET: values.META_APP_SECRET ? mask(values.META_APP_SECRET) : "",
     TIKTOK_CLIENT_KEY: values.TIKTOK_CLIENT_KEY || "",
     TIKTOK_CLIENT_SECRET: values.TIKTOK_CLIENT_SECRET ? mask(values.TIKTOK_CLIENT_SECRET) : "",
+    LINKEDIN_CLIENT_ID: values.LINKEDIN_CLIENT_ID || "",
+    LINKEDIN_CLIENT_SECRET: values.LINKEDIN_CLIENT_SECRET ? mask(values.LINKEDIN_CLIENT_SECRET) : "",
+    X_CLIENT_ID: values.X_CLIENT_ID || "",
+    X_CLIENT_SECRET: values.X_CLIENT_SECRET ? mask(values.X_CLIENT_SECRET) : "",
+    PINTEREST_APP_ID: values.PINTEREST_APP_ID || "",
+    PINTEREST_APP_SECRET: values.PINTEREST_APP_SECRET ? mask(values.PINTEREST_APP_SECRET) : "",
+    REDDIT_CLIENT_ID: values.REDDIT_CLIENT_ID || "",
+    REDDIT_CLIENT_SECRET: values.REDDIT_CLIENT_SECRET ? mask(values.REDDIT_CLIENT_SECRET) : "",
+    SNAPCHAT_CLIENT_ID: values.SNAPCHAT_CLIENT_ID || "",
+    SNAPCHAT_CLIENT_SECRET: values.SNAPCHAT_CLIENT_SECRET ? mask(values.SNAPCHAT_CLIENT_SECRET) : "",
     has_google: Boolean(values.GOOGLE_OAUTH_CLIENT_ID && values.GOOGLE_OAUTH_CLIENT_SECRET),
     has_meta: Boolean(values.META_APP_ID && values.META_APP_SECRET),
     has_tiktok: Boolean(values.TIKTOK_CLIENT_KEY && values.TIKTOK_CLIENT_SECRET),
+    has_linkedin: Boolean(values.LINKEDIN_CLIENT_ID && values.LINKEDIN_CLIENT_SECRET),
+    has_x: Boolean(values.X_CLIENT_ID && values.X_CLIENT_SECRET),
+    has_pinterest: Boolean(values.PINTEREST_APP_ID && values.PINTEREST_APP_SECRET),
+    has_reddit: Boolean(values.REDDIT_CLIENT_ID && values.REDDIT_CLIENT_SECRET),
+    has_snapchat: Boolean(values.SNAPCHAT_CLIENT_ID && values.SNAPCHAT_CLIENT_SECRET),
   };
 }
 

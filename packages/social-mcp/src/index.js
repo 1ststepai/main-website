@@ -28,7 +28,7 @@ export function createSocialMcpServer({ engine } = {}) {
 
   server.tool(
     "status",
-    `Show local ${PRODUCT_NAME} home path, profiles, connections, and the OAuth redirect URI to register with Google/Meta/TikTok.`,
+    `Show local ${PRODUCT_NAME} home path, profiles, connections, platforms, and the OAuth redirect URI to register with provider consoles.`,
     {},
     tool(async () => eng.publicStatus()),
   );
@@ -54,15 +54,43 @@ export function createSocialMcpServer({ engine } = {}) {
 
   server.tool(
     "connect_accounts",
-    "One-click style connect chain. Opens the browser for YouTube → Meta (Facebook+Instagram) → TikTok and continues automatically after each consent.",
+    "One-click style connect chain. Opens the browser for configured OAuth providers (YouTube, Meta, TikTok, LinkedIn, X, Threads, Pinterest, Google Business, Reddit, Snapchat) and continues automatically after each consent. Bluesky uses connect_bluesky (app password).",
     {
       profile_id: z.string().min(2).max(64),
       platforms: z
-        .array(z.enum(["youtube", "meta", "tiktok", "instagram", "facebook"]))
+        .array(
+          z.enum([
+            "youtube",
+            "meta",
+            "tiktok",
+            "instagram",
+            "facebook",
+            "linkedin",
+            "x",
+            "threads",
+            "pinterest",
+            "google_business",
+            "reddit",
+            "snapchat",
+          ]),
+        )
         .optional()
-        .describe("Optional subset. Default is every missing network."),
+        .describe("Optional subset. Default is every missing OAuth network."),
     },
     tool(async (args) => eng.connectAccounts(args.profile_id, { platforms: args.platforms })),
+  );
+
+  server.tool(
+    "connect_bluesky",
+    "Connect Bluesky with a handle and app password (not browser OAuth). Create an app password in Bluesky settings.",
+    {
+      profile_id: z.string().min(2).max(64),
+      handle: z.string().min(2).max(120).describe("Bluesky handle, e.g. you.bsky.social"),
+      app_password: z.string().min(8).max(200).describe("Bluesky app password"),
+    },
+    tool(async (args) =>
+      eng.connectBluesky(args.profile_id, { handle: args.handle, app_password: args.app_password }),
+    ),
   );
 
   server.tool(
@@ -112,7 +140,7 @@ export function createSocialMcpServer({ engine } = {}) {
 
   server.tool(
     "publish_post",
-    "Publish now. YouTube/TikTok use media_path. Instagram/Facebook need media_url. Scheduled posts require force=true before their time.",
+    "Publish now. YouTube/TikTok use media_path. Instagram/Facebook/Pinterest need media_url. Text platforms use caption/title. Reddit uses tags[0] as subreddit. Snapchat/WhatsApp return honest API-restricted errors. Scheduled posts require force=true before their time.",
     {
       post_id: z.string().min(8),
       force: z.boolean().optional(),

@@ -82,7 +82,16 @@ function oauthReady(values) {
     google: Boolean(values.GOOGLE_OAUTH_CLIENT_ID && values.GOOGLE_OAUTH_CLIENT_SECRET),
     meta: Boolean(values.META_APP_ID && values.META_APP_SECRET),
     tiktok: Boolean(values.TIKTOK_CLIENT_KEY && values.TIKTOK_CLIENT_SECRET),
+    linkedin: Boolean(values.LINKEDIN_CLIENT_ID && values.LINKEDIN_CLIENT_SECRET),
+    x: Boolean(values.X_CLIENT_ID && values.X_CLIENT_SECRET),
+    pinterest: Boolean(values.PINTEREST_APP_ID && values.PINTEREST_APP_SECRET),
+    reddit: Boolean(values.REDDIT_CLIENT_ID && values.REDDIT_CLIENT_SECRET),
+    snapchat: Boolean(values.SNAPCHAT_CLIENT_ID && values.SNAPCHAT_CLIENT_SECRET),
   };
+}
+
+function anyOauthReady(ready) {
+  return Boolean(ready.google || ready.meta || ready.tiktok || ready.linkedin || ready.x || ready.pinterest || ready.reddit || ready.snapchat);
 }
 
 export function createDeskServer({ engine, env = process.env, port = Number(env.SOCIAL_MCP_DESK_PORT || DEFAULT_DESK_PORT) }) {
@@ -109,7 +118,7 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
       oauth: publicOAuthConfig(envValues),
       oauth_ready: ready,
       cursor,
-      next_step: !ready.google && !ready.meta && !ready.tiktok
+      next_step: !anyOauthReady(ready)
         ? "save_apps"
         : status.profiles.length === 0
           ? "create_profile"
@@ -153,6 +162,20 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
         loadOAuthEnvFile(homePaths, env);
         await engine.upsertProfile({ id: profileId, name });
         const result = await engine.connectAccounts(profileId, { platforms: body.platforms });
+        sendJson(res, 200, { ok: true, connect: result, ...snapshot() });
+        return;
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/connect-bluesky") {
+        const body = await readJson(req);
+        const profileId = String(body.profile_id || body.id || "").trim();
+        const name = String(body.name || profileId).trim();
+        if (!profileId) throw mcpError("invalid_profile", "Profile id is required.");
+        await engine.upsertProfile({ id: profileId, name });
+        const result = await engine.connectBluesky(profileId, {
+          handle: body.handle,
+          app_password: body.app_password,
+        });
         sendJson(res, 200, { ok: true, connect: result, ...snapshot() });
         return;
       }
