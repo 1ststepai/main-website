@@ -130,17 +130,17 @@ export function createSocialMcpServer({ engine } = {}) {
 
   server.tool(
     "schedule_post",
-    "Schedule a local draft for a future ISO time. While the PostPath desk/app is running, publish_due runs on an interval; or call publish_due / publish_post(force) yourself.",
+    "Schedule a local draft for a future ISO time. scheduled_at must include a timezone offset (Z or ±hh:mm) and is stored as UTC. While the PostPath desk/app is running, publish_due runs on an interval; or call publish_due / publish_post(force) yourself.",
     {
       post_id: z.string().min(8),
-      scheduled_at: z.string().describe("ISO-8601 timestamp"),
+      scheduled_at: z.string().describe("ISO-8601 timestamp with Z or ±hh:mm offset"),
     },
     tool(async (args) => eng.schedulePost(args)),
   );
 
   server.tool(
     "cancel_scheduled_post",
-    "Cancel a scheduled post: sets status back to draft and clears scheduled_at.",
+    "Cancel a scheduled post: sets status back to draft and clears scheduled_at. Fails with dispatch_started once dispatch has started or the row is needs_review. PostPath cannot undo a platform post.",
     {
       post_id: z.string().min(8),
     },
@@ -149,17 +149,18 @@ export function createSocialMcpServer({ engine } = {}) {
 
   server.tool(
     "publish_post",
-    "Publish now after local preflight validation (hard errors block; length overages are warnings). YouTube/TikTok use media_path. Instagram/Facebook/Pinterest need media_url. Text platforms use caption/title. Reddit uses tags[0] as subreddit. Snapchat/WhatsApp return honest API-restricted errors. Scheduled posts require force=true before their time.",
+    "Publish now after local preflight validation (hard errors block; length overages are warnings). YouTube/TikTok use media_path. Instagram/Facebook/Pinterest need media_url. Text platforms use caption/title. Reddit uses tags[0] as subreddit. Snapchat/WhatsApp return honest API-restricted errors. Scheduled posts require force=true before their time. needs_review posts are not retried unless acknowledge=true.",
     {
       post_id: z.string().min(8),
       force: z.boolean().optional(),
+      acknowledge: z.boolean().optional().describe("Required to send a needs_review post again. Default false."),
     },
     tool(async (args) => eng.publishPost(args)),
   );
 
   server.tool(
     "publish_due",
-    "Publish scheduled posts whose scheduled_at is due. The desk/app also calls this periodically while running.",
+    "Publish scheduled posts whose scheduled_at is due. Skips needs_review and does not resend posts left in publishing from an earlier run (those move to needs_review). The desk/app also calls this periodically while running.",
     {
       profile_id: z.string().min(2).max(64).optional(),
       limit: z.number().int().min(1).max(20).optional(),
@@ -172,7 +173,7 @@ export function createSocialMcpServer({ engine } = {}) {
     "List local drafts and posts.",
     {
       profile_id: z.string().min(2).max(64).optional(),
-      status: z.enum(["draft", "scheduled", "publishing", "published", "handed_off", "failed"]).optional(),
+      status: z.enum(["draft", "scheduled", "publishing", "published", "handed_off", "failed", "needs_review"]).optional(),
     },
     tool(async (args) => eng.listPosts(args)),
   );

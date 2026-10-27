@@ -1,4 +1,5 @@
 import { mcpError } from "../errors.js";
+import { invalidGrantError, isInvalidGrantPayload, sendWithRefresh } from "./authRetry.js";
 
 async function readJson(response) {
   const text = typeof response.text === "function" ? await response.text() : "";
@@ -10,12 +11,8 @@ async function readJson(response) {
   }
 }
 
-async function ensureAccess({ secrets, oauth, fetchImpl, now = Date.now(), onSecrets }) {
-  if (secrets.access_token && secrets.expires_at && Date.parse(secrets.expires_at) > now + 60_000) {
-    return secrets;
-  }
+async function refreshAccess({ secrets, oauth, fetchImpl, now = Date.now() }) {
   if (!secrets.refresh_token || !oauth?.clientId || !oauth?.clientSecret) {
-    if (secrets.access_token) return secrets;
     throw mcpError("linkedin_not_connected", "Reconnect LinkedIn.", 409);
   }
   const response = await fetchImpl("https://www.linkedin.com/oauth/v2/accessToken", {
@@ -29,47 +26,80 @@ async function ensureAccess({ secrets, oauth, fetchImpl, now = Date.now(), onSec
     }),
   });
   const payload = await readJson(response);
+  if (isInvalidGrantPayload(payload)) {
+    throw invalidGrantError("LinkedIn refresh token was revoked. Reconnect.");
+  }
   if (!response.ok || !payload.access_token) {
     throw mcpError("linkedin_auth_failed", "LinkedIn needs to be connected again.", 502);
   }
-  const next = {
+  return {
     ...secrets,
     access_token: payload.access_token,
     refresh_token: payload.refresh_token || secrets.refresh_token,
     expires_at: new Date(now + (Number(payload.expires_in) || 3600) * 1000).toISOString(),
   };
+}
+
+async function ensureAccess({ secrets, oauth, fetchImpl, now = Date.now(), onSecrets }) {
+  if (secrets.access_token && secrets.expires_at && Date.parse(secrets.expires_at) > now + 60_000) {
+    return secrets;
+  }
+  if (!secrets.refresh_token || !oauth?.clientId || !oauth?.clientSecret) {
+    if (secrets.access_token) return secrets;
+    throw mcpError("linkedin_not_connected", "Reconnect LinkedIn.", 409);
+  }
+  const next = await refreshAccess({ secrets, oauth, fetchImpl, now });
   if (onSecrets) await onSecrets(next);
   return next;
 }
 
-export async function publishLinkedInText({ post, connection, secrets, oauth, fetchImpl = fetch, onSecrets }) {
-  const fresh = await ensureAccess({ secrets, oauth, fetchImpl, onSecrets });
+export async function publishLinkedInText({
+  post,
+  connection,
+  secrets,
+  oauth,
+  fetchImpl = fetch,
+  onSecrets,
+  onNeedsReconnect,
+}) {
+  let fresh = await ensureAccess({ secrets, oauth, fetchImpl, onSecrets });
   const author = connection.person_urn;
   if (!author) throw mcpError("linkedin_not_connected", "LinkedIn person URN missing. Reconnect LinkedIn.", 409);
   const text = String(post.caption || post.description || post.title || "").slice(0, 3000);
   if (!text) throw mcpError("invalid_post", "LinkedIn posts need caption or description text.", 400);
 
-  const response = await fetchImpl("https://api.linkedin.com/v2/ugcPosts", {
-    method: "POST",
-    headers: {
-      authorization: `Bearer ${fresh.access_token}`,
-      "content-type": "application/json",
-      "x-restli-protocol-version": "2.0.0",
-    },
-    body: JSON.stringify({
-      author,
-      lifecycleState: "PUBLISHED",
-      specificContent: {
-        "com.linkedin.ugc.ShareContent": {
-          shareCommentary: { text },
-          shareMediaCategory: "NONE",
+  const budget = { used: false };
+  const sent = await sendWithRefresh({
+    budget,
+    secrets: fresh,
+    refresh: (current) => refreshAccess({ secrets: current, oauth, fetchImpl }),
+    onSecrets,
+    onNeedsReconnect,
+    send: (current) =>
+      fetchImpl("https://api.linkedin.com/v2/ugcPosts", {
+        method: "POST",
+        headers: {
+          authorization: `Bearer ${current.access_token}`,
+          "content-type": "application/json",
+          "x-restli-protocol-version": "2.0.0",
         },
-      },
-      visibility: {
-        "com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC",
-      },
-    }),
+        body: JSON.stringify({
+          author,
+          lifecycleState: "PUBLISHED",
+          specificContent: {
+            "com.linkedin.ugc.ShareContent": {
+              shareCommentary: { text },
+              shareMediaCategory: "NONE",
+            },
+          },
+          visibility: {
+            "com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC",
+          },
+        }),
+      }),
   });
+  fresh = sent.secrets;
+  const response = sent.response;
   const payload = await readJson(response);
   const id = payload.id || response.headers?.get?.("x-restli-id") || "";
   if (!response.ok || !id) {

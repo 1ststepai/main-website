@@ -4,6 +4,16 @@ import { mcpError } from "./errors.js";
 import { paths } from "./home.js";
 import { socialId } from "./ids.js";
 
+export const POST_STATUSES = [
+  "draft",
+  "scheduled",
+  "publishing",
+  "published",
+  "handed_off",
+  "failed",
+  "needs_review",
+];
+
 function emptyDb() {
   return {
     version: 1,
@@ -38,6 +48,7 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
   const homePaths = paths(home);
   const key = loadOrCreateKey(homePaths, env);
   let db = loadDb(homePaths.dbFile);
+  const inFlight = new Set();
 
   function persist() {
     const tmp = `${homePaths.dbFile}.${process.pid}.tmp`;
@@ -109,6 +120,18 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
     persist();
   }
 
+  function updateConnection(profileId, platform, patch) {
+    const row = getConnection(profileId, platform);
+    if (!row) return null;
+    const safe = { ...patch };
+    delete safe.secrets_enc;
+    delete safe.profile_id;
+    delete safe.platform;
+    Object.assign(row, safe, { updated_at: new Date(now()).toISOString() });
+    persist();
+    return publicConnection(row);
+  }
+
   function deleteConnection(profileId, platform) {
     delete db.connections[connectionKey(profileId, platform)];
     persist();
@@ -130,9 +153,47 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
     if (create && db.posts[post.id]) {
       throw mcpError("conflict", "Post already exists.", 409);
     }
+    if (!POST_STATUSES.includes(post.status)) {
+      throw mcpError("invalid_status", `Unknown post status ${post.status}.`, 409);
+    }
     db.posts[post.id] = post;
     persist();
     return publicPost(post);
+  }
+
+  function claimPost(postId, fromStatuses) {
+    const id = String(postId || "");
+    const post = db.posts[id];
+    if (!post) return { ok: false, reason: "not_found" };
+    if (inFlight.has(id)) return { ok: false, reason: "in_flight", status: post.status };
+    if (!fromStatuses.includes(post.status)) return { ok: false, reason: "status", status: post.status };
+    post.status = "publishing";
+    post.error = null;
+    post.updated_at = new Date(now()).toISOString();
+    inFlight.add(id);
+    persist();
+    return { ok: true, post };
+  }
+
+  function compareAndSetPost(postId, fromStatuses, mutate) {
+    const post = db.posts[String(postId || "")];
+    if (!post) return { ok: false, reason: "not_found" };
+    if (!fromStatuses.includes(post.status)) return { ok: false, reason: "status", status: post.status };
+    mutate(post);
+    if (!POST_STATUSES.includes(post.status)) {
+      throw mcpError("invalid_status", `Unknown post status ${post.status}.`, 409);
+    }
+    post.updated_at = new Date(now()).toISOString();
+    persist();
+    return { ok: true, post };
+  }
+
+  function releaseClaim(postId) {
+    inFlight.delete(String(postId || ""));
+  }
+
+  function isClaimed(postId) {
+    return inFlight.has(String(postId || ""));
   }
 
   function appendAudit(entry) {
@@ -160,10 +221,15 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
     saveConnection,
     readSecrets,
     updateSecrets,
+    updateConnection,
     deleteConnection,
     listPosts,
     getPost,
     savePost,
+    claimPost,
+    compareAndSetPost,
+    releaseClaim,
+    isClaimed,
     appendAudit,
     exportPublic,
     newId: socialId,
