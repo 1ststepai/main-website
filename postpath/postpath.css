@@ -777,8 +777,8 @@ img { display: block; max-width: 100%; }
   font-size: 0.58rem;
   font-weight: 700;
   letter-spacing: 0.02em;
-  color: #e2e8f0;
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.55), rgba(139, 92, 246, 0.55));
+  color: #ffffff;
+  background: #1e3a8a;
   flex-shrink: 0;
 }
 .soc-row {
