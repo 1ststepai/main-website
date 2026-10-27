@@ -7,6 +7,7 @@
   "scripts": {
     "start": "electron .",
     "desk": "node ../social-mcp/bin/social-mcp.js app --no-open",
+    "pack:win": "bash scripts/build-windows-installer.sh",
     "test": "node --test test/*.test.cjs"
   },
   "engines": {
@@ -20,7 +21,8 @@
     "social-mcp"
   ],
   "license": "UNLICENSED",
-  "optionalDependencies": {
-    "electron": "^37.2.6"
+  "devDependencies": {
+    "electron": "^37.2.6",
+    "electron-builder": "^25.1.8"
   }
 }

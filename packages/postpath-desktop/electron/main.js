@@ -5,6 +5,7 @@ const http = require("node:http");
 const path = require("node:path");
 const { app, BrowserWindow, shell } = require("electron");
 const { decideNavigation, createRedactingWriter } = require("./shellPolicy.js");
+const { resolveDeskLaunch } = require("./deskLaunch.js");
 
 const DESK_HOST = "127.0.0.1";
 const DESK_PORT = Number(process.env.SOCIAL_MCP_DESK_PORT || 47830);
@@ -19,15 +20,14 @@ let deskChild = null;
 let mainWindow = null;
 let shuttingDown = false;
 
-function socialMcpBin() {
-  if (process.env.POSTPATH_SOCIAL_MCP_BIN) {
-    return path.resolve(process.env.POSTPATH_SOCIAL_MCP_BIN);
-  }
-  return path.resolve(__dirname, "..", "..", "social-mcp", "bin", "social-mcp.js");
-}
-
-function nodeCommand() {
-  return process.env.POSTPATH_NODE || "node";
+function deskLaunch() {
+  return resolveDeskLaunch({
+    packaged: app.isPackaged,
+    resourcesPath: process.resourcesPath,
+    execPath: process.execPath,
+    moduleDir: __dirname,
+    env: process.env,
+  });
 }
 
 function probeDesk() {
@@ -72,11 +72,10 @@ function pipeDeskOutput(child) {
 }
 
 function spawnDesk() {
-  const bin = socialMcpBin();
-  const node = nodeCommand();
-  const child = spawn(node, [bin, "app", "--no-open"], {
-    cwd: path.dirname(bin),
-    env: { ...process.env },
+  const launch = deskLaunch();
+  const child = spawn(launch.command, launch.args, {
+    cwd: launch.cwd,
+    env: launch.env,
     stdio: ["ignore", "pipe", "pipe"],
   });
 
@@ -97,7 +96,8 @@ async function ensureDesk() {
     console.log(`[postpath-desktop] desk already running at ${DESK_URL}`);
     return;
   }
-  console.log(`[postpath-desktop] starting desk via ${nodeCommand()} ${socialMcpBin()} app --no-open`);
+  const launch = deskLaunch();
+  console.log(`[postpath-desktop] starting desk via ${launch.command} ${launch.args.join(" ")}`);
   spawnDesk();
   await waitForDesk();
 }
@@ -207,18 +207,29 @@ async function boot() {
   await createWindow();
 }
 
-app.whenReady().then(() => {
-  boot().catch((err) => {
-    console.error("[postpath-desktop]", err);
-    app.quit();
+const gotSingleInstance = app.requestSingleInstanceLock();
+if (!gotSingleInstance) {
+  app.quit();
+} else {
+  app.on("second-instance", () => {
+    if (!mainWindow) return;
+    if (mainWindow.isMinimized()) mainWindow.restore();
+    mainWindow.focus();
   });
 
-  app.on("activate", () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow().catch((err) => console.error("[postpath-desktop]", err));
-    }
+  app.whenReady().then(() => {
+    boot().catch((err) => {
+      console.error("[postpath-desktop]", err);
+      app.quit();
+    });
+
+    app.on("activate", () => {
+      if (BrowserWindow.getAllWindows().length === 0) {
+        createWindow().catch((err) => console.error("[postpath-desktop]", err));
+      }
+    });
   });
-});
+}
 
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {

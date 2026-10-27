@@ -1,5 +1,14 @@
 # Architecture Decision Log
 
+## 2026-10-27: Windows customer install is an unsigned internal preview
+
+- **Status / owner:** In review on PR #51. Not deployed. Evan runs the Windows installer. Mac signing and the YouTube upload stay blocked on Evan.
+- **Decision:** The customer Windows path is an NSIS installer that bundles Electron and the PostPath desk. It does not ask the customer to install Node.js, extract a zip, or run npm. The build is unsigned. SmartScreen stays on. The public site still says Request early access and does not link the installer. Saved accounts stay in `%USERPROFILE%\.social-mcp` across uninstall. A separate desk control removes them. There is no automatic updater. macOS uses the same application core later, after an Apple Developer ID and notarization exist. The first useful post is a private YouTube draft from the desk. Cursor is optional.
+- **Rationale:** The versioned zips still require Node.js 20+ and an npm install, which is not a nontechnical install.
+- **Affected systems:** `packages/postpath-desktop`, `packages/social-mcp` desk, `public/downloads/postpath/`.
+- **Verification:** Desk and launcher unit tests. The Windows installer is built on Linux and is not executed on Windows here.
+- **Rollback:** Leave PR #51 unmerged. Production stays on main.
+
 ## 2026-10-27: Unsigned developer preview stays the install label; PR #51 stays unmerged
 
 - **Status / owner:** Review boundary for the PostPath candidate. Not deployed. Evan owns the protected-preview look, Mac and Windows execution, the first real account, and any merge.

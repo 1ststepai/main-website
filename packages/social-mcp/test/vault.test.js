@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtempSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
@@ -59,4 +59,15 @@ test("store keeps secrets out of public connection views", () => {
   } finally {
     rmSync(home, { recursive: true, force: true });
   }
+});
+
+test("forgetVault deletes the saved accounts and refuses later writes", () => {
+  const home = mkdtempSync(join(tmpdir(), "social-mcp-forget-"));
+  const store = createStore({ home });
+  store.upsertProfile({ id: "acme", name: "Acme" });
+  assert.equal(existsSync(store.homePaths.keyFile), true);
+  const removed = store.forgetVault();
+  assert.equal(removed.removed, true);
+  assert.equal(existsSync(home), false);
+  assert.throws(() => store.savePost({ id: "post12345678", status: "draft" }), /Saved accounts were removed/);
 });

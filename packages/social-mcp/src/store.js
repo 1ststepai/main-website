@@ -1,4 +1,4 @@
-import { closeSync, constants, existsSync, openSync, readFileSync, renameSync, statSync, unlinkSync, writeFileSync } from "node:fs";
+import { closeSync, constants, existsSync, openSync, readFileSync, renameSync, rmSync, statSync, unlinkSync, writeFileSync } from "node:fs";
 import { decryptJson, encryptJson, loadOrCreateKey } from "./crypto.js";
 import { mcpError } from "./errors.js";
 import { paths } from "./home.js";
@@ -85,12 +85,27 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
   const lockFile = `${homePaths.dbFile}.lock`;
   let db = loadDb(homePaths.dbFile);
   const inFlight = new Set();
+  let removed = false;
 
   function locked(fn) {
+    if (removed) {
+      throw mcpError("vault_removed", "Saved accounts were removed. Quit PostPath and open it again.", 409);
+    }
     return withVaultLock(lockFile, () => {
       db = loadDb(homePaths.dbFile);
       return fn();
     });
+  }
+
+  function forgetVault() {
+    if (!removed) {
+      locked(() => {
+        removed = true;
+        db = emptyDb();
+      });
+    }
+    rmSync(homePaths.root, { recursive: true, force: true });
+    return { removed: true, path: homePaths.root };
   }
 
   function persist() {
@@ -283,6 +298,7 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
     isClaimed,
     appendAudit,
     exportPublic,
+    forgetVault,
     newId: socialId,
   };
 }

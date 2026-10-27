@@ -277,6 +277,121 @@ blueskyForm.addEventListener("submit", async (event) => {
   }
 });
 
+const youtubeForm = document.getElementById("youtube-form");
+const publishDraftButton = document.getElementById("publish-draft");
+const draftResult = document.getElementById("draft-result");
+let currentDraftId = "";
+
+document.getElementById("connect-youtube").addEventListener("click", async () => {
+  const button = document.getElementById("connect-youtube");
+  button.disabled = true;
+  try {
+    const data = await api("/api/connect", {
+      method: "POST",
+      body: JSON.stringify({
+        id: profileId.value.trim(),
+        name: profileName.value.trim() || profileId.value.trim(),
+        platforms: ["youtube"],
+      }),
+    });
+    renderStatus(data);
+    showToast(data.connect?.message || "Continue YouTube sign-in in your browser");
+  } catch (error) {
+    showToast(error.message, true);
+  } finally {
+    button.disabled = false;
+  }
+});
+
+youtubeForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const button = document.getElementById("save-draft");
+  button.disabled = true;
+  publishDraftButton.disabled = true;
+  try {
+    const form = new FormData(youtubeForm);
+    const file = form.get("video");
+    if (!file || !file.size) throw new Error("Choose the video file before saving the draft.");
+    let mediaPath = "";
+    if (file && typeof file === "object" && file.size) {
+      const saved = await api("/api/media", {
+        method: "POST",
+        headers: {
+          "content-type": file.type || "application/octet-stream",
+          "x-postpath-filename": file.name || "video.mp4",
+        },
+        body: file,
+      });
+      mediaPath = saved.media.filename;
+    }
+    const data = await api("/api/draft", {
+      method: "POST",
+      body: JSON.stringify({
+        id: profileId.value.trim(),
+        name: profileName.value.trim() || profileId.value.trim(),
+        platform: "youtube",
+        title: String(form.get("title") || ""),
+        description: String(form.get("description") || ""),
+        privacy_status: String(form.get("privacy_status") || "private"),
+        media_path: mediaPath || undefined,
+        media_content_type: file && file.type ? file.type : "video/mp4",
+      }),
+    });
+    currentDraftId = data.post?.id || "";
+    const privacy = data.post?.privacy_status || "private";
+    draftResult.textContent = currentDraftId
+      ? `Draft ${currentDraftId} saved. Privacy is ${privacy}. Read it, then publish only if this is the approved video.`
+      : "Draft was not saved.";
+    publishDraftButton.disabled = !currentDraftId;
+    showToast("Draft saved on this computer");
+  } catch (error) {
+    showToast(error.message, true);
+  } finally {
+    button.disabled = false;
+  }
+});
+
+publishDraftButton.addEventListener("click", async () => {
+  if (!currentDraftId) return;
+  const privacy = String(new FormData(youtubeForm).get("privacy_status") || "private");
+  if (privacy !== "private") {
+    const proceed = window.confirm(`This draft is ${privacy}. Publish it anyway?`);
+    if (!proceed) return;
+  }
+  publishDraftButton.disabled = true;
+  try {
+    const data = await api("/api/publish", {
+      method: "POST",
+      body: JSON.stringify({ post_id: currentDraftId }),
+    });
+    const url = data.result?.published_url || data.post?.published_url || "";
+    draftResult.textContent = url
+      ? `Published ${data.post?.privacy_status || privacy}. Open ${url} and confirm it, then delete it on YouTube when the check is done.`
+      : "Publish finished without a video URL. Check the channel before trying again.";
+    showToast("Publish finished");
+  } catch (error) {
+    showToast(error.message, true);
+    publishDraftButton.disabled = false;
+  }
+});
+
+document.getElementById("forget-vault").addEventListener("click", async () => {
+  const proceed = window.confirm(
+    "Remove saved accounts from this computer? PostPath stays installed. This does not delete videos already on YouTube.",
+  );
+  if (!proceed) return;
+  try {
+    const data = await api("/api/forget-vault", {
+      method: "POST",
+      body: JSON.stringify({ confirm: "remove saved accounts" }),
+    });
+    draftResult.textContent = data.message || "Saved accounts were removed. Quit PostPath and open it again.";
+    showToast(draftResult.textContent);
+  } catch (error) {
+    showToast(error.message, true);
+  }
+});
+
 refresh().catch((error) => showToast(error.message, true));
 setInterval(() => {
   refresh().catch(() => {});

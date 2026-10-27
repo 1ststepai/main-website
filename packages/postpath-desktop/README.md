@@ -1,8 +1,8 @@
 # PostPath desktop shell
 
-Developer preview. This is **not** a one-click installer and it is **not** signed.
+The Windows customer artifact is an unsigned internal preview installer. It bundles Electron and the desk, so a customer does not install Node.js or run npm. It is not Authenticode-signed. Leave SmartScreen on. Details, the macOS plan, and updates are in `docs/POSTPATH_INSTALL.md`.
 
-Thin **Electron** wrapper around the existing PostPath desk in `packages/social-mcp`. It still needs **Node.js 20+** and a checkout (or the versioned download zip) of `packages/social-mcp`. It does not bundle a notarized Mac app or an Authenticode-signed Windows installer.
+For development, this package is still a thin Electron wrapper around `packages/social-mcp`. A local checkout uses system Node.js unless you run the Windows installer.
 
 This package does **not** fork connect / vault / publish / MCP logic. It only:
 
