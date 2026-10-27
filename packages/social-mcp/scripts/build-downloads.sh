@@ -16,6 +16,7 @@ for item in "$ROOT"/*; do
   base="$(basename "$item")"
   case "$base" in
     node_modules|test|*.log|skills) continue ;;
+    *) ;;
   esac
   cp -a "$item" "$APP_STAGE/"
 done
