@@ -18,7 +18,7 @@ function connectionKey(profileId, platform) {
   return `${profileId}:${platform}`;
 }
 
-function normalizeProfileId(id) {
+export function normalizeProfileId(id) {
   const raw = String(id || "").trim().toLowerCase();
   let out = "";
   for (const ch of raw) {

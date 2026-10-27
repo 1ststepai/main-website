@@ -1,7 +1,7 @@
 import { PLATFORMS } from "./home.js";
 import { mcpError } from "./errors.js";
 import { resolveSafeMediaPath } from "./mediaPath.js";
-import { createStore } from "./store.js";
+import { createStore, normalizeProfileId } from "./store.js";
 import { createOAuthRuntime } from "./oauth/server.js";
 import { oauthConfig } from "./oauth/providers.js";
 import { publishYouTubeFromFile } from "./publish/youtube.js";
@@ -16,6 +16,7 @@ import { publishGoogleBusinessPost } from "./publish/google_business.js";
 import { publishRedditPost } from "./publish/reddit.js";
 import { publishSnapchatScaffold, publishWhatsAppScaffold } from "./publish/restricted.js";
 import { validateDraftForPublish } from "./publish/validate.js";
+import { assertProfileAllowed, getLicenseState } from "./license.js";
 
 const POST_STATUSES = ["draft", "scheduled", "publishing", "published", "handed_off", "failed"];
 
@@ -47,6 +48,12 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
   }
 
   async function upsertProfile(input) {
+    const profiles = store.listProfiles();
+    const existing = store.getProfile(normalizeProfileId(input?.id));
+    if (!existing) {
+      const license = getLicenseState(env);
+      assertProfileAllowed(profiles.length + 1, license);
+    }
     const profile = store.upsertProfile(input);
     store.appendAudit({
       id: store.newId("aud"),
