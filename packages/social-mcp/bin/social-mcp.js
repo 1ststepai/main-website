@@ -5,6 +5,7 @@ import { paths } from "../src/home.js";
 import { loadOAuthEnvFile } from "../src/envFile.js";
 import { createDeskServer } from "../src/desk/server.js";
 import { installCursorMcp } from "../src/cursorConfig.js";
+import { PRODUCT_NAME, PRODUCT_TITLE } from "../src/brand.js";
 
 const args = process.argv.slice(2);
 const command = args[0];
@@ -26,7 +27,7 @@ async function main() {
     const engine = bootEngine();
     const desk = createDeskServer({ engine });
     const { url } = await desk.start({ open: !args.includes("--no-open") });
-    console.log(`Social Connector desk: ${url}`);
+    console.log(`${PRODUCT_TITLE} desk: ${url}`);
     console.log("Leave this process running. Press Ctrl+C to stop.");
     await new Promise(() => {});
     return;
@@ -34,7 +35,7 @@ async function main() {
 
   if (command === "init") {
     const homePaths = paths();
-    const example = `# Social Connector OAuth apps — local only.
+    const example = `# ${PRODUCT_NAME} OAuth apps — local only.
 # Redirect URI for every provider:
 # http://127.0.0.1:47831/oauth/callback
 
@@ -47,7 +48,7 @@ TIKTOK_CLIENT_SECRET=
 `;
     writeFileSync(homePaths.envExample, example, { encoding: "utf8", mode: 0o600 });
     bootEngine();
-    console.log(`Social Connector ready at ${homePaths.root}`);
+    console.log(`${PRODUCT_TITLE} ready at ${homePaths.root}`);
     console.log(`Open the desk: node ./bin/social-mcp.js app`);
     console.log(`Redirect URI: http://127.0.0.1:47831/oauth/callback`);
     return;
@@ -63,7 +64,7 @@ TIKTOK_CLIENT_SECRET=
   if (command === "install-cursor") {
     const result = installCursorMcp();
     console.log(JSON.stringify(result, null, 2));
-    console.log("Restart Cursor to load Social MCP.");
+    console.log(`Restart Cursor to load ${PRODUCT_NAME}.`);
     return;
   }
 
@@ -86,6 +87,8 @@ TIKTOK_CLIENT_SECRET=
   }
 
   console.error(`Unknown command: ${command}
+${PRODUCT_TITLE}
+
 Usage:
   social-mcp app             # desktop Connect UI (recommended)
   social-mcp                 # stdio MCP server for Cursor/Claude

@@ -3,8 +3,9 @@ import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { mcpError } from "./errors.js";
+import { MCP_SERVER_KEY } from "./brand.js";
 
-const SERVER_KEY = "social-mcp";
+const SERVER_KEY = MCP_SERVER_KEY;
 
 export function defaultCursorMcpPath(env = process.env) {
   const override = String(env.CURSOR_MCP_CONFIG || "").trim();

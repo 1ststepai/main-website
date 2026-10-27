@@ -79,12 +79,19 @@ body {
 }
 
 .brand {
-  margin: 0 0 1rem;
+  margin: 0;
   font-size: 0.78rem;
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--accent);
   font-weight: 700;
+}
+
+.byline {
+  margin: 0.35rem 0 1rem;
+  font-size: 0.92rem;
+  color: var(--warm);
+  letter-spacing: 0.04em;
 }
 
 .hero h1 {

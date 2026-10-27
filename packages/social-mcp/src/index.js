@@ -6,6 +6,7 @@ import { formatToolError, formatToolResult } from "./errors.js";
 import { paths, PLATFORMS } from "./home.js";
 import { loadOAuthEnvFile } from "./envFile.js";
 import { createDeskServer } from "./desk/server.js";
+import { PRODUCT_NAME } from "./brand.js";
 
 function tool(handler) {
   return async (args) => {
@@ -21,13 +22,13 @@ export function createSocialMcpServer({ engine } = {}) {
   if (!engine) loadOAuthEnvFile(paths(), process.env);
   const eng = engine || createEngine();
   const server = new McpServer({
-    name: "social-mcp",
+    name: "postpath",
     version: "0.1.0",
   });
 
   server.tool(
     "status",
-    "Show local Social MCP home path, profiles, connections, and the OAuth redirect URI to register with Google/Meta/TikTok.",
+    `Show local ${PRODUCT_NAME} home path, profiles, connections, and the OAuth redirect URI to register with Google/Meta/TikTok.`,
     {},
     tool(async () => eng.publicStatus()),
   );

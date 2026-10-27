@@ -10,7 +10,7 @@ function isInsideRoot(candidate, root) {
 }
 
 /**
- * Media must live under the Social MCP media directory.
+ * Media must live under the PostPath media directory.
  * Agents copy or save files there; arbitrary filesystem paths are rejected.
  */
 export function resolveSafeMediaPath(userPath, mediaRoot) {
@@ -25,7 +25,7 @@ export function resolveSafeMediaPath(userPath, mediaRoot) {
   try {
     rootReal = realpathSync(mediaRoot);
   } catch {
-    throw mcpError("media_root_missing", "Social MCP media directory is not available.", 503);
+    throw mcpError("media_root_missing", "PostPath media directory is not available.", 503);
   }
 
   const trimmed = userPath.trim();
@@ -36,7 +36,7 @@ export function resolveSafeMediaPath(userPath, mediaRoot) {
     // Relative paths are always rooted at the media directory.
     const safeParts = trimmed.split(/[/\\]+/).filter(Boolean);
     if (!safeParts.length || safeParts.some((part) => part === ".." || !MEDIA_NAME.test(part))) {
-      throw mcpError("invalid_media", "media_path must be a file under the Social MCP media directory.");
+      throw mcpError("invalid_media", "media_path must be a file under the PostPath media directory.");
     }
     candidate = resolve(join(rootReal, ...safeParts));
   }
@@ -44,7 +44,7 @@ export function resolveSafeMediaPath(userPath, mediaRoot) {
   if (!isInsideRoot(candidate, rootReal)) {
     throw mcpError(
       "invalid_media",
-      `media_path must be inside the Social MCP media directory (${rootReal}).`,
+      `media_path must be inside the PostPath media directory (${rootReal}).`,
     );
   }
 
@@ -57,18 +57,18 @@ export function resolveSafeMediaPath(userPath, mediaRoot) {
   try {
     realFile = realpathSync(candidate);
   } catch {
-    throw mcpError("media_missing", "Media file is not available under the Social MCP media directory.");
+    throw mcpError("media_missing", "Media file is not available under the PostPath media directory.");
   }
 
   if (!isInsideRoot(realFile, rootReal)) {
-    throw mcpError("invalid_media", "media_path escaped the Social MCP media directory.");
+    throw mcpError("invalid_media", "media_path escaped the PostPath media directory.");
   }
 
   let stat;
   try {
     stat = statSync(realFile);
   } catch {
-    throw mcpError("media_missing", "Media file is not available under the Social MCP media directory.");
+    throw mcpError("media_missing", "Media file is not available under the PostPath media directory.");
   }
   if (!stat.isFile() || stat.size < 1) {
     throw mcpError("invalid_media", "media_path must point to a non-empty file.");
@@ -76,7 +76,7 @@ export function resolveSafeMediaPath(userPath, mediaRoot) {
 
   // Keep dirname check so symlinks outside the root cannot sneak through basename alone.
   if (!isInsideRoot(dirname(realFile), rootReal) && realFile !== rootReal) {
-    throw mcpError("invalid_media", "media_path escaped the Social MCP media directory.");
+    throw mcpError("invalid_media", "media_path escaped the PostPath media directory.");
   }
 
   return realFile;

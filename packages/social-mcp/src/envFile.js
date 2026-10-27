@@ -62,7 +62,7 @@ export function saveOAuthEnvFile(input, homePaths = paths()) {
     else delete next[key];
   }
   const lines = [
-    "# Social Connector OAuth apps — local only. Do not commit.",
+    "# PostPath OAuth apps — local only. Do not commit.",
     "# Redirect URI for every provider:",
     "# http://127.0.0.1:47831/oauth/callback",
     "",

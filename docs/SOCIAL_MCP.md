@@ -1,12 +1,12 @@
-# Social Connector (local desktop + MCP)
+# PostPath by 1stStep.ai (local desktop + MCP)
 
-Product package: `packages/social-mcp`.
+Product package: `packages/social-mcp` (technical path). Product name: **PostPath**.
 
-Humans use the **desk UI**. Agents use the **MCP server**. Both share the encrypted vault on disk.
+Humans use the **desk UI**. Agents use the **MCP server** (`postpath`). Both share the encrypted vault on disk.
 
 ## Open the desk
 
-**Windows:** double-click `packages/social-mcp/scripts/Open-SocialConnector.bat`
+**Windows:** double-click `packages/social-mcp/scripts/Open-PostPath.bat`
 
 ```powershell
 cd packages\social-mcp
@@ -27,7 +27,7 @@ OAuth callback: `http://127.0.0.1:47831/oauth/callback`
 
 1. Save Google / Meta / TikTok app credentials in the desk (stored in `~/.social-mcp/oauth.env`)
 2. **Connect accounts** — browser chain YouTube → Meta → TikTok
-3. **Enable in Cursor** — merges `social-mcp` into `~/.cursor/mcp.json`
+3. **Enable in Cursor** — merges `postpath` into `~/.cursor/mcp.json`
 4. Restart Cursor — agents can draft / schedule / publish
 
 ## Relationship to studio
@@ -35,9 +35,9 @@ OAuth callback: `http://127.0.0.1:47831/oauth/callback`
 | Surface | Role |
 | --- | --- |
 | `/admin/` Social Desk | Hosted owner control plane for 1stStep brands |
-| Social Connector package | Portable product for any brand / any AI on the user’s machine |
+| PostPath | Portable product for any brand / any AI on the user’s machine |
 
-They do not share KV or Blob. Do not point the connector at production website storage.
+They do not share KV or Blob. Do not point PostPath at production website storage.
 
 ## Media paths
 

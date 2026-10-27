@@ -37,7 +37,7 @@ test("cursor mcp config merges without wiping other servers", () => {
     buildSocialMcpServerEntry({ command: "node", args: ["/tmp/social-mcp.js"] }),
   );
   assert.equal(merged.mcpServers.other.command, "node");
-  assert.equal(merged.mcpServers["social-mcp"].args[0], "/tmp/social-mcp.js");
+  assert.equal(merged.mcpServers.postpath.args[0], "/tmp/social-mcp.js");
 });
 
 test("installCursorMcp writes file", () => {
@@ -50,7 +50,7 @@ test("installCursorMcp writes file", () => {
     });
     assert.equal(result.configPath, configPath);
     const parsed = JSON.parse(readFileSync(configPath, "utf8"));
-    assert.equal(parsed.mcpServers["social-mcp"].args[0], "bin.js");
+    assert.equal(parsed.mcpServers.postpath.args[0], "bin.js");
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -58,14 +58,19 @@ test("installCursorMcp writes file", () => {
 
 test("desk status and profile APIs stay on localhost", async () => {
   const home = mkdtempSync(join(tmpdir(), "social-mcp-"));
-  const engine = createEngine({ home });
-  const desk = createDeskServer({ engine, port: 47991 });
+  const env = {
+    SOCIAL_MCP_OAUTH_PORT: "47992",
+    SOCIAL_MCP_DESK_PORT: "47991",
+  };
+  const engine = createEngine({ home, env });
+  const desk = createDeskServer({ engine, env, port: 47991 });
   try {
     const { url } = await desk.start({ open: false });
     assert.equal(url, "http://127.0.0.1:47991/");
     const status = await fetch(`${url}api/status`).then((res) => res.json());
     assert.equal(status.ok, true);
-    assert.equal(status.product, "Social Connector");
+    assert.equal(status.product, "PostPath");
+    assert.equal(status.product_title, "PostPath by 1stStep.ai");
     const created = await fetch(`${url}api/profile`, {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -74,7 +79,8 @@ test("desk status and profile APIs stay on localhost", async () => {
     assert.equal(created.ok, true);
     assert.equal(created.profile.id, "acme");
     const html = await fetch(url).then((res) => res.text());
-    assert.match(html, /Social Connector/);
+    assert.match(html, /PostPath/);
+    assert.match(html, /1stStep\.ai/);
     assert.match(html, /Connect accounts/);
   } finally {
     await desk.stop();

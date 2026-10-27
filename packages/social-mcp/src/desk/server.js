@@ -7,6 +7,7 @@ import { loadOAuthEnvFile, publicOAuthConfig, saveOAuthEnvFile, parseEnvFile } f
 import { installCursorMcp, readCursorMcpStatus } from "../cursorConfig.js";
 import { openDesktopApp } from "../openApp.js";
 import { mcpError } from "../errors.js";
+import { PRODUCT_NAME, PRODUCT_TITLE } from "../brand.js";
 
 const PUBLIC_DIR = join(dirname(fileURLToPath(import.meta.url)), "public");
 const CONTENT_TYPES = {
@@ -96,7 +97,8 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
     const cursor = readCursorMcpStatus();
     const ready = oauthReady(envValues);
     return {
-      product: "Social Connector",
+      product: PRODUCT_NAME,
+      product_title: PRODUCT_TITLE,
       home: status.home,
       media_dir: status.media_dir,
       oauth_redirect_uri: status.oauth_redirect_uri || `http://127.0.0.1:${env.SOCIAL_MCP_OAUTH_PORT || 47831}/oauth/callback`,

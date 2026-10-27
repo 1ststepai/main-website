@@ -183,7 +183,7 @@ function loadDb(file) {
       audit: Array.isArray(parsed.audit) ? parsed.audit : [],
     };
   } catch {
-    throw mcpError("db_corrupt", "Local social-mcp database could not be read.", 503);
+    throw mcpError("db_corrupt", "Local PostPath database could not be read.", 503);
   }
 }
 

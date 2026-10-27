@@ -67,7 +67,7 @@ function renderStatus(data) {
   }).join("");
 
   redirectUri.textContent = data.oauth_redirect_uri || "http://127.0.0.1:47831/oauth/callback";
-  const cursor = data.cursor?.installed ? "Cursor MCP enabled" : "Cursor MCP not installed yet";
+  const cursor = data.cursor?.installed ? "PostPath enabled in Cursor" : "PostPath not enabled in Cursor yet";
   pathMeta.textContent = `${cursor} · vault ${data.home || ""} · media ${data.media_dir || ""}`;
 
   if (data.profiles?.[0] && !profileId.dataset.touched) {

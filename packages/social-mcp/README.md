@@ -1,12 +1,14 @@
-# Social Connector
+# PostPath by 1stStep.ai
 
 Local desktop + MCP connector. Connect YouTube, Instagram, Facebook, and TikTok once on your machine — then any AI (Cursor, Claude, Codex) can draft, schedule, and publish. No monthly social-API middleman.
+
+Package path stays `packages/social-mcp` for now; the product name is **PostPath**.
 
 ## Windows (recommended)
 
 1. Install [Node.js 20+](https://nodejs.org)
 2. Open this folder: `packages\social-mcp`
-3. Double-click `scripts\Open-SocialConnector.bat`  
+3. Double-click `scripts\Open-PostPath.bat`  
    (or in PowerShell:)
 
 ```powershell
@@ -15,7 +17,7 @@ npm install
 node .\bin\social-mcp.js app
 ```
 
-That opens the **Social Connector** desk in an app window.
+That opens the **PostPath** desk in an app window.
 
 ### In the desk
 
@@ -43,7 +45,7 @@ node ./bin/social-mcp.js app
 | --- | --- |
 | Desk UI (`social-mcp app`) | Human face: connect, credentials, Enable in Cursor |
 | Local vault `~/.social-mcp` | Encrypted tokens + oauth.env + media |
-| MCP stdio server | What Cursor/Claude call for draft / schedule / publish |
+| MCP server key `postpath` | What Cursor/Claude call for draft / schedule / publish |
 
 ## Platforms
 
@@ -59,7 +61,7 @@ node ./bin/social-mcp.js app
 ```text
 social-mcp app             Desktop Connect UI (default product path)
 social-mcp                 stdio MCP server
-social-mcp install-cursor  write ~/.cursor/mcp.json
+social-mcp install-cursor  write ~/.cursor/mcp.json (server key: postpath)
 social-mcp init            create vault
 social-mcp status
 social-mcp connect <id>    CLI fallback

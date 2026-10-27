@@ -1,11 +1,12 @@
 {
   "name": "@1ststep/social-mcp",
   "version": "0.1.0",
-  "description": "Social Connector: local desktop desk + MCP server so any AI can connect social accounts, draft, schedule, and publish. Tokens stay on your machine.",
+  "description": "PostPath by 1stStep.ai — local desktop desk + MCP server so any AI can connect social accounts, draft, schedule, and publish. Tokens stay on your machine.",
   "private": true,
   "type": "module",
   "bin": {
-    "social-mcp": "./bin/social-mcp.js"
+    "social-mcp": "./bin/social-mcp.js",
+    "postpath": "./bin/social-mcp.js"
   },
   "main": "./src/index.js",
   "exports": {
