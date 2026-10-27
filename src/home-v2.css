@@ -192,6 +192,7 @@ em{font-family:var(--ser);font-style:italic;font-weight:400;letter-spacing:-.02e
 .pp-chip-row{display:flex;flex-wrap:wrap;gap:8px}
 .pp-chip{display:inline-flex;align-items:center;gap:8px;min-height:36px;padding:0 12px 0 8px;border-radius:999px;border:1px solid var(--line);background:rgba(13,12,10,.72);color:var(--cream);font-size:13px;font-weight:560;letter-spacing:-.01em}
 .pp-chip img{width:22px;height:22px;border-radius:6px;display:block}
+.pp-chip-text{padding:0 12px}
 .pp-spot-note{margin:4px 0 0;color:var(--acid);font-family:var(--ser);font-style:italic;font-size:1.2rem;letter-spacing:-.02em}
 .pain-grid,.step-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:36px 0 0;padding:0;list-style:none}
 .pain-grid .card,.step-grid .card{position:relative;padding:28px 24px;background:var(--ink2);border:1px solid var(--line);border-radius:20px}
