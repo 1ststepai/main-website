@@ -81,8 +81,42 @@ cd ../postpath-desktop && npm install && npm start
 
 `npm test` in `packages/postpath-desktop` does not launch Electron.
 
+## Handoff
+
+`docs/POSTPATH.md` and `packages/social-mcp/README.md` still name the unversioned `PostPath-macOS.zip` and `PostPath-Windows.zip` paths. This lane did not edit those files. The files this script publishes are versioned:
+
+- `public/downloads/postpath/PostPath-0.1.0-macOS-developer-preview.zip`
+- `public/downloads/postpath/PostPath-0.1.0-Windows-developer-preview.zip`
+- `public/downloads/postpath/SHA256SUMS.txt`
+- `public/downloads/postpath/manifest.json` (`gitSha` `6cc649f6585bf34861e5c2433f362f436c12c842`, the commit the builder read)
+
 ## Verification
 
-Host: Linux. macOS GUI, Gatekeeper, and the double-click `.command` path were **NOT TESTED** on this host. Windows, SmartScreen, and the `.bat` / `.ps1` path were **NOT TESTED** on this host. No Apple or Windows signing certificate was available.
+Executed on this Linux host (Node v22.23.4). macOS GUI, Gatekeeper, and double-click of `Open PostPath.command` were **NOT TESTED**. Windows, SmartScreen, `Open-PostPath.bat`, and `Open-PostPath.ps1` were **NOT TESTED**. Signing is blocked: no Apple Developer ID and no Windows certificate in this environment.
 
-The Linux run of the zip launcher is recorded below after it is executed on this machine. Until that section is filled in, treat the install path as **not yet run**.
+### Checksums
+
+```
+67df7d27539d4124546dd0fda5c1051a5b40561deb804612ca8ef4f920859199  PostPath-0.1.0-macOS-developer-preview.zip
+6f608298581b1210848d6bf78861803203e2626e8369a7384c720cadd4e41a6b  PostPath-0.1.0-Windows-developer-preview.zip
+```
+
+`sha256sum -c SHA256SUMS.txt` reported both archives OK. `node --test` in `packages/postpath-desktop` passed (manifest checksums, launcher credential scan, navigation policy, log redaction). Zip text entries had no credential literals. The packed tree excludes `node_modules`, `test`, and env files.
+
+### Linux zip path (ran)
+
+Unpacked `PostPath-0.1.0-macOS-developer-preview.zip` into a temporary directory and ran `Open PostPath.command` with `HOME` set to that temporary directory and `POSTPATH_NO_OPEN=1`. That exercises the bash launcher on Linux. It is not a macOS test.
+
+- Fresh install printed `First run: unpacking PostPath developer preview 0.1.0 and installing dependencies...`, ran `npm install --omit=dev`, then served `http://127.0.0.1:47830/` (HTTP 200, title `PostPath by 1stStep.ai`).
+- App files landed in `$HOME/.postpath/app` (`bin/social-mcp.js` present).
+- The vault was created at `$HOME/.social-mcp` (`master.key` and `media/`). The real login home was not used.
+- Stopped the process. Port 47830 closed.
+- Relaunch printed `Relaunch: using existing app at .../.postpath/app` and served HTTP 200 again without a second install.
+- Uninstall removed the unzipped folder and `$HOME/.postpath`. `$HOME/.social-mcp/master.key` was still there afterward.
+- Launcher logs did not contain token, secret, password, authorization, api_key, or oauth lines.
+
+### Electron on Linux (ran, narrow)
+
+`npm install` inside `packages/postpath-desktop` downloaded Electron 37.10.3 only (binary about 192 MB; no extra browser or certificate tooling). `xvfb-run -a ./node_modules/.bin/electron .` with a temporary `HOME` started the shell, spawned `node .../social-mcp.js app --no-open`, and the desk returned HTTP 200. Stdout used the `[postpath-desk]` prefix and did not contain credential assignments. Chromium logged a GPU-process init error and missing system D-Bus; the window process stayed up anyway. No clicks, OAuth, or external-link navigation were performed. macOS and Windows Electron GUIs were **NOT TESTED**.
+
+The temporary homes, including the generated vaults, were deleted after the checks.
