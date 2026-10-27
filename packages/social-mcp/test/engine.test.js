@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { test } from "node:test";
 import { createEngine } from "../src/engine.js";
 import { missingProviders } from "../src/oauth/providers.js";
+import { youtubeFetchMock } from "./helpers/youtubeFetchMock.js";
 
 test("missingProviders reports full OAuth chain gaps", () => {
   assert.deepEqual(missingProviders([]), [
@@ -44,38 +45,7 @@ test("draft schedule and due publish path for youtube", async () => {
   const media = join(mediaDir, "clip.mp4");
   writeFileSync(media, Buffer.alloc(2048, 1));
   const calls = [];
-  const fetchImpl = async (url, init = {}) => {
-    calls.push({ url: String(url), method: init.method || "GET" });
-    if (String(url).includes("oauth2.googleapis.com/token")) {
-      return {
-        ok: true,
-        status: 200,
-        headers: { get: () => "" },
-        text: async () =>
-          JSON.stringify({
-            access_token: "ya29.access",
-            expires_in: 3600,
-          }),
-      };
-    }
-    if (String(url).includes("uploadType=resumable")) {
-      return {
-        ok: true,
-        status: 200,
-        headers: { get: (name) => (name.toLowerCase() === "location" ? "https://www.googleapis.com/upload/youtube/v3/resumable" : "") },
-        text: async () => "",
-      };
-    }
-    if (String(url).includes("/upload/youtube/v3/resumable")) {
-      return {
-        ok: true,
-        status: 200,
-        headers: { get: () => "" },
-        text: async () => JSON.stringify({ id: "vid123", status: { privacyStatus: "private" } }),
-      };
-    }
-    return { ok: false, status: 500, headers: { get: () => "" }, text: async () => "{}" };
-  };
+  const fetchImpl = youtubeFetchMock(calls, { videoId: "vid123" });
 
   try {
     const engine = createEngine({

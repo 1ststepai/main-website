@@ -81,7 +81,14 @@ social-mcp connect <id>    CLI fallback
 
 ## MCP tools (for agents)
 
-`status`, `upsert_profile`, `list_accounts`, `connect_accounts`, `connect_bluesky`, `create_draft`, `update_draft`, `schedule_post`, `publish_post`, `publish_due`, `list_posts`, `get_post_status`
+`status`, `upsert_profile`, `list_accounts`, `connect_accounts`, `connect_bluesky`, `create_draft`, `update_draft`, `schedule_post`, `cancel_scheduled_post`, `publish_post`, `publish_due`, `list_posts`, `get_post_status`
+
+## Scheduling
+
+- `schedule_post` stores a local `scheduled` post with `scheduled_at` (ISO time).
+- While `social-mcp app` / the desk is running, PostPath periodically calls `publish_due` (default every 30s; override with `SOCIAL_MCP_DUE_INTERVAL_MS`). Closing the desk stops that loop — schedules do not fire offline.
+- `cancel_scheduled_post` returns a post to `draft` and clears `scheduled_at`.
+- Agents can still call `publish_due` or `publish_post` with `force=true` manually.
 
 ## Security
 

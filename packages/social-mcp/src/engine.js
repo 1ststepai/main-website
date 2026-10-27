@@ -168,6 +168,26 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
     return { post };
   }
 
+  async function cancelScheduledPost({ post_id }) {
+    const post = store.getPost(post_id);
+    if (!post) throw mcpError("not_found", "Post not found.", 404);
+    if (post.status !== "scheduled") {
+      throw mcpError("invalid_status", "Only scheduled posts can be cancelled.", 409);
+    }
+    post.status = "draft";
+    post.scheduled_at = null;
+    post.updated_at = new Date(now()).toISOString();
+    store.savePost(post);
+    store.appendAudit({
+      id: store.newId("aud"),
+      at: post.updated_at,
+      action: "schedule_cancelled",
+      profile_id: post.profile_id,
+      post_id: post.id,
+    });
+    return { post };
+  }
+
   async function getPostStatus(postId) {
     const post = store.getPost(postId);
     if (!post) throw mcpError("not_found", "Post not found.", 404);
@@ -321,6 +341,7 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
     createDraft,
     updateDraft,
     schedulePost,
+    cancelScheduledPost,
     getPostStatus,
     listPosts,
     publishPost,

@@ -16,6 +16,7 @@ const NETWORKS = [
 
 const toastEl = document.getElementById("toast");
 const networkList = document.getElementById("network-list");
+const scheduledList = document.getElementById("scheduled-list");
 const pathMeta = document.getElementById("path-meta");
 const redirectUri = document.getElementById("redirect-uri");
 const connectHint = document.getElementById("connect-hint");
@@ -23,6 +24,52 @@ const profileName = document.getElementById("profile-name");
 const profileId = document.getElementById("profile-id");
 const oauthForm = document.getElementById("oauth-form");
 const blueskyForm = document.getElementById("bluesky-form");
+
+function formatWhen(iso) {
+  if (!iso) return "No time set";
+  const ms = Date.parse(iso);
+  if (!Number.isFinite(ms)) return String(iso);
+  try {
+    return new Date(ms).toLocaleString();
+  } catch {
+    return String(iso);
+  }
+}
+
+function renderScheduled(posts) {
+  scheduledList.replaceChildren();
+  const rows = Array.isArray(posts) ? posts : [];
+  if (!rows.length) {
+    const empty = document.createElement("li");
+    empty.className = "empty";
+    empty.textContent = "No scheduled posts.";
+    scheduledList.append(empty);
+    return;
+  }
+  for (const post of rows) {
+    const title = post.title || post.caption || post.description || post.id;
+    const platform = post.platform || "unknown";
+    const item = document.createElement("li");
+    item.dataset.postId = String(post.id || "");
+
+    const copy = document.createElement("div");
+    const strong = document.createElement("strong");
+    strong.textContent = String(title || "");
+    const when = document.createElement("div");
+    when.className = "when";
+    when.textContent = `${platform} · ${formatWhen(post.scheduled_at)}`;
+    copy.append(strong, when);
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "btn danger cancel-scheduled";
+    button.dataset.postId = String(post.id || "");
+    button.textContent = "Cancel";
+
+    item.append(copy, button);
+    scheduledList.append(item);
+  }
+}
 
 function showToast(message, isError = false) {
   toastEl.hidden = false;
@@ -107,6 +154,8 @@ function renderStatus(data) {
   } else {
     connectHint.textContent = "Connect opens each configured OAuth provider in order. Bluesky uses the form below.";
   }
+
+  renderScheduled(data.scheduled_posts);
 }
 
 async function refresh() {
@@ -117,6 +166,25 @@ async function refresh() {
 
 document.getElementById("refresh-btn").addEventListener("click", () => {
   refresh().catch((error) => showToast(error.message, true));
+});
+
+scheduledList.addEventListener("click", async (event) => {
+  const button = event.target.closest(".cancel-scheduled");
+  if (!button) return;
+  const postId = button.dataset.postId;
+  if (!postId) return;
+  button.disabled = true;
+  try {
+    const data = await api("/api/cancel-scheduled", {
+      method: "POST",
+      body: JSON.stringify({ post_id: postId }),
+    });
+    renderStatus(data);
+    showToast("Schedule cancelled — post is a draft again");
+  } catch (error) {
+    showToast(error.message, true);
+    button.disabled = false;
+  }
 });
 
 document.getElementById("copy-redirect").addEventListener("click", async () => {

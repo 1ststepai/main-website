@@ -94,8 +94,43 @@ function anyOauthReady(ready) {
   return Boolean(ready.google || ready.meta || ready.tiktok || ready.linkedin || ready.x || ready.pinterest || ready.reddit || ready.snapchat);
 }
 
+function resolveDueIntervalMs(env) {
+  const raw = Number(env.SOCIAL_MCP_DUE_INTERVAL_MS);
+  if (Number.isFinite(raw) && raw >= 1000) return Math.floor(raw);
+  return 30_000;
+}
+
 export function createDeskServer({ engine, env = process.env, port = Number(env.SOCIAL_MCP_DESK_PORT || DEFAULT_DESK_PORT) }) {
   const homePaths = engine.store.homePaths;
+  const dueIntervalMs = resolveDueIntervalMs(env);
+  let dueTimer = null;
+  let dueInFlight = false;
+
+  async function runPublishDue() {
+    if (dueInFlight) return;
+    dueInFlight = true;
+    try {
+      await engine.publishDue();
+    } catch {
+      // Keep the desk alive; publish_due failures are recorded on each post.
+    } finally {
+      dueInFlight = false;
+    }
+  }
+
+  function startDueLoop() {
+    if (dueTimer) return;
+    dueTimer = setInterval(() => {
+      void runPublishDue();
+    }, dueIntervalMs);
+    if (typeof dueTimer.unref === "function") dueTimer.unref();
+  }
+
+  function stopDueLoop() {
+    if (!dueTimer) return;
+    clearInterval(dueTimer);
+    dueTimer = null;
+  }
 
   function snapshot() {
     loadOAuthEnvFile(homePaths, env);
@@ -105,6 +140,7 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
     const status = engine.publicStatus();
     const cursor = readCursorMcpStatus();
     const ready = oauthReady(envValues);
+    const scheduled_posts = engine.store.listPosts({ status: "scheduled" });
     return {
       product: PRODUCT_NAME,
       product_title: PRODUCT_TITLE,
@@ -115,6 +151,8 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
       profiles: status.profiles,
       connections: status.connections,
       platforms: status.platforms,
+      scheduled_posts,
+      due_interval_ms: dueIntervalMs,
       oauth: publicOAuthConfig(envValues),
       oauth_ready: ready,
       cursor,
@@ -186,6 +224,13 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
         return;
       }
 
+      if (req.method === "POST" && url.pathname === "/api/cancel-scheduled") {
+        const body = await readJson(req);
+        const result = await engine.cancelScheduledPost({ post_id: body.post_id });
+        sendJson(res, 200, { ok: true, ...result, ...snapshot() });
+        return;
+      }
+
       if (req.method === "GET" && (url.pathname === "/" || extname(url.pathname))) {
         serveStatic(url.pathname, res);
         return;
@@ -213,14 +258,16 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
 
   async function start({ open = true } = {}) {
     const url = await listen();
+    startDueLoop();
     if (open) openDesktopApp(url);
-    return { url, port };
+    return { url, port, due_interval_ms: dueIntervalMs };
   }
 
   async function stop() {
+    stopDueLoop();
     await new Promise((resolve) => server.close(() => resolve()));
     await engine.oauth.stop();
   }
 
-  return { start, stop, snapshot, port };
+  return { start, stop, snapshot, port, startDueLoop, stopDueLoop };
 }
