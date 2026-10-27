@@ -1,5 +1,5 @@
 import { enforceRateLimit, requestQuery } from "../../../lib/social/http.js";
-import { completeSocialOAuth } from "../../../lib/social/service.js";
+import { completeSocialOAuth, continueConnectChain } from "../../../lib/social/service.js";
 
 function redirect(res, params) {
   const search = new URLSearchParams(params);
@@ -23,11 +23,28 @@ export default async function handler(req, res) {
     if (query.get("error")) {
       return redirect(res, { page: "social", social_oauth: "error", reason: "access_denied" });
     }
-    const brandId = await completeSocialOAuth({
+    const finished = await completeSocialOAuth({
       code: query.get("code"),
       state: query.get("state"),
     });
-    return redirect(res, { page: "social", social_oauth: "connected", brand: brandId });
+    const brandId = finished.brand_id;
+    if (finished.chain?.length) {
+      const next = await continueConnectChain(brandId, finished.chain);
+      if (next.authorization_url) {
+        res.statusCode = 302;
+        res.setHeader("Location", next.authorization_url);
+        res.setHeader("Cache-Control", "no-store");
+        res.setHeader("X-Robots-Tag", "noindex, noarchive");
+        res.end();
+        return;
+      }
+    }
+    return redirect(res, {
+      page: "social",
+      social_oauth: "connected",
+      brand: brandId,
+      finished: finished.finished || "",
+    });
   } catch (error) {
     const reason = String(error.code || "oauth_failed").replace(/[^a-z0-9_]/gi, "").slice(0, 40) || "oauth_failed";
     return redirect(res, { page: "social", social_oauth: "error", reason });
