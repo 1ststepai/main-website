@@ -267,12 +267,20 @@ img { display: block; max-width: 100%; }
   pointer-events: none;
 }
 
-.laptop { position: relative; filter: drop-shadow(0 36px 70px rgba(0, 0, 0, 0.55)); }
+.laptop {
+  position: relative;
+  z-index: 2;
+  isolation: isolate;
+  filter: drop-shadow(0 36px 70px rgba(0, 0, 0, 0.55));
+}
 .laptop-bezel {
+  position: relative;
+  z-index: 2;
   border: 1px solid rgba(148, 163, 184, 0.35);
   border-radius: 16px 16px 6px 6px;
   background: linear-gradient(180deg, #1A2238, #0E1426);
   padding: 10px;
+  overflow: hidden;
   box-shadow:
     0 0 0 1px rgba(59, 130, 246, 0.18),
     0 0 48px rgba(139, 92, 246, 0.2),
@@ -518,6 +526,7 @@ img { display: block; max-width: 100%; }
   inset: -10% -14% -6%;
   pointer-events: none;
   z-index: 0;
+  /* Sit behind the laptop desk so icons never cut through the demo UI */
 }
 .orbit-ring {
   position: absolute;
@@ -750,6 +759,28 @@ img { display: block; max-width: 100%; }
   gap: 1rem;
 }
 .int-block { border-radius: 18px; padding: 1.4rem 1.35rem; }
+.int-crm { grid-column: 1 / -1; }
+.int-crm-copy {
+  margin: 0.65rem 0 0;
+  max-width: 52rem;
+  color: var(--muted, rgba(226, 232, 240, 0.78));
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+.soc-tile.text-only .soc-mark {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #e2e8f0;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.55), rgba(139, 92, 246, 0.55));
+  flex-shrink: 0;
+}
 .soc-row {
   display: flex;
   flex-wrap: wrap;
@@ -861,8 +892,26 @@ img { display: block; max-width: 100%; }
   font-size: 0.92rem;
 }
 
-.access {
-  border-radius: 20px;
+.nav-downloads {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.nav-downloads .btn.secondary {
+  background: transparent;
+  color: var(--cream, #f8fafc);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+}
+.download-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+.end-downloads { margin-top: 0; }
+.access {  border-radius: 20px;
   padding: clamp(1.5rem, 4vw, 2.4rem);
   border-color: rgba(96, 165, 250, 0.35);
   background:

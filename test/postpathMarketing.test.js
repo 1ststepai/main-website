@@ -27,10 +27,24 @@ test("PostPath marketing page carries product identity and conversion hooks", as
   assert.match(html, /assets\/postpath\/postpath-mark-3d\.png|assets\/postpath\/postpath-mark\.svg/);
   assert.match(html, /postpath-hero-banner\.png/);
   assert.match(html, /Download for Mac/);
+  assert.match(html, /Download for Windows/);
+  assert.match(html, /\/downloads\/postpath\/PostPath-macOS\.zip/);
+  assert.match(html, /\/downloads\/postpath\/PostPath-Windows\.zip/);
   assert.match(html, /SoftwareApplication/);
   assert.match(html, /FAQPage/);
+  assert.match(html, /id="crm"/);
+  assert.match(html, /HubSpot/);
+  assert.match(html, /Salesforce/);
+  assert.match(html, /GoHighLevel/);
+  assert.match(html, /Pipedrive/);
+  assert.match(html, /CRM · next|Does PostPath connect to CRMs/i);
   assert.doesNotMatch(html, /epancis12@gmail\.com/);
   assert.doesNotMatch(html, /guaranteed revenue|fake review|#1 social tool/i);
+});
+
+test("PostPath Mac and Windows download zips exist", async () => {
+  assert.equal(await exists("public/downloads/postpath/PostPath-macOS.zip"), true);
+  assert.equal(await exists("public/downloads/postpath/PostPath-Windows.zip"), true);
 });
 
 test("PostPath logo assets exist", async () => {
