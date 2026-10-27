@@ -29,13 +29,19 @@ const PLATFORM_NOTES = {
 };
 
 const OAUTH_COPY = {
-  connected: "Account connected for this brand.",
-  access_denied: "Sign-in was cancelled.",
-  invalid_state: "That connection attempt expired. Start it again.",
+  connected: "Account connected. If more were left in the chain, the next login should have opened automatically.",
+  access_denied: "Sign-in was cancelled. Use Connect accounts to start again.",
+  invalid_state: "That connection attempt expired. Start Connect accounts again.",
   social_not_configured: "That platform's OAuth is not configured on this environment yet.",
   oauth_failed: "The account could not be connected.",
   account_mismatch: "That login is not the Swing Trade Pros account this studio expects.",
   ambiguous_page: "That Meta login can access more than one Page. Use the login for the Swing Trade Pros Page.",
+};
+
+const CONNECT_LABELS = {
+  youtube: "YouTube",
+  meta: "Meta (Facebook + Instagram)",
+  tiktok: "TikTok",
 };
 
 function previewDesk() {
@@ -184,6 +190,16 @@ export default function SocialDesk({ previewMode = false, request }) {
             if (body.action === "schedule") return { ...post, status: "scheduled", scheduled_at: body.scheduled_at };
             if (body.action === "reject") return { ...post, status: "rejected", error: body.reason || "Rejected by owner." };
             if (body.action === "set_privacy") return { ...post, privacy_status: body.privacy_status };
+            if (body.action === "publish_now") {
+              return {
+                ...post,
+                status: "scheduled",
+                scheduled_at: body.scheduled_at || new Date().toISOString(),
+                approved_by: "owner",
+                override_reason: body.override_reason || post.override_reason || null,
+                override_by: body.override_reason ? "owner" : post.override_by,
+              };
+            }
             if (body.action === "update_copy") {
               return {
                 ...post,
@@ -205,7 +221,18 @@ export default function SocialDesk({ previewMode = false, request }) {
       });
       if (data.desk) setDesk(data.desk);
       if (data.secret) setSecret(data.secret);
-      if (data.authorization_url) window.location.assign(data.authorization_url);
+      if (data.authorization_url) {
+        window.location.assign(data.authorization_url);
+        return data;
+      }
+      if (body.action === "connect_all" && data.done) {
+        setMessage(data.message || "All accounts for this brand are connected.");
+      }
+      if (body.action === "publish_now" && data.kick_publish) {
+        setMessage("Scheduled. Running Publish due…");
+        await publishDue();
+        return data;
+      }
       if (body.action === "publish_due") {
         if (data.status === "handed_off") setMessage(data.message || "Handed off. Finish it in the platform app.");
         else if (data.message) setMessage(data.message);
@@ -412,6 +439,25 @@ export default function SocialDesk({ previewMode = false, request }) {
       <div className="social-tools">
         <section className="editor-panel social-card social-accounts">
           <h3>Accounts</h3>
+          <p className="social-note">
+            Closest to one click: Connect accounts walks YouTube → Meta (Facebook + Instagram) → TikTok.
+            Each provider still shows its own login screen. X is not implemented.
+          </p>
+          <div className="social-heading-actions" style={{ marginBottom: 12 }}>
+            <button
+              className="button primary"
+              type="button"
+              disabled={busy || previewMode || desk?.connect_ready}
+              onClick={() => { void act({ action: "connect_all" }); }}
+            >
+              {desk?.connect_ready ? "All accounts connected" : "Connect accounts"}
+            </button>
+          </div>
+          {(desk?.connect_missing || []).length > 0 && (
+            <p className="social-note" role="status">
+              Still needed: {(desk.connect_missing || []).map((step) => CONNECT_LABELS[step] || step).join(" → ")}.
+            </p>
+          )}
           {["youtube", "instagram", "facebook", "tiktok", "x"].map((platform) => {
             const connected = connectionFor(platform);
             const expected = brand?.accounts?.[platform];
@@ -638,6 +684,27 @@ export default function SocialDesk({ previewMode = false, request }) {
                   <X size={16} />Reject
                 </button>
               </div>
+              {selected.proposed_scheduled_at && (
+                <p className="social-note">
+                  Agent proposed {new Date(selected.proposed_scheduled_at).toLocaleString()}.
+                  <button
+                    className="button compact"
+                    type="button"
+                    style={{ marginLeft: 8 }}
+                    disabled={busy || (reviewable && approveDisabled)}
+                    onClick={() => {
+                      void act({
+                        action: "publish_now",
+                        post_id: selected.id,
+                        scheduled_at: selected.proposed_scheduled_at,
+                        override_reason: needsOverride ? overrideReason.trim() : "",
+                      });
+                    }}
+                  >
+                    Use proposed time
+                  </button>
+                </p>
+              )}
               <div className="social-actions">
                 <label className="field">Schedule
                   <input type="datetime-local" value={scheduleAt} onChange={(event) => setScheduleAt(event.target.value)} />
@@ -645,17 +712,38 @@ export default function SocialDesk({ previewMode = false, request }) {
                 <button
                   className="button"
                   type="button"
-                  disabled={busy || !scheduleAt || !["approved", "scheduled"].includes(selected.status)}
-                  onClick={() => { void act({ action: "schedule", post_id: selected.id, scheduled_at: new Date(scheduleAt).toISOString() }); }}
+                  disabled={busy || !scheduleAt || (reviewable ? approveDisabled : !["approved", "scheduled", "failed", "handed_off"].includes(selected.status))}
+                  onClick={() => {
+                    void act({
+                      action: "publish_now",
+                      post_id: selected.id,
+                      scheduled_at: new Date(scheduleAt).toISOString(),
+                      override_reason: needsOverride ? overrideReason.trim() : "",
+                    });
+                  }}
                 >
                   Schedule
+                </button>
+                <button
+                  className="button primary"
+                  type="button"
+                  disabled={busy || (reviewable ? approveDisabled : !["approved", "scheduled", "failed", "handed_off"].includes(selected.status))}
+                  onClick={() => {
+                    void act({
+                      action: "publish_now",
+                      post_id: selected.id,
+                      override_reason: needsOverride ? overrideReason.trim() : "",
+                    });
+                  }}
+                >
+                  Publish now
                 </button>
                 {(selected.status === "failed" || selected.status === "handed_off") && <button className="button" type="button" disabled={busy} onClick={() => { void act({ action: "retry_publish", post_id: selected.id }); }}>Retry publish</button>}
                 {(selected.status === "failed" || selected.status === "publishing") && (
                   <button className="button" type="button" disabled={busy} onClick={() => { void act({ action: "restart_upload", post_id: selected.id }); }}>Start upload over</button>
                 )}
               </div>
-              {selected.scheduled_at && <p className="social-note">Scheduled {new Date(selected.scheduled_at).toLocaleString()}. Publish due sends posts whose time has arrived, one chunk at a time.</p>}
+              {selected.scheduled_at && <p className="social-note">Scheduled {new Date(selected.scheduled_at).toLocaleString()}. Publish due / Publish now send posts whose time has arrived, one chunk at a time.</p>}
             </div>
           )}
         </section>

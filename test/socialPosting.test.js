@@ -429,8 +429,9 @@ test.describe("social posting", { concurrency: false }, () => {
           }
           return response({ payload: { items: [{ id: "UC86s7HqMAR-FSfxuv1N1Pwg", snippet: { customUrl: "@SwingTradePros" } }] } });
         };
-        const brandId = await completeYouTubeOAuth({ code: "auth-code", state, fetchImpl });
-        assert.equal(brandId, "swingtradepros");
+        const finished = await completeYouTubeOAuth({ code: "auth-code", state, fetchImpl });
+        assert.equal(finished.brand_id, "swingtradepros");
+        assert.deepEqual(finished.chain, []);
         await assert.rejects(() => completeYouTubeOAuth({ code: "auth-code", state, fetchImpl }), (error) => error.code === "invalid_state");
         const stored = JSON.stringify(kv.snapshot());
         assert.equal(stored.includes("refresh-secret-value"), false);
@@ -833,6 +834,92 @@ test.describe("social posting", { concurrency: false }, () => {
         assert.equal(result.status, "handed_off");
         assert.match(finishBody, /video_state=DRAFT/);
         assert.equal(result.published_url, null);
+      });
+    } finally {
+      for (const [name, value] of saved) restore(name, value);
+    }
+  });
+
+  test("Connect accounts chains YouTube into Meta and Publish now schedules at will", async () => {
+    const names = [
+      "SOCIAL_TOKEN_ENC_KEY",
+      "GOOGLE_OAUTH_CLIENT_ID",
+      "GOOGLE_OAUTH_CLIENT_SECRET",
+      "GOOGLE_OAUTH_REDIRECT_URI",
+      "META_APP_ID",
+      "META_APP_SECRET",
+      "META_OAUTH_REDIRECT_URI",
+      "TIKTOK_CLIENT_KEY",
+      "TIKTOK_CLIENT_SECRET",
+      "TIKTOK_OAUTH_REDIRECT_URI",
+    ];
+    const saved = names.map((name) => [name, process.env[name]]);
+    process.env.SOCIAL_TOKEN_ENC_KEY = KEY;
+    process.env.GOOGLE_OAUTH_CLIENT_ID = "google-client";
+    process.env.GOOGLE_OAUTH_CLIENT_SECRET = "google-secret";
+    process.env.GOOGLE_OAUTH_REDIRECT_URI = "https://www.1ststep.ai/api/social/oauth/callback";
+    process.env.META_APP_ID = "meta-app";
+    process.env.META_APP_SECRET = "meta-secret";
+    process.env.META_OAUTH_REDIRECT_URI = "https://www.1ststep.ai/api/social/oauth/callback";
+    process.env.TIKTOK_CLIENT_KEY = "tiktok-key";
+    process.env.TIKTOK_CLIENT_SECRET = "tiktok-secret";
+    process.env.TIKTOK_OAUTH_REDIRECT_URI = "https://www.1ststep.ai/api/social/oauth/callback";
+    try {
+      await withStore(async () => {
+        const svc = await import("../lib/social/service.js");
+        assert.deepEqual(await svc.missingConnectSteps("swingtradepros"), ["youtube", "meta", "tiktok"]);
+        const started = await svc.beginConnectAll("swingtradepros");
+        assert.equal(started.next, "youtube");
+        assert.deepEqual(started.chain, ["meta", "tiktok"]);
+        const state = new URL(started.authorization_url).searchParams.get("state");
+        const finished = await svc.completeYouTubeOAuth({
+          code: "auth-code",
+          state,
+          fetchImpl: async (url) => {
+            if (String(url).includes("oauth2.googleapis.com/token")) {
+              return response({
+                payload: {
+                  access_token: "ya29.CHAIN",
+                  refresh_token: "refresh-chain",
+                  expires_in: 3600,
+                },
+              });
+            }
+            return response({
+              payload: { items: [{ id: "UC86s7HqMAR-FSfxuv1N1Pwg", snippet: { customUrl: "@SwingTradePros" } }] },
+            });
+          },
+        });
+        assert.deepEqual(finished.chain, ["meta", "tiktok"]);
+        const next = await svc.continueConnectChain(finished.brand_id, finished.chain);
+        assert.equal(next.next, "meta");
+        assert.deepEqual(next.chain, ["tiktok"]);
+        assert.match(next.authorization_url, /facebook\.com/);
+
+        const created = await svc.createApiToken("swingtradepros", "agent");
+        const token = await svc.authenticateAgentToken(created.secret);
+        const when = "2026-10-27T16:00:00.000Z";
+        const draft = await svc.createPostForToken(token, {
+          platform: "youtube",
+          title: "Where is Bitcoin in six months?",
+          status: "ready_for_review",
+          title_score: 94,
+          thumbnail_score: 96,
+          keywords: ["bitcoin"],
+          proposed_scheduled_at: when,
+        });
+        assert.equal(draft.proposed_scheduled_at, when);
+        await assert.rejects(
+          () => svc.createPostForToken(token, { platform: "youtube", title: "x", scheduled_at: when }),
+          (error) => error.code === "agent_forbidden",
+        );
+        const desk = await svc.loadDesk("swingtradepros");
+        assert.equal(desk.connect_missing.includes("youtube"), false);
+        assert.equal(desk.connect_missing.includes("meta"), true);
+        const published = await svc.publishPostNow(draft.id, { scheduledAt: when });
+        assert.equal(published.status, "scheduled");
+        assert.equal(published.scheduled_at, when);
+        assert.equal(published.approved_by, "owner");
       });
     } finally {
       for (const [name, value] of saved) restore(name, value);

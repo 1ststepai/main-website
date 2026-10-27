@@ -1,5 +1,14 @@
 # Architecture Decision Log
 
+## 2026-10-26: One Connect accounts chain and owner publish-at-will
+
+- **Status / owner:** Evan asked for the closest thing to one-click sign-in across socials, plus posting and scheduling at will, with AI able to queue work.
+- **Decision:** Studio **Connect accounts** starts the first missing provider and the OAuth callback continues the chain YouTube → Meta → TikTok. There is no single OAuth across Google, Meta, and TikTok. **Publish now** and **Schedule** are owner-only; they approve when needed and schedule, then kick Publish due. Brand tokens may set `proposed_scheduled_at` but still cannot approve, schedule, or publish.
+- **Rationale:** Platform identity providers cannot be collapsed into one login. Owner authority for publish stays in Studio.
+- **Affected systems:** `lib/social/service.js`, `api/social/oauth/callback.js`, `api/social/admin.js`, `src/admin/SocialDesk.jsx`.
+- **Verification:** `test/socialPosting.test.js` covers the connect chain and Publish now.
+- **Rollback:** Revert the branch. Existing per-platform Connect buttons remain as fallbacks.
+
 ## 2026-10-26: Social publishers and the Swing Trade Pros owner path
 
 - **Status / owner:** Evan asked to finish the studio social queue on PR #29. Review only. No production deploy and no production env changes.

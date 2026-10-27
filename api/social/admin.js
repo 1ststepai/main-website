@@ -8,6 +8,7 @@ import {
 } from "../../lib/social/http.js";
 import {
   approvePost,
+  beginConnectAll,
   beginMetaConnect,
   beginTikTokConnect,
   beginYouTubeConnect,
@@ -17,6 +18,7 @@ import {
   issueOwnerUpload,
   loadDesk,
   publishDueSlice,
+  publishPostNow,
   queueOwnerShort,
   recordOwnerScores,
   rejectPost,
@@ -59,6 +61,10 @@ export default async function handler(req, res) {
     if (action === "disconnect") {
       await disconnectPlatform(body.brand_id, body.platform);
       return deskResponse(res, body.brand_id);
+    }
+    if (action === "connect_all") {
+      const connection = await beginConnectAll(body.brand_id);
+      return deskResponse(res, body.brand_id, connection);
     }
     if (action === "connect_youtube") {
       const connection = await beginYouTubeConnect(body.brand_id);
@@ -108,6 +114,14 @@ export default async function handler(req, res) {
     if (action === "schedule") {
       const post = await schedulePost(body.post_id, body.scheduled_at);
       return deskResponse(res, body.brand_id || post.brand_id, { post });
+    }
+    if (action === "publish_now") {
+      const post = await publishPostNow(body.post_id, {
+        overrideReason: body.override_reason,
+        scheduledAt: body.scheduled_at || null,
+        privacy: body.privacy_status || null,
+      });
+      return deskResponse(res, body.brand_id || post.brand_id, { post, kick_publish: true });
     }
     if (action === "set_privacy") {
       const post = await setPostPrivacy(body.post_id, body.privacy_status);
