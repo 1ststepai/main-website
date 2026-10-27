@@ -25,6 +25,9 @@ const profileId = document.getElementById("profile-id");
 const oauthForm = document.getElementById("oauth-form");
 const blueskyForm = document.getElementById("bluesky-form");
 
+const DISPATCH_HONESTY =
+  "After dispatch starts, PostPath cannot guarantee the platform did not accept the post. Cancel only works while a post is still scheduled. Dispatch-started posts stay needs review and are not auto-retried or undone.";
+
 function formatWhen(iso) {
   if (!iso) return "No time set";
   const ms = Date.parse(iso);
@@ -109,6 +112,9 @@ profileId.addEventListener("input", () => {
 });
 
 function renderStatus(data) {
+  const dispatchHonesty = document.getElementById("dispatch-honesty");
+  if (dispatchHonesty) dispatchHonesty.textContent = DISPATCH_HONESTY;
+
   const byPlatform = new Map((data.connections || []).map((row) => [row.platform, row]));
   networkList.innerHTML = NETWORKS.map((network) => {
     const row = byPlatform.get(network.key);

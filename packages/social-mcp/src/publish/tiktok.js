@@ -1,6 +1,7 @@
 import { readFileSync, statSync } from "node:fs";
 import { mcpError } from "../errors.js";
 import { resolveSafeMediaPath } from "../mediaPath.js";
+import { invalidGrantError, isInvalidGrantPayload, sendWithRefresh } from "./authRetry.js";
 
 const TOKEN_URL = "https://open.tiktokapis.com/v2/oauth/token/";
 
@@ -14,10 +15,7 @@ async function readJson(response) {
   }
 }
 
-async function ensureAccess({ secrets, oauth, fetchImpl, now = Date.now() }) {
-  if (secrets.access_token && secrets.expires_at && Date.parse(secrets.expires_at) > now + 60_000) {
-    return secrets;
-  }
+async function refreshAccess({ secrets, oauth, fetchImpl, now = Date.now() }) {
   if (!secrets.refresh_token) throw mcpError("tiktok_not_connected", "Reconnect TikTok.", 409);
   const response = await fetchImpl(TOKEN_URL, {
     method: "POST",
@@ -30,6 +28,9 @@ async function ensureAccess({ secrets, oauth, fetchImpl, now = Date.now() }) {
     }),
   });
   const payload = await readJson(response);
+  if (isInvalidGrantPayload(payload)) {
+    throw invalidGrantError("TikTok refresh token was revoked. Reconnect.");
+  }
   const token = payload.access_token || payload.data?.access_token;
   if (!response.ok || !token) throw mcpError("tiktok_auth_failed", "TikTok needs to be connected again.", 502);
   return {
@@ -40,6 +41,13 @@ async function ensureAccess({ secrets, oauth, fetchImpl, now = Date.now() }) {
   };
 }
 
+async function ensureAccess({ secrets, oauth, fetchImpl, now = Date.now() }) {
+  if (secrets.access_token && secrets.expires_at && Date.parse(secrets.expires_at) > now + 60_000) {
+    return secrets;
+  }
+  return refreshAccess({ secrets, oauth, fetchImpl, now });
+}
+
 export async function publishTikTokInboxFromFile({
   post,
   mediaRoot,
@@ -47,27 +55,39 @@ export async function publishTikTokInboxFromFile({
   oauth,
   fetchImpl = fetch,
   onSecrets,
+  onNeedsReconnect,
 }) {
   const filePath = resolveSafeMediaPath(post.media_path, mediaRoot);
-  const fresh = await ensureAccess({ secrets, oauth, fetchImpl });
+  let fresh = await ensureAccess({ secrets, oauth, fetchImpl });
   if (onSecrets && fresh !== secrets) await onSecrets(fresh);
+  const budget = { used: false };
   const stat = statSync(filePath);
 
-  const init = await fetchImpl("https://open.tiktokapis.com/v2/post/publish/inbox/video/init/", {
-    method: "POST",
-    headers: {
-      authorization: `Bearer ${fresh.access_token}`,
-      "content-type": "application/json",
-    },
-    body: JSON.stringify({
-      source_info: {
-        source: "FILE_UPLOAD",
-        video_size: stat.size,
-        chunk_size: stat.size,
-        total_chunk_count: 1,
-      },
-    }),
+  const opened = await sendWithRefresh({
+    budget,
+    secrets: fresh,
+    refresh: (current) => refreshAccess({ secrets: current, oauth, fetchImpl }),
+    onSecrets,
+    onNeedsReconnect,
+    send: (current) =>
+      fetchImpl("https://open.tiktokapis.com/v2/post/publish/inbox/video/init/", {
+        method: "POST",
+        headers: {
+          authorization: `Bearer ${current.access_token}`,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          source_info: {
+            source: "FILE_UPLOAD",
+            video_size: stat.size,
+            chunk_size: stat.size,
+            total_chunk_count: 1,
+          },
+        }),
+      }),
   });
+  fresh = opened.secrets;
+  const init = opened.response;
   const initPayload = await readJson(init);
   const uploadUrl = initPayload.data?.upload_url;
   const publishId = initPayload.data?.publish_id;
@@ -76,15 +96,24 @@ export async function publishTikTokInboxFromFile({
   }
 
   const bytes = readFileSync(filePath);
-  const upload = await fetchImpl(uploadUrl, {
-    method: "PUT",
-    headers: {
-      "content-type": post.media_content_type || "video/mp4",
-      "content-length": String(bytes.length),
-      "content-range": `bytes 0-${bytes.length - 1}/${bytes.length}`,
-    },
-    body: bytes,
+  const uploaded = await sendWithRefresh({
+    budget,
+    secrets: fresh,
+    refresh: (current) => refreshAccess({ secrets: current, oauth, fetchImpl }),
+    onSecrets,
+    onNeedsReconnect,
+    send: () =>
+      fetchImpl(uploadUrl, {
+        method: "PUT",
+        headers: {
+          "content-type": post.media_content_type || "video/mp4",
+          "content-length": String(bytes.length),
+          "content-range": `bytes 0-${bytes.length - 1}/${bytes.length}`,
+        },
+        body: bytes,
+      }),
   });
+  const upload = uploaded.response;
   if (!upload.ok) {
     throw mcpError("tiktok_upload_failed", "TikTok rejected the video upload.", 502);
   }

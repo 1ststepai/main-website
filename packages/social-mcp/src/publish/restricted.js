@@ -3,6 +3,9 @@ import { mcpError } from "../errors.js";
 /**
  * Snapchat Marketing API and WhatsApp Channels publishing are approval-gated.
  * Keep connect scaffolding, but refuse silent fake publishes.
+ * Snapchat may store a refresh_token at connect time. This scaffold does not
+ * call Snapchat, so that token is not refreshed and no post is dispatched.
+ * WhatsApp has no refresh token and no free publish API.
  */
 export async function publishSnapchatScaffold() {
   throw mcpError(

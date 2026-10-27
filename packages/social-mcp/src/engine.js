@@ -1,7 +1,7 @@
 import { PLATFORMS } from "./home.js";
 import { mcpError } from "./errors.js";
 import { resolveSafeMediaPath } from "./mediaPath.js";
-import { createStore, normalizeProfileId } from "./store.js";
+import { createStore, normalizeProfileId, POST_STATUSES } from "./store.js";
 import { createOAuthRuntime } from "./oauth/server.js";
 import { oauthConfig } from "./oauth/providers.js";
 import { publishYouTubeFromFile } from "./publish/youtube.js";
@@ -18,7 +18,42 @@ import { publishSnapchatScaffold, publishWhatsAppScaffold } from "./publish/rest
 import { validateDraftForPublish } from "./publish/validate.js";
 import { assertProfileAllowed, getLicenseState } from "./license.js";
 
-const POST_STATUSES = ["draft", "scheduled", "publishing", "published", "handed_off", "failed"];
+const ISO_OFFSET = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$/i;
+const DISPATCH_STARTED_MESSAGE =
+  "Dispatch already started. PostPath cannot guarantee the platform did not accept the post, and it cannot undo it. The local row is not returned to draft and publish_due will not retry it.";
+
+function isAuthExchange(url) {
+  const value = String(url);
+  return (
+    value.includes("oauth2.googleapis.com/token") ||
+    value.includes("/oauth/token") ||
+    value.includes("/oauth/v2/accessToken") ||
+    value.includes("/oauth2/token") ||
+    value.includes("/api/v1/access_token") ||
+    value.includes("refresh_access_token") ||
+    value.includes("/oauth/access_token") ||
+    value.includes("com.atproto.server.createSession") ||
+    value.includes("com.atproto.server.refreshSession")
+  );
+}
+
+function parseScheduledAt(value) {
+  const raw = String(value || "").trim();
+  if (!ISO_OFFSET.test(raw)) {
+    throw mcpError(
+      "invalid_schedule",
+      "scheduled_at must be an ISO-8601 timestamp with a timezone offset (Z or ±hh:mm).",
+    );
+  }
+  const when = Date.parse(raw);
+  if (!Number.isFinite(when)) {
+    throw mcpError(
+      "invalid_schedule",
+      "scheduled_at must be an ISO-8601 timestamp with a timezone offset (Z or ±hh:mm).",
+    );
+  }
+  return { when, iso: new Date(when).toISOString() };
+}
 
 function optionalMediaPath(value, mediaRoot) {
   if (value === undefined || value === null || value === "") return null;
@@ -28,6 +63,40 @@ function optionalMediaPath(value, mediaRoot) {
 export function createEngine({ home, env = process.env, fetchImpl = fetch, now = () => Date.now() } = {}) {
   const store = createStore({ home, env, now });
   const oauth = createOAuthRuntime({ store, env, fetchImpl });
+
+  async function trackedFetch(url, init) {
+    const method = String(init?.method || "GET").toUpperCase();
+    const mutating = method !== "GET" && method !== "HEAD";
+    const authExchange = isAuthExchange(url);
+    try {
+      const response = await fetchImpl(url, init);
+      if (response?.status === 429) {
+        throw mcpError("rate_limited", "Platform rate limit reached. Not retrying.", 429);
+      }
+      if (mutating && !authExchange && response?.status >= 500) {
+        const error = mcpError(
+          "dispatch_ambiguous",
+          "The platform request was sent but the outcome is unknown.",
+          502,
+        );
+        error.ambiguous = true;
+        throw error;
+      }
+      return response;
+    } catch (error) {
+      if (error?.code === "rate_limited" || error?.ambiguous || error?.code === "dispatch_ambiguous") throw error;
+      if (mutating && !authExchange) {
+        const wrapped = mcpError(
+          "dispatch_ambiguous",
+          "The platform request was sent but the outcome is unknown.",
+          502,
+        );
+        wrapped.ambiguous = true;
+        throw wrapped;
+      }
+      throw error;
+    }
+  }
   const mediaRoot = store.homePaths.mediaDir;
 
   function requireProfile(profileId) {
@@ -158,10 +227,22 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
   async function schedulePost({ post_id, scheduled_at }) {
     const post = store.getPost(post_id);
     if (!post) throw mcpError("not_found", "Post not found.", 404);
-    const when = Date.parse(String(scheduled_at || ""));
-    if (!Number.isFinite(when)) throw mcpError("invalid_schedule", "scheduled_at must be an ISO timestamp.");
+    if (!["draft", "scheduled", "failed"].includes(post.status)) {
+      throw mcpError("invalid_status", "Only draft, scheduled, or failed posts can be scheduled.", 409);
+    }
+    const { when, iso } = parseScheduledAt(scheduled_at);
     if (when < now() - 30_000) throw mcpError("invalid_schedule", "scheduled_at must be in the future.");
-    post.scheduled_at = new Date(when).toISOString();
+    const clash = store
+      .listPosts({ profileId: post.profile_id, status: "scheduled" })
+      .find((row) => row.id !== post.id && row.platform === post.platform && row.scheduled_at === iso);
+    if (clash) {
+      throw mcpError(
+        "duplicate_schedule",
+        `Another ${post.platform} post for this profile is already scheduled at ${iso}.`,
+        409,
+      );
+    }
+    post.scheduled_at = iso;
     post.status = "scheduled";
     post.updated_at = new Date(now()).toISOString();
     store.savePost(post);
@@ -179,21 +260,32 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
   async function cancelScheduledPost({ post_id }) {
     const post = store.getPost(post_id);
     if (!post) throw mcpError("not_found", "Post not found.", 404);
+    if (post.status === "publishing" || post.status === "needs_review" || store.isClaimed(post_id)) {
+      throw mcpError("dispatch_started", DISPATCH_STARTED_MESSAGE, 409);
+    }
     if (post.status !== "scheduled") {
       throw mcpError("invalid_status", "Only scheduled posts can be cancelled.", 409);
     }
-    post.status = "draft";
-    post.scheduled_at = null;
-    post.updated_at = new Date(now()).toISOString();
-    store.savePost(post);
+    const result = store.compareAndSetPost(post_id, ["scheduled"], (row) => {
+      row.status = "draft";
+      row.scheduled_at = null;
+    });
+    if (!result.ok) {
+      const current = store.getPost(post_id);
+      if (!current) throw mcpError("not_found", "Post not found.", 404);
+      if (current.status === "publishing" || current.status === "needs_review" || store.isClaimed(post_id)) {
+        throw mcpError("dispatch_started", DISPATCH_STARTED_MESSAGE, 409);
+      }
+      throw mcpError("invalid_status", "Only scheduled posts can be cancelled.", 409);
+    }
     store.appendAudit({
       id: store.newId("aud"),
-      at: post.updated_at,
+      at: result.post.updated_at,
       action: "schedule_cancelled",
-      profile_id: post.profile_id,
-      post_id: post.id,
+      profile_id: result.post.profile_id,
+      post_id: result.post.id,
     });
-    return { post };
+    return { post: result.post };
   }
 
   async function getPostStatus(postId) {
@@ -207,25 +299,50 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
     return { posts: store.listPosts({ profileId: input.profile_id, status: input.status }) };
   }
 
-  function assertPublishable(post, force) {
+  function assertPublishable(post, force, acknowledge) {
     if (!force && post.status === "scheduled" && post.scheduled_at && Date.parse(post.scheduled_at) > now()) {
       throw mcpError("not_due", "Post is scheduled for later. Pass force=true to publish now.", 409);
+    }
+    if (post.status === "needs_review") {
+      if (acknowledge !== true) {
+        throw mcpError(
+          "needs_review",
+          "This post may already have been accepted. publish_due will not retry it. Pass acknowledge=true to publish_post after checking the platform.",
+          409,
+        );
+      }
+      return;
+    }
+    if (post.status === "publishing") {
+      throw mcpError("dispatch_started", DISPATCH_STARTED_MESSAGE, 409);
     }
     if (!["draft", "scheduled", "failed"].includes(post.status)) {
       throw mcpError("invalid_status", `Cannot publish from status ${post.status}.`, 409);
     }
   }
 
+  function statusesFor(observedStatus) {
+    if (observedStatus === "needs_review") return ["needs_review"];
+    if (observedStatus === "scheduled") return ["scheduled"];
+    if (observedStatus === "draft") return ["draft"];
+    if (observedStatus === "failed") return ["failed"];
+    return [];
+  }
+
   async function dispatchPublish(post, connection, secrets, config) {
     const onSecrets = async (next) => store.updateSecrets(post.profile_id, post.platform, next);
+    const onNeedsReconnect = async () => {
+      store.updateConnection(post.profile_id, post.platform, { status: "needs_reconnect" });
+    };
     if (post.platform === "youtube") {
       return publishYouTubeFromFile({
         post,
         mediaRoot,
         secrets,
         oauth: config.google,
-        fetchImpl,
+        fetchImpl: trackedFetch,
         onSecrets,
+        onNeedsReconnect,
       });
     }
     if (post.platform === "tiktok") {
@@ -234,8 +351,9 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
         mediaRoot,
         secrets,
         oauth: config.tiktok,
-        fetchImpl,
+        fetchImpl: trackedFetch,
         onSecrets,
+        onNeedsReconnect,
       });
     }
     if (post.platform === "instagram" || post.platform === "facebook") {
@@ -244,23 +362,60 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
         platform: post.platform,
         connection,
         secrets,
-        fetchImpl,
+        fetchImpl: trackedFetch,
+        onNeedsReconnect,
       });
     }
     if (post.platform === "linkedin") {
-      return publishLinkedInText({ post, connection, secrets, oauth: config.linkedin, fetchImpl, onSecrets });
+      return publishLinkedInText({
+        post,
+        connection,
+        secrets,
+        oauth: config.linkedin,
+        fetchImpl: trackedFetch,
+        onSecrets,
+        onNeedsReconnect,
+      });
     }
     if (post.platform === "x") {
-      return publishXPost({ post, secrets, oauth: config.x, fetchImpl, onSecrets });
+      return publishXPost({
+        post,
+        secrets,
+        oauth: config.x,
+        fetchImpl: trackedFetch,
+        onSecrets,
+        onNeedsReconnect,
+      });
     }
     if (post.platform === "threads") {
-      return publishThreadsPost({ post, connection, secrets, fetchImpl });
+      return publishThreadsPost({
+        post,
+        connection,
+        secrets,
+        fetchImpl: trackedFetch,
+        onSecrets,
+        onNeedsReconnect,
+      });
     }
     if (post.platform === "pinterest") {
-      return publishPinterestPin({ post, connection, secrets, fetchImpl });
+      return publishPinterestPin({
+        post,
+        connection,
+        secrets,
+        oauth: config.pinterest,
+        fetchImpl: trackedFetch,
+        onSecrets,
+        onNeedsReconnect,
+      });
     }
     if (post.platform === "bluesky") {
-      return publishBlueskyPost({ post, secrets, fetchImpl, onSecrets });
+      return publishBlueskyPost({
+        post,
+        secrets,
+        fetchImpl: trackedFetch,
+        onSecrets,
+        onNeedsReconnect,
+      });
     }
     if (post.platform === "google_business") {
       return publishGoogleBusinessPost({
@@ -268,22 +423,77 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
         connection,
         secrets,
         oauth: config.google,
-        fetchImpl,
+        fetchImpl: trackedFetch,
         onSecrets,
+        onNeedsReconnect,
       });
     }
     if (post.platform === "reddit") {
-      return publishRedditPost({ post, connection, secrets, oauth: config.reddit, fetchImpl, onSecrets });
+      return publishRedditPost({
+        post,
+        connection,
+        secrets,
+        oauth: config.reddit,
+        fetchImpl: trackedFetch,
+        onSecrets,
+        onNeedsReconnect,
+      });
     }
     if (post.platform === "snapchat") return publishSnapchatScaffold();
     if (post.platform === "whatsapp") return publishWhatsAppScaffold();
     throw mcpError("unsupported_platform", "Platform is not supported yet.");
   }
 
-  async function publishPost({ post_id, force = false }) {
+  function quarantinePublishing(profileId) {
+    const stuck = store.listPosts({ profileId, status: "publishing" });
+    const ids = [];
+    for (const row of stuck) {
+      if (store.isClaimed(row.id)) continue;
+      const live = store.getPost(row.id);
+      if (!live || live.status !== "publishing") continue;
+      live.status = "needs_review";
+      live.error = {
+        code: "dispatch_ambiguous",
+        message:
+          "Publish was already in progress. PostPath did not send it again because the platform may have accepted it.",
+      };
+      live.updated_at = new Date(now()).toISOString();
+      store.savePost(live);
+      ids.push(live.id);
+    }
+    return ids;
+  }
+
+  function settlePublishError(working, error) {
+    const ambiguous = Boolean(error?.ambiguous) || error?.code === "dispatch_ambiguous";
+    if (error?.revoked || error?.code === "invalid_grant" || error?.code === "needs_reconnect") {
+      store.updateConnection(working.profile_id, working.platform, { status: "needs_reconnect" });
+    }
+    if (ambiguous) {
+      working.status = "needs_review";
+      working.error = {
+        code: "dispatch_ambiguous",
+        message:
+          "The platform request may have been accepted. PostPath will not auto-retry. Pass acknowledge=true on publish_post only after you have checked the platform.",
+      };
+    } else if (error?.code === "rate_limited") {
+      working.status = "failed";
+      working.error = { code: "rate_limited", message: error.message || "Platform rate limit reached." };
+    } else {
+      working.status = "failed";
+      working.error = { code: error.code || "publish_failed", message: error.message || "Publish failed." };
+    }
+    working.updated_at = new Date(now()).toISOString();
+    store.savePost(working);
+  }
+
+  async function publishPost({ post_id, force = false, acknowledge = false, claimFrom = null } = {}) {
     const post = store.getPost(post_id);
     if (!post) throw mcpError("not_found", "Post not found.", 404);
-    assertPublishable(post, force);
+    assertPublishable(post, force, acknowledge);
+    if (claimFrom && !claimFrom.includes(post.status)) {
+      return { post, skipped: "cancelled_before_dispatch" };
+    }
 
     const validation = validateDraftForPublish(post);
     if (!validation.ok) {
@@ -297,52 +507,72 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
     const secrets = store.readSecrets(post.profile_id, post.platform);
     if (!secrets) throw mcpError("not_connected", `${post.platform} secrets are missing. Reconnect.`, 409);
 
-    post.status = "publishing";
-    post.error = null;
-    post.updated_at = new Date(now()).toISOString();
-    store.savePost(post);
+    const from = claimFrom || statusesFor(post.status);
+    await Promise.resolve();
 
-    const config = oauthConfig(env, oauth.redirectUri);
+    const claim = store.claimPost(post.id, from);
+    if (!claim.ok) {
+      const current = store.getPost(post_id);
+      if (claim.reason === "in_flight" || current?.status === "publishing") {
+        throw mcpError("dispatch_started", DISPATCH_STARTED_MESSAGE, 409);
+      }
+      if (current?.status === "draft" && from.includes("scheduled") && !from.includes("draft")) {
+        if (claimFrom) return { post: current, skipped: "cancelled_before_dispatch" };
+        throw mcpError("cancelled_before_dispatch", "Cancelled before dispatch. The post was not sent.", 409);
+      }
+      throw mcpError("invalid_status", `Cannot publish from status ${current?.status || "unknown"}.`, 409);
+    }
+
+    const working = claim.post;
     try {
-      const result = await dispatchPublish(post, connection, secrets, config);
-      post.platform_post_id = result.platform_post_id || null;
-      post.published_url = result.published_url || null;
-      post.status = result.handoff ? "handed_off" : "published";
-      post.error = null;
-      post.updated_at = new Date(now()).toISOString();
-      store.savePost(post);
+      const config = oauthConfig(env, oauth.redirectUri);
+      const result = await dispatchPublish(working, connection, secrets, config);
+      working.platform_post_id = result.platform_post_id || null;
+      working.published_url = result.published_url || null;
+      working.status = result.handoff ? "handed_off" : "published";
+      working.error = null;
+      working.updated_at = new Date(now()).toISOString();
+      store.savePost(working);
       store.appendAudit({
         id: store.newId("aud"),
-        at: post.updated_at,
-        action: post.status,
-        profile_id: post.profile_id,
-        post_id: post.id,
-        detail: result.note || post.published_url || post.platform_post_id,
+        at: working.updated_at,
+        action: working.status,
+        profile_id: working.profile_id,
+        post_id: working.id,
+        detail: result.note || working.published_url || working.platform_post_id,
       });
-      return { post, result, warnings: validation.warnings };
+      return { post: working, result, warnings: validation.warnings };
     } catch (error) {
-      post.status = "failed";
-      post.error = { code: error.code || "publish_failed", message: error.message || "Publish failed." };
-      post.updated_at = new Date(now()).toISOString();
-      store.savePost(post);
+      settlePublishError(working, error);
       throw error;
+    } finally {
+      store.releaseClaim(working.id);
     }
   }
 
   async function publishDue({ profile_id, limit = 5 } = {}) {
+    const quarantined = quarantinePublishing(profile_id);
     const due = store
       .listPosts({ profileId: profile_id, status: "scheduled" })
       .filter((post) => post.scheduled_at && Date.parse(post.scheduled_at) <= now())
       .slice(0, Math.max(1, Math.min(20, Number(limit) || 5)));
-    const settled = await Promise.allSettled(due.map((post) => publishPost({ post_id: post.id, force: true })));
-    const results = settled.map((item, index) => {
-      if (item.status === "fulfilled") return item.value;
-      return {
+    await Promise.resolve();
+    const settled = await Promise.allSettled(
+      due.map((post) => publishPost({ post_id: post.id, force: true, claimFrom: ["scheduled"] })),
+    );
+    const results = [];
+    settled.forEach((item, index) => {
+      if (item.status === "fulfilled") {
+        if (item.value?.skipped) return;
+        results.push(item.value);
+        return;
+      }
+      results.push({
         post_id: due[index].id,
         error: { code: item.reason?.code || "publish_failed", message: item.reason?.message || "Publish failed." },
-      };
+      });
     });
-    return { count: results.length, results };
+    return { count: results.length, results, quarantined };
   }
 
   return {
