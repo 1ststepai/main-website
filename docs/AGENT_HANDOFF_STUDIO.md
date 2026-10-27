@@ -64,4 +64,8 @@ On the machine that runs the bridge, set `AGENT_HANDOFF_BRIDGE_URL` and `AGENT_H
 
 ## Source
 
-Repository: this main-website checkout. The commit SHA for this handoff is recorded in the commit that contains this file.
+Repository: this main-website checkout, branch `cursor/studio-agent-handoff-5fec`.
+
+Feature commit: `0946e5efb508b1b7d0b311caba492b7779772647`
+
+That commit is the implementation. This note records it. No production deploy.
