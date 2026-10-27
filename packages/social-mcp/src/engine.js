@@ -7,6 +7,14 @@ import { oauthConfig } from "./oauth/providers.js";
 import { publishYouTubeFromFile } from "./publish/youtube.js";
 import { publishTikTokInboxFromFile } from "./publish/tiktok.js";
 import { publishMetaReel } from "./publish/meta.js";
+import { publishLinkedInText } from "./publish/linkedin.js";
+import { publishXPost } from "./publish/x.js";
+import { publishThreadsPost } from "./publish/threads.js";
+import { publishPinterestPin } from "./publish/pinterest.js";
+import { connectBlueskyAccount, publishBlueskyPost } from "./publish/bluesky.js";
+import { publishGoogleBusinessPost } from "./publish/google_business.js";
+import { publishRedditPost } from "./publish/reddit.js";
+import { publishSnapchatScaffold, publishWhatsAppScaffold } from "./publish/restricted.js";
 
 const POST_STATUSES = ["draft", "scheduled", "publishing", "published", "handed_off", "failed"];
 
@@ -59,6 +67,26 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
   async function connectAccounts(profileId, options) {
     requireProfile(profileId);
     return oauth.connectAccounts(profileId, options);
+  }
+
+  async function connectBluesky(profileId, { handle, app_password } = {}) {
+    requireProfile(profileId);
+    const bundle = await connectBlueskyAccount({ handle, appPassword: app_password, fetchImpl });
+    store.saveConnection({ profile_id: profileId, ...bundle.record }, bundle.secrets);
+    store.appendAudit({
+      id: store.newId("aud"),
+      at: new Date(now()).toISOString(),
+      action: "connected",
+      profile_id: profileId,
+      platform: "bluesky",
+      detail: bundle.record.account_label,
+    });
+    return {
+      profile_id: profileId,
+      status: "complete",
+      connection: store.getConnection(profileId, "bluesky"),
+      message: "Bluesky connected with an app password.",
+    };
   }
 
   async function createDraft(input) {
@@ -161,6 +189,7 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
   }
 
   async function dispatchPublish(post, connection, secrets, config) {
+    const onSecrets = async (next) => store.updateSecrets(post.profile_id, post.platform, next);
     if (post.platform === "youtube") {
       return publishYouTubeFromFile({
         post,
@@ -168,7 +197,7 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
         secrets,
         oauth: config.google,
         fetchImpl,
-        onSecrets: async (next) => store.updateSecrets(post.profile_id, "youtube", next),
+        onSecrets,
       });
     }
     if (post.platform === "tiktok") {
@@ -178,7 +207,7 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
         secrets,
         oauth: config.tiktok,
         fetchImpl,
-        onSecrets: async (next) => store.updateSecrets(post.profile_id, "tiktok", next),
+        onSecrets,
       });
     }
     if (post.platform === "instagram" || post.platform === "facebook") {
@@ -190,6 +219,36 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
         fetchImpl,
       });
     }
+    if (post.platform === "linkedin") {
+      return publishLinkedInText({ post, connection, secrets, oauth: config.linkedin, fetchImpl, onSecrets });
+    }
+    if (post.platform === "x") {
+      return publishXPost({ post, secrets, oauth: config.x, fetchImpl, onSecrets });
+    }
+    if (post.platform === "threads") {
+      return publishThreadsPost({ post, connection, secrets, fetchImpl });
+    }
+    if (post.platform === "pinterest") {
+      return publishPinterestPin({ post, connection, secrets, fetchImpl });
+    }
+    if (post.platform === "bluesky") {
+      return publishBlueskyPost({ post, secrets, fetchImpl, onSecrets });
+    }
+    if (post.platform === "google_business") {
+      return publishGoogleBusinessPost({
+        post,
+        connection,
+        secrets,
+        oauth: config.google,
+        fetchImpl,
+        onSecrets,
+      });
+    }
+    if (post.platform === "reddit") {
+      return publishRedditPost({ post, connection, secrets, oauth: config.reddit, fetchImpl, onSecrets });
+    }
+    if (post.platform === "snapchat") return publishSnapchatScaffold();
+    if (post.platform === "whatsapp") return publishWhatsAppScaffold();
     throw mcpError("unsupported_platform", "Platform is not supported yet.");
   }
 
@@ -258,6 +317,7 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
     upsertProfile,
     listAccounts,
     connectAccounts,
+    connectBluesky,
     createDraft,
     updateDraft,
     schedulePost,

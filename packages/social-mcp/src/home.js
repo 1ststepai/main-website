@@ -1,9 +1,9 @@
 import { chmodSync, existsSync, mkdirSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
+import { CONNECT_ORDER, PLATFORM_LABELS, PLATFORMS } from "./platforms.js";
 
-export const PLATFORMS = ["youtube", "instagram", "facebook", "tiktok"];
-export const CONNECT_ORDER = ["youtube", "meta", "tiktok"];
+export { CONNECT_ORDER, PLATFORM_LABELS, PLATFORMS };
 export const DEFAULT_OAUTH_PORT = 47831;
 export const DEFAULT_DESK_PORT = 47830;
 
