@@ -1,0 +1,30 @@
+appId: ai.1ststep.postpath
+productName: PostPath
+executableName: PostPath
+copyright: Copyright 1stStep.ai
+asar: true
+npmRebuild: false
+directories:
+  output: dist
+files:
+  - electron/**
+  - package.json
+extraResources:
+  - from: ../social-mcp
+    to: social-mcp
+    filter:
+      - package.json
+      - bin/**
+      - src/**
+      - node_modules/**
+      - "!**/.env"
+      - "!**/.env.*"
+      - "!**/*.pem"
+      - "!**/*.key"
+      - "!**/test/**"
+      - "!**/oauth.env"
+win:
+  target:
+    - dir
+  signAndEditExecutable: false
+  verifyUpdateCodeSignature: false

@@ -43,33 +43,34 @@ async function runDemo() {
 
   runBtn.disabled = true;
   timeline.hidden = false;
-  ["connect", "create", "distribute", "review"].forEach((step) => setStep(step, null));
+  ["connect", "draft", "review", "schedule"].forEach((step) => setStep(step, null));
 
   setStep("connect", "run");
   await sleep(500);
   setStep("connect", "on");
 
-  setStep("create", "run");
+  setStep("draft", "run");
   await sleep(650);
-  setStep("create", "on");
-
-  setStep("distribute", "run");
-  await sleep(700);
-  setStep("distribute", "on");
+  setStep("draft", "on");
 
   setStep("review", "run");
-  await sleep(500);
+  await sleep(700);
   setStep("review", "on");
 
+  setStep("schedule", "run");
+  await sleep(500);
+  setStep("schedule", "on");
+
+  const handoff = chosen.includes("TikTok") ? " TikTok, if chosen, stays an inbox handoff." : "";
   result.classList.add("show");
   result.textContent = [
-    "WORKFLOW PREVIEW",
+    "SIMULATED PREVIEW",
     "",
-    `1. Your AI receives: “${prompt}”`,
-    `2. PostPath routes drafts toward: ${chosen.join(", ")}.`,
-    "3. You review before any intended publishing action.",
+    `1. Prompt: “${prompt}”`,
+    `2. Draft would be aimed at: ${chosen.join(", ")}.${handoff}`,
+    "3. You would review it, then it could sit on a local schedule.",
     "",
-    "Simulation only — nothing was sent or published.",
+    "Simulated only. Nothing was sent.",
   ].join("\n");
 
   runBtn.disabled = false;
@@ -85,7 +86,8 @@ runBtn?.addEventListener("click", () => {
 
 document.getElementById("access-form")?.addEventListener("submit", (event) => {
   event.preventDefault();
-  const data = new FormData(event.currentTarget);
+  const form = event.currentTarget;
+  const data = new FormData(form);
   const name = String(data.get("name") || "").trim();
   const email = String(data.get("email") || "").trim();
   const need = String(data.get("need") || "").trim() || "Early access";
@@ -94,6 +96,13 @@ document.getElementById("access-form")?.addEventListener("submit", (event) => {
     `Name: ${name}\nEmail: ${email}\nNeed: ${need}\n\nSource: postpath.1ststep.ai`,
   );
   const note = document.getElementById("access-note");
-  if (note) note.textContent = "Email draft opened. Send it to join early access—we reply from 1stStep.ai.";
+  if (note) {
+    note.textContent = "Email draft opened. Send it to request early access. We reply from 1stStep.ai.";
+  }
+  if (typeof window.fsaiTrack === "function") {
+    window.fsaiTrack("postpath_early_access_click", { placement: "access_form" });
+  }
+  const submitButton = form.querySelector("button[type=submit]");
+  if (submitButton) submitButton.disabled = true;
   window.location.href = `mailto:evan@1ststep.ai?subject=${subject}&body=${body}`;
 });

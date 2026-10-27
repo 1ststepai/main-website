@@ -177,6 +177,9 @@ test("desk cancel-scheduled API restores draft", async () => {
     assert.equal(cancelled.scheduled_posts.length, 0);
     const html = await fetch(url).then((res) => res.text());
     assert.match(html, /Schedules only fire while PostPath is running/);
+    assert.match(html, /cannot guarantee the platform did not accept/);
+    const deskJs = await fetch(`${url}app.js`).then((res) => res.text());
+    assert.match(deskJs, /cancel-scheduled/);
   } finally {
     await desk.stop();
     rmSync(home, { recursive: true, force: true });

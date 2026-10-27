@@ -36,7 +36,7 @@ export function createFoundry(host, {tier="balanced", onSlow=()=>{}, started=per
  const labels=['UI','DATA','AUTH','AGENTS','AUTOMATION','INTEGRATIONS','ANALYTICS','DEPLOYMENT','EVIDENCE','DOCUMENTATION'];
  const labelBatch=createLabels(scene,[...labels,'OWNER','SOURCE','INFRASTRUCTURE','ACCESS','HANDOFF DATA','HANDOFF DOCUMENTATION','HANDOFF EVIDENCE','HUMAN CONTROL']);
  textures.push(labelBatch.texture);
- function label(text,size=.2){return labelBatch.label(text,size)}
+ function label(text,size=.2,color){return labelBatch.label(text,size,color)}
  function mesh(geo,mat,parent=root){const m=new T.Mesh(geo,mat);parent.add(m);return m}
  function ring(radius,tube,mat,parent=root){return mesh(new T.TorusGeometry(radius,tube,settings.radial,settings.segments),mat,parent)}
  function sector(inner,outer,start,length,depth){const s=new T.Shape();s.absarc(0,0,outer,start,start+length,false);s.absarc(0,0,inner,start+length,start,true);s.closePath();return new T.ExtrudeGeometry(s,{depth,bevelEnabled:settings.bevel>0,bevelSegments:settings.bevel,steps:1,bevelSize:.035,bevelThickness:.025,curveSegments:settings.curve})}

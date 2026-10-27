@@ -18,8 +18,16 @@ export function createLabels(scene, texts) {
   const corners=[[-1,-1],[1,-1],[1,1],[-1,-1],[1,1],[-1,1]];
   return {
     texture,
-    label(text,size=.2) {
+    label(text,size=.2,color) {
       const anchor=new T.Object3D();const index=texts.indexOf(text);
+      if (color && index >= 0) {
+        ctx.clearRect(0, index * 64, canvas.width, 64);
+        ctx.font = '28px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillStyle = color;
+        ctx.fillText(text.replace("HANDOFF ", ""), 256, index * 64 + 43);
+        texture.needsUpdate = true;
+      }
       entries.push({anchor,size,index});
       corners.forEach(([x,y],j)=>{uvs[index*12+j*2]=(x+1)/2;uvs[index*12+j*2+1]=1-(index+(1-y)/2)/texts.length;});
       geometry.attributes.uv.needsUpdate=true;return anchor;

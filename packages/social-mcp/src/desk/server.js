@@ -1,5 +1,7 @@
 import { createServer } from "node:http";
-import { readFileSync, existsSync } from "node:fs";
+import { randomBytes } from "node:crypto";
+import { createWriteStream, existsSync, mkdirSync, readFileSync, rmSync } from "node:fs";
+import { pipeline } from "node:stream/promises";
 import { dirname, extname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { DEFAULT_DESK_PORT } from "../home.js";
@@ -10,6 +12,7 @@ import { mcpError } from "../errors.js";
 import { PRODUCT_NAME, PRODUCT_TITLE } from "../brand.js";
 
 const PUBLIC_DIR = join(dirname(fileURLToPath(import.meta.url)), "public");
+const MEDIA_LIMIT = 200 * 1024 * 1024;
 const CONTENT_TYPES = {
   ".html": "text/html; charset=utf-8",
   ".css": "text/css; charset=utf-8",
@@ -39,6 +42,38 @@ async function readJson(req, limit = 64_000) {
   } catch {
     throw mcpError("invalid_json", "JSON body is invalid.");
   }
+}
+
+function safeMediaName(original) {
+  const base = String(original || "video.mp4").split(/[/\\]/).pop();
+  const cleaned = base.replace(/[^A-Za-z0-9._-]/g, "").slice(0, 80);
+  const suffix = cleaned && /^[A-Za-z0-9]/.test(cleaned) ? cleaned : "video.mp4";
+  return `${Date.now().toString(36)}-${randomBytes(4).toString("hex")}-${suffix}`;
+}
+
+async function saveMedia(req, mediaRoot) {
+  const name = safeMediaName(req.headers["x-postpath-filename"]);
+  mkdirSync(mediaRoot, { recursive: true, mode: 0o700 });
+  const target = join(mediaRoot, name);
+  let size = 0;
+  async function* limited(source) {
+    for await (const chunk of source) {
+      size += chunk.length;
+      if (size > MEDIA_LIMIT) throw mcpError("payload_too_large", "Video is larger than 200 MB.", 413);
+      yield chunk;
+    }
+  }
+  try {
+    await pipeline(limited(req), createWriteStream(target, { mode: 0o600 }));
+  } catch (error) {
+    rmSync(target, { force: true });
+    throw error;
+  }
+  if (!size) {
+    rmSync(target, { force: true });
+    throw mcpError("invalid_media", "Choose a video file.");
+  }
+  return { filename: name, bytes: size };
 }
 
 function sendJson(res, status, payload) {
@@ -228,6 +263,57 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
         const body = await readJson(req);
         const result = await engine.cancelScheduledPost({ post_id: body.post_id });
         sendJson(res, 200, { ok: true, ...result, ...snapshot() });
+        return;
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/media") {
+        const saved = await saveMedia(req, homePaths.mediaDir);
+        sendJson(res, 200, { ok: true, media: saved });
+        return;
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/draft") {
+        const body = await readJson(req);
+        const profileId = String(body.profile_id || body.id || "").trim();
+        const name = String(body.name || profileId).trim();
+        if (!profileId) throw mcpError("invalid_profile", "Profile id is required.");
+        await engine.upsertProfile({ id: profileId, name });
+        const created = await engine.createDraft({
+          profile_id: profileId,
+          platform: body.platform || "youtube",
+          title: body.title,
+          description: body.description,
+          caption: body.caption,
+          privacy_status: body.privacy_status,
+          media_path: body.media_path,
+          media_content_type: body.media_content_type,
+        });
+        sendJson(res, 200, { ok: true, ...created, ...snapshot() });
+        return;
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/publish") {
+        const body = await readJson(req);
+        const result = await engine.publishPost({
+          post_id: body.post_id,
+          force: body.force === true,
+          acknowledge: body.acknowledge === true,
+        });
+        sendJson(res, 200, { ok: true, ...result, ...snapshot() });
+        return;
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/forget-vault") {
+        const body = await readJson(req);
+        if (body.confirm !== "remove saved accounts") {
+          throw mcpError("confirm_required", "Saved accounts stay until you confirm removal.", 400);
+        }
+        const removed = engine.store.forgetVault();
+        sendJson(res, 200, {
+          ok: true,
+          removed,
+          message: "Saved accounts were removed. Quit PostPath and open it again. The app itself is still installed.",
+        });
         return;
       }
 

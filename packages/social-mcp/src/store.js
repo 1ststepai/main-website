@@ -1,8 +1,18 @@
-import { existsSync, readFileSync, renameSync, writeFileSync } from "node:fs";
+import { closeSync, constants, existsSync, openSync, readFileSync, renameSync, rmSync, statSync, unlinkSync, writeFileSync } from "node:fs";
 import { decryptJson, encryptJson, loadOrCreateKey } from "./crypto.js";
 import { mcpError } from "./errors.js";
 import { paths } from "./home.js";
 import { socialId } from "./ids.js";
+
+export const POST_STATUSES = [
+  "draft",
+  "scheduled",
+  "publishing",
+  "published",
+  "handed_off",
+  "failed",
+  "needs_review",
+];
 
 function emptyDb() {
   return {
@@ -16,6 +26,41 @@ function emptyDb() {
 
 function connectionKey(profileId, platform) {
   return `${profileId}:${platform}`;
+}
+
+function sleepMs(ms) {
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+}
+
+function withVaultLock(lockFile, fn) {
+  const start = Date.now();
+  let fd = 0;
+  while (!fd) {
+    try {
+      fd = openSync(lockFile, constants.O_CREAT | constants.O_EXCL | constants.O_WRONLY, 0o600);
+    } catch (error) {
+      if (error.code !== "EEXIST") throw error;
+      try {
+        if (Date.now() - statSync(lockFile).mtimeMs > 15_000) unlinkSync(lockFile);
+      } catch {
+        // The other process released the lock between the checks.
+      }
+      if (Date.now() - start > 5_000) {
+        throw mcpError("vault_busy", "Another PostPath process is updating the vault.", 409);
+      }
+      sleepMs(20);
+    }
+  }
+  try {
+    return fn();
+  } finally {
+    closeSync(fd);
+    try {
+      unlinkSync(lockFile);
+    } catch {
+      // Already removed.
+    }
+  }
 }
 
 export function normalizeProfileId(id) {
@@ -37,7 +82,31 @@ export function normalizeProfileId(id) {
 export function createStore({ home, env = process.env, now = () => Date.now() } = {}) {
   const homePaths = paths(home);
   const key = loadOrCreateKey(homePaths, env);
+  const lockFile = `${homePaths.dbFile}.lock`;
   let db = loadDb(homePaths.dbFile);
+  const inFlight = new Set();
+  let removed = false;
+
+  function locked(fn) {
+    if (removed) {
+      throw mcpError("vault_removed", "Saved accounts were removed. Quit PostPath and open it again.", 409);
+    }
+    return withVaultLock(lockFile, () => {
+      db = loadDb(homePaths.dbFile);
+      return fn();
+    });
+  }
+
+  function forgetVault() {
+    if (!removed) {
+      locked(() => {
+        removed = true;
+        db = emptyDb();
+      });
+    }
+    rmSync(homePaths.root, { recursive: true, force: true });
+    return { removed: true, path: homePaths.root };
+  }
 
   function persist() {
     const tmp = `${homePaths.dbFile}.${process.pid}.tmp`;
@@ -102,11 +171,25 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
   }
 
   function updateSecrets(profileId, platform, secrets) {
+    locked(() => {
+      const row = getConnection(profileId, platform);
+      if (!row) throw mcpError("not_connected", `${platform} is not connected for this profile.`, 409);
+      row.secrets_enc = encryptJson(secrets, `conn:${platform}`, key);
+      row.updated_at = new Date(now()).toISOString();
+      persist();
+    });
+  }
+
+  function updateConnection(profileId, platform, patch) {
     const row = getConnection(profileId, platform);
-    if (!row) throw mcpError("not_connected", `${platform} is not connected for this profile.`, 409);
-    row.secrets_enc = encryptJson(secrets, `conn:${platform}`, key);
-    row.updated_at = new Date(now()).toISOString();
+    if (!row) return null;
+    const safe = { ...patch };
+    delete safe.secrets_enc;
+    delete safe.profile_id;
+    delete safe.platform;
+    Object.assign(row, safe, { updated_at: new Date(now()).toISOString() });
     persist();
+    return publicConnection(row);
   }
 
   function deleteConnection(profileId, platform) {
@@ -127,12 +210,56 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
   }
 
   function savePost(post, { create = false } = {}) {
-    if (create && db.posts[post.id]) {
-      throw mcpError("conflict", "Post already exists.", 409);
-    }
-    db.posts[post.id] = post;
-    persist();
-    return publicPost(post);
+    return locked(() => {
+      if (create && db.posts[post.id]) {
+        throw mcpError("conflict", "Post already exists.", 409);
+      }
+      if (!POST_STATUSES.includes(post.status)) {
+        throw mcpError("invalid_status", `Unknown post status ${post.status}.`, 409);
+      }
+      db.posts[post.id] = post;
+      persist();
+      return publicPost(post);
+    });
+  }
+
+  function claimPost(postId, fromStatuses) {
+    return locked(() => {
+      const id = String(postId || "");
+      const post = db.posts[id];
+      if (!post) return { ok: false, reason: "not_found" };
+      if (inFlight.has(id)) return { ok: false, reason: "in_flight", status: post.status };
+      if (!fromStatuses.includes(post.status)) return { ok: false, reason: "status", status: post.status };
+      post.status = "publishing";
+      post.error = null;
+      post.updated_at = new Date(now()).toISOString();
+      inFlight.add(id);
+      persist();
+      return { ok: true, post };
+    });
+  }
+
+  function compareAndSetPost(postId, fromStatuses, mutate) {
+    return locked(() => {
+      const post = db.posts[String(postId || "")];
+      if (!post) return { ok: false, reason: "not_found" };
+      if (!fromStatuses.includes(post.status)) return { ok: false, reason: "status", status: post.status };
+      mutate(post);
+      if (!POST_STATUSES.includes(post.status)) {
+        throw mcpError("invalid_status", `Unknown post status ${post.status}.`, 409);
+      }
+      post.updated_at = new Date(now()).toISOString();
+      persist();
+      return { ok: true, post };
+    });
+  }
+
+  function releaseClaim(postId) {
+    inFlight.delete(String(postId || ""));
+  }
+
+  function isClaimed(postId) {
+    return inFlight.has(String(postId || ""));
   }
 
   function appendAudit(entry) {
@@ -160,12 +287,18 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
     saveConnection,
     readSecrets,
     updateSecrets,
+    updateConnection,
     deleteConnection,
     listPosts,
     getPost,
     savePost,
+    claimPost,
+    compareAndSetPost,
+    releaseClaim,
+    isClaimed,
     appendAudit,
     exportPublic,
+    forgetVault,
     newId: socialId,
   };
 }

@@ -71,7 +71,13 @@ From the repo root (after `npm` tooling is available):
 bash packages/social-mcp/scripts/build-downloads.sh
 ```
 
-Writes `PostPath-macOS.zip` and `PostPath-Windows.zip` under `public/downloads/postpath/`. Each zip includes a first-run launcher that unpacks into `~/.postpath/app` (or `%USERPROFILE%\.postpath\app`).
+Writes versioned, unsigned developer-preview archives under `public/downloads/postpath/`:
+
+- `PostPath-0.1.0-macOS-developer-preview.zip`
+- `PostPath-0.1.0-Windows-developer-preview.zip`
+- `SHA256SUMS.txt` and `manifest.json` (`signed: false`, `kind: developer-preview`)
+
+These are not one-click installers. Each requires Node.js 20+ and unpacks into `~/.postpath/app` (or `%USERPROFILE%\.postpath\app`). The marketing page does not link them. `manifest.gitSha` is the commit the script read while packing, which can differ from the later commit that stores the zip bytes.
 
 ## What the product is
 
@@ -83,21 +89,23 @@ Writes `PostPath-macOS.zip` and `PostPath-Windows.zip` under `public/downloads/p
 
 ## Platforms
 
-| Platform | Connect | Publish |
-| --- | --- | --- |
-| YouTube | Google OAuth | `media_path` under vault `media/` |
-| Instagram | Meta OAuth | https `media_url` |
-| Facebook | Meta OAuth | https `media_url` |
-| TikTok | Login Kit | `media_path` → creator inbox |
-| LinkedIn | LinkedIn OAuth | text (`caption` / `description`) |
-| X | X OAuth (PKCE) | text tweet |
-| Threads | Threads OAuth (Meta app) | text and/or https `media_url` |
-| Pinterest | Pinterest OAuth | https `media_url` pin |
-| Bluesky | App password | text post |
-| Google Business | Google OAuth (`business.manage`) | local post text |
-| Reddit | Reddit OAuth | title + text; `tags[0]` = subreddit |
-| Snapchat | OAuth scaffold | API-restricted until Marketing API approval |
-| WhatsApp Channels | — | API-restricted (no free third-party publish path) |
+Real-account acceptance is **not** claimed. Tests mock `fetch`. Nothing here is a live customer publish.
+
+| Platform | Connect | Publish | Lane status |
+| --- | --- | --- | --- |
+| YouTube | Google OAuth | `media_path` under vault `media/` | implemented (mock-tested, real-account acceptance NOT claimed) |
+| Instagram | Meta OAuth | https `media_url` | implemented (mock-tested, real-account acceptance NOT claimed) |
+| Facebook | Meta OAuth | https `media_url` | implemented (mock-tested, real-account acceptance NOT claimed) |
+| TikTok | Login Kit | `media_path` → creator inbox | handoff (TikTok inbox; mock-tested, real-account acceptance NOT claimed) |
+| LinkedIn | LinkedIn OAuth | text (`caption` / `description`) | implemented (mock-tested, real-account acceptance NOT claimed) |
+| X | X OAuth (PKCE) | text tweet | implemented (mock-tested, real-account acceptance NOT claimed) |
+| Threads | Threads OAuth (Meta app) | text and/or https `media_url` | implemented (mock-tested, real-account acceptance NOT claimed) |
+| Pinterest | Pinterest OAuth | https `media_url` pin | implemented (mock-tested, real-account acceptance NOT claimed) |
+| Bluesky | App password | text post | implemented (mock-tested, real-account acceptance NOT claimed) |
+| Google Business | Google OAuth (`business.manage`) | local post text | implemented (mock-tested, real-account acceptance NOT claimed) |
+| Reddit | Reddit OAuth | title + text; `tags[0]` = subreddit | implemented (mock-tested, real-account acceptance NOT claimed) |
+| Snapchat | OAuth scaffold | API-restricted until Marketing API approval | restricted scaffold |
+| WhatsApp Channels | — | API-restricted (no free third-party publish path) | restricted scaffold |
 
 ## CLI reference
 
@@ -116,10 +124,15 @@ social-mcp connect <id>         CLI fallback
 
 ## Scheduling
 
-- `schedule_post` stores a local `scheduled` post with `scheduled_at` (ISO time).
+- `schedule_post` requires `scheduled_at` to be ISO-8601 **with a timezone offset** (`Z` or `±hh:mm`). Values without an offset are rejected. The stored value is UTC (`toISOString()`).
+- Two different wall-clock labels that are the same absolute instant (for example `2026-11-01T01:30:00-04:00` and `2026-11-01T05:30:00.000Z`) cannot both be scheduled for the same profile and platform. Fall-back offsets that are different instants stay different. A missing offset such as `2026-03-08T02:30:00` is rejected, including around the America/New_York spring-forward gap.
 - While `social-mcp app` / the desk is running, PostPath periodically calls `publish_due` (default every 30s; override with `SOCIAL_MCP_DUE_INTERVAL_MS`). Closing the desk stops that loop — schedules do not fire offline.
-- `cancel_scheduled_post` returns a post to `draft` and clears `scheduled_at`.
-- Agents can still call `publish_due` or `publish_post` with `force=true` manually.
+- `cancel_scheduled_post` returns a **scheduled** post to `draft` and clears `scheduled_at`. If cancel wins before dispatch, `publish_due` / the in-flight `publish_post` does not call the platform.
+- Once status is `publishing`, cancel fails with `dispatch_started`. PostPath cannot guarantee the platform did not accept the post, and it does not pretend the platform post was undone.
+- After dispatch starts, an uncertain result (network error or HTTP 5xx after the publish request was sent, or a `publishing` row still open on startup) is stored as `needs_review`. `publish_due` does not send it again. `publish_post` resends it only when `acknowledge=true` (default off). `force=true` does not acknowledge.
+- A failure **before** the publish request is sent (validation, or token refresh that never reached the publish URL) stays `failed`. Explicit `publish_post` may retry `failed`. `publish_due` does not retry `failed`.
+- HTTP 429 sets `failed` with `rate_limited` and does not loop.
+- A 401 on a publisher that can refresh retries once after a single refresh. A second 401, or `invalid_grant` / revoked, sets the connection to `needs_reconnect` and stops. Meta page tokens have no refresh token: one 401 is `needs_reconnect` with no refresh loop. Snapchat's stored refresh token is unused because publish is a restricted scaffold and does not call the network.
 
 ## Security
 

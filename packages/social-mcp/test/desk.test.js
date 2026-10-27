@@ -82,6 +82,45 @@ test("desk status and profile APIs stay on localhost", async () => {
     assert.match(html, /PostPath/);
     assert.match(html, /1stStep\.ai/);
     assert.match(html, /Connect accounts/);
+    assert.match(html, /Save draft/);
+    assert.match(html, /Close the window to quit/);
+    assert.match(html, /Setup guide/);
+    assert.match(html, /id="guide"/);
+    const media = await fetch(`${url}api/media`, {
+      method: "POST",
+      headers: { "content-type": "video/mp4", "x-postpath-filename": "clip.mp4" },
+      body: Buffer.from("not-a-real-video"),
+    }).then((res) => res.json());
+    assert.equal(media.ok, true);
+    const draft = await fetch(`${url}api/draft`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        id: "acme",
+        name: "Acme Co",
+        platform: "youtube",
+        title: "PostPath private connection test",
+        description: "Private upload check.",
+        privacy_status: "private",
+        media_path: media.media.filename,
+      }),
+    }).then((res) => res.json());
+    assert.equal(draft.ok, true);
+    assert.equal(draft.post.privacy_status, "private");
+    assert.equal(draft.post.status, "draft");
+    const refused = await fetch(`${url}api/forget-vault`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ confirm: "no" }),
+    }).then((res) => res.json());
+    assert.equal(refused.ok, false);
+    const forgotten = await fetch(`${url}api/forget-vault`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ confirm: "remove saved accounts" }),
+    }).then((res) => res.json());
+    assert.equal(forgotten.ok, true);
+    assert.equal(forgotten.removed.removed, true);
   } finally {
     await desk.stop();
     rmSync(home, { recursive: true, force: true });

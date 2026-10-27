@@ -1,9 +1,45 @@
 # Architecture Decision Log
 
+## 2026-10-27: First-run guide saves a draft and does not publish
+
+- **Status / owner:** In review on PR #51. Not deployed. Evan still owns the Windows run, the Google Desktop client, and any real YouTube upload.
+- **Decision:** The desk opens a six-step guide on first launch. It asks one question at a time: intent, channel, content, manual or Cursor help, review, then the verified result. Progress is stored in the desk origin's local storage. Skip and Setup guide reopen it. The approved action in the guide is Save draft. The guide does not schedule or publish. YouTube sign-in stays closed until a Google app is configured. Customers are not asked to create that app. Cursor help is a copied request plus Enable in Cursor. PostPath does not write the post. Snapchat, WhatsApp, and TikTok stay unavailable in the guide.
+- **Rationale:** A nontechnical first post has to be a guided draft. Asking every customer for a Google client secret is not a supported desktop sign-in, and a secret inside an installer would not be confidential.
+- **Affected systems:** `packages/social-mcp/src/desk/public/`, YouTube and Google Business authorize URL (PKCE). The Windows installer bytes already built for `e0eb52b` do not contain this guide.
+- **Verification:** `packages/social-mcp` guide and desk tests. Browser pass is recorded with the change. No YouTube upload.
+- **Rollback:** Leave PR #51 unmerged. Production stays on main.
+
+## 2026-10-27: Windows customer install is an unsigned internal preview
+
+- **Status / owner:** In review on PR #51. Not deployed. Evan runs the Windows installer. Mac signing and the YouTube upload stay blocked on Evan.
+- **Decision:** The customer Windows path is an NSIS installer that bundles Electron and the PostPath desk. It does not ask the customer to install Node.js, extract a zip, or run npm. The build is unsigned. SmartScreen stays on. The public site still says Request early access and does not link the installer. Saved accounts stay in `%USERPROFILE%\.social-mcp` across uninstall. A separate desk control removes them. There is no automatic updater. macOS uses the same application core later, after an Apple Developer ID and notarization exist. The first useful post is a private YouTube draft from the desk. Cursor is optional.
+- **Rationale:** The versioned zips still require Node.js 20+ and an npm install, which is not a nontechnical install.
+- **Affected systems:** `packages/postpath-desktop`, `packages/social-mcp` desk, `public/downloads/postpath/`.
+- **Verification:** Desk and launcher unit tests. The Windows installer is built on Linux and is not executed on Windows here.
+- **Rollback:** Leave PR #51 unmerged. Production stays on main.
+
+## 2026-10-27: Unsigned developer preview stays the install label; PR #51 stays unmerged
+
+- **Status / owner:** Review boundary for the PostPath candidate. Not deployed. Evan owns the protected-preview look, Mac and Windows execution, the first real account, and any merge.
+- **Decision:** Keep PR #51 unmerged. The Mac and Windows archives stay an unsigned Node.js 20+ developer preview. They are not consumer installers and are not linked from the marketing page. Payment provider, prices, and CRM stay deferred. A live publish waits for one named account and one approved test post. The archives packed for this review contain source commit `74c726c7d952a67143504f7a32e6979e50d90321`.
+- **Rationale:** The previous archives were packed at `6cc649f`, before the publish claim, `needs_review` hold, vault lock, and entitlement gate.
+- **Affected systems:** `public/downloads/postpath/`, `packages/social-mcp/README.md`, `docs/postpath-lanes/02-desktop.md`, `docs/postpath-lanes/06-qa.md`.
+- **Verification:** `sha256sum -c` on the new archives. Linux launcher smoke only (fresh install, relaunch, vault kept after app removal). macOS and Windows execution are not done. This agent could not read the Vercel preview (team visible, deployment lookup 404).
+- **Rollback:** Leave the pull request unmerged. Production stays on main.
+
+## 2026-10-27: PostPath customer path is Request early access
+
+- **Status / owner:** Supersedes the “Download for Mac” nav label in the marketing-site decision below. Requested for the early-access release candidate. Not deployed.
+- **Decision:** The PostPath navigation and primary call to action say **Request early access** and open a mailto to `evan@1ststep.ai`. Nothing is stored on the page. The versioned Mac and Windows zips under `public/downloads/postpath/` are a Node.js 20+ developer preview (`signed: false`). They are not the primary download and are not linked as a one-click installer. HubSpot, Salesforce, GoHighLevel, and Pipedrive stay planned text, with no CRM login and no restricted logos. The on-page desk stays labeled Simulated. Real-account publishing acceptance is not claimed. The consultancy homepage keeps Begin Your Journey and Book a call as its service path. PostPath is an added product section, plus links from Work, Tools, and the footer.
+- **Rationale:** A Download for Mac control would overclaim. Those zips still require Node and are unsigned.
+- **Affected systems:** `postpath/index.html`, `index.html`, `work/index.html`, `tools/index.html`, `test/postpathMarketing.test.js`.
+- **Verification:** `node --test test/postpathMarketing.test.js`. Browser pass is recorded on the release candidate when it is run.
+- **Rollback:** Restore a download button only when that button delivers the signed artifact it names.
+
 ## 2026-10-27: PostPath marketing site on postpath.1ststep.ai
 
 - **Status / owner:** Evan named the product URL `postpath.1ststep.ai` and asked for a conversion-focused marketing site with live demo. Implemented on `cursor/social-local-mcp-c683`. Preview/PR only until domain is attached and deploy is approved.
-- **Decision:** Ship `postpath/index.html` as the PostPath marketing site. Canonical host is `https://postpath.1ststep.ai/`. Same page is available at `https://www.1ststep.ai/postpath/`. Vercel host rewrites map `postpath.1ststep.ai` to `/postpath/*`. Visual system copies the approved PostPath brand kit (`postpath-brand-board.png` + `postpath-hero-banner.png`): Midnight `#0B1020`, Electric `#3B82F6`, Violet `#8B5CF6`, Sunrise `#FF6B6B`, Sora + Inter, 3D glass P+play mark, neon rings/light trails, laptop Connected Accounts hero, capability icons, keyword pills, glowing social tiles, nav “Download for Mac”. Early access uses a prefilled mailto to `evan@1ststep.ai` (nothing stored on the page). The on-page desk is a simulated interactive demo, labeled as such. No fake testimonials or metrics. Parent homepage CTA stays Begin Your Journey / Book a call—PostPath is a product subdomain. The locked 1stStep logo is never replaced.
+- **Decision:** Ship `postpath/index.html` as the PostPath marketing site. Canonical host is `https://postpath.1ststep.ai/`. Same page is available at `https://www.1ststep.ai/postpath/`. Vercel host rewrites map `postpath.1ststep.ai` to `/postpath/*`. Visual system copies the approved PostPath brand kit (`postpath-brand-board.png` + `postpath-hero-banner.png`): Midnight `#0B1020`, Electric `#3B82F6`, Violet `#8B5CF6`, Sunrise `#FF6B6B`, Sora + Inter, 3D glass P+play mark, neon rings/light trails, laptop Connected Accounts hero, capability icons, keyword pills, glowing social tiles. The nav label in this entry was “Download for Mac”; that label is superseded by the Request early access decision above. Early access uses a prefilled mailto to `evan@1ststep.ai` (nothing stored on the page). The on-page desk is a simulated interactive demo, labeled as such. No fake testimonials or metrics. Parent homepage CTA stays Begin Your Journey / Book a call—PostPath is a product subdomain. The locked 1stStep logo is never replaced.
 - **Rationale:** The sellable connector needs its own conversion surface without stealing the consultancy homepage.
 - **Affected systems:** `postpath/`, `vercel.json`, Vite input, sitemaps, `public/llms.txt`, discoverability test.
 - **Verification:** `npm test` discoverability; visual screenshot of `/postpath/`. DNS + Vercel domain `postpath.1ststep.ai` still require Evan to attach in the Vercel project.

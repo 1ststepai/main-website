@@ -1,21 +1,8 @@
 import { mcpError } from "../errors.js";
+import { invalidGrantError, isInvalidGrantPayload, readJson, sendWithRefresh } from "./authRetry.js";
 
-async function readJson(response) {
-  const text = typeof response.text === "function" ? await response.text() : "";
-  if (!text) return {};
-  try {
-    return JSON.parse(text);
-  } catch {
-    return {};
-  }
-}
-
-async function ensureAccess({ secrets, oauth, fetchImpl, now = Date.now(), onSecrets }) {
-  if (secrets.access_token && secrets.expires_at && Date.parse(secrets.expires_at) > now + 60_000) {
-    return secrets;
-  }
+async function refreshAccess({ secrets, oauth, fetchImpl, now = Date.now() }) {
   if (!secrets.refresh_token || !oauth?.clientId || !oauth?.clientSecret) {
-    if (secrets.access_token) return secrets;
     throw mcpError("reddit_not_connected", "Reconnect Reddit.", 409);
   }
   const basic = Buffer.from(`${oauth.clientId}:${oauth.clientSecret}`).toString("base64");
@@ -32,20 +19,42 @@ async function ensureAccess({ secrets, oauth, fetchImpl, now = Date.now(), onSec
     }),
   });
   const payload = await readJson(response);
+  if (isInvalidGrantPayload(payload)) {
+    throw invalidGrantError("Reddit refresh token was revoked. Reconnect.");
+  }
   if (!response.ok || !payload.access_token) {
     throw mcpError("reddit_auth_failed", "Reddit needs to be connected again.", 502);
   }
-  const next = {
+  return {
     ...secrets,
     access_token: payload.access_token,
     expires_at: new Date(now + (Number(payload.expires_in) || 3600) * 1000).toISOString(),
   };
+}
+
+async function ensureAccess({ secrets, oauth, fetchImpl, now = Date.now(), onSecrets }) {
+  if (secrets.access_token && secrets.expires_at && Date.parse(secrets.expires_at) > now + 60_000) {
+    return secrets;
+  }
+  if (!secrets.refresh_token || !oauth?.clientId || !oauth?.clientSecret) {
+    if (secrets.access_token) return secrets;
+    throw mcpError("reddit_not_connected", "Reconnect Reddit.", 409);
+  }
+  const next = await refreshAccess({ secrets, oauth, fetchImpl, now });
   if (onSecrets) await onSecrets(next);
   return next;
 }
 
-export async function publishRedditPost({ post, connection, secrets, oauth, fetchImpl = fetch, onSecrets }) {
-  const fresh = await ensureAccess({ secrets, oauth, fetchImpl, onSecrets });
+export async function publishRedditPost({
+  post,
+  connection,
+  secrets,
+  oauth,
+  fetchImpl = fetch,
+  onSecrets,
+  onNeedsReconnect,
+}) {
+  let fresh = await ensureAccess({ secrets, oauth, fetchImpl, onSecrets });
   const subreddit = String(post.tags?.[0] || connection.default_subreddit || "")
     .trim()
     .replace(/^r\//i, "");
@@ -73,15 +82,26 @@ export async function publishRedditPost({ post, connection, secrets, oauth, fetc
     body.delete("text");
   }
 
-  const response = await fetchImpl("https://oauth.reddit.com/api/submit", {
-    method: "POST",
-    headers: {
-      authorization: `Bearer ${fresh.access_token}`,
-      "content-type": "application/x-www-form-urlencoded",
-      "user-agent": "PostPath/0.1 by 1stStep.ai",
-    },
-    body,
+  const budget = { used: false };
+  const sent = await sendWithRefresh({
+    budget,
+    secrets: fresh,
+    refresh: (current) => refreshAccess({ secrets: current, oauth, fetchImpl }),
+    onSecrets,
+    onNeedsReconnect,
+    send: (current) =>
+      fetchImpl("https://oauth.reddit.com/api/submit", {
+        method: "POST",
+        headers: {
+          authorization: `Bearer ${current.access_token}`,
+          "content-type": "application/x-www-form-urlencoded",
+          "user-agent": "PostPath/0.1 by 1stStep.ai",
+        },
+        body,
+      }),
   });
+  fresh = sent.secrets;
+  const response = sent.response;
   const payload = await readJson(response);
   const errors = payload?.json?.errors;
   if (!response.ok || (Array.isArray(errors) && errors.length)) {

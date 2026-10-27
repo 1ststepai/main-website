@@ -1,24 +1,12 @@
 import { createReadStream, statSync } from "node:fs";
 import { mcpError } from "../errors.js";
 import { resolveSafeMediaPath } from "../mediaPath.js";
+import { invalidGrantError, isInvalidGrantPayload, readJson, sendWithRefresh } from "./authRetry.js";
 
 const TOKEN_URL = "https://oauth2.googleapis.com/token";
 const CHUNK = 2 * 1024 * 1024;
 
-async function readJson(response) {
-  const text = typeof response.text === "function" ? await response.text() : "";
-  if (!text) return {};
-  try {
-    return JSON.parse(text);
-  } catch {
-    return { raw: String(text).slice(0, 180) };
-  }
-}
-
-async function ensureAccess({ secrets, oauth, fetchImpl, now = Date.now() }) {
-  if (secrets.access_token && secrets.expires_at && Date.parse(secrets.expires_at) > now + 60_000) {
-    return secrets;
-  }
+async function refreshAccess({ secrets, oauth, fetchImpl, now = Date.now() }) {
   if (!secrets.refresh_token) throw mcpError("youtube_not_connected", "Reconnect YouTube.", 409);
   const response = await fetchImpl(TOKEN_URL, {
     method: "POST",
@@ -31,6 +19,9 @@ async function ensureAccess({ secrets, oauth, fetchImpl, now = Date.now() }) {
     }),
   });
   const payload = await readJson(response);
+  if (isInvalidGrantPayload(payload)) {
+    throw invalidGrantError("YouTube refresh token was revoked. Reconnect.");
+  }
   if (!response.ok || !payload.access_token) {
     throw mcpError("youtube_auth_failed", "YouTube needs to be connected again.", 502);
   }
@@ -41,6 +32,13 @@ async function ensureAccess({ secrets, oauth, fetchImpl, now = Date.now() }) {
   };
 }
 
+async function ensureAccess({ secrets, oauth, fetchImpl, now = Date.now() }) {
+  if (secrets.access_token && secrets.expires_at && Date.parse(secrets.expires_at) > now + 60_000) {
+    return secrets;
+  }
+  return refreshAccess({ secrets, oauth, fetchImpl, now });
+}
+
 export async function publishYouTubeFromFile({
   post,
   mediaRoot,
@@ -48,10 +46,12 @@ export async function publishYouTubeFromFile({
   oauth,
   fetchImpl = fetch,
   onSecrets,
+  onNeedsReconnect,
 }) {
   const filePath = resolveSafeMediaPath(post.media_path, mediaRoot);
-  const fresh = await ensureAccess({ secrets, oauth, fetchImpl });
+  let fresh = await ensureAccess({ secrets, oauth, fetchImpl });
   if (onSecrets && fresh !== secrets) await onSecrets(fresh);
+  const budget = { used: false };
 
   const stat = statSync(filePath);
 
@@ -68,19 +68,26 @@ export async function publishYouTubeFromFile({
     },
   };
 
-  const init = await fetchImpl(
-    "https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status",
-    {
-      method: "POST",
-      headers: {
-        authorization: `Bearer ${fresh.access_token}`,
-        "content-type": "application/json; charset=UTF-8",
-        "x-upload-content-type": post.media_content_type || "video/mp4",
-        "x-upload-content-length": String(stat.size),
-      },
-      body: JSON.stringify(metadata),
-    },
-  );
+  const opened = await sendWithRefresh({
+    budget,
+    secrets: fresh,
+    refresh: (current) => refreshAccess({ secrets: current, oauth, fetchImpl }),
+    onSecrets,
+    onNeedsReconnect,
+    send: (current) =>
+      fetchImpl("https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status", {
+        method: "POST",
+        headers: {
+          authorization: `Bearer ${current.access_token}`,
+          "content-type": "application/json; charset=UTF-8",
+          "x-upload-content-type": post.media_content_type || "video/mp4",
+          "x-upload-content-length": String(stat.size),
+        },
+        body: JSON.stringify(metadata),
+      }),
+  });
+  fresh = opened.secrets;
+  const init = opened.response;
   const location = init.headers?.get?.("location") || "";
   if (!init.ok || !location) {
     const payload = await readJson(init);
@@ -96,15 +103,26 @@ export async function publishYouTubeFromFile({
     const chunks = [];
     for await (const chunk of stream) chunks.push(chunk);
     const body = Buffer.concat(chunks);
-    const response = await fetchImpl(location, {
-      method: "PUT",
-      headers: {
-        "content-length": String(size),
-        "content-type": post.media_content_type || "video/mp4",
-        "content-range": `bytes ${offset}-${end}/${stat.size}`,
-      },
-      body,
+    const uploaded = await sendWithRefresh({
+      budget,
+      secrets: fresh,
+      refresh: (current) => refreshAccess({ secrets: current, oauth, fetchImpl }),
+      onSecrets,
+      onNeedsReconnect,
+      send: (current) =>
+        fetchImpl(location, {
+          method: "PUT",
+          headers: {
+            authorization: `Bearer ${current.access_token}`,
+            "content-length": String(size),
+            "content-type": post.media_content_type || "video/mp4",
+            "content-range": `bytes ${offset}-${end}/${stat.size}`,
+          },
+          body,
+        }),
     });
+    fresh = uploaded.secrets;
+    const response = uploaded.response;
     if (response.status === 308) {
       offset = end + 1;
       continue;

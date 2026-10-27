@@ -1,16 +1,7 @@
 import { mcpError } from "../errors.js";
+import { invalidGrantError, isInvalidGrantPayload, readJson, sendWithRefresh } from "./authRetry.js";
 
 const PDS = "https://bsky.social";
-
-async function readJson(response) {
-  const text = typeof response.text === "function" ? await response.text() : "";
-  if (!text) return {};
-  try {
-    return JSON.parse(text);
-  } catch {
-    return {};
-  }
-}
 
 async function createSession({ identifier, appPassword, fetchImpl }) {
   const response = await fetchImpl(`${PDS}/xrpc/com.atproto.server.createSession`, {
@@ -49,7 +40,32 @@ export async function connectBlueskyAccount({ handle, appPassword, fetchImpl = f
   };
 }
 
-export async function publishBlueskyPost({ post, secrets, fetchImpl = fetch, onSecrets }) {
+async function refreshSession({ secrets, fetchImpl }) {
+  if (!secrets.refresh_jwt) {
+    const error = mcpError("needs_reconnect", "Bluesky has no refresh session. Reconnect with an app password.", 401);
+    error.revoked = true;
+    throw error;
+  }
+  const response = await fetchImpl(`${PDS}/xrpc/com.atproto.server.refreshSession`, {
+    method: "POST",
+    headers: { authorization: `Bearer ${secrets.refresh_jwt}` },
+  });
+  const payload = await readJson(response);
+  if (isInvalidGrantPayload(payload) || payload?.error === "ExpiredToken") {
+    throw invalidGrantError(payload?.message || "Bluesky refresh session was revoked. Reconnect.");
+  }
+  if (!response.ok || !payload.accessJwt) {
+    throw mcpError("bluesky_auth_failed", payload?.message || "Bluesky session refresh failed.", 502);
+  }
+  return {
+    ...secrets,
+    access_jwt: payload.accessJwt,
+    refresh_jwt: payload.refreshJwt || secrets.refresh_jwt,
+    did: payload.did || secrets.did,
+  };
+}
+
+export async function publishBlueskyPost({ post, secrets, fetchImpl = fetch, onSecrets, onNeedsReconnect }) {
   if (!secrets?.identifier || !secrets?.app_password) {
     throw mcpError("bluesky_not_connected", "Connect Bluesky with a handle and app password.", 409);
   }
@@ -58,33 +74,46 @@ export async function publishBlueskyPost({ post, secrets, fetchImpl = fetch, onS
     appPassword: secrets.app_password,
     fetchImpl,
   });
-  if (onSecrets) {
-    await onSecrets({
-      ...secrets,
-      access_jwt: session.accessJwt,
-      refresh_jwt: session.refreshJwt || secrets.refresh_jwt || "",
-      did: session.did,
-    });
-  }
+  let current = {
+    ...secrets,
+    access_jwt: session.accessJwt,
+    refresh_jwt: session.refreshJwt || secrets.refresh_jwt || "",
+    did: session.did,
+  };
+  if (onSecrets) await onSecrets(current);
   const text = String(post.caption || post.description || post.title || "").slice(0, 300);
   if (!text) throw mcpError("invalid_post", "Bluesky posts need caption or description text.", 400);
 
-  const response = await fetchImpl(`${PDS}/xrpc/com.atproto.repo.createRecord`, {
-    method: "POST",
-    headers: {
-      authorization: `Bearer ${session.accessJwt}`,
-      "content-type": "application/json",
+  const budget = { used: false };
+  const sent = await sendWithRefresh({
+    budget,
+    secrets: current,
+    refresh: async (active) => {
+      const next = await refreshSession({ secrets: active, fetchImpl });
+      current = next;
+      return next;
     },
-    body: JSON.stringify({
-      repo: session.did,
-      collection: "app.bsky.feed.post",
-      record: {
-        $type: "app.bsky.feed.post",
-        text,
-        createdAt: new Date().toISOString(),
-      },
-    }),
+    onSecrets,
+    onNeedsReconnect,
+    send: (active) =>
+      fetchImpl(`${PDS}/xrpc/com.atproto.repo.createRecord`, {
+        method: "POST",
+        headers: {
+          authorization: `Bearer ${active.access_jwt}`,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          repo: active.did,
+          collection: "app.bsky.feed.post",
+          record: {
+            $type: "app.bsky.feed.post",
+            text,
+            createdAt: new Date().toISOString(),
+          },
+        }),
+      }),
   });
+  const response = sent.response;
   const payload = await readJson(response);
   if (!response.ok || !payload.uri) {
     throw mcpError("bluesky_publish_failed", payload?.message || "Bluesky publish failed.", 502);

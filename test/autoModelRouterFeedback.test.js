@@ -5,6 +5,13 @@ import {
   normalizeAutoModelRouterFeedback,
   validateAutoModelRouterFeedbackPayload,
 } from "../lib/autoModelRouter/normalizeFeedback.js";
+import {
+  expectClosedDelivery,
+  expectDelivered,
+  expectOriginRejected,
+  intakeRequest,
+  intakeResponse,
+} from "./intakeEndpointHarness.js";
 
 function payload(overrides = {}) {
   return {
@@ -17,34 +24,6 @@ function payload(overrides = {}) {
       malicious_field: "<script>alert(1)</script>",
     },
     ...overrides,
-  };
-}
-
-function mockResponse() {
-  return {
-    statusCode: 200,
-    headers: new Map(),
-    body: "",
-    setHeader(name, value) {
-      this.headers.set(name.toLowerCase(), String(value));
-    },
-    end(value = "") {
-      this.body = String(value);
-    },
-  };
-}
-
-function mockRequest(body, headers = {}) {
-  return {
-    method: "POST",
-    body,
-    headers: {
-      "content-type": "application/json",
-      host: "www.1ststep.ai",
-      origin: "https://www.1ststep.ai",
-      "x-forwarded-for": `203.0.113.${Math.floor(Math.random() * 180) + 1}`,
-      ...headers,
-    },
   };
 }
 
@@ -87,65 +66,36 @@ test("rejects empty submissions, email without opt-in, and unexpected fields", (
 });
 
 test("delivers a notification without echoing personal data", async (t) => {
-  t.mock.method(globalThis, "fetch", async (_url, options) => {
-    const email = JSON.parse(options.body);
-    assert.match(email.subject, /builder@example\.com/);
-    assert.match(email.html, /builder@example\.com/);
-    assert.match(email.html, /suggest-then-confirm/);
-    assert.doesNotMatch(email.html, /malicious_field/);
-    assert.equal(email.reply_to, "builder@example.com");
-    return new Response(JSON.stringify({ id: "email_amr_123" }), {
-      status: 200,
-      headers: { "content-type": "application/json" },
-    });
+  await expectDelivered(t, {
+    handler,
+    body: payload(),
+    idempotencyKey: "amr:test:delivery:001",
+    requestIdPattern: /^amr_/,
+    omittedFields: ["email", "feedback"],
+    providerMessageId: "email_amr_123",
+    inspect(email) {
+      assert.match(email.subject, /builder@example\.com/);
+      assert.match(email.html, /builder@example\.com/);
+      assert.match(email.html, /suggest-then-confirm/);
+      assert.doesNotMatch(email.html, /malicious_field/);
+      assert.equal(email.reply_to, "builder@example.com");
+    },
   });
-  t.mock.method(console, "log", () => {});
-  process.env.RESEND_API_KEY = "re_test";
-  process.env.APP_IDEA_NOTIFY_TO = "owner@1ststep.ai";
-  process.env.APP_IDEA_NOTIFY_FROM = "Website <website@1ststep.ai>";
-
-  const req = mockRequest(payload(), { "idempotency-key": "amr:test:delivery:001" });
-  const res = mockResponse();
-  await handler(req, res);
-
-  const body = JSON.parse(res.body);
-  assert.equal(res.statusCode, 201);
-  assert.equal(body.ok, true);
-  assert.match(body.request_id, /^amr_/);
-  assert.equal(body.email, undefined);
-  assert.equal(body.feedback, undefined);
 });
 
 test("fails closed when feedback delivery is not configured", async (t) => {
-  t.mock.method(console, "error", () => {});
-  delete process.env.RESEND_API_KEY;
-  delete process.env.APP_IDEA_NOTIFY_TO;
-  delete process.env.APP_IDEA_NOTIFY_FROM;
-
-  const req = mockRequest(payload(), { "idempotency-key": "amr:test:closed:001" });
-  const res = mockResponse();
-  await handler(req, res);
-
-  const body = JSON.parse(res.body);
-  assert.equal(res.statusCode, 503);
-  assert.equal(body.ok, false);
-  assert.equal(body.code, "delivery_unavailable");
+  await expectClosedDelivery(t, handler, payload(), "amr:test:closed:001");
 });
 
 test("rejects hostile cross-origin feedback requests", async () => {
-  const req = mockRequest(payload(), { origin: "https://attacker.example" });
-  const res = mockResponse();
-  await handler(req, res);
-  assert.equal(res.statusCode, 403);
-  assert.equal(JSON.parse(res.body).code, "origin_not_allowed");
+  await expectOriginRejected(handler, payload());
 });
 
 test("returns a clear validation error for email without opt-in", async () => {
-  const req = mockRequest(payload({ opt_in: false }), { "idempotency-key": "amr:test:optin:001" });
-  const res = mockResponse();
-  await handler(req, res);
-  const body = JSON.parse(res.body);
-  assert.equal(res.statusCode, 400);
+  const response = intakeResponse();
+  await handler(intakeRequest(payload({ opt_in: false }), { "idempotency-key": "amr:test:optin:001" }), response);
+  const body = JSON.parse(response.body);
+  assert.equal(response.statusCode, 400);
   assert.equal(body.ok, false);
   assert.equal(body.code, "invalid_auto_model_router_feedback");
   assert.ok(body.errors.some((error) => error.includes("opt-in is required")));
