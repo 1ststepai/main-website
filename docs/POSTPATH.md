@@ -7,7 +7,25 @@
 
 ## Domain
 
-Add `postpath.1ststep.ai` as a domain on the Vercel project `main-website-repo`, then point DNS (CNAME to Vercel). Host rewrites in `vercel.json` already map that host to `/postpath/*`.
+Target: **https://postpath.1ststep.ai/** on Vercel project `main-website-repo` (team `1ststep`).
+
+Host rewrites in `vercel.json` (this PR / after merge) map `postpath.1ststep.ai` → `/postpath/*`. Also available at `https://www.1ststep.ai/postpath/`.
+
+### Setup checklist
+
+1. **Merge** the PostPath PR into `main` so production has `/postpath/` + host rewrites.
+2. **Vercel → Project → Domains:** add `postpath.1ststep.ai` (no redirect).
+3. **Cloudflare DNS** for `1ststep.ai` (nameservers are Cloudflare — not Vercel DNS):
+
+| Type | Name | Target | Proxy |
+| --- | --- | --- | --- |
+| CNAME | `postpath` | `0366bb615042ced3.vercel-dns-016.com` | DNS only (or Proxied if you already proxy `www` the same way) |
+
+Use the same CNAME target as `www.1ststep.ai` (currently `0366bb615042ced3.vercel-dns-016.com`). If Vercel shows a different recommended value after the domain is added, use that.
+
+4. Wait for TLS / DNS, then verify:
+   - `https://postpath.1ststep.ai/` loads the PostPath marketing page
+   - `https://www.1ststep.ai/postpath/` still works
 
 ## Conversion
 
