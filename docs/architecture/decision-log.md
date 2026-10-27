@@ -1,5 +1,14 @@
 # Architecture Decision Log
 
+## 2026-10-27: First-run guide saves a draft and does not publish
+
+- **Status / owner:** In review on PR #51. Not deployed. Evan still owns the Windows run, the Google Desktop client, and any real YouTube upload.
+- **Decision:** The desk opens a six-step guide on first launch. It asks one question at a time: intent, channel, content, manual or Cursor help, review, then the verified result. Progress is stored in the desk origin's local storage. Skip and Setup guide reopen it. The approved action in the guide is Save draft. The guide does not schedule or publish. YouTube sign-in stays closed until a Google app is configured. Customers are not asked to create that app. Cursor help is a copied request plus Enable in Cursor. PostPath does not write the post. Snapchat, WhatsApp, and TikTok stay unavailable in the guide.
+- **Rationale:** A nontechnical first post has to be a guided draft. Asking every customer for a Google client secret is not a supported desktop sign-in, and a secret inside an installer would not be confidential.
+- **Affected systems:** `packages/social-mcp/src/desk/public/`, YouTube and Google Business authorize URL (PKCE). The Windows installer bytes already built for `e0eb52b` do not contain this guide.
+- **Verification:** `packages/social-mcp` guide and desk tests. Browser pass is recorded with the change. No YouTube upload.
+- **Rollback:** Leave PR #51 unmerged. Production stays on main.
+
 ## 2026-10-27: Windows customer install is an unsigned internal preview
 
 - **Status / owner:** In review on PR #51. Not deployed. Evan runs the Windows installer. Mac signing and the YouTube upload stay blocked on Evan.

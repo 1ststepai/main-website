@@ -127,30 +127,43 @@ export function createPkcePair() {
   return { verifier, challenge };
 }
 
+function googleAuthorizationUrl({ clientId, redirectUri, scope, state, pkce, includeGrantedScopes = false }) {
+  if (!pkce?.challenge) throw mcpError("oauth_failed", "Google sign-in requires PKCE.", 500);
+  const params = {
+    client_id: clientId,
+    redirect_uri: redirectUri,
+    response_type: "code",
+    scope,
+    access_type: "offline",
+    prompt: "consent",
+    state,
+    code_challenge: pkce.challenge,
+    code_challenge_method: "S256",
+  };
+  if (includeGrantedScopes) params.include_granted_scopes = "true";
+  return `${GOOGLE_AUTH}?${new URLSearchParams(params)}`;
+}
+
 export function authorizationUrl(provider, { state, config, pkce }) {
   assertProviderConfigured(provider, config);
   if (provider === "youtube") {
-    return `${GOOGLE_AUTH}?${new URLSearchParams({
-      client_id: config.google.clientId,
-      redirect_uri: config.google.redirectUri,
-      response_type: "code",
+    return googleAuthorizationUrl({
+      clientId: config.google.clientId,
+      redirectUri: config.google.redirectUri,
       scope: YOUTUBE_SCOPES.join(" "),
-      access_type: "offline",
-      prompt: "consent",
-      include_granted_scopes: "true",
       state,
-    })}`;
+      pkce,
+      includeGrantedScopes: true,
+    });
   }
   if (provider === "google_business") {
-    return `${GOOGLE_AUTH}?${new URLSearchParams({
-      client_id: config.google.clientId,
-      redirect_uri: config.google.redirectUri,
-      response_type: "code",
+    return googleAuthorizationUrl({
+      clientId: config.google.clientId,
+      redirectUri: config.google.redirectUri,
       scope: GBP_SCOPES.join(" "),
-      access_type: "offline",
-      prompt: "consent",
       state,
-    })}`;
+      pkce,
+    });
   }
   if (provider === "meta") {
     return `https://www.facebook.com/v22.0/dialog/oauth?${new URLSearchParams({
@@ -250,17 +263,23 @@ function tokenBundle(access, refresh, expiresIn, scope = "") {
   };
 }
 
-async function exchangeGoogleCode(code, config, fetchImpl, platform = "youtube") {
+async function exchangeGoogleCode(code, config, fetchImpl, platform = "youtube", codeVerifier = "") {
+  if (!codeVerifier) throw mcpError("oauth_failed", "Google sign-in requires PKCE.", 500);
+  const params = {
+    code,
+    client_id: config.google.clientId,
+    redirect_uri: config.google.redirectUri,
+    grant_type: "authorization_code",
+    code_verifier: codeVerifier,
+  };
+  // Google Desktop clients still reject a token exchange that omits client_secret.
+  // The value is not confidential once it ships inside an installer. Send it only
+  // when an owner has saved one locally. Do not embed one in the app.
+  if (config.google.clientSecret) params.client_secret = config.google.clientSecret;
   const response = await fetchImpl(GOOGLE_TOKEN, {
     method: "POST",
     headers: { "content-type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({
-      code,
-      client_id: config.google.clientId,
-      client_secret: config.google.clientSecret,
-      redirect_uri: config.google.redirectUri,
-      grant_type: "authorization_code",
-    }),
+    body: new URLSearchParams(params),
   });
   const payload = await readJson(response);
   if (!response.ok || !payload.refresh_token || !payload.access_token) {
@@ -620,8 +639,8 @@ async function exchangeSnapchatCode(code, config, fetchImpl) {
 
 export async function exchangeCode(provider, { code, config, fetchImpl = fetch, codeVerifier } = {}) {
   assertProviderConfigured(provider, config);
-  if (provider === "youtube") return exchangeGoogleCode(code, config, fetchImpl, "youtube");
-  if (provider === "google_business") return exchangeGoogleCode(code, config, fetchImpl, "google_business");
+  if (provider === "youtube") return exchangeGoogleCode(code, config, fetchImpl, "youtube", codeVerifier);
+  if (provider === "google_business") return exchangeGoogleCode(code, config, fetchImpl, "google_business", codeVerifier);
   if (provider === "meta") return exchangeMetaCode(code, config, fetchImpl);
   if (provider === "threads") return exchangeThreadsCode(code, config, fetchImpl);
   if (provider === "tiktok") return exchangeTikTokCode(code, config, fetchImpl);

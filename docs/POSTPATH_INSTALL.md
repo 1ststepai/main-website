@@ -45,11 +45,19 @@ Use the same Electron core and `ELECTRON_RUN_AS_NODE` desk launch. Package it wi
 
 This environment cannot finish that package. It has no Apple Developer ID Application certificate, no notarization credentials, and no Mac. Do not treat an unsigned Mac build as accepted. Gatekeeper stays on. A customer Mac test waits until a signed build exists.
 
+## First-run guide
+
+The desk source now opens a setup guide on first launch. It can save a private draft and it does not publish. Skip and Setup guide are both available, and the answers stay in the browser storage for `127.0.0.1`.
+
+That guide is not inside the installer whose SHA256 is `3c79455c8ad4b9329a276ab30ace075e729cb9bebe8cd6fe99c09185d27b3eb5`. Those bytes were packed from source commit `87745d180b03136a6e059b5b8a26f0ec7587e2fb` and stored in `e0eb52b6d3bf6d1964818db48f056622c3945eb4`. Replacing the installer would change the checksum Evan is checking.
+
 ## YouTube first test
 
 Not run. Do not connect, upload, or delete until Evan approves the account and the exact text.
 
-The desk asks for the Google client id and secret once and stores them in the local vault. Do not paste them into chat. The redirect URI to register is `http://127.0.0.1:47831/oauth/callback`.
+Ordinary customers are not asked to create a Google Cloud app. This preview does not include a client id. Google's desktop flow is a loopback redirect on `http://127.0.0.1:47831/oauth/callback` plus PKCE. A Desktop client still returns a client secret, and Google's token endpoint currently requires that parameter, but Google treats an installed app as a public client: a secret shipped inside the installer is not confidential. Do not paste a client id or secret into chat. The App credentials form remains for an owner private test and stores the values only in the local vault.
+
+The shipped installer above still shows the older credential form. The PKCE change is in source only until a later installer is built.
 
 The YouTube connection requests `youtube.upload` and `youtube.readonly`, with offline access. Upload uses the resumable `videos.insert` call. Privacy defaults to `private`. The code sets category 22 and made-for-kids to false. PostPath cannot delete the YouTube video afterward.
 

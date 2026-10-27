@@ -161,7 +161,7 @@ export function createOAuthRuntime({ store, env = process.env, fetchImpl = fetch
   async function beginProvider(profileId, provider, remainingChain = [], { open = true } = {}) {
     await ensureListening();
     const config = oauthConfig(env, redirectUri);
-    const pkce = provider === "x" ? createPkcePair() : null;
+    const pkce = provider === "x" || provider === "youtube" || provider === "google_business" ? createPkcePair() : null;
     const state = signState(
       {
         profile_id: profileId,

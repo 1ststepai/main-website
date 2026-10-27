@@ -84,6 +84,8 @@ test("desk status and profile APIs stay on localhost", async () => {
     assert.match(html, /Connect accounts/);
     assert.match(html, /Save draft/);
     assert.match(html, /Close the window to quit/);
+    assert.match(html, /Setup guide/);
+    assert.match(html, /id="guide"/);
     const media = await fetch(`${url}api/media`, {
       method: "POST",
       headers: { "content-type": "video/mp4", "x-postpath-filename": "clip.mp4" },

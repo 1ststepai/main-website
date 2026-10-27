@@ -21,7 +21,12 @@ fi
 
 # electron-builder prepares the Windows app directory. NSIS is compiled with the
 # Linux makensis so the installer does not depend on Wine.
-npx electron-builder --win dir --publish never
+BUILDER="$ROOT/node_modules/.bin/electron-builder"
+if [[ ! -x "$BUILDER" ]]; then
+  echo "electron-builder is not installed in postpath-desktop" >&2
+  exit 1
+fi
+"$BUILDER" --win dir --publish never
 command -v makensis >/dev/null
 (cd "$ROOT" && makensis build/postpath.nsi)
 

@@ -38,6 +38,7 @@
           <div class="cta-row">
             <button type="submit" class="btn primary" id="connect-btn">Connect accounts</button>
             <button type="button" class="btn ghost" id="cursor-btn">Enable in Cursor</button>
+            <button type="button" class="btn ghost" id="reopen-guide">Setup guide</button>
           </div>
           <p class="hint" id="connect-hint">Connect YouTube below for the first post. Enable in Cursor only if an AI assistant should use the same saved accounts.</p>
         </form>
@@ -49,8 +50,9 @@
           <p class="panel-note">Private unless you change it</p>
         </div>
         <p class="hint">
-          Save the Google app credentials in App credentials once. They stay on this computer. PostPath does not include them.
-          This copy is an unsigned internal preview. Leave Windows SmartScreen and macOS Gatekeeper on.
+          YouTube sign-in is not included in this preview. Customers do not create a Google Cloud app.
+          App credentials below are for an owner private test. This copy is an unsigned internal preview.
+          Leave Windows SmartScreen and macOS Gatekeeper on.
         </p>
         <div class="cta-row">
           <button type="button" class="btn secondary" id="connect-youtube">Connect YouTube</button>
@@ -114,7 +116,7 @@
       <section class="panel" aria-labelledby="apps-title">
         <div class="panel-head">
           <h2 id="apps-title">App credentials</h2>
-          <p class="panel-note">One-time setup from each developer console. Save only the networks you use.</p>
+          <p class="panel-note">Owner private test. Customers do not paste app secrets here.</p>
         </div>
         <p class="redirect">
           Redirect URI for every app:
@@ -173,6 +175,19 @@
         <span>PostPath by 1stStep.ai</span>
       </footer>
     </main>
+    <div id="guide" class="guide" hidden>
+      <div class="guide-card" role="dialog" aria-modal="true" aria-labelledby="guide-title">
+        <p class="guide-kicker" id="guide-kicker"></p>
+        <h2 id="guide-title" tabindex="-1"></h2>
+        <div id="guide-body"></div>
+        <p class="hint" id="guide-error" hidden></p>
+        <div class="cta-row">
+          <button type="button" class="btn ghost" id="guide-back">Back</button>
+          <button type="button" class="btn tiny" id="guide-skip">Skip for now</button>
+          <button type="button" class="btn primary" id="guide-next">Continue</button>
+        </div>
+      </div>
+    </div>
     <script type="module" src="/app.js"></script>
   </body>
 </html>
