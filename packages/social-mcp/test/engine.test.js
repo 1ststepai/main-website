@@ -6,6 +6,7 @@ import { test } from "node:test";
 import { createEngine } from "../src/engine.js";
 import { missingProviders } from "../src/oauth/providers.js";
 import { youtubeFetchMock } from "./helpers/youtubeFetchMock.js";
+import { PLATFORM_TEXT_LIMITS } from "../src/publish/validate.js";
 
 test("missingProviders reports full OAuth chain gaps", () => {
   assert.deepEqual(missingProviders([]), [
@@ -196,6 +197,63 @@ test("x publish posts text tweet", async () => {
     const published = await engine.publishPost({ post_id: post.id });
     assert.equal(published.post.status, "published");
     assert.equal(published.post.platform_post_id, "tw123");
+    assert.deepEqual(published.warnings, []);
+    await engine.oauth.stop();
+  } finally {
+    rmSync(home, { recursive: true, force: true });
+  }
+});
+
+test("publish_post blocks validation errors and surfaces length warnings", async () => {
+  const home = mkdtempSync(join(tmpdir(), "social-mcp-"));
+  const fetchImpl = async (url, init = {}) => {
+    if (String(url).includes("api.twitter.com/2/tweets") && init.method === "POST") {
+      return {
+        ok: true,
+        status: 201,
+        headers: { get: () => "" },
+        text: async () => JSON.stringify({ data: { id: "tw-warn" } }),
+      };
+    }
+    return { ok: false, status: 500, headers: { get: () => "" }, text: async () => "{}" };
+  };
+  try {
+    const engine = createEngine({
+      home,
+      env: { X_CLIENT_ID: "xid", X_CLIENT_SECRET: "xsecret" },
+      fetchImpl,
+      now: () => Date.parse("2026-10-27T12:00:00.000Z"),
+    });
+    await engine.upsertProfile({ id: "acme", name: "Acme" });
+    engine.store.saveConnection(
+      { profile_id: "acme", platform: "youtube", account_label: "@acme", channel_id: "UCacme" },
+      { refresh_token: "rt", access_token: "old", expires_at: "2099-01-01T00:00:00.000Z" },
+    );
+    engine.store.saveConnection(
+      { profile_id: "acme", platform: "x", account_label: "@acme", user_id: "1" },
+      {
+        access_token: "xa",
+        refresh_token: "xr",
+        expires_at: "2099-01-01T00:00:00.000Z",
+      },
+    );
+
+    const yt = await engine.createDraft({
+      profile_id: "acme",
+      platform: "youtube",
+      title: "no file",
+      description: "missing media",
+    });
+    await assert.rejects(() => engine.publishPost({ post_id: yt.post.id }), /media_path|validation/i);
+
+    const long = await engine.createDraft({
+      profile_id: "acme",
+      platform: "x",
+      caption: "x".repeat(PLATFORM_TEXT_LIMITS.x + 5),
+    });
+    const published = await engine.publishPost({ post_id: long.post.id });
+    assert.equal(published.post.status, "published");
+    assert.ok(published.warnings.some((w) => /280/.test(w)));
     await engine.oauth.stop();
   } finally {
     rmSync(home, { recursive: true, force: true });
