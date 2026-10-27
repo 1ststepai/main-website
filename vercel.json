@@ -1,11 +1,14 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "rewrites": [
+  "redirects": [
     {
       "source": "/",
       "has": [{ "type": "host", "value": "postpath.1ststep.ai" }],
-      "destination": "/postpath/index.html"
-    },
+      "destination": "/postpath/",
+      "permanent": false
+    }
+  ],
+  "rewrites": [
     {
       "source": "/:path*",
       "has": [{ "type": "host", "value": "postpath.1ststep.ai" }],

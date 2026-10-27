@@ -47,7 +47,12 @@ test("PostPath logo assets exist", async () => {
 
 test("Vercel maps postpath host and www path", async () => {
   const vercel = JSON.parse(await source("vercel.json"));
-  const sources = vercel.rewrites.map((row) => JSON.stringify(row));
-  assert.ok(sources.some((row) => row.includes("postpath.1ststep.ai") && row.includes("/postpath")));
-  assert.ok(sources.some((row) => row.includes('"/postpath/"')));
+  const rewrites = vercel.rewrites.map((row) => JSON.stringify(row));
+  const redirects = (vercel.redirects || []).map((row) => JSON.stringify(row));
+  assert.ok(
+    redirects.some((row) => row.includes("postpath.1ststep.ai") && row.includes("/postpath/")),
+    "host root should redirect to /postpath/ before filesystem index.html",
+  );
+  assert.ok(rewrites.some((row) => row.includes("postpath.1ststep.ai") && row.includes("/postpath")));
+  assert.ok(rewrites.some((row) => row.includes('"/postpath/"')));
 });
