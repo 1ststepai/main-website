@@ -1,0 +1,25 @@
+{
+  "name": "@1ststep/postpath-desktop",
+  "version": "0.1.0",
+  "description": "PostPath desktop shell — Electron wrapper around the local PostPath desk (packages/social-mcp). Does not fork business logic.",
+  "private": true,
+  "main": "electron/main.js",
+  "scripts": {
+    "start": "electron .",
+    "desk": "node ../social-mcp/bin/social-mcp.js app --no-open"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "postpath",
+    "electron",
+    "desktop",
+    "local-first",
+    "social-mcp"
+  ],
+  "license": "UNLICENSED",
+  "optionalDependencies": {
+    "electron": "^37.2.6"
+  }
+}
