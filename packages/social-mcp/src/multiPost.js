@@ -1,6 +1,6 @@
 import { PLATFORMS } from "./platforms.js";
 
-export const BUNDLE_STATUSES = ["draft", "scheduled", "partial", "complete", "discarded"];
+export const BUNDLE_STATUSES = ["draft", "scheduled", "approved", "partial", "complete", "discarded"];
 
 export function defaultPresets() {
   return {

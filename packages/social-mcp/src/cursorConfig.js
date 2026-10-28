@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
-import { dirname, join } from "node:path";
+import { dirname, join, resolve as resolvePath } from "node:path";
 import { fileURLToPath } from "node:url";
 import { mcpError } from "./errors.js";
 import { MCP_SERVER_KEY } from "./brand.js";
@@ -18,15 +18,22 @@ export function socialMcpBinPath() {
   return join(here, "..", "bin", "social-mcp.js");
 }
 
-export function buildSocialMcpServerEntry({ command = process.execPath, args, env = {} } = {}) {
-  return {
+export const PILOT_CURSOR_ENV = {
+  SOCIAL_MCP_PILOT_MODE: "1",
+  SOCIAL_MCP_DRAFT_ONLY: "1",
+  SOCIAL_MCP_PUBLISH_MODE: "mock",
+};
+
+export function buildSocialMcpServerEntry({ command = process.execPath, args, env = {}, pilot = false, home } = {}) {
+  const merged = pilot ? { ...PILOT_CURSOR_ENV, ...env } : { ...env };
+  const homeDir = String(home || "").trim();
+  if (homeDir) merged.SOCIAL_MCP_HOME = resolvePath(homeDir);
+  const entry = {
     command,
     args: args || [socialMcpBinPath()],
-    env: {
-      // Vault + oauth.env are loaded by the process; no secrets required here.
-      ...env,
-    },
   };
+  if (Object.keys(merged).length) entry.env = merged;
+  return entry;
 }
 
 export function publicMcpClientConfig(entry = buildSocialMcpServerEntry()) {

@@ -1,0 +1,28 @@
+.seo { margin-top: 14px; }
+.seo-help { margin: 0 0 10px; }
+.seo-help summary { cursor: pointer; font-weight: 650; }
+.seo-help ol, .seo-help ul { margin: 8px 0 0; padding-left: 1.2rem; }
+.seo-help li { margin: 2px 0; }
+.seo-count { margin: 8px 0; font-family: var(--display); font-size: 1.05rem; }
+.seo-suggestions, .seo-drafts { list-style: none; margin: 8px 0; padding: 0; display: grid; gap: 8px; }
+.seo-drafts { display: grid; gap: 10px; }
+.seo-brand-block, .seo-channel {
+  padding: 8px;
+  border-radius: 14px;
+  background: rgba(8, 12, 24, 0.45);
+}
+.seo-channel h3, .seo-brand-block h3 { margin: 0 0 6px; font-size: 0.92rem; }
+.seo-notes {
+  margin: 0;
+  color: #f6e7b8;
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+.seo-report {
+  margin-top: 8px;
+  white-space: pre-wrap;
+  font-family: "DM Mono", ui-monospace, monospace;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.chip.copy-only { color: #d7e4ff; background: rgba(121, 167, 255, 0.2); }

@@ -17,6 +17,7 @@ import { publishRedditPost } from "./publish/reddit.js";
 import { publishSnapchatScaffold, publishWhatsAppScaffold } from "./publish/restricted.js";
 import { validateDraftForPublish } from "./publish/validate.js";
 import { displayOutcome, publishMode } from "./publish/outcome.js";
+import { isPilotMode, PILOT_PUBLISH_MESSAGE } from "./pilot/config.js";
 import { assertActionAllowed, assertProfileAllowed, getEntitlement } from "./license.js";
 import {
   applyPresets,
@@ -29,6 +30,8 @@ import {
 } from "./multiPost.js";
 import { normalizeGenerate, prepareAttachedFile, produceMedia } from "./media/run.js";
 import { reviewDraft, reviewImages, writeCaptions } from "./media/claude.js";
+import { createSeo } from "./seo/index.js";
+import { createHooks } from "./hook/index.js";
 import { planFor } from "./media/specs.js";
 import { randomBytes } from "node:crypto";
 import { rmSync } from "node:fs";
@@ -76,9 +79,30 @@ function optionalMediaPath(value, mediaRoot) {
   return resolveSafeMediaPath(String(value), mediaRoot);
 }
 
-export function createEngine({ home, env = process.env, fetchImpl = fetch, now = () => Date.now() } = {}) {
+export function createEngine({
+  home,
+  env = process.env,
+  fetchImpl = fetch,
+  now = () => Date.now(),
+  captionProvider = null,
+  hookGenerator = null,
+  structureProvider = null,
+  publishers = null,
+} = {}) {
   const store = createStore({ home, env, now });
   const oauth = createOAuthRuntime({ store, env, fetchImpl });
+  let seo;
+  let hooks;
+  const publishStats = { calls: 0 };
+
+  function pilotOn() {
+    return isPilotMode(env, store.homePaths);
+  }
+
+  function refusePilotPublish() {
+    if (!pilotOn()) return;
+    throw mcpError("pilot_publish_disabled", PILOT_PUBLISH_MESSAGE, 403);
+  }
 
   async function trackedFetch(url, init) {
     const method = String(init?.method || "GET").toUpperCase();
@@ -370,7 +394,9 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
       connections: store.listConnections(),
       oauth_redirect_uri: oauth.redirectUri,
       google_redirect_uri: oauth.googleRedirectUri,
-      publish_mode: publishMode(env),
+      publish_mode: pilotOn() ? "disabled" : publishMode(env),
+      pilot_mode: pilotOn(),
+      publisher_calls: publishStats.calls,
       platforms: PLATFORMS,
     };
   }
@@ -482,7 +508,7 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
     const platforms = knownPlatforms(shaped.platforms);
     if (!platforms.length) throw mcpError("invalid_platform", `Platform must be one of: ${PLATFORMS.join(", ")}`);
     const stamp = new Date(now()).toISOString();
-    const source = input.source === "mcp" ? "mcp" : "desk";
+    const source = ["mcp", "cli"].includes(input.source) ? input.source : "desk";
     const bundle = {
       id: store.newId("bnd"),
       profile_id: profile.id,
@@ -569,7 +595,7 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
       media_path: optionalMediaPath(input.media_path, mediaRoot),
       media_url: input.media_url ? String(input.media_url).slice(0, 2000) : null,
       media_content_type: String(input.media_content_type || "video/mp4").slice(0, 80),
-      source: input.source === "mcp" ? "mcp" : undefined,
+      source: ["mcp", "cli"].includes(input.source) ? input.source : undefined,
       scheduled_at: null,
       published_url: null,
       platform_post_id: null,
@@ -627,6 +653,7 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
   }
 
   async function schedulePost({ post_id, scheduled_at }) {
+    refusePilotPublish();
     const post = store.getPost(post_id);
     if (!post) throw mcpError("not_found", "Post not found.", 404);
     if (!["draft", "scheduled", "failed"].includes(post.status)) {
@@ -732,6 +759,10 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
   }
 
   async function dispatchPublish(post, connection, secrets, config) {
+    publishStats.calls += 1;
+    if (publishers?.[post.platform]) {
+      return publishers[post.platform]({ post, connection, secrets, config, fetchImpl: trackedFetch });
+    }
     if (publishMode(env) === "mock") return mockPublish(post);
     const onSecrets = async (next) => store.updateSecrets(post.profile_id, post.platform, next);
     const onNeedsReconnect = async () => {
@@ -921,6 +952,7 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
   }
 
   async function approveBundle({ bundle_id, scheduled_at, instagram_public_confirmed } = {}) {
+    refusePilotPublish();
     const bundle = store.getBundle(bundle_id);
     if (!bundle) throw mcpError("not_found", "Draft not found.", 404);
     if (!["draft", "scheduled", "partial"].includes(bundle.status)) {
@@ -1003,42 +1035,20 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
   }
 
   async function attachVidiqCheck(input = {}) {
-    const record = vidiqRecord(input, new Date(now()).toISOString());
-    if (!record) throw mcpError("invalid_vidiq", "vidIQ check needs checked_at or it is stamped now.", 400);
-    if (!input.checked_at) record.checked_at = new Date(now()).toISOString();
-    const bundle = input.bundle_id ? store.getBundle(input.bundle_id) : input.post_id ? store.getBundle(store.getPost(input.post_id)?.bundle_id) : null;
-    if (bundle) {
-      bundle.vidiq = record;
-      bundle.updated_at = record.checked_at;
-      store.saveBundle(bundle);
-      const youtubeId = bundle.child_ids?.youtube;
-      const youtube = youtubeId ? store.getPost(youtubeId) : null;
-      if (youtube && ["draft", "scheduled", "failed"].includes(youtube.status)) {
-        youtube.vidiq = record;
-        youtube.updated_at = record.checked_at;
-        store.savePost(youtube);
-      }
-      return { bundle, vidiq: record };
-    }
-    const post = store.getPost(input.post_id);
-    if (!post) throw mcpError("not_found", "Post not found.", 404);
-    post.vidiq = record;
-    post.updated_at = record.checked_at;
-    store.savePost(post);
-    return { post, vidiq: record };
+    return seo.attachKeywordResearch({ ...input, source: "vidiq" });
   }
 
   function listQueue() {
-    return {
-      queue: queueItems({
-        bundles: store.listBundles(),
-        posts: store.listPosts(),
-        profiles: store.listProfiles(),
-      }),
-    };
+    const queue = queueItems({
+      bundles: store.listBundles(),
+      posts: store.listPosts(),
+      profiles: store.listProfiles(),
+    });
+    return { queue: queue.map((item) => hooks.annotate(seo.annotateQueueItem(item))) };
   }
 
   async function publishPost({ post_id, force = false, acknowledge = false, claimFrom = null } = {}) {
+    refusePilotPublish();
     const post = store.getPost(post_id);
     if (!post) throw mcpError("not_found", "Post not found.", 404);
     assertActionAllowed("publish", getEntitlement(env));
@@ -1116,6 +1126,7 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
   }
 
   async function publishDue({ profile_id, limit = 5 } = {}) {
+    if (pilotOn()) return { count: 0, results: [], quarantined: [], skipped: "pilot_publish_disabled" };
     const quarantined = quarantinePublishing(profile_id);
     const due = store
       .listPosts({ profileId: profile_id, status: "scheduled" })
@@ -1284,9 +1295,22 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
     return { post };
   }
 
+  seo = createSeo({
+    store,
+    env,
+    fetchImpl,
+    now,
+    captionProvider,
+    connectSearch: (profileId) => oauth.connectSearchData(profileId),
+    createDraft,
+  });
+  hooks = createHooks({ store, env, fetchImpl, now, hookGenerator, structureProvider });
+
   return {
     store,
     oauth,
+    seo,
+    hooks,
     publicStatus,
     upsertProfile,
     listAccounts,
@@ -1307,6 +1331,7 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
     listPosts,
     publishPost,
     publishDue,
+    publisherCalls: () => publishStats.calls,
     statuses: POST_STATUSES,
   };
 }

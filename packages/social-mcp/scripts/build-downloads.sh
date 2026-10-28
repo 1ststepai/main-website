@@ -49,6 +49,10 @@ for item in "$ROOT"/*; do
   cp -a "$item" "$APP_STAGE/"
 done
 tar -czf "$STAGE/postpath-app.tgz" -C "$STAGE" postpath-app
+# Build id: the launcher compares this with the installed copy and replaces the app files when it differs.
+APP_SHA="$(sha256sum "$STAGE/postpath-app.tgz" 2>/dev/null | awk '{print $1}' || shasum -a 256 "$STAGE/postpath-app.tgz" | awk '{print $1}')"
+BUILD_ID="${VERSION}-${APP_SHA:0:16}"
+printf '%s\n' "$BUILD_ID" > "$STAGE/postpath-app.build"
 
 stamp_version() {
   local file="$1"
@@ -60,7 +64,7 @@ stamp_version() {
 
 MAC="$STAGE/PostPath-macOS"
 mkdir -p "$MAC"
-cp "$STAGE/postpath-app.tgz" "$MAC/"
+cp "$STAGE/postpath-app.tgz" "$STAGE/postpath-app.build" "$MAC/"
 cat > "$MAC/Open PostPath.command" <<'EOF'
 #!/bin/bash
 # PostPath by 1stStep.ai — macOS developer preview __POSTPATH_VERSION__
@@ -100,18 +104,55 @@ if [ -z "$NODE_VER" ] || [ "${NODE_MAJOR}" -lt 20 ]; then
   require_node "Found ${NODE_VER:-unknown} — PostPath requires 20+."
 fi
 
+BUNDLE_BUILD="$(head -n 1 "${DIR}/postpath-app.build" 2>/dev/null | tr -d '[:space:]' || true)"
+INSTALLED_BUILD="$(head -n 1 "${APP}/.postpath-build" 2>/dev/null | tr -d '[:space:]' || true)"
+
+# Unpack into a staging folder first, so a failed unpack or npm install leaves the old app working.
+# Only ~/.postpath/app is replaced. The data home (~/.social-mcp: db.json, master.key, pilot.json) is never touched.
+stage_app() {
+  local next="${HOME}/.postpath/app.next"
+  rm -rf "${next}"
+  mkdir -p "${next}"
+  tar -xzf "${DIR}/postpath-app.tgz" -C "${next}" --strip-components=1
+  (cd "${next}" && npm install --omit=dev)
+  if [ -n "${BUNDLE_BUILD}" ]; then printf '%s\n' "${BUNDLE_BUILD}" > "${next}/.postpath-build"; fi
+  rm -rf "${HOME}/.postpath/app.old"
+  if [ -d "${APP}" ]; then mv "${APP}" "${HOME}/.postpath/app.old"; fi
+  mv "${next}" "${APP}"
+  rm -rf "${HOME}/.postpath/app.old"
+}
+
 if [ ! -f "${APP}/bin/social-mcp.js" ]; then
   echo "First run: unpacking PostPath developer preview __POSTPATH_VERSION__ and installing dependencies..."
-  mkdir -p "${APP}"
-  tar -xzf "${DIR}/postpath-app.tgz" -C "${APP}" --strip-components=1
-  (cd "${APP}" && npm install --omit=dev)
+  stage_app
+elif [ -n "${BUNDLE_BUILD}" ] && [ "${BUNDLE_BUILD}" != "${INSTALLED_BUILD}" ]; then
+  echo "Update: installed app ${INSTALLED_BUILD:-unknown} differs from this download ${BUNDLE_BUILD}. Replacing the app files at ${APP}."
+  echo "Your data home is left as it is."
+  stage_app
 else
-  echo "Relaunch: using existing app at ${APP}"
+  echo "Relaunch: using existing app at ${APP} (${INSTALLED_BUILD:-unknown})"
 fi
 
 cd "${APP}"
 echo "Starting PostPath by 1stStep.ai developer preview __POSTPATH_VERSION__ (Node ${NODE_VER})..."
 echo "This is not a one-click installer. Node.js 20+ is required."
+apply_pilot_env() {
+  if [ -n "${SOCIAL_MCP_PILOT_MODE:-}" ]; then
+    return
+  fi
+  local vault="${SOCIAL_MCP_HOME:-${HOME}/.social-mcp}"
+  local file="${vault}/pilot.json"
+  if [ -f "$file" ] && grep -Eq '"pilot_mode"[[:space:]]*:[[:space:]]*true' "$file"; then
+    export SOCIAL_MCP_PILOT_MODE=1
+    export SOCIAL_MCP_DRAFT_ONLY=1
+    if [ -z "${SOCIAL_MCP_PUBLISH_MODE:-}" ]; then
+      export SOCIAL_MCP_PUBLISH_MODE=mock
+    fi
+    echo "pilot.json is on: starting in pilot mode. Publish stays off."
+  fi
+}
+apply_pilot_env
+
 if [ "${POSTPATH_NO_OPEN:-}" = "1" ]; then
   exec node ./bin/social-mcp.js app --no-open
 fi
@@ -119,6 +160,16 @@ exec node ./bin/social-mcp.js app
 EOF
 stamp_version "$MAC/Open PostPath.command"
 chmod +x "$MAC/Open PostPath.command"
+cat > "$MAC/Open PostPath Pilot.command" <<'EOF'
+#!/bin/bash
+# Start the broker desk: topic picker, drafts, approve. Nothing is published.
+export SOCIAL_MCP_PILOT_MODE=1
+export SOCIAL_MCP_DRAFT_ONLY=1
+export SOCIAL_MCP_PUBLISH_MODE=mock
+DIR="$(cd "$(dirname "$0")" && pwd)"
+exec "$DIR/Open PostPath.command"
+EOF
+chmod +x "$MAC/Open PostPath Pilot.command"
 cat > "$MAC/README.txt" <<'EOF'
 PostPath by 1stStep.ai — macOS developer preview __POSTPATH_VERSION__
 
@@ -130,6 +181,7 @@ Fresh install:
 1. Install Node.js 20+ from https://nodejs.org
 2. Unzip this folder somewhere you can write.
 3. Double-click "Open PostPath.command".
+   Broker pilot: double-click "Open PostPath Pilot.command" instead.
    If macOS blocks it, right-click the command file and choose Open.
 4. The first launch unpacks the app into ~/.postpath/app and runs npm install once.
 5. In the desk:
@@ -142,10 +194,11 @@ Redirect URI for every developer console:
 http://127.0.0.1:47831/oauth/callback
 
 Relaunch:
-Run "Open PostPath.command" again. When ~/.postpath/app is already present, the launcher starts it without unpacking again.
+Run "Open PostPath.command" again. When ~/.postpath/app matches this download, the launcher starts it without unpacking again.
 
 Upgrade:
-Quit PostPath. Delete ~/.postpath/app only. Unzip the newer developer preview and run the launcher.
+Quit PostPath. Unzip the newer developer preview and run its launcher. It sees the different build,
+replaces ~/.postpath/app, and leaves your data in ~/.social-mcp alone.
 Do not delete ~/.social-mcp.
 
 Credentials:
@@ -164,7 +217,7 @@ stamp_version "$MAC/README.txt"
 
 WIN="$STAGE/PostPath-Windows"
 mkdir -p "$WIN"
-cp "$STAGE/postpath-app.tgz" "$WIN/"
+cp "$STAGE/postpath-app.tgz" "$STAGE/postpath-app.build" "$WIN/"
 cat > "$WIN/Open-PostPath.ps1" <<'EOF'
 # PostPath by 1stStep.ai — Windows developer preview __POSTPATH_VERSION__
 # Not a one-click installer. Requires Node.js 20+. Unsigned; do not disable SmartScreen.
@@ -202,16 +255,62 @@ if ($major -lt 20) {
 
 New-Item -ItemType Directory -Force -Path (Join-Path $env:USERPROFILE ".postpath") | Out-Null
 $entry = Join-Path $App "bin\social-mcp.js"
-if (-not (Test-Path $entry)) {
-  Write-Host "First run: unpacking PostPath developer preview __POSTPATH_VERSION__ and installing dependencies..."
-  New-Item -ItemType Directory -Force -Path $App | Out-Null
-  tar -xzf (Join-Path $Dir "postpath-app.tgz") -C $App --strip-components=1
-  Push-Location $App
+$Root = Join-Path $env:USERPROFILE ".postpath"
+$bundleFile = Join-Path $Dir "postpath-app.build"
+$installedFile = Join-Path $App ".postpath-build"
+$BundleBuild = if (Test-Path -LiteralPath $bundleFile) { (Get-Content -LiteralPath $bundleFile -TotalCount 1).Trim() } else { "" }
+$InstalledBuild = if (Test-Path -LiteralPath $installedFile) { (Get-Content -LiteralPath $installedFile -TotalCount 1).Trim() } else { "" }
+
+# Unpack into a staging folder first so a failed unpack or npm install leaves the old app working.
+# Only %USERPROFILE%\.postpath\app is replaced. The data home (.social-mcp: db.json, master.key, pilot.json) is never touched.
+function Install-AppFiles {
+  $next = Join-Path $Root "app.next"
+  $old = Join-Path $Root "app.old"
+  if (Test-Path -LiteralPath $next) { Remove-Item -LiteralPath $next -Recurse -Force }
+  New-Item -ItemType Directory -Force -Path $next | Out-Null
+  tar -xzf (Join-Path $Dir "postpath-app.tgz") -C $next --strip-components=1
+  if ($LASTEXITCODE -ne 0) { throw "Could not unpack postpath-app.tgz." }
+  Push-Location $next
   npm install --omit=dev
+  $npmCode = $LASTEXITCODE
   Pop-Location
-} else {
-  Write-Host "Relaunch: using existing app at $App"
+  if ($npmCode -ne 0) { throw "npm install failed." }
+  if ($BundleBuild) { Set-Content -LiteralPath (Join-Path $next ".postpath-build") -Value $BundleBuild }
+  if (Test-Path -LiteralPath $old) { Remove-Item -LiteralPath $old -Recurse -Force }
+  try {
+    if (Test-Path -LiteralPath $App) { Move-Item -LiteralPath $App -Destination $old }
+  } catch {
+    throw "Close every PostPath window, then run the launcher again. The app folder is in use."
+  }
+  Move-Item -LiteralPath $next -Destination $App
+  if (Test-Path -LiteralPath $old) { Remove-Item -LiteralPath $old -Recurse -Force }
 }
+
+if (-not (Test-Path -LiteralPath $entry)) {
+  Write-Host "First run: unpacking PostPath developer preview __POSTPATH_VERSION__ and installing dependencies..."
+  Install-AppFiles
+} elseif ($BundleBuild -and ($BundleBuild -ne $InstalledBuild)) {
+  Write-Host "Update: installed app $InstalledBuild differs from this download $BundleBuild. Replacing the app files at $App."
+  Write-Host "Your data home is left as it is."
+  Install-AppFiles
+} else {
+  Write-Host "Relaunch: using existing app at $App ($InstalledBuild)"
+}
+
+function Enable-PilotFromFile {
+  if ($env:SOCIAL_MCP_PILOT_MODE) { return }
+  $vault = if ($env:SOCIAL_MCP_HOME) { $env:SOCIAL_MCP_HOME } else { Join-Path $env:USERPROFILE ".social-mcp" }
+  $file = Join-Path $vault "pilot.json"
+  if (-not (Test-Path -LiteralPath $file)) { return }
+  $rawJson = Get-Content -LiteralPath $file -Raw
+  if ($rawJson -match '"pilot_mode"\s*:\s*true') {
+    $env:SOCIAL_MCP_PILOT_MODE = "1"
+    $env:SOCIAL_MCP_DRAFT_ONLY = "1"
+    if (-not $env:SOCIAL_MCP_PUBLISH_MODE) { $env:SOCIAL_MCP_PUBLISH_MODE = "mock" }
+    Write-Host "pilot.json is on: starting in pilot mode. Publish stays off."
+  }
+}
+Enable-PilotFromFile
 
 Set-Location $App
 Write-Host "Starting PostPath by 1stStep.ai developer preview __POSTPATH_VERSION__ (Node $raw)..."
@@ -243,6 +342,20 @@ if errorlevel 1 (
 )
 EOF
 stamp_version "$WIN/Open-PostPath.bat"
+cat > "$WIN/Open-PostPath-Pilot.bat" <<'EOF'
+@echo off
+setlocal
+title PostPath pilot
+cd /d "%~dp0"
+set SOCIAL_MCP_PILOT_MODE=1
+set SOCIAL_MCP_DRAFT_ONLY=1
+set SOCIAL_MCP_PUBLISH_MODE=mock
+echo.
+echo  PostPath pilot. Topic picker, drafts, and approve. Nothing is published.
+echo.
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0Open-PostPath.ps1"
+if errorlevel 1 pause
+EOF
 cat > "$WIN/README.txt" <<'EOF'
 PostPath by 1stStep.ai — Windows developer preview __POSTPATH_VERSION__
 
@@ -254,6 +367,7 @@ Fresh install:
 1. Install Node.js 20+ from https://nodejs.org
 2. Unzip this folder somewhere you can write.
 3. Double-click Open-PostPath.bat.
+   Broker pilot: double-click Open-PostPath-Pilot.bat instead.
 4. The first launch unpacks the app into %USERPROFILE%\.postpath\app and runs npm install once.
 5. In the desk:
    - Paste OAuth credentials → Save credentials
@@ -265,10 +379,11 @@ Redirect URI for every developer console:
 http://127.0.0.1:47831/oauth/callback
 
 Relaunch:
-Run Open-PostPath.bat again. When %USERPROFILE%\.postpath\app is already present, the launcher starts it without unpacking again.
+Run Open-PostPath.bat again. When %USERPROFILE%\.postpath\app matches this download, the launcher starts it without unpacking again.
 
 Upgrade:
-Quit PostPath. Delete %USERPROFILE%\.postpath\app only. Unzip the newer developer preview and run the launcher.
+Quit PostPath. Unzip the newer developer preview and run its launcher. It sees the different build,
+replaces %USERPROFILE%\.postpath\app, and leaves your data in %USERPROFILE%\.social-mcp alone.
 Do not delete %USERPROFILE%\.social-mcp.
 
 Credentials:
@@ -284,6 +399,29 @@ Signed: no
 Kind: developer preview
 EOF
 stamp_version "$WIN/README.txt"
+
+# Windows PowerShell 5.1 reads a BOM-less .ps1 as ANSI, where an em dash turns into a smart quote and breaks parsing.
+# Keep the .ps1 ASCII and give the .bat files CRLF line endings.
+python3 - "$WIN" <<'PY' 2>/dev/null || node -e '
+const fs=require("fs"),p=require("path"),d=process.argv[1];
+const ps=p.join(d,"Open-PostPath.ps1");fs.writeFileSync(ps,fs.readFileSync(ps,"utf8").replace(/\u2014/g,"-").replace(/\u2192/g,"->"));
+for(const f of fs.readdirSync(d).filter(n=>n.endsWith(".bat"))){const q=p.join(d,f);fs.writeFileSync(q,fs.readFileSync(q,"utf8").replace(/\r?\n/g,"\r\n"));}
+' "$WIN"
+import os, sys
+d = sys.argv[1]
+ps = os.path.join(d, "Open-PostPath.ps1")
+text = open(ps, encoding="utf-8").read().replace("\u2014", "-").replace("\u2192", "->")
+open(ps, "w", encoding="utf-8", newline="").write(text)
+for name in os.listdir(d):
+    if name.endswith(".bat"):
+        q = os.path.join(d, name)
+        body = open(q, encoding="utf-8").read().replace("\r\n", "\n").replace("\n", "\r\n")
+        open(q, "w", encoding="utf-8", newline="").write(body)
+PY
+if LC_ALL=C grep -q '[^[:print:][:space:]]' "$WIN/Open-PostPath.ps1"; then
+  echo "Open-PostPath.ps1 must be ASCII for Windows PowerShell 5.1" >&2
+  exit 1
+fi
 
 rm -f "$OUT/$MAC_NAME" "$OUT/$WIN_NAME"
 (cd "$STAGE" && zip -rq "$OUT/$MAC_NAME" PostPath-macOS)

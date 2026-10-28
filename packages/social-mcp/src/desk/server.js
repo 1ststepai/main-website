@@ -1,5 +1,6 @@
 import { createServer } from "node:http";
 import { randomBytes } from "node:crypto";
+import { execFileSync } from "node:child_process";
 import { createWriteStream, existsSync, mkdirSync, readFileSync, rmSync } from "node:fs";
 import { pipeline } from "node:stream/promises";
 import { dirname, extname, join } from "node:path";
@@ -17,6 +18,13 @@ import { openDesktopApp } from "../openApp.js";
 import { mcpError } from "../errors.js";
 import { resolveSafeMediaPath } from "../mediaPath.js";
 import { PRODUCT_NAME, PRODUCT_TITLE } from "../brand.js";
+import { handleSeoRoutes } from "../seo/http.js";
+import { handleHookRoutes } from "../hook/http.js";
+import { isPilotMode, PILOT_PUBLISH_MESSAGE } from "../pilot/config.js";
+import { editPilotCaption, exportApproved, generateFromTopic, pilotDeskView, queueApproved, regeneratePilot, requestPilotChanges } from "../pilot/loop.js";
+import { assertOwnerPin, ownerPinConfigured, pinFromRequest } from "../pilot/ownerAuth.js";
+import { FFMPEG_MISSING_MESSAGE } from "../media/audio.js";
+import { buildSocialMcpServerEntry } from "../cursorConfig.js";
 
 const PUBLIC_DIR = join(dirname(fileURLToPath(import.meta.url)), "public");
 const MEDIA_LIMIT = 200 * 1024 * 1024;
@@ -160,6 +168,30 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
   const dueIntervalMs = resolveDueIntervalMs(env);
   let dueTimer = null;
   let dueInFlight = false;
+  let ffmpegCache = { at: 0, ok: true, message: "" };
+
+  function ffmpegNote() {
+    if (Date.now() - ffmpegCache.at < 60_000) return { ok: ffmpegCache.ok, message: ffmpegCache.message };
+    try {
+      execFileSync("ffmpeg", ["-version"], { stdio: "ignore", timeout: 4000 });
+      ffmpegCache = { at: Date.now(), ok: true, message: "" };
+    } catch {
+      ffmpegCache = { at: Date.now(), ok: false, message: FFMPEG_MISSING_MESSAGE };
+    }
+    return { ok: ffmpegCache.ok, message: ffmpegCache.message };
+  }
+
+  function pilotActive() {
+    return isPilotMode(env, homePaths);
+  }
+
+  function requireOwner(req, body) {
+    if (!ownerPinConfigured(homePaths)) {
+      if (pilotActive()) throw mcpError("forbidden", "Connect, settings, keys, and tokens stay off the broker desk.", 403);
+      return;
+    }
+    assertOwnerPin(homePaths, pinFromRequest(req, body));
+  }
 
   async function runPublishDue() {
     if (dueInFlight) return;
@@ -229,7 +261,49 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
         : status.profiles.length === 0
           ? "create_profile"
           : "connect",
+      pilot_mode: pilotActive(),
+      publisher_calls: engine.publisherCalls?.() || 0,
     };
+  }
+
+  function publicSnapshot() {
+    const full = snapshot();
+    if (!pilotActive()) return full;
+    const view = pilotDeskView(engine);
+    return {
+      ok: true,
+      product: full.product,
+      product_title: full.product_title,
+      home: full.home,
+      media_dir: full.media_dir,
+      pilot_mode: true,
+      publish_mode: "disabled",
+      publisher_calls: engine.publisherCalls?.() || 0,
+      profiles: (full.profiles || []).map((profile) => ({ id: profile.id, name: profile.name })),
+      connections: (full.connections || []).map((row) => ({
+        profile_id: row.profile_id,
+        platform: row.platform,
+        account_label: row.account_label || "",
+        status: row.status || "",
+      })),
+      pilot: { ...view, ffmpeg: ffmpegNote() },
+      queue: view.queue,
+      recent_posts: (full.recent_posts || []).map((post) => ({
+        id: post.id,
+        platform: post.platform,
+        title: post.title,
+        caption: post.caption,
+        status: post.status,
+        queue_label: post.queue_label || "",
+        bundle_id: post.bundle_id || "",
+      })),
+      next_step: "pick_topic",
+      desk_url: full.desk_url,
+    };
+  }
+
+  function deskState() {
+    return pilotActive() ? publicSnapshot() : snapshot();
   }
 
   const server = createServer(async (req, res) => {
@@ -239,24 +313,76 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
       if (await handleRemoteMcp(req, res, { engine, store: engine.store, env, port })) return;
 
       if (req.method === "GET" && url.pathname === "/api/status") {
-        sendJson(res, 200, { ok: true, ...snapshot() });
+        sendJson(res, 200, { ok: true, ...deskState() });
+        return;
+      }
+
+      if (pilotActive() && req.method === "POST" && (url.pathname === "/api/publish" || url.pathname === "/api/license")) {
+        sendJson(res, 403, {
+          ok: false,
+          code: "pilot_publish_disabled",
+          message: PILOT_PUBLISH_MESSAGE,
+          publishers_called: engine.publisherCalls?.() || 0,
+        });
+        return;
+      }
+
+      if (req.method === "GET" && ["/api/pilot/export.txt", "/api/pilot/export.csv", "/api/pilot/export.zip"].includes(url.pathname)) {
+        const format = url.pathname.endsWith(".csv") ? "csv" : url.pathname.endsWith(".zip") ? "zip" : "txt";
+        const file = exportApproved(engine, format);
+        if (format === "txt") {
+          sendText(res, 200, file.body, file.type);
+          return;
+        }
+        res.writeHead(200, {
+          "content-type": file.type,
+          "content-disposition": `attachment; filename="${file.filename}"`,
+        });
+        res.end(file.body);
+        return;
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/pilot/draft") {
+        const body = await readJson(req);
+        const result = await generateFromTopic(engine, body, { env });
+        sendJson(res, 200, { ok: true, ...result, publishers_called: engine.publisherCalls?.() || 0, ...deskState() });
+        return;
+      }
+      if (req.method === "POST" && url.pathname === "/api/pilot/regenerate") {
+        const body = await readJson(req);
+        const result = await regeneratePilot(engine, body, { env });
+        sendJson(res, 200, { ok: true, ...result, ...deskState() });
+        return;
+      }
+      if (req.method === "POST" && url.pathname === "/api/pilot/edit") {
+        const body = await readJson(req);
+        const result = editPilotCaption(engine, body);
+        sendJson(res, 200, { ok: true, ...result, ...deskState() });
+        return;
+      }
+      if (req.method === "POST" && url.pathname === "/api/pilot/changes") {
+        const body = await readJson(req);
+        const result = requestPilotChanges(engine, body);
+        sendJson(res, 200, { ok: true, ...result, ...deskState() });
         return;
       }
 
       if (req.method === "POST" && url.pathname === "/api/profile") {
         const body = await readJson(req);
+        requireOwner(req, body);
         const result = await engine.upsertProfile({
           id: body.id || body.profile_id,
           name: body.name,
           require_vidiq: typeof body.require_vidiq === "boolean" ? body.require_vidiq : undefined,
           presets: body.presets,
         });
-        sendJson(res, 200, { ok: true, ...result, ...snapshot() });
+        sendJson(res, 200, { ok: true, ...result, ...deskState() });
         return;
       }
 
       if (req.method === "POST" && url.pathname === "/api/oauth-config") {
         const body = await readJson(req);
+        requireOwner(req, body);
         const current = existsSync(homePaths.oauthEnv)
           ? parseEnvFile(readFileSync(homePaths.oauthEnv, "utf8"))
           : {};
@@ -264,24 +390,26 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
         assertOAuthValues(merged);
         const saved = saveOAuthEnvFile(body, homePaths);
         loadOAuthEnvFile(homePaths, env);
-        sendJson(res, 200, { ok: true, oauth: publicOAuthConfig(saved.values), ...snapshot() });
+        sendJson(res, 200, { ok: true, oauth: publicOAuthConfig(saved.values), ...deskState() });
         return;
       }
 
       if (req.method === "POST" && url.pathname === "/api/connect") {
         const body = await readJson(req);
+        requireOwner(req, body);
         const profileId = String(body.profile_id || body.id || "").trim();
         const name = String(body.name || profileId).trim();
         if (!profileId) throw mcpError("invalid_profile", "Profile id is required.");
         loadOAuthEnvFile(homePaths, env);
         await engine.upsertProfile({ id: profileId, name });
         const result = await engine.connectAccounts(profileId, { platforms: body.platforms });
-        sendJson(res, 200, { ok: true, connect: result, ...snapshot() });
+        sendJson(res, 200, { ok: true, connect: result, ...deskState() });
         return;
       }
 
       if (req.method === "POST" && url.pathname === "/api/connect-bluesky") {
         const body = await readJson(req);
+        requireOwner(req, body);
         const profileId = String(body.profile_id || body.id || "").trim();
         const name = String(body.name || profileId).trim();
         if (!profileId) throw mcpError("invalid_profile", "Profile id is required.");
@@ -290,20 +418,23 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
           handle: body.handle,
           app_password: body.app_password,
         });
-        sendJson(res, 200, { ok: true, connect: result, ...snapshot() });
+        sendJson(res, 200, { ok: true, connect: result, ...deskState() });
         return;
       }
 
       if (req.method === "POST" && url.pathname === "/api/install-cursor") {
-        const installed = installCursorMcp();
-        sendJson(res, 200, { ok: true, installed, ...snapshot() });
+        requireOwner(req, {});
+        const installed = installCursorMcp({
+          entry: buildSocialMcpServerEntry({ pilot: pilotActive(), home: engine.store.homePaths.root }),
+        });
+        sendJson(res, 200, { ok: true, installed, ...deskState() });
         return;
       }
 
       if (req.method === "POST" && url.pathname === "/api/cancel-scheduled") {
         const body = await readJson(req);
         const result = await engine.cancelScheduledPost({ post_id: body.post_id });
-        sendJson(res, 200, { ok: true, ...result, ...snapshot() });
+        sendJson(res, 200, { ok: true, ...result, ...deskState() });
         return;
       }
 
@@ -348,56 +479,61 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
           wait: body.wait === true,
           source: "desk",
         });
-        sendJson(res, 200, { ok: true, ...created, ...snapshot() });
+        sendJson(res, 200, { ok: true, ...created, ...deskState() });
         return;
       }
 
       if (req.method === "POST" && url.pathname === "/api/approve") {
         const body = await readJson(req);
+        if (pilotActive()) {
+          const result = queueApproved(engine, { bundle_id: body.bundle_id, post_id: body.post_id });
+          sendJson(res, 200, { ok: true, ...result, publishers_called: engine.publisherCalls?.() || 0, ...deskState() });
+          return;
+        }
         if (body.bundle_id) {
           const result = await engine.approveBundle({
             bundle_id: body.bundle_id,
             scheduled_at: body.scheduled_at,
             instagram_public_confirmed: body.instagram_public_confirmed === true,
           });
-          sendJson(res, 200, { ok: true, ...result, ...snapshot() });
+          sendJson(res, 200, { ok: true, ...result, ...deskState() });
           return;
         }
         if (body.scheduled_at) {
           const result = await engine.schedulePost({ post_id: body.post_id, scheduled_at: body.scheduled_at });
-          sendJson(res, 200, { ok: true, ...result, ...snapshot() });
+          sendJson(res, 200, { ok: true, ...result, ...deskState() });
           return;
         }
         const result = await engine.publishPost({ post_id: body.post_id, force: true });
-        sendJson(res, 200, { ok: true, ...result, ...snapshot() });
+        sendJson(res, 200, { ok: true, ...result, ...deskState() });
         return;
       }
 
       if (req.method === "POST" && url.pathname === "/api/discard") {
         const body = await readJson(req);
         const result = await engine.discardItem({ bundle_id: body.bundle_id, post_id: body.post_id });
-        sendJson(res, 200, { ok: true, ...result, ...snapshot() });
+        sendJson(res, 200, { ok: true, ...result, ...deskState() });
         return;
       }
 
       if (req.method === "POST" && url.pathname === "/api/media/generate") {
         const body = await readJson(req);
         const result = await engine.generateMedia(body);
-        sendJson(res, 200, { ok: true, ...result, ...snapshot() });
+        sendJson(res, 200, { ok: true, ...result, ...deskState() });
         return;
       }
 
       if (req.method === "POST" && url.pathname === "/api/media/attach") {
         const body = await readJson(req);
         const result = await engine.attachMedia(body);
-        sendJson(res, 200, { ok: true, ...result, ...snapshot() });
+        sendJson(res, 200, { ok: true, ...result, ...deskState() });
         return;
       }
 
       if (req.method === "POST" && url.pathname === "/api/media/remove") {
         const body = await readJson(req);
         const result = await engine.removeMedia(body);
-        sendJson(res, 200, { ok: true, ...result, ...snapshot() });
+        sendJson(res, 200, { ok: true, ...result, ...deskState() });
         return;
       }
 
@@ -415,28 +551,37 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
         return;
       }
 
+      if (pilotActive() && (url.pathname.startsWith("/api/seo") || url.pathname.startsWith("/api/hook"))) {
+        // Keyword profiles, search-data sign-in, and on-camera voice are owner settings on a broker desk.
+        requireOwner(req, {});
+      }
+      if (await handleSeoRoutes(req, res, { url, engine, sendJson, readJson, snapshot: deskState })) return;
+      if (await handleHookRoutes(req, res, { url, engine, sendJson, readJson, snapshot: deskState })) return;
+
       if (req.method === "POST" && url.pathname === "/api/vidiq") {
         const body = await readJson(req);
         const result = await engine.attachVidiqCheck(body);
-        sendJson(res, 200, { ok: true, ...result, ...snapshot() });
+        sendJson(res, 200, { ok: true, ...result, ...deskState() });
         return;
       }
 
       if (req.method === "POST" && url.pathname === "/api/pat") {
         const body = await readJson(req);
+        requireOwner(req, body);
         const created = createPat(engine.store, {
           name: body.name,
           scopes: body.scopes,
           expiresInDays: body.expires_in_days,
         });
-        sendJson(res, 201, { ok: true, ...created, ...snapshot() });
+        sendJson(res, 201, { ok: true, ...created, ...deskState() });
         return;
       }
 
       if (req.method === "POST" && url.pathname === "/api/pat/revoke") {
         const body = await readJson(req);
+        requireOwner(req, body);
         const revoked = revokePat(engine.store, String(body.id || ""));
-        sendJson(res, 200, { ok: revoked, ...snapshot() });
+        sendJson(res, 200, { ok: revoked, ...deskState() });
         return;
       }
 
@@ -447,12 +592,13 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
           force: body.force === true,
           acknowledge: body.acknowledge === true,
         });
-        sendJson(res, 200, { ok: true, ...result, ...snapshot() });
+        sendJson(res, 200, { ok: true, ...result, ...deskState() });
         return;
       }
 
       if (req.method === "POST" && url.pathname === "/api/forget-vault") {
         const body = await readJson(req);
+        requireOwner(req, body);
         if (body.confirm !== "remove saved accounts") {
           throw mcpError("confirm_required", "Saved accounts stay until you confirm removal.", 400);
         }
@@ -492,7 +638,7 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
 
   async function start({ open = true } = {}) {
     const url = await listen();
-    startDueLoop();
+    if (!pilotActive()) startDueLoop();
     if (open) openDesktopApp(url);
     return { url, port, due_interval_ms: dueIntervalMs };
   }

@@ -155,9 +155,9 @@ test("back and dismiss do not drop the draft the user already entered", () => {
 
 test("desk save from the guide payload stays a private draft and connect fails closed", async () => {
   const home = mkdtempSync(join(tmpdir(), "social-mcp-guide-"));
-  const env = { SOCIAL_MCP_OAUTH_PORT: "47994", SOCIAL_MCP_DESK_PORT: "47993" };
+  const env = { SOCIAL_MCP_OAUTH_PORT: "48012", SOCIAL_MCP_DESK_PORT: "48011" };
   const engine = createEngine({ home, env });
-  const desk = createDeskServer({ engine, env, port: 47993 });
+  const desk = createDeskServer({ engine, env, port: 48011 });
   try {
     const { url } = await desk.start({ open: false });
     const plan = reviewView(

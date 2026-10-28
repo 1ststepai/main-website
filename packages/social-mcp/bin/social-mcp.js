@@ -1,13 +1,15 @@
 #!/usr/bin/env node
 import { writeFileSync } from "node:fs";
 import { startStdioServer, createEngine } from "../src/index.js";
-import { paths } from "../src/home.js";
+import { paths, resolveHome } from "../src/home.js";
 import { loadOAuthEnvFile } from "../src/envFile.js";
 import { createDeskServer } from "../src/desk/server.js";
 import { installCursorMcp } from "../src/cursorConfig.js";
 import { PRODUCT_NAME, PRODUCT_TITLE } from "../src/brand.js";
 import { DEFAULT_OAUTH_PORT } from "../src/home.js";
 import { providerRedirectUri } from "../src/oauth/redirect.js";
+import { runPilotCommands } from "../src/cli.js";
+import { buildSocialMcpServerEntry } from "../src/cursorConfig.js";
 
 const args = process.argv.slice(2);
 const command = args[0];
@@ -69,9 +71,22 @@ TIKTOK_CLIENT_SECRET=
   }
 
   if (command === "install-cursor") {
-    const result = installCursorMcp();
+    const pilot = args.includes("--pilot");
+    const homeIdx = args.indexOf("--home");
+    const homeFlag = homeIdx >= 0 ? args[homeIdx + 1] : "";
+    // Pilot entries always pin the home in use so Cursor drafts land in the broker's vault.
+    const home = homeFlag || (pilot || String(process.env.SOCIAL_MCP_HOME || "").trim() ? resolveHome(process.env) : "");
+    const result = installCursorMcp({
+      entry: buildSocialMcpServerEntry({ pilot, home }),
+    });
     console.log(JSON.stringify(result, null, 2));
-    console.log(`Restart Cursor to load ${PRODUCT_NAME}.`);
+    console.log(pilot ? `Restart Cursor to load ${PRODUCT_NAME} in pilot mode. Publish stays mock and draft-only.` : `Restart Cursor to load ${PRODUCT_NAME}.`);
+    return;
+  }
+
+  const pilotCode = await runPilotCommands(args);
+  if (pilotCode !== null) {
+    process.exitCode = pilotCode;
     return;
   }
 
@@ -99,8 +114,13 @@ ${PRODUCT_TITLE}
 Usage:
   social-mcp app             # desktop Connect UI (recommended)
   social-mcp                 # stdio MCP server for Cursor/Claude
-  social-mcp install-cursor  # write ~/.cursor/mcp.json entry
+  social-mcp install-cursor [--pilot]  # write ~/.cursor/mcp.json entry
   social-mcp init            # create local vault
+  social-mcp pilot init --home <dir> [--pin <pin>]
+  social-mcp pat create --scopes posts:read,drafts:write --out <file> [--home <dir>]
+  social-mcp pat revoke <id> [--home <dir>]
+  social-mcp drafts list --home <dir>
+  social-mcp drafts create --home <dir> --goal <id> --topic <id>
   social-mcp status
   social-mcp connect <id>    # CLI fallback
 `);

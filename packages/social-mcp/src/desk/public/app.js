@@ -1,3 +1,5 @@
+import { initSeo } from "./seo.js";
+import { initHook } from "./hook.js";
 import {
   AI_NOT_IN_APP,
   CREATION,
@@ -24,6 +26,7 @@ import {
   toggleChannel,
 } from "./guide.js";
 import { platformIcon } from "./icons.js";
+import { bindPilot, renderPilot } from "./pilotDesk.js";
 
 const NETWORKS = [
   { key: "youtube", label: "YouTube" },
@@ -255,6 +258,8 @@ function renderResults(posts, publishMode) {
 
 function renderStatus(data) {
   latestStatus = data;
+  if (renderPilot(data)) return;
+  document.body.classList.add("owner-mode");
   const dispatchHonesty = document.getElementById("dispatch-honesty");
   if (dispatchHonesty) dispatchHonesty.textContent = DISPATCH_HONESTY;
   renderMode(data);
@@ -1121,6 +1126,7 @@ async function saveGuideDrafts() {
 }
 
 function bootGuide() {
+  if (document.body.classList.contains("pilot-mode")) return;
   if (guideBooted) return;
   guideBooted = true;
   let saved = null;
@@ -1355,8 +1361,22 @@ function renderQueue(items) {
     discard.dataset.id = item.id;
     discard.dataset.kind = item.kind;
     discard.textContent = "Discard";
-    actions.append(now, when, later, edit, discard);
+    if (!document.body.classList.contains("pilot-mode")) actions.append(now, when, later);
+    actions.append(edit, discard);
     li.append(top);
+    if (Array.isArray(item.seo?.notes) && item.seo.notes.length) {
+      const seoNotes = document.createElement("p");
+      seoNotes.className = "seo-notes";
+      seoNotes.textContent = item.seo.notes.join(" ");
+      li.append(seoNotes);
+    }
+    if (item.hook?.spoken) {
+      const script = document.createElement("p");
+      script.className = "hook-script";
+      const from = item.hook.borrowed_from?.[0]?.url ? ` Structure borrowed from ${item.hook.borrowed_from[0].url}` : "";
+      script.textContent = `On camera: ${item.hook.spoken}.${from}`;
+      li.append(script);
+    }
     if (item.media_status === "generating") {
       const pending = document.createElement("p");
       pending.className = "hint";
@@ -1779,10 +1799,21 @@ document.getElementById("forget-vault").addEventListener("click", async () => {
   }
 });
 
+bindPilot(renderStatus);
+// SEO and Opening panels are owner tools. The pilot (broker) desk does not load them.
+function initOwnerSteps() {
+  if (document.body.classList.contains("pilot-mode")) return;
+  initSeo({ api, showToast, refresh });
+  initHook({ api, showToast, refresh });
+}
 refresh()
-  .then(() => bootGuide())
+  .then(() => {
+    initOwnerSteps();
+    bootGuide();
+  })
   .catch((error) => {
     showToast(error.message, true);
+    initOwnerSteps();
     bootGuide();
   });
 setInterval(() => {

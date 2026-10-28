@@ -36,6 +36,31 @@ html, body {
 
 body { min-height: 100vh; position: relative; overflow-x: hidden; }
 
+body:not(.owner-mode) .owner-surface,
+body.pilot-mode .owner-surface { display: none !important; }
+.pilot-app { display: grid; gap: 18px; }
+.pilot-app h1 { font-family: var(--display); letter-spacing: -0.04em; font-size: clamp(2rem, 4vw, 3.2rem); margin: 0; }
+.pilot-goals, .pilot-topics, .pilot-app .cta-row, .pilot-app .queue-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.compliance-banner {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(240, 212, 138, 0.12);
+  color: var(--warn);
+  border: 1px solid rgba(240, 212, 138, 0.35);
+}
+.pilot-app textarea {
+  width: 100%;
+  margin-top: 6px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: rgba(8, 12, 24, 0.45);
+  color: var(--ink);
+  font: inherit;
+  padding: 10px;
+}
+.pilot-app a.btn { text-decoration: none; display: inline-flex; align-items: center; }
+
 .atmosphere {
   position: fixed;
   inset: 0;

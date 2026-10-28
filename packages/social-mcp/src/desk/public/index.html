@@ -12,6 +12,8 @@
     />
     <link rel="icon" href="/assets/postpath-mark.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="/app.css" />
+    <link rel="stylesheet" href="/seo.css" />
+    <link rel="stylesheet" href="/hook.css" />
   </head>
   <body>
     <div class="atmosphere" aria-hidden="true"></div>
@@ -23,10 +25,36 @@
           <span>PostPath</span>
         </p>
         <p class="byline">by 1stStep.ai</p>
-        <button type="button" class="btn ghost" id="reopen-guide">Setup guide</button>
+        <button type="button" class="btn ghost owner-surface" id="reopen-guide">Setup guide</button>
       </header>
 
-      <section class="intro">
+      <section id="pilot-app" class="pilot-app" hidden>
+        <p class="eyebrow">Pilot desk</p>
+        <h1>Pick a topic. Approve the draft.</h1>
+        <p class="lede" id="pilot-campaign"></p>
+        <p class="compliance-banner" id="pilot-compliance"></p>
+        <p class="hint" id="pilot-ffmpeg" hidden></p>
+        <div class="pilot-goals" id="pilot-goals"></div>
+        <div class="pilot-topics" id="pilot-topics" hidden></div>
+        <section class="panel" aria-labelledby="pilot-queue-title">
+          <div class="panel-head">
+            <div>
+              <p class="step-kicker"><span>Queue</span></p>
+              <h2 id="pilot-queue-title">Drafts</h2>
+            </div>
+            <div class="cta-row">
+              <button type="button" class="btn tiny" id="pilot-copy">Copy captions</button>
+              <a class="btn tiny" id="pilot-csv" href="/api/pilot/export.csv">Download CSV</a>
+              <a class="btn tiny" id="pilot-zip" href="/api/pilot/export.zip">Download zip</a>
+            </div>
+          </div>
+          <p class="hint">Approve queues the draft. Nothing is posted from this desk.</p>
+          <ul class="queue-list" id="pilot-queue"></ul>
+          <p class="hint" id="pilot-empty">Pick a goal, then a topic. The draft shows up here.</p>
+        </section>
+      </section>
+
+      <section class="intro owner-surface">
         <p class="eyebrow">Post from this window</p>
         <h1>Nothing posts without <em>your approval</em>.</h1>
         <p class="lede">
@@ -43,7 +71,7 @@
         </p>
       </section>
 
-      <div class="stage">
+      <div class="stage owner-surface">
         <section class="panel accounts" aria-labelledby="status-title">
           <div class="panel-head">
             <div>
@@ -192,7 +220,104 @@
         </section>
       </div>
 
-      <section class="panel results" aria-labelledby="results-title">
+      <section class="panel seo owner-surface" id="seo-panel" aria-labelledby="seo-title">
+        <div class="panel-head">
+          <div>
+            <p class="step-kicker">Before the queue</p>
+            <h2 id="seo-title">Keywords and copy</h2>
+          </div>
+        </div>
+        <details class="seo-help" open>
+          <summary>What this saves</summary>
+          <div id="seo-help">
+            <p class="hint">One topic fills keywords and channel copy for each brand. The approval queue shows the notes. The action count loads with this panel.</p>
+          </div>
+        </details>
+        <details class="seo-help">
+          <summary>Setup</summary>
+          <div id="seo-setup"></div>
+        </details>
+        <form id="seo-form" class="oauth-form">
+          <div class="pair">
+            <label>Brand
+              <select id="seo-brand" name="profile_id"></select>
+            </label>
+            <label>Topic <input id="seo-topic" name="topic" maxlength="120" placeholder="One topic for every channel" required /></label>
+          </div>
+          <label>Audience <input id="seo-audience" maxlength="400" /></label>
+          <label>Primary keywords <textarea id="seo-primary" rows="2" placeholder="One keyword per line"></textarea></label>
+          <label>Secondary keywords <textarea id="seo-secondary" rows="2"></textarea></label>
+          <label>Keywords to avoid <textarea id="seo-negative" rows="2"></textarea></label>
+          <div class="vidiq-row">
+            <label>vidIQ overall <input id="seo-vidiq-score" inputmode="decimal" placeholder="Score" /></label>
+            <label>vidIQ volume <input id="seo-vidiq-volume" inputmode="decimal" placeholder="Only if you have it" /></label>
+          </div>
+          <label>vidIQ competition <input id="seo-vidiq-competition" placeholder="Only if you have it" maxlength="40" /></label>
+          <p class="hint">Paste vidIQ numbers from the assistant that is already signed in. This window does not sign in to vidIQ, and it does not fill in a volume you did not paste.</p>
+          <div class="cta-row">
+            <button type="button" class="btn secondary" id="seo-save-keywords">Save keywords</button>
+            <button type="button" class="btn secondary" id="seo-suggest">Suggest keywords</button>
+            <button type="submit" class="btn primary" id="seo-draft">Draft copy</button>
+          </div>
+        </form>
+        <ul class="seo-suggestions" id="seo-suggestions"></ul>
+        <div id="seo-drafts"></div>
+        <div class="cta-row">
+          <button type="button" class="btn primary" id="seo-queue" disabled>Add to approval queue</button>
+          <button type="button" class="btn tiny" id="seo-search-connect">Connect search data</button>
+          <button type="button" class="btn tiny" id="seo-search-sync">Update search terms</button>
+          <button type="button" class="btn tiny" id="seo-report">Weekly report</button>
+        </div>
+        <p class="hint" id="seo-search-note">Connect search data is a separate sign-in from posting. YouTube still needs its own connection before a video can send.</p>
+        <pre class="seo-report" id="seo-report-body" hidden></pre>
+      </section>
+
+      <section class="panel hook owner-surface" id="hook-panel" aria-labelledby="hook-title">
+        <div class="panel-head">
+          <div>
+            <p class="step-kicker">On camera</p>
+            <h2 id="hook-title">Opening</h2>
+          </div>
+        </div>
+        <details class="seo-help" open>
+          <summary>What this saves</summary>
+          <div id="hook-help">
+            <p class="hint">One topic can borrow an opening shape and give you a line to film yourself. The action count loads with this panel.</p>
+          </div>
+        </details>
+        <details class="seo-help">
+          <summary>Setup</summary>
+          <div id="hook-setup"></div>
+        </details>
+        <form id="hook-form" class="oauth-form">
+          <div class="pair">
+            <label>Brand
+              <select id="hook-brand"></select>
+            </label>
+            <label>Topic <input id="hook-topic" maxlength="120" placeholder="Same topic as the keyword step" /></label>
+          </div>
+          <p class="hint" id="hook-voice">Tone, energy, and on-camera style are still blank.</p>
+          <div class="cta-row">
+            <button type="button" class="btn secondary" id="hook-find">Find examples</button>
+          </div>
+        </form>
+        <ul class="seo-suggestions" id="hook-examples"></ul>
+        <label>What you saw in the first 10 seconds
+          <textarea id="hook-observation" rows="3" placeholder="Opening type, pattern, visual, pacing, delivery, promise. No transcript."></textarea>
+        </label>
+        <div class="cta-row">
+          <button type="button" class="btn secondary" id="hook-read">Read the opening</button>
+          <button type="button" class="btn secondary" id="hook-save-observation">Save observation</button>
+          <button type="button" class="btn primary" id="hook-write">Write 3 hooks</button>
+        </div>
+        <div id="hook-structure"></div>
+        <div id="hook-options"></div>
+        <label>Waiting draft
+          <select id="hook-draft"></select>
+        </label>
+      </section>
+
+      <section class="panel results owner-surface" aria-labelledby="results-title">
         <div class="panel-head">
           <div>
             <p class="step-kicker"><span>04</span> Results</p>
@@ -212,7 +337,7 @@
       </section>
       </div>
 
-      <details class="panel setup">
+      <details class="panel setup owner-surface">
         <summary>YouTube setup steps</summary>
         <p class="redirect">
           Google loopback URI:
@@ -229,7 +354,7 @@
         </ol>
       </details>
 
-      <details class="panel setup">
+      <details class="panel setup owner-surface">
         <summary id="meta-title">Facebook and Instagram</summary>
         <p class="panel-note">Page draft unless you choose Public</p>
         <p class="hint" id="meta-readiness">
@@ -264,7 +389,7 @@
         </form>
       </details>
 
-      <section class="panel connect-ai" id="connect-ai" aria-labelledby="connect-ai-title">
+      <section class="panel connect-ai owner-surface" id="connect-ai" aria-labelledby="connect-ai-title">
         <div class="connect-copy">
           <p class="step-kicker">Connect to your AI</p>
           <h2 id="connect-ai-title">Same accounts. Any MCP client.</h2>
@@ -277,6 +402,7 @@
               <label class="check"><input type="checkbox" name="scope" value="posts:read" checked /> posts:read</label>
               <label class="check"><input type="checkbox" name="scope" value="drafts:write" checked /> drafts:write</label>
               <label class="check"><input type="checkbox" name="scope" value="accounts:read" checked /> accounts:read</label>
+              <label class="check"><input type="checkbox" name="scope" value="accounts:write" /> accounts:write</label>
               <label class="check"><input type="checkbox" name="scope" value="queue:approve" /> queue:approve</label>
             </fieldset>
             <label>Expires in days <input name="expires_in_days" inputmode="numeric" placeholder="Optional" /></label>
@@ -322,7 +448,7 @@
         </div>
       </section>
 
-      <section class="panel" aria-labelledby="scheduled-title">
+      <section class="panel owner-surface" aria-labelledby="scheduled-title">
         <div class="panel-head">
           <h2 id="scheduled-title">Scheduled</h2>
           <p class="panel-note">Local queue</p>
@@ -336,7 +462,7 @@
         <ul class="scheduled-list" id="scheduled-list"></ul>
       </section>
 
-      <section class="panel" aria-labelledby="apps-title">
+      <section class="panel owner-surface" aria-labelledby="apps-title">
         <div class="panel-head">
           <h2 id="apps-title">App credentials</h2>
           <p class="panel-note">Saved only in the local oauth.env file. Not sent to 1stStep.</p>
