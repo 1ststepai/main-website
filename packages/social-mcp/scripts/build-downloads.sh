@@ -136,7 +136,7 @@ Fresh install:
    - Paste OAuth credentials → Save credentials
    - Register redirect URI: http://127.0.0.1:47831/oauth/callback
    - Connect accounts
-   - Click Enable in Cursor → restart Cursor
+   - Open Connect your AI assistant, pick the app, then restart it
 
 Redirect URI for every developer console:
 http://127.0.0.1:47831/oauth/callback
@@ -259,7 +259,7 @@ Fresh install:
    - Paste OAuth credentials → Save credentials
    - Register redirect URI: http://127.0.0.1:47831/oauth/callback
    - Connect accounts
-   - Click Enable in Cursor → restart Cursor
+   - Open Connect your AI assistant, pick the app, then restart it
 
 Redirect URI for every developer console:
 http://127.0.0.1:47831/oauth/callback

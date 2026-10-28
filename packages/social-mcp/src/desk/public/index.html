@@ -24,7 +24,7 @@
         <p class="byline">by 1stStep.ai</p>
         <h1>Post from this window.</h1>
         <p class="lede">
-          Connect a channel, review a draft, and publish it here. Cursor is optional. Close this window to quit. A scheduled post sends only while PostPath is open and this computer is on.
+          Connect a channel, review a draft, and publish it here. An assistant is optional. Close this window to quit. A scheduled post sends only while PostPath is open and this computer is on.
         </p>
         <form id="connect-form" class="connect-form">
           <label class="field">
@@ -37,12 +37,21 @@
           </label>
           <div class="cta-row">
             <button type="submit" class="btn primary" id="connect-btn">Connect accounts</button>
-            <button type="button" class="btn ghost" id="cursor-btn">Enable in Cursor</button>
             <button type="button" class="btn ghost" id="reopen-guide">Setup guide</button>
           </div>
-          <p class="hint" id="connect-hint">Connect YouTube below for the first post. Enable in Cursor only if an AI assistant should use the same saved accounts.</p>
+          <p class="hint" id="connect-hint">Connect a channel below for the first post. Use Connect your AI assistant when an app should use the same saved accounts.</p>
         </form>
       </header>
+
+      <section class="panel" id="assistants" aria-labelledby="assistants-title">
+        <div class="panel-head">
+          <h2 id="assistants-title">Connect your AI assistant</h2>
+        </div>
+        <p class="hint" id="assistants-intro">
+          Pick the app you already use. One click adds PostPath on this computer and leaves your other tools alone. Apps on the internet cannot see this computer. PostPath does not open a tunnel.
+        </p>
+        <div id="assistant-list" class="assistant-list"></div>
+      </section>
 
       <section class="panel" aria-labelledby="youtube-title">
         <div class="panel-head">

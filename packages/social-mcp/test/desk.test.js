@@ -82,6 +82,12 @@ test("desk status and profile APIs stay on localhost", async () => {
     assert.match(html, /PostPath/);
     assert.match(html, /1stStep\.ai/);
     assert.match(html, /Connect accounts/);
+    assert.match(html, /Connect your AI assistant/);
+    assert.equal(html.includes("Enable in Cursor"), false);
+    assert.ok(Array.isArray(status.clients));
+    const chatgpt = status.clients.find((client) => client.id === "chatgpt");
+    assert.equal(chatgpt.statusLabel, "Cannot connect from here");
+    assert.equal(status.clients.some((client) => client.id === "cursor"), true);
     assert.match(html, /Save draft/);
     assert.match(html, /Close the window to quit/);
     assert.match(html, /Setup guide/);
