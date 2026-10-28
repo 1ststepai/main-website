@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Sora:wght@600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
       rel="stylesheet"
     />
     <link rel="icon" href="/assets/postpath-mark.svg" type="image/svg+xml" />
@@ -16,75 +16,310 @@
   <body>
     <div class="atmosphere" aria-hidden="true"></div>
     <main class="shell">
-      <header class="hero">
+      <div class="story-fit">
+      <header class="topbar">
         <p class="brand">
           <img src="/assets/postpath-mark.svg" width="32" height="32" alt="" />
-          PostPath
+          <span>PostPath</span>
         </p>
         <p class="byline">by 1stStep.ai</p>
-        <h1>Post from this window.</h1>
-        <p class="lede">
-          Connect a channel, review a draft, and publish it here. Cursor is optional. Close this window to quit. A scheduled post sends only while PostPath is open and this computer is on.
-        </p>
-        <form id="connect-form" class="connect-form">
-          <label class="field">
-            <span>Brand or profile</span>
-            <input id="profile-name" name="name" type="text" placeholder="Acme Co" autocomplete="organization" required />
-          </label>
-          <label class="field">
-            <span>Profile id</span>
-            <input id="profile-id" name="id" type="text" placeholder="acme" pattern="[a-zA-Z0-9][a-zA-Z0-9_-]{1,63}" required />
-          </label>
-          <div class="cta-row">
-            <button type="submit" class="btn primary" id="connect-btn">Connect accounts</button>
-            <button type="button" class="btn ghost" id="cursor-btn">Enable in Cursor</button>
-            <button type="button" class="btn ghost" id="reopen-guide">Setup guide</button>
-          </div>
-          <p class="hint" id="connect-hint">Connect YouTube below for the first post. Enable in Cursor only if an AI assistant should use the same saved accounts.</p>
-        </form>
+        <button type="button" class="btn ghost" id="reopen-guide">Setup guide</button>
       </header>
 
-      <section class="panel" aria-labelledby="youtube-title">
-        <div class="panel-head">
-          <h2 id="youtube-title">YouTube</h2>
-          <p class="panel-note">Private unless you change it</p>
-        </div>
-        <p class="hint">
-          YouTube sign-in is not included in this preview. Customers do not create a Google Cloud app.
-          App credentials below are for an owner private test. This copy is an unsigned internal preview.
-          Leave Windows SmartScreen and macOS Gatekeeper on.
+      <section class="intro">
+        <p class="eyebrow">Post from this window</p>
+        <h1>Nothing posts without <em>your approval</em>.</h1>
+        <p class="lede">
+          Connect a channel, review a draft, and publish it here. Cursor is optional. Scheduled posts send only while PostPath is open.
         </p>
-        <div class="cta-row">
-          <button type="button" class="btn secondary" id="connect-youtube">Connect YouTube</button>
+        <ol class="story" aria-label="How a post moves">
+          <li><span>01</span> Accounts</li>
+          <li><span>02</span> Draft</li>
+          <li><span>03</span> Approval</li>
+          <li><span>04</span> Results</li>
+        </ol>
+        <p id="publish-mode" class="mode-banner live" role="status">
+          Live mode. Posted, failed, rate limited, and needs review come from the platform response after you publish. Live publishing has not been verified on a real account yet.
+        </p>
+      </section>
+
+      <div class="stage">
+        <section class="panel accounts" aria-labelledby="status-title">
+          <div class="panel-head">
+            <div>
+              <p class="step-kicker"><span>01</span> Accounts</p>
+              <h2 id="status-title">Connected accounts</h2>
+            </div>
+            <button type="button" class="btn tiny" id="refresh-btn">Refresh</button>
+          </div>
+          <p class="brand-live" id="brand-live">No brand yet</p>
+          <form id="connect-form" class="connect-form">
+            <div class="pair">
+              <label class="field">
+                <span>Brand or profile</span>
+                <input id="profile-name" name="name" type="text" placeholder="Acme Co" autocomplete="organization" required />
+              </label>
+              <label class="field">
+                <span>Profile id</span>
+                <input id="profile-id" name="id" type="text" placeholder="acme" pattern="[a-zA-Z0-9][a-zA-Z0-9_-]{1,63}" required />
+              </label>
+            </div>
+            <button type="submit" class="btn primary" id="connect-btn">Connect accounts</button>
+            <p class="hint" id="connect-hint">One button signs in to YouTube, Facebook, Instagram, TikTok, LinkedIn, X, Threads, Pinterest, Google Business, Reddit, and Snapchat. Bluesky uses the handle and app password here. Nothing is posted.</p>
+          </form>
+          <ul class="network-list" id="network-list"></ul>
+          <form id="bluesky-form" class="oauth-form">
+            <label>Bluesky handle <input name="handle" placeholder="you.bsky.social" autocomplete="off" /></label>
+            <label>Bluesky app password <input name="app_password" type="password" autocomplete="new-password" /></label>
+            <button type="submit" class="btn secondary">Connect Bluesky</button>
+          </form>
+          <p class="meta" id="path-meta"></p>
+        </section>
+
+        <section class="panel composer" aria-labelledby="youtube-title">
+          <div class="panel-head">
+            <div>
+              <p class="step-kicker"><span>02</span> Draft</p>
+              <h2 id="youtube-title">Composer</h2>
+            </div>
+            <button type="submit" class="btn primary" id="save-draft" form="youtube-form">Save draft</button>
+          </div>
+          <div class="toggles" id="platform-toggles" role="group" aria-label="Platforms">
+            <label class="toggle"><input type="checkbox" name="target-youtube" value="youtube" checked /> YouTube</label>
+            <label class="toggle"><input type="checkbox" name="target-facebook" value="facebook" checked /> Facebook</label>
+            <label class="toggle"><input type="checkbox" name="target-instagram" value="instagram" checked /> Instagram</label>
+            <label class="toggle"><input type="checkbox" name="target-tiktok" value="tiktok" /> TikTok</label>
+            <label class="toggle"><input type="checkbox" name="target-linkedin" value="linkedin" /> LinkedIn</label>
+            <label class="toggle"><input type="checkbox" name="target-x" value="x" /> X</label>
+            <label class="toggle"><input type="checkbox" name="target-threads" value="threads" /> Threads</label>
+            <label class="toggle"><input type="checkbox" name="target-pinterest" value="pinterest" /> Pinterest</label>
+            <label class="toggle"><input type="checkbox" name="target-bluesky" value="bluesky" /> Bluesky</label>
+            <label class="toggle"><input type="checkbox" name="target-google_business" value="google_business" /> Google Business</label>
+            <label class="toggle"><input type="checkbox" name="target-reddit" value="reddit" /> Reddit</label>
+          </div>
+          <form id="youtube-form" class="oauth-form">
+            <div class="pair">
+              <label>Title <input name="title" maxlength="100" required placeholder="Title for this draft" /></label>
+              <label>Privacy
+                <select name="privacy_status">
+                  <option value="private" selected>Private</option>
+                  <option value="unlisted">Unlisted</option>
+                  <option value="public">Public</option>
+                </select>
+              </label>
+            </div>
+            <label>Description <textarea name="description" maxlength="5000" rows="2" placeholder="What this post says"></textarea></label>
+            <div class="pair file-pair">
+              <label>Tags <input name="tags" placeholder="comma, separated" maxlength="400" /></label>
+              <label>Your file <input name="video" type="file" accept="video/mp4,video/*,image/*" /></label>
+            </div>
+            <fieldset class="generate-box">
+              <legend>Generate the asset</legend>
+              <label>Provider
+                <select id="media-provider">
+                  <option value="none" selected>None — use my own file</option>
+                  <option value="mock">Mock demo</option>
+                  <option value="openai">OpenAI images</option>
+                  <option value="google">Google Imagen / Veo</option>
+                  <option value="xai">xAI Grok Imagine</option>
+                  <option value="replicate">Replicate</option>
+                  <option value="fal">fal</option>
+                  <option value="claude">Claude cards</option>
+                </select>
+              </label>
+              <label>Captions
+                <select id="caption-provider">
+                  <option value="none" selected>I'll write them</option>
+                  <option value="mock">Mock writer</option>
+                  <option value="claude">Claude</option>
+                </select>
+              </label>
+              <label>Prompt <textarea id="media-prompt" rows="2" maxlength="2000" placeholder="What the image or video should show"></textarea></label>
+              <div class="pair">
+                <label>Type
+                  <select id="media-type">
+                    <option value="video" selected>Silent video</option>
+                    <option value="image">Image</option>
+                  </select>
+                </label>
+                <label>Style <input id="media-style" maxlength="200" placeholder="Optional" /></label>
+              </div>
+              <div class="pair">
+                <label>Duration seconds <input id="media-duration" inputmode="numeric" placeholder="4" /></label>
+                <label class="check"><input type="checkbox" id="youtube-long" /> YouTube long-form 16:9</label>
+              </div>
+              <label class="check"><input type="checkbox" id="claude-review" /> Ask Claude for advisory notes. This does not approve the post.</label>
+              <p class="hint">Connect accounts, connect your AI, one prompt, then review the queue. Generated video is silent. Claude cards are drawings, not photos or video.</p>
+            </fieldset>
+            <label class="check" id="instagram-confirm-label">
+              <input type="checkbox" id="instagram-confirm" />
+              Instagram goes public when you approve. Facebook stays a Page draft unless you choose Public below.
+            </label>
+            <label class="check">
+              <input type="checkbox" id="facebook-public" />
+              Facebook public
+            </label>
+            <div class="vidiq-row" id="vidiq-row">
+              <label>vidIQ score <input id="vidiq-score" inputmode="decimal" placeholder="Score" /></label>
+              <label>vidIQ notes <input id="vidiq-notes" placeholder="Paste the vidIQ result" maxlength="2000" /></label>
+            </div>
+          </form>
+          <p class="hint" id="youtube-readiness">
+            YouTube sign-in needs a Google OAuth Desktop client saved on this computer. PostPath does not include a Google app.
+          </p>
+          <button type="button" class="btn tiny" id="connect-youtube">Connect YouTube</button>
+        </section>
+
+        <section class="panel approval" aria-labelledby="approval-title">
+          <div class="panel-head">
+            <div>
+              <p class="step-kicker"><span>03</span> Approval</p>
+              <h2 id="approval-title">Your say</h2>
+            </div>
+          </div>
+          <p class="approval-line">Nothing posts without your approval.</p>
+          <p class="hint">One approval posts every selected platform. A failure on one does not stop the others.</p>
+          <ul class="queue-list" id="queue-list"></ul>
+          <p class="hint" id="queue-empty">No drafts waiting. Saved drafts and AI drafts show up here.</p>
+          <div class="approval-block" hidden>
+            <p class="hint" id="draft-result">No draft yet. Publishing uses the draft you just saved.</p>
+            <button type="button" class="btn primary" id="publish-draft" disabled>Publish this draft</button>
+          </div>
+          <div class="approval-block" hidden>
+            <p class="hint" id="meta-result">No Meta draft yet.</p>
+            <button type="button" class="btn secondary" id="publish-meta" disabled>Publish this draft</button>
+          </div>
+        </section>
+      </div>
+
+      <section class="panel results" aria-labelledby="results-title">
+        <div class="panel-head">
+          <div>
+            <p class="step-kicker"><span>04</span> Results</p>
+            <h2 id="results-title">Results</h2>
+          </div>
+          <p class="panel-note" id="results-note">From the platform response</p>
         </div>
-        <form id="youtube-form" class="oauth-form">
-          <label>Title <input name="title" maxlength="100" required /></label>
-          <label>Description <textarea name="description" maxlength="5000" rows="4"></textarea></label>
+        <ul class="chip-key" aria-label="Status labels">
+          <li><span class="chip connected">Connected</span></li>
+          <li><span class="chip draft">Draft</span></li>
+          <li><span class="chip posted">Posted</span></li>
+          <li><span class="chip review">Needs review</span></li>
+          <li><span class="chip failed">Failed</span></li>
+          <li><span class="chip rate">Rate limited</span></li>
+        </ul>
+        <ul class="result-list" id="result-list"></ul>
+      </section>
+      </div>
+
+      <details class="panel setup">
+        <summary>YouTube setup steps</summary>
+        <p class="redirect">
+          Google loopback URI:
+          <code id="google-redirect-uri">http://127.0.0.1:47831</code>
+          <button type="button" class="btn tiny" id="copy-google-redirect">Copy</button>
+        </p>
+        <ol class="steps" id="youtube-steps">
+          <li>In Google Cloud Console, create or open a project and enable YouTube Data API v3.</li>
+          <li>OAuth consent screen: add the scope youtube.upload. While the app is in Testing, add your Google account as a test user. Refresh tokens in Testing last about seven days.</li>
+          <li>Create an OAuth client of type Desktop app. Copy the client id and client secret into App credentials below. Do not commit them.</li>
+          <li>If Google asks for a redirect URI, paste the Google loopback URI. Desktop clients often allow http://127.0.0.1 with this port already.</li>
+          <li>Connect YouTube, then save a draft. Privacy starts at Private. A vertical MP4 of 3 minutes or less is what YouTube treats as a Short after processing. PostPath does not crop the file.</li>
+          <li>An unverified app can be limited to private uploads. videos.insert costs 1,600 quota units. A new project’s default is 10,000 units per day.</li>
+        </ol>
+      </details>
+
+      <details class="panel setup">
+        <summary id="meta-title">Facebook and Instagram</summary>
+        <p class="panel-note">Page draft unless you choose Public</p>
+        <p class="hint" id="meta-readiness">
+          Meta sign-in needs your Meta app id and app secret saved on this computer. PostPath does not include a Meta app.
+        </p>
+        <ol class="steps">
+          <li>Create a Meta app, type Business. Add Facebook Login and the Instagram product.</li>
+          <li>Add the Facebook user as an app admin, developer, or tester. In Development mode that is enough for your own Page. Other people’s accounts need App Review for instagram_content_publish and pages_manage_posts.</li>
+          <li>Connect a Facebook Page you manage. For Instagram, the account must be a professional (Business or Creator) account linked to that Page.</li>
+          <li>Valid OAuth redirect URI: the provider URI below. Save META_APP_ID and META_APP_SECRET in App credentials.</li>
+          <li>A video file on this computer is uploaded to Meta with their resumable upload. Facebook stays an unpublished Page Reel unless privacy is Public. Instagram has no private publish: PostPath will not upload it until you set Public.</li>
+        </ol>
+        <div class="cta-row">
+          <button type="button" class="btn secondary" id="connect-meta">Connect Meta</button>
+        </div>
+        <form id="meta-form" class="oauth-form">
+          <label>Network
+            <select name="platform">
+              <option value="facebook" selected>Facebook Page Reel</option>
+              <option value="instagram">Instagram Reel</option>
+            </select>
+          </label>
+          <label>Caption <textarea name="caption" maxlength="2200" rows="3"></textarea></label>
           <label>Privacy
             <select name="privacy_status">
-              <option value="private" selected>Private</option>
-              <option value="unlisted">Unlisted</option>
+              <option value="private" selected>Private / unpublished</option>
               <option value="public">Public</option>
             </select>
           </label>
           <label>Video file <input name="video" type="file" accept="video/mp4,video/*" /></label>
-          <div class="cta-row">
-            <button type="submit" class="btn primary" id="save-draft">Save draft</button>
-            <button type="button" class="btn secondary" id="publish-draft" disabled>Publish this draft</button>
-          </div>
+          <button type="submit" class="btn primary" id="save-meta-draft">Save draft</button>
         </form>
-        <p class="hint" id="draft-result">No draft yet. Publishing uses the draft you just saved.</p>
-        <p class="hint">Uninstalling PostPath leaves saved accounts in place. Remove them only with the button below, then quit and open PostPath again.</p>
-        <button type="button" class="btn danger" id="forget-vault">Remove saved accounts</button>
-      </section>
+      </details>
 
-      <section class="panel" aria-labelledby="status-title">
-        <div class="panel-head">
-          <h2 id="status-title">Status</h2>
-          <button type="button" class="btn tiny" id="refresh-btn">Refresh</button>
+      <section class="panel connect-ai" id="connect-ai" aria-labelledby="connect-ai-title">
+        <div class="connect-copy">
+          <p class="step-kicker">Connect to your AI</p>
+          <h2 id="connect-ai-title">Same accounts. Any MCP client.</h2>
+          <p class="lede">OAuth for clients that support it. A personal access token for clients that do not. The server key is <code>postpath</code>.</p>
+          <div id="mcp-remote" class="mcp-remote"></div>
+          <form id="pat-form" class="oauth-form">
+            <label>Token name <input name="name" placeholder="Claude on this Mac" required /></label>
+            <fieldset>
+              <legend>Scopes</legend>
+              <label class="check"><input type="checkbox" name="scope" value="posts:read" checked /> posts:read</label>
+              <label class="check"><input type="checkbox" name="scope" value="drafts:write" checked /> drafts:write</label>
+              <label class="check"><input type="checkbox" name="scope" value="accounts:read" checked /> accounts:read</label>
+              <label class="check"><input type="checkbox" name="scope" value="queue:approve" /> queue:approve</label>
+            </fieldset>
+            <label>Expires in days <input name="expires_in_days" inputmode="numeric" placeholder="Optional" /></label>
+            <button type="submit" class="btn secondary">Create access token</button>
+          </form>
+          <p class="hint" id="pat-once" hidden></p>
+          <ul class="queue-list" id="pat-list"></ul>
+          <ol class="explain">
+            <li>
+              <span>1</span>
+              <div>
+                <strong>Enable in Cursor</strong>
+                <p>Writes the postpath server into Cursor’s MCP config on this computer.</p>
+              </div>
+            </li>
+            <li>
+              <span>2</span>
+              <div>
+                <strong>Or copy the config</strong>
+                <p>Paste it into Claude Desktop or another MCP client. No secrets are in this block.</p>
+              </div>
+            </li>
+            <li>
+              <span>3</span>
+              <div>
+                <strong>Restart, then draft</strong>
+                <p>Ask the client for a draft. Nothing posts until you approve it here.</p>
+              </div>
+            </li>
+          </ol>
         </div>
-        <ul class="network-list" id="network-list"></ul>
-        <p class="meta" id="path-meta"></p>
+        <div class="connect-actions">
+          <button type="button" class="btn primary" id="cursor-btn">Enable in Cursor</button>
+          <pre class="mcp-config" id="mcp-config">{
+  "mcpServers": {
+    "postpath": {
+      "command": "node",
+      "args": ["bin/social-mcp.js"]
+    }
+  }
+}</pre>
+          <button type="button" class="btn secondary" id="copy-mcp">Copy MCP config</button>
+        </div>
       </section>
 
       <section class="panel" aria-labelledby="scheduled-title">
@@ -101,71 +336,72 @@
         <ul class="scheduled-list" id="scheduled-list"></ul>
       </section>
 
-      <section class="panel" aria-labelledby="bluesky-title">
-        <div class="panel-head">
-          <h2 id="bluesky-title">Bluesky</h2>
-          <p class="panel-note">App password — not browser OAuth.</p>
-        </div>
-        <form id="bluesky-form" class="oauth-form">
-          <label>Handle <input name="handle" placeholder="you.bsky.social" autocomplete="off" /></label>
-          <label>App password <input name="app_password" type="password" autocomplete="off" /></label>
-          <button type="submit" class="btn secondary">Connect Bluesky</button>
-        </form>
-      </section>
-
       <section class="panel" aria-labelledby="apps-title">
         <div class="panel-head">
           <h2 id="apps-title">App credentials</h2>
-          <p class="panel-note">Owner private test. Customers do not paste app secrets here.</p>
+          <p class="panel-note">Saved only in the local oauth.env file. Not sent to 1stStep.</p>
         </div>
+        <p class="hint" id="oauth-errors" hidden></p>
         <p class="redirect">
-          Redirect URI for every app:
+          Redirect URI for Meta, X, LinkedIn, and the other browser logins:
           <code id="redirect-uri">http://127.0.0.1:47831/oauth/callback</code>
           <button type="button" class="btn tiny" id="copy-redirect">Copy</button>
         </p>
-        <form id="oauth-form" class="oauth-form">
+        <p class="hint">A blank secret leaves the saved secret in place. Secrets stay masked. Clear the client id to remove that Google or Meta app from this computer.</p>
+        <form id="oauth-form" class="oauth-form credential-grid">
           <fieldset>
             <legend>Google / YouTube + Business</legend>
             <label>Client ID <input name="GOOGLE_OAUTH_CLIENT_ID" autocomplete="off" /></label>
-            <label>Client secret <input name="GOOGLE_OAUTH_CLIENT_SECRET" type="password" autocomplete="off" /></label>
+            <label>Client secret <input name="GOOGLE_OAUTH_CLIENT_SECRET" type="password" autocomplete="new-password" /></label>
           </fieldset>
           <fieldset>
             <legend>Meta / Instagram + Facebook + Threads</legend>
             <label>App ID <input name="META_APP_ID" autocomplete="off" /></label>
-            <label>App secret <input name="META_APP_SECRET" type="password" autocomplete="off" /></label>
+            <label>App secret <input name="META_APP_SECRET" type="password" autocomplete="new-password" /></label>
           </fieldset>
           <fieldset>
             <legend>TikTok</legend>
             <label>Client key <input name="TIKTOK_CLIENT_KEY" autocomplete="off" /></label>
-            <label>Client secret <input name="TIKTOK_CLIENT_SECRET" type="password" autocomplete="off" /></label>
+            <label>Client secret <input name="TIKTOK_CLIENT_SECRET" type="password" autocomplete="new-password" /></label>
           </fieldset>
           <fieldset>
             <legend>LinkedIn</legend>
             <label>Client ID <input name="LINKEDIN_CLIENT_ID" autocomplete="off" /></label>
-            <label>Client secret <input name="LINKEDIN_CLIENT_SECRET" type="password" autocomplete="off" /></label>
+            <label>Client secret <input name="LINKEDIN_CLIENT_SECRET" type="password" autocomplete="new-password" /></label>
           </fieldset>
           <fieldset>
             <legend>X</legend>
             <label>Client ID <input name="X_CLIENT_ID" autocomplete="off" /></label>
-            <label>Client secret <input name="X_CLIENT_SECRET" type="password" autocomplete="off" /></label>
+            <label>Client secret <input name="X_CLIENT_SECRET" type="password" autocomplete="new-password" /></label>
           </fieldset>
           <fieldset>
             <legend>Pinterest</legend>
             <label>App ID <input name="PINTEREST_APP_ID" autocomplete="off" /></label>
-            <label>App secret <input name="PINTEREST_APP_SECRET" type="password" autocomplete="off" /></label>
+            <label>App secret <input name="PINTEREST_APP_SECRET" type="password" autocomplete="new-password" /></label>
           </fieldset>
           <fieldset>
             <legend>Reddit</legend>
             <label>Client ID <input name="REDDIT_CLIENT_ID" autocomplete="off" /></label>
-            <label>Client secret <input name="REDDIT_CLIENT_SECRET" type="password" autocomplete="off" /></label>
+            <label>Client secret <input name="REDDIT_CLIENT_SECRET" type="password" autocomplete="new-password" /></label>
           </fieldset>
           <fieldset>
             <legend>Snapchat (Marketing API approval)</legend>
             <label>Client ID <input name="SNAPCHAT_CLIENT_ID" autocomplete="off" /></label>
-            <label>Client secret <input name="SNAPCHAT_CLIENT_SECRET" type="password" autocomplete="off" /></label>
+            <label>Client secret <input name="SNAPCHAT_CLIENT_SECRET" type="password" autocomplete="new-password" /></label>
+          </fieldset>
+          <fieldset>
+            <legend>Media generation</legend>
+            <label>OpenAI API key <input name="OPENAI_API_KEY" type="password" autocomplete="new-password" /></label>
+            <label>Google Gemini API key <input name="GEMINI_API_KEY" type="password" autocomplete="new-password" /></label>
+            <label>xAI API key <input name="XAI_API_KEY" type="password" autocomplete="new-password" /></label>
+            <label>Replicate token <input name="REPLICATE_API_TOKEN" type="password" autocomplete="new-password" /></label>
+            <label>fal key <input name="FAL_KEY" type="password" autocomplete="new-password" /></label>
+            <label>Anthropic API key <input name="ANTHROPIC_API_KEY" type="password" autocomplete="new-password" /></label>
           </fieldset>
           <button type="submit" class="btn secondary">Save credentials</button>
         </form>
+        <p class="hint">Uninstalling PostPath leaves saved accounts in place. Remove them only with the button below, then quit and open PostPath again. This installer is unsigned. Leave Windows SmartScreen and macOS Gatekeeper on.</p>
+        <button type="button" class="btn danger" id="forget-vault">Remove saved accounts</button>
       </section>
 
       <p class="toast" id="toast" hidden></p>

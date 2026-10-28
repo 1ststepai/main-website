@@ -26,5 +26,10 @@ extraResources:
 win:
   target:
     - dir
+  # Unsigned unless the build script sees CSC_LINK and CSC_KEY_PASSWORD.
+  # Do not commit a certificate. electron-builder signs the app exe only
+  # when scripts/build-windows-installer.sh turns signAndEditExecutable on.
+  signingHashAlgorithms:
+    - sha256
   signAndEditExecutable: false
   verifyUpdateCodeSignature: false

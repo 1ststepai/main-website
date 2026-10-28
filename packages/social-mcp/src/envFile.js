@@ -1,5 +1,6 @@
 import { chmodSync, existsSync, readFileSync, writeFileSync } from "node:fs";
-import { paths } from "./home.js";
+import { DEFAULT_OAUTH_PORT, paths } from "./home.js";
+import { oauthRedirectHost } from "./oauth/redirect.js";
 
 const OAUTH_KEYS = [
   "GOOGLE_OAUTH_CLIENT_ID",
@@ -19,6 +20,14 @@ const OAUTH_KEYS = [
   "SNAPCHAT_CLIENT_ID",
   "SNAPCHAT_CLIENT_SECRET",
   "SOCIAL_MCP_OAUTH_PORT",
+  "SOCIAL_MCP_OAUTH_REDIRECT_HOST",
+  "OPENAI_API_KEY",
+  "GEMINI_API_KEY",
+  "XAI_API_KEY",
+  "REPLICATE_API_TOKEN",
+  "FAL_KEY",
+  "ANTHROPIC_API_KEY",
+  "SOCIAL_MCP_MEDIA_PROVIDER",
 ];
 
 export function oauthEnvPath(homePaths = paths()) {
@@ -60,21 +69,48 @@ export function loadOAuthEnvFile(homePaths = paths(), env = process.env) {
   return { file, values, applied };
 }
 
+const SECRET_KEYS = new Set([
+  ...OAUTH_KEYS.filter((key) => key.endsWith("_SECRET") || key.endsWith("_API_KEY") || key.endsWith("_API_TOKEN") || key === "FAL_KEY"),
+]);
+
+export function mergeOAuthInput(current = {}, input = {}) {
+  const next = { ...current };
+  for (const key of OAUTH_KEYS) {
+    if (input[key] === undefined) continue;
+    const value = String(input[key] ?? "").trim();
+    if (SECRET_KEYS.has(key) && (!value || value.includes("••••"))) continue;
+    if (value) next[key] = value;
+    else delete next[key];
+  }
+  if (input.GOOGLE_OAUTH_CLIENT_ID !== undefined && !String(input.GOOGLE_OAUTH_CLIENT_ID || "").trim()) {
+    delete next.GOOGLE_OAUTH_CLIENT_ID;
+    delete next.GOOGLE_OAUTH_CLIENT_SECRET;
+  }
+  if (input.META_APP_ID !== undefined && !String(input.META_APP_ID || "").trim()) {
+    delete next.META_APP_ID;
+    delete next.META_APP_SECRET;
+  }
+  return next;
+}
+
 export function saveOAuthEnvFile(input, homePaths = paths()) {
   const current = existsSync(oauthEnvPath(homePaths))
     ? parseEnvFile(readFileSync(oauthEnvPath(homePaths), "utf8"))
     : {};
-  const next = { ...current };
-  for (const key of OAUTH_KEYS) {
-    if (input[key] === undefined) continue;
-    const value = String(input[key] || "").trim();
-    if (value) next[key] = value;
-    else delete next[key];
-  }
+  const next = mergeOAuthInput(current, input);
+  const port = Number(process.env.SOCIAL_MCP_OAUTH_PORT || DEFAULT_OAUTH_PORT);
+  const redirectHost = oauthRedirectHost(process.env);
   const lines = [
     "# PostPath OAuth apps — local only. Do not commit.",
-    "# Redirect URI for every provider:",
-    "# http://127.0.0.1:47831/oauth/callback",
+    "# Google Desktop loopback stays on 127.0.0.1. SOCIAL_MCP_OAUTH_REDIRECT_HOST does not change it.",
+    `# http://127.0.0.1:${port}`,
+    "# Other providers. Meta rejects http://127.0.0.1 and accepts http://localhost.",
+    "# SOCIAL_MCP_OAUTH_REDIRECT_HOST=localhost",
+    `# http://${redirectHost}:${port}/oauth/callback`,
+    "# Media generation keys stay in this file. They are not sent to 1stStep.",
+    "# OPENAI_API_KEY= GEMINI_API_KEY= XAI_API_KEY= REPLICATE_API_TOKEN= FAL_KEY= ANTHROPIC_API_KEY=",
+    "# Optional override when a Web client already uses the path form:",
+    "# GOOGLE_OAUTH_REDIRECT_URI=http://127.0.0.1:47831/oauth/callback",
     "",
   ];
   for (const key of OAUTH_KEYS) {
@@ -93,8 +129,8 @@ export function saveOAuthEnvFile(input, homePaths = paths()) {
 function mask(value) {
   const text = String(value || "");
   if (!text) return "";
-  if (text.length <= 8) return "••••••••";
-  return `${text.slice(0, 4)}••••${text.slice(-4)}`;
+  if (text.length <= 4) return "••••••••";
+  return `••••${text.slice(-4)}`;
 }
 
 export function publicOAuthConfig(values = {}) {
@@ -123,6 +159,18 @@ export function publicOAuthConfig(values = {}) {
     has_pinterest: Boolean(values.PINTEREST_APP_ID && values.PINTEREST_APP_SECRET),
     has_reddit: Boolean(values.REDDIT_CLIENT_ID && values.REDDIT_CLIENT_SECRET),
     has_snapchat: Boolean(values.SNAPCHAT_CLIENT_ID && values.SNAPCHAT_CLIENT_SECRET),
+    OPENAI_API_KEY: values.OPENAI_API_KEY ? mask(values.OPENAI_API_KEY) : "",
+    GEMINI_API_KEY: values.GEMINI_API_KEY ? mask(values.GEMINI_API_KEY) : "",
+    XAI_API_KEY: values.XAI_API_KEY ? mask(values.XAI_API_KEY) : "",
+    REPLICATE_API_TOKEN: values.REPLICATE_API_TOKEN ? mask(values.REPLICATE_API_TOKEN) : "",
+    FAL_KEY: values.FAL_KEY ? mask(values.FAL_KEY) : "",
+    has_openai: Boolean(values.OPENAI_API_KEY),
+    has_google_media: Boolean(values.GEMINI_API_KEY),
+    has_xai: Boolean(values.XAI_API_KEY),
+    has_replicate: Boolean(values.REPLICATE_API_TOKEN),
+    has_fal: Boolean(values.FAL_KEY),
+    ANTHROPIC_API_KEY: values.ANTHROPIC_API_KEY ? mask(values.ANTHROPIC_API_KEY) : "",
+    has_anthropic: Boolean(values.ANTHROPIC_API_KEY),
   };
 }
 

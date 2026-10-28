@@ -3,6 +3,7 @@ import {
   CREATION,
   INTENTS,
   YOUTUBE_APP_MISSING,
+  youtubeSetupMessage,
   channelCatalog,
   connectPlan,
   dismissGuide,
@@ -22,6 +23,7 @@ import {
   suggestedRequests,
   toggleChannel,
 } from "./guide.js";
+import { platformIcon } from "./icons.js";
 
 const NETWORKS = [
   { key: "youtube", label: "YouTube" },
@@ -52,6 +54,57 @@ const blueskyForm = document.getElementById("bluesky-form");
 
 const DISPATCH_HONESTY =
   "After dispatch starts, PostPath cannot guarantee the platform did not accept the post. Cancel only works while a post is still scheduled. Dispatch-started posts stay needs review and are not auto-retried or undone.";
+
+const OUTCOME_LABEL = {
+  posted: "Posted",
+  failed: "Failed",
+  rate_limited: "Rate limited",
+  needs_review: "Needs review",
+  handed_off: "Handed off",
+  draft: "Draft",
+  scheduled: "Scheduled",
+  publishing: "Publishing",
+};
+
+function outcomeChipClass(post, publishMode) {
+  if (post?.result_source === "mock" || publishMode === "mock") return "chip mock";
+  const outcome = post?.outcome || post?.status || "";
+  const kind = {
+    posted: "posted",
+    failed: "failed",
+    rate_limited: "rate",
+    needs_review: "review",
+    draft: "draft",
+    scheduled: "draft",
+    publishing: "review",
+    handed_off: "review",
+  }[outcome] || "draft";
+  return `chip ${kind}`;
+}
+
+function secretPlaceholder(value) {
+  const text = String(value || "");
+  if (!text) return "";
+  if (!/[•*]/.test(text)) return "Saved";
+  return text;
+}
+
+function outcomeLabel(post) {
+  const outcome = post?.outcome || post?.status || "";
+  const label =
+    post?.status === "handed_off" && post?.platform === "facebook"
+      ? "Saved on Facebook, not public"
+      : OUTCOME_LABEL[outcome] || outcome || "Unknown";
+  if (post?.result_source === "mock") return `MOCK · ${label}`;
+  return label;
+}
+
+function sourceLabel(post) {
+  if (post?.result_source === "mock") return "MOCK — not sent";
+  if (post?.result_source === "platform") return "Platform response";
+  if (post?.status === "draft" || post?.status === "scheduled") return "Saved on this computer";
+  return "Recorded on this computer";
+}
 
 function formatWhen(iso) {
   if (!iso) return "No time set";
@@ -136,31 +189,145 @@ profileId.addEventListener("input", () => {
   profileId.dataset.touched = "1";
 });
 
+function renderMode(data) {
+  const banner = document.getElementById("publish-mode");
+  const note = document.getElementById("results-note");
+  if (!banner) return;
+  const mock = data.publish_mode === "mock";
+  banner.className = mock ? "mode-banner mock" : "mode-banner live";
+  banner.textContent = mock
+    ? "MOCK MODE. These rows are practice results. PostPath did not call YouTube, Meta, or any other network."
+    : "Live mode. Posted, failed, rate limited, and needs review are saved from the platform response. A real post still needs your Google or Meta app. Live publishing has not been verified on a real account yet.";
+  if (note) note.textContent = mock ? "MOCK — not sent" : "From the platform response";
+}
+
+function renderResults(posts, publishMode) {
+  const list = document.getElementById("result-list");
+  if (!list) return;
+  list.replaceChildren();
+  const rows = Array.isArray(posts) ? posts : [];
+  if (!rows.length) {
+    const empty = document.createElement("li");
+    empty.className = "empty";
+    empty.textContent = "No posts yet. A saved draft shows up here as Draft. Publish writes Posted, Failed, Rate limited, or Needs review from the platform response.";
+    list.append(empty);
+    return;
+  }
+  for (const post of rows) {
+    const item = document.createElement("li");
+    const title = document.createElement("strong");
+    title.textContent = String(post.title || post.caption || post.description || post.id || "Post");
+    const pill = document.createElement("span");
+    pill.className = outcomeChipClass(post, publishMode);
+    pill.textContent = outcomeLabel(post);
+    const head = document.createElement("div");
+    head.className = "result-head";
+    head.append(platformIcon(post.platform), title, pill);
+    const meta = document.createElement("div");
+    meta.className = "meta";
+    const bits = [post.platform || "unknown", sourceLabel(post)];
+    if (post.privacy_status) bits.push(post.privacy_status);
+    if (post.platform_post_id) bits.push(post.platform_post_id);
+    meta.textContent = bits.join(" · ");
+    item.append(head, meta);
+    if (post.publish_note) {
+      const note = document.createElement("p");
+      note.className = "hint";
+      note.textContent = post.publish_note;
+      item.append(note);
+    }
+    if (post.error?.message) {
+      const err = document.createElement("p");
+      err.className = "hint";
+      err.textContent = post.error.message;
+      item.append(err);
+    }
+    if (post.published_url) {
+      const link = document.createElement("a");
+      link.href = post.published_url;
+      link.textContent = post.published_url;
+      link.rel = "noreferrer";
+      item.append(link);
+    }
+    list.append(item);
+  }
+}
+
 function renderStatus(data) {
   latestStatus = data;
   const dispatchHonesty = document.getElementById("dispatch-honesty");
   if (dispatchHonesty) dispatchHonesty.textContent = DISPATCH_HONESTY;
+  renderMode(data);
+  renderResults(data.recent_posts, data.publish_mode);
 
-  const byPlatform = new Map((data.connections || []).map((row) => [row.platform, row]));
-  networkList.innerHTML = NETWORKS.map((network) => {
+  const activeId = profileId.value.trim();
+  const connections = (data.connections || []).filter((row) => !activeId || row.profile_id === activeId);
+  const byPlatform = new Map(connections.map((row) => [row.platform, row]));
+  const brand = document.getElementById("brand-live");
+  const profiles = (data.profiles || []).filter((profile) => !activeId || profile.id === activeId);
+  if (brand) {
+    brand.textContent = profiles.length
+      ? profiles.map((profile) => profile.name || profile.id).join(" · ")
+      : "No brand yet";
+  }
+  networkList.replaceChildren();
+  for (const network of NETWORKS) {
     const row = byPlatform.get(network.key);
-    const detail = row
+    const on = Boolean(row);
+    const item = document.createElement("li");
+    const copy = document.createElement("div");
+    copy.className = "network-copy";
+    const strong = document.createElement("strong");
+    strong.textContent = network.label;
+    const detail = document.createElement("div");
+    detail.className = "meta";
+    detail.textContent = row
       ? row.account_label || "Connected"
       : network.limited
         ? "API approval required"
         : "Not connected";
-    const on = Boolean(row);
-    const pill = on ? "Live" : network.limited ? "Limited" : "Needed";
-    return `<li>
-      <div>
-        <strong>${network.label}</strong>
-        <div class="meta" style="margin:0.2rem 0 0">${detail}</div>
-      </div>
-      <span class="pill ${on ? "on" : "off"}">${pill}</span>
-    </li>`;
-  }).join("");
+    copy.append(strong, detail);
+    const pill = document.createElement("span");
+    if (on) {
+      pill.className = "chip connected";
+      pill.textContent = "Connected";
+    } else if (network.limited) {
+      pill.className = "chip limited";
+      pill.textContent = "Limited";
+    } else {
+      pill.className = "chip needed";
+      pill.textContent = "Not connected";
+    }
+    item.append(platformIcon(network.key), copy, pill);
+    networkList.append(item);
+  }
+  const mcpConfig = document.getElementById("mcp-config");
+  if (mcpConfig && data.mcp_config) {
+    mcpConfig.textContent = JSON.stringify(data.mcp_config, null, 2);
+  }
 
   redirectUri.textContent = data.oauth_redirect_uri || "http://127.0.0.1:47831/oauth/callback";
+  const googleRedirect = document.getElementById("google-redirect-uri");
+  if (googleRedirect) googleRedirect.textContent = data.google_redirect_uri || "http://127.0.0.1:47831";
+  const readiness = document.getElementById("youtube-readiness");
+  if (readiness) {
+    readiness.textContent = data.oauth_ready?.google
+      ? `Google client saved on this computer. Connect YouTube opens Google. Loopback redirect: ${googleRedirect?.textContent || "http://127.0.0.1:47831"}. New drafts stay private unless you change them.`
+      : youtubeSetupMessage(data.google_redirect_uri);
+  }
+  const metaReady = document.getElementById("meta-readiness");
+  if (metaReady) {
+    const metaErrors = data.oauth_check?.meta?.errors || [];
+    metaReady.textContent = data.oauth_ready?.meta
+      ? "Meta app saved on this computer. Connect Meta opens Facebook. Instagram publishes only when privacy is Public."
+      : metaErrors[0] || "Meta sign-in needs META_APP_ID and META_APP_SECRET saved on this computer. PostPath does not include a Meta app.";
+  }
+  const oauthErrors = document.getElementById("oauth-errors");
+  if (oauthErrors) {
+    const problems = [...(data.oauth_check?.google?.errors || []), ...(data.oauth_check?.meta?.errors || [])];
+    oauthErrors.hidden = problems.length === 0;
+    oauthErrors.textContent = problems.join(" ");
+  }
   const cursor = data.cursor?.installed ? "PostPath enabled in Cursor" : "PostPath not enabled in Cursor yet";
   pathMeta.textContent = `${cursor} · vault ${data.home || ""} · media ${data.media_dir || ""}`;
 
@@ -172,22 +339,29 @@ function renderStatus(data) {
   const oauth = data.oauth || {};
   for (const [key, value] of Object.entries(oauth)) {
     const input = oauthForm.elements.namedItem(key);
-    if (!input || typeof value !== "string") continue;
+    if (!input || typeof value !== "string" || input instanceof RadioNodeList) continue;
+    if (key.endsWith("_SECRET") || key.endsWith("_API_KEY") || key.endsWith("_API_TOKEN") || key === "FAL_KEY") {
+      input.placeholder = secretPlaceholder(value);
+      if (input.value && value && input.value === value && !/[•*]/.test(value)) input.value = "";
+      continue;
+    }
     if (String(value).includes("••••")) continue;
-    if (key.endsWith("_ID") || key.endsWith("_KEY") || key.endsWith("_SECRET")) {
+    if (key.endsWith("_ID") || key.endsWith("_KEY")) {
       input.value = value;
     }
   }
 
   if (data.next_step === "save_apps") {
-    connectHint.textContent = "Save at least one provider’s credentials below, then connect.";
+    connectHint.textContent = "Save the app credentials for the networks you use, then Connect accounts. One click chains YouTube, Facebook, Instagram, and the other browser logins. Bluesky uses the handle and app password in this panel. Nothing is posted.";
   } else if (data.cursor && !data.cursor.installed) {
-    connectHint.textContent = "Connect accounts, then click Enable in Cursor so any AI can use them.";
+    connectHint.textContent = "Connect accounts signs in to every network that is not connected yet. Bluesky uses the handle and app password in this panel. Then enable PostPath in Cursor. Nothing is posted.";
   } else {
-    connectHint.textContent = "Connect opens each configured OAuth provider in order. Bluesky uses the form below.";
+    connectHint.textContent = "Connect accounts signs in to every network that is not connected yet. Bluesky uses the handle and app password in this panel. Nothing is posted.";
   }
 
   renderScheduled(data.scheduled_posts);
+  renderQueue(data.queue);
+  renderMcpRemote(data);
   for (const node of document.querySelectorAll("[data-channel-status]")) {
     node.textContent = connectPlan(node.dataset.channelStatus, data).message;
   }
@@ -222,32 +396,139 @@ scheduledList.addEventListener("click", async (event) => {
   }
 });
 
-document.getElementById("copy-redirect").addEventListener("click", async () => {
+async function copyText(value, label) {
   try {
-    await navigator.clipboard.writeText(redirectUri.textContent);
-    showToast("Redirect URI copied");
+    await navigator.clipboard.writeText(value);
+    showToast(`${label} copied`);
   } catch {
     showToast("Copy failed — select the URI manually", true);
   }
+}
+
+document.getElementById("copy-redirect").addEventListener("click", () => {
+  copyText(redirectUri.textContent, "Redirect URI");
 });
+
+document.getElementById("copy-google-redirect").addEventListener("click", () => {
+  const node = document.getElementById("google-redirect-uri");
+  copyText(node?.textContent || "", "Google loopback URI");
+});
+
+document.getElementById("copy-mcp")?.addEventListener("click", () => {
+  copyText(document.getElementById("mcp-config")?.textContent || "", "MCP config");
+});
+
+function renderMcpRemote(data) {
+  const node = document.getElementById("mcp-remote");
+  const remote = data?.mcp_remote;
+  if (!node || !remote) return;
+  node.replaceChildren();
+  const links = document.createElement("div");
+  links.className = "connect-links";
+  for (const [label, href] of [
+    ["Cursor install", remote.cursor_install],
+    ["VS Code install", remote.vscode_install],
+  ]) {
+    const a = document.createElement("a");
+    a.href = href;
+    a.textContent = label;
+    links.append(a);
+  }
+  const oauth = document.createElement("p");
+  oauth.className = "hint";
+  oauth.textContent = `${remote.oauth_note} MCP URL: ${remote.mcp_url}`;
+  const claude = document.createElement("pre");
+  claude.className = "mcp-config";
+  claude.textContent = JSON.stringify(remote.claude_remote, null, 2);
+  const header = document.createElement("pre");
+  header.className = "mcp-config";
+  header.textContent = JSON.stringify(remote.header_remote, null, 2);
+  node.append(links, oauth, claude, header);
+  const list = document.getElementById("pat-list");
+  if (!list) return;
+  list.replaceChildren();
+  for (const pat of data.pats || []) {
+    const item = document.createElement("li");
+    const strong = document.createElement("strong");
+    strong.textContent = `${pat.name} ${pat.prefix}…`;
+    const meta = document.createElement("div");
+    meta.className = "meta";
+    meta.textContent = `${(pat.scopes || []).join(" ")} · last used ${pat.last_used_at || "never"}`;
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "btn danger revoke-pat";
+    button.dataset.id = pat.id;
+    button.textContent = "Revoke";
+    item.append(strong, meta, button);
+    list.append(item);
+  }
+}
+
+document.getElementById("pat-form")?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const form = new FormData(event.currentTarget);
+  const scopes = form.getAll("scope");
+  try {
+    const data = await api("/api/pat", {
+      method: "POST",
+      body: JSON.stringify({
+        name: String(form.get("name") || ""),
+        scopes,
+        expires_in_days: form.get("expires_in_days") ? Number(form.get("expires_in_days")) : undefined,
+      }),
+    });
+    const once = document.getElementById("pat-once");
+    if (once) {
+      once.hidden = false;
+      once.textContent = `Copy this token now. It is not shown again: ${data.token}`;
+    }
+    renderStatus(data);
+    once?.scrollIntoView({ block: "center" });
+    showToast("Access token created");
+  } catch (error) {
+    showToast(error.message, true);
+  }
+});
+
+document.getElementById("pat-list")?.addEventListener("click", (event) => {
+  const button = event.target.closest(".revoke-pat");
+  if (!button) return;
+  api("/api/pat/revoke", { method: "POST", body: JSON.stringify({ id: button.dataset.id }) })
+    .then((data) => {
+      renderStatus(data);
+      showToast("Token revoked");
+    })
+    .catch((error) => showToast(error.message, true));
+});
+
+for (const input of oauthForm.querySelectorAll('input[type="password"]')) {
+  input.readOnly = true;
+  input.addEventListener("focus", () => {
+    input.readOnly = false;
+  });
+}
 
 document.getElementById("connect-form").addEventListener("submit", async (event) => {
   event.preventDefault();
   const button = document.getElementById("connect-btn");
   button.disabled = true;
   try {
+    const id = profileId.value.trim();
     const data = await api("/api/connect", {
       method: "POST",
       body: JSON.stringify({
-        id: profileId.value.trim(),
-        name: profileName.value.trim() || profileId.value.trim(),
+        id,
+        name: profileName.value.trim() || id,
+        platforms: ["youtube", "meta", "tiktok", "linkedin", "x", "threads", "pinterest", "google_business", "reddit", "snapchat"],
       }),
     });
     renderStatus(data);
+    const bluesky = (data.connections || []).some((row) => row.platform === "bluesky" && row.profile_id === id);
+    const blueskyNote = bluesky ? "" : " Bluesky uses the handle and app password in this panel.";
     if (data.connect?.authorize_url) {
-      showToast(data.connect.message || "Sign-in opened in your browser");
+      showToast(`${data.connect.message || "Sign-in opened in your browser"}${blueskyNote}`);
     } else {
-      showToast(data.connect?.message || "Accounts connected");
+      showToast(`${data.connect?.message || "Accounts connected"}${blueskyNote}`);
     }
   } catch (error) {
     showToast(error.message, true);
@@ -310,6 +591,7 @@ const youtubeForm = document.getElementById("youtube-form");
 const publishDraftButton = document.getElementById("publish-draft");
 const draftResult = document.getElementById("draft-result");
 let currentDraftId = "";
+let currentBundleId = "";
 let latestStatus = null;
 let guideFile = null;
 let guide = emptyGuide();
@@ -381,22 +663,78 @@ function renderGuide() {
   const copy = stepContent(guide);
   guideKicker.textContent = copy.kicker;
   guideTitle.textContent = copy.title;
-  showGuideError(guide.step === "result" ? "" : guide.error);
+  showGuideError(guide.step === "queue" || guide.step === "result" ? "" : guide.error);
   clear(guideBody);
-  guideBack.hidden = guide.step === "intent" || guide.step === "result";
-  guideSkip.hidden = guide.step === "result";
+  guideBack.hidden = guide.step === "accounts" || guide.step === "queue" || guide.step === "result";
+  guideSkip.hidden = guide.step === "queue" || guide.step === "result";
   guideNext.hidden = false;
   guideNext.disabled = false;
-  guideNext.textContent = "Continue";
+  guideNext.textContent = guide.step === "prompt" ? "Save to the queue" : "Continue";
 
-  if (guide.step === "intent") renderIntent();
-  else if (guide.step === "channels") renderChannels();
-  else if (guide.step === "content") renderContent();
-  else if (guide.step === "creation") renderCreation();
-  else if (guide.step === "review") renderReview();
+  if (guide.step === "accounts" || guide.step === "channels") renderChannels();
+  else if (guide.step === "ai" || guide.step === "creation") renderAiConnect();
+  else if (guide.step === "prompt" || guide.step === "content") renderPrompt();
   else renderResult();
 
   guideTitle.focus();
+}
+
+function renderAiConnect() {
+  const list = document.createElement("div");
+  list.className = "guide-list";
+  for (const item of [
+    { id: "ai", label: "Claude writes the captions", detail: "Uses your Anthropic key on this computer. The draft still waits in the queue." },
+    { id: "manual", label: "I'll write them", detail: "The prompt is saved as the draft. Nothing is sent." },
+  ]) {
+    addChoice(list, {
+      label: item.label,
+      detail: item.detail,
+      selected: guide.creation === item.id,
+      onClick: () => {
+        guide = { ...guide, creation: item.id, error: "" };
+        persistGuide();
+        renderGuide();
+      },
+    });
+  }
+  guideBody.append(list);
+  addNote(guideBody, "Paste the Anthropic key under App credentials. This guide never sees the key, and it does not approve or publish.");
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "btn secondary";
+  button.textContent = "Enable in Cursor";
+  button.addEventListener("click", async () => {
+    button.disabled = true;
+    try {
+      const data = await api("/api/install-cursor", { method: "POST", body: "{}" });
+      latestStatus = data;
+      renderStatus(data);
+      showToast("PostPath was written into Cursor's config. Restart Cursor. Nothing was published.");
+    } catch (error) {
+      showGuideError(error.message);
+    } finally {
+      button.disabled = false;
+    }
+  });
+  guideBody.append(button);
+}
+
+function renderPrompt() {
+  const label = document.createElement("label");
+  label.className = "field";
+  const span = document.createElement("span");
+  span.textContent = "What should this post be?";
+  const input = document.createElement("textarea");
+  input.rows = 4;
+  input.maxLength = 2000;
+  input.value = guide.description || guide.title || "";
+  input.addEventListener("input", () => {
+    guide = { ...guide, description: input.value, title: guide.title || input.value.slice(0, 80), error: "" };
+    persistGuide();
+  });
+  label.append(span, input);
+  guideBody.append(label);
+  addNote(guideBody, "Save sends this to the queue as a private draft. Generate the asset from the composer if you want one. Nothing posts until you approve.");
 }
 
 function renderIntent() {
@@ -718,14 +1056,14 @@ function renderResult() {
       );
     }
   }
-  addNote(guideBody, "Next: connect a channel when sign-in is available, or publish later from the YouTube panel after you approve that exact draft. This guide will not publish it.");
+  addNote(guideBody, "Review the queue. Nothing posts until you approve it there.");
   if (!outcome.ok) {
     const retry = document.createElement("button");
     retry.type = "button";
     retry.className = "btn secondary";
-    retry.textContent = "Back to review";
+    retry.textContent = "Back to the prompt";
     retry.addEventListener("click", () => {
-      guide = { ...guide, step: "review", error: "" };
+      guide = { ...guide, step: "prompt", error: "" };
       persistGuide();
       renderGuide();
     });
@@ -738,7 +1076,7 @@ async function saveGuideDrafts() {
   const view = reviewView(guide, latestStatus || {}, { hasFile: Boolean(guideFile) });
   if (!view.canSave) {
     const message = view.blockers[0] || "The draft was not saved.";
-    guide = { ...guide, step: "result", error: message, outcome: { ok: false, message, saves: [] }, completed: false };
+    guide = { ...guide, step: "queue", error: message, outcome: { ok: false, message, saves: [] }, completed: false };
     persistGuide();
     renderGuide();
     return;
@@ -776,7 +1114,7 @@ async function saveGuideDrafts() {
     }
   }
   const outcome = resultFromSaves(saves);
-  guide = { ...guide, step: "result", outcome, error: outcome.ok ? "" : outcome.message, completed: outcome.ok };
+  guide = { ...guide, step: "queue", outcome, error: outcome.ok ? "" : outcome.message, completed: outcome.ok };
   persistGuide();
   renderGuide();
   showToast(outcome.message, !outcome.ok);
@@ -815,18 +1153,19 @@ guideSkip.addEventListener("click", () => {
 });
 
 guideNext.addEventListener("click", () => {
-  if (guide.step === "review") {
+  if (guide.step === "prompt" || guide.step === "review") {
     saveGuideDrafts().catch((error) => {
-      guide = { ...guide, step: "result", error: error.message, outcome: resultFromSaves([{ ok: false, message: error.message }]) };
+      guide = { ...guide, step: "queue", error: error.message, outcome: resultFromSaves([{ ok: false, message: error.message }]) };
       persistGuide();
       renderGuide();
     });
     return;
   }
-  if (guide.step === "result") {
+  if (guide.step === "queue" || guide.step === "result") {
     guide = dismissGuide(guide);
     persistGuide();
     renderGuide();
+    document.getElementById("queue-list")?.scrollIntoView({ block: "center" });
     return;
   }
   guide = goNext(guide, { hasProfile: hasGuideProfile() });
@@ -836,8 +1175,10 @@ guideNext.addEventListener("click", () => {
 
 document.getElementById("connect-youtube").addEventListener("click", async () => {
   const button = document.getElementById("connect-youtube");
-  if (!latestStatus?.oauth_ready?.google) {
-    showToast(YOUTUBE_APP_MISSING, true);
+  const plan = connectPlan("youtube", latestStatus || {});
+  if (plan.action === "blocked") {
+    showToast(plan.message || YOUTUBE_APP_MISSING, true);
+    document.getElementById("apps-title")?.scrollIntoView();
     return;
   }
   button.disabled = true;
@@ -867,9 +1208,15 @@ youtubeForm.addEventListener("submit", async (event) => {
   try {
     const form = new FormData(youtubeForm);
     const file = form.get("video");
-    if (!file || !file.size) throw new Error("Choose the video file before saving the draft.");
+    const provider = document.getElementById("media-provider")?.value || "none";
+    const prompt = document.getElementById("media-prompt")?.value.trim() || "";
+    const writer = document.getElementById("caption-provider")?.value || "none";
+    const generate = provider !== "none";
+    const description = String(form.get("description") || "");
+    if ((generate || writer !== "none") && !prompt && !description) throw new Error("Write one prompt.");
+    if (!generate && writer === "none" && (!file || !file.size)) throw new Error("Choose your file, or pick a provider and write a prompt.");
     let mediaPath = "";
-    if (file && typeof file === "object" && file.size) {
+    if (!generate && file && typeof file === "object" && file.size) {
       const saved = await api("/api/media", {
         method: "POST",
         headers: {
@@ -880,24 +1227,66 @@ youtubeForm.addEventListener("submit", async (event) => {
       });
       mediaPath = saved.media.filename;
     }
+    const platforms = [...document.querySelectorAll("#platform-toggles input:checked")].map((input) => input.value);
+    if (!platforms.length) throw new Error("Pick at least one platform.");
+    const score = document.getElementById("vidiq-score")?.value.trim();
+    const notes = document.getElementById("vidiq-notes")?.value.trim();
+    const duration = document.getElementById("media-duration")?.value.trim();
+    const overrides = {
+      facebook: { caption: document.getElementById("facebook-caption")?.value || undefined },
+      instagram: { caption: document.getElementById("instagram-caption")?.value || undefined },
+    };
+    if (document.getElementById("youtube-long")?.checked) overrides.youtube = { placement: "youtube_long" };
     const data = await api("/api/draft", {
       method: "POST",
       body: JSON.stringify({
         id: profileId.value.trim(),
         name: profileName.value.trim() || profileId.value.trim(),
-        platform: "youtube",
+        platforms,
         title: String(form.get("title") || ""),
-        description: String(form.get("description") || ""),
+        description: writer === "none" ? description : undefined,
+        caption: writer === "none" ? description : undefined,
+        brief: writer === "none" ? undefined : prompt || description,
+        tags: String(form.get("tags") || ""),
         privacy_status: String(form.get("privacy_status") || "private"),
         media_path: mediaPath || undefined,
-        media_content_type: file && file.type ? file.type : "video/mp4",
+        media_content_type: generate
+          ? document.getElementById("media-type")?.value === "image"
+            ? "image/jpeg"
+            : "video/mp4"
+          : file && file.type
+            ? file.type
+            : "video/mp4",
+        media: generate
+          ? {
+              generate: {
+                prompt,
+                type: document.getElementById("media-type")?.value || "video",
+                style: document.getElementById("media-style")?.value.trim() || undefined,
+                duration: duration ? Number(duration) : undefined,
+                provider,
+              },
+            }
+          : undefined,
+        caption_provider: document.getElementById("caption-provider")?.value || "none",
+        review: document.getElementById("claude-review")?.checked === true,
+        review_provider: document.getElementById("claude-review")?.checked ? "claude" : undefined,
+        instagram_public_confirmed: document.getElementById("instagram-confirm")?.checked === true,
+        facebook_public: document.getElementById("facebook-public")?.checked === true,
+        overrides,
+        vidiq: score || notes ? { score: score ? Number(score) : undefined, notes } : undefined,
       }),
     });
     currentDraftId = data.post?.id || "";
+    currentBundleId = data.bundle?.id || "";
     const privacy = data.post?.privacy_status || "private";
-    draftResult.textContent = currentDraftId
-      ? `Draft ${currentDraftId} saved. Privacy is ${privacy}. Read it, then publish only if this is the approved video.`
-      : "Draft was not saved.";
+    draftResult.textContent = data.bundle
+      ? data.bundle.media_status === "generating"
+        ? `Draft saved for ${(data.bundle.platforms || []).join(", ")}. The asset is generating. Nothing posts until you approve it.`
+        : `Draft saved for ${(data.bundle.platforms || []).join(", ")}. Nothing posts until you approve it.`
+      : currentDraftId
+        ? `Draft ${currentDraftId} saved. Privacy is ${privacy}. Read it, then publish only if this is the approved video.`
+        : "Draft was not saved.";
     publishDraftButton.disabled = !currentDraftId;
     showToast("Draft saved on this computer");
   } catch (error) {
@@ -907,7 +1296,341 @@ youtubeForm.addEventListener("submit", async (event) => {
   }
 });
 
+function renderQueue(items) {
+  const list = document.getElementById("queue-list");
+  const empty = document.getElementById("queue-empty");
+  if (!list) return;
+  list.replaceChildren();
+  const rows = Array.isArray(items) ? items : [];
+  if (empty) empty.hidden = rows.length > 0;
+  for (const item of rows) {
+    const li = document.createElement("li");
+    const top = document.createElement("div");
+    top.className = "queue-top";
+    const strong = document.createElement("strong");
+    strong.textContent = `${item.profile_name || item.profile_id}: ${item.title || "Draft"}`;
+    top.append(strong);
+    if (item.source === "mcp") {
+      const ai = document.createElement("span");
+      ai.className = "chip ai";
+      ai.textContent = "From AI";
+      top.append(ai);
+    }
+    if (item.vidiq_needed) {
+      const chip = document.createElement("span");
+      chip.className = "chip vidiq";
+      chip.textContent = "vidIQ check needed";
+      top.append(chip);
+    }
+    for (const target of item.platforms || []) {
+      top.append(platformIcon(target.platform));
+    }
+    const actions = document.createElement("div");
+    actions.className = "queue-actions";
+    const now = document.createElement("button");
+    now.type = "button";
+    now.className = "btn primary approve-now";
+    now.dataset.id = item.id;
+    now.dataset.kind = item.kind;
+    now.textContent = "Approve and post now";
+    const when = document.createElement("input");
+    when.type = "datetime-local";
+    when.className = "queue-when";
+    when.setAttribute("aria-label", `Approve ${item.title || "draft"} for date and time`);
+    const later = document.createElement("button");
+    later.type = "button";
+    later.className = "btn secondary approve-later";
+    later.dataset.id = item.id;
+    later.dataset.kind = item.kind;
+    later.textContent = "Approve for time";
+    const edit = document.createElement("button");
+    edit.type = "button";
+    edit.className = "btn tiny edit-queue";
+    edit.dataset.id = item.id;
+    edit.dataset.kind = item.kind;
+    edit.textContent = "Edit";
+    const discard = document.createElement("button");
+    discard.type = "button";
+    discard.className = "btn danger discard-queue";
+    discard.dataset.id = item.id;
+    discard.dataset.kind = item.kind;
+    discard.textContent = "Discard";
+    actions.append(now, when, later, edit, discard);
+    li.append(top);
+    if (item.media_status === "generating") {
+      const pending = document.createElement("p");
+      pending.className = "hint";
+      pending.textContent = `Generating${item.provider ? ` with ${item.provider}` : ""}…`;
+      li.append(pending);
+    } else if (item.media_status === "failed") {
+      const failed = document.createElement("p");
+      failed.className = "hint";
+      failed.textContent = item.media_error || "Generation failed.";
+      li.append(failed);
+    }
+    const cards = document.createElement("div");
+    cards.className = "asset-row";
+    for (const asset of item.assets || []) {
+      if (!asset.media_path && !asset.prompt && !asset.provider) continue;
+      const card = document.createElement("article");
+      card.className = "asset-card";
+      if (asset.media_path) {
+        const visual = String(asset.content_type || "").startsWith("video/") ? document.createElement("video") : document.createElement("img");
+        visual.src = `/media/${encodeURIComponent(asset.media_path)}`;
+        if (visual.tagName === "VIDEO") {
+          visual.controls = true;
+          visual.preload = "metadata";
+        } else {
+          visual.alt = asset.label || asset.platform;
+        }
+        card.append(visual);
+      }
+      const meta = document.createElement("div");
+      meta.className = "asset-meta";
+      const badge = document.createElement("span");
+      badge.className = "chip aspect-badge";
+      badge.textContent = [asset.label, asset.aspect].filter(Boolean).join(" ");
+      const check = document.createElement("p");
+      check.textContent = asset.spec_message || (asset.spec_ok === false ? "Does not match the network preset." : "");
+      const who = document.createElement("p");
+      who.textContent = [asset.provider, asset.model, asset.prompt].filter(Boolean).join(" · ");
+      const assetActions = document.createElement("div");
+      assetActions.className = "queue-actions";
+      for (const [className, label] of [
+        ["regenerate-asset", "Regenerate"],
+        ["swap-asset", "Replace"],
+        ["remove-asset", "Remove"],
+      ]) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = `btn tiny ${className}`;
+        button.dataset.id = item.id;
+        button.dataset.kind = item.kind;
+        button.dataset.platform = asset.platform;
+        button.textContent = label;
+        assetActions.append(button);
+      }
+      meta.append(badge, check, who, assetActions);
+      card.append(meta);
+      cards.append(card);
+    }
+    if (cards.childElementCount) li.append(cards);
+    if (item.media_review?.items?.length) {
+      const notes = document.createElement("ul");
+      notes.className = "review-notes";
+      const intro = document.createElement("li");
+      intro.textContent = item.media_review.summary || "Advisory notes only. Nothing was approved.";
+      notes.append(intro);
+      for (const note of item.media_review.items) {
+        const row = document.createElement("li");
+        const chip = document.createElement("span");
+        chip.className = `chip ${note.status || "warn"}`;
+        chip.textContent = note.label || note.id;
+        const detail = document.createElement("span");
+        detail.textContent = note.detail || "";
+        row.append(chip, detail);
+        notes.append(row);
+      }
+      li.append(notes);
+    }
+    else if (item.prompt || item.media_status === "failed" || item.media_status === "generating") {
+      const again = document.createElement("button");
+      again.type = "button";
+      again.className = "btn tiny regenerate-asset";
+      again.dataset.id = item.id;
+      again.dataset.kind = item.kind;
+      again.textContent = "Regenerate";
+      li.append(again);
+    }
+    if (item.instagram_needs_confirm) {
+      const label = document.createElement("label");
+      label.className = "check";
+      const box = document.createElement("input");
+      box.type = "checkbox";
+      box.className = "queue-ig";
+      label.append(box, document.createTextNode("Instagram will be public"));
+      actions.append(label);
+    }
+    li.append(actions);
+    list.append(li);
+  }
+}
+
+function isoFromLocal(value) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(String(value || ""));
+  if (!match) throw new Error("Pick a date and time.");
+  const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]), Number(match[4]), Number(match[5]));
+  if (!Number.isFinite(date.getTime())) throw new Error("Pick a date and time.");
+  return date.toISOString();
+}
+
+async function approveQueue(button, scheduledAt) {
+  const row = button.closest("li");
+  const kind = button.dataset.kind;
+  const id = button.dataset.id;
+  const confirmed = row?.querySelector(".queue-ig")?.checked === true || document.getElementById("instagram-confirm")?.checked === true;
+  button.disabled = true;
+  try {
+    const score = document.getElementById("vidiq-score")?.value.trim();
+    const notes = document.getElementById("vidiq-notes")?.value.trim();
+    if (kind === "bundle" && (score || notes)) {
+      await api("/api/vidiq", {
+        method: "POST",
+        body: JSON.stringify({ bundle_id: id, score: score ? Number(score) : undefined, notes }),
+      });
+    }
+    const data = await api("/api/approve", {
+      method: "POST",
+      body: JSON.stringify({
+        bundle_id: kind === "bundle" ? id : undefined,
+        post_id: kind === "post" ? id : undefined,
+        scheduled_at: scheduledAt || undefined,
+        instagram_public_confirmed: confirmed,
+      }),
+    });
+    renderStatus(data);
+    const results = data.results || [];
+    const failed = results.filter((item) => item.ok === false);
+    const messages = [...new Set(failed.map((item) => item.error?.message).filter(Boolean))];
+    const note = scheduledAt
+      ? "Approved for that time. Nothing is posted yet."
+      : failed.length && failed.length === results.length
+        ? messages.join(" ") || "Nothing was posted."
+        : failed.length
+          ? "Approved. Check each platform in Results."
+          : "Approved and sent. Nothing posted before this click.";
+    showToast(note);
+  } catch (error) {
+    showToast(error.message, true);
+    button.disabled = false;
+  }
+}
+
+const replaceInput = document.createElement("input");
+replaceInput.type = "file";
+replaceInput.accept = "video/mp4,video/*,image/*";
+replaceInput.hidden = true;
+document.body.append(replaceInput);
+let replaceTarget = null;
+replaceInput.addEventListener("change", async () => {
+  const file = replaceInput.files?.[0];
+  const target = replaceTarget;
+  replaceInput.value = "";
+  replaceTarget = null;
+  if (!file || !target) return;
+  try {
+    const saved = await api("/api/media", {
+      method: "POST",
+      headers: {
+        "content-type": file.type || "application/octet-stream",
+        "x-postpath-filename": file.name || "upload.bin",
+      },
+      body: file,
+    });
+    const data = await api("/api/media/attach", {
+      method: "POST",
+      body: JSON.stringify({
+        bundle_id: target.kind === "bundle" ? target.id : undefined,
+        post_id: target.kind === "post" ? target.id : undefined,
+        platform: target.platform,
+        media_path: saved.media.filename,
+        ai_generated: false,
+        type: String(file.type || "").startsWith("image/") ? "image" : "video",
+      }),
+    });
+    renderStatus(data);
+    showToast("Asset replaced. Nothing posts until you approve.");
+  } catch (error) {
+    showToast(error.message, true);
+  }
+});
+
+document.getElementById("queue-list")?.addEventListener("click", async (event) => {
+  const regen = event.target.closest(".regenerate-asset");
+  const swap = event.target.closest(".swap-asset");
+  const remove = event.target.closest(".remove-asset");
+  if (regen || remove) {
+    const button = regen || remove;
+    button.disabled = true;
+    try {
+      const data = await api(regen ? "/api/media/generate" : "/api/media/remove", {
+        method: "POST",
+        body: JSON.stringify({
+          bundle_id: button.dataset.kind === "bundle" ? button.dataset.id : undefined,
+          post_id: button.dataset.kind === "post" ? button.dataset.id : undefined,
+          platform: button.dataset.platform,
+        }),
+      });
+      renderStatus(data);
+      showToast(regen ? "Regenerating. Nothing posts until you approve." : "Asset removed.");
+    } catch (error) {
+      showToast(error.message, true);
+      button.disabled = false;
+    }
+    return;
+  }
+  if (swap) {
+    replaceTarget = { id: swap.dataset.id, kind: swap.dataset.kind, platform: swap.dataset.platform };
+    replaceInput.click();
+    return;
+  }
+  const now = event.target.closest(".approve-now");
+  const later = event.target.closest(".approve-later");
+  const discard = event.target.closest(".discard-queue");
+  const edit = event.target.closest(".edit-queue");
+  if (now) {
+    approveQueue(now).catch((error) => showToast(error.message, true));
+    return;
+  }
+  if (later) {
+    const when = later.parentElement?.querySelector(".queue-when")?.value;
+    approveQueue(later, isoFromLocal(when)).catch((error) => showToast(error.message, true));
+    return;
+  }
+  if (edit) {
+    document.getElementById("youtube-title")?.scrollIntoView({ block: "center" });
+    showToast("Edit the composer, then save the draft again.");
+    return;
+  }
+  if (!discard) return;
+  discard.disabled = true;
+  api("/api/discard", {
+    method: "POST",
+    body: JSON.stringify({
+      bundle_id: discard.dataset.kind === "bundle" ? discard.dataset.id : undefined,
+      post_id: discard.dataset.kind === "post" ? discard.dataset.id : undefined,
+    }),
+  })
+    .then((data) => {
+      renderStatus(data);
+      showToast("Draft discarded");
+    })
+    .catch((error) => {
+      showToast(error.message, true);
+      discard.disabled = false;
+    });
+});
+
 publishDraftButton.addEventListener("click", async () => {
+  if (currentBundleId) {
+    publishDraftButton.disabled = true;
+    try {
+      const data = await api("/api/approve", {
+        method: "POST",
+        body: JSON.stringify({
+          bundle_id: currentBundleId,
+          instagram_public_confirmed: document.getElementById("instagram-confirm")?.checked === true,
+        }),
+      });
+      renderStatus(data);
+      draftResult.textContent = "Approved. Each platform has its own result.";
+      showToast("Approved and sent");
+    } catch (error) {
+      showToast(error.message, true);
+      publishDraftButton.disabled = false;
+    }
+    return;
+  }
   if (!currentDraftId) return;
   const privacy = String(new FormData(youtubeForm).get("privacy_status") || "private");
   if (privacy !== "private") {
@@ -921,13 +1644,121 @@ publishDraftButton.addEventListener("click", async () => {
       body: JSON.stringify({ post_id: currentDraftId }),
     });
     const url = data.result?.published_url || data.post?.published_url || "";
+    const outcome = data.post?.outcome || data.post?.status || "finished";
+    const source = data.post?.result_source === "mock" ? "MOCK — not sent. " : "";
     draftResult.textContent = url
-      ? `Published ${data.post?.privacy_status || privacy}. Open ${url} and confirm it, then delete it on YouTube when the check is done.`
-      : "Publish finished without a video URL. Check the channel before trying again.";
-    showToast("Publish finished");
+      ? `${source}${outcomeLabel(data.post)} ${data.post?.privacy_status || privacy}. ${url}`
+      : `${source}${outcome}. ${data.post?.publish_note || "Check the Results list for the platform response."}`;
+    renderStatus(data);
+    showToast(data.post?.result_source === "mock" ? "Mock result saved" : "Publish finished");
   } catch (error) {
     showToast(error.message, true);
     publishDraftButton.disabled = false;
+    refresh().catch(() => {});
+  }
+});
+
+const metaForm = document.getElementById("meta-form");
+const publishMetaButton = document.getElementById("publish-meta");
+const metaResult = document.getElementById("meta-result");
+let currentMetaDraftId = "";
+
+document.getElementById("connect-meta").addEventListener("click", async () => {
+  const button = document.getElementById("connect-meta");
+  if (!latestStatus?.oauth_ready?.meta) {
+    showToast(document.getElementById("meta-readiness")?.textContent || "Save the Meta app id and secret first.", true);
+    document.getElementById("apps-title")?.scrollIntoView();
+    return;
+  }
+  button.disabled = true;
+  try {
+    const data = await api("/api/connect", {
+      method: "POST",
+      body: JSON.stringify({
+        id: profileId.value.trim(),
+        name: profileName.value.trim() || profileId.value.trim(),
+        platforms: ["meta"],
+      }),
+    });
+    renderStatus(data);
+    showToast(data.connect?.message || "Continue Meta sign-in in your browser");
+  } catch (error) {
+    showToast(error.message, true);
+  } finally {
+    button.disabled = false;
+  }
+});
+
+metaForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const button = document.getElementById("save-meta-draft");
+  button.disabled = true;
+  publishMetaButton.disabled = true;
+  try {
+    const form = new FormData(metaForm);
+    const file = form.get("video");
+    if (!file || !file.size) throw new Error("Choose the video file before saving the draft.");
+    const saved = await api("/api/media", {
+      method: "POST",
+      headers: {
+        "content-type": file.type || "application/octet-stream",
+        "x-postpath-filename": file.name || "video.mp4",
+      },
+      body: file,
+    });
+    const platform = String(form.get("platform") || "facebook");
+    const data = await api("/api/draft", {
+      method: "POST",
+      body: JSON.stringify({
+        id: profileId.value.trim(),
+        name: profileName.value.trim() || profileId.value.trim(),
+        platform,
+        caption: String(form.get("caption") || ""),
+        title: String(form.get("caption") || "").slice(0, 100),
+        privacy_status: String(form.get("privacy_status") || "private"),
+        media_path: saved.media.filename,
+        media_content_type: file.type || "video/mp4",
+      }),
+    });
+    currentMetaDraftId = data.post?.id || "";
+    metaResult.textContent = currentMetaDraftId
+      ? `Draft ${currentMetaDraftId} saved for ${platform}. Privacy is ${data.post?.privacy_status || "private"}. It is not published.`
+      : "Draft was not saved.";
+    publishMetaButton.disabled = !currentMetaDraftId;
+    showToast("Draft saved on this computer");
+  } catch (error) {
+    showToast(error.message, true);
+  } finally {
+    button.disabled = false;
+  }
+});
+
+publishMetaButton.addEventListener("click", async () => {
+  if (!currentMetaDraftId) return;
+  const privacy = String(new FormData(metaForm).get("privacy_status") || "private");
+  const platform = String(new FormData(metaForm).get("platform") || "facebook");
+  if (platform === "instagram" && privacy !== "public") {
+    showToast("Instagram Reels publish is public. Choose Public to upload it.", true);
+    return;
+  }
+  if (privacy === "public") {
+    const proceed = window.confirm(`This ${platform} draft is public. Publish it anyway?`);
+    if (!proceed) return;
+  }
+  publishMetaButton.disabled = true;
+  try {
+    const data = await api("/api/publish", {
+      method: "POST",
+      body: JSON.stringify({ post_id: currentMetaDraftId }),
+    });
+    const source = data.post?.result_source === "mock" ? "MOCK — not sent. " : "";
+    metaResult.textContent = `${source}${outcomeLabel(data.post)}. ${data.post?.publish_note || ""}`.trim();
+    renderStatus(data);
+    showToast(data.post?.result_source === "mock" ? "Mock result saved" : "Publish finished");
+  } catch (error) {
+    showToast(error.message, true);
+    publishMetaButton.disabled = false;
+    refresh().catch(() => {});
   }
 });
 
@@ -957,3 +1788,9 @@ refresh()
 setInterval(() => {
   refresh().catch(() => {});
 }, 5000);
+window.addEventListener("focus", () => {
+  refresh().catch(() => {});
+});
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") refresh().catch(() => {});
+});

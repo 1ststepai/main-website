@@ -132,12 +132,22 @@ export function validateDraftForPublish(post) {
       break;
 
     case "instagram":
-      requireHttpsMediaUrl(post, errors, "Instagram");
+      if ((post.privacy_status || "private") !== "public") {
+        push(
+          errors,
+          "Instagram Reels publish is public. Set privacy_status to public to publish. PostPath will not upload the file until you do.",
+        );
+      }
+      if (!hasNonEmpty(post?.media_path) && !HTTPS_URL.test(String(post?.media_url || "").trim())) {
+        push(errors, "Instagram needs a local media_path or a public https media_url.");
+      }
       warnIfOver(warnings, "Instagram caption", primaryText(post), PLATFORM_TEXT_LIMITS.instagram);
       break;
 
     case "facebook":
-      requireHttpsMediaUrl(post, errors, "Facebook");
+      if (!hasNonEmpty(post?.media_path) && !HTTPS_URL.test(String(post?.media_url || "").trim())) {
+        push(errors, "Facebook needs a local media_path or a public https media_url.");
+      }
       warnIfOver(warnings, "Facebook caption", primaryText(post), PLATFORM_TEXT_LIMITS.facebook);
       break;
 

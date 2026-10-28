@@ -47,7 +47,7 @@ test("first launch opens the guide and skipping keeps the answers for later", ()
   assert.equal(shouldAutoOpen(null), true);
   const storage = memoryStorage();
   assert.equal(loadGuide(storage), null);
-  let guide = { ...emptyGuide(), intent: "video", step: "channels", channels: ["youtube"], title: "Desk check" };
+  let guide = { ...emptyGuide(), intent: "video", step: "accounts", channels: ["youtube"], title: "Desk check" };
   guide = skipGuide(guide);
   saveGuide(storage, guide);
   const loaded = loadGuide(storage);
@@ -58,25 +58,23 @@ test("first launch opens the guide and skipping keeps the answers for later", ()
   assert.deepEqual(loaded.channels, ["youtube"]);
   const resumed = reopenGuide(loaded);
   assert.equal(shouldAutoOpen(resumed), true);
-  assert.equal(resumed.step, "channels");
+  assert.equal(resumed.step, "accounts");
   assert.equal(resumed.title, "Desk check");
 });
 
 test("resume returns to the saved step and does not ask for a known profile", () => {
   const storage = memoryStorage();
-  let guide = goNext({ ...emptyGuide(), intent: "video" }, { hasProfile: true });
-  guide = toggleChannel(guide, "youtube");
-  guide = { ...guide, profileName: "" };
+  let guide = toggleChannel({ ...emptyGuide(), profileName: "" }, "youtube");
   assert.equal(leaveBlocker(guide, { hasProfile: true }), "");
   guide = goNext(guide, { hasProfile: true });
-  assert.equal(guide.step, "content");
+  assert.equal(guide.step, "ai");
   saveGuide(storage, guide);
   const loaded = loadGuide(storage);
-  assert.equal(loaded.step, "content");
+  assert.equal(loaded.step, "ai");
   const known = profileFor(loaded, { profiles: [{ id: "acme", name: "Acme Co" }] });
   assert.equal(known.known, true);
   assert.equal(known.id, "acme");
-  assert.equal(leaveBlocker({ ...loaded, step: "channels", channels: ["youtube"] }, { hasProfile: false }), "Name this profile. PostPath does not have one yet.");
+  assert.equal(leaveBlocker({ ...loaded, step: "accounts", channels: ["youtube"], profileName: "" }, { hasProfile: false }), "Name this profile. PostPath does not have one yet.");
 });
 
 test("youtube connect is blocked until a google app exists", () => {
@@ -146,9 +144,9 @@ test("suggested requests stay outside PostPath and failure results are not succe
 });
 
 test("back and dismiss do not drop the draft the user already entered", () => {
-  let guide = { ...emptyGuide(), step: "content", intent: "post", title: "Hello", channels: ["bluesky"] };
+  let guide = { ...emptyGuide(), step: "prompt", intent: "post", title: "Hello", channels: ["bluesky"] };
   guide = goBack(guide);
-  assert.equal(guide.step, "channels");
+  assert.equal(guide.step, "ai");
   assert.equal(guide.title, "Hello");
   guide = dismissGuide(guide);
   assert.equal(guide.open, false);

@@ -134,7 +134,7 @@ test("rejects media_path outside the vault media directory", async () => {
   }
 });
 
-test("meta publish requires https media_url", async () => {
+test("instagram publish without a file or https url is rejected before upload", async () => {
   const home = mkdtempSync(join(tmpdir(), "social-mcp-"));
   try {
     const engine = createEngine({ home, now: () => Date.parse("2026-10-27T12:00:00.000Z") });

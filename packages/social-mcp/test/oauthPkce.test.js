@@ -6,6 +6,7 @@ import { test } from "node:test";
 import { createStore } from "../src/store.js";
 import { createOAuthRuntime } from "../src/oauth/server.js";
 import { authorizationUrl, exchangeCode, oauthConfig } from "../src/oauth/providers.js";
+import { oauthRedirectHost, providerRedirectUri } from "../src/oauth/redirect.js";
 
 const redirectUri = "http://127.0.0.1:47831/oauth/callback";
 
@@ -57,6 +58,48 @@ test("youtube authorization and token exchange require PKCE", async () => {
   );
 });
 
+test("redirect host accepts localhost and rejects public hosts", () => {
+  assert.equal(oauthRedirectHost({}), "127.0.0.1");
+  assert.equal(oauthRedirectHost({ SOCIAL_MCP_OAUTH_REDIRECT_HOST: "localhost" }), "localhost");
+  assert.equal(oauthRedirectHost({ SOCIAL_MCP_OAUTH_REDIRECT_HOST: "LOCALHOST" }), "localhost");
+  assert.equal(oauthRedirectHost({ SOCIAL_MCP_OAUTH_REDIRECT_HOST: "evil.example" }), "127.0.0.1");
+  assert.equal(oauthRedirectHost({ SOCIAL_MCP_OAUTH_REDIRECT_HOST: "localhost:47831" }), "127.0.0.1");
+  assert.equal(
+    providerRedirectUri({ SOCIAL_MCP_OAUTH_REDIRECT_HOST: "localhost" }, 47831),
+    "http://localhost:47831/oauth/callback",
+  );
+});
+
+test("localhost redirect is for non-Google providers only", async () => {
+  const home = mkdtempSync(join(tmpdir(), "social-mcp-host-"));
+  const store = createStore({ home });
+  store.upsertProfile({ id: "acme", name: "Acme Co" });
+  const oauth = createOAuthRuntime({
+    store,
+    env: {
+      GOOGLE_OAUTH_CLIENT_ID: "gid.apps.googleusercontent.com",
+      GOOGLE_OAUTH_CLIENT_SECRET: "desktop-secret",
+      META_APP_ID: "123456789012345",
+      META_APP_SECRET: "meta-app-secret-value",
+      SOCIAL_MCP_OAUTH_PORT: "48741",
+      SOCIAL_MCP_OAUTH_REDIRECT_HOST: "localhost",
+    },
+    port: 48741,
+  });
+  try {
+    const youtube = await oauth.connectAccounts("acme", { platforms: ["youtube"], open: false });
+    assert.equal(new URL(youtube.authorize_url).searchParams.get("redirect_uri"), "http://127.0.0.1:48741");
+    assert.equal(youtube.redirect_uri, "http://localhost:48741/oauth/callback");
+    assert.equal(youtube.google_redirect_uri, "http://127.0.0.1:48741");
+    const meta = await oauth.connectAccounts("acme", { platforms: ["meta"], open: false });
+    assert.equal(new URL(meta.authorize_url).searchParams.get("redirect_uri"), "http://localhost:48741/oauth/callback");
+    assert.equal(meta.google_redirect_uri, "http://127.0.0.1:48741");
+  } finally {
+    await oauth.stop();
+    rmSync(home, { recursive: true, force: true });
+  }
+});
+
 test("youtube connect URL from the local runtime carries a PKCE challenge", async () => {
   const home = mkdtempSync(join(tmpdir(), "social-mcp-pkce-"));
   const store = createStore({ home });
@@ -76,7 +119,9 @@ test("youtube connect URL from the local runtime carries a PKCE challenge", asyn
     assert.equal(url.origin + url.pathname, "https://accounts.google.com/o/oauth2/v2/auth");
     assert.ok(url.searchParams.get("code_challenge"));
     assert.equal(url.searchParams.get("code_challenge_method"), "S256");
+    assert.equal(url.searchParams.get("redirect_uri"), "http://127.0.0.1:48731");
     assert.equal(pending.redirect_uri, "http://127.0.0.1:48731/oauth/callback");
+    assert.equal(pending.google_redirect_uri, "http://127.0.0.1:48731");
   } finally {
     await oauth.stop();
     rmSync(home, { recursive: true, force: true });

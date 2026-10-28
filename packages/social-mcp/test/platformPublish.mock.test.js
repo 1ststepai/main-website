@@ -33,6 +33,7 @@ test("mock publish paths for each implemented platform", async () => {
     async (url, init = {}) => {
       const href = String(url);
       calls.push({ href, method: init.method || "GET", authorization: init.headers?.authorization || "" });
+      if (href.includes("status_code")) return jsonResponse(200, { status_code: "FINISHED" });
       if (href.includes("graph.facebook.com") && href.endsWith("/media")) return jsonResponse(200, { id: "ig-container" });
       if (href.includes("/media_publish")) return jsonResponse(200, { id: "ig-post" });
       if (href.includes("/video_reels")) return jsonResponse(200, { video_id: "start" });

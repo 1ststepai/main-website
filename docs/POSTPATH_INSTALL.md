@@ -51,9 +51,17 @@ The desk source now opens a setup guide on first launch. It can save a private d
 
 That guide is not inside the installer whose SHA256 is `3c79455c8ad4b9329a276ab30ace075e729cb9bebe8cd6fe99c09185d27b3eb5`. Those bytes were packed from source commit `87745d180b03136a6e059b5b8a26f0ec7587e2fb` and stored in `e0eb52b6d3bf6d1964818db48f056622c3945eb4`. Replacing the installer would change the checksum Evan is checking.
 
+## Windows code signing
+
+The installer build stays unsigned unless both `CSC_LINK` (a path to a `.pfx` on the build machine) and `CSC_KEY_PASSWORD` are set, and `osslsigncode` is installed. `packages/postpath-desktop/scripts/build-windows-installer.sh` then asks electron-builder to sign the app executable and signs the NSIS installer with `osslsigncode`. It runs `osslsigncode verify` before writing `signed: true`. If the certificate variables are set and `osslsigncode` is missing, the script exits and does not describe the file as signed.
+
+Evan needs to buy or already hold an Authenticode certificate and export the `.pfx`. An EV certificate is what reduces SmartScreen warnings. An OV certificate can still warn until it has reputation. Do not commit the `.pfx` or the password. This environment has no certificate, and the exe already in `public/downloads/postpath/` is still the unsigned internal preview. macOS still needs an Apple Developer ID and notarization. Gatekeeper stays on.
+
 ## YouTube first test
 
 Not run. Do not connect, upload, or delete until Evan approves the account and the exact text.
+
+The desk now shows the Google Desktop loopback URI (`http://127.0.0.1:47831`, or `GOOGLE_OAUTH_REDIRECT_URI` when that is set) and checks the client id shape before saving it. Setup steps for the Google Cloud project and the Meta app are in `packages/social-mcp/README.md`. A private YouTube upload is the code path: PKCE, loopback, resumable upload, privacy private. It still needs Evan’s Desktop client, a test user on the consent screen, and quota. This repository does not record a successful live upload.
 
 Ordinary customers are not asked to create a Google Cloud app. This preview does not include a client id. Google's desktop flow is a loopback redirect on `http://127.0.0.1:47831/oauth/callback` plus PKCE. A Desktop client still returns a client secret, and Google's token endpoint currently requires that parameter, but Google treats an installed app as a public client: a secret shipped inside the installer is not confidential. Do not paste a client id or secret into chat. The App credentials form remains for an owner private test and stores the values only in the local vault.
 

@@ -15,7 +15,12 @@ export function formatToolError(error) {
 }
 
 export function formatToolResult(payload) {
+  const structuredContent = {
+    ok: true,
+    ...(payload && typeof payload === "object" ? payload : { value: payload }),
+  };
   return {
-    content: [{ type: "text", text: JSON.stringify({ ok: true, ...payload }, null, 2) }],
+    content: [{ type: "text", text: JSON.stringify(structuredContent, null, 2) }],
+    structuredContent,
   };
 }

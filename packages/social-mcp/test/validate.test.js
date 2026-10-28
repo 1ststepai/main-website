@@ -111,25 +111,59 @@ test("youtube / tiktok: require media_path", () => {
   );
 });
 
-test("instagram / facebook / pinterest: require https media_url", () => {
+test("instagram / facebook accept a local file; pinterest still needs https", () => {
   for (const platform of ["instagram", "facebook", "pinterest"]) {
     const missing = validateDraftForPublish({ platform, caption: "hi" });
     assert.equal(missing.ok, false, platform);
-    assert.match(missing.errors.join(" "), /https media_url/i);
+    assert.match(missing.errors.join(" "), /https media_url|media_path/i);
 
     const http = validateDraftForPublish({
       platform,
       media_url: "http://cdn.example.com/v.mp4",
     });
     assert.equal(http.ok, false, platform);
-
-    const ok = validateDraftForPublish({
-      platform,
-      media_url: "https://cdn.example.com/v.mp4",
-      caption: "hi",
-    });
-    assert.equal(ok.ok, true, platform);
   }
+
+  const instagram = validateDraftForPublish({
+    platform: "instagram",
+    media_url: "https://cdn.example.com/v.mp4",
+    caption: "hi",
+    privacy_status: "public",
+  });
+  assert.equal(instagram.ok, true);
+  const instagramFile = validateDraftForPublish({
+    platform: "instagram",
+    media_path: "clip.mp4",
+    privacy_status: "public",
+  });
+  assert.equal(instagramFile.ok, true);
+  const instagramPrivate = validateDraftForPublish({
+    platform: "instagram",
+    media_path: "clip.mp4",
+    privacy_status: "private",
+  });
+  assert.equal(instagramPrivate.ok, false);
+  assert.match(instagramPrivate.errors.join(" "), /public/i);
+
+  const facebook = validateDraftForPublish({
+    platform: "facebook",
+    media_path: "clip.mp4",
+    privacy_status: "private",
+  });
+  assert.equal(facebook.ok, true);
+  const facebookUrl = validateDraftForPublish({
+    platform: "facebook",
+    media_url: "https://cdn.example.com/v.mp4",
+    caption: "hi",
+  });
+  assert.equal(facebookUrl.ok, true);
+
+  const pinterest = validateDraftForPublish({
+    platform: "pinterest",
+    media_url: "https://cdn.example.com/v.mp4",
+    caption: "hi",
+  });
+  assert.equal(pinterest.ok, true);
 
   const pinWarn = validateDraftForPublish({
     platform: "pinterest",

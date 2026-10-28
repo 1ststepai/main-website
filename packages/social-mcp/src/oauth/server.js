@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import { createServer } from "node:http";
 import { spawn } from "node:child_process";
 import { CONNECT_ORDER, DEFAULT_OAUTH_PORT } from "../home.js";
+import { googleLoopbackUri, providerRedirectUri } from "./redirect.js";
 import { signState, verifyState } from "../crypto.js";
 import { mcpError } from "../errors.js";
 import { authorizationUrl, createPkcePair, exchangeCode, missingProviders, oauthConfig } from "./providers.js";
@@ -71,16 +72,25 @@ function openBrowser(url) {
   }
 }
 
+function isOAuthCallback(pathname) {
+  return pathname === "/oauth/callback" || pathname === "/oauth/callback/" || pathname === "/" || pathname === "";
+}
+
 export function createOAuthRuntime({ store, env = process.env, fetchImpl = fetch, port = Number(env.SOCIAL_MCP_OAUTH_PORT || DEFAULT_OAUTH_PORT) }) {
   let server = null;
-  let redirectUri = `http://127.0.0.1:${port}/oauth/callback`;
+  const redirectUri = providerRedirectUri(env, port);
+  const googleRedirectUri = googleLoopbackUri(env, port);
+
+  function currentConfig() {
+    return oauthConfig(env, redirectUri, googleRedirectUri);
+  }
 
   async function ensureListening() {
     if (server?.listening) return redirectUri;
     server = createServer(async (req, res) => {
       try {
         const url = new URL(req.url || "/", `http://127.0.0.1:${port}`);
-        if (url.pathname !== "/oauth/callback") {
+        if (!isOAuthCallback(url.pathname)) {
           res.writeHead(404, { "content-type": "text/html; charset=utf-8" });
           res.end(htmlPage("Not found", "<p>Use connect_accounts from your AI client.</p>"));
           return;
@@ -102,7 +112,7 @@ export function createOAuthRuntime({ store, env = process.env, fetchImpl = fetch
         if (Date.now() - Number(state.ts || 0) > 15 * 60 * 1000) {
           throw mcpError("invalid_state", "The connection attempt expired. Start again.");
         }
-        const config = oauthConfig(env, redirectUri);
+        const config = currentConfig();
         const exchanged = await exchangeCode(state.provider, {
           code,
           config,
@@ -150,17 +160,14 @@ export function createOAuthRuntime({ store, env = process.env, fetchImpl = fetch
 
     await new Promise((resolve, reject) => {
       server.once("error", reject);
-      server.listen(port, "127.0.0.1", () => {
-        redirectUri = `http://127.0.0.1:${port}/oauth/callback`;
-        resolve();
-      });
+      server.listen(port, "127.0.0.1", resolve);
     });
     return redirectUri;
   }
 
   async function beginProvider(profileId, provider, remainingChain = [], { open = true } = {}) {
     await ensureListening();
-    const config = oauthConfig(env, redirectUri);
+    const config = currentConfig();
     const pkce = provider === "x" || provider === "youtube" || provider === "google_business" ? createPkcePair() : null;
     const state = signState(
       {
@@ -209,6 +216,7 @@ export function createOAuthRuntime({ store, env = process.env, fetchImpl = fetch
       remaining: rest,
       authorize_url: url,
       redirect_uri: redirectUri,
+      google_redirect_uri: googleRedirectUri,
       message: open
         ? "Browser opened for sign-in. Finish each consent screen; the chain continues automatically."
         : "Open authorize_url to sign in. Finish each consent screen; the chain continues automatically.",
@@ -227,6 +235,9 @@ export function createOAuthRuntime({ store, env = process.env, fetchImpl = fetch
     stop,
     get redirectUri() {
       return redirectUri;
+    },
+    get googleRedirectUri() {
+      return googleRedirectUri;
     },
   };
 }
