@@ -2,8 +2,11 @@ export const GUIDE_STORAGE_KEY = "postpath.guide.v1";
 
 export const STEPS = ["intent", "channels", "content", "creation", "review", "result"];
 
-export const YOUTUBE_APP_MISSING =
-  "YouTube sign-in is not available in this preview. PostPath does not include a Google app, and customers do not create one. A private draft can still be saved on this computer. Connecting waits until 1stStep publishes a Google sign-in app, or until an owner saves one for a private test.";
+export function youtubeSetupMessage(redirect = "http://127.0.0.1:47831") {
+  return `YouTube sign-in needs a Google OAuth Desktop client saved on this computer. PostPath does not include a Google app. Save the client id and secret under App credentials. If Google Cloud asks for a redirect URI, use ${redirect}. A private draft can still be saved. This guide does not publish.`;
+}
+
+export const YOUTUBE_APP_MISSING = youtubeSetupMessage();
 
 export const PUBLISH_NOT_IN_GUIDE =
   "This guide does not publish. Nothing is sent to YouTube or any other network.";
@@ -185,7 +188,7 @@ export function connectPlan(channelKey, status = {}) {
     };
   }
   if (channel.key === "youtube" && !status.oauth_ready?.google) {
-    return { action: "blocked", message: YOUTUBE_APP_MISSING };
+    return { action: "blocked", message: youtubeSetupMessage(status.google_redirect_uri) };
   }
   const ready = channel.oauth && status.oauth_ready?.[channel.oauth];
   if (!ready) {

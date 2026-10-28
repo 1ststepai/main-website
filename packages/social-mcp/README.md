@@ -91,11 +91,43 @@ These are not one-click installers. Each requires Node.js 20+ and unpacks into `
 
 Real-account acceptance is **not** claimed. Tests mock `fetch`. Nothing here is a live customer publish.
 
+`SOCIAL_MCP_PUBLISH_MODE=mock` (or `POSTPATH_PUBLISH_MODE=mock`) skips the platform call and stores a result with `result_source: "mock"`. The desk banner says MOCK. `SOCIAL_MCP_MOCK_OUTCOME` may be `posted`, `failed`, `rate_limited`, or `needs_review`. Live mode stores `result_source: "platform"` from the HTTP response. A mock row and a platform row are labeled differently in the Results list.
+
+## Owner app setup
+
+PostPath does not ship a Google or Meta app. Save the ids below in the desk’s App credentials form (written to `~/.social-mcp/oauth.env`, mode 0600) or in the environment. Do not commit them.
+
+Google loopback URI (Desktop client, no path): `http://127.0.0.1:47831` unless `SOCIAL_MCP_OAUTH_PORT` is set. Other providers, including Meta: `http://127.0.0.1:47831/oauth/callback`. If a Web client is already registered with the path form, set `GOOGLE_OAUTH_REDIRECT_URI` to that exact string.
+
+### YouTube
+
+1. Open Google Cloud Console and create or choose a project.
+2. APIs & Services → Library → enable **YouTube Data API v3**.
+3. APIs & Services → OAuth consent screen. Add scopes `https://www.googleapis.com/auth/youtube.upload` and `https://www.googleapis.com/auth/youtube.readonly`.
+4. While the app stays in **Testing**, add the Google account that owns the channel as a test user. Refresh tokens in Testing expire after about seven days.
+5. APIs & Services → Credentials → Create credentials → OAuth client ID → **Desktop app**.
+6. Save `GOOGLE_OAUTH_CLIENT_ID` and `GOOGLE_OAUTH_CLIENT_SECRET`. The desk rejects a client id that does not end in `.apps.googleusercontent.com`.
+7. Copy the Google loopback URI from the desk into the client if Google asks for a redirect URI.
+8. Connect YouTube, save a draft with privacy **Private**, then publish. A vertical MP4 of 3 minutes or less is what YouTube classifies as a Short after processing. PostPath does not crop or transcode.
+9. An unverified app can be limited to private uploads. `videos.insert` costs 1,600 quota units. A new project’s default quota is 10,000 units per day.
+10. Open the returned watch URL while signed into that channel, then delete the video in YouTube Studio.
+
+### Meta (Facebook Page Reel and Instagram Reel)
+
+1. Create a Meta app of type **Business**. Add Facebook Login and Instagram.
+2. Facebook Login → Settings → Valid OAuth Redirect URIs: `http://127.0.0.1:47831/oauth/callback`.
+3. Save `META_APP_ID` (numeric) and `META_APP_SECRET`.
+4. Add your Facebook user as an app administrator, developer, or tester. Development mode is enough for that user. Anyone else needs App Review for `instagram_content_publish` and `pages_manage_posts`.
+5. The Page must be one you manage. Instagram must be a professional (Business or Creator) account linked to that Page.
+6. Scopes requested: `pages_show_list`, `pages_read_engagement`, `pages_manage_posts`, `instagram_basic`, `instagram_content_publish`, `business_management`.
+7. A local video is uploaded with Meta’s resumable upload. Facebook stays a Page draft (`video_state=DRAFT`) unless privacy is Public. Instagram has no private publish, so PostPath does not upload it until privacy is Public.
+8. An https `media_url` still works when the file is already hosted somewhere public. PostPath does not host the file.
+
 | Platform | Connect | Publish | Lane status |
 | --- | --- | --- | --- |
-| YouTube | Google OAuth | `media_path` under vault `media/` | implemented (mock-tested, real-account acceptance NOT claimed) |
-| Instagram | Meta OAuth | https `media_url` | implemented (mock-tested, real-account acceptance NOT claimed) |
-| Facebook | Meta OAuth | https `media_url` | implemented (mock-tested, real-account acceptance NOT claimed) |
+| YouTube | Google OAuth Desktop + PKCE loopback | `media_path` under vault `media/`. Resumable `videos.insert`. Privacy defaults to private. | implemented (mock-tested, real-account acceptance NOT claimed) |
+| Instagram | Meta OAuth | local `media_path` (resumable Reel upload) or https `media_url`. Publishes only when privacy is public. | implemented (mock-tested, real-account acceptance NOT claimed) |
+| Facebook | Meta OAuth | local `media_path` (Page Reel resumable upload, draft unless public) or https `media_url` | implemented (mock-tested, real-account acceptance NOT claimed) |
 | TikTok | Login Kit | `media_path` → creator inbox | handoff (TikTok inbox; mock-tested, real-account acceptance NOT claimed) |
 | LinkedIn | LinkedIn OAuth | text (`caption` / `description`) | implemented (mock-tested, real-account acceptance NOT claimed) |
 | X | X OAuth (PKCE) | text tweet | implemented (mock-tested, real-account acceptance NOT claimed) |
@@ -145,7 +177,7 @@ social-mcp connect <id>         CLI fallback
 
 `src/publish/validate.js` → `validateDraftForPublish(post)` runs inside `publish_post` / `publish_due` before network calls.
 
-Returns `{ ok, warnings[], errors[] }` with no live API calls. Hard **errors** throw `validation_failed` and block publish. Length overages are **warnings** returned on success (publish still truncates). Platform rules match current publish modules (X ~280, LinkedIn/Threads/Bluesky/Google Business text caps, YouTube/TikTok `media_path`, Instagram/Facebook/Pinterest https `media_url`, Reddit `tags[0]` + title, Snapchat/WhatsApp API-restricted).
+Returns `{ ok, warnings[], errors[] }` with no live API calls. Hard **errors** throw `validation_failed` and block publish. Length overages are **warnings** returned on success (publish still truncates). Platform rules match current publish modules (X ~280, LinkedIn/Threads/Bluesky/Google Business text caps, YouTube/TikTok `media_path`, Instagram/Facebook local `media_path` or https `media_url` with Instagram public-only, Pinterest https `media_url`, Reddit `tags[0]` + title, Snapchat/WhatsApp API-restricted).
 
 ## Tests
 

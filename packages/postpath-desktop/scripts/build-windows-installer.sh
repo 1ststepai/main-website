@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
-# Build the unsigned Windows installer. The customer does not run this.
+# Build the Windows installer. The customer does not run this.
 # It bundles Electron, the PostPath desk, and production dependencies.
-# No code signing certificate is available. Do not disable SmartScreen.
+# Signing happens only when CSC_LINK and CSC_KEY_PASSWORD are set and
+# osslsigncode can verify the result. Otherwise the installer stays unsigned.
+# Do not disable SmartScreen. Do not commit a certificate.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 REPO="$(cd "$ROOT/../.." && pwd)"
@@ -26,7 +28,24 @@ if [[ ! -x "$BUILDER" ]]; then
   echo "electron-builder is not installed in postpath-desktop" >&2
   exit 1
 fi
-"$BUILDER" --win dir --publish never
+SIGNING=false
+if [[ -n "${CSC_LINK:-}" && -n "${CSC_KEY_PASSWORD:-}" ]]; then
+  if ! command -v osslsigncode >/dev/null 2>&1; then
+    echo "CSC_LINK is set but osslsigncode is not installed. Refusing to emit an unsigned file as if it were signed." >&2
+    echo "Install osslsigncode, or unset CSC_LINK to build the unsigned internal preview." >&2
+    exit 1
+  fi
+  SIGNING=true
+  export CSC_IDENTITY_AUTO_DISCOVERY="${CSC_IDENTITY_AUTO_DISCOVERY:-true}"
+fi
+
+BUILD_ARGS=(--win dir --publish never)
+if [[ "$SIGNING" == true ]]; then
+  BUILD_ARGS+=(--config.win.signAndEditExecutable=true --config.win.verifyUpdateCodeSignature=true)
+else
+  export CSC_IDENTITY_AUTO_DISCOVERY=false
+fi
+"$BUILDER" "${BUILD_ARGS[@]}"
 command -v makensis >/dev/null
 (cd "$ROOT" && makensis build/postpath.nsi)
 
@@ -34,6 +53,24 @@ EXE="$(find "$STAGE" -maxdepth 1 -type f -name 'PostPath-*-windows-unsigned-inte
 if [[ -z "$EXE" ]]; then
   echo "Windows installer was not produced" >&2
   exit 1
+fi
+
+SIGNED=false
+KIND="unsigned-internal-preview"
+SMARTSCREEN="Leave SmartScreen enabled. Windows will warn because this build is unsigned."
+if [[ "$SIGNING" == true ]]; then
+  SIGNED_EXE="${EXE/-windows-unsigned-internal-preview.exe/-windows.exe}"
+  # CSC_LINK may be a filesystem path. Base64 and remote certs are not expanded here.
+  if [[ ! -f "$CSC_LINK" ]]; then
+    echo "CSC_LINK must be a path to a .pfx on this machine. A base64 blob is not used, so the certificate is never written into the repo." >&2
+    exit 1
+  fi
+  osslsigncode sign -pkcs12 "$CSC_LINK" -pass "$CSC_KEY_PASSWORD" -n "PostPath" -i "https://1ststep.ai" -t "http://timestamp.digicert.com" -in "$EXE" -out "$SIGNED_EXE"
+  osslsigncode verify -in "$SIGNED_EXE" >/dev/null
+  EXE="$SIGNED_EXE"
+  SIGNED=true
+  KIND="authenticode"
+  SMARTSCREEN="Signed with the certificate supplied at build time. SmartScreen can still warn until that certificate has reputation. An EV certificate is what reduces the warning. This is not a macOS notarized build."
 fi
 
 mkdir -p "$OUT"
@@ -48,11 +85,11 @@ cat > "$OUT/PostPath-windows-installer-provenance.json" <<EOF
   "version": "$VERSION",
   "gitSha": "$GIT_SHA",
   "sha256": "$SHA",
-  "signed": false,
-  "kind": "unsigned-internal-preview",
+  "signed": $SIGNED,
+  "kind": "$KIND",
   "platform": "Windows",
   "runtime": "Electron bundled; system Node.js is not required",
-  "smartScreen": "Leave SmartScreen enabled. Windows will warn because this build is unsigned."
+  "smartScreen": "$SMARTSCREEN"
 }
 EOF
 echo "$SHA  $NAME" > "$OUT/PostPath-windows-installer.sha256"

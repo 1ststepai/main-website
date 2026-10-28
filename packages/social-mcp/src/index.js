@@ -95,7 +95,7 @@ export function createSocialMcpServer({ engine } = {}) {
 
   server.tool(
     "create_draft",
-    "Create a local draft post for a profile and platform. Attach media_path (local file) and/or media_url (required for Instagram/Facebook publish).",
+    "Create a local draft post for a profile and platform. YouTube uses media_path. Instagram and Facebook use a local media_path (uploaded to Meta) or an https media_url.",
     {
       profile_id: z.string().min(2).max(64),
       platform: z.enum(PLATFORMS),
@@ -149,7 +149,7 @@ export function createSocialMcpServer({ engine } = {}) {
 
   server.tool(
     "publish_post",
-    "Publish now after local preflight validation (hard errors block; length overages are warnings). YouTube/TikTok use media_path. Instagram/Facebook/Pinterest need media_url. Text platforms use caption/title. Reddit uses tags[0] as subreddit. Snapchat/WhatsApp return honest API-restricted errors. Scheduled posts require force=true before their time. needs_review posts are not retried unless acknowledge=true.",
+    "Publish now after local preflight validation (hard errors block; length overages are warnings). YouTube/TikTok use media_path. Instagram/Facebook use a local media_path or https media_url. Instagram publishes only when privacy_status is public. Pinterest needs media_url. Text platforms use caption/title. Reddit uses tags[0] as subreddit. Snapchat/WhatsApp return honest API-restricted errors. Scheduled posts require force=true before their time. needs_review posts are not retried unless acknowledge=true. SOCIAL_MCP_PUBLISH_MODE=mock records a labeled mock result and does not call the platform.",
     {
       post_id: z.string().min(8),
       force: z.boolean().optional(),

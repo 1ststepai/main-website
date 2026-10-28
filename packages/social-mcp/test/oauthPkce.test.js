@@ -76,7 +76,9 @@ test("youtube connect URL from the local runtime carries a PKCE challenge", asyn
     assert.equal(url.origin + url.pathname, "https://accounts.google.com/o/oauth2/v2/auth");
     assert.ok(url.searchParams.get("code_challenge"));
     assert.equal(url.searchParams.get("code_challenge_method"), "S256");
+    assert.equal(url.searchParams.get("redirect_uri"), "http://127.0.0.1:48731");
     assert.equal(pending.redirect_uri, "http://127.0.0.1:48731/oauth/callback");
+    assert.equal(pending.google_redirect_uri, "http://127.0.0.1:48731");
   } finally {
     await oauth.stop();
     rmSync(home, { recursive: true, force: true });

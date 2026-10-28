@@ -1,5 +1,14 @@
 # Architecture Decision Log
 
+## 2026-10-28: Real publish uses owner OAuth apps and platform responses
+
+- **Status / owner:** Draft, not deployed. Evan owns the Google Cloud project, the Meta app, any real upload, and the Authenticode certificate. This change does not post to a live account.
+- **Decision:** YouTube sign-in is a Desktop OAuth loopback with PKCE. The redirect shown for Google is `http://127.0.0.1:<port>` (override with `GOOGLE_OAUTH_REDIRECT_URI`). The desk validates the client id and secret locally and does not ship a Google app. Upload stays resumable and private by default. Facebook Page Reels upload from a local file and stay unpublished unless privacy is public. Instagram Reels use Meta resumable upload and are sent only when privacy is public, because that API has no private publish. Posted, failed, rate limited, and needs review are stored from the platform response with `result_source: "platform"`. `SOCIAL_MCP_PUBLISH_MODE=mock` is labeled MOCK and does not call the network. Windows Authenticode signing is wired to `CSC_LINK` plus `osslsigncode` and stays off when those are absent. Marketing copy still says live publishing is not verified.
+- **Rationale:** The adapters already called the platform APIs. The desk told the owner that YouTube sign-in was unavailable, and Meta required a public video URL. A private YouTube test needs Evan’s own client, not a secret baked into the installer.
+- **Affected systems:** `packages/social-mcp` desk, OAuth, YouTube and Meta publishers; `packages/postpath-desktop` Windows build script. The public site and the already-built unsigned exe are unchanged.
+- **Verification:** `packages/social-mcp` unit tests with mocked HTTP. No live OAuth and no live upload.
+- **Rollback:** Leave this draft unmerged. PR #51 and `main` stay as they are.
+
 ## 2026-10-27: First-run guide saves a draft and does not publish
 
 - **Status / owner:** In review on PR #51. Not deployed. Evan still owns the Windows run, the Google Desktop client, and any real YouTube upload.

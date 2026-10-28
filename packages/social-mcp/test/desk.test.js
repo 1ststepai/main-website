@@ -86,6 +86,12 @@ test("desk status and profile APIs stay on localhost", async () => {
     assert.match(html, /Close the window to quit/);
     assert.match(html, /Setup guide/);
     assert.match(html, /id="guide"/);
+    assert.match(html, /id="google-redirect-uri"/);
+    assert.match(html, /id="publish-mode"/);
+    assert.match(html, /Google loopback URI/);
+    assert.doesNotMatch(html, /YouTube sign-in is not included in this preview/);
+    assert.equal(status.publish_mode, "live");
+    assert.equal(status.google_redirect_uri, "http://127.0.0.1:47992");
     const media = await fetch(`${url}api/media`, {
       method: "POST",
       headers: { "content-type": "video/mp4", "x-postpath-filename": "clip.mp4" },
@@ -121,6 +127,41 @@ test("desk status and profile APIs stay on localhost", async () => {
     }).then((res) => res.json());
     assert.equal(forgotten.ok, true);
     assert.equal(forgotten.removed.removed, true);
+  } finally {
+    await desk.stop();
+    rmSync(home, { recursive: true, force: true });
+  }
+});
+
+test("oauth config rejects a bad Google client id and accepts a Desktop client", async () => {
+  const home = mkdtempSync(join(tmpdir(), "social-mcp-oauth-"));
+  const env = { SOCIAL_MCP_OAUTH_PORT: "47994", SOCIAL_MCP_DESK_PORT: "47993" };
+  const engine = createEngine({ home, env });
+  const desk = createDeskServer({ engine, env, port: 47993 });
+  try {
+    const { url } = await desk.start({ open: false });
+    const bad = await fetch(`${url}api/oauth-config`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        GOOGLE_OAUTH_CLIENT_ID: "not-a-client",
+        GOOGLE_OAUTH_CLIENT_SECRET: "super-secret-value",
+      }),
+    }).then((res) => res.json());
+    assert.equal(bad.ok, false);
+    assert.equal(bad.code, "oauth_invalid");
+    const good = await fetch(`${url}api/oauth-config`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        GOOGLE_OAUTH_CLIENT_ID: "123456789012-abcDEF1234.apps.googleusercontent.com",
+        GOOGLE_OAUTH_CLIENT_SECRET: "GOCSPX-real-secret-value",
+      }),
+    }).then((res) => res.json());
+    assert.equal(good.ok, true);
+    assert.equal(good.oauth_ready.google, true);
+    assert.equal(good.google_redirect_uri, "http://127.0.0.1:47994");
+    assert.match(good.oauth.GOOGLE_OAUTH_CLIENT_SECRET, /••••/);
   } finally {
     await desk.stop();
     rmSync(home, { recursive: true, force: true });

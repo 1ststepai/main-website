@@ -60,21 +60,41 @@ export function loadOAuthEnvFile(homePaths = paths(), env = process.env) {
   return { file, values, applied };
 }
 
+const SECRET_KEYS = new Set(OAUTH_KEYS.filter((key) => key.endsWith("_SECRET")));
+
+export function mergeOAuthInput(current = {}, input = {}) {
+  const next = { ...current };
+  for (const key of OAUTH_KEYS) {
+    if (input[key] === undefined) continue;
+    const value = String(input[key] ?? "").trim();
+    if (SECRET_KEYS.has(key) && (!value || value.includes("••••"))) continue;
+    if (value) next[key] = value;
+    else delete next[key];
+  }
+  if (input.GOOGLE_OAUTH_CLIENT_ID !== undefined && !String(input.GOOGLE_OAUTH_CLIENT_ID || "").trim()) {
+    delete next.GOOGLE_OAUTH_CLIENT_ID;
+    delete next.GOOGLE_OAUTH_CLIENT_SECRET;
+  }
+  if (input.META_APP_ID !== undefined && !String(input.META_APP_ID || "").trim()) {
+    delete next.META_APP_ID;
+    delete next.META_APP_SECRET;
+  }
+  return next;
+}
+
 export function saveOAuthEnvFile(input, homePaths = paths()) {
   const current = existsSync(oauthEnvPath(homePaths))
     ? parseEnvFile(readFileSync(oauthEnvPath(homePaths), "utf8"))
     : {};
-  const next = { ...current };
-  for (const key of OAUTH_KEYS) {
-    if (input[key] === undefined) continue;
-    const value = String(input[key] || "").trim();
-    if (value) next[key] = value;
-    else delete next[key];
-  }
+  const next = mergeOAuthInput(current, input);
   const lines = [
     "# PostPath OAuth apps — local only. Do not commit.",
-    "# Redirect URI for every provider:",
+    "# Google Desktop loopback (no path). Copy this if Google Cloud asks for a redirect URI:",
+    "# http://127.0.0.1:47831",
+    "# Other providers:",
     "# http://127.0.0.1:47831/oauth/callback",
+    "# Optional override when a Web client already uses the path form:",
+    "# GOOGLE_OAUTH_REDIRECT_URI=http://127.0.0.1:47831/oauth/callback",
     "",
   ];
   for (const key of OAUTH_KEYS) {

@@ -54,13 +54,13 @@ function requireEnv(env, name, label) {
   return value;
 }
 
-export function oauthConfig(env, redirectUri) {
+export function oauthConfig(env, redirectUri, googleRedirectUri = redirectUri) {
   const source = env || process.env;
   return {
     google: {
       clientId: String(source.GOOGLE_OAUTH_CLIENT_ID || "").trim(),
       clientSecret: String(source.GOOGLE_OAUTH_CLIENT_SECRET || "").trim(),
-      redirectUri,
+      redirectUri: googleRedirectUri || redirectUri,
     },
     meta: {
       appId: String(source.META_APP_ID || "").trim(),

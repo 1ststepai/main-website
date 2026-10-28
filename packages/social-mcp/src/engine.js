@@ -16,6 +16,7 @@ import { publishGoogleBusinessPost } from "./publish/google_business.js";
 import { publishRedditPost } from "./publish/reddit.js";
 import { publishSnapchatScaffold, publishWhatsAppScaffold } from "./publish/restricted.js";
 import { validateDraftForPublish } from "./publish/validate.js";
+import { displayOutcome, publishMode } from "./publish/outcome.js";
 import { assertActionAllowed, assertProfileAllowed, getEntitlement } from "./license.js";
 
 const ISO_OFFSET = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$/i;
@@ -112,7 +113,40 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
       profiles: store.listProfiles(),
       connections: store.listConnections(),
       oauth_redirect_uri: oauth.redirectUri,
+      google_redirect_uri: oauth.googleRedirectUri,
+      publish_mode: publishMode(env),
       platforms: PLATFORMS,
+    };
+  }
+
+  function rememberResult(working, source) {
+    working.result_source = source || (publishMode(env) === "mock" ? "mock" : "platform");
+    working.outcome = displayOutcome(working);
+  }
+
+  function mockPublish(post) {
+    const forced = String(env.SOCIAL_MCP_MOCK_OUTCOME || "posted").trim().toLowerCase();
+    if (forced === "rate_limited") {
+      const error = mcpError("rate_limited", "Mock rate limit. Nothing was sent.", 429);
+      error.result_source = "mock";
+      throw error;
+    }
+    if (forced === "needs_review") {
+      const error = mcpError("dispatch_ambiguous", "Mock uncertain result. Nothing was sent.", 502);
+      error.ambiguous = true;
+      error.result_source = "mock";
+      throw error;
+    }
+    if (forced === "failed") {
+      const error = mcpError("mock_failed", "Mock failure. Nothing was sent.", 502);
+      error.result_source = "mock";
+      throw error;
+    }
+    return {
+      platform_post_id: `mock-${post.platform}`,
+      published_url: null,
+      result_source: "mock",
+      note: "Mock result. Nothing was sent to the platform.",
     };
   }
 
@@ -331,6 +365,7 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
   }
 
   async function dispatchPublish(post, connection, secrets, config) {
+    if (publishMode(env) === "mock") return mockPublish(post);
     const onSecrets = async (next) => store.updateSecrets(post.profile_id, post.platform, next);
     const onNeedsReconnect = async () => {
       store.updateConnection(post.profile_id, post.platform, { status: "needs_reconnect" });
@@ -363,6 +398,7 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
         platform: post.platform,
         connection,
         secrets,
+        mediaRoot,
         fetchImpl: trackedFetch,
         onNeedsReconnect,
       });
@@ -484,6 +520,8 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
       working.status = "failed";
       working.error = { code: error.code || "publish_failed", message: error.message || "Publish failed." };
     }
+    working.publish_note = "";
+    rememberResult(working, error?.result_source);
     working.updated_at = new Date(now()).toISOString();
     store.savePost(working);
   }
@@ -533,6 +571,9 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
       working.published_url = result.published_url || null;
       working.status = result.handoff ? "handed_off" : "published";
       working.error = null;
+      working.publish_note = result.note || "";
+      if (result.privacy_status) working.privacy_status = result.privacy_status;
+      rememberResult(working, result.result_source);
       working.updated_at = new Date(now()).toISOString();
       store.savePost(working);
       store.appendAudit({

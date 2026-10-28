@@ -3,6 +3,7 @@ import {
   CREATION,
   INTENTS,
   YOUTUBE_APP_MISSING,
+  youtubeSetupMessage,
   channelCatalog,
   connectPlan,
   dismissGuide,
@@ -52,6 +53,34 @@ const blueskyForm = document.getElementById("bluesky-form");
 
 const DISPATCH_HONESTY =
   "After dispatch starts, PostPath cannot guarantee the platform did not accept the post. Cancel only works while a post is still scheduled. Dispatch-started posts stay needs review and are not auto-retried or undone.";
+
+const OUTCOME_LABEL = {
+  posted: "Posted",
+  failed: "Failed",
+  rate_limited: "Rate limited",
+  needs_review: "Needs review",
+  handed_off: "Handed off",
+  draft: "Draft",
+  scheduled: "Scheduled",
+  publishing: "Publishing",
+};
+
+function outcomeLabel(post) {
+  const outcome = post?.outcome || post?.status || "";
+  const label =
+    post?.status === "handed_off" && post?.platform === "facebook"
+      ? "Saved on Facebook, not public"
+      : OUTCOME_LABEL[outcome] || outcome || "Unknown";
+  if (post?.result_source === "mock") return `MOCK · ${label}`;
+  return label;
+}
+
+function sourceLabel(post) {
+  if (post?.result_source === "mock") return "MOCK — not sent";
+  if (post?.result_source === "platform") return "Platform response";
+  if (post?.status === "draft" || post?.status === "scheduled") return "Saved on this computer";
+  return "Recorded on this computer";
+}
 
 function formatWhen(iso) {
   if (!iso) return "No time set";
@@ -136,10 +165,73 @@ profileId.addEventListener("input", () => {
   profileId.dataset.touched = "1";
 });
 
+function renderMode(data) {
+  const banner = document.getElementById("publish-mode");
+  const note = document.getElementById("results-note");
+  if (!banner) return;
+  const mock = data.publish_mode === "mock";
+  banner.className = mock ? "mode-banner mock" : "mode-banner live";
+  banner.textContent = mock
+    ? "MOCK MODE. These rows are practice results. PostPath did not call YouTube, Meta, or any other network."
+    : "Live mode. Posted, failed, rate limited, and needs review are saved from the platform response. A real post still needs your Google or Meta app. Live publishing has not been verified on a real account yet.";
+  if (note) note.textContent = mock ? "MOCK — not sent" : "From the platform response";
+}
+
+function renderResults(posts, publishMode) {
+  const list = document.getElementById("result-list");
+  if (!list) return;
+  list.replaceChildren();
+  const rows = Array.isArray(posts) ? posts : [];
+  if (!rows.length) {
+    const empty = document.createElement("li");
+    empty.className = "empty";
+    empty.textContent = "No posts yet. A saved draft shows up here as Draft. Publish writes Posted, Failed, Rate limited, or Needs review from the platform response.";
+    list.append(empty);
+    return;
+  }
+  for (const post of rows) {
+    const item = document.createElement("li");
+    const title = document.createElement("strong");
+    title.textContent = String(post.title || post.caption || post.description || post.id || "Post");
+    const pill = document.createElement("span");
+    pill.className = post.result_source === "mock" || publishMode === "mock" ? "pill mock" : "pill";
+    pill.textContent = outcomeLabel(post);
+    const meta = document.createElement("div");
+    meta.className = "meta";
+    const bits = [post.platform || "unknown", sourceLabel(post)];
+    if (post.privacy_status) bits.push(post.privacy_status);
+    if (post.platform_post_id) bits.push(post.platform_post_id);
+    meta.textContent = bits.join(" · ");
+    item.append(title, pill, meta);
+    if (post.publish_note) {
+      const note = document.createElement("p");
+      note.className = "hint";
+      note.textContent = post.publish_note;
+      item.append(note);
+    }
+    if (post.error?.message) {
+      const err = document.createElement("p");
+      err.className = "hint";
+      err.textContent = post.error.message;
+      item.append(err);
+    }
+    if (post.published_url) {
+      const link = document.createElement("a");
+      link.href = post.published_url;
+      link.textContent = post.published_url;
+      link.rel = "noreferrer";
+      item.append(link);
+    }
+    list.append(item);
+  }
+}
+
 function renderStatus(data) {
   latestStatus = data;
   const dispatchHonesty = document.getElementById("dispatch-honesty");
   if (dispatchHonesty) dispatchHonesty.textContent = DISPATCH_HONESTY;
+  renderMode(data);
+  renderResults(data.recent_posts, data.publish_mode);
 
   const byPlatform = new Map((data.connections || []).map((row) => [row.platform, row]));
   networkList.innerHTML = NETWORKS.map((network) => {
@@ -161,6 +253,27 @@ function renderStatus(data) {
   }).join("");
 
   redirectUri.textContent = data.oauth_redirect_uri || "http://127.0.0.1:47831/oauth/callback";
+  const googleRedirect = document.getElementById("google-redirect-uri");
+  if (googleRedirect) googleRedirect.textContent = data.google_redirect_uri || "http://127.0.0.1:47831";
+  const readiness = document.getElementById("youtube-readiness");
+  if (readiness) {
+    readiness.textContent = data.oauth_ready?.google
+      ? `Google client saved on this computer. Connect YouTube opens Google. Loopback redirect: ${googleRedirect?.textContent || "http://127.0.0.1:47831"}. New drafts stay private unless you change them.`
+      : youtubeSetupMessage(data.google_redirect_uri);
+  }
+  const metaReady = document.getElementById("meta-readiness");
+  if (metaReady) {
+    const metaErrors = data.oauth_check?.meta?.errors || [];
+    metaReady.textContent = data.oauth_ready?.meta
+      ? "Meta app saved on this computer. Connect Meta opens Facebook. Instagram publishes only when privacy is Public."
+      : metaErrors[0] || "Meta sign-in needs META_APP_ID and META_APP_SECRET saved on this computer. PostPath does not include a Meta app.";
+  }
+  const oauthErrors = document.getElementById("oauth-errors");
+  if (oauthErrors) {
+    const problems = [...(data.oauth_check?.google?.errors || []), ...(data.oauth_check?.meta?.errors || [])];
+    oauthErrors.hidden = problems.length === 0;
+    oauthErrors.textContent = problems.join(" ");
+  }
   const cursor = data.cursor?.installed ? "PostPath enabled in Cursor" : "PostPath not enabled in Cursor yet";
   pathMeta.textContent = `${cursor} · vault ${data.home || ""} · media ${data.media_dir || ""}`;
 
@@ -182,7 +295,7 @@ function renderStatus(data) {
   if (data.next_step === "save_apps") {
     connectHint.textContent = "Save at least one provider’s credentials below, then connect.";
   } else if (data.cursor && !data.cursor.installed) {
-    connectHint.textContent = "Connect accounts, then click Enable in Cursor so any AI can use them.";
+    connectHint.textContent = "Connect accounts, then click Enable in Cursor so Cursor can use them.";
   } else {
     connectHint.textContent = "Connect opens each configured OAuth provider in order. Bluesky uses the form below.";
   }
@@ -222,13 +335,22 @@ scheduledList.addEventListener("click", async (event) => {
   }
 });
 
-document.getElementById("copy-redirect").addEventListener("click", async () => {
+async function copyText(value, label) {
   try {
-    await navigator.clipboard.writeText(redirectUri.textContent);
-    showToast("Redirect URI copied");
+    await navigator.clipboard.writeText(value);
+    showToast(`${label} copied`);
   } catch {
     showToast("Copy failed — select the URI manually", true);
   }
+}
+
+document.getElementById("copy-redirect").addEventListener("click", () => {
+  copyText(redirectUri.textContent, "Redirect URI");
+});
+
+document.getElementById("copy-google-redirect").addEventListener("click", () => {
+  const node = document.getElementById("google-redirect-uri");
+  copyText(node?.textContent || "", "Google loopback URI");
 });
 
 document.getElementById("connect-form").addEventListener("submit", async (event) => {
@@ -836,8 +958,10 @@ guideNext.addEventListener("click", () => {
 
 document.getElementById("connect-youtube").addEventListener("click", async () => {
   const button = document.getElementById("connect-youtube");
-  if (!latestStatus?.oauth_ready?.google) {
-    showToast(YOUTUBE_APP_MISSING, true);
+  const plan = connectPlan("youtube", latestStatus || {});
+  if (plan.action === "blocked") {
+    showToast(plan.message || YOUTUBE_APP_MISSING, true);
+    document.getElementById("apps-title")?.scrollIntoView();
     return;
   }
   button.disabled = true;
@@ -888,6 +1012,7 @@ youtubeForm.addEventListener("submit", async (event) => {
         platform: "youtube",
         title: String(form.get("title") || ""),
         description: String(form.get("description") || ""),
+        tags: String(form.get("tags") || ""),
         privacy_status: String(form.get("privacy_status") || "private"),
         media_path: mediaPath || undefined,
         media_content_type: file && file.type ? file.type : "video/mp4",
@@ -921,13 +1046,121 @@ publishDraftButton.addEventListener("click", async () => {
       body: JSON.stringify({ post_id: currentDraftId }),
     });
     const url = data.result?.published_url || data.post?.published_url || "";
+    const outcome = data.post?.outcome || data.post?.status || "finished";
+    const source = data.post?.result_source === "mock" ? "MOCK — not sent. " : "";
     draftResult.textContent = url
-      ? `Published ${data.post?.privacy_status || privacy}. Open ${url} and confirm it, then delete it on YouTube when the check is done.`
-      : "Publish finished without a video URL. Check the channel before trying again.";
-    showToast("Publish finished");
+      ? `${source}${outcomeLabel(data.post)} ${data.post?.privacy_status || privacy}. ${url}`
+      : `${source}${outcome}. ${data.post?.publish_note || "Check the Results list for the platform response."}`;
+    renderStatus(data);
+    showToast(data.post?.result_source === "mock" ? "Mock result saved" : "Publish finished");
   } catch (error) {
     showToast(error.message, true);
     publishDraftButton.disabled = false;
+    refresh().catch(() => {});
+  }
+});
+
+const metaForm = document.getElementById("meta-form");
+const publishMetaButton = document.getElementById("publish-meta");
+const metaResult = document.getElementById("meta-result");
+let currentMetaDraftId = "";
+
+document.getElementById("connect-meta").addEventListener("click", async () => {
+  const button = document.getElementById("connect-meta");
+  if (!latestStatus?.oauth_ready?.meta) {
+    showToast(document.getElementById("meta-readiness")?.textContent || "Save the Meta app id and secret first.", true);
+    document.getElementById("apps-title")?.scrollIntoView();
+    return;
+  }
+  button.disabled = true;
+  try {
+    const data = await api("/api/connect", {
+      method: "POST",
+      body: JSON.stringify({
+        id: profileId.value.trim(),
+        name: profileName.value.trim() || profileId.value.trim(),
+        platforms: ["meta"],
+      }),
+    });
+    renderStatus(data);
+    showToast(data.connect?.message || "Continue Meta sign-in in your browser");
+  } catch (error) {
+    showToast(error.message, true);
+  } finally {
+    button.disabled = false;
+  }
+});
+
+metaForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const button = document.getElementById("save-meta-draft");
+  button.disabled = true;
+  publishMetaButton.disabled = true;
+  try {
+    const form = new FormData(metaForm);
+    const file = form.get("video");
+    if (!file || !file.size) throw new Error("Choose the video file before saving the draft.");
+    const saved = await api("/api/media", {
+      method: "POST",
+      headers: {
+        "content-type": file.type || "application/octet-stream",
+        "x-postpath-filename": file.name || "video.mp4",
+      },
+      body: file,
+    });
+    const platform = String(form.get("platform") || "facebook");
+    const data = await api("/api/draft", {
+      method: "POST",
+      body: JSON.stringify({
+        id: profileId.value.trim(),
+        name: profileName.value.trim() || profileId.value.trim(),
+        platform,
+        caption: String(form.get("caption") || ""),
+        title: String(form.get("caption") || "").slice(0, 100),
+        privacy_status: String(form.get("privacy_status") || "private"),
+        media_path: saved.media.filename,
+        media_content_type: file.type || "video/mp4",
+      }),
+    });
+    currentMetaDraftId = data.post?.id || "";
+    metaResult.textContent = currentMetaDraftId
+      ? `Draft ${currentMetaDraftId} saved for ${platform}. Privacy is ${data.post?.privacy_status || "private"}. It is not published.`
+      : "Draft was not saved.";
+    publishMetaButton.disabled = !currentMetaDraftId;
+    showToast("Draft saved on this computer");
+  } catch (error) {
+    showToast(error.message, true);
+  } finally {
+    button.disabled = false;
+  }
+});
+
+publishMetaButton.addEventListener("click", async () => {
+  if (!currentMetaDraftId) return;
+  const privacy = String(new FormData(metaForm).get("privacy_status") || "private");
+  const platform = String(new FormData(metaForm).get("platform") || "facebook");
+  if (platform === "instagram" && privacy !== "public") {
+    showToast("Instagram Reels publish is public. Choose Public to upload it.", true);
+    return;
+  }
+  if (privacy === "public") {
+    const proceed = window.confirm(`This ${platform} draft is public. Publish it anyway?`);
+    if (!proceed) return;
+  }
+  publishMetaButton.disabled = true;
+  try {
+    const data = await api("/api/publish", {
+      method: "POST",
+      body: JSON.stringify({ post_id: currentMetaDraftId }),
+    });
+    const source = data.post?.result_source === "mock" ? "MOCK — not sent. " : "";
+    metaResult.textContent = `${source}${outcomeLabel(data.post)}. ${data.post?.publish_note || ""}`.trim();
+    renderStatus(data);
+    showToast(data.post?.result_source === "mock" ? "Mock result saved" : "Publish finished");
+  } catch (error) {
+    showToast(error.message, true);
+    publishMetaButton.disabled = false;
+    refresh().catch(() => {});
   }
 });
 

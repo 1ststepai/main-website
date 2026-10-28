@@ -40,19 +40,34 @@
             <button type="button" class="btn ghost" id="cursor-btn">Enable in Cursor</button>
             <button type="button" class="btn ghost" id="reopen-guide">Setup guide</button>
           </div>
-          <p class="hint" id="connect-hint">Connect YouTube below for the first post. Enable in Cursor only if an AI assistant should use the same saved accounts.</p>
+          <p class="hint" id="connect-hint">Connect YouTube below for the first post. Enable in Cursor only if Cursor should use the same saved accounts.</p>
         </form>
       </header>
+
+      <p id="publish-mode" class="mode-banner live" role="status">
+        Live mode. Posted, failed, rate limited, and needs review come from the platform response after you publish. Live publishing has not been verified on a real account yet.
+      </p>
 
       <section class="panel" aria-labelledby="youtube-title">
         <div class="panel-head">
           <h2 id="youtube-title">YouTube</h2>
           <p class="panel-note">Private unless you change it</p>
         </div>
-        <p class="hint">
-          YouTube sign-in is not included in this preview. Customers do not create a Google Cloud app.
-          App credentials below are for an owner private test. This copy is an unsigned internal preview.
-          Leave Windows SmartScreen and macOS Gatekeeper on.
+        <p class="hint" id="youtube-readiness">
+          YouTube sign-in needs a Google OAuth Desktop client saved on this computer. PostPath does not include a Google app.
+        </p>
+        <ol class="steps" id="youtube-steps">
+          <li>In Google Cloud Console, create or open a project and enable YouTube Data API v3.</li>
+          <li>OAuth consent screen: add the scope youtube.upload. While the app is in Testing, add your Google account as a test user. Refresh tokens in Testing last about seven days.</li>
+          <li>Create an OAuth client of type Desktop app. Copy the client id and client secret into App credentials below. Do not commit them.</li>
+          <li>If Google asks for a redirect URI, paste the Google loopback URI. Desktop clients often allow http://127.0.0.1 with this port already.</li>
+          <li>Connect YouTube, then save a draft. Privacy starts at Private. A vertical MP4 of 3 minutes or less is what YouTube treats as a Short after processing. PostPath does not crop the file.</li>
+          <li>An unverified app can be limited to private uploads. videos.insert costs 1,600 quota units. A new project’s default is 10,000 units per day.</li>
+        </ol>
+        <p class="redirect">
+          Google loopback URI:
+          <code id="google-redirect-uri">http://127.0.0.1:47831</code>
+          <button type="button" class="btn tiny" id="copy-google-redirect">Copy</button>
         </p>
         <div class="cta-row">
           <button type="button" class="btn secondary" id="connect-youtube">Connect YouTube</button>
@@ -60,6 +75,7 @@
         <form id="youtube-form" class="oauth-form">
           <label>Title <input name="title" maxlength="100" required /></label>
           <label>Description <textarea name="description" maxlength="5000" rows="4"></textarea></label>
+          <label>Tags <input name="tags" placeholder="comma, separated" maxlength="400" /></label>
           <label>Privacy
             <select name="privacy_status">
               <option value="private" selected>Private</option>
@@ -74,8 +90,57 @@
           </div>
         </form>
         <p class="hint" id="draft-result">No draft yet. Publishing uses the draft you just saved.</p>
-        <p class="hint">Uninstalling PostPath leaves saved accounts in place. Remove them only with the button below, then quit and open PostPath again.</p>
+        <p class="hint">Uninstalling PostPath leaves saved accounts in place. Remove them only with the button below, then quit and open PostPath again. This installer is unsigned. Leave Windows SmartScreen and macOS Gatekeeper on.</p>
         <button type="button" class="btn danger" id="forget-vault">Remove saved accounts</button>
+      </section>
+
+      <section class="panel" aria-labelledby="meta-title">
+        <div class="panel-head">
+          <h2 id="meta-title">Facebook and Instagram</h2>
+          <p class="panel-note">Page draft unless you choose Public</p>
+        </div>
+        <p class="hint" id="meta-readiness">
+          Meta sign-in needs your Meta app id and app secret saved on this computer. PostPath does not include a Meta app.
+        </p>
+        <ol class="steps">
+          <li>Create a Meta app, type Business. Add Facebook Login and the Instagram product.</li>
+          <li>Add the Facebook user as an app admin, developer, or tester. In Development mode that is enough for your own Page. Other people’s accounts need App Review for instagram_content_publish and pages_manage_posts.</li>
+          <li>Connect a Facebook Page you manage. For Instagram, the account must be a professional (Business or Creator) account linked to that Page.</li>
+          <li>Valid OAuth redirect URI: the provider URI below. Save META_APP_ID and META_APP_SECRET in App credentials.</li>
+          <li>A video file on this computer is uploaded to Meta with their resumable upload. Facebook stays an unpublished Page Reel unless privacy is Public. Instagram has no private publish: PostPath will not upload it until you set Public.</li>
+        </ol>
+        <div class="cta-row">
+          <button type="button" class="btn secondary" id="connect-meta">Connect Meta</button>
+        </div>
+        <form id="meta-form" class="oauth-form">
+          <label>Network
+            <select name="platform">
+              <option value="facebook" selected>Facebook Page Reel</option>
+              <option value="instagram">Instagram Reel</option>
+            </select>
+          </label>
+          <label>Caption <textarea name="caption" maxlength="2200" rows="3"></textarea></label>
+          <label>Privacy
+            <select name="privacy_status">
+              <option value="private" selected>Private / unpublished</option>
+              <option value="public">Public</option>
+            </select>
+          </label>
+          <label>Video file <input name="video" type="file" accept="video/mp4,video/*" /></label>
+          <div class="cta-row">
+            <button type="submit" class="btn primary" id="save-meta-draft">Save draft</button>
+            <button type="button" class="btn secondary" id="publish-meta" disabled>Publish this draft</button>
+          </div>
+        </form>
+        <p class="hint" id="meta-result">No Meta draft yet.</p>
+      </section>
+
+      <section class="panel" aria-labelledby="results-title">
+        <div class="panel-head">
+          <h2 id="results-title">Results</h2>
+          <p class="panel-note" id="results-note">From the platform response</p>
+        </div>
+        <ul class="result-list" id="result-list"></ul>
       </section>
 
       <section class="panel" aria-labelledby="status-title">
@@ -116,13 +181,15 @@
       <section class="panel" aria-labelledby="apps-title">
         <div class="panel-head">
           <h2 id="apps-title">App credentials</h2>
-          <p class="panel-note">Owner private test. Customers do not paste app secrets here.</p>
+          <p class="panel-note">Saved only in the local oauth.env file. Not sent to 1stStep.</p>
         </div>
+        <p class="hint" id="oauth-errors" hidden></p>
         <p class="redirect">
-          Redirect URI for every app:
+          Redirect URI for Meta, X, LinkedIn, and the other browser logins:
           <code id="redirect-uri">http://127.0.0.1:47831/oauth/callback</code>
           <button type="button" class="btn tiny" id="copy-redirect">Copy</button>
         </p>
+        <p class="hint">A blank secret leaves the saved secret in place. Clear the client id to remove that Google or Meta app from this computer.</p>
         <form id="oauth-form" class="oauth-form">
           <fieldset>
             <legend>Google / YouTube + Business</legend>

@@ -5,7 +5,9 @@ import { pipeline } from "node:stream/promises";
 import { dirname, extname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { DEFAULT_DESK_PORT } from "../home.js";
-import { loadOAuthEnvFile, publicOAuthConfig, saveOAuthEnvFile, parseEnvFile } from "../envFile.js";
+import { OAUTH_KEYS, loadOAuthEnvFile, mergeOAuthInput, publicOAuthConfig, saveOAuthEnvFile, parseEnvFile } from "../envFile.js";
+import { assessOAuthValues, assertOAuthValues } from "../oauth/credentials.js";
+import { displayOutcome } from "../publish/outcome.js";
 import { installCursorMcp, readCursorMcpStatus } from "../cursorConfig.js";
 import { openDesktopApp } from "../openApp.js";
 import { mcpError } from "../errors.js";
@@ -112,10 +114,20 @@ function serveStatic(urlPath, res) {
   res.end(body);
 }
 
+function credentialValues(fileValues, env) {
+  const merged = { ...fileValues };
+  for (const key of OAUTH_KEYS) {
+    const fromEnv = String(env[key] || "").trim();
+    if (fromEnv) merged[key] = fromEnv;
+  }
+  return merged;
+}
+
 function oauthReady(values) {
+  const check = assessOAuthValues(values);
   return {
-    google: Boolean(values.GOOGLE_OAUTH_CLIENT_ID && values.GOOGLE_OAUTH_CLIENT_SECRET),
-    meta: Boolean(values.META_APP_ID && values.META_APP_SECRET),
+    google: check.google.configured,
+    meta: check.meta.configured,
     tiktok: Boolean(values.TIKTOK_CLIENT_KEY && values.TIKTOK_CLIENT_SECRET),
     linkedin: Boolean(values.LINKEDIN_CLIENT_ID && values.LINKEDIN_CLIENT_SECRET),
     x: Boolean(values.X_CLIENT_ID && values.X_CLIENT_SECRET),
@@ -169,9 +181,10 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
 
   function snapshot() {
     loadOAuthEnvFile(homePaths, env);
-    const envValues = existsSync(homePaths.oauthEnv)
+    const fileValues = existsSync(homePaths.oauthEnv)
       ? parseEnvFile(readFileSync(homePaths.oauthEnv, "utf8"))
       : {};
+    const envValues = credentialValues(fileValues, env);
     const status = engine.publicStatus();
     const cursor = readCursorMcpStatus();
     const ready = oauthReady(envValues);
@@ -182,6 +195,13 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
       home: status.home,
       media_dir: status.media_dir,
       oauth_redirect_uri: status.oauth_redirect_uri || `http://127.0.0.1:${env.SOCIAL_MCP_OAUTH_PORT || 47831}/oauth/callback`,
+      google_redirect_uri: status.google_redirect_uri || `http://127.0.0.1:${env.SOCIAL_MCP_OAUTH_PORT || 47831}`,
+      publish_mode: status.publish_mode || "live",
+      oauth_check: assessOAuthValues(envValues),
+      recent_posts: engine.store.listPosts().slice(0, 30).map((post) => ({
+        ...post,
+        outcome: post.outcome || displayOutcome(post),
+      })),
       desk_url: `http://127.0.0.1:${port}/`,
       profiles: status.profiles,
       connections: status.connections,
@@ -221,6 +241,11 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
 
       if (req.method === "POST" && url.pathname === "/api/oauth-config") {
         const body = await readJson(req);
+        const current = existsSync(homePaths.oauthEnv)
+          ? parseEnvFile(readFileSync(homePaths.oauthEnv, "utf8"))
+          : {};
+        const merged = mergeOAuthInput(current, body);
+        assertOAuthValues(merged);
         const saved = saveOAuthEnvFile(body, homePaths);
         loadOAuthEnvFile(homePaths, env);
         sendJson(res, 200, { ok: true, oauth: publicOAuthConfig(saved.values), ...snapshot() });
@@ -284,8 +309,15 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
           title: body.title,
           description: body.description,
           caption: body.caption,
+          tags: Array.isArray(body.tags)
+            ? body.tags
+            : String(body.tags || "")
+                .split(",")
+                .map((tag) => tag.trim())
+                .filter(Boolean),
           privacy_status: body.privacy_status,
           media_path: body.media_path,
+          media_url: body.media_url,
           media_content_type: body.media_content_type,
         });
         sendJson(res, 200, { ok: true, ...created, ...snapshot() });

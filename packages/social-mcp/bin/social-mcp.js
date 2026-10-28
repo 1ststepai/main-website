@@ -35,9 +35,12 @@ async function main() {
 
   if (command === "init") {
     const homePaths = paths();
-    const example = `# ${PRODUCT_NAME} OAuth apps — local only.
-# Redirect URI for every provider:
+    const example = `# ${PRODUCT_NAME} OAuth apps — local only. Do not commit.
+# Google Desktop loopback (no path):
+# http://127.0.0.1:47831
+# Other providers:
 # http://127.0.0.1:47831/oauth/callback
+# GOOGLE_OAUTH_REDIRECT_URI=http://127.0.0.1:47831/oauth/callback
 
 GOOGLE_OAUTH_CLIENT_ID=
 GOOGLE_OAUTH_CLIENT_SECRET=

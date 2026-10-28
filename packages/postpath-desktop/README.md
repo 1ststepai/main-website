@@ -83,7 +83,7 @@ Agents continue to use the MCP server. The desktop shell is optional chrome for 
 
 ## Signing
 
-Blocked in this environment. There is no Apple Developer ID and no Windows Authenticode certificate here. Do not treat Gatekeeper or SmartScreen warnings as something this package bypasses.
+No certificate is stored in this repo. `scripts/build-windows-installer.sh` signs only when `CSC_LINK` is a path to a `.pfx`, `CSC_KEY_PASSWORD` is set, and `osslsigncode` can verify the installer. Otherwise the output stays the unsigned internal preview and SmartScreen stays on. Buy or provide an Authenticode certificate (EV if the goal is fewer SmartScreen warnings). Do not commit the certificate. There is still no Apple Developer ID here, so there is no Mac app and Gatekeeper stays on.
 
 ## Tests
 
