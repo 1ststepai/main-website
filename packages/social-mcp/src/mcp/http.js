@@ -20,6 +20,7 @@ import {
   validVerifier,
 } from "./auth.js";
 import { originAllowed, publicBase } from "./clients.js";
+import { ownerPinConfigured, readOwnerAuth, verifyOwnerPin } from "../pilot/ownerAuth.js";
 
 const sessions = new Map();
 
@@ -114,7 +115,7 @@ function metadata(base) {
   };
 }
 
-function consentPage(consent, client) {
+function consentPage(consent, client, { pinRequired = false } = {}) {
   const boxes = (consent.requested_scopes || [])
     .map((scope) => {
       const checked = DEFAULT_SCOPES.includes(scope) ? "checked" : "";
@@ -134,6 +135,7 @@ p{color:#b2bed6} .row{display:flex;gap:10px;margin:10px 0} button{font:inherit;b
 <p><strong>${esc(client.client_name)}</strong> is asking to use PostPath on this computer. Logins stay here. Nothing is published unless you tick queue:approve.</p>
 <form method="post" action="/oauth/authorize/decision">
 <input type="hidden" name="consent_id" value="${esc(consent.id)}" />
+${pinRequired ? `<label class="row">Owner PIN <input type="password" name="owner_pin" autocomplete="current-password" required /></label>` : ""}
 ${boxes}
 <p><button class="yes" name="decision" value="approve">Approve</button><button class="no" name="decision" value="deny">Deny</button></p>
 </form></main></body></html>`;
@@ -172,11 +174,18 @@ async function handleAuthorize(req, res, ctx) {
     resource: ctx.resource,
     state,
   });
-  sendHtml(res, 200, consentPage(consent, client));
+  const pinRequired = ownerPinConfigured(ctx.engine.store.homePaths);
+  sendHtml(res, 200, consentPage(consent, client, { pinRequired }));
 }
 
 async function handleDecision(req, res, ctx) {
   const body = formOrJson(await readBody(req), req.headers["content-type"]);
+  if (ownerPinConfigured(ctx.engine.store.homePaths)) {
+    const record = readOwnerAuth(ctx.engine.store.homePaths);
+    if (!verifyOwnerPin(record, body.owner_pin)) {
+      return oauthError(res, 401, "owner_auth", "Owner PIN required.");
+    }
+  }
   const scopes = normalizeScopes([].concat(body.scope || []));
   const consent = takeConsent(ctx.store, String(body.consent_id || ""));
   if (!consent) return oauthError(res, 400, "invalid_request", "This approval expired. Start the connection again.");

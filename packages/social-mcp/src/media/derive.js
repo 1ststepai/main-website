@@ -1,7 +1,4 @@
-import { execFile } from "node:child_process";
-import { promisify } from "node:util";
-
-const exec = promisify(execFile);
+import { runFfmpeg } from "./audio.js";
 
 export async function deriveImage(source, dest, spec) {
   const sharp = (await import("sharp")).default;
@@ -17,12 +14,11 @@ export async function deriveVideo(source, dest, spec, duration) {
   const args = ["-y", "-i", source, "-vf", vf, "-an", "-c:v", "libx264", "-preset", "ultrafast", "-pix_fmt", "yuv420p"];
   if (duration) args.push("-t", String(duration));
   args.push(dest);
-  await exec("ffmpeg", args, { timeout: 180000 });
+  await runFfmpeg(args, { timeout: 180000 });
 }
 
 export async function writeSilentVideo(dest, { width, height, duration }) {
-  await exec(
-    "ffmpeg",
+  await runFfmpeg(
     [
       "-y",
       "-f",

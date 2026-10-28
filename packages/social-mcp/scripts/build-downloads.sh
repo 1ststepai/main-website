@@ -112,6 +112,23 @@ fi
 cd "${APP}"
 echo "Starting PostPath by 1stStep.ai developer preview __POSTPATH_VERSION__ (Node ${NODE_VER})..."
 echo "This is not a one-click installer. Node.js 20+ is required."
+apply_pilot_env() {
+  if [ -n "${SOCIAL_MCP_PILOT_MODE:-}" ]; then
+    return
+  fi
+  local vault="${SOCIAL_MCP_HOME:-${HOME}/.social-mcp}"
+  local file="${vault}/pilot.json"
+  if [ -f "$file" ] && grep -Eq '"pilot_mode"[[:space:]]*:[[:space:]]*true' "$file"; then
+    export SOCIAL_MCP_PILOT_MODE=1
+    export SOCIAL_MCP_DRAFT_ONLY=1
+    if [ -z "${SOCIAL_MCP_PUBLISH_MODE:-}" ]; then
+      export SOCIAL_MCP_PUBLISH_MODE=mock
+    fi
+    echo "pilot.json is on: starting in pilot mode. Publish stays off."
+  fi
+}
+apply_pilot_env
+
 if [ "${POSTPATH_NO_OPEN:-}" = "1" ]; then
   exec node ./bin/social-mcp.js app --no-open
 fi
@@ -119,6 +136,16 @@ exec node ./bin/social-mcp.js app
 EOF
 stamp_version "$MAC/Open PostPath.command"
 chmod +x "$MAC/Open PostPath.command"
+cat > "$MAC/Open PostPath Pilot.command" <<'EOF'
+#!/bin/bash
+# Start the broker desk: topic picker, drafts, approve. Nothing is published.
+export SOCIAL_MCP_PILOT_MODE=1
+export SOCIAL_MCP_DRAFT_ONLY=1
+export SOCIAL_MCP_PUBLISH_MODE=mock
+DIR="$(cd "$(dirname "$0")" && pwd)"
+exec "$DIR/Open PostPath.command"
+EOF
+chmod +x "$MAC/Open PostPath Pilot.command"
 cat > "$MAC/README.txt" <<'EOF'
 PostPath by 1stStep.ai — macOS developer preview __POSTPATH_VERSION__
 
@@ -130,6 +157,7 @@ Fresh install:
 1. Install Node.js 20+ from https://nodejs.org
 2. Unzip this folder somewhere you can write.
 3. Double-click "Open PostPath.command".
+   Broker pilot: double-click "Open PostPath Pilot.command" instead.
    If macOS blocks it, right-click the command file and choose Open.
 4. The first launch unpacks the app into ~/.postpath/app and runs npm install once.
 5. In the desk:
@@ -213,6 +241,21 @@ if (-not (Test-Path $entry)) {
   Write-Host "Relaunch: using existing app at $App"
 }
 
+function Enable-PilotFromFile {
+  if ($env:SOCIAL_MCP_PILOT_MODE) { return }
+  $vault = if ($env:SOCIAL_MCP_HOME) { $env:SOCIAL_MCP_HOME } else { Join-Path $env:USERPROFILE ".social-mcp" }
+  $file = Join-Path $vault "pilot.json"
+  if (-not (Test-Path -LiteralPath $file)) { return }
+  $rawJson = Get-Content -LiteralPath $file -Raw
+  if ($rawJson -match '"pilot_mode"\s*:\s*true') {
+    $env:SOCIAL_MCP_PILOT_MODE = "1"
+    $env:SOCIAL_MCP_DRAFT_ONLY = "1"
+    if (-not $env:SOCIAL_MCP_PUBLISH_MODE) { $env:SOCIAL_MCP_PUBLISH_MODE = "mock" }
+    Write-Host "pilot.json is on: starting in pilot mode. Publish stays off."
+  }
+}
+Enable-PilotFromFile
+
 Set-Location $App
 Write-Host "Starting PostPath by 1stStep.ai developer preview __POSTPATH_VERSION__ (Node $raw)..."
 Write-Host "This is not a one-click installer. Node.js 20+ is required."
@@ -243,6 +286,20 @@ if errorlevel 1 (
 )
 EOF
 stamp_version "$WIN/Open-PostPath.bat"
+cat > "$WIN/Open-PostPath-Pilot.bat" <<'EOF'
+@echo off
+setlocal
+title PostPath pilot
+cd /d "%~dp0"
+set SOCIAL_MCP_PILOT_MODE=1
+set SOCIAL_MCP_DRAFT_ONLY=1
+set SOCIAL_MCP_PUBLISH_MODE=mock
+echo.
+echo  PostPath pilot. Topic picker, drafts, and approve. Nothing is published.
+echo.
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0Open-PostPath.ps1"
+if errorlevel 1 pause
+EOF
 cat > "$WIN/README.txt" <<'EOF'
 PostPath by 1stStep.ai — Windows developer preview __POSTPATH_VERSION__
 
@@ -254,6 +311,7 @@ Fresh install:
 1. Install Node.js 20+ from https://nodejs.org
 2. Unzip this folder somewhere you can write.
 3. Double-click Open-PostPath.bat.
+   Broker pilot: double-click Open-PostPath-Pilot.bat instead.
 4. The first launch unpacks the app into %USERPROFILE%\.postpath\app and runs npm install once.
 5. In the desk:
    - Paste OAuth credentials → Save credentials

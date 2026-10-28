@@ -1,7 +1,6 @@
-import { execFile } from "node:child_process";
+import { runFfmpeg } from "./audio.js";
 import { readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
-import { promisify } from "node:util";
 import { mcpError } from "../errors.js";
 
 function redactSecrets(text, secrets) {
@@ -12,8 +11,6 @@ function redactSecrets(text, secrets) {
   }
   return out;
 }
-
-const exec = promisify(execFile);
 
 export const CLAUDE_MODEL = "claude-sonnet-4-5";
 
@@ -271,7 +268,7 @@ export async function jpegForReview(file) {
 }
 
 export async function frameForReview(videoPath, dest) {
-  await exec("ffmpeg", ["-y", "-ss", "0.2", "-i", videoPath, "-frames:v", "1", dest], { timeout: 20000 });
+  await runFfmpeg(["-y", "-ss", "0.2", "-i", videoPath, "-frames:v", "1", dest], { timeout: 20000 });
   return dest;
 }
 

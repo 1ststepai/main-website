@@ -8,6 +8,7 @@ import { defaultPresets } from "./multiPost.js";
 export const POST_STATUSES = [
   "draft",
   "scheduled",
+  "approved",
   "publishing",
   "published",
   "handed_off",

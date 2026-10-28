@@ -17,6 +17,7 @@ import { publishRedditPost } from "./publish/reddit.js";
 import { publishSnapchatScaffold, publishWhatsAppScaffold } from "./publish/restricted.js";
 import { validateDraftForPublish } from "./publish/validate.js";
 import { displayOutcome, publishMode } from "./publish/outcome.js";
+import { isPilotMode, PILOT_PUBLISH_MESSAGE } from "./pilot/config.js";
 import { assertActionAllowed, assertProfileAllowed, getEntitlement } from "./license.js";
 import {
   applyPresets,
@@ -76,9 +77,19 @@ function optionalMediaPath(value, mediaRoot) {
   return resolveSafeMediaPath(String(value), mediaRoot);
 }
 
-export function createEngine({ home, env = process.env, fetchImpl = fetch, now = () => Date.now() } = {}) {
+export function createEngine({ home, env = process.env, fetchImpl = fetch, now = () => Date.now(), publishers = null } = {}) {
   const store = createStore({ home, env, now });
   const oauth = createOAuthRuntime({ store, env, fetchImpl });
+  const publishStats = { calls: 0 };
+
+  function pilotOn() {
+    return isPilotMode(env, store.homePaths);
+  }
+
+  function refusePilotPublish() {
+    if (!pilotOn()) return;
+    throw mcpError("pilot_publish_disabled", PILOT_PUBLISH_MESSAGE, 403);
+  }
 
   async function trackedFetch(url, init) {
     const method = String(init?.method || "GET").toUpperCase();
@@ -370,7 +381,9 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
       connections: store.listConnections(),
       oauth_redirect_uri: oauth.redirectUri,
       google_redirect_uri: oauth.googleRedirectUri,
-      publish_mode: publishMode(env),
+      publish_mode: pilotOn() ? "disabled" : publishMode(env),
+      pilot_mode: pilotOn(),
+      publisher_calls: publishStats.calls,
       platforms: PLATFORMS,
     };
   }
@@ -627,6 +640,7 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
   }
 
   async function schedulePost({ post_id, scheduled_at }) {
+    refusePilotPublish();
     const post = store.getPost(post_id);
     if (!post) throw mcpError("not_found", "Post not found.", 404);
     if (!["draft", "scheduled", "failed"].includes(post.status)) {
@@ -732,6 +746,10 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
   }
 
   async function dispatchPublish(post, connection, secrets, config) {
+    publishStats.calls += 1;
+    if (publishers?.[post.platform]) {
+      return publishers[post.platform]({ post, connection, secrets, config, fetchImpl: trackedFetch });
+    }
     if (publishMode(env) === "mock") return mockPublish(post);
     const onSecrets = async (next) => store.updateSecrets(post.profile_id, post.platform, next);
     const onNeedsReconnect = async () => {
@@ -921,6 +939,7 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
   }
 
   async function approveBundle({ bundle_id, scheduled_at, instagram_public_confirmed } = {}) {
+    refusePilotPublish();
     const bundle = store.getBundle(bundle_id);
     if (!bundle) throw mcpError("not_found", "Draft not found.", 404);
     if (!["draft", "scheduled", "partial"].includes(bundle.status)) {
@@ -1039,6 +1058,7 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
   }
 
   async function publishPost({ post_id, force = false, acknowledge = false, claimFrom = null } = {}) {
+    refusePilotPublish();
     const post = store.getPost(post_id);
     if (!post) throw mcpError("not_found", "Post not found.", 404);
     assertActionAllowed("publish", getEntitlement(env));
@@ -1116,6 +1136,7 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
   }
 
   async function publishDue({ profile_id, limit = 5 } = {}) {
+    if (pilotOn()) return { count: 0, results: [], quarantined: [], skipped: "pilot_publish_disabled" };
     const quarantined = quarantinePublishing(profile_id);
     const due = store
       .listPosts({ profileId: profile_id, status: "scheduled" })
@@ -1307,6 +1328,7 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
     listPosts,
     publishPost,
     publishDue,
+    publisherCalls: () => publishStats.calls,
     statuses: POST_STATUSES,
   };
 }

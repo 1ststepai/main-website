@@ -7,6 +7,8 @@ import { formatToolError, formatToolResult, mcpError } from "../errors.js";
 import { paths, PLATFORMS } from "../home.js";
 import { loadOAuthEnvFile } from "../envFile.js";
 import { POSTPATH_INSTRUCTIONS } from "./instructions.js";
+import { DRAFT_ONLY_SCOPES } from "./clients.js";
+import { isDraftOnly } from "../pilot/config.js";
 
 const outputSchema = z
   .object({
@@ -93,9 +95,10 @@ function safeMediaName(name) {
   return clean;
 }
 
-export function createSocialMcpServer({ engine, auth } = {}) {
-  if (!engine) loadOAuthEnvFile(paths(), process.env);
-  const eng = engine || createEngine();
+export function createSocialMcpServer({ engine, auth, env = process.env } = {}) {
+  if (!engine) loadOAuthEnvFile(paths(), env);
+  const eng = engine || createEngine({ env });
+  const gate = auth === undefined ? (isDraftOnly(env, eng.store.homePaths) ? { scopes: [...DRAFT_ONLY_SCOPES] } : null) : auth;
   const server = new McpServer(
     { name: "postpath", version: "0.1.0" },
     {
@@ -104,13 +107,22 @@ export function createSocialMcpServer({ engine, auth } = {}) {
     },
   );
 
+  function scopeAllowed(scope) {
+    if (!gate) return true;
+    const scopes = gate.scopes || [];
+    if (scopes.includes(scope)) return true;
+    if (scope === "accounts:write" && scopes.includes("owner")) return true;
+    return false;
+  }
+
   function gated(scope, handler) {
     return async (args) => {
       try {
-        if (auth && !auth.scopes?.includes(scope)) {
+        if (!scopeAllowed(scope)) {
+          const extra = scope === "queue:approve" ? " queue:approve is off until it is ticked." : "";
           throw mcpError(
             "insufficient_scope",
-            `This call needs the ${scope} scope. Open ${auth.connectUrl || "the PostPath desk"} and approve it. queue:approve is off until it is ticked.`,
+            `This call needs the ${scope} scope. Open ${gate.connectUrl || "the PostPath desk"} and approve it.${extra}`,
           );
         }
         return formatToolResult(await handler(args));
@@ -146,7 +158,7 @@ export function createSocialMcpServer({ engine, auth } = {}) {
     "upsert_profile",
     "Save brand profile",
     "Create or update a brand profile, including presets for default platforms, privacy, hashtags, and a caption footer.",
-    "drafts:write",
+    "accounts:write",
     { idempotent: true },
     {
       id: z.string().min(2).max(64).describe("Stable profile id, such as acme or 1ststep-ai."),
@@ -179,7 +191,7 @@ export function createSocialMcpServer({ engine, auth } = {}) {
     "connect_accounts",
     "Start account sign-in",
     "Open the browser so the user can sign in. One call chains the networks that are not connected yet: YouTube, Facebook, Instagram, TikTok, LinkedIn, X, Threads, Pinterest, Google Business, Reddit, and Snapchat. Bluesky uses connect_bluesky in the same Connect flow. This does not publish.",
-    "drafts:write",
+    "accounts:write",
     { open: true },
     {
       profile_id: z.string().min(2).max(64).describe("Profile that will own the connection."),
@@ -192,7 +204,7 @@ export function createSocialMcpServer({ engine, auth } = {}) {
     "connect_bluesky",
     "Connect Bluesky",
     "Store a Bluesky handle and app password for a profile. Use this from the same Connect flow as connect_accounts. This does not publish.",
-    "drafts:write",
+    "accounts:write",
     { open: true },
     {
       profile_id: z.string().min(2).max(64).describe("Profile that will own the connection."),
@@ -336,7 +348,7 @@ export function createSocialMcpServer({ engine, auth } = {}) {
     { read: true, idempotent: true },
     {
       profile_id: z.string().min(2).max(64).optional().describe("Limit to one profile."),
-      status: z.enum(["draft", "scheduled", "publishing", "published", "handed_off", "failed", "needs_review"]).optional().describe("Limit to one status."),
+      status: z.enum(["draft", "scheduled", "approved", "publishing", "published", "handed_off", "failed", "needs_review"]).optional().describe("Limit to one status."),
     },
     async (args) => eng.listPosts(args),
   );
