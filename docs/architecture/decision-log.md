@@ -1,5 +1,50 @@
 # Architecture Decision Log
 
+## 2026-10-28: Suggested times come from the brand's own audience
+
+- **Status / owner:** Draft, not deployed. Evan owns any reconnect and any live post.
+- **Decision:** Suggested posting times are read from a brand's own platform audience data when that login already has the scope, then from that brand's own posts. A missing scope is shown as "Needs permission to read audience data" and is not added. Facebook's hourly page metric is deprecated and is not requested. There is no generic best-time table. The owner adds the slot.
+- **Rationale:** A borrowed internet table would look like this account's data. The current logins do not include the analytics scopes, and adding one requires the owner to reconnect.
+- **Affected systems:** PostPath desk schedule panel and the get_best_times tool. No deploy, no new OAuth scope, and no live account connection.
+- **Verification:** Mocked responses for a granted Instagram hour map, a missing scope, a short post history, a deprecated Facebook metric, and YouTube views by day.
+- **Rollback:** Leave this draft unmerged.
+
+## 2026-10-28: A brand posting plan fills the existing schedule
+
+- **Status / owner:** Draft, not deployed. Evan owns any live post.
+- **Decision:** A brand can store recurring slots and an IANA time zone on its profile. Approving a post for the next open slot uses the existing scheduled-post path. Approve and post now still sends immediately. A scheduled time more than 2 hours in the past is marked missed, reschedule? and is not sent on its own. Unconfirmed posts are not scheduled.
+- **Rationale:** The due checker already sends posts while PostPath is open. The plan only chooses the time.
+- **Affected systems:** PostPath desk schedule panel and MCP schedule tools. No deploy and no live publish.
+- **Verification:** New York clock-change times, brand scoping, a missed slot that is not sent, and a draft that stays unscheduled without confirm.
+- **Rollback:** Leave this draft unmerged.
+
+## 2026-10-28: The assistant is told about the queue, and the owner still approves
+
+- **Status / owner:** Draft, not deployed. Evan owns any live approval.
+- **Decision:** `get_queue_status` lists drafts waiting for the owner, drafts that fail a check, scheduled posts, and failed publishes, per brand or for every brand. Server instructions tell the assistant to read that at the start of a session and after saving drafts. Tool results include a one-line queue note. The queue is also an MCP resource. Update notifications are sent only when the connected client says it supports resources; otherwise the send is skipped. There is no auto-approve. A per-brand "let my assistant approve" switch is not added, because approval already depends on the owner's queue:approve scope, the Instagram public confirmation, and the vidIQ check.
+- **Rationale:** The assistant can move drafts forward by editing them. Publishing stays with the owner.
+- **Affected systems:** PostPath MCP tools, desk brand switcher, and approval queue. No deploy and no live publish.
+- **Verification:** Queue notes on tool results, brand scoping, and drafts that stay unpublished until an approval call.
+- **Rollback:** Leave this draft unmerged.
+
+## 2026-10-28: An interview stays on the brand and becomes drafts
+
+- **Status / owner:** Draft, not deployed. Evan owns any assistant that writes the posts.
+- **Decision:** Each brand can store typed interview answers, optional local recordings, and voice notes on its existing profile. PostPath does not transcribe audio and does not call a transcription service. `get_interview` returns the typed answers, voice notes, and presets. `create_drafts_from_interview` saves the assistant's posts as drafts for that brand, with the existing per-network overrides, and runs the same length checks. The drafts stay in the approval queue. Nothing is published.
+- **Rationale:** The assistant already writes. PostPath only keeps the answers and the drafts on this computer.
+- **Affected systems:** PostPath desk and MCP tools. No deploy and no live publish.
+- **Verification:** Drafts stay on the brand that owns the interview, stay unpublished, and keep a network override.
+- **Rollback:** Leave this draft unmerged.
+
+## 2026-10-28: The desk switches brands on the existing profile
+
+- **Status / owner:** Draft, not deployed. Evan owns any live account connection.
+- **Decision:** The desk keeps one selected profile. A switcher lists every saved profile and can add one through the existing profile upsert. Accounts, the composer, the approval queue, scheduled posts, and results show that profile only. The last id is stored in the browser. Compose has the same list and starts on the selected profile. License flags still do not create a cap. If an entitlement later reports `enforce` and a numeric `profileLimit`, the desk says "Your plan allows N brands" and does not add upgrade copy.
+- **Rationale:** Connections are already stored as profile plus network. A second brand model would split the queue.
+- **Affected systems:** PostPath desk. No deploy and no live sign-in.
+- **Verification:** Brand A drafts and connections stay out of brand B, and brand B cannot publish on brand A's login.
+- **Rollback:** Leave this draft unmerged.
+
 ## 2026-10-28: PostPath stays free and one approve covers the bundle
 
 - **Status / owner:** Draft, not deployed. Evan still owns developer apps, OAuth verification, and any live post.

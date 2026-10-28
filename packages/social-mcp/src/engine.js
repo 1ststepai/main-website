@@ -25,16 +25,23 @@ import {
   profileRequiresVidiq,
   queueItems,
   rollupStatus,
+  sanitizeOverrides,
   vidiqRecord,
 } from "./multiPost.js";
 import { normalizeGenerate, prepareAttachedFile, produceMedia } from "./media/run.js";
 import { reviewDraft, reviewImages, writeCaptions } from "./media/claude.js";
 import { planFor } from "./media/specs.js";
+import { checksForPosts, publicInterview, readInterviewAudio, writeInterviewAudio } from "./interview.js";
+import { buildQueueStatus } from "./queueStatus.js";
+import { nextOpenSlot, occurrences } from "./desk/public/schedulePlan.js";
+import { collectBestTimes } from "./audienceTimes.js";
+import { interviewPrompt } from "./desk/public/interviewPrompts.js";
 import { randomBytes } from "node:crypto";
 import { rmSync } from "node:fs";
 import { join } from "node:path";
 
 const ISO_OFFSET = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$/i;
+const MISSED_GRACE_MS = 2 * 60 * 60 * 1000;
 const DISPATCH_STARTED_MESSAGE =
   "Dispatch already started. PostPath cannot guarantee the platform did not accept the post, and it cannot undo it. The local row is not returned to draft and publish_due will not retry it.";
 
@@ -78,6 +85,33 @@ function optionalMediaPath(value, mediaRoot) {
 
 export function createEngine({ home, env = process.env, fetchImpl = fetch, now = () => Date.now() } = {}) {
   const store = createStore({ home, env, now });
+  const queueListeners = new Set();
+  let queueNotifyQueued = false;
+  function emitQueueChange() {
+    if (queueNotifyQueued) return;
+    queueNotifyQueued = true;
+    queueMicrotask(() => {
+      queueNotifyQueued = false;
+      for (const fn of queueListeners) {
+        Promise.resolve()
+          .then(() => fn())
+          .catch(() => {});
+      }
+    });
+  }
+  for (const name of ["savePost", "deletePost", "saveBundle", "deleteBundle"]) {
+    const original = store[name];
+    if (typeof original !== "function") continue;
+    store[name] = (...args) => {
+      const result = original(...args);
+      emitQueueChange();
+      return result;
+    };
+  }
+  function onQueueChange(fn) {
+    queueListeners.add(fn);
+    return () => queueListeners.delete(fn);
+  }
   const oauth = createOAuthRuntime({ store, env, fetchImpl });
 
   async function trackedFetch(url, init) {
@@ -482,7 +516,7 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
     const platforms = knownPlatforms(shaped.platforms);
     if (!platforms.length) throw mcpError("invalid_platform", `Platform must be one of: ${PLATFORMS.join(", ")}`);
     const stamp = new Date(now()).toISOString();
-    const source = input.source === "mcp" ? "mcp" : "desk";
+    const source = input.source === "mcp" || input.source === "interview" ? input.source : "desk";
     const bundle = {
       id: store.newId("bnd"),
       profile_id: profile.id,
@@ -494,7 +528,7 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
       tags: shaped.tags.map((tag) => String(tag).slice(0, 40)).slice(0, 30),
       privacy_status: shaped.privacy_status || "private",
       platforms,
-      overrides: input.overrides && typeof input.overrides === "object" ? input.overrides : {},
+      overrides: sanitizeOverrides(input.overrides),
       media_path: optionalMediaPath(input.media_path, mediaRoot),
       media_url: input.media_url ? String(input.media_url).slice(0, 2000) : null,
       media_content_type: String(input.media_content_type || "video/mp4").slice(0, 80),
@@ -569,7 +603,7 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
       media_path: optionalMediaPath(input.media_path, mediaRoot),
       media_url: input.media_url ? String(input.media_url).slice(0, 2000) : null,
       media_content_type: String(input.media_content_type || "video/mp4").slice(0, 80),
-      source: input.source === "mcp" ? "mcp" : undefined,
+      source: input.source === "mcp" || input.source === "interview" ? input.source : undefined,
       scheduled_at: null,
       published_url: null,
       platform_post_id: null,
@@ -646,6 +680,8 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
     }
     post.scheduled_at = iso;
     post.status = "scheduled";
+    post.schedule_missed = false;
+    post.schedule_note = "";
     post.updated_at = new Date(now()).toISOString();
     store.savePost(post);
     store.appendAudit({
@@ -920,7 +956,20 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
     return bundle;
   }
 
-  async function approveBundle({ bundle_id, scheduled_at, instagram_public_confirmed } = {}) {
+  function brandPosts(profileId) {
+    return store.listPosts({ profileId, status: "scheduled" });
+  }
+
+  function slotFor(profile, platform, after) {
+    return nextOpenSlot({
+      plan: profile?.posting_plan,
+      platform,
+      from: after,
+      posts: brandPosts(profile?.id),
+    });
+  }
+
+  async function approveBundle({ bundle_id, scheduled_at, instagram_public_confirmed, into_next_slot } = {}) {
     const bundle = store.getBundle(bundle_id);
     if (!bundle) throw mcpError("not_found", "Draft not found.", 404);
     if (!["draft", "scheduled", "partial"].includes(bundle.status)) {
@@ -946,12 +995,16 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
     const children = (bundle.platforms || [])
       .map((platform) => store.getPost(bundle.child_ids?.[platform]))
       .filter(Boolean);
-    if (scheduled_at) {
+    if (scheduled_at || into_next_slot) {
       const scheduled = [];
       const errors = [];
       for (const child of children) {
         try {
-          scheduled.push(await schedulePost({ post_id: child.id, scheduled_at }));
+          const when = scheduled_at || slotFor(profile, child.platform, now())?.starts_at;
+          if (!when) {
+            throw mcpError("no_open_slot", `No open ${child.platform} slot is on this brand's plan.`, 409);
+          }
+          scheduled.push(await schedulePost({ post_id: child.id, scheduled_at: when }));
         } catch (error) {
           errors.push({ ok: false, platform: child.platform, post_id: child.id, error: { code: error.code, message: error.message } });
         }
@@ -1117,10 +1170,24 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
 
   async function publishDue({ profile_id, limit = 5 } = {}) {
     const quarantined = quarantinePublishing(profile_id);
-    const due = store
-      .listPosts({ profileId: profile_id, status: "scheduled" })
-      .filter((post) => post.scheduled_at && Date.parse(post.scheduled_at) <= now())
-      .slice(0, Math.max(1, Math.min(20, Number(limit) || 5)));
+    const stamp = new Date(now()).toISOString();
+    const missed = [];
+    const due = [];
+    for (const post of store.listPosts({ profileId: profile_id, status: "scheduled" })) {
+      if (!post.scheduled_at || post.schedule_missed) continue;
+      const when = Date.parse(post.scheduled_at);
+      if (!Number.isFinite(when) || when > now()) continue;
+      if (now() - when > MISSED_GRACE_MS) {
+        post.schedule_missed = true;
+        post.schedule_note = "missed, reschedule?";
+        post.updated_at = stamp;
+        store.savePost(post);
+        missed.push({ id: post.id, profile_id: post.profile_id, platform: post.platform, schedule_note: post.schedule_note });
+        continue;
+      }
+      due.push(post);
+      if (due.length >= Math.max(1, Math.min(20, Number(limit) || 5))) break;
+    }
     await Promise.resolve();
     const settled = await Promise.allSettled(
       due.map((post) => publishPost({ post_id: post.id, force: true, claimFrom: ["scheduled"] })),
@@ -1137,7 +1204,7 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
         error: { code: item.reason?.code || "publish_failed", message: item.reason?.message || "Publish failed." },
       });
     });
-    return { count: results.length, results, quarantined };
+    return { count: results.length, results, quarantined, missed };
   }
 
   async function generateMedia(input = {}) {
@@ -1284,6 +1351,136 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
     return { post };
   }
 
+  function getInterview(profileId) {
+    return publicInterview(requireProfile(profileId));
+  }
+
+  function saveInterview(profileId, input = {}) {
+    requireProfile(profileId);
+    store.saveInterview(profileId, input);
+    return getInterview(profileId);
+  }
+
+  function saveInterviewAudio(profileId, promptId, bytes, contentType) {
+    requireProfile(profileId);
+    if (!interviewPrompt(promptId)) throw mcpError("invalid_prompt", "That interview question is not in the list.");
+    const saved = writeInterviewAudio({
+      root: store.homePaths.root,
+      profileId: normalizeProfileId(profileId),
+      promptId,
+      bytes,
+      contentType,
+    });
+    store.setInterviewAudio(profileId, promptId, saved);
+    return getInterview(profileId);
+  }
+
+  function readInterviewRecording(profileId, promptId) {
+    const profile = requireProfile(profileId);
+    return readInterviewAudio({ root: store.homePaths.root, profile, promptId });
+  }
+
+  async function createDraftsFromInterview(input = {}) {
+    const profile = requireProfile(input.profile_id);
+    const posts = Array.isArray(input.posts) ? input.posts : [];
+    if (!posts.length || posts.length > 8) {
+      throw mcpError("invalid_request", "Send between 1 and 8 drafted posts.", 400);
+    }
+    const drafts = [];
+    for (const post of posts) {
+      const platforms = knownPlatforms(post.platforms);
+      const created = await createDraft({
+        profile_id: profile.id,
+        platform: platforms.length ? undefined : post.platform,
+        platforms: platforms.length ? platforms : undefined,
+        title: post.title,
+        description: post.description,
+        caption: post.caption,
+        tags: post.tags,
+        privacy_status: post.privacy_status,
+        overrides: post.overrides,
+        instagram_public_confirmed: post.instagram_public_confirmed === true,
+        facebook_public: post.facebook_public === true,
+        source: "interview",
+      });
+      const children = created.posts || (created.post ? [created.post] : []);
+      drafts.push({
+        bundle: created.bundle || null,
+        post: created.post || null,
+        posts: children,
+        checks: checksForPosts(children),
+      });
+    }
+    return { published: false, profile_id: profile.id, drafts };
+  }
+
+  function setPostingPlan(profileId, input = {}) {
+    requireProfile(profileId);
+    const profile = store.savePostingPlan(profileId, input);
+    return getSchedule(profile.id);
+  }
+
+  function getSchedule(profileId) {
+    const profile = requireProfile(profileId);
+    const posts = brandPosts(profile.id);
+    const upcoming = occurrences({ plan: profile.posting_plan, from: now(), days: 7, posts });
+    return {
+      profile_id: profile.id,
+      name: profile.name,
+      timezone: profile.posting_plan?.timezone || "",
+      slots: profile.posting_plan?.slots || [],
+      upcoming,
+    };
+  }
+
+  function suggestSlot({ profile_id: profileId, platform } = {}) {
+    const profile = requireProfile(profileId);
+    const slot = slotFor(profile, platform, now());
+    if (!slot) throw mcpError("no_open_slot", `No open ${platform} slot is on this brand's plan.`, 404);
+    return { profile_id: profile.id, ...slot, scheduled: false };
+  }
+
+  async function scheduleApprovedPost({ post_id, confirm, scheduled_at } = {}) {
+    const post = store.getPost(post_id);
+    if (!post) throw mcpError("not_found", "Post not found.", 404);
+    if (confirm !== true) {
+      throw mcpError("confirm_required", "Confirm this post before it can be scheduled. Nothing was scheduled.", 409);
+    }
+    if (!["draft", "scheduled", "failed"].includes(post.status)) {
+      throw mcpError("invalid_status", "This post can no longer be scheduled.", 409);
+    }
+    const when = scheduled_at || slotFor(store.getProfile(post.profile_id), post.platform, now())?.starts_at;
+    if (!when) throw mcpError("no_open_slot", `No open ${post.platform} slot is on this brand's plan.`, 409);
+    const scheduled = await schedulePost({ post_id: post.id, scheduled_at: when });
+    return { published: false, post: scheduled.post };
+  }
+
+  async function getBestTimes({ profile_id: profileId, platform } = {}) {
+    const profile = requireProfile(profileId);
+    const connection = store.getConnection(profile.id, platform);
+    const secrets = connection ? store.readSecrets(profile.id, platform) : null;
+    return collectBestTimes({
+      platform,
+      secrets,
+      connection,
+      posts: store.listPosts({ profileId: profile.id }),
+      timeZone: profile.posting_plan?.timezone || "UTC",
+      fetchImpl,
+      now: now(),
+    });
+  }
+
+  function getQueueStatus({ profile_id: profileId } = {}) {
+    if (profileId) requireProfile(profileId);
+    return buildQueueStatus({
+      bundles: store.listBundles(),
+      posts: store.listPosts(),
+      profiles: store.listProfiles(),
+      profileId,
+      now: now(),
+    });
+  }
+
   return {
     store,
     oauth,
@@ -1293,6 +1490,18 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
     connectAccounts,
     connectBluesky,
     createDraft,
+    getQueueStatus,
+    setPostingPlan,
+    getSchedule,
+    suggestSlot,
+    getBestTimes,
+    scheduleApprovedPost,
+    onQueueChange,
+    getInterview,
+    saveInterview,
+    saveInterviewAudio,
+    readInterviewRecording,
+    createDraftsFromInterview,
     updateDraft,
     generateMedia,
     attachMedia,

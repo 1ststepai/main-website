@@ -7,6 +7,7 @@ import { formatToolError, formatToolResult, mcpError } from "../errors.js";
 import { paths, PLATFORMS } from "../home.js";
 import { loadOAuthEnvFile } from "../envFile.js";
 import { POSTPATH_INSTRUCTIONS } from "./instructions.js";
+import { QUEUE_URI } from "../queueStatus.js";
 
 const outputSchema = z
   .object({
@@ -24,8 +25,14 @@ const platformOverride = z
     title: z.string().max(100).optional().describe("Network-specific title. YouTube uses this when the draft title is omitted."),
     description: z.string().max(5000).optional().describe("Network-specific description."),
     caption: z.string().max(2200).optional().describe("Network-specific caption."),
-    tags: z.array(z.string().max(40)).max(30).optional().describe("Network-specific tags or hashtags."),
-    privacy_status: z.enum(["private", "unlisted", "public"]).optional().describe("Network privacy. YouTube defaults to private."),
+    tags: z.array(z.string().max(40)).max(30).optional().describe("Network-specific tags. YouTube uses these as snippet tags."),
+    hashtags: z
+      .array(z.string().max(80))
+      .max(60)
+      .optional()
+      .describe("Hashtags for this network only. Added to the caption, or to the YouTube description. Omit to keep the base post."),
+    subreddit: z.string().max(40).optional().describe("Reddit community name, without r/. Used only on the reddit override."),
+    privacy_status: z.enum(["private", "unlisted", "public"]).optional().describe("Network privacy. YouTube defaults to private. Instagram stays public."),
     placement: z.string().max(40).optional().describe("Network preset id, such as youtube_long or instagram_story."),
     generate: z
       .object({
@@ -41,19 +48,14 @@ const platformOverride = z
   })
   .optional();
 
-const draftShape = {
+export const draftShape = {
   profile_id: z.string().min(2).max(64).describe("Brand profile id."),
   platform: z.enum(PLATFORMS).optional().describe("One network. Omit when platforms is set."),
   platforms: z.array(z.enum(PLATFORMS)).min(1).max(8).optional().describe("Networks that share this draft. Example: youtube, facebook, instagram."),
   overrides: z
-    .object({
-      youtube: platformOverride,
-      facebook: platformOverride,
-      instagram: platformOverride,
-      tiktok: platformOverride,
-    })
+    .object(Object.fromEntries(PLATFORMS.map((platform) => [platform, platformOverride])))
     .optional()
-    .describe("Optional per-network title, caption, tags, or privacy."),
+    .describe("Optional per-network title, caption, description, hashtags, tags, Reddit community, privacy, placement, or generation. Omit a network's copy fields to use the base post."),
   title: z.string().max(100).optional().describe("Draft title. If omitted, the YouTube override title is used, otherwise a shortened caption."),
   description: z.string().max(5000).optional().describe("Shared description."),
   caption: z.string().max(2200).optional().describe("Shared caption."),
@@ -120,6 +122,19 @@ export function createSocialMcpServer({ engine, auth } = {}) {
     };
   }
 
+  async function notifyQueueResource() {
+    if (!server.isConnected?.()) return false;
+    const resources = server.server.getClientCapabilities?.()?.resources;
+    if (!resources) return false;
+    try {
+      if (resources.subscribe) await server.server.sendResourceUpdated({ uri: QUEUE_URI });
+      await server.sendResourceListChanged();
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   function add(name, title, description, scope, hints, inputSchema, handler) {
     server.registerTool(
       name,
@@ -136,7 +151,11 @@ export function createSocialMcpServer({ engine, auth } = {}) {
           openWorldHint: Boolean(hints.open),
         },
       },
-      gated(scope, handler),
+      gated(scope, async (args) => {
+        const result = await handler(args);
+        if (!hints.queue || !result || typeof result !== "object") return result;
+        return { ...result, queue_note: eng.getQueueStatus().note };
+      }),
     );
   }
 
@@ -228,7 +247,7 @@ export function createSocialMcpServer({ engine, auth } = {}) {
     "Create draft",
     "Create a draft post for one or more social networks. It lands in the approval queue and is not published.",
     "drafts:write",
-    {},
+    { queue: true },
     draftShape,
     async (args) => eng.createDraft({ ...args, source: "mcp" }),
   );
@@ -238,9 +257,49 @@ export function createSocialMcpServer({ engine, auth } = {}) {
     "Create multi-network draft",
     "Create one draft for several networks from one media file and a shared caption, with optional per-network overrides. It is not published.",
     "drafts:write",
-    {},
+    { queue: true },
     draftShape,
     async (args) => eng.createDraft({ ...args, source: "mcp" }),
+  );
+
+  add(
+    "get_interview",
+    "Read interview",
+    "Read one brand's typed interview answers, voice notes, and presets. PostPath does not transcribe recordings. This does not publish.",
+    "posts:read",
+    { read: true, idempotent: true },
+    { profile_id: z.string().min(2).max(64).describe("Brand profile id.") },
+    async (args) => eng.getInterview(args.profile_id),
+  );
+
+  add(
+    "create_drafts_from_interview",
+    "Save interview drafts",
+    "Save posts the assistant already wrote as drafts for one brand. Each draft can set platforms and per-network overrides. The drafts wait for approval and are not published.",
+    "drafts:write",
+    { queue: true },
+    {
+      profile_id: z.string().min(2).max(64).describe("Brand that owns the drafts."),
+      posts: z
+        .array(
+          z.object({
+            title: draftShape.title,
+            description: draftShape.description,
+            caption: draftShape.caption,
+            tags: draftShape.tags,
+            platforms: draftShape.platforms,
+            platform: draftShape.platform,
+            overrides: draftShape.overrides,
+            privacy_status: draftShape.privacy_status,
+            instagram_public_confirmed: draftShape.instagram_public_confirmed,
+            facebook_public: draftShape.facebook_public,
+          }),
+        )
+        .min(1)
+        .max(8)
+        .describe("Posts already written by the assistant. Between 1 and 8."),
+    },
+    async (args) => eng.createDraftsFromInterview(args),
   );
 
   add(
@@ -285,9 +344,9 @@ export function createSocialMcpServer({ engine, auth } = {}) {
   add(
     "update_draft",
     "Edit draft",
-    "Change the copy or media on a draft, scheduled, or failed post that has not been sent.",
+    "Change the copy or media on a draft, scheduled, or failed post that has not been sent. Use this when a draft fails a check. This does not publish.",
     "drafts:write",
-    { idempotent: true },
+    { idempotent: true, queue: true },
     {
       post_id: z.string().min(8).describe("Post id to edit."),
       title: z.string().max(100).optional().describe("Replacement title."),
@@ -319,6 +378,89 @@ export function createSocialMcpServer({ engine, auth } = {}) {
   );
 
   add(
+    "get_queue_status",
+    "Queue status",
+    "Read drafts waiting for the owner, drafts that fail a check, scheduled posts, and failed publishes. Call this at the start of a session and after saving drafts. This does not publish.",
+    "posts:read",
+    { read: true, idempotent: true, queue: true },
+    { profile_id: z.string().min(2).max(64).optional().describe("Limit to one brand. Omit for every brand.") },
+    async (args) => eng.getQueueStatus(args),
+  );
+
+  add(
+    "get_schedule",
+    "Read posting plan",
+    "Read one brand's posting plan and the filled and empty slots for the next 7 days. This does not publish.",
+    "posts:read",
+    { read: true, idempotent: true },
+    { profile_id: z.string().min(2).max(64).describe("Brand profile id.") },
+    async (args) => eng.getSchedule(args.profile_id),
+  );
+
+  add(
+    "set_posting_plan",
+    "Save posting plan",
+    "Save recurring slots for one brand. This does not schedule drafts and does not publish.",
+    "drafts:write",
+    { idempotent: true },
+    {
+      profile_id: z.string().min(2).max(64).describe("Brand profile id."),
+      timezone: z.string().min(1).max(80).describe("IANA time zone, such as America/New_York."),
+      slots: z
+        .array(
+          z.object({
+            id: z.string().max(40).optional(),
+            platform: z.enum(PLATFORMS),
+            weekday: z.union([z.number().int().min(0).max(6), z.literal("daily")]).describe("0 is Sunday. daily repeats every day."),
+            time: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/).describe("Local time HH:mm."),
+          }),
+        )
+        .max(40),
+    },
+    async (args) => eng.setPostingPlan(args.profile_id, args),
+  );
+
+  add(
+    "get_best_times",
+    "Audience times",
+    "Read suggested posting times for one brand and network from that account's own audience data or its own past posts. This does not publish and does not add a permission.",
+    "posts:read",
+    { read: true, idempotent: true },
+    {
+      profile_id: z.string().min(2).max(64).describe("Brand profile id."),
+      platform: z.enum(PLATFORMS).describe("Network to read."),
+    },
+    async (args) => eng.getBestTimes(args),
+  );
+
+  add(
+    "suggest_slot",
+    "Suggest a slot",
+    "Name the next open slot for one network. This does not schedule the post and does not publish.",
+    "posts:read",
+    { read: true, idempotent: true },
+    {
+      profile_id: z.string().min(2).max(64).describe("Brand profile id."),
+      platform: z.enum(PLATFORMS).describe("Network that needs a slot."),
+    },
+    async (args) => eng.suggestSlot(args),
+  );
+
+  add(
+    "schedule_approved_post",
+    "Schedule an approved post",
+    "Put one post on the next open slot, or on scheduled_at when the owner picked a time. confirm must be true. Otherwise nothing is scheduled and nothing is published.",
+    "drafts:write",
+    { queue: true },
+    {
+      post_id: z.string().min(8).describe("Post id."),
+      confirm: z.boolean().describe("True only when the owner is approving this post onto the schedule."),
+      scheduled_at: z.string().optional().describe("Owner-picked ISO time with Z or a numeric offset. Omit to use the next open slot."),
+    },
+    async (args) => eng.scheduleApprovedPost(args),
+  );
+
+  add(
     "list_queue",
     "List approval queue",
     "List drafts waiting for approval, including drafts created by an AI client.",
@@ -333,7 +475,7 @@ export function createSocialMcpServer({ engine, auth } = {}) {
     "List posts",
     "List drafts and posts saved on this computer, including each network's status.",
     "posts:read",
-    { read: true, idempotent: true },
+    { read: true, idempotent: true, queue: true },
     {
       profile_id: z.string().min(2).max(64).optional().describe("Limit to one profile."),
       status: z.enum(["draft", "scheduled", "publishing", "published", "handed_off", "failed", "needs_review"]).optional().describe("Limit to one status."),
@@ -356,7 +498,7 @@ export function createSocialMcpServer({ engine, auth } = {}) {
     "Request approval",
     "Publish a queued draft now, or schedule it for an ISO time. Requires queue:approve. Instagram is refused until instagram_public_confirmed is true. YouTube is refused when the profile requires a vidIQ check and none is attached.",
     "queue:approve",
-    { destructive: true, open: true },
+    { destructive: true, open: true, queue: true },
     {
       bundle_id: z.string().min(8).optional().describe("Multi-network draft id."),
       post_id: z.string().min(8).optional().describe("Single post id, when there is no bundle."),
@@ -444,7 +586,7 @@ export function createSocialMcpServer({ engine, auth } = {}) {
     "Publish one post",
     "Send one post that is already a draft or due. Requires queue:approve. Instagram must be public. YouTube on a gated profile needs a vidIQ check. A needs_review post is not sent again unless acknowledge is true.",
     "queue:approve",
-    { destructive: true, open: true },
+    { destructive: true, open: true, queue: true },
     {
       post_id: z.string().min(8).describe("Post id."),
       force: z.boolean().optional().describe("Send a scheduled post before its time."),
@@ -458,7 +600,7 @@ export function createSocialMcpServer({ engine, auth } = {}) {
     "Publish due posts",
     "Send scheduled posts whose time has arrived. Requires queue:approve. Skips posts that need review.",
     "queue:approve",
-    { destructive: true, open: true },
+    { destructive: true, open: true, queue: true },
     {
       profile_id: z.string().min(2).max(64).optional().describe("Limit to one profile."),
       limit: z.number().int().min(1).max(20).optional().describe("Maximum posts to send."),
@@ -466,5 +608,25 @@ export function createSocialMcpServer({ engine, auth } = {}) {
     async (args) => eng.publishDue(args),
   );
 
-  return { server, engine: eng };
+  server.registerResource(
+    "queue",
+    QUEUE_URI,
+    {
+      title: "Approval queue",
+      description: "Drafts waiting for the owner, drafts that fail a check, scheduled posts, and failed publishes.",
+      mimeType: "application/json",
+    },
+    async () => ({
+      contents: [
+        {
+          uri: QUEUE_URI,
+          mimeType: "application/json",
+          text: JSON.stringify(eng.getQueueStatus(), null, 2),
+        },
+      ],
+    }),
+  );
+
+  const stopQueueWatch = typeof eng.onQueueChange === "function" ? eng.onQueueChange(() => notifyQueueResource()) : () => {};
+  return { server, engine: eng, stopQueueWatch };
 }

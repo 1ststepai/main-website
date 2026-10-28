@@ -72,6 +72,65 @@ export function applyPresets(input = {}, presets = defaultPresets()) {
   };
 }
 
+function cleanList(value, maxItems, maxLen) {
+  if (!Array.isArray(value)) return [];
+  const out = [];
+  for (const item of value) {
+    const text = String(item || "").trim().slice(0, maxLen);
+    if (!text || out.includes(text)) continue;
+    out.push(text);
+    if (out.length >= maxItems) break;
+  }
+  return out;
+}
+
+const GENERATE_PROVIDERS = ["mock", "openai", "google", "xai", "replicate", "fal", "claude"];
+
+function sanitizeGenerate(value) {
+  if (!value || typeof value !== "object") return null;
+  const prompt = String(value.prompt || "").trim().slice(0, 2000);
+  if (!prompt) return null;
+  const generate = { prompt };
+  if (value.type === "image" || value.type === "video") generate.type = value.type;
+  if (value.style) generate.style = String(value.style).slice(0, 200);
+  const duration = Number(value.duration);
+  if (Number.isFinite(duration) && duration >= 1 && duration <= 3600) generate.duration = duration;
+  if (GENERATE_PROVIDERS.includes(value.provider)) generate.provider = value.provider;
+  if (value.placement) generate.placement = String(value.placement).slice(0, 40);
+  return generate;
+}
+
+export function sanitizeOverrides(input) {
+  if (!input || typeof input !== "object" || Array.isArray(input)) return {};
+  const out = {};
+  for (const [platform, value] of Object.entries(input)) {
+    if (!PLATFORMS.includes(platform) || !value || typeof value !== "object") continue;
+    const over = {};
+    if (value.title) over.title = String(value.title).slice(0, 100);
+    if (value.description) over.description = String(value.description).slice(0, 5000);
+    if (value.caption) over.caption = String(value.caption).slice(0, 2200);
+    const tags = cleanList(value.tags, 30, 40);
+    if (tags.length) over.tags = tags;
+    const hashtags = cleanList(value.hashtags, 60, 80).map((tag) => tag.replace(/^#/, ""));
+    if (hashtags.length) over.hashtags = hashtags;
+    if (value.subreddit) over.subreddit = String(value.subreddit).replace(/^r\//i, "").slice(0, 40);
+    if (["private", "unlisted", "public"].includes(value.privacy_status)) over.privacy_status = value.privacy_status;
+    if (value.placement) over.placement = String(value.placement).slice(0, 40);
+    const generate = sanitizeGenerate(value.generate);
+    if (generate) over.generate = generate;
+    if (Object.keys(over).length) out[platform] = over;
+  }
+  return out;
+}
+
+function appendHashtags(text, hashtags) {
+  const tags = hashtags.map((tag) => (String(tag).startsWith("#") ? String(tag) : `#${tag}`));
+  const current = String(text || "");
+  const missing = tags.filter((tag) => !current.toLowerCase().includes(tag.toLowerCase()));
+  if (!missing.length) return current;
+  return current.trim() ? `${current.trim()}\n${missing.join(" ")}` : missing.join(" ");
+}
+
 export function childFields(bundle, platform) {
   const over = bundle.overrides?.[platform] || {};
   const shared = String(bundle.caption || bundle.description || "");
@@ -83,12 +142,24 @@ export function childFields(bundle, platform) {
         : platform === "facebook"
           ? over.privacy_status || "private"
           : bundle.privacy_status || "private";
+  let description = String(over.description || bundle.description || shared).slice(0, 5000);
+  let caption = String(over.caption || shared).slice(0, 2200);
+  let tags = Array.isArray(over.tags) ? cleanList(over.tags, 30, 40) : cleanList(bundle.tags || [], 30, 40);
+  const hashtags = cleanList(over.hashtags, 60, 80);
+  if (hashtags.length) {
+    if (platform === "youtube" || platform === "pinterest") description = appendHashtags(description, hashtags).slice(0, 5000);
+    else caption = appendHashtags(caption, hashtags).slice(0, 2200);
+  }
+  if (platform === "reddit" && over.subreddit) {
+    const sub = String(over.subreddit).replace(/^r\//i, "");
+    tags = [sub, ...tags.filter((tag) => tag.replace(/^r\//i, "").toLowerCase() !== sub.toLowerCase())].slice(0, 30);
+  }
   return {
     platform,
     title: String(over.title || bundle.title || shared).slice(0, 100),
-    description: String(over.description || bundle.description || shared).slice(0, 5000),
-    caption: String(over.caption || shared).slice(0, 2200),
-    tags: Array.isArray(over.tags) ? over.tags : bundle.tags || [],
+    description,
+    caption,
+    tags,
     privacy_status: privacy,
     media_path: bundle.media_assets?.[platform]?.path || bundle.media_path || null,
     media_url: bundle.media_url || null,

@@ -24,6 +24,9 @@ import {
   toggleChannel,
 } from "./guide.js";
 import { platformIcon } from "./icons.js";
+import { checkNetwork, readMp4Meta } from "./optimize.js";
+import { isValidTimeZone, nextZonedStart, occurrences } from "./schedulePlan.js";
+import { BRAND_STORAGE_KEY, brandCapMessage, chooseBrandId, scopeToBrand, waitingOnYouCount, waitingOnYouLabel } from "./brand.js";
 
 const NETWORKS = [
   { key: "youtube", label: "YouTube" },
@@ -117,6 +120,81 @@ function formatWhen(iso) {
   }
 }
 
+let audienceKey = "";
+let audienceBrand = "";
+const audienceCache = new Map();
+
+function renderPlan(profile, posts) {
+  const list = document.getElementById("plan-slots");
+  const week = document.getElementById("week-view");
+  const zone = document.getElementById("plan-timezone");
+  if (!list || !week) return;
+  const plan = profile?.posting_plan;
+  if (zone && document.activeElement !== zone) {
+    zone.value = plan?.timezone || "";
+    if (!zone.value) {
+      try {
+        zone.value = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
+      } catch {
+        zone.value = "";
+      }
+    }
+  }
+  list.replaceChildren();
+  for (const slot of plan?.slots || []) {
+    const item = document.createElement("li");
+    const day = slot.weekday === "daily" ? "Daily" : ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][slot.weekday];
+    item.textContent = `${slot.platform} · ${day} ${slot.time}`;
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.className = "btn tiny remove-slot";
+    remove.dataset.id = slot.id;
+    remove.textContent = "Remove";
+    item.append(remove);
+    list.append(item);
+  }
+  week.replaceChildren();
+  if (audienceBrand !== (profile?.id || "")) {
+    audienceBrand = profile?.id || "";
+    audienceCache.clear();
+    audienceKey = "";
+  }
+  const platform = document.getElementById("plan-platform")?.value || "youtube";
+  const key = `${profile?.id || ""}:${platform}`;
+  if (key !== audienceKey) {
+    audienceKey = key;
+    loadAudienceSuggestions(platform).catch(() => {});
+  }
+  if (!plan?.slots?.length) {
+    const empty = document.createElement("p");
+    empty.className = "hint";
+    empty.textContent = profile ? "No slots yet for this brand." : "Add a brand before saving a posting plan.";
+    week.append(empty);
+    return;
+  }
+  const rows = occurrences({
+    plan,
+    from: Date.now(),
+    days: 7,
+    posts: (posts || []).filter((post) => post.profile_id === profile.id),
+  });
+  if (!rows.length) {
+    const empty = document.createElement("p");
+    empty.className = "hint";
+    empty.textContent = "No slots in the next 7 days.";
+    week.append(empty);
+    return;
+  }
+  for (const row of rows) {
+    const line = document.createElement("p");
+    line.className = row.state === "filled" ? "slot-filled" : row.state === "missed" ? "slot-missed" : "slot-empty";
+    const when = new Date(row.starts_at).toLocaleString();
+    const detail = row.state === "filled" ? `filled · ${row.title || "Scheduled"}` : row.state === "missed" ? "missed, reschedule?" : "empty";
+    line.textContent = `${row.local_label} · ${row.platform} · ${when} · ${detail}`;
+    week.append(line);
+  }
+}
+
 function renderScheduled(posts) {
   scheduledList.replaceChildren();
   const rows = Array.isArray(posts) ? posts : [];
@@ -138,7 +216,9 @@ function renderScheduled(posts) {
     strong.textContent = String(title || "");
     const when = document.createElement("div");
     when.className = "when";
-    when.textContent = `${platform} · ${formatWhen(post.scheduled_at)}`;
+    when.textContent = post.schedule_missed
+      ? `${platform} · missed, reschedule?`
+      : `${platform} · ${formatWhen(post.scheduled_at)}`;
     copy.append(strong, when);
 
     const button = document.createElement("button");
@@ -253,23 +333,134 @@ function renderResults(posts, publishMode) {
   }
 }
 
+let selectedBrandId = "";
+try {
+  selectedBrandId = localStorage.getItem(BRAND_STORAGE_KEY) || "";
+} catch {
+  selectedBrandId = "";
+}
+
+function rememberBrand(id) {
+  selectedBrandId = String(id || "");
+  try {
+    if (selectedBrandId) localStorage.setItem(BRAND_STORAGE_KEY, selectedBrandId);
+    else localStorage.removeItem(BRAND_STORAGE_KEY);
+  } catch {
+    /* The desk still uses the selection for this page. */
+  }
+}
+
+function scopedGuideStatus() {
+  const status = latestStatus || {};
+  const selected = (status.profiles || []).find((row) => row.id === selectedBrandId);
+  if (!selected) return status;
+  return {
+    ...status,
+    profiles: [selected, ...(status.profiles || []).filter((row) => row.id !== selected.id)],
+  };
+}
+
+function applyBrand(id, profiles) {
+  rememberBrand(chooseBrandId(profiles, id));
+  if (latestStatus) renderStatus(latestStatus);
+}
+
+function renderBrandControls(profiles, license, queue) {
+  const rows = Array.isArray(profiles) ? profiles : [];
+  const current = rows.find((row) => row.id === selectedBrandId) || null;
+  const name = document.getElementById("brand-switch-name");
+  if (name) name.textContent = current?.name || current?.id || "No brand yet";
+  const currentWaiting = waitingOnYouLabel(waitingOnYouCount(queue, current?.id));
+  const headerBadge = document.getElementById("brand-waiting");
+  if (headerBadge) {
+    headerBadge.hidden = !currentWaiting;
+    headerBadge.textContent = currentWaiting;
+  }
+  const queueBadge = document.getElementById("queue-waiting");
+  if (queueBadge) {
+    queueBadge.hidden = !currentWaiting;
+    queueBadge.textContent = currentWaiting;
+  }
+  const live = document.getElementById("brand-live");
+  if (live) live.textContent = current ? current.name || current.id : "No brand yet";
+  const list = document.getElementById("brand-menu-list");
+  if (list) {
+    list.replaceChildren();
+    for (const profile of rows) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.role = "menuitem";
+      button.textContent = profile.name || profile.id;
+      const waiting = waitingOnYouLabel(waitingOnYouCount(queue, profile.id));
+      if (waiting) {
+        const badge = document.createElement("span");
+        badge.className = "waiting-badge";
+        badge.textContent = waiting;
+        button.append(badge);
+      }
+      if (profile.id === selectedBrandId) button.setAttribute("aria-current", "true");
+      button.addEventListener("click", () => {
+        document.getElementById("brand-menu").hidden = true;
+        document.getElementById("brand-switch-btn").setAttribute("aria-expanded", "false");
+        applyBrand(profile.id, rows);
+      });
+      list.append(button);
+    }
+  }
+  const picker = document.getElementById("compose-brand");
+  if (picker) {
+    const previous = picker.value;
+    picker.replaceChildren();
+    if (!rows.length) {
+      const empty = document.createElement("option");
+      empty.value = "";
+      empty.textContent = "Add a brand first";
+      picker.append(empty);
+    }
+    for (const profile of rows) {
+      const option = document.createElement("option");
+      option.value = profile.id;
+      option.textContent = profile.name || profile.id;
+      picker.append(option);
+    }
+    picker.value = rows.some((row) => row.id === selectedBrandId) ? selectedBrandId : previous;
+  }
+  if (current) {
+    profileId.value = current.id;
+    profileName.value = current.name || current.id;
+    profileId.dataset.touched = "1";
+  }
+  const cap = brandCapMessage(license);
+  const capNode = document.getElementById("brand-cap");
+  if (capNode) {
+    capNode.hidden = !cap;
+    capNode.textContent = cap;
+  }
+  const atCap = Boolean(cap) && rows.length >= Number(license?.profileLimit);
+  const saveBrand = document.getElementById("save-brand");
+  if (saveBrand) saveBrand.disabled = atCap;
+  const ai = document.getElementById("ai-brand");
+  if (ai) {
+    ai.textContent = current
+      ? `Accounts, drafts, and this composer are for ${current.name || current.id}. The MCP address is for this computer. Name this brand when an assistant saves a draft.`
+      : "Add a brand before an assistant saves a draft for it. The MCP address is for this computer.";
+  }
+}
+
 function renderStatus(data) {
   latestStatus = data;
   const dispatchHonesty = document.getElementById("dispatch-honesty");
   if (dispatchHonesty) dispatchHonesty.textContent = DISPATCH_HONESTY;
+  const profiles = data.profiles || [];
+  selectedBrandId = chooseBrandId(profiles, selectedBrandId);
+  if (selectedBrandId) rememberBrand(selectedBrandId);
+  renderBrandControls(profiles, data.license, data.queue);
+  renderInterview(profiles.find((row) => row.id === selectedBrandId) || null);
   renderMode(data);
-  renderResults(data.recent_posts, data.publish_mode);
+  renderResults(scopeToBrand(data.recent_posts, selectedBrandId), data.publish_mode);
 
-  const activeId = profileId.value.trim();
-  const connections = (data.connections || []).filter((row) => !activeId || row.profile_id === activeId);
+  const connections = scopeToBrand(data.connections, selectedBrandId);
   const byPlatform = new Map(connections.map((row) => [row.platform, row]));
-  const brand = document.getElementById("brand-live");
-  const profiles = (data.profiles || []).filter((profile) => !activeId || profile.id === activeId);
-  if (brand) {
-    brand.textContent = profiles.length
-      ? profiles.map((profile) => profile.name || profile.id).join(" · ")
-      : "No brand yet";
-  }
   networkList.replaceChildren();
   for (const network of NETWORKS) {
     const row = byPlatform.get(network.key);
@@ -331,10 +522,6 @@ function renderStatus(data) {
   const cursor = data.cursor?.installed ? "PostPath enabled in Cursor" : "PostPath not enabled in Cursor yet";
   pathMeta.textContent = `${cursor} · vault ${data.home || ""} · media ${data.media_dir || ""}`;
 
-  if (data.profiles?.[0] && !profileId.dataset.touched) {
-    profileId.value = data.profiles[0].id;
-    profileName.value = data.profiles[0].name;
-  }
 
   const oauth = data.oauth || {};
   for (const [key, value] of Object.entries(oauth)) {
@@ -359,9 +546,12 @@ function renderStatus(data) {
     connectHint.textContent = "Connect accounts signs in to every network that is not connected yet. Bluesky uses the handle and app password in this panel. Nothing is posted.";
   }
 
-  renderScheduled(data.scheduled_posts);
-  renderQueue(data.queue);
+  renderScheduled(scopeToBrand(data.scheduled_posts, selectedBrandId));
+  renderPlan(profiles.find((row) => row.id === selectedBrandId) || null, data.scheduled_posts);
+  renderQueue(scopeToBrand(data.queue, selectedBrandId));
   renderMcpRemote(data);
+  renderAssistants(data);
+  renderChecks();
   for (const node of document.querySelectorAll("[data-channel-status]")) {
     node.textContent = connectPlan(node.dataset.channelStatus, data).message;
   }
@@ -508,6 +698,73 @@ for (const input of oauthForm.querySelectorAll('input[type="password"]')) {
   });
 }
 
+document.getElementById("brand-switch-btn")?.addEventListener("click", () => {
+  const menu = document.getElementById("brand-menu");
+  const open = menu.hidden;
+  menu.hidden = !open;
+  document.getElementById("brand-switch-btn").setAttribute("aria-expanded", String(open));
+});
+
+document.getElementById("add-brand")?.addEventListener("click", () => {
+  const form = document.getElementById("add-brand-form");
+  form.hidden = !form.hidden;
+  if (!form.hidden) document.getElementById("add-brand-name")?.focus();
+});
+
+document.getElementById("add-brand-name")?.addEventListener("input", () => {
+  const id = document.getElementById("add-brand-id");
+  if (id && !id.dataset.touched) id.value = slugify(document.getElementById("add-brand-name").value);
+});
+
+document.getElementById("add-brand-id")?.addEventListener("input", () => {
+  document.getElementById("add-brand-id").dataset.touched = "1";
+});
+
+document.getElementById("add-brand-form")?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const cap = brandCapMessage(latestStatus?.license);
+  const count = (latestStatus?.profiles || []).length;
+  if (cap && count >= Number(latestStatus?.license?.profileLimit)) {
+    showToast(cap, true);
+    return;
+  }
+  const button = document.getElementById("save-brand");
+  button.disabled = true;
+  try {
+    const id = document.getElementById("add-brand-id").value.trim();
+    const name = document.getElementById("add-brand-name").value.trim() || id;
+    const data = await api("/api/profile", {
+      method: "POST",
+      body: JSON.stringify({ id, name }),
+    });
+    document.getElementById("add-brand-name").value = "";
+    document.getElementById("add-brand-id").value = "";
+    delete document.getElementById("add-brand-id").dataset.touched;
+    document.getElementById("add-brand-form").hidden = true;
+    document.getElementById("brand-menu").hidden = true;
+    document.getElementById("brand-switch-btn").setAttribute("aria-expanded", "false");
+    rememberBrand(id);
+    renderStatus(data);
+    showToast("Brand saved on this computer");
+  } catch (error) {
+    showToast(error.message, true);
+  } finally {
+    button.disabled = Boolean(brandCapMessage(latestStatus?.license)) && (latestStatus?.profiles || []).length >= Number(latestStatus?.license?.profileLimit);
+  }
+});
+
+document.getElementById("compose-brand")?.addEventListener("change", (event) => {
+  applyBrand(event.target.value, latestStatus?.profiles || []);
+});
+
+document.addEventListener("click", (event) => {
+  const wrap = document.querySelector(".brand-switch");
+  const menu = document.getElementById("brand-menu");
+  if (!wrap || !menu || menu.hidden || wrap.contains(event.target)) return;
+  menu.hidden = true;
+  document.getElementById("brand-switch-btn").setAttribute("aria-expanded", "false");
+});
+
 document.getElementById("connect-form").addEventListener("submit", async (event) => {
   event.preventDefault();
   const button = document.getElementById("connect-btn");
@@ -535,6 +792,217 @@ document.getElementById("connect-form").addEventListener("submit", async (event)
   } finally {
     button.disabled = false;
   }
+});
+
+const editorState = {};
+let mediaMeta = null;
+
+function selectedPlatforms() {
+  return [...document.querySelectorAll("#platform-toggles input:checked")].map((node) => node.value);
+}
+
+function editorFor(key) {
+  if (!editorState[key]) editorState[key] = { same: true, title: "", caption: "", description: "", hashtags: "", tags: "", subreddit: "" };
+  return editorState[key];
+}
+
+function readEditors() {
+  for (const node of document.querySelectorAll("[data-override]")) {
+    const [platform, field] = node.dataset.override.split(":");
+    const state = editorFor(platform);
+    if (field === "same") state.same = node.checked;
+    else state[field] = node.value;
+  }
+}
+
+function splitList(value) {
+  return String(value || "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function collectOverrides(platforms) {
+  readEditors();
+  const overrides = {};
+  for (const key of platforms) {
+    const state = editorState[key];
+    if (!state || state.same) continue;
+    const over = {};
+    if (state.title.trim()) over.title = state.title.trim();
+    if (state.caption.trim()) over.caption = state.caption.trim();
+    if (state.description.trim()) over.description = state.description.trim();
+    const hashtags = splitList(state.hashtags);
+    const tags = splitList(state.tags);
+    if (hashtags.length) over.hashtags = hashtags;
+    if (tags.length) over.tags = tags;
+    if (state.subreddit.trim()) over.subreddit = state.subreddit.trim();
+    if (Object.keys(over).length) overrides[key] = over;
+  }
+  return overrides;
+}
+
+function resolvedPreview(platform) {
+  readEditors();
+  const form = document.getElementById("youtube-form");
+  const data = new FormData(form);
+  const description = String(data.get("description") || "");
+  const base = {
+    title: String(data.get("title") || ""),
+    description,
+    caption: description,
+    tags: splitList(data.get("tags")),
+  };
+  const state = editorFor(platform);
+  if (state.same) {
+    if (platform === "reddit" && !base.tags[0]) return base;
+    return base;
+  }
+  const hashtags = splitList(state.hashtags).map((tag) => (tag.startsWith("#") ? tag : `#${tag}`));
+  const caption = state.caption.trim() || base.caption;
+  const nextDescription = state.description.trim() || base.description;
+  const withTags = hashtags.length ? `${platform === "youtube" ? nextDescription : caption}\n${hashtags.join(" ")}`.trim() : "";
+  return {
+    title: state.title.trim() || base.title,
+    description: platform === "youtube" && withTags ? withTags : nextDescription,
+    caption: platform !== "youtube" && withTags ? withTags : caption,
+    tags: splitList(state.tags).length ? splitList(state.tags) : platform === "reddit" && state.subreddit.trim() ? [state.subreddit.trim()] : base.tags,
+  };
+}
+
+function renderEditors() {
+  readEditors();
+  const host = document.getElementById("network-editors");
+  if (!host) return;
+  host.replaceChildren();
+  for (const key of selectedPlatforms()) {
+    const state = editorFor(key);
+    const network = NETWORKS.find((item) => item.key === key);
+    const card = document.createElement("article");
+    card.className = "network-editor";
+    const heading = document.createElement("h3");
+    heading.textContent = network?.label || key;
+    const same = document.createElement("label");
+    same.className = "check";
+    const box = document.createElement("input");
+    box.type = "checkbox";
+    box.checked = state.same !== false;
+    box.dataset.override = `${key}:same`;
+    same.append(box, document.createTextNode(" Same as the base post"));
+    card.append(heading, same);
+    if (!state.same) {
+      card.append(overrideField(key, "title", "Title", state.title));
+      card.append(overrideField(key, "caption", "Caption", state.caption));
+      card.append(overrideField(key, "description", "Description", state.description));
+      card.append(overrideField(key, "hashtags", "Hashtags", state.hashtags));
+      if (key === "youtube") card.append(overrideField(key, "tags", "YouTube keyword tags", state.tags));
+      if (key === "reddit") card.append(overrideField(key, "subreddit", "Community", state.subreddit));
+    }
+    host.append(card);
+  }
+  host.querySelectorAll("[data-override]").forEach((node) => {
+    node.addEventListener("change", () => {
+      renderEditors();
+      renderChecks();
+    });
+    node.addEventListener("input", renderChecks);
+  });
+  renderChecks();
+}
+
+function overrideField(platform, field, label, value) {
+  const wrap = document.createElement("label");
+  wrap.className = "field";
+  const span = document.createElement("span");
+  span.textContent = label;
+  const input = field === "caption" || field === "description" ? document.createElement("textarea") : document.createElement("input");
+  input.dataset.override = `${platform}:${field}`;
+  input.value = value || "";
+  wrap.append(span, input);
+  return wrap;
+}
+
+function renderChecks() {
+  const host = document.getElementById("check-list");
+  if (!host) return;
+  host.replaceChildren();
+  for (const key of selectedPlatforms()) {
+    const items = checkNetwork({ platform: key, post: resolvedPreview(key), media: key === "youtube" ? mediaMeta : null });
+    const network = NETWORKS.find((item) => item.key === key);
+    for (const item of items) {
+      const row = document.createElement("p");
+      row.className = `check ${item.kind}`;
+      row.textContent = `${network?.label || key}: ${item.message}`;
+      host.append(row);
+    }
+  }
+}
+
+function renderAssistants(data) {
+  const host = document.getElementById("assistant-list");
+  if (!host) return;
+  host.replaceChildren();
+  const clients = Array.isArray(data?.clients) ? data.clients : [];
+  for (const client of clients) {
+    if (client.id === "cursor") continue;
+    const row = document.createElement("article");
+    row.className = "assistant-row";
+    const head = document.createElement("div");
+    head.className = "assistant-head";
+    const title = document.createElement("h3");
+    title.textContent = client.label;
+    const status = document.createElement("span");
+    status.textContent = client.statusLabel;
+    head.append(title, status);
+    const detail = document.createElement("p");
+    detail.className = "hint";
+    detail.textContent = client.detail;
+    row.append(head, detail);
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "btn secondary";
+    button.textContent = client.actionLabel || "Set up";
+    button.addEventListener("click", async () => {
+      if (client.mode !== "write") {
+        try {
+          await navigator.clipboard.writeText(client.snippet || client.detail);
+          showToast(client.group === "cloud" ? "Explanation copied" : "Steps copied");
+        } catch {
+          showToast(client.detail, client.group === "cloud");
+        }
+        return;
+      }
+      button.disabled = true;
+      try {
+        const next = await api("/api/install-client", { method: "POST", body: JSON.stringify({ id: client.id }) });
+        renderStatus(next);
+        showToast(`${client.label} settings were written. ${client.restart || ""}`.trim());
+      } catch (error) {
+        showToast(error.message, true);
+      } finally {
+        button.disabled = false;
+      }
+    });
+    row.append(button);
+    host.append(row);
+  }
+}
+
+document.getElementById("platform-toggles")?.addEventListener("change", () => {
+  renderEditors();
+});
+
+document.querySelector("#youtube-form input[name=video]")?.addEventListener("change", async (event) => {
+  const file = event.target.files?.[0];
+  mediaMeta = null;
+  if (file) {
+    try {
+      mediaMeta = readMp4Meta(new Uint8Array(await file.arrayBuffer()));
+    } catch {
+      mediaMeta = null;
+    }
+  }
+  renderChecks();
 });
 
 document.getElementById("cursor-btn").addEventListener("click", async () => {
@@ -757,7 +1225,7 @@ function renderIntent() {
 }
 
 function renderChannels() {
-  const known = profileFor(guide, latestStatus || {});
+  const known = profileFor(guide, scopedGuideStatus());
   if (known.known) {
     addNote(guideBody, `Using the profile already on this computer: ${known.name}.`);
   } else {
@@ -836,7 +1304,7 @@ function blueskyFields() {
     event.preventDefault();
     button.disabled = true;
     try {
-      const profile = profileFor(guide, latestStatus || {});
+      const profile = profileFor(guide, scopedGuideStatus());
       if (!profile.id) throw new Error("Name this profile before connecting Bluesky.");
       const data = await api("/api/connect-bluesky", {
         method: "POST",
@@ -867,7 +1335,7 @@ function blueskyFields() {
 async function connectFromGuide(platforms, button) {
   button.disabled = true;
   try {
-    const profile = profileFor(guide, latestStatus || {});
+    const profile = profileFor(guide, scopedGuideStatus());
     if (!profile.id) throw new Error("Name this profile before connecting.");
     const data = await api("/api/connect", {
       method: "POST",
@@ -1081,7 +1549,7 @@ async function saveGuideDrafts() {
     renderGuide();
     return;
   }
-  const profile = profileFor(guide, latestStatus || {});
+  const profile = profileFor(guide, scopedGuideStatus());
   const saves = [];
   for (const plan of view.plans) {
     try {
@@ -1227,21 +1695,23 @@ youtubeForm.addEventListener("submit", async (event) => {
       });
       mediaPath = saved.media.filename;
     }
-    const platforms = [...document.querySelectorAll("#platform-toggles input:checked")].map((input) => input.value);
+    const platforms = selectedPlatforms();
     if (!platforms.length) throw new Error("Pick at least one platform.");
+    const brandId = document.getElementById("compose-brand")?.value || selectedBrandId;
+    const brand = (latestStatus?.profiles || []).find((row) => row.id === brandId);
+    if (!brand) throw new Error("Add a brand before saving a draft.");
     const score = document.getElementById("vidiq-score")?.value.trim();
     const notes = document.getElementById("vidiq-notes")?.value.trim();
     const duration = document.getElementById("media-duration")?.value.trim();
-    const overrides = {
-      facebook: { caption: document.getElementById("facebook-caption")?.value || undefined },
-      instagram: { caption: document.getElementById("instagram-caption")?.value || undefined },
-    };
-    if (document.getElementById("youtube-long")?.checked) overrides.youtube = { placement: "youtube_long" };
+    const overrides = collectOverrides(platforms);
+    if (document.getElementById("youtube-long")?.checked) {
+      overrides.youtube = { ...(overrides.youtube || {}), placement: "youtube_long" };
+    }
     const data = await api("/api/draft", {
       method: "POST",
       body: JSON.stringify({
-        id: profileId.value.trim(),
-        name: profileName.value.trim() || profileId.value.trim(),
+        id: brand.id,
+        name: brand.name || brand.id,
         platforms,
         title: String(form.get("title") || ""),
         description: writer === "none" ? description : undefined,
@@ -1310,10 +1780,10 @@ function renderQueue(items) {
     const strong = document.createElement("strong");
     strong.textContent = `${item.profile_name || item.profile_id}: ${item.title || "Draft"}`;
     top.append(strong);
-    if (item.source === "mcp") {
+    if (item.source === "mcp" || item.source === "interview") {
       const ai = document.createElement("span");
       ai.className = "chip ai";
-      ai.textContent = "From AI";
+      ai.textContent = item.source === "interview" ? "From interview" : "From AI";
       top.append(ai);
     }
     if (item.vidiq_needed) {
@@ -1343,6 +1813,12 @@ function renderQueue(items) {
     later.dataset.id = item.id;
     later.dataset.kind = item.kind;
     later.textContent = "Approve for time";
+    const slot = document.createElement("button");
+    slot.type = "button";
+    slot.className = "btn tiny approve-slot";
+    slot.dataset.id = item.id;
+    slot.dataset.kind = item.kind;
+    slot.textContent = "Next open slot";
     const edit = document.createElement("button");
     edit.type = "button";
     edit.className = "btn tiny edit-queue";
@@ -1355,7 +1831,7 @@ function renderQueue(items) {
     discard.dataset.id = item.id;
     discard.dataset.kind = item.kind;
     discard.textContent = "Discard";
-    actions.append(now, when, later, edit, discard);
+    actions.append(now, when, later, slot, edit, discard);
     li.append(top);
     if (item.media_status === "generating") {
       const pending = document.createElement("p");
@@ -1452,6 +1928,30 @@ function renderQueue(items) {
       actions.append(label);
     }
     li.append(actions);
+    const audience = document.createElement("div");
+    audience.className = "queue-audience";
+    li.append(audience);
+    const platforms = [...new Set((item.platforms || []).map((row) => row.platform).filter(Boolean))];
+    if (selectedBrandId && platforms.length) {
+      Promise.all(platforms.map(async (platform) => ({ platform, times: await audienceTimes(platform) })))
+        .then((rows) => {
+          if (!audience.isConnected) return;
+          const note = document.createElement("p");
+          note.className = "hint";
+          note.textContent = rows.map((row) => `${row.platform}: ${audienceSentence(row.times)}`).join(" ");
+          const chips = document.createElement("div");
+          chips.className = "audience-suggestions";
+          for (const row of rows) {
+            chips.append(
+              suggestionButtons(row.times, (suggestion) => {
+                fillScheduleTime(when, suggestion);
+              }),
+            );
+          }
+          audience.append(note, chips);
+        })
+        .catch(() => {});
+    }
     list.append(li);
   }
 }
@@ -1464,7 +1964,7 @@ function isoFromLocal(value) {
   return date.toISOString();
 }
 
-async function approveQueue(button, scheduledAt) {
+async function approveQueue(button, scheduledAt, intoNextSlot) {
   const row = button.closest("li");
   const kind = button.dataset.kind;
   const id = button.dataset.id;
@@ -1485,6 +1985,7 @@ async function approveQueue(button, scheduledAt) {
         bundle_id: kind === "bundle" ? id : undefined,
         post_id: kind === "post" ? id : undefined,
         scheduled_at: scheduledAt || undefined,
+        into_next_slot: intoNextSlot === true,
         instagram_public_confirmed: confirmed,
       }),
     });
@@ -1492,7 +1993,11 @@ async function approveQueue(button, scheduledAt) {
     const results = data.results || [];
     const failed = results.filter((item) => item.ok === false);
     const messages = [...new Set(failed.map((item) => item.error?.message).filter(Boolean))];
-    const note = scheduledAt
+    const note = intoNextSlot
+      ? failed.length
+        ? messages.join(" ") || "No open slot. Nothing was scheduled."
+        : "Approved onto the next open slot. Nothing is posted yet."
+      : scheduledAt
       ? "Approved for that time. Nothing is posted yet."
       : failed.length && failed.length === results.length
         ? messages.join(" ") || "Nothing was posted."
@@ -1576,10 +2081,15 @@ document.getElementById("queue-list")?.addEventListener("click", async (event) =
   }
   const now = event.target.closest(".approve-now");
   const later = event.target.closest(".approve-later");
+  const slot = event.target.closest(".approve-slot");
   const discard = event.target.closest(".discard-queue");
   const edit = event.target.closest(".edit-queue");
   if (now) {
     approveQueue(now).catch((error) => showToast(error.message, true));
+    return;
+  }
+  if (slot) {
+    approveQueue(slot, undefined, true).catch((error) => showToast(error.message, true));
     return;
   }
   if (later) {
@@ -1776,6 +2286,277 @@ document.getElementById("forget-vault").addEventListener("click", async () => {
     showToast(draftResult.textContent);
   } catch (error) {
     showToast(error.message, true);
+  }
+});
+
+function audienceSentence(times) {
+  const bits = ["Suggested from your audience"];
+  if (times?.permission_note) bits.push(times.permission_note);
+  if (times?.detail) bits.push(times.detail);
+  if (times?.sample_size) bits.push(`${times.sample_size} in this sample`);
+  if (times?.confidence && times.confidence !== "none") bits.push(times.confidence);
+  if (times?.range?.start) bits.push(`${String(times.range.start).slice(0, 10)} to ${String(times.range.end).slice(0, 10)}`);
+  if (times?.message) bits.push(times.message);
+  return bits.join(". ");
+}
+
+function suggestionButtons(times, onPick) {
+  const fragment = document.createDocumentFragment();
+  for (const suggestion of times?.suggestions || []) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "btn tiny";
+    button.textContent = suggestion.label;
+    button.addEventListener("click", () => onPick(suggestion));
+    fragment.append(button);
+  }
+  return fragment;
+}
+
+function datetimeLocalValue(iso) {
+  const date = new Date(iso);
+  const pad = (value) => String(value).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+function fillScheduleTime(input, suggestion) {
+  if (!suggestion?.time) {
+    showToast("This report has a day, not a clock time. Pick a time, then approve it.");
+    return;
+  }
+  const zone = document.getElementById("plan-timezone")?.value.trim() || "UTC";
+  const iso = nextZonedStart(isValidTimeZone(zone) ? zone : "UTC", suggestion.weekday, suggestion.time, Date.now());
+  if (!iso || !input) return;
+  input.value = datetimeLocalValue(iso);
+  showToast("Time filled from your audience. Approve for time when it should be scheduled.");
+}
+
+async function audienceTimes(platform) {
+  const key = `${selectedBrandId}:${platform}`;
+  if (!audienceCache.has(key)) {
+    const pending = api(`/api/best-times?profile_id=${encodeURIComponent(selectedBrandId)}&platform=${encodeURIComponent(platform)}`)
+      .then((data) => data.times || {})
+      .catch((error) => {
+        audienceCache.delete(key);
+        throw error;
+      });
+    audienceCache.set(key, pending);
+  }
+  return audienceCache.get(key);
+}
+
+async function addSuggestedSlot(suggestion) {
+  const weekday = document.getElementById("plan-weekday");
+  const time = document.getElementById("plan-time");
+  if (!weekday || !time) return;
+  if (suggestion.weekday === "daily") weekday.value = "daily";
+  else if (suggestion.weekday !== "" && suggestion.weekday != null) weekday.value = String(suggestion.weekday);
+  if (!suggestion.time) {
+    showToast("This report has a day, not a clock time. Pick a time, then add the slot.");
+    return;
+  }
+  time.value = suggestion.time;
+  document.getElementById("plan-form")?.requestSubmit();
+}
+
+async function loadAudienceSuggestions(platform) {
+  const note = document.getElementById("audience-note");
+  const host = document.getElementById("audience-suggestions");
+  if (!host) return;
+  host.replaceChildren();
+  if (!selectedBrandId) {
+    if (note) note.textContent = "";
+    return;
+  }
+  try {
+    const times = await audienceTimes(platform);
+    if (note) note.textContent = audienceSentence(times);
+    host.append(
+      suggestionButtons(times, (suggestion) => {
+        addSuggestedSlot(suggestion).catch((error) => showToast(error.message, true));
+      }),
+    );
+  } catch (error) {
+    if (note) note.textContent = error.message;
+  }
+}
+
+document.getElementById("plan-platform")?.addEventListener("change", () => {
+  const platform = document.getElementById("plan-platform").value;
+  audienceKey = `${selectedBrandId}:${platform}`;
+  loadAudienceSuggestions(platform).catch((error) => showToast(error.message, true));
+});
+
+document.getElementById("plan-form")?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const brandId = selectedBrandId || document.getElementById("compose-brand")?.value || "";
+  if (!brandId) {
+    showToast("Add a brand before saving a posting plan.", true);
+    return;
+  }
+  const profile = (latestStatus?.profiles || []).find((row) => row.id === brandId);
+  const weekdayRaw = document.getElementById("plan-weekday").value;
+  const slot = {
+    platform: document.getElementById("plan-platform").value,
+    weekday: weekdayRaw === "daily" ? "daily" : Number(weekdayRaw),
+    time: document.getElementById("plan-time").value,
+  };
+  const slots = [...(profile?.posting_plan?.slots || []), slot];
+  try {
+    const data = await api("/api/posting-plan", {
+      method: "POST",
+      body: JSON.stringify({
+        profile_id: brandId,
+        timezone: document.getElementById("plan-timezone").value.trim(),
+        slots,
+      }),
+    });
+    renderStatus(data);
+    showToast("Slot saved on this computer. Nothing is scheduled yet.");
+  } catch (error) {
+    showToast(error.message, true);
+  }
+});
+
+document.getElementById("plan-slots")?.addEventListener("click", async (event) => {
+  const button = event.target.closest(".remove-slot");
+  if (!button) return;
+  const brandId = selectedBrandId;
+  const profile = (latestStatus?.profiles || []).find((row) => row.id === brandId);
+  if (!profile?.posting_plan) return;
+  const slots = profile.posting_plan.slots.filter((slot) => slot.id !== button.dataset.id);
+  try {
+    const data = await api("/api/posting-plan", {
+      method: "POST",
+      body: JSON.stringify({ profile_id: brandId, timezone: profile.posting_plan.timezone, slots }),
+    });
+    renderStatus(data);
+  } catch (error) {
+    showToast(error.message, true);
+  }
+});
+
+document.getElementById("youtube-form")?.addEventListener("input", renderChecks);
+renderEditors();
+
+let shownInterviewBrand = "";
+let activeRecorder = null;
+
+function renderInterview(profile) {
+  const root = document.getElementById("interview");
+  if (!root) return;
+  const id = profile?.id || "";
+  if (root.contains(document.activeElement) && shownInterviewBrand === id) return;
+  shownInterviewBrand = id;
+  const notes = document.getElementById("voice-notes");
+  if (notes) notes.value = profile?.voice_notes || "";
+  const answers = profile?.interview?.answers || {};
+  for (const box of root.querySelectorAll("[data-answer]")) {
+    box.value = answers[box.dataset.answer]?.text || "";
+  }
+  for (const audio of root.querySelectorAll("[data-audio]")) {
+    const saved = answers[audio.dataset.audio];
+    if (profile && saved?.audio_file) {
+      audio.hidden = false;
+      const next = `/interview-audio/${encodeURIComponent(profile.id)}/${audio.dataset.audio}`;
+      if (audio.getAttribute("src") !== next) audio.src = next;
+    } else {
+      audio.hidden = true;
+      audio.removeAttribute("src");
+    }
+  }
+}
+
+document.getElementById("save-interview")?.addEventListener("click", async () => {
+  const button = document.getElementById("save-interview");
+  const brandId = selectedBrandId || document.getElementById("compose-brand")?.value || "";
+  if (!brandId) {
+    showToast("Add a brand before saving an interview.", true);
+    return;
+  }
+  button.disabled = true;
+  try {
+    const answers = {};
+    for (const box of document.querySelectorAll("#interview [data-answer]")) {
+      answers[box.dataset.answer] = { text: box.value };
+    }
+    const data = await api("/api/interview", {
+      method: "POST",
+      body: JSON.stringify({
+        profile_id: brandId,
+        voice_notes: document.getElementById("voice-notes")?.value || "",
+        answers,
+      }),
+    });
+    shownInterviewBrand = "";
+    renderStatus(data);
+    const saved = document.getElementById("interview-saved");
+    if (saved) saved.textContent = "Answers saved on this computer. They are not published.";
+    showToast("Answers saved on this computer");
+  } catch (error) {
+    showToast(error.message, true);
+  } finally {
+    button.disabled = false;
+  }
+});
+
+document.getElementById("interview")?.addEventListener("click", async (event) => {
+  const button = event.target.closest("[data-record]");
+  if (!button) return;
+  const promptId = button.dataset.record;
+  const brandId = selectedBrandId || document.getElementById("compose-brand")?.value || "";
+  if (!brandId) {
+    showToast("Add a brand before recording.", true);
+    return;
+  }
+  if (activeRecorder?.promptId === promptId) {
+    activeRecorder.recorder.stop();
+    return;
+  }
+  if (activeRecorder) activeRecorder.recorder.stop();
+  if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
+    showToast("This browser cannot record. Type the answer.", true);
+    return;
+  }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const mime = MediaRecorder.isTypeSupported("audio/webm") ? "audio/webm" : "";
+    const recorder = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
+    const chunks = [];
+    recorder.addEventListener("dataavailable", (item) => {
+      if (item.data?.size) chunks.push(item.data);
+    });
+    recorder.addEventListener("stop", async () => {
+      stream.getTracks().forEach((track) => track.stop());
+      button.textContent = "Record";
+      if (activeRecorder?.recorder === recorder) activeRecorder = null;
+      const blob = new Blob(chunks, { type: recorder.mimeType || "audio/webm" });
+      if (!blob.size) return;
+      button.disabled = true;
+      try {
+        const data = await api("/api/interview/audio", {
+          method: "POST",
+          headers: {
+            "content-type": blob.type || "audio/webm",
+            "x-postpath-profile": brandId,
+            "x-postpath-prompt": promptId,
+          },
+          body: blob,
+        });
+        shownInterviewBrand = "";
+        renderStatus(data);
+        showToast("Recording saved on this computer");
+      } catch (error) {
+        showToast(error.message, true);
+      } finally {
+        button.disabled = false;
+      }
+    });
+    activeRecorder = { promptId, recorder };
+    recorder.start();
+    button.textContent = "Stop";
+  } catch {
+    showToast("This browser did not start a recording. Type the answer.", true);
   }
 });
 

@@ -8,7 +8,7 @@ import { DEFAULT_DESK_PORT } from "../home.js";
 import { OAUTH_KEYS, loadOAuthEnvFile, mergeOAuthInput, publicOAuthConfig, saveOAuthEnvFile, parseEnvFile } from "../envFile.js";
 import { assessOAuthValues, assertOAuthValues } from "../oauth/credentials.js";
 import { displayOutcome } from "../publish/outcome.js";
-import { installCursorMcp, publicMcpClientConfig, readCursorMcpStatus } from "../cursorConfig.js";
+import { installClient, installCursorMcp, listClientStatus, publicMcpClientConfig, readCursorMcpStatus } from "../cursorConfig.js";
 import { googleLoopbackUri, providerRedirectUri } from "../oauth/redirect.js";
 import { handleRemoteMcp } from "../mcp/http.js";
 import { allowedHost, clientSetup } from "../mcp/clients.js";
@@ -17,6 +17,7 @@ import { openDesktopApp } from "../openApp.js";
 import { mcpError } from "../errors.js";
 import { resolveSafeMediaPath } from "../mediaPath.js";
 import { PRODUCT_NAME, PRODUCT_TITLE } from "../brand.js";
+import { getEntitlement } from "../license.js";
 
 const PUBLIC_DIR = join(dirname(fileURLToPath(import.meta.url)), "public");
 const MEDIA_LIMIT = 200 * 1024 * 1024;
@@ -30,6 +31,7 @@ const CONTENT_TYPES = {
   ".jpeg": "image/jpeg",
   ".mp4": "video/mp4",
   ".webp": "image/webp",
+  ".webm": "audio/webm",
   ".ico": "image/x-icon",
 };
 
@@ -214,6 +216,7 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
       desk_url: `http://127.0.0.1:${port}/`,
       profiles: status.profiles,
       connections: status.connections,
+      license: getEntitlement(env),
       platforms: status.platforms,
       scheduled_posts,
       queue: engine.listQueue().queue,
@@ -223,6 +226,7 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
       cursor,
       mcp_config: publicMcpClientConfig(),
       mcp_remote: clientSetup(env, port),
+      clients: listClientStatus(),
       pats: listPats(engine.store),
       next_step: !anyOauthReady(ready)
         ? "save_apps"
@@ -300,10 +304,57 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
         return;
       }
 
+      if (req.method === "POST" && url.pathname === "/api/install-client") {
+        const body = await readJson(req);
+        const installed = installClient(String(body.id || "").trim());
+        sendJson(res, 200, { ok: true, installed, ...snapshot() });
+        return;
+      }
+
       if (req.method === "POST" && url.pathname === "/api/cancel-scheduled") {
         const body = await readJson(req);
         const result = await engine.cancelScheduledPost({ post_id: body.post_id });
         sendJson(res, 200, { ok: true, ...result, ...snapshot() });
+        return;
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/interview") {
+        const body = await readJson(req, 80_000);
+        const saved = engine.saveInterview(body.profile_id || body.id, {
+          voice_notes: body.voice_notes,
+          answers: body.answers,
+        });
+        sendJson(res, 200, { ok: true, interview: saved, ...snapshot() });
+        return;
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/interview/audio") {
+        const chunks = [];
+        let size = 0;
+        for await (const chunk of req) {
+          size += chunk.length;
+          if (size > 8 * 1024 * 1024) throw mcpError("payload_too_large", "A recording must be 8 MB or smaller.", 413);
+          chunks.push(chunk);
+        }
+        const saved = engine.saveInterviewAudio(
+          req.headers["x-postpath-profile"],
+          req.headers["x-postpath-prompt"],
+          Buffer.concat(chunks),
+          req.headers["content-type"],
+        );
+        sendJson(res, 200, { ok: true, interview: saved, ...snapshot() });
+        return;
+      }
+
+      if (req.method === "GET" && url.pathname.startsWith("/interview-audio/")) {
+        const parts = url.pathname.split("/").filter(Boolean);
+        try {
+          const recording = engine.readInterviewRecording(parts[1], parts[2]);
+          res.writeHead(200, { "content-type": recording.content_type || "audio/webm", "cache-control": "no-store" });
+          res.end(recording.bytes);
+        } catch (error) {
+          sendJson(res, error.statusCode || 404, { ok: false, message: error.message || "Recording not found" });
+        }
         return;
       }
 
@@ -352,14 +403,39 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
         return;
       }
 
+      if (req.method === "GET" && url.pathname === "/api/best-times") {
+        const times = await engine.getBestTimes({
+          profile_id: url.searchParams.get("profile_id"),
+          platform: url.searchParams.get("platform"),
+        });
+        sendJson(res, 200, { ok: true, times });
+        return;
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/posting-plan") {
+        const body = await readJson(req);
+        const saved = engine.setPostingPlan(body.profile_id || body.id, {
+          timezone: body.timezone,
+          slots: body.slots,
+        });
+        sendJson(res, 200, { ok: true, schedule: saved, ...snapshot() });
+        return;
+      }
+
       if (req.method === "POST" && url.pathname === "/api/approve") {
         const body = await readJson(req);
         if (body.bundle_id) {
           const result = await engine.approveBundle({
             bundle_id: body.bundle_id,
             scheduled_at: body.scheduled_at,
+            into_next_slot: body.into_next_slot === true,
             instagram_public_confirmed: body.instagram_public_confirmed === true,
           });
+          sendJson(res, 200, { ok: true, ...result, ...snapshot() });
+          return;
+        }
+        if (body.into_next_slot === true) {
+          const result = await engine.scheduleApprovedPost({ post_id: body.post_id, confirm: true });
           sendJson(res, 200, { ok: true, ...result, ...snapshot() });
           return;
         }
@@ -476,6 +552,7 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
         ok: false,
         code: error.code || "error",
         message: error.message || "Unexpected error",
+        snippet: error.snippet || undefined,
       });
     }
   });

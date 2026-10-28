@@ -265,15 +265,20 @@ async function handleMcp(req, res, ctx, parsedBody) {
     return;
   }
   const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: () => randomUUID() });
-  const { server } = createSocialMcpServer({
+  const created = createSocialMcpServer({
     engine: ctx.engine,
     auth: { ...auth, connectUrl: `${ctx.base}/#connect-ai` },
   });
-  await server.connect(transport);
+  await created.server.connect(transport);
   await transport.handleRequest(req, res, parsedBody);
   if (transport.sessionId) {
-    sessions.set(transport.sessionId, { transport, server, tokenHash: auth.tokenHash });
-    transport.onclose = () => sessions.delete(transport.sessionId);
+    sessions.set(transport.sessionId, { transport, server: created.server, tokenHash: auth.tokenHash });
+    transport.onclose = () => {
+      created.stopQueueWatch?.();
+      sessions.delete(transport.sessionId);
+    };
+  } else {
+    created.stopQueueWatch?.();
   }
 }
 
