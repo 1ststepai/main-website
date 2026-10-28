@@ -1,5 +1,14 @@
 # Architecture Decision Log
 
+## 2026-10-28: PostPath desk is a five-part composer, not one long setup page
+
+- **Status / owner:** Draft, stacked on the assistant-connect branch. Not deployed. Evan owns any merge.
+- **Decision:** The desk is Compose, Drafts, Accounts, Assistant, and Settings. Compose reviews a draft before saving it. Publish stays limited to a YouTube draft saved in this window. Accounts use a neutral “Not connected” state. Owner app secrets stay in Settings. The trust line is exactly: “Your social logins are saved on your own computer, encrypted, not on our servers.” Sora is stored in the desk, not loaded from a font service. No new draft-list API. The drafts screen shows drafts saved during this visit, plus the existing scheduled queue.
+- **Rationale:** The previous page gave setup, secrets, and a red status list the same weight as writing a post.
+- **Affected systems:** `packages/social-mcp/src/desk/public/` only. Endpoints are unchanged.
+- **Verification:** Existing PostPath tests, plus a check that the on-screen length numbers match `validate.js`. Browser shots of each view at desktop and phone width.
+- **Rollback:** Leave this pull request unmerged.
+
 ## 2026-10-28: PostPath connects local assistants from the desk, and does not tunnel for cloud apps
 
 - **Status / owner:** Draft on the PostPath release-candidate branch. Not deployed. Evan owns any merge.

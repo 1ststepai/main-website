@@ -4,186 +4,240 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>PostPath by 1stStep.ai</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Sora:wght@600;700&display=swap"
-      rel="stylesheet"
-    />
     <link rel="icon" href="/assets/postpath-mark.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="/app.css" />
   </head>
   <body>
-    <div class="atmosphere" aria-hidden="true"></div>
-    <main class="shell">
-      <header class="hero">
+    <a class="skip" href="#compose-heading">Skip to compose</a>
+    <div class="app">
+      <header class="topbar">
         <p class="brand">
-          <img src="/assets/postpath-mark.svg" width="32" height="32" alt="" />
-          PostPath
+          <img src="/assets/postpath-mark.svg" width="28" height="28" alt="" />
+          <span>PostPath</span>
         </p>
-        <p class="byline">by 1stStep.ai</p>
-        <h1>Post from this window.</h1>
-        <p class="lede">
-          Connect a channel, review a draft, and publish it here. An assistant is optional. Close this window to quit. A scheduled post sends only while PostPath is open and this computer is on.
-        </p>
-        <form id="connect-form" class="connect-form">
-          <label class="field">
-            <span>Brand or profile</span>
-            <input id="profile-name" name="name" type="text" placeholder="Acme Co" autocomplete="organization" required />
-          </label>
-          <label class="field">
-            <span>Profile id</span>
-            <input id="profile-id" name="id" type="text" placeholder="acme" pattern="[a-zA-Z0-9][a-zA-Z0-9_-]{1,63}" required />
-          </label>
-          <div class="cta-row">
-            <button type="submit" class="btn primary" id="connect-btn">Connect accounts</button>
-            <button type="button" class="btn ghost" id="reopen-guide">Setup guide</button>
-          </div>
-          <p class="hint" id="connect-hint">Connect a channel below for the first post. Use Connect your AI assistant when an app should use the same saved accounts.</p>
-        </form>
+        <p class="trust">Your social logins are saved on your own computer, encrypted, not on our servers.</p>
+        <button type="button" class="btn tiny top-guide" data-reopen-guide>Setup guide</button>
       </header>
 
-      <section class="panel" id="assistants" aria-labelledby="assistants-title">
-        <div class="panel-head">
-          <h2 id="assistants-title">Connect your AI assistant</h2>
-        </div>
-        <p class="hint" id="assistants-intro">
-          Pick the app you already use. One click adds PostPath on this computer and leaves your other tools alone. Apps on the internet cannot see this computer. PostPath does not open a tunnel.
+      <nav class="nav" aria-label="PostPath">
+        <p class="brand nav-brand">
+          <img src="/assets/postpath-mark.svg" width="28" height="28" alt="" />
+          <span>PostPath</span>
         </p>
-        <div id="assistant-list" class="assistant-list"></div>
-      </section>
+        <p class="byline">by 1stStep.ai</p>
+        <div class="nav-links">
+          <button type="button" class="nav-btn" data-view="compose" aria-current="page">Compose</button>
+          <button type="button" class="nav-btn" data-view="queue">Drafts</button>
+          <button type="button" class="nav-btn" data-view="accounts">Accounts</button>
+          <button type="button" class="nav-btn" data-view="assistant">Assistant</button>
+          <button type="button" class="nav-btn" data-view="settings">Settings</button>
+        </div>
+        <div class="nav-foot">
+          <p class="trust">Your social logins are saved on your own computer, encrypted, not on our servers.</p>
+          <p class="quiet">Close the window to quit.</p>
+          <button type="button" class="btn tiny" id="reopen-guide" data-reopen-guide>Setup guide</button>
+        </div>
+      </nav>
 
-      <section class="panel" aria-labelledby="youtube-title">
-        <div class="panel-head">
-          <h2 id="youtube-title">YouTube</h2>
-          <p class="panel-note">Private unless you change it</p>
-        </div>
-        <p class="hint">
-          YouTube sign-in is not included in this preview. Customers do not create a Google Cloud app.
-          App credentials below are for an owner private test. This copy is an unsigned internal preview.
-          Leave Windows SmartScreen and macOS Gatekeeper on.
-        </p>
-        <div class="cta-row">
-          <button type="button" class="btn secondary" id="connect-youtube">Connect YouTube</button>
-        </div>
-        <form id="youtube-form" class="oauth-form">
-          <label>Title <input name="title" maxlength="100" required /></label>
-          <label>Description <textarea name="description" maxlength="5000" rows="4"></textarea></label>
-          <label>Privacy
-            <select name="privacy_status">
-              <option value="private" selected>Private</option>
-              <option value="unlisted">Unlisted</option>
-              <option value="public">Public</option>
-            </select>
-          </label>
-          <label>Video file <input name="video" type="file" accept="video/mp4,video/*" /></label>
-          <div class="cta-row">
-            <button type="submit" class="btn primary" id="save-draft">Save draft</button>
-            <button type="button" class="btn secondary" id="publish-draft" disabled>Publish this draft</button>
+      <main class="main">
+        <section class="view" id="view-compose" aria-labelledby="compose-heading">
+          <div class="view-head">
+            <h1 id="compose-heading">Write a draft</h1>
+            <p>Choose where it could go, then review it. Nothing is sent until you publish a YouTube draft you just saved.</p>
           </div>
-        </form>
-        <p class="hint" id="draft-result">No draft yet. Publishing uses the draft you just saved.</p>
-        <p class="hint">Uninstalling PostPath leaves saved accounts in place. Remove them only with the button below, then quit and open PostPath again.</p>
-        <button type="button" class="btn danger" id="forget-vault">Remove saved accounts</button>
-      </section>
+          <form id="youtube-form" class="composer">
+            <div id="compose-editor">
+            <fieldset class="chips" id="network-chips">
+              <legend>Networks</legend>
+              <button type="button" class="chip" data-network="youtube" aria-pressed="true">YouTube</button>
+              <button type="button" class="chip" data-network="instagram" aria-pressed="false">Instagram</button>
+              <button type="button" class="chip" data-network="facebook" aria-pressed="false">Facebook</button>
+              <button type="button" class="chip" data-network="linkedin" aria-pressed="false">LinkedIn</button>
+              <button type="button" class="chip" data-network="x" aria-pressed="false">X</button>
+              <button type="button" class="chip" data-network="threads" aria-pressed="false">Threads</button>
+              <button type="button" class="chip" data-network="pinterest" aria-pressed="false">Pinterest</button>
+              <button type="button" class="chip" data-network="bluesky" aria-pressed="false">Bluesky</button>
+              <button type="button" class="chip" data-network="google_business" aria-pressed="false">Google Business</button>
+              <button type="button" class="chip" data-network="reddit" aria-pressed="false">Reddit</button>
+              <button type="button" class="chip" data-network="tiktok" aria-pressed="false" disabled>TikTok</button>
+              <button type="button" class="chip" data-network="snapchat" aria-pressed="false" disabled>Snapchat</button>
+              <button type="button" class="chip" data-network="whatsapp" aria-pressed="false" disabled>WhatsApp</button>
+            </fieldset>
+            <p class="quiet" id="chip-note">TikTok, Snapchat, and WhatsApp stay off. This window does not publish them.</p>
+              <label class="field">
+                <span>Title</span>
+                <input name="title" maxlength="100" placeholder="A clear title" autocomplete="off" />
+              </label>
+              <label class="field">
+                <span>Words</span>
+                <textarea name="description" maxlength="5000" rows="6" placeholder="What should this say?"></textarea>
+              </label>
+              <label class="field" id="privacy-field">
+                <span>YouTube privacy</span>
+                <select name="privacy_status">
+                  <option value="private" selected>Private</option>
+                  <option value="unlisted">Unlisted</option>
+                  <option value="public">Public</option>
+                </select>
+              </label>
+              <label class="drop" id="drop-zone">
+                <input id="video-input" name="video" type="file" accept="video/mp4,video/*" />
+                <span class="drop-title" id="drop-label">Drop a video here, or choose a file</span>
+                <span class="quiet">Used for a YouTube draft. The file stays on this computer.</span>
+              </label>
+              <div id="length-hints" class="hints" aria-live="polite"></div>
+              <div class="cta-row">
+                <button type="button" class="btn primary" id="review-draft">Review</button>
+              </div>
+            </div>
 
-      <section class="panel" aria-labelledby="status-title">
-        <div class="panel-head">
-          <h2 id="status-title">Status</h2>
-          <button type="button" class="btn tiny" id="refresh-btn">Refresh</button>
-        </div>
-        <ul class="network-list" id="network-list"></ul>
-        <p class="meta" id="path-meta"></p>
-      </section>
+            <div id="compose-review" hidden>
+              <h2>Review</h2>
+              <div id="review-summary" class="review-summary"></div>
+              <p class="quiet" id="draft-result">No draft yet. Publishing uses the YouTube draft you just saved.</p>
+              <div class="cta-row">
+                <button type="button" class="btn secondary" id="review-back">Edit</button>
+                <button type="submit" class="btn primary" id="save-draft">Save draft</button>
+                <button type="button" class="btn secondary" id="publish-draft" disabled>Publish this draft</button>
+              </div>
+            </div>
+          </form>
+        </section>
 
-      <section class="panel" aria-labelledby="scheduled-title">
-        <div class="panel-head">
-          <h2 id="scheduled-title">Scheduled</h2>
-          <p class="panel-note">Local queue</p>
-        </div>
-        <p class="hint" id="schedule-honesty">
-          Schedules only fire while PostPath is running. Closing this desk pauses the due checker until you open it again.
-        </p>
-        <p class="hint" id="dispatch-honesty">
-          After dispatch starts, PostPath cannot guarantee the platform did not accept the post. Cancel only works while a post is still scheduled. Dispatch-started posts stay needs review and are not auto-retried or undone.
-        </p>
-        <ul class="scheduled-list" id="scheduled-list"></ul>
-      </section>
+        <section class="view" id="view-queue" hidden aria-labelledby="queue-heading">
+          <div class="view-head">
+            <h1 id="queue-heading">Drafts and queue</h1>
+            <p>Only posts this desk has actually saved. Nothing here is a sample.</p>
+          </div>
+          <section class="panel" aria-labelledby="drafts-title">
+            <div class="panel-head">
+              <h2 id="drafts-title">Drafts</h2>
+            </div>
+            <ul class="item-list" id="draft-list"></ul>
+            <p class="quiet">Drafts saved since you opened this window appear here. Closing the window does not delete them, and this list does not invent older ones.</p>
+          </section>
+          <section class="panel" aria-labelledby="scheduled-title">
+            <div class="panel-head">
+              <h2 id="scheduled-title">Waiting to send</h2>
+              <button type="button" class="btn tiny" id="refresh-btn">Refresh</button>
+            </div>
+            <p class="quiet" id="schedule-honesty">Schedules only fire while PostPath is running. Closing this desk pauses the due checker until you open it again.</p>
+            <p class="quiet" id="dispatch-honesty">After dispatch starts, PostPath cannot guarantee the platform did not accept the post. Cancel only works while a post is still scheduled. Dispatch-started posts stay needs review and are not auto-retried or undone.</p>
+            <ul class="item-list" id="scheduled-list"></ul>
+          </section>
+        </section>
 
-      <section class="panel" aria-labelledby="bluesky-title">
-        <div class="panel-head">
-          <h2 id="bluesky-title">Bluesky</h2>
-          <p class="panel-note">App password — not browser OAuth.</p>
-        </div>
-        <form id="bluesky-form" class="oauth-form">
-          <label>Handle <input name="handle" placeholder="you.bsky.social" autocomplete="off" /></label>
-          <label>App password <input name="app_password" type="password" autocomplete="off" /></label>
-          <button type="submit" class="btn secondary">Connect Bluesky</button>
-        </form>
-      </section>
+        <section class="view" id="view-accounts" hidden aria-labelledby="accounts-heading">
+          <div class="view-head">
+            <h1 id="accounts-heading">Accounts</h1>
+            <p id="connect-hint">Connect a channel when you are ready. A draft can be saved before that.</p>
+          </div>
+          <div class="cta-row">
+            <button type="submit" class="btn primary" id="connect-btn" form="connect-form">Connect accounts</button>
+          </div>
+          <div id="account-list" class="account-grid"></div>
+          <form id="bluesky-form" class="panel bluesky-card">
+            <div class="panel-head">
+              <h2>Bluesky</h2>
+              <p class="quiet">Uses an app password from Bluesky settings.</p>
+            </div>
+            <label class="field">Handle <input name="handle" placeholder="you.bsky.social" autocomplete="off" /></label>
+            <label class="field">App password <input name="app_password" type="password" autocomplete="off" /></label>
+            <button type="submit" class="btn secondary">Connect Bluesky</button>
+          </form>
+        </section>
 
-      <section class="panel" aria-labelledby="apps-title">
-        <div class="panel-head">
-          <h2 id="apps-title">App credentials</h2>
-          <p class="panel-note">Owner private test. Customers do not paste app secrets here.</p>
-        </div>
-        <p class="redirect">
-          Redirect URI for every app:
-          <code id="redirect-uri">http://127.0.0.1:47831/oauth/callback</code>
-          <button type="button" class="btn tiny" id="copy-redirect">Copy</button>
-        </p>
-        <form id="oauth-form" class="oauth-form">
-          <fieldset>
-            <legend>Google / YouTube + Business</legend>
-            <label>Client ID <input name="GOOGLE_OAUTH_CLIENT_ID" autocomplete="off" /></label>
-            <label>Client secret <input name="GOOGLE_OAUTH_CLIENT_SECRET" type="password" autocomplete="off" /></label>
-          </fieldset>
-          <fieldset>
-            <legend>Meta / Instagram + Facebook + Threads</legend>
-            <label>App ID <input name="META_APP_ID" autocomplete="off" /></label>
-            <label>App secret <input name="META_APP_SECRET" type="password" autocomplete="off" /></label>
-          </fieldset>
-          <fieldset>
-            <legend>TikTok</legend>
-            <label>Client key <input name="TIKTOK_CLIENT_KEY" autocomplete="off" /></label>
-            <label>Client secret <input name="TIKTOK_CLIENT_SECRET" type="password" autocomplete="off" /></label>
-          </fieldset>
-          <fieldset>
-            <legend>LinkedIn</legend>
-            <label>Client ID <input name="LINKEDIN_CLIENT_ID" autocomplete="off" /></label>
-            <label>Client secret <input name="LINKEDIN_CLIENT_SECRET" type="password" autocomplete="off" /></label>
-          </fieldset>
-          <fieldset>
-            <legend>X</legend>
-            <label>Client ID <input name="X_CLIENT_ID" autocomplete="off" /></label>
-            <label>Client secret <input name="X_CLIENT_SECRET" type="password" autocomplete="off" /></label>
-          </fieldset>
-          <fieldset>
-            <legend>Pinterest</legend>
-            <label>App ID <input name="PINTEREST_APP_ID" autocomplete="off" /></label>
-            <label>App secret <input name="PINTEREST_APP_SECRET" type="password" autocomplete="off" /></label>
-          </fieldset>
-          <fieldset>
-            <legend>Reddit</legend>
-            <label>Client ID <input name="REDDIT_CLIENT_ID" autocomplete="off" /></label>
-            <label>Client secret <input name="REDDIT_CLIENT_SECRET" type="password" autocomplete="off" /></label>
-          </fieldset>
-          <fieldset>
-            <legend>Snapchat (Marketing API approval)</legend>
-            <label>Client ID <input name="SNAPCHAT_CLIENT_ID" autocomplete="off" /></label>
-            <label>Client secret <input name="SNAPCHAT_CLIENT_SECRET" type="password" autocomplete="off" /></label>
-          </fieldset>
-          <button type="submit" class="btn secondary">Save credentials</button>
-        </form>
-      </section>
+        <section class="view" id="view-assistant" hidden>
+          <div class="view-head">
+            <h1 id="assistants-title">Connect your AI assistant</h1>
+            <p id="assistants-intro">Pick the app you already use. One click adds PostPath on this computer and leaves your other tools alone. Apps on the internet cannot see this computer. PostPath does not open a tunnel.</p>
+          </div>
+          <div class="panel" id="assistants">
+            <div id="assistant-list" class="assistant-list"></div>
+          </div>
+        </section>
 
-      <p class="toast" id="toast" hidden></p>
-      <footer class="foot">
-        <span>Close the window to quit. Saved accounts stay on this computer.</span>
-        <span class="dot" aria-hidden="true"></span>
-        <span>PostPath by 1stStep.ai</span>
-      </footer>
-    </main>
+        <section class="view" id="view-settings" hidden aria-labelledby="settings-heading">
+          <div class="view-head">
+            <h1 id="settings-heading">Settings</h1>
+            <p>The name on your drafts, and the owner setup for sign-in apps.</p>
+          </div>
+          <form id="connect-form" class="panel">
+            <h2>Name</h2>
+            <label class="field">
+              <span>Name</span>
+              <input id="profile-name" name="name" type="text" placeholder="Acme Co" autocomplete="organization" />
+            </label>
+            <label class="field">
+              <span>Short name</span>
+              <input id="profile-id" name="id" type="text" placeholder="acme" autocomplete="off" />
+            </label>
+            <p class="quiet">Letters and numbers. PostPath uses it to keep this brand’s drafts together.</p>
+          </form>
+          <p class="quiet" id="path-meta"></p>
+          <details class="panel">
+            <summary>Owner setup</summary>
+            <p class="quiet">For a private test by the owner. Customers do not paste app secrets here.</p>
+            <p class="redirect">
+              Redirect for every app:
+              <code id="redirect-uri">http://127.0.0.1:47831/oauth/callback</code>
+              <button type="button" class="btn tiny" id="copy-redirect">Copy</button>
+            </p>
+            <form id="oauth-form" class="oauth-form">
+              <fieldset>
+                <legend>Google / YouTube + Business</legend>
+                <label>Client ID <input name="GOOGLE_OAUTH_CLIENT_ID" autocomplete="off" /></label>
+                <label>Client secret <input name="GOOGLE_OAUTH_CLIENT_SECRET" type="password" autocomplete="off" /></label>
+              </fieldset>
+              <fieldset>
+                <legend>Meta / Instagram + Facebook + Threads</legend>
+                <label>App ID <input name="META_APP_ID" autocomplete="off" /></label>
+                <label>App secret <input name="META_APP_SECRET" type="password" autocomplete="off" /></label>
+              </fieldset>
+              <fieldset>
+                <legend>TikTok</legend>
+                <label>Client key <input name="TIKTOK_CLIENT_KEY" autocomplete="off" /></label>
+                <label>Client secret <input name="TIKTOK_CLIENT_SECRET" type="password" autocomplete="off" /></label>
+              </fieldset>
+              <fieldset>
+                <legend>LinkedIn</legend>
+                <label>Client ID <input name="LINKEDIN_CLIENT_ID" autocomplete="off" /></label>
+                <label>Client secret <input name="LINKEDIN_CLIENT_SECRET" type="password" autocomplete="off" /></label>
+              </fieldset>
+              <fieldset>
+                <legend>X</legend>
+                <label>Client ID <input name="X_CLIENT_ID" autocomplete="off" /></label>
+                <label>Client secret <input name="X_CLIENT_SECRET" type="password" autocomplete="off" /></label>
+              </fieldset>
+              <fieldset>
+                <legend>Pinterest</legend>
+                <label>App ID <input name="PINTEREST_APP_ID" autocomplete="off" /></label>
+                <label>App secret <input name="PINTEREST_APP_SECRET" type="password" autocomplete="off" /></label>
+              </fieldset>
+              <fieldset>
+                <legend>Reddit</legend>
+                <label>Client ID <input name="REDDIT_CLIENT_ID" autocomplete="off" /></label>
+                <label>Client secret <input name="REDDIT_CLIENT_SECRET" type="password" autocomplete="off" /></label>
+              </fieldset>
+              <fieldset>
+                <legend>Snapchat</legend>
+                <label>Client ID <input name="SNAPCHAT_CLIENT_ID" autocomplete="off" /></label>
+                <label>Client secret <input name="SNAPCHAT_CLIENT_SECRET" type="password" autocomplete="off" /></label>
+              </fieldset>
+              <button type="submit" class="btn secondary">Save owner setup</button>
+            </form>
+          </details>
+          <section class="panel">
+            <h2>Saved accounts</h2>
+            <p class="quiet">Removing them leaves PostPath installed. Quit and open it again afterward. Videos already on YouTube stay there.</p>
+            <button type="button" class="btn danger" id="forget-vault">Remove saved accounts</button>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <p class="toast" id="toast" role="status" aria-live="polite" hidden></p>
+
     <div id="guide" class="guide" hidden>
       <div class="guide-card" role="dialog" aria-modal="true" aria-labelledby="guide-title">
         <p class="guide-kicker" id="guide-kicker"></p>
