@@ -26,6 +26,7 @@ import {
   toggleChannel,
 } from "./guide.js";
 import { platformIcon } from "./icons.js";
+import { bindPilot, renderPilot } from "./pilotDesk.js";
 
 const NETWORKS = [
   { key: "youtube", label: "YouTube" },
@@ -257,6 +258,8 @@ function renderResults(posts, publishMode) {
 
 function renderStatus(data) {
   latestStatus = data;
+  if (renderPilot(data)) return;
+  document.body.classList.add("owner-mode");
   const dispatchHonesty = document.getElementById("dispatch-honesty");
   if (dispatchHonesty) dispatchHonesty.textContent = DISPATCH_HONESTY;
   renderMode(data);
@@ -1123,6 +1126,7 @@ async function saveGuideDrafts() {
 }
 
 function bootGuide() {
+  if (document.body.classList.contains("pilot-mode")) return;
   if (guideBooted) return;
   guideBooted = true;
   let saved = null;
@@ -1357,7 +1361,8 @@ function renderQueue(items) {
     discard.dataset.id = item.id;
     discard.dataset.kind = item.kind;
     discard.textContent = "Discard";
-    actions.append(now, when, later, edit, discard);
+    if (!document.body.classList.contains("pilot-mode")) actions.append(now, when, later);
+    actions.append(edit, discard);
     li.append(top);
     if (Array.isArray(item.seo?.notes) && item.seo.notes.length) {
       const seoNotes = document.createElement("p");
@@ -1796,6 +1801,7 @@ document.getElementById("forget-vault").addEventListener("click", async () => {
 
 initSeo({ api, showToast, refresh });
 initHook({ api, showToast, refresh });
+bindPilot(renderStatus);
 refresh()
   .then(() => bootGuide())
   .catch((error) => {

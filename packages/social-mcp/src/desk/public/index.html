@@ -25,10 +25,36 @@
           <span>PostPath</span>
         </p>
         <p class="byline">by 1stStep.ai</p>
-        <button type="button" class="btn ghost" id="reopen-guide">Setup guide</button>
+        <button type="button" class="btn ghost owner-surface" id="reopen-guide">Setup guide</button>
       </header>
 
-      <section class="intro">
+      <section id="pilot-app" class="pilot-app" hidden>
+        <p class="eyebrow">Pilot desk</p>
+        <h1>Pick a topic. Approve the draft.</h1>
+        <p class="lede" id="pilot-campaign"></p>
+        <p class="compliance-banner" id="pilot-compliance"></p>
+        <p class="hint" id="pilot-ffmpeg" hidden></p>
+        <div class="pilot-goals" id="pilot-goals"></div>
+        <div class="pilot-topics" id="pilot-topics" hidden></div>
+        <section class="panel" aria-labelledby="pilot-queue-title">
+          <div class="panel-head">
+            <div>
+              <p class="step-kicker"><span>Queue</span></p>
+              <h2 id="pilot-queue-title">Drafts</h2>
+            </div>
+            <div class="cta-row">
+              <button type="button" class="btn tiny" id="pilot-copy">Copy captions</button>
+              <a class="btn tiny" id="pilot-csv" href="/api/pilot/export.csv">Download CSV</a>
+              <a class="btn tiny" id="pilot-zip" href="/api/pilot/export.zip">Download zip</a>
+            </div>
+          </div>
+          <p class="hint">Approve queues the draft. Nothing is posted from this desk.</p>
+          <ul class="queue-list" id="pilot-queue"></ul>
+          <p class="hint" id="pilot-empty">Pick a goal, then a topic. The draft shows up here.</p>
+        </section>
+      </section>
+
+      <section class="intro owner-surface">
         <p class="eyebrow">Post from this window</p>
         <h1>Nothing posts without <em>your approval</em>.</h1>
         <p class="lede">
@@ -45,7 +71,7 @@
         </p>
       </section>
 
-      <div class="stage">
+      <div class="stage owner-surface">
         <section class="panel accounts" aria-labelledby="status-title">
           <div class="panel-head">
             <div>
@@ -291,7 +317,7 @@
         </label>
       </section>
 
-      <section class="panel results" aria-labelledby="results-title">
+      <section class="panel results owner-surface" aria-labelledby="results-title">
         <div class="panel-head">
           <div>
             <p class="step-kicker"><span>04</span> Results</p>
@@ -311,7 +337,7 @@
       </section>
       </div>
 
-      <details class="panel setup">
+      <details class="panel setup owner-surface">
         <summary>YouTube setup steps</summary>
         <p class="redirect">
           Google loopback URI:
@@ -328,7 +354,7 @@
         </ol>
       </details>
 
-      <details class="panel setup">
+      <details class="panel setup owner-surface">
         <summary id="meta-title">Facebook and Instagram</summary>
         <p class="panel-note">Page draft unless you choose Public</p>
         <p class="hint" id="meta-readiness">
@@ -363,7 +389,7 @@
         </form>
       </details>
 
-      <section class="panel connect-ai" id="connect-ai" aria-labelledby="connect-ai-title">
+      <section class="panel connect-ai owner-surface" id="connect-ai" aria-labelledby="connect-ai-title">
         <div class="connect-copy">
           <p class="step-kicker">Connect to your AI</p>
           <h2 id="connect-ai-title">Same accounts. Any MCP client.</h2>
@@ -376,6 +402,7 @@
               <label class="check"><input type="checkbox" name="scope" value="posts:read" checked /> posts:read</label>
               <label class="check"><input type="checkbox" name="scope" value="drafts:write" checked /> drafts:write</label>
               <label class="check"><input type="checkbox" name="scope" value="accounts:read" checked /> accounts:read</label>
+              <label class="check"><input type="checkbox" name="scope" value="accounts:write" /> accounts:write</label>
               <label class="check"><input type="checkbox" name="scope" value="queue:approve" /> queue:approve</label>
             </fieldset>
             <label>Expires in days <input name="expires_in_days" inputmode="numeric" placeholder="Optional" /></label>
@@ -421,7 +448,7 @@
         </div>
       </section>
 
-      <section class="panel" aria-labelledby="scheduled-title">
+      <section class="panel owner-surface" aria-labelledby="scheduled-title">
         <div class="panel-head">
           <h2 id="scheduled-title">Scheduled</h2>
           <p class="panel-note">Local queue</p>
@@ -435,7 +462,7 @@
         <ul class="scheduled-list" id="scheduled-list"></ul>
       </section>
 
-      <section class="panel" aria-labelledby="apps-title">
+      <section class="panel owner-surface" aria-labelledby="apps-title">
         <div class="panel-head">
           <h2 id="apps-title">App credentials</h2>
           <p class="panel-note">Saved only in the local oauth.env file. Not sent to 1stStep.</p>

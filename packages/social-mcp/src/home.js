@@ -33,6 +33,9 @@ export function paths(home = resolveHome()) {
     mediaDir: join(root, "media"),
     oauthEnv: join(root, "oauth.env"),
     envExample: join(root, "oauth.env.example"),
+    pilotFile: join(root, "pilot.json"),
+    ownerAuth: join(root, "owner-auth.json"),
+    ownerPinFile: join(root, "owner-pin.txt"),
   };
 }
 
