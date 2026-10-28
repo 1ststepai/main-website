@@ -25,6 +25,7 @@ import {
 } from "./guide.js";
 import { platformIcon } from "./icons.js";
 import { checkNetwork, readMp4Meta } from "./optimize.js";
+import { BRAND_STORAGE_KEY, brandCapMessage, chooseBrandId, scopeToBrand } from "./brand.js";
 
 const NETWORKS = [
   { key: "youtube", label: "YouTube" },
@@ -254,23 +255,115 @@ function renderResults(posts, publishMode) {
   }
 }
 
+let selectedBrandId = "";
+try {
+  selectedBrandId = localStorage.getItem(BRAND_STORAGE_KEY) || "";
+} catch {
+  selectedBrandId = "";
+}
+
+function rememberBrand(id) {
+  selectedBrandId = String(id || "");
+  try {
+    if (selectedBrandId) localStorage.setItem(BRAND_STORAGE_KEY, selectedBrandId);
+    else localStorage.removeItem(BRAND_STORAGE_KEY);
+  } catch {
+    /* The desk still uses the selection for this page. */
+  }
+}
+
+function scopedGuideStatus() {
+  const status = latestStatus || {};
+  const selected = (status.profiles || []).find((row) => row.id === selectedBrandId);
+  if (!selected) return status;
+  return {
+    ...status,
+    profiles: [selected, ...(status.profiles || []).filter((row) => row.id !== selected.id)],
+  };
+}
+
+function applyBrand(id, profiles) {
+  rememberBrand(chooseBrandId(profiles, id));
+  if (latestStatus) renderStatus(latestStatus);
+}
+
+function renderBrandControls(profiles, license) {
+  const rows = Array.isArray(profiles) ? profiles : [];
+  const current = rows.find((row) => row.id === selectedBrandId) || null;
+  const name = document.getElementById("brand-switch-name");
+  if (name) name.textContent = current?.name || current?.id || "No brand yet";
+  const live = document.getElementById("brand-live");
+  if (live) live.textContent = current ? current.name || current.id : "No brand yet";
+  const list = document.getElementById("brand-menu-list");
+  if (list) {
+    list.replaceChildren();
+    for (const profile of rows) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.role = "menuitem";
+      button.textContent = profile.name || profile.id;
+      if (profile.id === selectedBrandId) button.setAttribute("aria-current", "true");
+      button.addEventListener("click", () => {
+        document.getElementById("brand-menu").hidden = true;
+        document.getElementById("brand-switch-btn").setAttribute("aria-expanded", "false");
+        applyBrand(profile.id, rows);
+      });
+      list.append(button);
+    }
+  }
+  const picker = document.getElementById("compose-brand");
+  if (picker) {
+    const previous = picker.value;
+    picker.replaceChildren();
+    if (!rows.length) {
+      const empty = document.createElement("option");
+      empty.value = "";
+      empty.textContent = "Add a brand first";
+      picker.append(empty);
+    }
+    for (const profile of rows) {
+      const option = document.createElement("option");
+      option.value = profile.id;
+      option.textContent = profile.name || profile.id;
+      picker.append(option);
+    }
+    picker.value = rows.some((row) => row.id === selectedBrandId) ? selectedBrandId : previous;
+  }
+  if (current) {
+    profileId.value = current.id;
+    profileName.value = current.name || current.id;
+    profileId.dataset.touched = "1";
+  }
+  const cap = brandCapMessage(license);
+  const capNode = document.getElementById("brand-cap");
+  if (capNode) {
+    capNode.hidden = !cap;
+    capNode.textContent = cap;
+  }
+  const atCap = Boolean(cap) && rows.length >= Number(license?.profileLimit);
+  const saveBrand = document.getElementById("save-brand");
+  if (saveBrand) saveBrand.disabled = atCap;
+  const ai = document.getElementById("ai-brand");
+  if (ai) {
+    ai.textContent = current
+      ? `Accounts, drafts, and this composer are for ${current.name || current.id}. The MCP address is for this computer. Name this brand when an assistant saves a draft.`
+      : "Add a brand before an assistant saves a draft for it. The MCP address is for this computer.";
+  }
+}
+
 function renderStatus(data) {
   latestStatus = data;
   const dispatchHonesty = document.getElementById("dispatch-honesty");
   if (dispatchHonesty) dispatchHonesty.textContent = DISPATCH_HONESTY;
+  const profiles = data.profiles || [];
+  selectedBrandId = chooseBrandId(profiles, selectedBrandId);
+  if (selectedBrandId) rememberBrand(selectedBrandId);
+  renderBrandControls(profiles, data.license);
   renderMode(data);
-  renderResults(data.recent_posts, data.publish_mode);
+  renderResults(scopeToBrand(data.recent_posts, selectedBrandId), data.publish_mode);
 
-  const activeId = profileId.value.trim();
-  const connections = (data.connections || []).filter((row) => !activeId || row.profile_id === activeId);
+  const connections = scopeToBrand(data.connections, selectedBrandId);
   const byPlatform = new Map(connections.map((row) => [row.platform, row]));
-  const brand = document.getElementById("brand-live");
-  const profiles = (data.profiles || []).filter((profile) => !activeId || profile.id === activeId);
-  if (brand) {
-    brand.textContent = profiles.length
-      ? profiles.map((profile) => profile.name || profile.id).join(" · ")
-      : "No brand yet";
-  }
   networkList.replaceChildren();
   for (const network of NETWORKS) {
     const row = byPlatform.get(network.key);
@@ -332,10 +425,6 @@ function renderStatus(data) {
   const cursor = data.cursor?.installed ? "PostPath enabled in Cursor" : "PostPath not enabled in Cursor yet";
   pathMeta.textContent = `${cursor} · vault ${data.home || ""} · media ${data.media_dir || ""}`;
 
-  if (data.profiles?.[0] && !profileId.dataset.touched) {
-    profileId.value = data.profiles[0].id;
-    profileName.value = data.profiles[0].name;
-  }
 
   const oauth = data.oauth || {};
   for (const [key, value] of Object.entries(oauth)) {
@@ -360,8 +449,8 @@ function renderStatus(data) {
     connectHint.textContent = "Connect accounts signs in to every network that is not connected yet. Bluesky uses the handle and app password in this panel. Nothing is posted.";
   }
 
-  renderScheduled(data.scheduled_posts);
-  renderQueue(data.queue);
+  renderScheduled(scopeToBrand(data.scheduled_posts, selectedBrandId));
+  renderQueue(scopeToBrand(data.queue, selectedBrandId));
   renderMcpRemote(data);
   renderAssistants(data);
   renderChecks();
@@ -510,6 +599,73 @@ for (const input of oauthForm.querySelectorAll('input[type="password"]')) {
     input.readOnly = false;
   });
 }
+
+document.getElementById("brand-switch-btn")?.addEventListener("click", () => {
+  const menu = document.getElementById("brand-menu");
+  const open = menu.hidden;
+  menu.hidden = !open;
+  document.getElementById("brand-switch-btn").setAttribute("aria-expanded", String(open));
+});
+
+document.getElementById("add-brand")?.addEventListener("click", () => {
+  const form = document.getElementById("add-brand-form");
+  form.hidden = !form.hidden;
+  if (!form.hidden) document.getElementById("add-brand-name")?.focus();
+});
+
+document.getElementById("add-brand-name")?.addEventListener("input", () => {
+  const id = document.getElementById("add-brand-id");
+  if (id && !id.dataset.touched) id.value = slugify(document.getElementById("add-brand-name").value);
+});
+
+document.getElementById("add-brand-id")?.addEventListener("input", () => {
+  document.getElementById("add-brand-id").dataset.touched = "1";
+});
+
+document.getElementById("add-brand-form")?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const cap = brandCapMessage(latestStatus?.license);
+  const count = (latestStatus?.profiles || []).length;
+  if (cap && count >= Number(latestStatus?.license?.profileLimit)) {
+    showToast(cap, true);
+    return;
+  }
+  const button = document.getElementById("save-brand");
+  button.disabled = true;
+  try {
+    const id = document.getElementById("add-brand-id").value.trim();
+    const name = document.getElementById("add-brand-name").value.trim() || id;
+    const data = await api("/api/profile", {
+      method: "POST",
+      body: JSON.stringify({ id, name }),
+    });
+    document.getElementById("add-brand-name").value = "";
+    document.getElementById("add-brand-id").value = "";
+    delete document.getElementById("add-brand-id").dataset.touched;
+    document.getElementById("add-brand-form").hidden = true;
+    document.getElementById("brand-menu").hidden = true;
+    document.getElementById("brand-switch-btn").setAttribute("aria-expanded", "false");
+    rememberBrand(id);
+    renderStatus(data);
+    showToast("Brand saved on this computer");
+  } catch (error) {
+    showToast(error.message, true);
+  } finally {
+    button.disabled = Boolean(brandCapMessage(latestStatus?.license)) && (latestStatus?.profiles || []).length >= Number(latestStatus?.license?.profileLimit);
+  }
+});
+
+document.getElementById("compose-brand")?.addEventListener("change", (event) => {
+  applyBrand(event.target.value, latestStatus?.profiles || []);
+});
+
+document.addEventListener("click", (event) => {
+  const wrap = document.querySelector(".brand-switch");
+  const menu = document.getElementById("brand-menu");
+  if (!wrap || !menu || menu.hidden || wrap.contains(event.target)) return;
+  menu.hidden = true;
+  document.getElementById("brand-switch-btn").setAttribute("aria-expanded", "false");
+});
 
 document.getElementById("connect-form").addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -971,7 +1127,7 @@ function renderIntent() {
 }
 
 function renderChannels() {
-  const known = profileFor(guide, latestStatus || {});
+  const known = profileFor(guide, scopedGuideStatus());
   if (known.known) {
     addNote(guideBody, `Using the profile already on this computer: ${known.name}.`);
   } else {
@@ -1050,7 +1206,7 @@ function blueskyFields() {
     event.preventDefault();
     button.disabled = true;
     try {
-      const profile = profileFor(guide, latestStatus || {});
+      const profile = profileFor(guide, scopedGuideStatus());
       if (!profile.id) throw new Error("Name this profile before connecting Bluesky.");
       const data = await api("/api/connect-bluesky", {
         method: "POST",
@@ -1081,7 +1237,7 @@ function blueskyFields() {
 async function connectFromGuide(platforms, button) {
   button.disabled = true;
   try {
-    const profile = profileFor(guide, latestStatus || {});
+    const profile = profileFor(guide, scopedGuideStatus());
     if (!profile.id) throw new Error("Name this profile before connecting.");
     const data = await api("/api/connect", {
       method: "POST",
@@ -1295,7 +1451,7 @@ async function saveGuideDrafts() {
     renderGuide();
     return;
   }
-  const profile = profileFor(guide, latestStatus || {});
+  const profile = profileFor(guide, scopedGuideStatus());
   const saves = [];
   for (const plan of view.plans) {
     try {
@@ -1443,6 +1599,9 @@ youtubeForm.addEventListener("submit", async (event) => {
     }
     const platforms = selectedPlatforms();
     if (!platforms.length) throw new Error("Pick at least one platform.");
+    const brandId = document.getElementById("compose-brand")?.value || selectedBrandId;
+    const brand = (latestStatus?.profiles || []).find((row) => row.id === brandId);
+    if (!brand) throw new Error("Add a brand before saving a draft.");
     const score = document.getElementById("vidiq-score")?.value.trim();
     const notes = document.getElementById("vidiq-notes")?.value.trim();
     const duration = document.getElementById("media-duration")?.value.trim();
@@ -1453,8 +1612,8 @@ youtubeForm.addEventListener("submit", async (event) => {
     const data = await api("/api/draft", {
       method: "POST",
       body: JSON.stringify({
-        id: profileId.value.trim(),
-        name: profileName.value.trim() || profileId.value.trim(),
+        id: brand.id,
+        name: brand.name || brand.id,
         platforms,
         title: String(form.get("title") || ""),
         description: writer === "none" ? description : undefined,

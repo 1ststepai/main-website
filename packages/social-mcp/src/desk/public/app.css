@@ -75,6 +75,52 @@ body { min-height: 100vh; position: relative; overflow-x: hidden; }
   min-height: 44px;
 }
 
+.brand-switch { position: relative; margin-left: auto; }
+.brand-switch-btn {
+  display: flex;
+  align-items: center;
+  min-height: 36px;
+  max-width: 240px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+}
+.brand-switch-btn span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.brand-menu[hidden] { display: none; }
+.brand-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 30;
+  width: min(280px, 80vw);
+  padding: 8px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: #12182a;
+  display: grid;
+  gap: 4px;
+  box-shadow: var(--shadow);
+}
+.brand-menu button, .add-brand-form button {
+  text-align: left;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  padding: 8px 10px;
+  cursor: pointer;
+}
+.brand-menu button[aria-current="true"] { background: rgba(115, 222, 247, 0.12); }
+.brand-menu-add { color: var(--cyan); }
+.add-brand-form { display: grid; gap: 8px; padding: 4px; }
+.add-brand-form[hidden] { display: none; }
+.compose-brand { max-width: 320px; }
+
 .brand {
   margin: 0;
   display: flex;

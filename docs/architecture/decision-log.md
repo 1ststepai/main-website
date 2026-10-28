@@ -1,5 +1,14 @@
 # Architecture Decision Log
 
+## 2026-10-28: The desk switches brands on the existing profile
+
+- **Status / owner:** Draft, not deployed. Evan owns any live account connection.
+- **Decision:** The desk keeps one selected profile. A switcher lists every saved profile and can add one through the existing profile upsert. Accounts, the composer, the approval queue, scheduled posts, and results show that profile only. The last id is stored in the browser. Compose has the same list and starts on the selected profile. License flags still do not create a cap. If an entitlement later reports `enforce` and a numeric `profileLimit`, the desk says "Your plan allows N brands" and does not add upgrade copy.
+- **Rationale:** Connections are already stored as profile plus network. A second brand model would split the queue.
+- **Affected systems:** PostPath desk. No deploy and no live sign-in.
+- **Verification:** Brand A drafts and connections stay out of brand B, and brand B cannot publish on brand A's login.
+- **Rollback:** Leave this draft unmerged.
+
 ## 2026-10-28: PostPath stays free and one approve covers the bundle
 
 - **Status / owner:** Draft, not deployed. Evan still owns developer apps, OAuth verification, and any live post.

@@ -17,6 +17,7 @@ import { openDesktopApp } from "../openApp.js";
 import { mcpError } from "../errors.js";
 import { resolveSafeMediaPath } from "../mediaPath.js";
 import { PRODUCT_NAME, PRODUCT_TITLE } from "../brand.js";
+import { getEntitlement } from "../license.js";
 
 const PUBLIC_DIR = join(dirname(fileURLToPath(import.meta.url)), "public");
 const MEDIA_LIMIT = 200 * 1024 * 1024;
@@ -214,6 +215,7 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
       desk_url: `http://127.0.0.1:${port}/`,
       profiles: status.profiles,
       connections: status.connections,
+      license: getEntitlement(env),
       platforms: status.platforms,
       scheduled_posts,
       queue: engine.listQueue().queue,

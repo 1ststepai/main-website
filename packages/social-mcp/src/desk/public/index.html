@@ -23,6 +23,21 @@
           <span>PostPath</span>
         </p>
         <p class="byline">by 1stStep.ai</p>
+        <div class="brand-switch">
+          <button type="button" class="brand-switch-btn" id="brand-switch-btn" aria-haspopup="menu" aria-expanded="false" aria-controls="brand-menu">
+            <span id="brand-switch-name">No brand yet</span>
+          </button>
+          <div id="brand-menu" class="brand-menu" role="menu" hidden>
+            <div id="brand-menu-list"></div>
+            <button type="button" class="brand-menu-add" id="add-brand">Add brand</button>
+            <form id="add-brand-form" class="add-brand-form" hidden>
+              <label>Brand name <input id="add-brand-name" type="text" required autocomplete="organization" /></label>
+              <label>Profile id <input id="add-brand-id" type="text" required pattern="[a-zA-Z0-9][a-zA-Z0-9_-]{1,63}" /></label>
+              <p class="hint" id="brand-cap" hidden></p>
+              <button type="submit" class="btn secondary" id="save-brand">Save brand</button>
+            </form>
+          </div>
+        </div>
         <button type="button" class="btn ghost" id="reopen-guide">Setup guide</button>
       </header>
 
@@ -84,6 +99,10 @@
             </div>
             <button type="submit" class="btn primary" id="save-draft" form="youtube-form">Save draft</button>
           </div>
+          <label class="field compose-brand">
+            <span>Brand</span>
+            <select id="compose-brand" aria-label="Brand for this draft"></select>
+          </label>
           <div class="toggles" id="platform-toggles" role="group" aria-label="Platforms">
             <label class="toggle"><input type="checkbox" name="target-youtube" value="youtube" checked /> YouTube</label>
             <label class="toggle"><input type="checkbox" name="target-facebook" value="facebook" checked /> Facebook</label>
@@ -271,6 +290,7 @@
           <p class="step-kicker">Connect to your AI</p>
           <h2 id="connect-ai-title">Same accounts. Any MCP client.</h2>
           <p class="lede">OAuth for clients that can reach this computer's MCP address. A personal access token for clients that do not. Or write a local config for an app on this machine. The server key is <code>postpath</code>. A settings file is not proof the app has connected.</p>
+          <p class="hint" id="ai-brand">Add a brand before an assistant saves a draft for it.</p>
           <p class="hint">ChatGPT and Grok on the web need a public https address. This MCP address stays on this computer unless you set one yourself. PostPath does not open a tunnel, so those two are not connected from here.</p>
           <div id="mcp-remote" class="mcp-remote"></div>
           <form id="pat-form" class="oauth-form">
