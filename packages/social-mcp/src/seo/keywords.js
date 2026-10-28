@@ -74,9 +74,16 @@ export function keywordListNotes(record) {
   return notes;
 }
 
-export function saveKeywordProfile(ctx, input = {}) {
+export function saveKeywordProfile(ctx, input = {}, { allowProfileWrite = true } = {}) {
   const id = normalizeProfileId(input.profile_id || input.id);
   if (id.length < 2) throw mcpError("invalid_profile", "Profile id must be at least 2 characters.");
+  if (!allowProfileWrite) {
+    // drafts:write may edit keyword lists, but creating or renaming a brand profile needs accounts:write (same as upsert_profile).
+    const current = ctx.store.getProfile(id);
+    if (!current || (input.name && input.name !== current.name)) {
+      throw mcpError("insufficient_scope", "Creating or renaming a brand profile needs the accounts:write scope. Save keywords for an existing brand instead.");
+    }
+  }
   const seed = seedById(id);
   const existing = keywordsFor(ctx.store, id, nowIso(ctx));
   const name = String(input.name || existing?.name || seed?.name || id).slice(0, 120);

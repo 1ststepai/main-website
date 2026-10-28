@@ -1799,13 +1799,21 @@ document.getElementById("forget-vault").addEventListener("click", async () => {
   }
 });
 
-initSeo({ api, showToast, refresh });
-initHook({ api, showToast, refresh });
 bindPilot(renderStatus);
+// SEO and Opening panels are owner tools. The pilot (broker) desk does not load them.
+function initOwnerSteps() {
+  if (document.body.classList.contains("pilot-mode")) return;
+  initSeo({ api, showToast, refresh });
+  initHook({ api, showToast, refresh });
+}
 refresh()
-  .then(() => bootGuide())
+  .then(() => {
+    initOwnerSteps();
+    bootGuide();
+  })
   .catch((error) => {
     showToast(error.message, true);
+    initOwnerSteps();
     bootGuide();
   });
 setInterval(() => {

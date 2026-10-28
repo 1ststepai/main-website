@@ -26,7 +26,7 @@ function resultSchema(extra) {
   return z.object({ ok: z.boolean().describe("True when the tool finished."), ...extra }).passthrough();
 }
 
-export function registerSeoTools(server, { engine, gated }) {
+export function registerSeoTools(server, { engine, gated, scopeAllowed = () => true }) {
   function add(name, title, description, scope, hints, inputSchema, outputSchema, handler) {
     server.registerTool(
       name,
@@ -81,7 +81,7 @@ export function registerSeoTools(server, { engine, gated }) {
       site: z.string().max(200).optional().describe("Site used later for Search Console, such as https://1ststep.ai/."),
     },
     resultSchema({ profile: z.object({ profile_id: z.string() }).passthrough().optional(), notes: z.array(z.string()).optional() }),
-    async (args) => seo().saveKeywordProfile(args),
+    async (args) => seo().saveKeywordProfile(args, { allowProfileWrite: scopeAllowed("accounts:write") }),
   );
 
   add(
@@ -205,7 +205,7 @@ export function registerSeoTools(server, { engine, gated }) {
     "connect_search_data",
     "Connect search data",
     "Start a separate Google sign-in for YouTube Analytics search terms and Search Console. This does not change the sign-in used for posting and does not publish.",
-    "drafts:write",
+    "accounts:write",
     { open: true },
     { profile_id: z.string().min(2).max(64).describe("Brand that will own the search-data connection.") },
     resultSchema({

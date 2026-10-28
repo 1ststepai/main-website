@@ -22,7 +22,7 @@ export function createSeo({
   const ctx = { store, env, fetchImpl, now, captionProvider, connectSearch, createDraft };
   return {
     listKeywordProfiles: () => listKeywordProfiles(ctx),
-    saveKeywordProfile: (input) => saveKeywordProfile(ctx, input),
+    saveKeywordProfile: (input, options) => saveKeywordProfile(ctx, input, options),
     suggestKeywords: (input) => suggestKeywords(ctx, input),
     attachKeywordResearch: (input) => attachKeywordResearch(ctx, input),
     draft: (input) => draftCopy(ctx, input),

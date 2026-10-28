@@ -480,7 +480,7 @@ export function createSocialMcpServer({ engine, auth, env = process.env } = {}) 
     async (args) => eng.publishDue(args),
   );
 
-  registerSeoTools(server, { engine: eng, gated });
+  registerSeoTools(server, { engine: eng, gated, scopeAllowed });
   registerHookTools(server, { engine: eng, gated });
 
   return { server, engine: eng };

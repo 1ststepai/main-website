@@ -551,8 +551,12 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
         return;
       }
 
-      if (await handleSeoRoutes(req, res, { url, engine, sendJson, readJson, snapshot })) return;
-      if (await handleHookRoutes(req, res, { url, engine, sendJson, readJson, snapshot })) return;
+      if (pilotActive() && (url.pathname.startsWith("/api/seo") || url.pathname.startsWith("/api/hook"))) {
+        // Keyword profiles, search-data sign-in, and on-camera voice are owner settings on a broker desk.
+        requireOwner(req, {});
+      }
+      if (await handleSeoRoutes(req, res, { url, engine, sendJson, readJson, snapshot: deskState })) return;
+      if (await handleHookRoutes(req, res, { url, engine, sendJson, readJson, snapshot: deskState })) return;
 
       if (req.method === "POST" && url.pathname === "/api/vidiq") {
         const body = await readJson(req);
