@@ -34,6 +34,7 @@ import { planFor } from "./media/specs.js";
 import { checksForPosts, publicInterview, readInterviewAudio, writeInterviewAudio } from "./interview.js";
 import { buildQueueStatus } from "./queueStatus.js";
 import { nextOpenSlot, occurrences } from "./desk/public/schedulePlan.js";
+import { collectBestTimes } from "./audienceTimes.js";
 import { interviewPrompt } from "./desk/public/interviewPrompts.js";
 import { randomBytes } from "node:crypto";
 import { rmSync } from "node:fs";
@@ -1454,6 +1455,21 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
     return { published: false, post: scheduled.post };
   }
 
+  async function getBestTimes({ profile_id: profileId, platform } = {}) {
+    const profile = requireProfile(profileId);
+    const connection = store.getConnection(profile.id, platform);
+    const secrets = connection ? store.readSecrets(profile.id, platform) : null;
+    return collectBestTimes({
+      platform,
+      secrets,
+      connection,
+      posts: store.listPosts({ profileId: profile.id }),
+      timeZone: profile.posting_plan?.timezone || "UTC",
+      fetchImpl,
+      now: now(),
+    });
+  }
+
   function getQueueStatus({ profile_id: profileId } = {}) {
     if (profileId) requireProfile(profileId);
     return buildQueueStatus({
@@ -1478,6 +1494,7 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
     setPostingPlan,
     getSchedule,
     suggestSlot,
+    getBestTimes,
     scheduleApprovedPost,
     onQueueChange,
     getInterview,

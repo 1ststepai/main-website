@@ -25,7 +25,7 @@ import {
 } from "./guide.js";
 import { platformIcon } from "./icons.js";
 import { checkNetwork, readMp4Meta } from "./optimize.js";
-import { occurrences } from "./schedulePlan.js";
+import { isValidTimeZone, nextZonedStart, occurrences } from "./schedulePlan.js";
 import { BRAND_STORAGE_KEY, brandCapMessage, chooseBrandId, scopeToBrand, waitingOnYouCount, waitingOnYouLabel } from "./brand.js";
 
 const NETWORKS = [
@@ -120,6 +120,10 @@ function formatWhen(iso) {
   }
 }
 
+let audienceKey = "";
+let audienceBrand = "";
+const audienceCache = new Map();
+
 function renderPlan(profile, posts) {
   const list = document.getElementById("plan-slots");
   const week = document.getElementById("week-view");
@@ -150,6 +154,17 @@ function renderPlan(profile, posts) {
     list.append(item);
   }
   week.replaceChildren();
+  if (audienceBrand !== (profile?.id || "")) {
+    audienceBrand = profile?.id || "";
+    audienceCache.clear();
+    audienceKey = "";
+  }
+  const platform = document.getElementById("plan-platform")?.value || "youtube";
+  const key = `${profile?.id || ""}:${platform}`;
+  if (key !== audienceKey) {
+    audienceKey = key;
+    loadAudienceSuggestions(platform).catch(() => {});
+  }
   if (!plan?.slots?.length) {
     const empty = document.createElement("p");
     empty.className = "hint";
@@ -1913,6 +1928,30 @@ function renderQueue(items) {
       actions.append(label);
     }
     li.append(actions);
+    const audience = document.createElement("div");
+    audience.className = "queue-audience";
+    li.append(audience);
+    const platforms = [...new Set((item.platforms || []).map((row) => row.platform).filter(Boolean))];
+    if (selectedBrandId && platforms.length) {
+      Promise.all(platforms.map(async (platform) => ({ platform, times: await audienceTimes(platform) })))
+        .then((rows) => {
+          if (!audience.isConnected) return;
+          const note = document.createElement("p");
+          note.className = "hint";
+          note.textContent = rows.map((row) => `${row.platform}: ${audienceSentence(row.times)}`).join(" ");
+          const chips = document.createElement("div");
+          chips.className = "audience-suggestions";
+          for (const row of rows) {
+            chips.append(
+              suggestionButtons(row.times, (suggestion) => {
+                fillScheduleTime(when, suggestion);
+              }),
+            );
+          }
+          audience.append(note, chips);
+        })
+        .catch(() => {});
+    }
     list.append(li);
   }
 }
@@ -2248,6 +2287,104 @@ document.getElementById("forget-vault").addEventListener("click", async () => {
   } catch (error) {
     showToast(error.message, true);
   }
+});
+
+function audienceSentence(times) {
+  const bits = ["Suggested from your audience"];
+  if (times?.permission_note) bits.push(times.permission_note);
+  if (times?.detail) bits.push(times.detail);
+  if (times?.sample_size) bits.push(`${times.sample_size} in this sample`);
+  if (times?.confidence && times.confidence !== "none") bits.push(times.confidence);
+  if (times?.range?.start) bits.push(`${String(times.range.start).slice(0, 10)} to ${String(times.range.end).slice(0, 10)}`);
+  if (times?.message) bits.push(times.message);
+  return bits.join(". ");
+}
+
+function suggestionButtons(times, onPick) {
+  const fragment = document.createDocumentFragment();
+  for (const suggestion of times?.suggestions || []) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "btn tiny";
+    button.textContent = suggestion.label;
+    button.addEventListener("click", () => onPick(suggestion));
+    fragment.append(button);
+  }
+  return fragment;
+}
+
+function datetimeLocalValue(iso) {
+  const date = new Date(iso);
+  const pad = (value) => String(value).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+function fillScheduleTime(input, suggestion) {
+  if (!suggestion?.time) {
+    showToast("This report has a day, not a clock time. Pick a time, then approve it.");
+    return;
+  }
+  const zone = document.getElementById("plan-timezone")?.value.trim() || "UTC";
+  const iso = nextZonedStart(isValidTimeZone(zone) ? zone : "UTC", suggestion.weekday, suggestion.time, Date.now());
+  if (!iso || !input) return;
+  input.value = datetimeLocalValue(iso);
+  showToast("Time filled from your audience. Approve for time when it should be scheduled.");
+}
+
+async function audienceTimes(platform) {
+  const key = `${selectedBrandId}:${platform}`;
+  if (!audienceCache.has(key)) {
+    const pending = api(`/api/best-times?profile_id=${encodeURIComponent(selectedBrandId)}&platform=${encodeURIComponent(platform)}`)
+      .then((data) => data.times || {})
+      .catch((error) => {
+        audienceCache.delete(key);
+        throw error;
+      });
+    audienceCache.set(key, pending);
+  }
+  return audienceCache.get(key);
+}
+
+async function addSuggestedSlot(suggestion) {
+  const weekday = document.getElementById("plan-weekday");
+  const time = document.getElementById("plan-time");
+  if (!weekday || !time) return;
+  if (suggestion.weekday === "daily") weekday.value = "daily";
+  else if (suggestion.weekday !== "" && suggestion.weekday != null) weekday.value = String(suggestion.weekday);
+  if (!suggestion.time) {
+    showToast("This report has a day, not a clock time. Pick a time, then add the slot.");
+    return;
+  }
+  time.value = suggestion.time;
+  document.getElementById("plan-form")?.requestSubmit();
+}
+
+async function loadAudienceSuggestions(platform) {
+  const note = document.getElementById("audience-note");
+  const host = document.getElementById("audience-suggestions");
+  if (!host) return;
+  host.replaceChildren();
+  if (!selectedBrandId) {
+    if (note) note.textContent = "";
+    return;
+  }
+  try {
+    const times = await audienceTimes(platform);
+    if (note) note.textContent = audienceSentence(times);
+    host.append(
+      suggestionButtons(times, (suggestion) => {
+        addSuggestedSlot(suggestion).catch((error) => showToast(error.message, true));
+      }),
+    );
+  } catch (error) {
+    if (note) note.textContent = error.message;
+  }
+}
+
+document.getElementById("plan-platform")?.addEventListener("change", () => {
+  const platform = document.getElementById("plan-platform").value;
+  audienceKey = `${selectedBrandId}:${platform}`;
+  loadAudienceSuggestions(platform).catch((error) => showToast(error.message, true));
 });
 
 document.getElementById("plan-form")?.addEventListener("submit", async (event) => {

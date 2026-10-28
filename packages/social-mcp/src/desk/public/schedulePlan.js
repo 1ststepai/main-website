@@ -11,7 +11,7 @@ export function isValidTimeZone(timeZone) {
   }
 }
 
-function partsInZone(timeZone, utcMs) {
+export function partsInZone(timeZone, utcMs) {
   const dtf = new Intl.DateTimeFormat("en-US", {
     timeZone,
     hourCycle: "h23",
@@ -118,6 +118,20 @@ export function occurrences({ plan, from, days = 7, posts = [] } = {}) {
     }
   }
   return out.sort((a, b) => a.starts_at.localeCompare(b.starts_at) || a.platform.localeCompare(b.platform));
+}
+
+export function nextZonedStart(timeZone, weekday, time, from = Date.now()) {
+  if (!isValidTimeZone(timeZone) || !TIME_RE.test(String(time || ""))) return null;
+  const [hour, minute] = String(time).split(":").map(Number);
+  const start = partsInZone(timeZone, from);
+  for (let offset = 0; offset < 8; offset += 1) {
+    const date = addDays(start.year, start.month, start.day, offset);
+    const day = new Date(Date.UTC(date.year, date.month - 1, date.day)).getUTCDay();
+    if (weekday !== "daily" && day !== Number(weekday)) continue;
+    const utc = zonedToUtc(timeZone, date.year, date.month, date.day, hour, minute);
+    if (utc > from) return new Date(utc).toISOString();
+  }
+  return null;
 }
 
 export function nextOpenSlot({ plan, platform, from, posts = [], horizonDays = 60 } = {}) {

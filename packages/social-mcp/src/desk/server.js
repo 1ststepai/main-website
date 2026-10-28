@@ -403,6 +403,15 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
         return;
       }
 
+      if (req.method === "GET" && url.pathname === "/api/best-times") {
+        const times = await engine.getBestTimes({
+          profile_id: url.searchParams.get("profile_id"),
+          platform: url.searchParams.get("platform"),
+        });
+        sendJson(res, 200, { ok: true, times });
+        return;
+      }
+
       if (req.method === "POST" && url.pathname === "/api/posting-plan") {
         const body = await readJson(req);
         const saved = engine.setPostingPlan(body.profile_id || body.id, {

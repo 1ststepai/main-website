@@ -1,5 +1,14 @@
 # Architecture Decision Log
 
+## 2026-10-28: Suggested times come from the brand's own audience
+
+- **Status / owner:** Draft, not deployed. Evan owns any reconnect and any live post.
+- **Decision:** Suggested posting times are read from a brand's own platform audience data when that login already has the scope, then from that brand's own posts. A missing scope is shown as "Needs permission to read audience data" and is not added. Facebook's hourly page metric is deprecated and is not requested. There is no generic best-time table. The owner adds the slot.
+- **Rationale:** A borrowed internet table would look like this account's data. The current logins do not include the analytics scopes, and adding one requires the owner to reconnect.
+- **Affected systems:** PostPath desk schedule panel and the get_best_times tool. No deploy, no new OAuth scope, and no live account connection.
+- **Verification:** Mocked responses for a granted Instagram hour map, a missing scope, a short post history, a deprecated Facebook metric, and YouTube views by day.
+- **Rollback:** Leave this draft unmerged.
+
 ## 2026-10-28: A brand posting plan fills the existing schedule
 
 - **Status / owner:** Draft, not deployed. Evan owns any live post.

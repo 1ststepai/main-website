@@ -421,6 +421,19 @@ export function createSocialMcpServer({ engine, auth } = {}) {
   );
 
   add(
+    "get_best_times",
+    "Audience times",
+    "Read suggested posting times for one brand and network from that account's own audience data or its own past posts. This does not publish and does not add a permission.",
+    "posts:read",
+    { read: true, idempotent: true },
+    {
+      profile_id: z.string().min(2).max(64).describe("Brand profile id."),
+      platform: z.enum(PLATFORMS).describe("Network to read."),
+    },
+    async (args) => eng.getBestTimes(args),
+  );
+
+  add(
     "suggest_slot",
     "Suggest a slot",
     "Name the next open slot for one network. This does not schedule the post and does not publish.",

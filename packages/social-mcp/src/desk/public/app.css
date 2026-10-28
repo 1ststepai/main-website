@@ -141,6 +141,9 @@ body { min-height: 100vh; position: relative; overflow-x: hidden; }
 .slot-empty { color: var(--quiet); }
 .slot-filled { color: var(--ok); }
 .slot-missed { color: var(--warn); }
+.queue-audience { margin-top: 8px; }
+.audience-suggestions { display: flex; flex-wrap: wrap; gap: 8px; }
+.audience-suggestions button { font: inherit; }
 
 .brand {
   margin: 0;
