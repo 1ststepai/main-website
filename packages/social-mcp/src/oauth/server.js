@@ -191,7 +191,7 @@ export function createOAuthRuntime({ store, env = process.env, fetchImpl = fetch
     return url;
   }
 
-  async function connectAccounts(profileId, { platforms, open = true } = {}) {
+  async function connectAccounts(profileId, { platforms, open = true, force = false } = {}) {
     const profile = store.getProfile(profileId);
     if (!profile) throw mcpError("unknown_profile", "Create the profile first with upsert_profile.");
     await ensureListening();
@@ -204,7 +204,9 @@ export function createOAuthRuntime({ store, env = process.env, fetchImpl = fetch
       const provider = normalizeProvider(item);
       if (!steps.includes(provider) && CONNECT_ORDER.includes(provider)) steps.push(provider);
     }
-    const filtered = steps.filter((provider) => providerStillNeeded(provider, connections));
+    // Reconnect (force) always starts a fresh consent for the named networks so the
+    // full current scope set is requested, even when an older connection exists.
+    const filtered = force && platforms?.length ? steps : steps.filter((provider) => providerStillNeeded(provider, connections));
     if (!filtered.length) {
       return {
         profile_id: profileId,

@@ -127,3 +127,38 @@ test("youtube connect URL from the local runtime carries a PKCE challenge", asyn
     rmSync(home, { recursive: true, force: true });
   }
 });
+
+test("reconnect forces a fresh consent with the full scope set for connected networks", async () => {
+  const home = mkdtempSync(join(tmpdir(), "social-mcp-reconnect-"));
+  const store = createStore({ home });
+  store.upsertProfile({ id: "acme", name: "Acme Co" });
+  for (const platform of ["youtube", "facebook", "instagram"]) {
+    store.saveConnection({ profile_id: "acme", platform, account_label: platform }, { access_token: "fake-token" });
+  }
+  const oauth = createOAuthRuntime({
+    store,
+    env: {
+      GOOGLE_OAUTH_CLIENT_ID: "gid.apps.googleusercontent.com",
+      GOOGLE_OAUTH_CLIENT_SECRET: "desktop-secret",
+      META_APP_ID: "123456789012345",
+      META_APP_SECRET: "meta-app-secret-value",
+      SOCIAL_MCP_OAUTH_PORT: "48742",
+    },
+    port: 48742,
+  });
+  try {
+    const plain = await oauth.connectAccounts("acme", { platforms: ["youtube"], open: false });
+    assert.equal(plain.status, "complete");
+    const yt = await oauth.connectAccounts("acme", { platforms: ["youtube"], open: false, force: true });
+    assert.equal(yt.status, "pending");
+    assert.equal(yt.started, "youtube");
+    assert.match(new URL(yt.authorize_url).searchParams.get("scope"), /youtube\.force-ssl/);
+    const meta = await oauth.connectAccounts("acme", { platforms: ["meta"], open: false, force: true });
+    assert.equal(meta.status, "pending");
+    assert.ok(meta.authorize_url.startsWith("https://"));
+    assert.equal(store.listConnections("acme").length, 3);
+  } finally {
+    await oauth.stop();
+    rmSync(home, { recursive: true, force: true });
+  }
+});

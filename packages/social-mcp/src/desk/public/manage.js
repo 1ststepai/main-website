@@ -206,7 +206,7 @@ async function onManageClick(event) {
     if (target.classList.contains("manage-reconnect")) {
       const provider = target.dataset.provider;
       fetch("/api/recordings/event", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ type: "reconnect_started", provider, platform: target.dataset.platform }) }).catch(() => {});
-      const data = await call("/api/connect", { id: manageState.profile, name: manageState.profile, platforms: [provider] });
+      const data = await call("/api/connect", { id: manageState.profile, name: manageState.profile, platforms: [provider], reconnect: true });
       toast(data.connect?.message || "Sign-in opened in your browser. Approve every permission, then come back.");
       return;
     }

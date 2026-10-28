@@ -465,7 +465,11 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
         if (!profileId) throw mcpError("invalid_profile", "Profile id is required.");
         loadOAuthEnvFile(homePaths, env);
         await engine.upsertProfile({ id: profileId, name });
-        const result = await engine.connectAccounts(profileId, { platforms: body.platforms });
+        const result = await engine.connectAccounts(profileId, {
+          platforms: body.platforms,
+          force: body.reconnect === true,
+          open: body.open !== false,
+        });
         sendJson(res, 200, { ok: true, connect: result, ...deskState() });
         return;
       }
