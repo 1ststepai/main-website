@@ -258,6 +258,11 @@ body { min-height: 100vh; position: relative; overflow-x: hidden; }
 .asset-meta { display: grid; gap: 4px; min-width: 0; }
 .asset-meta p { margin: 0; color: var(--muted); font-size: 12px; }
 .aspect-badge { font-family: var(--mono); font-size: 11px; letter-spacing: 0.03em; }
+.review-notes { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.review-notes li { display: grid; gap: 2px; font-size: 12px; color: var(--muted); }
+.chip.pass { color: #06281f; background: var(--ok); }
+.chip.warn { color: #2a2208; background: var(--warn); }
+.chip.flag { color: #2a0c10; background: #ffb4b4; }
 .queue-list { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 8px; }
 .queue-list li { display: grid; gap: 6px; padding: 8px; border-radius: 14px; background: rgba(8, 12, 24, 0.45); border: 1px solid transparent; }
 .queue-list li:hover { border-color: rgba(121, 167, 255, 0.35); }

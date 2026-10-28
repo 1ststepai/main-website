@@ -180,7 +180,33 @@ Generated video is silent. Requests ask for no music and no voice, and ffmpeg st
 
 Provenance (provider, model, prompt) is stored on the draft. YouTube uploads set `containsSyntheticMedia` when the asset is AI-generated. Instagram and Facebook requests set `is_ai_generated`. vidIQ and the Instagram public confirmation still apply. Nothing is posted until you approve. Image posts stay in the queue; the current publishers upload video.
 
-`mock` is the provider used in tests. Tests do not call OpenAI, Google, xAI, Replicate, or fal.
+`mock` is the provider used in tests. Tests do not call OpenAI, Google, xAI, Replicate, fal, or Anthropic.
+
+Claude uses your own Anthropic key. It does not generate photos or video. It can draft per-network titles, captions, and tags (`caption_provider: "claude"`), design an SVG or HTML card that PostPath renders to PNG (`provider: "claude"`), and write advisory review notes (`review: true`). Those notes show in the queue and never approve the draft. `caption_provider: "mock"` and `review_provider: "mock"` stay on this computer.
+
+## Ship readiness
+
+What works locally:
+
+- Connect accounts on this computer, connect an AI client, write one prompt, and review the queue before anything is sent.
+- Multi-network drafts, approval, the vidIQ gate, and the Instagram public confirmation.
+- MCP over Streamable HTTP on the desk, with OAuth and personal access tokens.
+- Mock media, mock captions, mock review, silent-video stripping, and network preset checks.
+- Claude caption, card, and review requests are implemented against the Anthropic Messages API and covered with a fake response.
+
+What is mocked or unproven:
+
+- `SOCIAL_MCP_PUBLISH_MODE=mock` does not call a network.
+- OpenAI, Google, xAI, Replicate, fal, and Claude adapters have not been called with a live key in this workspace.
+- The registry remote `https://postpath.1ststep.ai/mcp` is a placeholder.
+
+Still needed before a public release:
+
+- Evan saves his own provider keys and approves one real post on a named account.
+- Confirm the Anthropic model id on that account (`ANTHROPIC_MODEL` overrides `claude-sonnet-4-5`).
+- Live YouTube and Meta uploads, including the AI disclosure fields, are not production-verified.
+- Image posts stay in the queue. The publishers upload video.
+- Directory submission, npm publish, and deployment have not been done.
 
 ## Connect an AI client
 

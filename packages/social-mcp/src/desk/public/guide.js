@@ -1,6 +1,15 @@
 export const GUIDE_STORAGE_KEY = "postpath.guide.v1";
 
-export const STEPS = ["intent", "channels", "content", "creation", "review", "result"];
+export const STEPS = ["accounts", "ai", "prompt", "queue"];
+
+const STEP_ALIAS = {
+  intent: "accounts",
+  channels: "accounts",
+  creation: "ai",
+  content: "prompt",
+  review: "queue",
+  result: "queue",
+};
 
 export function youtubeSetupMessage(redirect = "http://127.0.0.1:47831") {
   return `YouTube sign-in needs a Google OAuth Desktop client saved on this computer. PostPath does not include a Google app. Save the client id and secret under App credentials. If Google Cloud asks for a redirect URI, use ${redirect}. A private draft can still be saved. This guide does not publish.`;
@@ -66,11 +75,11 @@ const CHANNELS = [
 export function emptyGuide() {
   return {
     version: 1,
-    step: "intent",
+    step: "accounts",
     open: true,
     skipped: false,
     completed: false,
-    intent: "",
+    intent: "post",
     channels: [],
     profileName: "",
     title: "",
@@ -121,7 +130,7 @@ export function loadGuide(storage) {
   const base = emptyGuide();
   return {
     ...base,
-    step: STEPS.includes(parsed.step) ? parsed.step : base.step,
+    step: STEPS.includes(parsed.step) ? parsed.step : STEP_ALIAS[parsed.step] || base.step,
     open: parsed.open !== false,
     skipped: Boolean(parsed.skipped),
     completed: Boolean(parsed.completed),
@@ -205,19 +214,16 @@ export function connectPlan(channelKey, status = {}) {
 }
 
 export function leaveBlocker(guide, { hasProfile = false } = {}) {
-  if (guide.step === "intent" && !guide.intent) return "Choose one to continue.";
-  if (guide.step === "channels") {
+  if (guide.step === "accounts" || guide.step === "channels") {
     if (!guide.channels?.length) return "Choose at least one channel. You can continue without connecting it.";
     if (!hasProfile && !profileFor(guide, {}).id) return "Name this profile. PostPath does not have one yet.";
   }
-  if (guide.step === "content") {
-    if (guide.intent === "video" && !String(guide.title || "").trim()) return "Add a title for the video.";
-    if (guide.intent === "post" && !String(guide.title || guide.description || "").trim()) return "Write the post, or skip this guide.";
-    if (guide.intent === "ai" && !String(guide.assistantRequest || guide.description || guide.title || "").trim()) {
-      return "Choose a suggested request or describe the idea.";
-    }
+  if (guide.step === "ai" && guide.creation !== "manual" && guide.creation !== "ai") {
+    return "Choose Claude for captions, or say you will write them.";
   }
-  if (guide.step === "creation" && !guide.creation) return "Choose whether you will write it, or ask Cursor for help.";
+  if (guide.step === "prompt" && !String(guide.description || guide.title || "").trim()) {
+    return "Write one prompt. This guide saves a draft and does not publish.";
+  }
   return "";
 }
 
@@ -376,13 +382,9 @@ export function resultFromSaves(saves) {
 export function stepContent(guide) {
   const index = Math.max(0, STEPS.indexOf(guide.step));
   const kicker = `Step ${index + 1} of ${STEPS.length}`;
-  if (guide.step === "intent") return { kicker, title: "What do you want to do first?" };
-  if (guide.step === "channels") return { kicker, title: "Which channel is this for?" };
-  if (guide.step === "content" && guide.intent === "post") return { kicker, title: "What should the post say?" };
-  if (guide.step === "content" && guide.intent === "ai") return { kicker, title: "What should the assistant help with?" };
-  if (guide.step === "content") return { kicker, title: "What is the video called?" };
-  if (guide.step === "creation") return { kicker, title: "How do you want to make it?" };
-  if (guide.step === "review") return { kicker, title: "Does this look right?" };
-  if (guide.outcome?.ok) return { kicker, title: "Draft saved on this computer" };
+  if (guide.step === "accounts") return { kicker, title: "Connect accounts" };
+  if (guide.step === "ai") return { kicker, title: "Connect your AI" };
+  if (guide.step === "prompt") return { kicker, title: "One prompt" };
+  if (guide.outcome?.ok) return { kicker, title: "Review the queue" };
   return { kicker, title: "That did not finish" };
 }

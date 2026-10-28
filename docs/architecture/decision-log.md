@@ -1,5 +1,14 @@
 # Architecture Decision Log
 
+## 2026-10-28: Claude drafts captions and cards, and never approves
+
+- **Status / owner:** Draft, not deployed. Evan owns the Anthropic key and any live Claude call. Tests use a fake response or the mock writer.
+- **Decision:** Claude is a bring-your-own-key helper. It does not generate photos or video. `caption_provider: claude` drafts per-network titles, captions, and tags. `provider: claude` asks for SVG or HTML and PostPath renders a PNG with sharp. `review: true` sends the image, or a sampled video frame, plus the captions, and stores a checklist. The checklist is advisory. Approval stays a separate human action. The first-run guide is four steps: connect accounts, connect your AI, one prompt, review the queue. The guide saves a private draft and does not call Claude.
+- **Rationale:** The useful path is one queue for sign-in, captions, media, and posting. A model must not be able to approve its own draft.
+- **Affected systems:** `packages/social-mcp` media providers, desk guide, approval queue. No live Claude call and no deploy.
+- **Verification:** Mock captions, a fake Anthropic card response, advisory review that leaves the draft unpublished, and SVG sanitizing.
+- **Rollback:** Leave this draft unmerged. Captions can still be typed by hand.
+
 ## 2026-10-28: PostPath can generate a silent asset, then wait for approval
 
 - **Status / owner:** Draft, not deployed. Evan owns any real provider key and any live generation spend. Tests use the mock provider only.

@@ -342,6 +342,9 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
           facebook_public: body.facebook_public === true,
           vidiq: body.vidiq,
           media: body.media,
+          caption_provider: body.caption_provider,
+          review: body.review === true,
+          review_provider: body.review_provider,
           wait: body.wait === true,
           source: "desk",
         });

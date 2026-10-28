@@ -26,6 +26,7 @@ const OAUTH_KEYS = [
   "XAI_API_KEY",
   "REPLICATE_API_TOKEN",
   "FAL_KEY",
+  "ANTHROPIC_API_KEY",
   "SOCIAL_MCP_MEDIA_PROVIDER",
 ];
 
@@ -107,7 +108,7 @@ export function saveOAuthEnvFile(input, homePaths = paths()) {
     "# SOCIAL_MCP_OAUTH_REDIRECT_HOST=localhost",
     `# http://${redirectHost}:${port}/oauth/callback`,
     "# Media generation keys stay in this file. They are not sent to 1stStep.",
-    "# OPENAI_API_KEY= GEMINI_API_KEY= XAI_API_KEY= REPLICATE_API_TOKEN= FAL_KEY=",
+    "# OPENAI_API_KEY= GEMINI_API_KEY= XAI_API_KEY= REPLICATE_API_TOKEN= FAL_KEY= ANTHROPIC_API_KEY=",
     "# Optional override when a Web client already uses the path form:",
     "# GOOGLE_OAUTH_REDIRECT_URI=http://127.0.0.1:47831/oauth/callback",
     "",
@@ -168,6 +169,8 @@ export function publicOAuthConfig(values = {}) {
     has_xai: Boolean(values.XAI_API_KEY),
     has_replicate: Boolean(values.REPLICATE_API_TOKEN),
     has_fal: Boolean(values.FAL_KEY),
+    ANTHROPIC_API_KEY: values.ANTHROPIC_API_KEY ? mask(values.ANTHROPIC_API_KEY) : "",
+    has_anthropic: Boolean(values.ANTHROPIC_API_KEY),
   };
 }
 

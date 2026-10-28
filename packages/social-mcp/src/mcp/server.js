@@ -33,7 +33,7 @@ const platformOverride = z
         type: z.enum(["image", "video"]).optional().describe("image or video. Video is stored silent."),
         style: z.string().max(200).optional().describe("Optional style note."),
         duration: z.number().min(1).max(3600).optional().describe("Video length in seconds."),
-        provider: z.enum(["mock", "openai", "google", "xai", "replicate", "fal"]).optional().describe("Provider for this network."),
+        provider: z.enum(["mock", "openai", "google", "xai", "replicate", "fal", "claude"]).optional().describe("Provider for this network. claude designs a text card. It does not generate a photo or a video."),
         placement: z.string().max(40).optional().describe("Network preset id."),
       })
       .optional()
@@ -72,7 +72,7 @@ const draftShape = {
           type: z.enum(["image", "video"]).describe("image or video. Generated video is silent: no music and no voice."),
           style: z.string().max(200).optional().describe("Optional style note."),
           duration: z.number().min(1).max(3600).optional().describe("Video length in seconds. Network presets can reject a length that does not fit."),
-          provider: z.enum(["mock", "openai", "google", "xai", "replicate", "fal"]).describe("Bring-your-own-key provider. mock writes a local demo file and does not call a paid API."),
+          provider: z.enum(["mock", "openai", "google", "xai", "replicate", "fal", "claude"]).describe("Bring-your-own-key provider. mock writes a local demo file and does not call a paid API. claude designs an SVG or HTML card and PostPath renders the PNG. Claude does not generate photos or video."),
           placement: z.string().max(40).optional().describe("Preset id such as youtube_short, youtube_long, instagram_reel, or instagram_story."),
         })
         .optional()
@@ -81,6 +81,9 @@ const draftShape = {
     .optional()
     .describe("Optional generated asset. A draft is still not published."),
   wait: z.boolean().optional().describe("Wait until generation finishes. Omit to return while generation continues."),
+  caption_provider: z.enum(["none", "mock", "claude"]).optional().describe("Who drafts per-network titles, captions, and tags. none keeps the caption you sent. claude uses the Anthropic key on this computer."),
+  review: z.boolean().optional().describe("When true, Claude adds advisory checklist notes after the asset is ready. Notes never approve the draft."),
+  review_provider: z.enum(["mock", "claude"]).optional().describe("Review writer. mock is a local checklist and does not call Claude."),
 };
 
 function safeMediaName(name) {
@@ -254,7 +257,7 @@ export function createSocialMcpServer({ engine, auth } = {}) {
       type: z.enum(["image", "video"]).optional().describe("image or video. Video is silent."),
       style: z.string().max(200).optional().describe("Optional style note."),
       duration: z.number().min(1).max(3600).optional().describe("Video length in seconds."),
-      provider: z.enum(["mock", "openai", "google", "xai", "replicate", "fal"]).optional().describe("Provider. mock does not call a paid API."),
+      provider: z.enum(["mock", "openai", "google", "xai", "replicate", "fal", "claude"]).optional().describe("Provider. mock does not call a paid API. claude designs a card, not a photo or video."),
       placement: z.string().max(40).optional().describe("Network preset id."),
       wait: z.boolean().optional().describe("Wait until the file is ready. Omit to return while status stays generating."),
     },

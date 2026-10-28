@@ -1,8 +1,9 @@
 import { writeFileSync } from "node:fs";
 import { mcpError } from "../errors.js";
+import { designCard, renderCardPng } from "./claude.js";
 import { deriveImage, writeSilentVideo } from "./derive.js";
 
-export const MEDIA_PROVIDERS = ["none", "mock", "openai", "google", "xai", "replicate", "fal"];
+export const MEDIA_PROVIDERS = ["none", "mock", "openai", "google", "xai", "replicate", "fal", "claude"];
 
 export const SILENT_VIDEO_NOTE = "Silent video only. No music, no sound effects, no voices, and no voiceover.";
 
@@ -401,8 +402,37 @@ function createHosted({ id, key, fetchImpl, model }) {
   };
 }
 
+function createClaude({ key, fetchImpl, env }) {
+  return {
+    id: "claude",
+    label: "Claude cards",
+    nativeAspects: true,
+    async generateImage({ dest, prompt, aspect, width, height, style }) {
+      const card = await designCard({
+        provider: "claude",
+        prompt,
+        style: style || aspect,
+        width: width || 1080,
+        height: height || 1080,
+        key,
+        fetchImpl,
+        env,
+      });
+      await renderCardPng(card.svg, dest, { width: width || 1080, height: height || 1080 });
+      return { status: "succeeded", model: card.model || "claude", dest };
+    },
+    async generateVideo() {
+      throw mcpError(
+        "media_provider",
+        "Claude does not generate video. It can write captions, review a draft, or design a text card.",
+      );
+    },
+  };
+}
+
 export function createMediaProvider(id, { keys = {}, fetchImpl = fetch, env = process.env, model } = {}) {
   if (id === "mock") return createMock();
+  if (id === "claude") return createClaude({ key: keys.anthropic || "", fetchImpl, env });
   if (id === "openai") return createOpenAI({ key: keys.openai || "", fetchImpl, env });
   if (id === "google") return createGoogle({ key: keys.google || "", fetchImpl, env });
   if (id === "xai") return createXai({ key: keys.xai || "", fetchImpl, env });

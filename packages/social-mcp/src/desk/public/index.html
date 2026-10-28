@@ -111,6 +111,14 @@
                   <option value="xai">xAI Grok Imagine</option>
                   <option value="replicate">Replicate</option>
                   <option value="fal">fal</option>
+                  <option value="claude">Claude cards</option>
+                </select>
+              </label>
+              <label>Captions
+                <select id="caption-provider">
+                  <option value="none" selected>I'll write them</option>
+                  <option value="mock">Mock writer</option>
+                  <option value="claude">Claude</option>
                 </select>
               </label>
               <label>Prompt <textarea id="media-prompt" rows="2" maxlength="2000" placeholder="What the image or video should show"></textarea></label>
@@ -127,7 +135,8 @@
                 <label>Duration seconds <input id="media-duration" inputmode="numeric" placeholder="4" /></label>
                 <label class="check"><input type="checkbox" id="youtube-long" /> YouTube long-form 16:9</label>
               </div>
-              <p class="hint">Generated video is silent. No music and no voice. Nothing posts until you approve.</p>
+              <label class="check"><input type="checkbox" id="claude-review" /> Ask Claude for advisory notes. This does not approve the post.</label>
+              <p class="hint">Connect accounts, connect your AI, one prompt, then review the queue. Generated video is silent. Claude cards are drawings, not photos or video.</p>
             </fieldset>
             <label class="check" id="instagram-confirm-label">
               <input type="checkbox" id="instagram-confirm" />
@@ -386,6 +395,7 @@
             <label>xAI API key <input name="XAI_API_KEY" type="password" autocomplete="new-password" /></label>
             <label>Replicate token <input name="REPLICATE_API_TOKEN" type="password" autocomplete="new-password" /></label>
             <label>fal key <input name="FAL_KEY" type="password" autocomplete="new-password" /></label>
+            <label>Anthropic API key <input name="ANTHROPIC_API_KEY" type="password" autocomplete="new-password" /></label>
           </fieldset>
           <button type="submit" class="btn secondary">Save credentials</button>
         </form>

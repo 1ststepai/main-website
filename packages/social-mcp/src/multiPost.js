@@ -174,6 +174,8 @@ export function queueItems({ bundles = [], posts = [], profiles = [] } = {}) {
       prompt: bundle.media_provenance?.prompt || bundle.media_request?.prompt || "",
       provider: bundle.media_provenance?.provider || bundle.media_request?.provider || "",
       model: bundle.media_provenance?.model || "",
+      caption_provider: bundle.caption_provenance?.provider || "",
+      media_review: bundle.media_review || null,
       assets: (bundle.platforms || []).map((platform) => assetView(platform, bundle.media_assets?.[platform], bundle.media_provenance)),
     });
   }
@@ -199,6 +201,8 @@ export function queueItems({ bundles = [], posts = [], profiles = [] } = {}) {
       prompt: post.media_provenance?.prompt || post.media_request?.prompt || "",
       provider: post.media_provenance?.provider || post.media_request?.provider || "",
       model: post.media_provenance?.model || "",
+      caption_provider: post.caption_provenance?.provider || "",
+      media_review: post.media_review || null,
       assets: post.media_asset ? [assetView(post.platform, post.media_asset, post.media_provenance)] : [],
     });
   }

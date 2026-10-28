@@ -659,22 +659,78 @@ function renderGuide() {
   const copy = stepContent(guide);
   guideKicker.textContent = copy.kicker;
   guideTitle.textContent = copy.title;
-  showGuideError(guide.step === "result" ? "" : guide.error);
+  showGuideError(guide.step === "queue" || guide.step === "result" ? "" : guide.error);
   clear(guideBody);
-  guideBack.hidden = guide.step === "intent" || guide.step === "result";
-  guideSkip.hidden = guide.step === "result";
+  guideBack.hidden = guide.step === "accounts" || guide.step === "queue" || guide.step === "result";
+  guideSkip.hidden = guide.step === "queue" || guide.step === "result";
   guideNext.hidden = false;
   guideNext.disabled = false;
-  guideNext.textContent = "Continue";
+  guideNext.textContent = guide.step === "prompt" ? "Save to the queue" : "Continue";
 
-  if (guide.step === "intent") renderIntent();
-  else if (guide.step === "channels") renderChannels();
-  else if (guide.step === "content") renderContent();
-  else if (guide.step === "creation") renderCreation();
-  else if (guide.step === "review") renderReview();
+  if (guide.step === "accounts" || guide.step === "channels") renderChannels();
+  else if (guide.step === "ai" || guide.step === "creation") renderAiConnect();
+  else if (guide.step === "prompt" || guide.step === "content") renderPrompt();
   else renderResult();
 
   guideTitle.focus();
+}
+
+function renderAiConnect() {
+  const list = document.createElement("div");
+  list.className = "guide-list";
+  for (const item of [
+    { id: "ai", label: "Claude writes the captions", detail: "Uses your Anthropic key on this computer. The draft still waits in the queue." },
+    { id: "manual", label: "I'll write them", detail: "The prompt is saved as the draft. Nothing is sent." },
+  ]) {
+    addChoice(list, {
+      label: item.label,
+      detail: item.detail,
+      selected: guide.creation === item.id,
+      onClick: () => {
+        guide = { ...guide, creation: item.id, error: "" };
+        persistGuide();
+        renderGuide();
+      },
+    });
+  }
+  guideBody.append(list);
+  addNote(guideBody, "Paste the Anthropic key under App credentials. This guide never sees the key, and it does not approve or publish.");
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "btn secondary";
+  button.textContent = "Enable in Cursor";
+  button.addEventListener("click", async () => {
+    button.disabled = true;
+    try {
+      const data = await api("/api/install-cursor", { method: "POST", body: "{}" });
+      latestStatus = data;
+      renderStatus(data);
+      showToast("PostPath was written into Cursor's config. Restart Cursor. Nothing was published.");
+    } catch (error) {
+      showGuideError(error.message);
+    } finally {
+      button.disabled = false;
+    }
+  });
+  guideBody.append(button);
+}
+
+function renderPrompt() {
+  const label = document.createElement("label");
+  label.className = "field";
+  const span = document.createElement("span");
+  span.textContent = "What should this post be?";
+  const input = document.createElement("textarea");
+  input.rows = 4;
+  input.maxLength = 2000;
+  input.value = guide.description || guide.title || "";
+  input.addEventListener("input", () => {
+    guide = { ...guide, description: input.value, title: guide.title || input.value.slice(0, 80), error: "" };
+    persistGuide();
+  });
+  label.append(span, input);
+  guideBody.append(label);
+  addNote(guideBody, "Save sends this to the queue as a private draft. Generate the asset from the composer if you want one. Nothing posts until you approve.");
 }
 
 function renderIntent() {
@@ -996,14 +1052,14 @@ function renderResult() {
       );
     }
   }
-  addNote(guideBody, "Next: connect a channel when sign-in is available, or publish later from the YouTube panel after you approve that exact draft. This guide will not publish it.");
+  addNote(guideBody, "Review the queue. Nothing posts until you approve it there.");
   if (!outcome.ok) {
     const retry = document.createElement("button");
     retry.type = "button";
     retry.className = "btn secondary";
-    retry.textContent = "Back to review";
+    retry.textContent = "Back to the prompt";
     retry.addEventListener("click", () => {
-      guide = { ...guide, step: "review", error: "" };
+      guide = { ...guide, step: "prompt", error: "" };
       persistGuide();
       renderGuide();
     });
@@ -1016,7 +1072,7 @@ async function saveGuideDrafts() {
   const view = reviewView(guide, latestStatus || {}, { hasFile: Boolean(guideFile) });
   if (!view.canSave) {
     const message = view.blockers[0] || "The draft was not saved.";
-    guide = { ...guide, step: "result", error: message, outcome: { ok: false, message, saves: [] }, completed: false };
+    guide = { ...guide, step: "queue", error: message, outcome: { ok: false, message, saves: [] }, completed: false };
     persistGuide();
     renderGuide();
     return;
@@ -1054,7 +1110,7 @@ async function saveGuideDrafts() {
     }
   }
   const outcome = resultFromSaves(saves);
-  guide = { ...guide, step: "result", outcome, error: outcome.ok ? "" : outcome.message, completed: outcome.ok };
+  guide = { ...guide, step: "queue", outcome, error: outcome.ok ? "" : outcome.message, completed: outcome.ok };
   persistGuide();
   renderGuide();
   showToast(outcome.message, !outcome.ok);
@@ -1093,18 +1149,19 @@ guideSkip.addEventListener("click", () => {
 });
 
 guideNext.addEventListener("click", () => {
-  if (guide.step === "review") {
+  if (guide.step === "prompt" || guide.step === "review") {
     saveGuideDrafts().catch((error) => {
-      guide = { ...guide, step: "result", error: error.message, outcome: resultFromSaves([{ ok: false, message: error.message }]) };
+      guide = { ...guide, step: "queue", error: error.message, outcome: resultFromSaves([{ ok: false, message: error.message }]) };
       persistGuide();
       renderGuide();
     });
     return;
   }
-  if (guide.step === "result") {
+  if (guide.step === "queue" || guide.step === "result") {
     guide = dismissGuide(guide);
     persistGuide();
     renderGuide();
+    document.getElementById("queue-list")?.scrollIntoView({ block: "center" });
     return;
   }
   guide = goNext(guide, { hasProfile: hasGuideProfile() });
@@ -1149,9 +1206,11 @@ youtubeForm.addEventListener("submit", async (event) => {
     const file = form.get("video");
     const provider = document.getElementById("media-provider")?.value || "none";
     const prompt = document.getElementById("media-prompt")?.value.trim() || "";
+    const writer = document.getElementById("caption-provider")?.value || "none";
     const generate = provider !== "none";
-    if (generate && !prompt) throw new Error("Write a prompt for the generated image or video.");
-    if (!generate && (!file || !file.size)) throw new Error("Choose your file, or pick a provider and write a prompt.");
+    const description = String(form.get("description") || "");
+    if ((generate || writer !== "none") && !prompt && !description) throw new Error("Write one prompt.");
+    if (!generate && writer === "none" && (!file || !file.size)) throw new Error("Choose your file, or pick a provider and write a prompt.");
     let mediaPath = "";
     if (!generate && file && typeof file === "object" && file.size) {
       const saved = await api("/api/media", {
@@ -1183,8 +1242,9 @@ youtubeForm.addEventListener("submit", async (event) => {
         name: profileName.value.trim() || profileId.value.trim(),
         platforms,
         title: String(form.get("title") || ""),
-        description: String(form.get("description") || ""),
-        caption: String(form.get("description") || ""),
+        description: writer === "none" ? description : undefined,
+        caption: writer === "none" ? description : undefined,
+        brief: writer === "none" ? undefined : prompt || description,
         tags: String(form.get("tags") || ""),
         privacy_status: String(form.get("privacy_status") || "private"),
         media_path: mediaPath || undefined,
@@ -1206,6 +1266,9 @@ youtubeForm.addEventListener("submit", async (event) => {
               },
             }
           : undefined,
+        caption_provider: document.getElementById("caption-provider")?.value || "none",
+        review: document.getElementById("claude-review")?.checked === true,
+        review_provider: document.getElementById("claude-review")?.checked ? "claude" : undefined,
         instagram_public_confirmed: document.getElementById("instagram-confirm")?.checked === true,
         facebook_public: document.getElementById("facebook-public")?.checked === true,
         overrides,
@@ -1350,6 +1413,24 @@ function renderQueue(items) {
       cards.append(card);
     }
     if (cards.childElementCount) li.append(cards);
+    if (item.media_review?.items?.length) {
+      const notes = document.createElement("ul");
+      notes.className = "review-notes";
+      const intro = document.createElement("li");
+      intro.textContent = item.media_review.summary || "Advisory notes only. Nothing was approved.";
+      notes.append(intro);
+      for (const note of item.media_review.items) {
+        const row = document.createElement("li");
+        const chip = document.createElement("span");
+        chip.className = `chip ${note.status || "warn"}`;
+        chip.textContent = note.label || note.id;
+        const detail = document.createElement("span");
+        detail.textContent = note.detail || "";
+        row.append(chip, detail);
+        notes.append(row);
+      }
+      li.append(notes);
+    }
     else if (item.prompt || item.media_status === "failed" || item.media_status === "generating") {
       const again = document.createElement("button");
       again.type = "button";

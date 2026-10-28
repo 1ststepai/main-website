@@ -28,6 +28,7 @@ import {
   vidiqRecord,
 } from "./multiPost.js";
 import { normalizeGenerate, prepareAttachedFile, produceMedia } from "./media/run.js";
+import { reviewDraft, reviewImages, writeCaptions } from "./media/claude.js";
 import { planFor } from "./media/specs.js";
 import { randomBytes } from "node:crypto";
 import { rmSync } from "node:fs";
@@ -122,7 +123,93 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
       xai: env.XAI_API_KEY || "",
       replicate: env.REPLICATE_API_TOKEN || "",
       fal: env.FAL_KEY || "",
+      anthropic: env.ANTHROPIC_API_KEY || "",
     };
+  }
+
+  async function withCaptions(input, platforms) {
+    const provider = String(input.caption_provider || input.media?.captions?.provider || "").trim();
+    if (!provider || provider === "none") return input;
+    const prompt = String(input.media?.generate?.prompt || input.brief || input.caption || input.description || input.title || "").trim();
+    if (!prompt) throw mcpError("invalid_request", "A caption writer needs a prompt or the words for the post.");
+    const profile = store.getProfile(input.profile_id);
+    const written = await writeCaptions({
+      provider,
+      prompt,
+      platforms,
+      presets: profile?.presets,
+      key: env.ANTHROPIC_API_KEY || "",
+      fetchImpl,
+      env,
+    });
+    const overrides = { ...(input.overrides || {}) };
+    for (const platform of platforms) {
+      const own = written.networks?.[platform];
+      if (!own) continue;
+      const current = overrides[platform] || {};
+      overrides[platform] = {
+        ...own,
+        ...current,
+        title: current.title || own.title,
+        caption: current.caption || own.caption,
+        tags: current.tags?.length ? current.tags : own.tags,
+      };
+    }
+    return {
+      ...input,
+      title: input.title || written.title,
+      caption: input.caption || written.caption,
+      description: input.description || input.caption || written.caption,
+      tags: Array.isArray(input.tags) && input.tags.length ? input.tags : written.tags,
+      overrides,
+      caption_provenance: { provider: written.provider, model: written.model },
+    };
+  }
+
+  async function attachReview(bundle, post, request) {
+    const savedBundle = bundle ? store.getBundle(bundle.id) : null;
+    const savedPost = !savedBundle && post ? store.getPost(post.id) : null;
+    const saved = savedBundle || savedPost;
+    if (!saved) return;
+    const assets = saved.media_assets || (saved.media_asset ? { [saved.platform]: saved.media_asset } : {});
+    let review;
+    try {
+      const images = request.review_provider === "mock" ? [] : await reviewImages(assets, mediaRoot);
+      review = await reviewDraft({
+        provider: request.review_provider || "claude",
+        prompt: request.prompt || saved.caption || "",
+        captions: [saved.caption, ...Object.values(saved.overrides || {}).map((row) => row?.caption)].filter(Boolean).join("\n"),
+        presets: store.getProfile(saved.profile_id)?.presets,
+        images,
+        key: env.ANTHROPIC_API_KEY || "",
+        fetchImpl,
+        env,
+      });
+    } catch (error) {
+      review = {
+        provider: request.review_provider || "claude",
+        model: "",
+        advisory: true,
+        summary: "Advisory notes only. Nothing was approved.",
+        items: [{ id: "review", label: "Review", status: "warn", detail: error?.message || "Review did not finish." }],
+      };
+    }
+    review.advisory = true;
+    if (savedBundle) {
+      savedBundle.media_review = review;
+      savedBundle.updated_at = new Date(now()).toISOString();
+      store.saveBundle(savedBundle);
+      for (const id of Object.values(savedBundle.child_ids || {})) {
+        const child = store.getPost(id);
+        if (!child) continue;
+        child.media_review = review;
+        store.savePost(child);
+      }
+      return;
+    }
+    savedPost.media_review = review;
+    savedPost.updated_at = new Date(now()).toISOString();
+    store.savePost(savedPost);
   }
 
   function processAlive(pid) {
@@ -254,6 +341,7 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
         });
         if (bundle) applyBundleMedia(bundle.id, result);
         else applyPostMedia(post.id, result);
+        if (request.review) await attachReview(bundle, post, request);
         return result;
       } catch (error) {
         if (bundle) failBundleMedia(bundle.id, error);
@@ -388,6 +476,8 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
 
   async function createMultiDraft(input) {
     const profile = requireProfile(input.profile_id);
+    const preview = applyPresets(input, profile.presets);
+    input = await withCaptions(input, preview.platforms);
     const shaped = applyPresets(input, profile.presets);
     const platforms = knownPlatforms(shaped.platforms);
     if (!platforms.length) throw mcpError("invalid_platform", `Platform must be one of: ${PLATFORMS.join(", ")}`);
@@ -410,6 +500,7 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
       media_content_type: String(input.media_content_type || "video/mp4").slice(0, 80),
       instagram_public_confirmed: input.instagram_public_confirmed === true,
       vidiq: vidiqRecord(input.vidiq || {}, stamp),
+      caption_provenance: input.caption_provenance || null,
       child_ids: {},
       scheduled_at: null,
       created_at: stamp,
@@ -462,6 +553,7 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
     const profile = requireProfile(input.profile_id);
     const platform = String(input.platform || "");
     if (!PLATFORMS.includes(platform)) throw mcpError("invalid_platform", `Platform must be one of: ${PLATFORMS.join(", ")}`);
+    input = await withCaptions(input, [platform]);
     const stamp = new Date(now()).toISOString();
     const post = {
       id: store.newId("post"),
@@ -472,6 +564,7 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
       description: String(input.description || "").slice(0, 5000),
       caption: String(input.caption || input.description || "").slice(0, 2200),
       tags: Array.isArray(input.tags) ? input.tags.map((tag) => String(tag).slice(0, 40)).slice(0, 30) : [],
+      caption_provenance: input.caption_provenance || null,
       privacy_status: ["private", "unlisted", "public"].includes(input.privacy_status) ? input.privacy_status : "private",
       media_path: optionalMediaPath(input.media_path, mediaRoot),
       media_url: input.media_url ? String(input.media_url).slice(0, 2000) : null,

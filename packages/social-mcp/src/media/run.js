@@ -32,6 +32,8 @@ export function normalizeGenerate(input = {}) {
     duration: source.duration ? Number(source.duration) : undefined,
     provider,
     placement: String(source.placement || "").slice(0, 40),
+    review: input.review === true || input.media?.review === true,
+    review_provider: String(input.review_provider || input.media?.review_provider || "claude"),
   };
 }
 
@@ -45,6 +47,7 @@ async function renderMaster({ provider, request, dest, spec, duration }) {
     width: spec.width,
     height: spec.height,
     duration,
+    style: request.style,
     sleep: request.sleep,
   });
   if (request.type === "video") await stripAudio(dest);
