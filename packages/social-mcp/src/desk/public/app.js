@@ -359,6 +359,7 @@ function renderStatus(data) {
   selectedBrandId = chooseBrandId(profiles, selectedBrandId);
   if (selectedBrandId) rememberBrand(selectedBrandId);
   renderBrandControls(profiles, data.license);
+  renderInterview(profiles.find((row) => row.id === selectedBrandId) || null);
   renderMode(data);
   renderResults(scopeToBrand(data.recent_posts, selectedBrandId), data.publish_mode);
 
@@ -1682,10 +1683,10 @@ function renderQueue(items) {
     const strong = document.createElement("strong");
     strong.textContent = `${item.profile_name || item.profile_id}: ${item.title || "Draft"}`;
     top.append(strong);
-    if (item.source === "mcp") {
+    if (item.source === "mcp" || item.source === "interview") {
       const ai = document.createElement("span");
       ai.className = "chip ai";
-      ai.textContent = "From AI";
+      ai.textContent = item.source === "interview" ? "From interview" : "From AI";
       top.append(ai);
     }
     if (item.vidiq_needed) {
@@ -2153,6 +2154,127 @@ document.getElementById("forget-vault").addEventListener("click", async () => {
 
 document.getElementById("youtube-form")?.addEventListener("input", renderChecks);
 renderEditors();
+
+let shownInterviewBrand = "";
+let activeRecorder = null;
+
+function renderInterview(profile) {
+  const root = document.getElementById("interview");
+  if (!root) return;
+  const id = profile?.id || "";
+  if (root.contains(document.activeElement) && shownInterviewBrand === id) return;
+  shownInterviewBrand = id;
+  const notes = document.getElementById("voice-notes");
+  if (notes) notes.value = profile?.voice_notes || "";
+  const answers = profile?.interview?.answers || {};
+  for (const box of root.querySelectorAll("[data-answer]")) {
+    box.value = answers[box.dataset.answer]?.text || "";
+  }
+  for (const audio of root.querySelectorAll("[data-audio]")) {
+    const saved = answers[audio.dataset.audio];
+    if (profile && saved?.audio_file) {
+      audio.hidden = false;
+      const next = `/interview-audio/${encodeURIComponent(profile.id)}/${audio.dataset.audio}`;
+      if (audio.getAttribute("src") !== next) audio.src = next;
+    } else {
+      audio.hidden = true;
+      audio.removeAttribute("src");
+    }
+  }
+}
+
+document.getElementById("save-interview")?.addEventListener("click", async () => {
+  const button = document.getElementById("save-interview");
+  const brandId = selectedBrandId || document.getElementById("compose-brand")?.value || "";
+  if (!brandId) {
+    showToast("Add a brand before saving an interview.", true);
+    return;
+  }
+  button.disabled = true;
+  try {
+    const answers = {};
+    for (const box of document.querySelectorAll("#interview [data-answer]")) {
+      answers[box.dataset.answer] = { text: box.value };
+    }
+    const data = await api("/api/interview", {
+      method: "POST",
+      body: JSON.stringify({
+        profile_id: brandId,
+        voice_notes: document.getElementById("voice-notes")?.value || "",
+        answers,
+      }),
+    });
+    shownInterviewBrand = "";
+    renderStatus(data);
+    const saved = document.getElementById("interview-saved");
+    if (saved) saved.textContent = "Answers saved on this computer. They are not published.";
+    showToast("Answers saved on this computer");
+  } catch (error) {
+    showToast(error.message, true);
+  } finally {
+    button.disabled = false;
+  }
+});
+
+document.getElementById("interview")?.addEventListener("click", async (event) => {
+  const button = event.target.closest("[data-record]");
+  if (!button) return;
+  const promptId = button.dataset.record;
+  const brandId = selectedBrandId || document.getElementById("compose-brand")?.value || "";
+  if (!brandId) {
+    showToast("Add a brand before recording.", true);
+    return;
+  }
+  if (activeRecorder?.promptId === promptId) {
+    activeRecorder.recorder.stop();
+    return;
+  }
+  if (activeRecorder) activeRecorder.recorder.stop();
+  if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
+    showToast("This browser cannot record. Type the answer.", true);
+    return;
+  }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const mime = MediaRecorder.isTypeSupported("audio/webm") ? "audio/webm" : "";
+    const recorder = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
+    const chunks = [];
+    recorder.addEventListener("dataavailable", (item) => {
+      if (item.data?.size) chunks.push(item.data);
+    });
+    recorder.addEventListener("stop", async () => {
+      stream.getTracks().forEach((track) => track.stop());
+      button.textContent = "Record";
+      if (activeRecorder?.recorder === recorder) activeRecorder = null;
+      const blob = new Blob(chunks, { type: recorder.mimeType || "audio/webm" });
+      if (!blob.size) return;
+      button.disabled = true;
+      try {
+        const data = await api("/api/interview/audio", {
+          method: "POST",
+          headers: {
+            "content-type": blob.type || "audio/webm",
+            "x-postpath-profile": brandId,
+            "x-postpath-prompt": promptId,
+          },
+          body: blob,
+        });
+        shownInterviewBrand = "";
+        renderStatus(data);
+        showToast("Recording saved on this computer");
+      } catch (error) {
+        showToast(error.message, true);
+      } finally {
+        button.disabled = false;
+      }
+    });
+    activeRecorder = { promptId, recorder };
+    recorder.start();
+    button.textContent = "Stop";
+  } catch {
+    showToast("This browser did not start a recording. Type the answer.", true);
+  }
+});
 
 refresh()
   .then(() => bootGuide())

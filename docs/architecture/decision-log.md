@@ -1,5 +1,14 @@
 # Architecture Decision Log
 
+## 2026-10-28: An interview stays on the brand and becomes drafts
+
+- **Status / owner:** Draft, not deployed. Evan owns any assistant that writes the posts.
+- **Decision:** Each brand can store typed interview answers, optional local recordings, and voice notes on its existing profile. PostPath does not transcribe audio and does not call a transcription service. `get_interview` returns the typed answers, voice notes, and presets. `create_drafts_from_interview` saves the assistant's posts as drafts for that brand, with the existing per-network overrides, and runs the same length checks. The drafts stay in the approval queue. Nothing is published.
+- **Rationale:** The assistant already writes. PostPath only keeps the answers and the drafts on this computer.
+- **Affected systems:** PostPath desk and MCP tools. No deploy and no live publish.
+- **Verification:** Drafts stay on the brand that owns the interview, stay unpublished, and keep a network override.
+- **Rollback:** Leave this draft unmerged.
+
 ## 2026-10-28: The desk switches brands on the existing profile
 
 - **Status / owner:** Draft, not deployed. Evan owns any live account connection.

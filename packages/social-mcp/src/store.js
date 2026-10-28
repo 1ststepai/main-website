@@ -1,6 +1,7 @@
 import { closeSync, constants, existsSync, openSync, readFileSync, renameSync, rmSync, statSync, unlinkSync, writeFileSync } from "node:fs";
 import { decryptJson, encryptJson, loadOrCreateKey } from "./crypto.js";
 import { mcpError } from "./errors.js";
+import { cleanAnswers, interviewPrompt } from "./interview.js";
 import { paths } from "./home.js";
 import { socialId } from "./ids.js";
 import { defaultPresets } from "./multiPost.js";
@@ -179,6 +180,49 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
     db.profiles[profileId] = profile;
     persist();
     return profile;
+  }
+
+  function requireStoredProfile(profileId) {
+    const id = normalizeProfileId(profileId);
+    const profile = db.profiles[id];
+    if (!profile) throw mcpError("not_found", "Brand not found.", 404);
+    return profile;
+  }
+
+  function saveInterview(profileId, input = {}) {
+    return locked(() => {
+      const profile = requireStoredProfile(profileId);
+      const stamp = new Date(now()).toISOString();
+      if (typeof input.voice_notes === "string") profile.voice_notes = String(input.voice_notes).slice(0, 2000);
+      const next = { ...(profile.interview?.answers || {}) };
+      for (const [key, value] of Object.entries(cleanAnswers(input.answers))) {
+        next[key] = { ...(next[key] || {}), text: value.text, updated_at: stamp };
+      }
+      profile.interview = { updated_at: stamp, answers: next };
+      profile.updated_at = stamp;
+      persist();
+      return profile;
+    });
+  }
+
+  function setInterviewAudio(profileId, promptId, audio) {
+    return locked(() => {
+      if (!interviewPrompt(promptId)) throw mcpError("invalid_prompt", "That interview question is not in the list.");
+      const profile = requireStoredProfile(profileId);
+      const stamp = new Date(now()).toISOString();
+      const answers = { ...(profile.interview?.answers || {}) };
+      answers[promptId] = {
+        ...(answers[promptId] || {}),
+        text: String(answers[promptId]?.text || ""),
+        audio_file: audio.audio_file,
+        audio_content_type: audio.audio_content_type,
+        updated_at: stamp,
+      };
+      profile.interview = { updated_at: stamp, answers };
+      profile.updated_at = stamp;
+      persist();
+      return profile;
+    });
   }
 
   function listConnections(profileId) {
@@ -390,6 +434,8 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
     listProfiles,
     getProfile,
     upsertProfile,
+    saveInterview,
+    setInterviewAudio,
     listConnections,
     getConnection,
     saveConnection,

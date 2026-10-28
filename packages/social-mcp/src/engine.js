@@ -31,6 +31,8 @@ import {
 import { normalizeGenerate, prepareAttachedFile, produceMedia } from "./media/run.js";
 import { reviewDraft, reviewImages, writeCaptions } from "./media/claude.js";
 import { planFor } from "./media/specs.js";
+import { checksForPosts, publicInterview, readInterviewAudio, writeInterviewAudio } from "./interview.js";
+import { interviewPrompt } from "./desk/public/interviewPrompts.js";
 import { randomBytes } from "node:crypto";
 import { rmSync } from "node:fs";
 import { join } from "node:path";
@@ -483,7 +485,7 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
     const platforms = knownPlatforms(shaped.platforms);
     if (!platforms.length) throw mcpError("invalid_platform", `Platform must be one of: ${PLATFORMS.join(", ")}`);
     const stamp = new Date(now()).toISOString();
-    const source = input.source === "mcp" ? "mcp" : "desk";
+    const source = input.source === "mcp" || input.source === "interview" ? input.source : "desk";
     const bundle = {
       id: store.newId("bnd"),
       profile_id: profile.id,
@@ -570,7 +572,7 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
       media_path: optionalMediaPath(input.media_path, mediaRoot),
       media_url: input.media_url ? String(input.media_url).slice(0, 2000) : null,
       media_content_type: String(input.media_content_type || "video/mp4").slice(0, 80),
-      source: input.source === "mcp" ? "mcp" : undefined,
+      source: input.source === "mcp" || input.source === "interview" ? input.source : undefined,
       scheduled_at: null,
       published_url: null,
       platform_post_id: null,
@@ -1285,6 +1287,69 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
     return { post };
   }
 
+  function getInterview(profileId) {
+    return publicInterview(requireProfile(profileId));
+  }
+
+  function saveInterview(profileId, input = {}) {
+    requireProfile(profileId);
+    store.saveInterview(profileId, input);
+    return getInterview(profileId);
+  }
+
+  function saveInterviewAudio(profileId, promptId, bytes, contentType) {
+    requireProfile(profileId);
+    if (!interviewPrompt(promptId)) throw mcpError("invalid_prompt", "That interview question is not in the list.");
+    const saved = writeInterviewAudio({
+      root: store.homePaths.root,
+      profileId: normalizeProfileId(profileId),
+      promptId,
+      bytes,
+      contentType,
+    });
+    store.setInterviewAudio(profileId, promptId, saved);
+    return getInterview(profileId);
+  }
+
+  function readInterviewRecording(profileId, promptId) {
+    const profile = requireProfile(profileId);
+    return readInterviewAudio({ root: store.homePaths.root, profile, promptId });
+  }
+
+  async function createDraftsFromInterview(input = {}) {
+    const profile = requireProfile(input.profile_id);
+    const posts = Array.isArray(input.posts) ? input.posts : [];
+    if (!posts.length || posts.length > 8) {
+      throw mcpError("invalid_request", "Send between 1 and 8 drafted posts.", 400);
+    }
+    const drafts = [];
+    for (const post of posts) {
+      const platforms = knownPlatforms(post.platforms);
+      const created = await createDraft({
+        profile_id: profile.id,
+        platform: platforms.length ? undefined : post.platform,
+        platforms: platforms.length ? platforms : undefined,
+        title: post.title,
+        description: post.description,
+        caption: post.caption,
+        tags: post.tags,
+        privacy_status: post.privacy_status,
+        overrides: post.overrides,
+        instagram_public_confirmed: post.instagram_public_confirmed === true,
+        facebook_public: post.facebook_public === true,
+        source: "interview",
+      });
+      const children = created.posts || (created.post ? [created.post] : []);
+      drafts.push({
+        bundle: created.bundle || null,
+        post: created.post || null,
+        posts: children,
+        checks: checksForPosts(children),
+      });
+    }
+    return { published: false, profile_id: profile.id, drafts };
+  }
+
   return {
     store,
     oauth,
@@ -1294,6 +1359,11 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
     connectAccounts,
     connectBluesky,
     createDraft,
+    getInterview,
+    saveInterview,
+    saveInterviewAudio,
+    readInterviewRecording,
+    createDraftsFromInterview,
     updateDraft,
     generateMedia,
     attachMedia,

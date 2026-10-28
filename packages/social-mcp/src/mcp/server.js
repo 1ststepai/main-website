@@ -245,6 +245,46 @@ export function createSocialMcpServer({ engine, auth } = {}) {
   );
 
   add(
+    "get_interview",
+    "Read interview",
+    "Read one brand's typed interview answers, voice notes, and presets. PostPath does not transcribe recordings. This does not publish.",
+    "posts:read",
+    { read: true, idempotent: true },
+    { profile_id: z.string().min(2).max(64).describe("Brand profile id.") },
+    async (args) => eng.getInterview(args.profile_id),
+  );
+
+  add(
+    "create_drafts_from_interview",
+    "Save interview drafts",
+    "Save posts the assistant already wrote as drafts for one brand. Each draft can set platforms and per-network overrides. The drafts wait for approval and are not published.",
+    "drafts:write",
+    {},
+    {
+      profile_id: z.string().min(2).max(64).describe("Brand that owns the drafts."),
+      posts: z
+        .array(
+          z.object({
+            title: draftShape.title,
+            description: draftShape.description,
+            caption: draftShape.caption,
+            tags: draftShape.tags,
+            platforms: draftShape.platforms,
+            platform: draftShape.platform,
+            overrides: draftShape.overrides,
+            privacy_status: draftShape.privacy_status,
+            instagram_public_confirmed: draftShape.instagram_public_confirmed,
+            facebook_public: draftShape.facebook_public,
+          }),
+        )
+        .min(1)
+        .max(8)
+        .describe("Posts already written by the assistant. Between 1 and 8."),
+    },
+    async (args) => eng.createDraftsFromInterview(args),
+  );
+
+  add(
     "generate_media",
     "Generate media",
     "Generate an image or a silent video for an existing draft. Video is stored with no music and no voice. The result stays in the approval queue and is not published.",

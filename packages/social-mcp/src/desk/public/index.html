@@ -189,6 +189,41 @@
             YouTube sign-in needs a Google OAuth Desktop client saved on this computer. PostPath does not include a Google app.
           </p>
           <button type="button" class="btn tiny" id="connect-youtube">Connect YouTube</button>
+          <details class="interview" id="interview">
+            <summary>Interview</summary>
+            <p class="hint" id="interview-note">Answer a few questions for this brand. Your assistant can turn the typed answers into drafts. Those drafts wait in the approval queue. PostPath does not publish them, and it does not transcribe audio. Type the answer. A recording stays on this computer for your own assistant.</p>
+            <label class="field">How I talk
+              <textarea id="voice-notes" maxlength="2000" rows="2" placeholder="Words you use, words you avoid"></textarea>
+            </label>
+            <div class="interview-list">
+              <label class="field">What did you do this week?
+                <textarea data-answer="week" maxlength="4000" rows="2"></textarea>
+                <span class="interview-audio"><button type="button" class="btn tiny" data-record="week">Record</button><audio data-audio="week" controls hidden></audio></span>
+              </label>
+              <label class="field">What customer question did you answer?
+                <textarea data-answer="question" maxlength="4000" rows="2"></textarea>
+                <span class="interview-audio"><button type="button" class="btn tiny" data-record="question">Record</button><audio data-audio="question" controls hidden></audio></span>
+              </label>
+              <label class="field">What mistake should someone avoid?
+                <textarea data-answer="mistake" maxlength="4000" rows="2"></textarea>
+                <span class="interview-audio"><button type="button" class="btn tiny" data-record="mistake">Record</button><audio data-audio="mistake" controls hidden></audio></span>
+              </label>
+              <label class="field">What tip would you share?
+                <textarea data-answer="tip" maxlength="4000" rows="2"></textarea>
+                <span class="interview-audio"><button type="button" class="btn tiny" data-record="tip">Record</button><audio data-audio="tip" controls hidden></audio></span>
+              </label>
+              <label class="field">What opinion do you want to say out loud?
+                <textarea data-answer="opinion" maxlength="4000" rows="2"></textarea>
+                <span class="interview-audio"><button type="button" class="btn tiny" data-record="opinion">Record</button><audio data-audio="opinion" controls hidden></audio></span>
+              </label>
+              <label class="field">What should happen next for this work?
+                <textarea data-answer="next" maxlength="4000" rows="2"></textarea>
+                <span class="interview-audio"><button type="button" class="btn tiny" data-record="next">Record</button><audio data-audio="next" controls hidden></audio></span>
+              </label>
+            </div>
+            <button type="button" class="btn secondary" id="save-interview">Save answers</button>
+            <p class="hint" id="interview-saved"></p>
+          </details>
         </section>
 
         <section class="panel approval" aria-labelledby="approval-title">

@@ -120,6 +120,11 @@ body { min-height: 100vh; position: relative; overflow-x: hidden; }
 .add-brand-form { display: grid; gap: 8px; padding: 4px; }
 .add-brand-form[hidden] { display: none; }
 .compose-brand { max-width: 320px; }
+.interview { margin-top: 16px; }
+.interview summary { cursor: pointer; font-family: var(--display); font-size: 1.05rem; }
+.interview-list { display: grid; gap: 10px; margin: 10px 0; }
+.interview-audio { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.interview audio { max-width: 100%; height: 32px; }
 
 .brand {
   margin: 0;

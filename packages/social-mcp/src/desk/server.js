@@ -31,6 +31,7 @@ const CONTENT_TYPES = {
   ".jpeg": "image/jpeg",
   ".mp4": "video/mp4",
   ".webp": "image/webp",
+  ".webm": "audio/webm",
   ".ico": "image/x-icon",
 };
 
@@ -314,6 +315,46 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
         const body = await readJson(req);
         const result = await engine.cancelScheduledPost({ post_id: body.post_id });
         sendJson(res, 200, { ok: true, ...result, ...snapshot() });
+        return;
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/interview") {
+        const body = await readJson(req, 80_000);
+        const saved = engine.saveInterview(body.profile_id || body.id, {
+          voice_notes: body.voice_notes,
+          answers: body.answers,
+        });
+        sendJson(res, 200, { ok: true, interview: saved, ...snapshot() });
+        return;
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/interview/audio") {
+        const chunks = [];
+        let size = 0;
+        for await (const chunk of req) {
+          size += chunk.length;
+          if (size > 8 * 1024 * 1024) throw mcpError("payload_too_large", "A recording must be 8 MB or smaller.", 413);
+          chunks.push(chunk);
+        }
+        const saved = engine.saveInterviewAudio(
+          req.headers["x-postpath-profile"],
+          req.headers["x-postpath-prompt"],
+          Buffer.concat(chunks),
+          req.headers["content-type"],
+        );
+        sendJson(res, 200, { ok: true, interview: saved, ...snapshot() });
+        return;
+      }
+
+      if (req.method === "GET" && url.pathname.startsWith("/interview-audio/")) {
+        const parts = url.pathname.split("/").filter(Boolean);
+        try {
+          const recording = engine.readInterviewRecording(parts[1], parts[2]);
+          res.writeHead(200, { "content-type": recording.content_type || "audio/webm", "cache-control": "no-store" });
+          res.end(recording.bytes);
+        } catch (error) {
+          sendJson(res, error.statusCode || 404, { ok: false, message: error.message || "Recording not found" });
+        }
         return;
       }
 
