@@ -31,6 +31,8 @@ test("PostPath marketing page carries product identity and conversion hooks", as
   assert.match(html, /mailto:evan@1ststep\.ai/);
   assert.match(html, /assets\/postpath\/postpath-mark-3d\.png|assets\/postpath\/postpath-mark\.svg/);
   assert.match(html, /postpath-hero-banner\.png/);
+  assert.match(html, /PostPath by 1stStep\.ai: your private desk for social posts\./);
+  assert.doesNotMatch(html, /older line/);
   assert.match(html, /SoftwareApplication/);
   assert.match(html, /FAQPage/);
   assert.doesNotMatch(html, /Any AI can post/);

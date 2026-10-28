@@ -28,7 +28,7 @@ The marketing site at `/postpath/` copies the kit’s visual system: Midnight ca
 
 ## Tagline
 
-The brand-kit artwork still prints `CONNECT ONCE. ANY AI CAN POST.`, with **ANY AI** in cyan. That line is not a current product claim. Public pages say PostPath is a private desk on your computer, in early access. It is not a scheduler and not an AI writer. Live publishing is not yet verified.
+The hero banner (`postpath-hero-banner.png`, 981×259) reads `YOUR PRIVATE DESK FOR SOCIAL POSTS.` Do not restore `CONNECT ONCE. ANY AI CAN POST.` as public copy. Public pages say PostPath is a private desk on your computer, in early access. It is not a scheduler and not an AI writer. Live publishing is not yet verified.
 
 ## Palette
 
