@@ -155,7 +155,7 @@ export function normalizeReview(payload, model) {
   };
 }
 
-async function claudeMessages({ key, fetchImpl, env, content }) {
+export async function claudeMessages({ key, fetchImpl, env, content }) {
   if (!key) throw mcpError("missing_media_key", "Add an Anthropic API key in the desk. The key stays on this computer.");
   const model = env?.ANTHROPIC_MODEL || CLAUDE_MODEL;
   let response;

@@ -13,6 +13,7 @@
     <link rel="icon" href="/assets/postpath-mark.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="/app.css" />
     <link rel="stylesheet" href="/seo.css" />
+    <link rel="stylesheet" href="/hook.css" />
   </head>
   <body>
     <div class="atmosphere" aria-hidden="true"></div>
@@ -243,6 +244,51 @@
         </div>
         <p class="hint" id="seo-search-note">Connect search data is a separate sign-in from posting. YouTube still needs its own connection before a video can send.</p>
         <pre class="seo-report" id="seo-report-body" hidden></pre>
+      </section>
+
+      <section class="panel hook" id="hook-panel" aria-labelledby="hook-title">
+        <div class="panel-head">
+          <div>
+            <p class="step-kicker">On camera</p>
+            <h2 id="hook-title">Opening</h2>
+          </div>
+        </div>
+        <details class="seo-help" open>
+          <summary>What this saves</summary>
+          <div id="hook-help">
+            <p class="hint">One topic can borrow an opening shape and give you a line to film yourself. The action count loads with this panel.</p>
+          </div>
+        </details>
+        <details class="seo-help">
+          <summary>Setup</summary>
+          <div id="hook-setup"></div>
+        </details>
+        <form id="hook-form" class="oauth-form">
+          <div class="pair">
+            <label>Brand
+              <select id="hook-brand"></select>
+            </label>
+            <label>Topic <input id="hook-topic" maxlength="120" placeholder="Same topic as the keyword step" /></label>
+          </div>
+          <p class="hint" id="hook-voice">Tone, energy, and on-camera style are still blank.</p>
+          <div class="cta-row">
+            <button type="button" class="btn secondary" id="hook-find">Find examples</button>
+          </div>
+        </form>
+        <ul class="seo-suggestions" id="hook-examples"></ul>
+        <label>What you saw in the first 10 seconds
+          <textarea id="hook-observation" rows="3" placeholder="Opening type, pattern, visual, pacing, delivery, promise. No transcript."></textarea>
+        </label>
+        <div class="cta-row">
+          <button type="button" class="btn secondary" id="hook-read">Read the opening</button>
+          <button type="button" class="btn secondary" id="hook-save-observation">Save observation</button>
+          <button type="button" class="btn primary" id="hook-write">Write 3 hooks</button>
+        </div>
+        <div id="hook-structure"></div>
+        <div id="hook-options"></div>
+        <label>Waiting draft
+          <select id="hook-draft"></select>
+        </label>
       </section>
 
       <section class="panel results" aria-labelledby="results-title">

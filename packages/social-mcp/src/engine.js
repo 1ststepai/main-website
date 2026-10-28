@@ -30,6 +30,7 @@ import {
 import { normalizeGenerate, prepareAttachedFile, produceMedia } from "./media/run.js";
 import { reviewDraft, reviewImages, writeCaptions } from "./media/claude.js";
 import { createSeo } from "./seo/index.js";
+import { createHooks } from "./hook/index.js";
 import { planFor } from "./media/specs.js";
 import { randomBytes } from "node:crypto";
 import { rmSync } from "node:fs";
@@ -77,10 +78,19 @@ function optionalMediaPath(value, mediaRoot) {
   return resolveSafeMediaPath(String(value), mediaRoot);
 }
 
-export function createEngine({ home, env = process.env, fetchImpl = fetch, now = () => Date.now(), captionProvider = null } = {}) {
+export function createEngine({
+  home,
+  env = process.env,
+  fetchImpl = fetch,
+  now = () => Date.now(),
+  captionProvider = null,
+  hookGenerator = null,
+  structureProvider = null,
+} = {}) {
   const store = createStore({ home, env, now });
   const oauth = createOAuthRuntime({ store, env, fetchImpl });
   let seo;
+  let hooks;
 
   async function trackedFetch(url, init) {
     const method = String(init?.method || "GET").toUpperCase();
@@ -1014,7 +1024,7 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
       posts: store.listPosts(),
       profiles: store.listProfiles(),
     });
-    return { queue: queue.map((item) => seo.annotateQueueItem(item)) };
+    return { queue: queue.map((item) => hooks.annotate(seo.annotateQueueItem(item))) };
   }
 
   async function publishPost({ post_id, force = false, acknowledge = false, claimFrom = null } = {}) {
@@ -1272,11 +1282,13 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
     connectSearch: (profileId) => oauth.connectSearchData(profileId),
     createDraft,
   });
+  hooks = createHooks({ store, env, fetchImpl, now, hookGenerator, structureProvider });
 
   return {
     store,
     oauth,
     seo,
+    hooks,
     publicStatus,
     upsertProfile,
     listAccounts,

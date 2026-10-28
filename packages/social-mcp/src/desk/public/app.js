@@ -1,4 +1,5 @@
 import { initSeo } from "./seo.js";
+import { initHook } from "./hook.js";
 import {
   AI_NOT_IN_APP,
   CREATION,
@@ -1364,6 +1365,13 @@ function renderQueue(items) {
       seoNotes.textContent = item.seo.notes.join(" ");
       li.append(seoNotes);
     }
+    if (item.hook?.spoken) {
+      const script = document.createElement("p");
+      script.className = "hook-script";
+      const from = item.hook.borrowed_from?.[0]?.url ? ` Structure borrowed from ${item.hook.borrowed_from[0].url}` : "";
+      script.textContent = `On camera: ${item.hook.spoken}.${from}`;
+      li.append(script);
+    }
     if (item.media_status === "generating") {
       const pending = document.createElement("p");
       pending.className = "hint";
@@ -1787,6 +1795,7 @@ document.getElementById("forget-vault").addEventListener("click", async () => {
 });
 
 initSeo({ api, showToast, refresh });
+initHook({ api, showToast, refresh });
 refresh()
   .then(() => bootGuide())
   .catch((error) => {

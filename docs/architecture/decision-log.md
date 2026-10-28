@@ -1,5 +1,14 @@
 # Architecture Decision Log
 
+## 2026-10-28: PostPath hook capture keeps the pattern and not the footage
+
+- **Status / owner:** Draft, not deployed. Evan owns any YouTube quota, Gemini key, and Anthropic key. Voice fields stay blank until Evan fills them.
+- **Decision:** For one topic, PostPath can search public YouTube videos from about the last 90 days, rank them by views divided by subscribers, and store only the opening structure plus the video link, title, and public counts. Gemini, with the owner's key, is asked for seconds 0 to 10 of the public URL and is not given a downloaded file. A transcript is not stored. A quote longer than six words is dropped and is not sent to the writer. Claude, or a mock in tests, writes three original openings. More than four consecutive source words rejects that opening. The chosen opening becomes the on-camera script, the caption lead, and the media prompt, then the existing SEO notes and one Approve still apply. vidIQ is not used. Nothing posts by itself.
+- **Rationale:** The useful part is the shape of an opening the owner can film. Copying footage or wording is not.
+- **Affected systems:** `packages/social-mcp/src/hook`, the desk Opening panel, and three MCP tools. No live YouTube, Gemini, or Claude call in tests.
+- **Verification:** Mocked search, a mocked Gemini body limited to 10 seconds, originality rejection, and an attached draft that stays unapproved.
+- **Rollback:** Leave this draft unmerged.
+
 ## 2026-10-28: PostPath SEO step is free, advisory, and separate from publish sign-in
 
 - **Status / owner:** Draft, not deployed. Evan owns any Google re-consent, Search Console properties, and a future Ads developer token.

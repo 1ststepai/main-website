@@ -18,6 +18,7 @@ import { mcpError } from "../errors.js";
 import { resolveSafeMediaPath } from "../mediaPath.js";
 import { PRODUCT_NAME, PRODUCT_TITLE } from "../brand.js";
 import { handleSeoRoutes } from "../seo/http.js";
+import { handleHookRoutes } from "../hook/http.js";
 
 const PUBLIC_DIR = join(dirname(fileURLToPath(import.meta.url)), "public");
 const MEDIA_LIMIT = 200 * 1024 * 1024;
@@ -417,6 +418,7 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
       }
 
       if (await handleSeoRoutes(req, res, { url, engine, sendJson, readJson, snapshot })) return;
+      if (await handleHookRoutes(req, res, { url, engine, sendJson, readJson, snapshot })) return;
 
       if (req.method === "POST" && url.pathname === "/api/vidiq") {
         const body = await readJson(req);

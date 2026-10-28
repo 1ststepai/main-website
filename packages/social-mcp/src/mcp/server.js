@@ -8,6 +8,7 @@ import { paths, PLATFORMS } from "../home.js";
 import { loadOAuthEnvFile } from "../envFile.js";
 import { POSTPATH_INSTRUCTIONS } from "./instructions.js";
 import { registerSeoTools } from "../seo/tools.js";
+import { registerHookTools } from "../hook/tools.js";
 
 const outputSchema = z
   .object({
@@ -468,6 +469,7 @@ export function createSocialMcpServer({ engine, auth } = {}) {
   );
 
   registerSeoTools(server, { engine: eng, gated });
+  registerHookTools(server, { engine: eng, gated });
 
   return { server, engine: eng };
 }
