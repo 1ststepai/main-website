@@ -3,6 +3,7 @@ import { decryptJson, encryptJson, loadOrCreateKey } from "./crypto.js";
 import { mcpError } from "./errors.js";
 import { paths } from "./home.js";
 import { socialId } from "./ids.js";
+import { defaultPresets } from "./multiPost.js";
 
 export const POST_STATUSES = [
   "draft",
@@ -20,8 +21,14 @@ function emptyDb() {
     profiles: {},
     connections: {},
     posts: {},
+    bundles: {},
+    mcpAuth: emptyMcpAuth(),
     audit: [],
   };
+}
+
+function emptyMcpAuth() {
+  return { clients: {}, codes: {}, grants: {}, tokens: {}, retiredRefresh: {}, pats: {}, consents: {} };
 }
 
 function connectionKey(profileId, platform) {
@@ -84,16 +91,36 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
   const key = loadOrCreateKey(homePaths, env);
   const lockFile = `${homePaths.dbFile}.lock`;
   let db = loadDb(homePaths.dbFile);
+  let loadedStamp = fileStamp(homePaths.dbFile);
+  let lockDepth = 0;
   const inFlight = new Set();
   let removed = false;
+
+  function rememberStamp() {
+    loadedStamp = fileStamp(homePaths.dbFile);
+  }
+
+  function ensureFresh() {
+    if (removed || lockDepth > 0) return;
+    const stamp = fileStamp(homePaths.dbFile);
+    if (stamp === loadedStamp) return;
+    db = loadDb(homePaths.dbFile);
+    loadedStamp = stamp;
+  }
 
   function locked(fn) {
     if (removed) {
       throw mcpError("vault_removed", "Saved accounts were removed. Quit PostPath and open it again.", 409);
     }
     return withVaultLock(lockFile, () => {
-      db = loadDb(homePaths.dbFile);
-      return fn();
+      lockDepth += 1;
+      try {
+        db = loadDb(homePaths.dbFile);
+        rememberStamp();
+        return fn();
+      } finally {
+        lockDepth -= 1;
+      }
     });
   }
 
@@ -112,17 +139,24 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
     const tmp = `${homePaths.dbFile}.${process.pid}.tmp`;
     writeFileSync(tmp, `${JSON.stringify(db, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
     renameSync(tmp, homePaths.dbFile);
+    rememberStamp();
   }
 
   function listProfiles() {
+    ensureFresh();
     return Object.values(db.profiles).sort((a, b) => a.name.localeCompare(b.name));
   }
 
   function getProfile(profileId) {
+    ensureFresh();
     return db.profiles[String(profileId || "")] || null;
   }
 
-  function upsertProfile({ id, name }) {
+  function upsertProfile({ id, name, require_vidiq, presets } = {}) {
+    return locked(() => upsertProfileBody({ id, name, require_vidiq, presets }));
+  }
+
+  function upsertProfileBody({ id, name, require_vidiq, presets } = {}) {
     const profileId = normalizeProfileId(id);
     if (profileId.length < 2 || !/^[a-z0-9]/.test(profileId)) {
       throw mcpError("invalid_profile", "Profile id must be 2–64 chars: letters, numbers, _ or -.");
@@ -130,27 +164,40 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
     const stamp = new Date(now()).toISOString();
     const existing = db.profiles[profileId];
     const profile = {
+      ...(existing || {}),
       id: profileId,
       name: String(name || existing?.name || profileId).trim().slice(0, 120) || profileId,
       created_at: existing?.created_at || stamp,
       updated_at: stamp,
+      presets: existing?.presets || defaultPresets(),
     };
+    if (typeof require_vidiq === "boolean") profile.require_vidiq = require_vidiq;
+    else if (profile.require_vidiq === undefined && profileId === "1ststep-ai") profile.require_vidiq = true;
+    if (presets && typeof presets === "object") {
+      profile.presets = { ...defaultPresets(), ...existing?.presets, ...presets };
+    }
     db.profiles[profileId] = profile;
     persist();
     return profile;
   }
 
   function listConnections(profileId) {
+    ensureFresh();
     return Object.values(db.connections)
       .filter((row) => !profileId || row.profile_id === profileId)
       .map(publicConnection);
   }
 
   function getConnection(profileId, platform) {
+    ensureFresh();
     return db.connections[connectionKey(profileId, platform)] || null;
   }
 
   function saveConnection(record, secrets) {
+    return locked(() => saveConnectionBody(record, secrets));
+  }
+
+  function saveConnectionBody(record, secrets) {
     const stamp = new Date(now()).toISOString();
     const keyName = connectionKey(record.profile_id, record.platform);
     const existing = db.connections[keyName];
@@ -181,6 +228,10 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
   }
 
   function updateConnection(profileId, platform, patch) {
+    return locked(() => updateConnectionBody(profileId, platform, patch));
+  }
+
+  function updateConnectionBody(profileId, platform, patch) {
     const row = getConnection(profileId, platform);
     if (!row) return null;
     const safe = { ...patch };
@@ -193,11 +244,14 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
   }
 
   function deleteConnection(profileId, platform) {
-    delete db.connections[connectionKey(profileId, platform)];
-    persist();
+    locked(() => {
+      delete db.connections[connectionKey(profileId, platform)];
+      persist();
+    });
   }
 
   function listPosts({ profileId, status } = {}) {
+    ensureFresh();
     return Object.values(db.posts)
       .filter((post) => !profileId || post.profile_id === profileId)
       .filter((post) => !status || post.status === status)
@@ -206,6 +260,7 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
   }
 
   function getPost(postId) {
+    ensureFresh();
     return db.posts[String(postId || "")] || null;
   }
 
@@ -262,10 +317,63 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
     return inFlight.has(String(postId || ""));
   }
 
+  function listBundles() {
+    ensureFresh();
+    return Object.values(db.bundles || {}).sort((a, b) => String(b.updated_at).localeCompare(String(a.updated_at)));
+  }
+
+  function getBundle(bundleId) {
+    ensureFresh();
+    return (db.bundles || {})[String(bundleId || "")] || null;
+  }
+
+  function saveBundle(bundle) {
+    return locked(() => {
+      if (!db.bundles) db.bundles = {};
+      db.bundles[bundle.id] = bundle;
+      persist();
+      return { ...bundle };
+    });
+  }
+
+  function deletePost(postId) {
+    return locked(() => {
+      delete db.posts[String(postId || "")];
+      persist();
+    });
+  }
+
+  function deleteBundle(bundleId) {
+    return locked(() => {
+      if (!db.bundles) return;
+      delete db.bundles[String(bundleId || "")];
+      persist();
+    });
+  }
+
+  function readMcpAuth() {
+    ensureFresh();
+    if (!db.mcpAuth) db.mcpAuth = emptyMcpAuth();
+    return db.mcpAuth;
+  }
+
+  function withMcpAuth(mutator) {
+    return locked(() => {
+      if (!db.mcpAuth) db.mcpAuth = emptyMcpAuth();
+      try {
+        return mutator(db.mcpAuth);
+      } finally {
+        persist();
+      }
+    });
+  }
+
   function appendAudit(entry) {
-    db.audit.push(entry);
-    if (db.audit.length > 1000) db.audit = db.audit.slice(-1000);
-    persist();
+    locked(() => {
+      db.audit.push(entry);
+      if (db.audit.length > 1000) db.audit = db.audit.slice(-1000);
+      persist();
+    });
   }
 
   function exportPublic() {
@@ -292,6 +400,13 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
     listPosts,
     getPost,
     savePost,
+    deletePost,
+    listBundles,
+    getBundle,
+    saveBundle,
+    deleteBundle,
+    readMcpAuth,
+    withMcpAuth,
     claimPost,
     compareAndSetPost,
     releaseClaim,
@@ -301,6 +416,15 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
     forgetVault,
     newId: socialId,
   };
+}
+
+function fileStamp(file) {
+  try {
+    const stat = statSync(file);
+    return `${stat.mtimeMs}:${stat.size}`;
+  } catch {
+    return "missing";
+  }
 }
 
 function loadDb(file) {
@@ -313,6 +437,8 @@ function loadDb(file) {
       profiles: parsed.profiles || {},
       connections: parsed.connections || {},
       posts: parsed.posts || {},
+      bundles: parsed.bundles || {},
+      mcpAuth: { ...emptyMcpAuth(), ...(parsed.mcpAuth || {}) },
       audit: Array.isArray(parsed.audit) ? parsed.audit : [],
     };
   } catch {

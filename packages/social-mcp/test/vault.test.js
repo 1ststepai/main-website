@@ -61,6 +61,48 @@ test("store keeps secrets out of public connection views", () => {
   }
 });
 
+test("a second store on the same home sees the first store's drafts", () => {
+  const home = mkdtempSync(join(tmpdir(), "social-mcp-share-"));
+  try {
+    const writer = createStore({ home });
+    const reader = createStore({ home });
+    assert.equal(reader.listBundles().length, 0);
+    writer.upsertProfile({ id: "acme", name: "Acme" });
+    assert.equal(reader.getProfile("acme").name, "Acme");
+    const stamp = "2026-06-01T12:00:00.000Z";
+    writer.savePost(
+      {
+        id: "post_shared0001",
+        profile_id: "acme",
+        platform: "youtube",
+        status: "draft",
+        title: "Shared",
+        caption: "Hello",
+        created_at: stamp,
+        updated_at: stamp,
+      },
+      { create: true },
+    );
+    writer.saveBundle({
+      id: "bnd_shared0001",
+      profile_id: "acme",
+      status: "draft",
+      title: "Shared",
+      platforms: ["youtube"],
+      child_ids: { youtube: "post_shared0001" },
+      source: "mcp",
+      created_at: stamp,
+      updated_at: stamp,
+    });
+    assert.equal(reader.listPosts().length, 1);
+    assert.equal(reader.getPost("post_shared0001").platform, "youtube");
+    assert.equal(reader.listBundles()[0].id, "bnd_shared0001");
+    assert.equal(reader.getBundle("bnd_shared0001").source, "mcp");
+  } finally {
+    rmSync(home, { recursive: true, force: true });
+  }
+});
+
 test("forgetVault deletes the saved accounts and refuses later writes", () => {
   const home = mkdtempSync(join(tmpdir(), "social-mcp-forget-"));
   const store = createStore({ home });

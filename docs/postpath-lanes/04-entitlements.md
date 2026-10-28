@@ -6,13 +6,11 @@ Public contract: [POSTPATH_LICENSING.md](../POSTPATH_LICENSING.md).
 
 ## Decision
 
-The public offer is early access. The current system stays an environment-only stub, off and unlimited by default. `paid` is false and `provider` is null. A `POSTPATH_LICENSE_KEY` sets `keyPresent` and is not verified.
+PostPath is free. There is no billing, paywall, plan limit, or upgrade prompt. License environment flags do not create a cap. `paid` is false and `provider` is null.
 
-Status: local stub. Do not ship this stub as paid licensing.
+Status: free product. Do not add a paid plan unless Evan asks for one.
 
-Rationale: an enforce flag and a profile cap do not prove a purchase. Calling the stub a paid license would overstate what the product can check.
-
-Evan dependency, exact: choose payment provider, prices, and a signed-key or store verifier before any paid entitlement can ship.
+Rationale: the product is one approve button for networks the person already has. A plan limit would put a checkout in front of that.
 
 Affected systems: `packages/social-mcp/src/license.js` and its tests. `engine.js` still uses `getLicenseState` and `assertProfileAllowed` only.
 

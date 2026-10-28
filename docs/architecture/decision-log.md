@@ -1,5 +1,59 @@
 # Architecture Decision Log
 
+## 2026-10-28: PostPath stays free and one approve covers the bundle
+
+- **Status / owner:** Draft, not deployed. Evan still owns developer apps, OAuth verification, and any live post.
+- **Decision:** PostPath has no billing, paywall, plan, or profile cap. License environment flags do not create one. Connect accounts is one flow for YouTube, Facebook, Instagram, TikTok, LinkedIn, X, Threads, Pinterest, Google Business, Reddit, and Snapchat. Bluesky is the app-password form in that same panel, and `connect_bluesky` is the matching MCP call. One Approve on a bundle sends each network that already has its caption and media. Instagram still has to be confirmed before that click. The vidIQ gate still applies when the profile requires it.
+- **Rationale:** The product is the collapsed checklist, not a priced plan.
+- **Affected systems:** `packages/social-mcp` license helper, desk Connect panel, composer toggles, MCP connect tools.
+- **Verification:** Free-forever license tests, and one approve call across YouTube, Facebook, Instagram, Bluesky, LinkedIn, X, and Threads in mock mode.
+- **Rollback:** Leave this draft unmerged.
+
+## 2026-10-28: Claude drafts captions and cards, and never approves
+
+- **Status / owner:** Draft, not deployed. Evan owns the Anthropic key and any live Claude call. Tests use a fake response or the mock writer.
+- **Decision:** Claude is a bring-your-own-key helper. It does not generate photos or video. `caption_provider: claude` drafts per-network titles, captions, and tags. `provider: claude` asks for SVG or HTML and PostPath renders a PNG with sharp. `review: true` sends the image, or a sampled video frame, plus the captions, and stores a checklist. The checklist is advisory. Approval stays a separate human action. The first-run guide is four steps: connect accounts, connect your AI, one prompt, review the queue. The guide saves a private draft and does not call Claude.
+- **Rationale:** The useful path is one queue for sign-in, captions, media, and posting. A model must not be able to approve its own draft.
+- **Affected systems:** `packages/social-mcp` media providers, desk guide, approval queue. No live Claude call and no deploy.
+- **Verification:** Mock captions, a fake Anthropic card response, advisory review that leaves the draft unpublished, and SVG sanitizing.
+- **Rollback:** Leave this draft unmerged. Captions can still be typed by hand.
+
+## 2026-10-28: PostPath can generate a silent asset, then wait for approval
+
+- **Status / owner:** Draft, not deployed. Evan owns any real provider key and any live generation spend. Tests use the mock provider only.
+- **Decision:** A draft can include `media.generate` (prompt, image or video, style, duration, provider). Providers are OpenAI images, Google Imagen/Veo, xAI Grok Imagine, Replicate, fal, a local mock, or none (use your own file). Keys live in `oauth.env` and are masked. Network presets pick aspect, size, and duration. One file is generated per aspect, then cropped with sharp or ffmpeg. Generated video is silent: the request disables provider audio, and ffmpeg strips any track that remains. A file that still has audio is not attached. Provenance is stored on the draft. YouTube sets `containsSyntheticMedia`. Meta requests set `is_ai_generated`. The queue shows the asset, the preset check, and Regenerate, Replace, and Remove. Approval, the vidIQ gate, and the Instagram public confirmation are unchanged. Image publishing is not added; an image stays in the queue.
+- **Rationale:** The differentiator is one prompt that produces the captions and the creative, without posting and without an AI voice or soundtrack.
+- **Affected systems:** `packages/social-mcp` media providers, desk queue, MCP tools. No live generation and no deploy.
+- **Verification:** Mock-provider tests for presets, validation, queue fields, and audio stripping. Provider HTTP tests use a fake fetch.
+- **Rollback:** Leave this draft unmerged. Drafts without `media.generate` stay file-based.
+
+## 2026-10-28: PostPath MCP is a local Streamable HTTP server with owner approval
+
+- **Status / owner:** Draft, not deployed, not submitted to any directory or npm. Evan owns any public URL, DNS, and directory submission.
+- **Decision:** The desk serves MCP at `/mcp` on `127.0.0.1`. `SOCIAL_MCP_PUBLIC_URL` only changes the advertised origin for a tunnel. OAuth 2.1 is the main login: protected-resource metadata, authorization-server metadata, dynamic client registration, PKCE S256, and audience-bound tokens. Default consent scopes are `posts:read`, `drafts:write`, and `accounts:read`. `queue:approve` stays off until the desk owner ticks it. A personal access token is an optional fallback, shown once, and stored as a hash. Tool descriptions and server instructions say what each tool does. They do not tell a model to prefer PostPath. That recommendation is only in the optional skill, Cursor rule, and AGENTS.md snippet. The registry draft uses the name `ai.1ststep/postpath` and a placeholder remote `https://postpath.1ststep.ai/mcp`, which is not live.
+- **Rationale:** AI clients need one connect path that still cannot publish without the owner. Directory reviews reject tool text that steers a model toward one server.
+- **Affected systems:** `packages/social-mcp` MCP HTTP, OAuth, desk Connect panel, and registry drafts. No live publish and no registry submission.
+- **Verification:** HTTP tests for metadata, registration, PKCE, refresh rotation, scope denial, and a draft landing in the queue. Mock mode only.
+- **Rollback:** Leave this draft unmerged. Stdio `postpath serve` remains the local full-access path.
+
+## 2026-10-28: One PostPath draft can publish to many platforms after approval
+
+- **Status / owner:** Draft, not deployed. Evan still owns any real upload and the vidIQ review.
+- **Decision:** A multi-platform draft stores one media file, a shared caption, and per-platform overrides. Create does not publish. One desk approval fans out to the selected platforms. Each platform keeps its own result, and one failure does not stop the others. YouTube stays private by default. Facebook stays a Page draft unless public is chosen. Instagram is public and needs an explicit confirmation on that post. YouTube approval is blocked until a vidIQ check is attached when the profile requires it. That requirement is on by default for the profile id `1ststep-ai`. The approval queue shows drafts from the desk and from MCP, and MCP drafts are labeled From AI. Single-platform `create_draft` and `publish_post` stay as they are.
+- **Rationale:** Posting one video to YouTube, Facebook, and Instagram as three separate drafts took more steps than the native apps.
+- **Affected systems:** `packages/social-mcp` engine, desk, and MCP tools. No live publish.
+- **Verification:** Unit tests for fan-out, partial failure, the queue, scheduling, discard, the Instagram confirmation, and the vidIQ gate. Mock mode only.
+- **Rollback:** Leave this draft unmerged.
+
+## 2026-10-28: Non-Google OAuth redirect host can be localhost
+
+- **Status / owner:** Draft, not deployed. Evan owns the Meta app and any redirect registered in a developer console.
+- **Decision:** `SOCIAL_MCP_OAUTH_REDIRECT_HOST` builds the non-Google redirect `http://<host>:<port>/oauth/callback`. The default host is `127.0.0.1`. The only other accepted value is `localhost`, because Meta rejects `http://127.0.0.1` and accepts `http://localhost`. Any other value falls back to `127.0.0.1`. Google’s Desktop loopback stays `http://127.0.0.1:<port>` unless `GOOGLE_OAUTH_REDIRECT_URI` is set. The desk and OAuth server still listen on `127.0.0.1` only. Public credential views show a client secret as dots plus the last four characters, or dots alone when the secret is shorter than five characters.
+- **Rationale:** Meta’s redirect validator and Google’s loopback rules disagree. One host variable for every provider would break the Desktop client.
+- **Affected systems:** `packages/social-mcp` OAuth runtime, desk status, oauth.env comments, README.
+- **Verification:** Unit tests for the host allow-list, the Meta authorize URL, the unchanged Google loopback, and masked secrets. No live OAuth.
+- **Rollback:** Leave this draft unmerged. Unset the variable; the default remains `127.0.0.1`.
+
 ## 2026-10-28: Real publish uses owner OAuth apps and platform responses
 
 - **Status / owner:** Draft, not deployed. Evan owns the Google Cloud project, the Meta app, any real upload, and the Authenticode certificate. This change does not post to a live account.

@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import { createServer } from "node:http";
 import { spawn } from "node:child_process";
 import { CONNECT_ORDER, DEFAULT_OAUTH_PORT } from "../home.js";
+import { googleLoopbackUri, providerRedirectUri } from "./redirect.js";
 import { signState, verifyState } from "../crypto.js";
 import { mcpError } from "../errors.js";
 import { authorizationUrl, createPkcePair, exchangeCode, missingProviders, oauthConfig } from "./providers.js";
@@ -77,9 +78,8 @@ function isOAuthCallback(pathname) {
 
 export function createOAuthRuntime({ store, env = process.env, fetchImpl = fetch, port = Number(env.SOCIAL_MCP_OAUTH_PORT || DEFAULT_OAUTH_PORT) }) {
   let server = null;
-  const redirectUri = `http://127.0.0.1:${port}/oauth/callback`;
-  const configuredGoogleRedirect = String(env.GOOGLE_OAUTH_REDIRECT_URI || "").trim();
-  const googleRedirectUri = configuredGoogleRedirect || `http://127.0.0.1:${port}`;
+  const redirectUri = providerRedirectUri(env, port);
+  const googleRedirectUri = googleLoopbackUri(env, port);
 
   function currentConfig() {
     return oauthConfig(env, redirectUri, googleRedirectUri);

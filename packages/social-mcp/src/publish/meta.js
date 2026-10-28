@@ -125,6 +125,11 @@ async function pollInstagramContainer({ containerId, secrets, fetchImpl, onNeeds
   throw mcpError("instagram_processing", "Instagram is still processing the video. It was not published.", 409);
 }
 
+export function metaDisclosureParams(post) {
+  if (post?.ai_generated === true || post?.media_provenance?.ai_generated === true) return { is_ai_generated: "true" };
+  return {};
+}
+
 async function publishInstagram({ post, connection, secrets, mediaRoot, fetchImpl, onNeedsReconnect, budget, sleep }) {
   const igId = connection.instagram_id;
   if (!igId) throw mcpError("instagram_not_connected", "No Instagram business account on this Meta connection.", 409);
@@ -150,6 +155,7 @@ async function publishInstagram({ post, connection, secrets, mediaRoot, fetchImp
         media_type: "REELS",
         upload_type: "resumable",
         caption,
+        ...metaDisclosureParams(post),
       },
     });
     const created = await requireOk(createdSent, {
@@ -188,6 +194,7 @@ async function publishInstagram({ post, connection, secrets, mediaRoot, fetchImp
         media_type: "REELS",
         video_url: mediaUrl,
         caption,
+        ...metaDisclosureParams(post),
       },
     });
     const created = await requireOk(createdSent, {
@@ -268,6 +275,7 @@ async function publishFacebook({ post, connection, secrets, mediaRoot, fetchImpl
         video_state: videoState,
         description: caption,
         title: String(post.title || "").slice(0, 255),
+        ...metaDisclosureParams(post),
       },
     });
     await requireOk(finishSent, {
@@ -304,6 +312,7 @@ async function publishFacebook({ post, connection, secrets, mediaRoot, fetchImpl
       file_url: mediaUrl,
       description: caption,
       published: String(isPublic),
+      ...metaDisclosureParams(post),
     },
   });
   const payload = await requireOk(videoSent, {

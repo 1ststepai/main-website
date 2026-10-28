@@ -8,9 +8,14 @@ import { DEFAULT_DESK_PORT } from "../home.js";
 import { OAUTH_KEYS, loadOAuthEnvFile, mergeOAuthInput, publicOAuthConfig, saveOAuthEnvFile, parseEnvFile } from "../envFile.js";
 import { assessOAuthValues, assertOAuthValues } from "../oauth/credentials.js";
 import { displayOutcome } from "../publish/outcome.js";
-import { installCursorMcp, readCursorMcpStatus } from "../cursorConfig.js";
+import { installCursorMcp, publicMcpClientConfig, readCursorMcpStatus } from "../cursorConfig.js";
+import { googleLoopbackUri, providerRedirectUri } from "../oauth/redirect.js";
+import { handleRemoteMcp } from "../mcp/http.js";
+import { allowedHost, clientSetup } from "../mcp/clients.js";
+import { createPat, listPats, revokePat } from "../mcp/auth.js";
 import { openDesktopApp } from "../openApp.js";
 import { mcpError } from "../errors.js";
+import { resolveSafeMediaPath } from "../mediaPath.js";
 import { PRODUCT_NAME, PRODUCT_TITLE } from "../brand.js";
 
 const PUBLIC_DIR = join(dirname(fileURLToPath(import.meta.url)), "public");
@@ -21,13 +26,16 @@ const CONTENT_TYPES = {
   ".js": "text/javascript; charset=utf-8",
   ".svg": "image/svg+xml",
   ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".mp4": "video/mp4",
+  ".webp": "image/webp",
   ".ico": "image/x-icon",
 };
 
-function assertLocalHost(req, port) {
+function assertLocalHost(req, port, env) {
   const host = String(req.headers.host || "");
-  const ok = host === `127.0.0.1:${port}` || host === `localhost:${port}`;
-  if (!ok) throw mcpError("forbidden", "Desk is local-only.", 403);
+  if (!allowedHost(host, env, port)) throw mcpError("forbidden", "Desk is local-only.", 403);
 }
 
 async function readJson(req, limit = 64_000) {
@@ -194,8 +202,9 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
       product_title: PRODUCT_TITLE,
       home: status.home,
       media_dir: status.media_dir,
-      oauth_redirect_uri: status.oauth_redirect_uri || `http://127.0.0.1:${env.SOCIAL_MCP_OAUTH_PORT || 47831}/oauth/callback`,
-      google_redirect_uri: status.google_redirect_uri || `http://127.0.0.1:${env.SOCIAL_MCP_OAUTH_PORT || 47831}`,
+      oauth_redirect_uri:
+        status.oauth_redirect_uri || providerRedirectUri(env, Number(env.SOCIAL_MCP_OAUTH_PORT || 47831)),
+      google_redirect_uri: status.google_redirect_uri || googleLoopbackUri(env, Number(env.SOCIAL_MCP_OAUTH_PORT || 47831)),
       publish_mode: status.publish_mode || "live",
       oauth_check: assessOAuthValues(envValues),
       recent_posts: engine.store.listPosts().slice(0, 30).map((post) => ({
@@ -207,10 +216,14 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
       connections: status.connections,
       platforms: status.platforms,
       scheduled_posts,
+      queue: engine.listQueue().queue,
       due_interval_ms: dueIntervalMs,
       oauth: publicOAuthConfig(envValues),
       oauth_ready: ready,
       cursor,
+      mcp_config: publicMcpClientConfig(),
+      mcp_remote: clientSetup(env, port),
+      pats: listPats(engine.store),
       next_step: !anyOauthReady(ready)
         ? "save_apps"
         : status.profiles.length === 0
@@ -221,8 +234,9 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
 
   const server = createServer(async (req, res) => {
     try {
-      assertLocalHost(req, port);
+      assertLocalHost(req, port, env);
       const url = new URL(req.url || "/", `http://127.0.0.1:${port}`);
+      if (await handleRemoteMcp(req, res, { engine, store: engine.store, env, port })) return;
 
       if (req.method === "GET" && url.pathname === "/api/status") {
         sendJson(res, 200, { ok: true, ...snapshot() });
@@ -234,6 +248,8 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
         const result = await engine.upsertProfile({
           id: body.id || body.profile_id,
           name: body.name,
+          require_vidiq: typeof body.require_vidiq === "boolean" ? body.require_vidiq : undefined,
+          presets: body.presets,
         });
         sendJson(res, 200, { ok: true, ...result, ...snapshot() });
         return;
@@ -303,24 +319,124 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
         const name = String(body.name || profileId).trim();
         if (!profileId) throw mcpError("invalid_profile", "Profile id is required.");
         await engine.upsertProfile({ id: profileId, name });
+        const tags = Array.isArray(body.tags)
+          ? body.tags
+          : String(body.tags || "")
+              .split(",")
+              .map((tag) => tag.trim())
+              .filter(Boolean);
         const created = await engine.createDraft({
           profile_id: profileId,
-          platform: body.platform || "youtube",
+          platform: body.platforms ? undefined : body.platform || "youtube",
+          platforms: body.platforms,
+          overrides: body.overrides,
           title: body.title,
           description: body.description,
-          caption: body.caption,
-          tags: Array.isArray(body.tags)
-            ? body.tags
-            : String(body.tags || "")
-                .split(",")
-                .map((tag) => tag.trim())
-                .filter(Boolean),
+          caption: body.caption || body.description,
+          tags,
           privacy_status: body.privacy_status,
           media_path: body.media_path,
           media_url: body.media_url,
           media_content_type: body.media_content_type,
+          instagram_public_confirmed: body.instagram_public_confirmed === true,
+          facebook_public: body.facebook_public === true,
+          vidiq: body.vidiq,
+          media: body.media,
+          caption_provider: body.caption_provider,
+          review: body.review === true,
+          review_provider: body.review_provider,
+          wait: body.wait === true,
+          source: "desk",
         });
         sendJson(res, 200, { ok: true, ...created, ...snapshot() });
+        return;
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/approve") {
+        const body = await readJson(req);
+        if (body.bundle_id) {
+          const result = await engine.approveBundle({
+            bundle_id: body.bundle_id,
+            scheduled_at: body.scheduled_at,
+            instagram_public_confirmed: body.instagram_public_confirmed === true,
+          });
+          sendJson(res, 200, { ok: true, ...result, ...snapshot() });
+          return;
+        }
+        if (body.scheduled_at) {
+          const result = await engine.schedulePost({ post_id: body.post_id, scheduled_at: body.scheduled_at });
+          sendJson(res, 200, { ok: true, ...result, ...snapshot() });
+          return;
+        }
+        const result = await engine.publishPost({ post_id: body.post_id, force: true });
+        sendJson(res, 200, { ok: true, ...result, ...snapshot() });
+        return;
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/discard") {
+        const body = await readJson(req);
+        const result = await engine.discardItem({ bundle_id: body.bundle_id, post_id: body.post_id });
+        sendJson(res, 200, { ok: true, ...result, ...snapshot() });
+        return;
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/media/generate") {
+        const body = await readJson(req);
+        const result = await engine.generateMedia(body);
+        sendJson(res, 200, { ok: true, ...result, ...snapshot() });
+        return;
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/media/attach") {
+        const body = await readJson(req);
+        const result = await engine.attachMedia(body);
+        sendJson(res, 200, { ok: true, ...result, ...snapshot() });
+        return;
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/media/remove") {
+        const body = await readJson(req);
+        const result = await engine.removeMedia(body);
+        sendJson(res, 200, { ok: true, ...result, ...snapshot() });
+        return;
+      }
+
+      if (req.method === "GET" && url.pathname.startsWith("/media/")) {
+        const name = decodeURIComponent(url.pathname.slice("/media/".length));
+        try {
+          const file = resolveSafeMediaPath(name, homePaths.mediaDir);
+          const body = readFileSync(file);
+          const type = CONTENT_TYPES[extname(file)] || "application/octet-stream";
+          res.writeHead(200, { "content-type": type, "cache-control": "no-store" });
+          res.end(body);
+        } catch {
+          sendJson(res, 404, { ok: false, message: "Media not found" });
+        }
+        return;
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/vidiq") {
+        const body = await readJson(req);
+        const result = await engine.attachVidiqCheck(body);
+        sendJson(res, 200, { ok: true, ...result, ...snapshot() });
+        return;
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/pat") {
+        const body = await readJson(req);
+        const created = createPat(engine.store, {
+          name: body.name,
+          scopes: body.scopes,
+          expiresInDays: body.expires_in_days,
+        });
+        sendJson(res, 201, { ok: true, ...created, ...snapshot() });
+        return;
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/pat/revoke") {
+        const body = await readJson(req);
+        const revoked = revokePat(engine.store, String(body.id || ""));
+        sendJson(res, 200, { ok: revoked, ...snapshot() });
         return;
       }
 

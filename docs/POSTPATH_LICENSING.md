@@ -1,18 +1,20 @@
-# PostPath licensing (early access stub)
+# PostPath is free
 
-Local licensing helpers live in `packages/social-mcp/src/license.js`.
+Local helpers live in `packages/social-mcp/src/license.js`.
 
-The public offer is **early access**. This is an environment-only stub. It is off and unlimited by default. It does not call Stripe, LemonSqueezy, or any other paid verification API. It does not store license keys or secrets in the repository. Do not ship this stub as paid licensing.
+PostPath has no billing, paywall, plan, or profile cap. `POSTPATH_LICENSE_ENFORCE`, `POSTPATH_TIER`, `POSTPATH_LICENSE_KEY`, revocation, and expiry do not change that. The helpers do not call a payment provider.
 
 `getEntitlement` always reports:
 
 | Field | Value |
 | --- | --- |
-| `offer` | `early_access` |
+| `offer` | `free` |
 | `paid` | `false` |
 | `provider` | `null` |
+| `enforce` | `false` |
+| `profileLimit` | unlimited |
 
-There is no verifier. `POSTPATH_LICENSE_KEY`, when non-empty after trim, sets `keyPresent: true` only. It does not activate a paid plan and it does not change the offer.
+The tables below described an earlier env stub. They do not apply.
 
 ## Defaults
 

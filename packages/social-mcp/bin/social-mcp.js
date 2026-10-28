@@ -6,6 +6,8 @@ import { loadOAuthEnvFile } from "../src/envFile.js";
 import { createDeskServer } from "../src/desk/server.js";
 import { installCursorMcp } from "../src/cursorConfig.js";
 import { PRODUCT_NAME, PRODUCT_TITLE } from "../src/brand.js";
+import { DEFAULT_OAUTH_PORT } from "../src/home.js";
+import { providerRedirectUri } from "../src/oauth/redirect.js";
 
 const args = process.argv.slice(2);
 const command = args[0];
@@ -35,12 +37,14 @@ async function main() {
 
   if (command === "init") {
     const homePaths = paths();
+    const port = Number(process.env.SOCIAL_MCP_OAUTH_PORT || DEFAULT_OAUTH_PORT);
+    const redirectUri = providerRedirectUri(process.env, port);
     const example = `# ${PRODUCT_NAME} OAuth apps — local only. Do not commit.
-# Google Desktop loopback (no path):
-# http://127.0.0.1:47831
-# Other providers:
-# http://127.0.0.1:47831/oauth/callback
-# GOOGLE_OAUTH_REDIRECT_URI=http://127.0.0.1:47831/oauth/callback
+# Google Desktop loopback stays http://127.0.0.1:${port}
+# Other providers use SOCIAL_MCP_OAUTH_REDIRECT_HOST (default 127.0.0.1).
+# Meta accepts localhost. Example: SOCIAL_MCP_OAUTH_REDIRECT_HOST=localhost
+# ${redirectUri}
+# GOOGLE_OAUTH_REDIRECT_URI=http://127.0.0.1:${port}/oauth/callback
 
 GOOGLE_OAUTH_CLIENT_ID=
 GOOGLE_OAUTH_CLIENT_SECRET=
@@ -53,7 +57,7 @@ TIKTOK_CLIENT_SECRET=
     bootEngine();
     console.log(`${PRODUCT_TITLE} ready at ${homePaths.root}`);
     console.log(`Open the desk: node ./bin/social-mcp.js app`);
-    console.log(`Redirect URI: http://127.0.0.1:47831/oauth/callback`);
+    console.log(`Redirect URI: ${redirectUri}`);
     return;
   }
 
