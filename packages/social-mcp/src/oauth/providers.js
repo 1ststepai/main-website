@@ -357,7 +357,26 @@ function metaSecrets(pageToken, userToken, expiresIn) {
   };
 }
 
-async function exchangeMetaCode(code, config, fetchImpl) {
+// Pick the Facebook Page for this profile. A Meta login can cover several Pages,
+// so prefer the profile's saved choice (page id or exact name, case-insensitive)
+// and only fall back to the first Page when nothing was chosen.
+export function pickMetaPage(pages, preference) {
+  const list = Array.isArray(pages) ? pages : [];
+  const wanted = String(preference || "").trim();
+  if (!wanted) return list[0] || null;
+  const byId = list.find((page) => page.id === wanted);
+  if (byId) return byId;
+  const lower = wanted.toLowerCase();
+  const byName = list.find((page) => String(page.name || "").toLowerCase() === lower);
+  if (byName) return byName;
+  throw mcpError(
+    "page_not_found",
+    `The Facebook Page "${wanted}" was not in this Meta login. Reconnect and tick that Page on the Facebook screen.`,
+    400,
+  );
+}
+
+async function exchangeMetaCode(code, config, fetchImpl, pagePreference = "") {
   const short = await fetchImpl(`${META_GRAPH}/oauth/access_token`, {
     method: "POST",
     headers: { "content-type": "application/x-www-form-urlencoded" },
@@ -386,7 +405,7 @@ async function exchangeMetaCode(code, config, fetchImpl) {
   if (!pages.length) {
     throw mcpError("oauth_failed", "No Facebook Pages were found for that Meta login.", 502);
   }
-  const page = pages[0];
+  const page = pickMetaPage(pages, pagePreference);
   const secrets = metaSecrets(page.access_token, userToken, expiresIn);
   const platforms = {
     facebook: {
@@ -672,12 +691,12 @@ async function exchangeSnapchatCode(code, config, fetchImpl) {
   };
 }
 
-export async function exchangeCode(provider, { code, config, fetchImpl = fetch, codeVerifier } = {}) {
+export async function exchangeCode(provider, { code, config, fetchImpl = fetch, codeVerifier, pagePreference = "" } = {}) {
   assertProviderConfigured(provider, config);
   if (provider === "youtube") return exchangeGoogleCode(code, config, fetchImpl, "youtube", codeVerifier);
   if (provider === "google_search") return exchangeGoogleCode(code, config, fetchImpl, "search_data", codeVerifier);
   if (provider === "google_business") return exchangeGoogleCode(code, config, fetchImpl, "google_business", codeVerifier);
-  if (provider === "meta") return exchangeMetaCode(code, config, fetchImpl);
+  if (provider === "meta") return exchangeMetaCode(code, config, fetchImpl, pagePreference);
   if (provider === "threads") return exchangeThreadsCode(code, config, fetchImpl);
   if (provider === "tiktok") return exchangeTikTokCode(code, config, fetchImpl);
   if (provider === "linkedin") return exchangeLinkedInCode(code, config, fetchImpl);

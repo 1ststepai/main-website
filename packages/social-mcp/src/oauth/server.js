@@ -120,6 +120,14 @@ export function createOAuthRuntime({ store, env = process.env, fetchImpl = fetch
           config,
           fetchImpl,
           codeVerifier: state.code_verifier || "",
+          // Keep each brand on its own Facebook Page: the profile's saved choice wins,
+          // then the Page it is already linked to.
+          pagePreference:
+            state.provider === "meta"
+              ? store.getProfile(state.profile_id)?.presets?.meta_page ||
+                store.getConnection(state.profile_id, "facebook")?.page_id ||
+                ""
+              : "",
         });
         for (const [platform, bundle] of Object.entries(exchanged.platforms || {})) {
           store.saveConnection(
