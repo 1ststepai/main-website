@@ -400,6 +400,29 @@ Kind: developer preview
 EOF
 stamp_version "$WIN/README.txt"
 
+# Windows PowerShell 5.1 reads a BOM-less .ps1 as ANSI, where an em dash turns into a smart quote and breaks parsing.
+# Keep the .ps1 ASCII and give the .bat files CRLF line endings.
+python3 - "$WIN" <<'PY' 2>/dev/null || node -e '
+const fs=require("fs"),p=require("path"),d=process.argv[1];
+const ps=p.join(d,"Open-PostPath.ps1");fs.writeFileSync(ps,fs.readFileSync(ps,"utf8").replace(/\u2014/g,"-").replace(/\u2192/g,"->"));
+for(const f of fs.readdirSync(d).filter(n=>n.endsWith(".bat"))){const q=p.join(d,f);fs.writeFileSync(q,fs.readFileSync(q,"utf8").replace(/\r?\n/g,"\r\n"));}
+' "$WIN"
+import os, sys
+d = sys.argv[1]
+ps = os.path.join(d, "Open-PostPath.ps1")
+text = open(ps, encoding="utf-8").read().replace("\u2014", "-").replace("\u2192", "->")
+open(ps, "w", encoding="utf-8", newline="").write(text)
+for name in os.listdir(d):
+    if name.endswith(".bat"):
+        q = os.path.join(d, name)
+        body = open(q, encoding="utf-8").read().replace("\r\n", "\n").replace("\n", "\r\n")
+        open(q, "w", encoding="utf-8", newline="").write(body)
+PY
+if LC_ALL=C grep -q '[^[:print:][:space:]]' "$WIN/Open-PostPath.ps1"; then
+  echo "Open-PostPath.ps1 must be ASCII for Windows PowerShell 5.1" >&2
+  exit 1
+fi
+
 rm -f "$OUT/$MAC_NAME" "$OUT/$WIN_NAME"
 (cd "$STAGE" && zip -rq "$OUT/$MAC_NAME" PostPath-macOS)
 (cd "$STAGE" && zip -rq "$OUT/$WIN_NAME" PostPath-Windows)

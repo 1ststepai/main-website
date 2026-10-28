@@ -96,6 +96,12 @@ test("mac launcher replaces a stale app copy and leaves the data home alone", { 
     assert.match(ps1, /app\.next/);
     assert.doesNotMatch(ps1, /Remove-Item[^\n]*social-mcp/);
     assert.ok(existsSync(path.join(unpack, "PostPath-Windows", "postpath-app.build")));
+    assert.match(ps1, /^[\x09\x0a\x0d\x20-\x7e]*$/, "Open-PostPath.ps1 must be ASCII for Windows PowerShell 5.1");
+    for (const bat of ["Open-PostPath.bat", "Open-PostPath-Pilot.bat"]) {
+      const body = readFileSync(path.join(unpack, "PostPath-Windows", bat), "utf8");
+      assert.doesNotMatch(body, /[^\r]\n/, `${bat} needs CRLF line endings`);
+      assert.match(body, /-File "%~dp0Open-PostPath\.ps1"/);
+    }
   } finally {
     rmSync(work, { recursive: true, force: true });
   }

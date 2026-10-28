@@ -1,2 +1,2 @@
-c62f961db4acc0ccbe23e22b15165c46812b6f2cf8d83c4d2aaf3592e4f53162  PostPath-0.1.0-macOS-developer-preview.zip
-5de455fb7ea35266161f04ad72c56bb585ee61aeee53eff730f191898d1b72d7  PostPath-0.1.0-Windows-developer-preview.zip
+4784c4d06be47d4b2d18a4b595908bccc71de37ea60cacaa28462725482ebda4  PostPath-0.1.0-macOS-developer-preview.zip
+2acb5beb61dc65c9372a8f386beb34da577d115eb10c6ea73b400e650eb8dc81  PostPath-0.1.0-Windows-developer-preview.zip
