@@ -217,7 +217,22 @@
         <div class="connect-copy">
           <p class="step-kicker">Connect to your AI</p>
           <h2 id="connect-ai-title">Same accounts. Any MCP client.</h2>
-          <p class="lede">One click for Cursor. A copy-ready block for Claude Desktop and everyone else. The server key is <code>postpath</code>.</p>
+          <p class="lede">OAuth for clients that support it. A personal access token for clients that do not. The server key is <code>postpath</code>.</p>
+          <div id="mcp-remote" class="mcp-remote"></div>
+          <form id="pat-form" class="oauth-form">
+            <label>Token name <input name="name" placeholder="Claude on this Mac" required /></label>
+            <fieldset>
+              <legend>Scopes</legend>
+              <label class="check"><input type="checkbox" name="scope" value="posts:read" checked /> posts:read</label>
+              <label class="check"><input type="checkbox" name="scope" value="drafts:write" checked /> drafts:write</label>
+              <label class="check"><input type="checkbox" name="scope" value="accounts:read" checked /> accounts:read</label>
+              <label class="check"><input type="checkbox" name="scope" value="queue:approve" /> queue:approve</label>
+            </fieldset>
+            <label>Expires in days <input name="expires_in_days" inputmode="numeric" placeholder="Optional" /></label>
+            <button type="submit" class="btn secondary">Create access token</button>
+          </form>
+          <p class="hint" id="pat-once" hidden></p>
+          <ul class="queue-list" id="pat-list"></ul>
           <ol class="explain">
             <li>
               <span>1</span>

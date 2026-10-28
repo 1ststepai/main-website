@@ -22,8 +22,13 @@ function emptyDb() {
     connections: {},
     posts: {},
     bundles: {},
+    mcpAuth: emptyMcpAuth(),
     audit: [],
   };
+}
+
+function emptyMcpAuth() {
+  return { clients: {}, codes: {}, grants: {}, tokens: {}, retiredRefresh: {}, pats: {}, consents: {} };
 }
 
 function connectionKey(profileId, platform) {
@@ -346,6 +351,23 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
     });
   }
 
+  function readMcpAuth() {
+    ensureFresh();
+    if (!db.mcpAuth) db.mcpAuth = emptyMcpAuth();
+    return db.mcpAuth;
+  }
+
+  function withMcpAuth(mutator) {
+    return locked(() => {
+      if (!db.mcpAuth) db.mcpAuth = emptyMcpAuth();
+      try {
+        return mutator(db.mcpAuth);
+      } finally {
+        persist();
+      }
+    });
+  }
+
   function appendAudit(entry) {
     locked(() => {
       db.audit.push(entry);
@@ -383,6 +405,8 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
     getBundle,
     saveBundle,
     deleteBundle,
+    readMcpAuth,
+    withMcpAuth,
     claimPost,
     compareAndSetPost,
     releaseClaim,
@@ -414,6 +438,7 @@ function loadDb(file) {
       connections: parsed.connections || {},
       posts: parsed.posts || {},
       bundles: parsed.bundles || {},
+      mcpAuth: { ...emptyMcpAuth(), ...(parsed.mcpAuth || {}) },
       audit: Array.isArray(parsed.audit) ? parsed.audit : [],
     };
   } catch {

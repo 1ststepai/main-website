@@ -259,7 +259,8 @@ body { min-height: 100vh; position: relative; overflow-x: hidden; }
 .queue-actions input[type="datetime-local"] { width: auto; padding: 0.35rem 0.45rem; font-size: 0.75rem; }
 .chip.ai { color: #140b22; background: var(--violet); }
 .chip.vidiq { color: #2a2208; background: var(--warn); }
-.composer .panel-head .btn { flex: none; white-space: nowrap; }
+.connect-links { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+.connect-links a { color: var(--cyan); font-size: 0.85rem; font-weight: 700; }
 
 #youtube-readiness {
   display: -webkit-box;

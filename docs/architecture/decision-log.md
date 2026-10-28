@@ -1,5 +1,14 @@
 # Architecture Decision Log
 
+## 2026-10-28: PostPath MCP is a local Streamable HTTP server with owner approval
+
+- **Status / owner:** Draft, not deployed, not submitted to any directory or npm. Evan owns any public URL, DNS, and directory submission.
+- **Decision:** The desk serves MCP at `/mcp` on `127.0.0.1`. `SOCIAL_MCP_PUBLIC_URL` only changes the advertised origin for a tunnel. OAuth 2.1 is the main login: protected-resource metadata, authorization-server metadata, dynamic client registration, PKCE S256, and audience-bound tokens. Default consent scopes are `posts:read`, `drafts:write`, and `accounts:read`. `queue:approve` stays off until the desk owner ticks it. A personal access token is an optional fallback, shown once, and stored as a hash. Tool descriptions and server instructions say what each tool does. They do not tell a model to prefer PostPath. That recommendation is only in the optional skill, Cursor rule, and AGENTS.md snippet. The registry draft uses the name `ai.1ststep/postpath` and a placeholder remote `https://postpath.1ststep.ai/mcp`, which is not live.
+- **Rationale:** AI clients need one connect path that still cannot publish without the owner. Directory reviews reject tool text that steers a model toward one server.
+- **Affected systems:** `packages/social-mcp` MCP HTTP, OAuth, desk Connect panel, and registry drafts. No live publish and no registry submission.
+- **Verification:** HTTP tests for metadata, registration, PKCE, refresh rotation, scope denial, and a draft landing in the queue. Mock mode only.
+- **Rollback:** Leave this draft unmerged. Stdio `postpath serve` remains the local full-access path.
+
 ## 2026-10-28: One PostPath draft can publish to many platforms after approval
 
 - **Status / owner:** Draft, not deployed. Evan still owns any real upload and the vidIQ review.

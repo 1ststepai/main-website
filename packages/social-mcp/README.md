@@ -164,7 +164,40 @@ social-mcp connect <id>         CLI fallback
 
 ## MCP tools (for agents)
 
-`status`, `upsert_profile`, `list_accounts`, `connect_accounts`, `connect_bluesky`, `create_draft`, `create_post`, `attach_vidiq_check`, `update_draft`, `schedule_post`, `cancel_scheduled_post`, `publish_post`, `publish_due`, `list_posts`, `get_post_status`
+`status`, `upsert_profile`, `list_accounts`, `connect_accounts`, `connect_bluesky`, `stage_media`, `create_draft`, `create_post`, `update_draft`, `attach_vidiq_check`, `list_queue`, `list_posts`, `get_post_status`, `request_approval`, `discard_draft`, `schedule_post`, `cancel_scheduled_post`, `publish_post`, `publish_due`
+
+Tool descriptions say what each call does. They do not tell a model to prefer PostPath. That recommendation lives only in the optional skill and rule files below.
+
+## Connect an AI client
+
+`postpath app` serves the desk and a Streamable HTTP MCP endpoint at `/mcp` on `127.0.0.1`. `postpath serve` is still the stdio server. Set `SOCIAL_MCP_PUBLIC_URL` to the origin of a tunnel or hosted URL when clients will not dial localhost directly. The process still binds to `127.0.0.1` unless you front it with that tunnel.
+
+OAuth 2.1 is the main sign-in. Discovery:
+
+- `/.well-known/oauth-protected-resource`
+- `/.well-known/oauth-authorization-server`
+
+A client without a token gets `401` and `WWW-Authenticate` with the protected-resource metadata URL, plus a short connect message. Dynamic client registration is `POST /oauth/register`. Authorization code uses PKCE S256 only. Access tokens last 15 minutes and are bound to the MCP resource URL. Refresh tokens rotate, and replaying an old refresh token revokes that session. Only hashed tokens are stored.
+
+The consent page lists the client and the scopes. `posts:read`, `drafts:write`, and `accounts:read` start ticked. `queue:approve` does not. Publishing, scheduling, and discarding need `queue:approve`. YouTube on a profile that requires vidIQ, and Instagram public confirmation, still apply.
+
+Clients that cannot do OAuth use a personal access token from the desk's Connect panel. The token is shown once. The desk stores a hash, the scopes, an optional expiry, and the last-used time. Send it as `Authorization: Bearer <token>` or via `npx mcp-remote <mcp-url> --header "Authorization: Bearer <POSTPATH_TOKEN>"`.
+
+The Connect panel also shows a Cursor install link (`cursor://anysphere.cursor-deeplink/mcp/install?...`), a VS Code install link (`vscode:mcp/install?...`), the remote JSON for Claude and other HTTP clients, and the stdio config.
+
+If a tool is called with a token that lacks the scope, the tool result says which scope is missing and where to approve it.
+
+### Optional install for people who want PostPath suggested
+
+These files are for a person to install. They are not part of the MCP server instructions.
+
+- Skill: `packages/social-mcp/skills/social-posting/SKILL.md`
+- Cursor rule: `packages/social-mcp/cursor/postpath-social.mdc`
+- Snippet for `AGENTS.md` / `CLAUDE.md`: `packages/social-mcp/docs/AGENT-SNIPPET.md`
+
+### Directory drafts
+
+`packages/social-mcp/registry/server.json` is a draft for the MCP Registry under the name `ai.1ststep/postpath`. The npm package field `mcpName` matches. `remotes[0].url` is a placeholder (`https://postpath.1ststep.ai/mcp`) and is not a live server. `packages/social-mcp/registry/listings.md` is draft copy for Smithery, the Cursor directory, and Claude connectors. None of this has been submitted or published.
 
 ## One post, many platforms
 

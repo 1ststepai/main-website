@@ -361,6 +361,7 @@ function renderStatus(data) {
 
   renderScheduled(data.scheduled_posts);
   renderQueue(data.queue);
+  renderMcpRemote(data);
   for (const node of document.querySelectorAll("[data-channel-status]")) {
     node.textContent = connectPlan(node.dataset.channelStatus, data).message;
   }
@@ -415,6 +416,89 @@ document.getElementById("copy-google-redirect").addEventListener("click", () => 
 
 document.getElementById("copy-mcp")?.addEventListener("click", () => {
   copyText(document.getElementById("mcp-config")?.textContent || "", "MCP config");
+});
+
+function renderMcpRemote(data) {
+  const node = document.getElementById("mcp-remote");
+  const remote = data?.mcp_remote;
+  if (!node || !remote) return;
+  node.replaceChildren();
+  const links = document.createElement("div");
+  links.className = "connect-links";
+  for (const [label, href] of [
+    ["Cursor install", remote.cursor_install],
+    ["VS Code install", remote.vscode_install],
+  ]) {
+    const a = document.createElement("a");
+    a.href = href;
+    a.textContent = label;
+    links.append(a);
+  }
+  const oauth = document.createElement("p");
+  oauth.className = "hint";
+  oauth.textContent = `${remote.oauth_note} MCP URL: ${remote.mcp_url}`;
+  const claude = document.createElement("pre");
+  claude.className = "mcp-config";
+  claude.textContent = JSON.stringify(remote.claude_remote, null, 2);
+  const header = document.createElement("pre");
+  header.className = "mcp-config";
+  header.textContent = JSON.stringify(remote.header_remote, null, 2);
+  node.append(links, oauth, claude, header);
+  const list = document.getElementById("pat-list");
+  if (!list) return;
+  list.replaceChildren();
+  for (const pat of data.pats || []) {
+    const item = document.createElement("li");
+    const strong = document.createElement("strong");
+    strong.textContent = `${pat.name} ${pat.prefix}…`;
+    const meta = document.createElement("div");
+    meta.className = "meta";
+    meta.textContent = `${(pat.scopes || []).join(" ")} · last used ${pat.last_used_at || "never"}`;
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "btn danger revoke-pat";
+    button.dataset.id = pat.id;
+    button.textContent = "Revoke";
+    item.append(strong, meta, button);
+    list.append(item);
+  }
+}
+
+document.getElementById("pat-form")?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const form = new FormData(event.currentTarget);
+  const scopes = form.getAll("scope");
+  try {
+    const data = await api("/api/pat", {
+      method: "POST",
+      body: JSON.stringify({
+        name: String(form.get("name") || ""),
+        scopes,
+        expires_in_days: form.get("expires_in_days") ? Number(form.get("expires_in_days")) : undefined,
+      }),
+    });
+    const once = document.getElementById("pat-once");
+    if (once) {
+      once.hidden = false;
+      once.textContent = `Copy this token now. It is not shown again: ${data.token}`;
+    }
+    renderStatus(data);
+    once?.scrollIntoView({ block: "center" });
+    showToast("Access token created");
+  } catch (error) {
+    showToast(error.message, true);
+  }
+});
+
+document.getElementById("pat-list")?.addEventListener("click", (event) => {
+  const button = event.target.closest(".revoke-pat");
+  if (!button) return;
+  api("/api/pat/revoke", { method: "POST", body: JSON.stringify({ id: button.dataset.id }) })
+    .then((data) => {
+      renderStatus(data);
+      showToast("Token revoked");
+    })
+    .catch((error) => showToast(error.message, true));
 });
 
 for (const input of oauthForm.querySelectorAll('input[type="password"]')) {

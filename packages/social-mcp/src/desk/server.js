@@ -10,6 +10,9 @@ import { assessOAuthValues, assertOAuthValues } from "../oauth/credentials.js";
 import { displayOutcome } from "../publish/outcome.js";
 import { installCursorMcp, publicMcpClientConfig, readCursorMcpStatus } from "../cursorConfig.js";
 import { googleLoopbackUri, providerRedirectUri } from "../oauth/redirect.js";
+import { handleRemoteMcp } from "../mcp/http.js";
+import { allowedHost, clientSetup } from "../mcp/clients.js";
+import { createPat, listPats, revokePat } from "../mcp/auth.js";
 import { openDesktopApp } from "../openApp.js";
 import { mcpError } from "../errors.js";
 import { PRODUCT_NAME, PRODUCT_TITLE } from "../brand.js";
@@ -25,10 +28,9 @@ const CONTENT_TYPES = {
   ".ico": "image/x-icon",
 };
 
-function assertLocalHost(req, port) {
+function assertLocalHost(req, port, env) {
   const host = String(req.headers.host || "");
-  const ok = host === `127.0.0.1:${port}` || host === `localhost:${port}`;
-  if (!ok) throw mcpError("forbidden", "Desk is local-only.", 403);
+  if (!allowedHost(host, env, port)) throw mcpError("forbidden", "Desk is local-only.", 403);
 }
 
 async function readJson(req, limit = 64_000) {
@@ -215,6 +217,8 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
       oauth_ready: ready,
       cursor,
       mcp_config: publicMcpClientConfig(),
+      mcp_remote: clientSetup(env, port),
+      pats: listPats(engine.store),
       next_step: !anyOauthReady(ready)
         ? "save_apps"
         : status.profiles.length === 0
@@ -225,8 +229,9 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
 
   const server = createServer(async (req, res) => {
     try {
-      assertLocalHost(req, port);
+      assertLocalHost(req, port, env);
       const url = new URL(req.url || "/", `http://127.0.0.1:${port}`);
+      if (await handleRemoteMcp(req, res, { engine, store: engine.store, env, port })) return;
 
       if (req.method === "GET" && url.pathname === "/api/status") {
         sendJson(res, 200, { ok: true, ...snapshot() });
@@ -369,6 +374,24 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
         const body = await readJson(req);
         const result = await engine.attachVidiqCheck(body);
         sendJson(res, 200, { ok: true, ...result, ...snapshot() });
+        return;
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/pat") {
+        const body = await readJson(req);
+        const created = createPat(engine.store, {
+          name: body.name,
+          scopes: body.scopes,
+          expiresInDays: body.expires_in_days,
+        });
+        sendJson(res, 201, { ok: true, ...created, ...snapshot() });
+        return;
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/pat/revoke") {
+        const body = await readJson(req);
+        const revoked = revokePat(engine.store, String(body.id || ""));
+        sendJson(res, 200, { ok: revoked, ...snapshot() });
         return;
       }
 

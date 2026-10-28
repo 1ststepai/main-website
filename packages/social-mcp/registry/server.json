@@ -1,0 +1,18 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "ai.1ststep/postpath",
+  "title": "PostPath",
+  "description": "AI drafts, you approve, logins stay on your computer. Nothing posts until you approve.",
+  "version": "0.1.0",
+  "repository": {
+    "url": "https://github.com/1ststepai/main-website",
+    "source": "github",
+    "subfolder": "packages/social-mcp"
+  },
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://postpath.1ststep.ai/mcp"
+    }
+  ]
+}
