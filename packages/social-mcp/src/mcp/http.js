@@ -21,6 +21,9 @@ import {
 } from "./auth.js";
 import { originAllowed, publicBase } from "./clients.js";
 import { ownerPinConfigured, readOwnerAuth, verifyOwnerPin } from "../pilot/ownerAuth.js";
+import { isPilotMode } from "../pilot/config.js";
+import { AUTO_POST_RISK_LABEL, enableAutoPost } from "../autoPost.js";
+import { PLATFORMS } from "../home.js";
 
 const sessions = new Map();
 
@@ -115,7 +118,19 @@ function metadata(base) {
   };
 }
 
-function consentPage(consent, client, { pinRequired = false } = {}) {
+function autoPostSection(profiles) {
+  if (!profiles.length) return "";
+  const brands = profiles.map((p) => `<option value="${esc(p.id)}">${esc(p.name || p.id)}</option>`).join("");
+  const nets = PLATFORMS.map((n) => `<label><input type="checkbox" name="auto_post_network" value="${esc(n)}" /> ${esc(n)}</label>`).join(" ");
+  return `<fieldset class="auto"><legend>Auto-post (optional, off unless you choose it)</legend>
+<p class="risk"><strong>${esc(AUTO_POST_RISK_LABEL)}</strong></p>
+<label class="row">Brand <select name="auto_post_profile"><option value="">Leave auto-post off</option>${brands}</select></label>
+<div class="row nets">${nets}</div>
+<label class="row"><input type="checkbox" name="auto_post_confirm" value="yes" /> <span>I understand. Let this connection post for this brand on the ticked networks without asking me each time. I can turn it off in the desk.</span></label>
+</fieldset>`;
+}
+
+function consentPage(consent, client, { pinRequired = false, profiles = [], pilot = false } = {}) {
   const boxes = (consent.requested_scopes || [])
     .map((scope) => {
       const checked = DEFAULT_SCOPES.includes(scope) ? "checked" : "";
@@ -129,6 +144,7 @@ body{margin:0;background:#070912;color:#f7f8ff;font:16px/1.45 Inter,sans-serif}
 main{max-width:520px;margin:8vh auto;padding:28px;border:1px solid rgba(194,210,255,.16);border-radius:22px;background:#101525}
 h1{font-size:1.6rem;letter-spacing:-.04em;margin:0 0 8px}
 p{color:#b2bed6} .row{display:flex;gap:10px;margin:10px 0} button{font:inherit;border-radius:999px;padding:10px 16px;border:0;cursor:pointer}
+.auto{border:1px solid #ff5a6a;border-radius:14px;margin:14px 0;padding:10px 14px}.risk{color:#ff5a6a}.nets{flex-wrap:wrap}
 .yes{background:linear-gradient(120deg,#6ea0ff,#73def7);color:#071018;font-weight:700} .no{background:transparent;color:#f7f8ff;border:1px solid rgba(194,210,255,.3);margin-left:8px}
 </style></head><body><main>
 <h1>Approve this connection</h1>
@@ -137,6 +153,7 @@ p{color:#b2bed6} .row{display:flex;gap:10px;margin:10px 0} button{font:inherit;b
 <input type="hidden" name="consent_id" value="${esc(consent.id)}" />
 ${pinRequired ? `<label class="row">Owner PIN <input type="password" name="owner_pin" autocomplete="current-password" required /></label>` : ""}
 ${boxes}
+${pilot ? "" : autoPostSection(profiles)}
 <p><button class="yes" name="decision" value="approve">Approve</button><button class="no" name="decision" value="deny">Deny</button></p>
 </form></main></body></html>`;
 }
@@ -175,7 +192,9 @@ async function handleAuthorize(req, res, ctx) {
     state,
   });
   const pinRequired = ownerPinConfigured(ctx.engine.store.homePaths);
-  sendHtml(res, 200, consentPage(consent, client, { pinRequired }));
+  const pilot = isPilotMode(ctx.env, ctx.engine.store.homePaths);
+  const profiles = ctx.engine.store.listProfiles().map((p) => ({ id: p.id, name: p.name }));
+  sendHtml(res, 200, consentPage(consent, client, { pinRequired, profiles, pilot }));
 }
 
 async function handleDecision(req, res, ctx) {
@@ -200,7 +219,17 @@ async function handleDecision(req, res, ctx) {
   }
   const granted = scopes.filter((scope) => consent.requested_scopes.includes(scope));
   if (!granted.length) return oauthError(res, 400, "invalid_scope", "Tick at least one scope.");
-  const code = issueCode(ctx.store, consent, granted);
+  let autoPost = null;
+  const autoProfile = String(body.auto_post_profile || "");
+  const autoNets = [].concat(body.auto_post_network || []).map(String).filter((n) => PLATFORMS.includes(n));
+  if (autoProfile || autoNets.length) {
+    if (isPilotMode(ctx.env, ctx.engine.store.homePaths)) return oauthError(res, 403, "pilot_auto_post_disabled", "Auto-post is off in pilot mode.");
+    if (!autoProfile || !autoNets.length) return oauthError(res, 400, "invalid_request", "Pick a brand and at least one network for auto-post, or leave both blank.");
+    if (body.auto_post_confirm !== "yes") return oauthError(res, 400, "invalid_request", "Tick the auto-post confirm box, or leave auto-post off.");
+    if (!ctx.engine.store.getProfile(autoProfile)) return oauthError(res, 400, "invalid_request", "Unknown brand for auto-post.");
+    autoPost = { profile_id: autoProfile, networks: autoNets };
+  }
+  const code = issueCode(ctx.store, consent, granted, { autoPost });
   back.searchParams.set("code", code);
   if (consent.state) back.searchParams.set("state", consent.state);
   if (!client) return oauthError(res, 400, "invalid_client", "Client disappeared.");
@@ -221,6 +250,10 @@ async function handleToken(req, res, ctx) {
         verifier: body.code_verifier,
         resource,
       });
+      if (tokens.autoPost && tokens.grantId && !isPilotMode(ctx.env, ctx.engine.store.homePaths)) {
+        // The owner ticked auto-post on the consent screen; it applies to this grant only.
+        enableAutoPost(ctx.engine.store, { ...tokens.autoPost, connection_id: tokens.grantId, enabled_by: "consent" });
+      }
       return sendJson(res, 200, tokens);
     }
     if (body.grant_type === "refresh_token") {

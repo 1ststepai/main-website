@@ -141,6 +141,39 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
     });
   }
 
+  function readAutoPost() {
+    ensureFresh();
+    return structuredClone(db.autoPost && typeof db.autoPost === "object" ? db.autoPost : {});
+  }
+
+  function updateAutoPost(mutator) {
+    return locked(() => {
+      if (!db.autoPost || typeof db.autoPost !== "object") db.autoPost = {};
+      const result = mutator(db.autoPost);
+      persist();
+      return result;
+    });
+  }
+
+  /** All-or-nothing change: the mutator gets the live db; any throw restores the previous copy and nothing is written. */
+  function atomic(mutator) {
+    return locked(() => {
+      const backup = structuredClone(db);
+      atomicDepth += 1;
+      let result;
+      try {
+        result = mutator(db, { upsertProfile: upsertProfileBody });
+      } catch (error) {
+        db = backup;
+        throw error;
+      } finally {
+        atomicDepth -= 1;
+      }
+      persist();
+      return result;
+    });
+  }
+
   function forgetVault() {
     if (!removed) {
       locked(() => {
@@ -152,7 +185,10 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
     return { removed: true, path: homePaths.root };
   }
 
+  let atomicDepth = 0;
+
   function persist() {
+    if (atomicDepth > 0) return;
     const tmp = `${homePaths.dbFile}.${process.pid}.tmp`;
     writeFileSync(tmp, `${JSON.stringify(db, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
     renameSync(tmp, homePaths.dbFile);
@@ -431,6 +467,9 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
     appendAudit,
     readSeo,
     updateSeo,
+    readAutoPost,
+    updateAutoPost,
+    atomic,
     exportPublic,
     forgetVault,
     newId: socialId,

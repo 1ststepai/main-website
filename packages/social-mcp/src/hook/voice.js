@@ -78,7 +78,18 @@ export function voiceFor(store, profileId) {
 
 export function saveVoice(store, input, stamp) {
   const profileId = String(input.profile_id || "").trim();
-  const current = voiceFor(store, profileId);
+  const record = buildVoiceRecord(voiceFor(store, profileId), { ...input, profile_id: profileId }, stamp);
+  store.updateSeo((seo) => {
+    seo.voices = seo.voices || {};
+    seo.voices[profileId] = record;
+    return record;
+  });
+  return record;
+}
+
+/** Merge new voice answers over the current record. Blank stays blank. */
+export function buildVoiceRecord(current, input, stamp) {
+  const profileId = String(input.profile_id || "").trim();
   const appears = input.appears_on_camera;
   const record = {
     profile_id: profileId,
@@ -95,11 +106,6 @@ export function saveVoice(store, input, stamp) {
     if (field === "appears_on_camera") return record.appears_on_camera !== true && record.appears_on_camera !== false;
     if (field === "avoid") return !record.avoid.length;
     return !record[field];
-  });
-  store.updateSeo((seo) => {
-    seo.voices = seo.voices || {};
-    seo.voices[profileId] = record;
-    return record;
   });
   return record;
 }

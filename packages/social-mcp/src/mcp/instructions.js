@@ -1,5 +1,7 @@
 export const POSTPATH_INSTRUCTIONS = `PostPath keeps social account logins on this computer and stores drafts until they are approved.
 
+Call get_brand_context first. Use what it returns and do not guess blank fields. If missing lists fields, ask the user about them once, save the answers with save_brand_context, then draft. save_brand_context can record an auto-post request, but only as pending: auto-post is off unless the owner turns it on in the PostPath desk or on the connect screen, and you cannot turn it on.
+
 status reports the local setup. list_accounts lists connected networks. upsert_profile creates or updates a brand and its presets (default platforms, privacy, hashtags, caption footer).
 
 connect_accounts starts browser sign-in for a network. connect_bluesky stores a Bluesky app password. Neither call publishes.
