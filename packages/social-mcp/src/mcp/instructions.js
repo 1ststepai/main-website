@@ -8,7 +8,7 @@ stage_media saves a file into the local media folder and returns media_path. cre
 
 generate_media starts or repeats generation for an existing draft. attach_media stores a file the client already made. Neither call publishes.
 
-update_draft changes a draft that has not been sent. attach_vidiq_check records a vidIQ score and notes on a YouTube draft. Profiles that require a vidIQ check, including the profile id 1ststep-ai unless that setting is turned off, cannot be approved without one.
+update_draft changes a draft that has not been sent. attach_vidiq_check records a vidIQ score and notes on a YouTube draft. attach_seo_check stores a research score with its source and date. seo_draft returns per-channel copy from one topic. seo_score records advisory notes. seo_weekly_report summarizes posted drafts and saved search terms. Profiles that require a vidIQ check, including the profile id 1ststep-ai unless that setting is turned off, cannot be approved without one. Search volumes are only stored when the caller sends them.
 
 list_queue lists drafts waiting for approval. list_posts and get_post_status read saved posts and each network's result.
 

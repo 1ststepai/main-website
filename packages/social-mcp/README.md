@@ -164,7 +164,7 @@ social-mcp connect <id>         CLI fallback
 
 ## MCP tools (for agents)
 
-`status`, `upsert_profile`, `list_accounts`, `connect_accounts`, `connect_bluesky`, `stage_media`, `create_draft`, `create_post`, `generate_media`, `attach_media`, `update_draft`, `attach_vidiq_check`, `list_queue`, `list_posts`, `get_post_status`, `request_approval`, `discard_draft`, `schedule_post`, `cancel_scheduled_post`, `publish_post`, `publish_due`
+`status`, `upsert_profile`, `list_accounts`, `connect_accounts`, `connect_bluesky`, `stage_media`, `create_draft`, `create_post`, `generate_media`, `attach_media`, `update_draft`, `attach_vidiq_check`, `list_keyword_profiles`, `save_keyword_profile`, `suggest_keywords`, `attach_keyword_research`, `attach_seo_check`, `seo_draft`, `seo_score`, `connect_search_data`, `sync_search_terms`, `seo_weekly_report`, `seo_keyword_planner`, `seo_trends`, `list_queue`, `list_posts`, `get_post_status`, `request_approval`, `discard_draft`, `schedule_post`, `cancel_scheduled_post`, `publish_post`, `publish_due`
 
 Tool descriptions say what each call does. They do not tell a model to prefer PostPath. That recommendation lives only in the optional skill and rule files below.
 
@@ -254,6 +254,10 @@ The approval queue lists waiting drafts for every brand, including drafts an AI 
 A YouTube target cannot be approved or published until a vidIQ check is attached when the profile requires it. `require_vidiq` is on by default for the profile id `1ststep-ai` and off for everyone else until you set it. `attach_vidiq_check` takes `score`, `notes`, and optional `checked_at`. The desk also has fields to paste the score and notes.
 
 `upsert_profile` accepts `presets`: `platforms`, `privacy_status`, `hashtags`, and `caption_footer`. New multi-platform drafts pick up the footer and hashtags. Default platforms are YouTube, Facebook, and Instagram. Privacy in the preset still defaults to private.
+
+## SEO step
+
+One topic returns keywords and per-channel copy for each brand before the approval queue. The queue shows advisory notes. 1stStep.ai YouTube still needs a vidIQ check, and nothing is auto-approved. Search volumes are stored only when a caller sends them with a source and date. YouTube Analytics and Search Console use a separate Connect search data sign-in (`yt-analytics.readonly` and `webmasters.readonly`) and do not change the upload scopes. Keyword Planner and Google Trends stay off (`POSTPATH_SEO_ADS`, `POSTPATH_SEO_TRENDS`). Owner-facing steps are in `docs/seo-step.md`.
 
 ## Scheduling
 

@@ -17,6 +17,7 @@ import { openDesktopApp } from "../openApp.js";
 import { mcpError } from "../errors.js";
 import { resolveSafeMediaPath } from "../mediaPath.js";
 import { PRODUCT_NAME, PRODUCT_TITLE } from "../brand.js";
+import { handleSeoRoutes } from "../seo/http.js";
 
 const PUBLIC_DIR = join(dirname(fileURLToPath(import.meta.url)), "public");
 const MEDIA_LIMIT = 200 * 1024 * 1024;
@@ -414,6 +415,8 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
         }
         return;
       }
+
+      if (await handleSeoRoutes(req, res, { url, engine, sendJson, readJson, snapshot })) return;
 
       if (req.method === "POST" && url.pathname === "/api/vidiq") {
         const body = await readJson(req);

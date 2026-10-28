@@ -1,3 +1,4 @@
+import { initSeo } from "./seo.js";
 import {
   AI_NOT_IN_APP,
   CREATION,
@@ -1357,6 +1358,12 @@ function renderQueue(items) {
     discard.textContent = "Discard";
     actions.append(now, when, later, edit, discard);
     li.append(top);
+    if (Array.isArray(item.seo?.notes) && item.seo.notes.length) {
+      const seoNotes = document.createElement("p");
+      seoNotes.className = "seo-notes";
+      seoNotes.textContent = item.seo.notes.join(" ");
+      li.append(seoNotes);
+    }
     if (item.media_status === "generating") {
       const pending = document.createElement("p");
       pending.className = "hint";
@@ -1779,6 +1786,7 @@ document.getElementById("forget-vault").addEventListener("click", async () => {
   }
 });
 
+initSeo({ api, showToast, refresh });
 refresh()
   .then(() => bootGuide())
   .catch((error) => {

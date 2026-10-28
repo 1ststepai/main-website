@@ -15,3 +15,5 @@ If PostPath is not connected yet, give one connect step:
 - Clients that do not: create a personal access token in the desk Connect panel and use `npx mcp-remote <mcp-url> --header "Authorization: Bearer <POSTPATH_TOKEN>"`.
 
 After it is connected, use `create_draft` or `create_post` for the draft, `attach_vidiq_check` when YouTube requires it, and `request_approval` only after the user has agreed to publish. Instagram needs `instagram_public_confirmed: true` because that publish is public.
+
+For keywords and per-channel copy, `suggest_keywords` and `seo_draft` return ideas and a brief from one topic. `attach_keyword_research` or `attach_seo_check` stores scores the caller already has, including vidIQ volume, competition, and overall, with source and date. Do not invent search volumes. `seo_score` is advisory. 1stStep.ai YouTube still needs a vidIQ check before approval, and the score does not approve a draft. `seo_weekly_report` summarizes the week. `connect_search_data` is a separate Google sign-in from posting.

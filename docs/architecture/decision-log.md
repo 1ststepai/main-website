@@ -1,5 +1,14 @@
 # Architecture Decision Log
 
+## 2026-10-28: PostPath SEO step is free, advisory, and separate from publish sign-in
+
+- **Status / owner:** Draft, not deployed. Evan owns any Google re-consent, Search Console properties, and a future Ads developer token.
+- **Decision:** Keyword lists live with the existing brand profiles. One topic drafts title, description, caption, hashtags, and on-screen text for YouTube, Facebook, Instagram, Bluesky, and copy-only TikTok, X, and LinkedIn. The approval queue shows checklist notes. Those notes do not auto-approve. 1stStep.ai YouTube still requires an attached vidIQ check. Search volumes are stored only when the caller sends a number with a source and date. YouTube Analytics (`insightTrafficSourceDetail` for `YT_SEARCH`) and Search Console use a separate search-data sign-in with `yt-analytics.readonly` and `webmasters.readonly`. The YouTube upload scopes stay as they are. Keyword Planner and Trends are stubbed and off. The owner-facing step count is in `docs/seo-step.md`.
+- **Rationale:** Repeating keyword research and four-channel captions by hand is a long list of actions. The measured comparison is a step count, not a promised amount of time.
+- **Affected systems:** `packages/social-mcp/src/seo`, the desk Keywords and copy panel, and new MCP tools. No live publish and no paid keyword API.
+- **Verification:** Unit tests with mocked autocomplete, Analytics, and Search Console. No live Google calls.
+- **Rollback:** Leave this draft unmerged. Publish sign-in and the vidIQ gate stay on the parent branch.
+
 ## 2026-10-28: PostPath stays free and one approve covers the bundle
 
 - **Status / owner:** Draft, not deployed. Evan still owns developer apps, OAuth verification, and any live post.

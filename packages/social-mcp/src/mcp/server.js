@@ -7,6 +7,7 @@ import { formatToolError, formatToolResult, mcpError } from "../errors.js";
 import { paths, PLATFORMS } from "../home.js";
 import { loadOAuthEnvFile } from "../envFile.js";
 import { POSTPATH_INSTRUCTIONS } from "./instructions.js";
+import { registerSeoTools } from "../seo/tools.js";
 
 const outputSchema = z
   .object({
@@ -465,6 +466,8 @@ export function createSocialMcpServer({ engine, auth } = {}) {
     },
     async (args) => eng.publishDue(args),
   );
+
+  registerSeoTools(server, { engine: eng, gated });
 
   return { server, engine: eng };
 }

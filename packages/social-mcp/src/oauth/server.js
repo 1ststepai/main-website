@@ -168,7 +168,7 @@ export function createOAuthRuntime({ store, env = process.env, fetchImpl = fetch
   async function beginProvider(profileId, provider, remainingChain = [], { open = true } = {}) {
     await ensureListening();
     const config = currentConfig();
-    const pkce = provider === "x" || provider === "youtube" || provider === "google_business" ? createPkcePair() : null;
+    const pkce = provider === "x" || provider === "youtube" || provider === "google_business" || provider === "google_search" ? createPkcePair() : null;
     const state = signState(
       {
         profile_id: profileId,
@@ -223,6 +223,18 @@ export function createOAuthRuntime({ store, env = process.env, fetchImpl = fetch
     };
   }
 
+  async function connectSearchData(profileId) {
+    const url = await beginProvider(profileId, "google_search", [], { open: true });
+    return {
+      profile_id: profileId,
+      status: "pending",
+      started: "google_search",
+      authorize_url: url,
+      redirect_uri: redirectUri,
+      google_redirect_uri: googleRedirectUri,
+    };
+  }
+
   async function stop() {
     if (!server) return;
     await new Promise((resolve) => server.close(() => resolve()));
@@ -231,6 +243,7 @@ export function createOAuthRuntime({ store, env = process.env, fetchImpl = fetch
 
   return {
     connectAccounts,
+    connectSearchData,
     ensureListening,
     stop,
     get redirectUri() {
