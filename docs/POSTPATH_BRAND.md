@@ -14,7 +14,7 @@ PostPath has its **own product logo and system**. It does not replace the locked
 | `public/assets/postpath/postpath-mark-on-dark.svg` | SVG app-icon fallback |
 | `public/assets/postpath/postpath-lockup.svg` | SVG lockup fallback |
 
-The marketing site at `/postpath/` copies the kit’s visual system: Midnight canvas, Electric/Violet/Sunrise glass, Sora + Inter, neon rings + light trails, laptop hero, capability icons, keyword pills, and glowing social tiles. Do not use the kit line **Connect once. Any AI can post.** as public copy. The page says PostPath is a private desk on your computer, in early access. It is not a scheduler and not an AI writer.
+The marketing site at `/postpath/` copies the kit’s visual system: Midnight canvas, Electric/Violet/Sunrise glass, Sora + Inter, neon rings + light trails, laptop hero, capability icons, keyword pills, and glowing social tiles. The retired kit tagline is not public copy. The page headline is **Stop juggling ten apps to post once.** and the line is **One desk. Your assistant. You approve.** Visible copy says "your assistant", never the standalone word "AI" (brand names like 1stStep.ai are fine).
 
 ## Mark
 
@@ -28,7 +28,7 @@ The marketing site at `/postpath/` copies the kit’s visual system: Midnight ca
 
 ## Tagline
 
-The hero banner (`postpath-hero-banner.png`, 981×259) reads `YOUR PRIVATE DESK FOR SOCIAL POSTS.` Do not restore `CONNECT ONCE. ANY AI CAN POST.` as public copy. Public pages say PostPath is a private desk on your computer, in early access. It is not a scheduler and not an AI writer. Live publishing is not yet verified.
+The hero banner (`postpath-hero-banner.png`, 981×259) reads `YOUR PRIVATE DESK FOR SOCIAL POSTS.` Do not restore the retired kit tagline. Public line: `One desk. Your assistant. You approve.`
 
 ## Palette
 
@@ -45,6 +45,10 @@ The hero banner (`postpath-hero-banner.png`, 981×259) reads `YOUR PRIVATE DESK 
 
 - Headlines / brand: **Sora**
 - Body / UI: **Inter**
+
+## Domain
+
+Always write **1ststep.ai** with the number 1. Never write the spelled-out "first" + "step" .ai domain: a different company owns that domain. Every link and email uses 1ststep.ai.
 
 ## Hierarchy with 1stStep
 

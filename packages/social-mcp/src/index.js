@@ -35,7 +35,7 @@ export function createSocialMcpServer({ engine } = {}) {
 
   server.tool(
     "upsert_profile",
-    "Create or update a brand/user profile. Any AI can use multiple profiles on one machine.",
+    "Create or update a brand/user profile. Any assistant can use multiple profiles on one machine.",
     {
       id: z.string().min(2).max(64).describe("Stable profile id, e.g. swingtradepros or acme"),
       name: z.string().min(1).max(120).optional().describe("Display name"),
