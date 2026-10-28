@@ -1,5 +1,6 @@
 import { chmodSync, existsSync, readFileSync, writeFileSync } from "node:fs";
-import { paths } from "./home.js";
+import { DEFAULT_OAUTH_PORT, paths } from "./home.js";
+import { oauthRedirectHost } from "./oauth/redirect.js";
 
 const OAUTH_KEYS = [
   "GOOGLE_OAUTH_CLIENT_ID",
@@ -19,6 +20,7 @@ const OAUTH_KEYS = [
   "SNAPCHAT_CLIENT_ID",
   "SNAPCHAT_CLIENT_SECRET",
   "SOCIAL_MCP_OAUTH_PORT",
+  "SOCIAL_MCP_OAUTH_REDIRECT_HOST",
 ];
 
 export function oauthEnvPath(homePaths = paths()) {
@@ -87,12 +89,15 @@ export function saveOAuthEnvFile(input, homePaths = paths()) {
     ? parseEnvFile(readFileSync(oauthEnvPath(homePaths), "utf8"))
     : {};
   const next = mergeOAuthInput(current, input);
+  const port = Number(process.env.SOCIAL_MCP_OAUTH_PORT || DEFAULT_OAUTH_PORT);
+  const redirectHost = oauthRedirectHost(process.env);
   const lines = [
     "# PostPath OAuth apps — local only. Do not commit.",
-    "# Google Desktop loopback (no path). Copy this if Google Cloud asks for a redirect URI:",
-    "# http://127.0.0.1:47831",
-    "# Other providers:",
-    "# http://127.0.0.1:47831/oauth/callback",
+    "# Google Desktop loopback stays on 127.0.0.1. SOCIAL_MCP_OAUTH_REDIRECT_HOST does not change it.",
+    `# http://127.0.0.1:${port}`,
+    "# Other providers. Meta rejects http://127.0.0.1 and accepts http://localhost.",
+    "# SOCIAL_MCP_OAUTH_REDIRECT_HOST=localhost",
+    `# http://${redirectHost}:${port}/oauth/callback`,
     "# Optional override when a Web client already uses the path form:",
     "# GOOGLE_OAUTH_REDIRECT_URI=http://127.0.0.1:47831/oauth/callback",
     "",
@@ -113,8 +118,8 @@ export function saveOAuthEnvFile(input, homePaths = paths()) {
 function mask(value) {
   const text = String(value || "");
   if (!text) return "";
-  if (text.length <= 8) return "••••••••";
-  return `${text.slice(0, 4)}••••${text.slice(-4)}`;
+  if (text.length <= 4) return "••••••••";
+  return `••••${text.slice(-4)}`;
 }
 
 export function publicOAuthConfig(values = {}) {

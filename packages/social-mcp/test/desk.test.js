@@ -24,7 +24,8 @@ test("oauth env file round trip masks secrets in public view", () => {
     assert.equal(loaded.values.GOOGLE_OAUTH_CLIENT_ID, "gid.apps.googleusercontent.com");
     const pub = publicOAuthConfig(loaded.values);
     assert.equal(pub.has_google, true);
-    assert.match(pub.GOOGLE_OAUTH_CLIENT_SECRET, /••••/);
+    assert.equal(pub.GOOGLE_OAUTH_CLIENT_SECRET, "••••alue");
+    assert.doesNotMatch(pub.GOOGLE_OAUTH_CLIENT_SECRET, /super/);
     assert.ok(!String(pub.GOOGLE_OAUTH_CLIENT_SECRET).includes("super-secret-value"));
   } finally {
     rmSync(home, { recursive: true, force: true });
@@ -89,6 +90,12 @@ test("desk status and profile APIs stay on localhost", async () => {
     assert.match(html, /id="google-redirect-uri"/);
     assert.match(html, /id="publish-mode"/);
     assert.match(html, /Google loopback URI/);
+    assert.match(html, /Nothing posts without your approval/);
+    assert.match(html, /id="connect-ai"/);
+    assert.match(html, /id="mcp-config"/);
+    assert.match(html, /"postpath"/);
+    assert.match(html, /name="META_APP_SECRET" type="password"/);
+    assert.match(html, /name="GOOGLE_OAUTH_CLIENT_SECRET" type="password"/);
     assert.doesNotMatch(html, /YouTube sign-in is not included in this preview/);
     assert.equal(status.publish_mode, "live");
     assert.equal(status.google_redirect_uri, "http://127.0.0.1:47992");
@@ -162,6 +169,9 @@ test("oauth config rejects a bad Google client id and accepts a Desktop client",
     assert.equal(good.oauth_ready.google, true);
     assert.equal(good.google_redirect_uri, "http://127.0.0.1:47994");
     assert.match(good.oauth.GOOGLE_OAUTH_CLIENT_SECRET, /••••/);
+    assert.equal(JSON.stringify(good).includes("GOCSPX-real-secret-value"), false);
+    assert.equal(good.mcp_config.mcpServers.postpath.command, process.execPath);
+    assert.equal(JSON.stringify(good.mcp_config).includes("SECRET"), false);
   } finally {
     await desk.stop();
     rmSync(home, { recursive: true, force: true });

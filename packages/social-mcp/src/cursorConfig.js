@@ -29,6 +29,17 @@ export function buildSocialMcpServerEntry({ command = process.execPath, args, en
   };
 }
 
+export function publicMcpClientConfig(entry = buildSocialMcpServerEntry()) {
+  return {
+    mcpServers: {
+      [SERVER_KEY]: {
+        command: entry.command,
+        args: [...(entry.args || [])],
+      },
+    },
+  };
+}
+
 export function mergeCursorMcpConfig(existing, entry) {
   const base =
     existing && typeof existing === "object"

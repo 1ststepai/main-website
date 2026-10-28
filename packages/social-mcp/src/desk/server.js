@@ -8,7 +8,8 @@ import { DEFAULT_DESK_PORT } from "../home.js";
 import { OAUTH_KEYS, loadOAuthEnvFile, mergeOAuthInput, publicOAuthConfig, saveOAuthEnvFile, parseEnvFile } from "../envFile.js";
 import { assessOAuthValues, assertOAuthValues } from "../oauth/credentials.js";
 import { displayOutcome } from "../publish/outcome.js";
-import { installCursorMcp, readCursorMcpStatus } from "../cursorConfig.js";
+import { installCursorMcp, publicMcpClientConfig, readCursorMcpStatus } from "../cursorConfig.js";
+import { googleLoopbackUri, providerRedirectUri } from "../oauth/redirect.js";
 import { openDesktopApp } from "../openApp.js";
 import { mcpError } from "../errors.js";
 import { PRODUCT_NAME, PRODUCT_TITLE } from "../brand.js";
@@ -194,8 +195,9 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
       product_title: PRODUCT_TITLE,
       home: status.home,
       media_dir: status.media_dir,
-      oauth_redirect_uri: status.oauth_redirect_uri || `http://127.0.0.1:${env.SOCIAL_MCP_OAUTH_PORT || 47831}/oauth/callback`,
-      google_redirect_uri: status.google_redirect_uri || `http://127.0.0.1:${env.SOCIAL_MCP_OAUTH_PORT || 47831}`,
+      oauth_redirect_uri:
+        status.oauth_redirect_uri || providerRedirectUri(env, Number(env.SOCIAL_MCP_OAUTH_PORT || 47831)),
+      google_redirect_uri: status.google_redirect_uri || googleLoopbackUri(env, Number(env.SOCIAL_MCP_OAUTH_PORT || 47831)),
       publish_mode: status.publish_mode || "live",
       oauth_check: assessOAuthValues(envValues),
       recent_posts: engine.store.listPosts().slice(0, 30).map((post) => ({
@@ -211,6 +213,7 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
       oauth: publicOAuthConfig(envValues),
       oauth_ready: ready,
       cursor,
+      mcp_config: publicMcpClientConfig(),
       next_step: !anyOauthReady(ready)
         ? "save_apps"
         : status.profiles.length === 0

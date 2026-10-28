@@ -1,5 +1,14 @@
 # Architecture Decision Log
 
+## 2026-10-28: Non-Google OAuth redirect host can be localhost
+
+- **Status / owner:** Draft, not deployed. Evan owns the Meta app and any redirect registered in a developer console.
+- **Decision:** `SOCIAL_MCP_OAUTH_REDIRECT_HOST` builds the non-Google redirect `http://<host>:<port>/oauth/callback`. The default host is `127.0.0.1`. The only other accepted value is `localhost`, because Meta rejects `http://127.0.0.1` and accepts `http://localhost`. Any other value falls back to `127.0.0.1`. Google’s Desktop loopback stays `http://127.0.0.1:<port>` unless `GOOGLE_OAUTH_REDIRECT_URI` is set. The desk and OAuth server still listen on `127.0.0.1` only. Public credential views show a client secret as dots plus the last four characters, or dots alone when the secret is shorter than five characters.
+- **Rationale:** Meta’s redirect validator and Google’s loopback rules disagree. One host variable for every provider would break the Desktop client.
+- **Affected systems:** `packages/social-mcp` OAuth runtime, desk status, oauth.env comments, README.
+- **Verification:** Unit tests for the host allow-list, the Meta authorize URL, the unchanged Google loopback, and masked secrets. No live OAuth.
+- **Rollback:** Leave this draft unmerged. Unset the variable; the default remains `127.0.0.1`.
+
 ## 2026-10-28: Real publish uses owner OAuth apps and platform responses
 
 - **Status / owner:** Draft, not deployed. Evan owns the Google Cloud project, the Meta app, any real upload, and the Authenticode certificate. This change does not post to a live account.

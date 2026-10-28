@@ -27,15 +27,17 @@ That opens the **PostPath** desk in an app window.
 ### In the desk (Windows)
 
 1. Paste developer-app credentials for the networks you use → **Save credentials**
-2. Register this redirect on every OAuth console:
+2. Register this redirect on every non-Google OAuth console:
 
    `http://127.0.0.1:47831/oauth/callback`
+
+   Meta rejects `http://127.0.0.1` and accepts `http://localhost`. Set `SOCIAL_MCP_OAUTH_REDIRECT_HOST=localhost` and register `http://localhost:47831/oauth/callback` instead. Google’s loopback stays `http://127.0.0.1:47831`.
 
 3. Enter a brand name → **Connect accounts** (browser chain for configured providers)
 4. Bluesky: use the Bluesky form (handle + app password)
 5. Click **Enable in Cursor** → restart Cursor
 
-No MCP JSON paste. No `&&` in chat.
+Enable in Cursor writes the local config. Claude Desktop and other MCP clients can copy the same `postpath` block from the desk. No `&&` in chat.
 
 ## First run — macOS / Linux
 
@@ -55,9 +57,11 @@ npx postpath app
 ### In the desk (macOS / Linux)
 
 1. Paste developer-app credentials → **Save credentials**
-2. Register this redirect on every OAuth console:
+2. Register this redirect on every non-Google OAuth console:
 
    `http://127.0.0.1:47831/oauth/callback`
+
+   Meta rejects `http://127.0.0.1` and accepts `http://localhost`. Set `SOCIAL_MCP_OAUTH_REDIRECT_HOST=localhost` and register `http://localhost:47831/oauth/callback` instead. Google’s loopback stays `http://127.0.0.1:47831`.
 
 3. Enter a brand name → **Connect accounts**
 4. Bluesky: handle + app password form
@@ -97,7 +101,15 @@ Real-account acceptance is **not** claimed. Tests mock `fetch`. Nothing here is 
 
 PostPath does not ship a Google or Meta app. Save the ids below in the desk’s App credentials form (written to `~/.social-mcp/oauth.env`, mode 0600) or in the environment. Do not commit them.
 
-Google loopback URI (Desktop client, no path): `http://127.0.0.1:47831` unless `SOCIAL_MCP_OAUTH_PORT` is set. Other providers, including Meta: `http://127.0.0.1:47831/oauth/callback`. If a Web client is already registered with the path form, set `GOOGLE_OAUTH_REDIRECT_URI` to that exact string.
+Google loopback URI (Desktop client, no path): `http://127.0.0.1:47831` unless `SOCIAL_MCP_OAUTH_PORT` is set. `SOCIAL_MCP_OAUTH_REDIRECT_HOST` does not change the Google loopback.
+
+Other providers, including Meta, X, LinkedIn, TikTok, Pinterest, Reddit, and Snapchat, use `http://<host>:<port>/oauth/callback`. `<host>` is `SOCIAL_MCP_OAUTH_REDIRECT_HOST`, default `127.0.0.1`. The only accepted values are `127.0.0.1` and `localhost`. Anything else falls back to `127.0.0.1`. Meta rejects an `http://127.0.0.1` redirect and accepts `http://localhost`, so set:
+
+```bash
+SOCIAL_MCP_OAUTH_REDIRECT_HOST=localhost
+```
+
+The desk and the OAuth callback server still bind to `127.0.0.1` only. `localhost` is the name sent to the provider; the browser reaches the same local listener. Restart PostPath after changing the variable. If a Google Web client is already registered with the path form, set `GOOGLE_OAUTH_REDIRECT_URI` to that exact string. That override is Google-only.
 
 ### YouTube
 
@@ -115,7 +127,7 @@ Google loopback URI (Desktop client, no path): `http://127.0.0.1:47831` unless `
 ### Meta (Facebook Page Reel and Instagram Reel)
 
 1. Create a Meta app of type **Business**. Add Facebook Login and Instagram.
-2. Facebook Login → Settings → Valid OAuth Redirect URIs: `http://127.0.0.1:47831/oauth/callback`.
+2. Facebook Login → Settings → Valid OAuth Redirect URIs: `http://127.0.0.1:47831/oauth/callback`, or `http://localhost:47831/oauth/callback` when `SOCIAL_MCP_OAUTH_REDIRECT_HOST=localhost`. Meta rejects the `127.0.0.1` form.
 3. Save `META_APP_ID` (numeric) and `META_APP_SECRET`.
 4. Add your Facebook user as an app administrator, developer, or tester. Development mode is enough for that user. Anyone else needs App Review for `instagram_content_publish` and `pages_manage_posts`.
 5. The Page must be one you manage. Instagram must be a professional (Business or Creator) account linked to that Page.
@@ -168,7 +180,7 @@ social-mcp connect <id>         CLI fallback
 
 ## Security
 
-- Desk and OAuth bind to `127.0.0.1` only
+- Desk and OAuth bind to `127.0.0.1` only. `SOCIAL_MCP_OAUTH_REDIRECT_HOST` changes the non-Google redirect string (`127.0.0.1` or `localhost`) and does not change the bind address or the Google loopback.
 - Secrets in `~/.social-mcp/oauth.env` (mode 0600) and encrypted connection envelopes
 - Media paths must stay under `~/.social-mcp/media`
 - Do not commit the vault

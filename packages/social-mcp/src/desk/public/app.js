@@ -23,6 +23,7 @@ import {
   suggestedRequests,
   toggleChannel,
 } from "./guide.js";
+import { platformIcon } from "./icons.js";
 
 const NETWORKS = [
   { key: "youtube", label: "YouTube" },
@@ -64,6 +65,29 @@ const OUTCOME_LABEL = {
   scheduled: "Scheduled",
   publishing: "Publishing",
 };
+
+function outcomeChipClass(post, publishMode) {
+  if (post?.result_source === "mock" || publishMode === "mock") return "chip mock";
+  const outcome = post?.outcome || post?.status || "";
+  const kind = {
+    posted: "posted",
+    failed: "failed",
+    rate_limited: "rate",
+    needs_review: "review",
+    draft: "draft",
+    scheduled: "draft",
+    publishing: "review",
+    handed_off: "review",
+  }[outcome] || "draft";
+  return `chip ${kind}`;
+}
+
+function secretPlaceholder(value) {
+  const text = String(value || "");
+  if (!text) return "";
+  if (!/[•*]/.test(text)) return "Saved";
+  return text;
+}
 
 function outcomeLabel(post) {
   const outcome = post?.outcome || post?.status || "";
@@ -194,15 +218,18 @@ function renderResults(posts, publishMode) {
     const title = document.createElement("strong");
     title.textContent = String(post.title || post.caption || post.description || post.id || "Post");
     const pill = document.createElement("span");
-    pill.className = post.result_source === "mock" || publishMode === "mock" ? "pill mock" : "pill";
+    pill.className = outcomeChipClass(post, publishMode);
     pill.textContent = outcomeLabel(post);
+    const head = document.createElement("div");
+    head.className = "result-head";
+    head.append(platformIcon(post.platform), title, pill);
     const meta = document.createElement("div");
     meta.className = "meta";
     const bits = [post.platform || "unknown", sourceLabel(post)];
     if (post.privacy_status) bits.push(post.privacy_status);
     if (post.platform_post_id) bits.push(post.platform_post_id);
     meta.textContent = bits.join(" · ");
-    item.append(title, pill, meta);
+    item.append(head, meta);
     if (post.publish_note) {
       const note = document.createElement("p");
       note.className = "hint";
@@ -233,24 +260,51 @@ function renderStatus(data) {
   renderMode(data);
   renderResults(data.recent_posts, data.publish_mode);
 
-  const byPlatform = new Map((data.connections || []).map((row) => [row.platform, row]));
-  networkList.innerHTML = NETWORKS.map((network) => {
+  const activeId = profileId.value.trim();
+  const connections = (data.connections || []).filter((row) => !activeId || row.profile_id === activeId);
+  const byPlatform = new Map(connections.map((row) => [row.platform, row]));
+  const brand = document.getElementById("brand-live");
+  const profiles = (data.profiles || []).filter((profile) => !activeId || profile.id === activeId);
+  if (brand) {
+    brand.textContent = profiles.length
+      ? profiles.map((profile) => profile.name || profile.id).join(" · ")
+      : "No brand yet";
+  }
+  networkList.replaceChildren();
+  for (const network of NETWORKS) {
     const row = byPlatform.get(network.key);
-    const detail = row
+    const on = Boolean(row);
+    const item = document.createElement("li");
+    const copy = document.createElement("div");
+    copy.className = "network-copy";
+    const strong = document.createElement("strong");
+    strong.textContent = network.label;
+    const detail = document.createElement("div");
+    detail.className = "meta";
+    detail.textContent = row
       ? row.account_label || "Connected"
       : network.limited
         ? "API approval required"
         : "Not connected";
-    const on = Boolean(row);
-    const pill = on ? "Live" : network.limited ? "Limited" : "Needed";
-    return `<li>
-      <div>
-        <strong>${network.label}</strong>
-        <div class="meta" style="margin:0.2rem 0 0">${detail}</div>
-      </div>
-      <span class="pill ${on ? "on" : "off"}">${pill}</span>
-    </li>`;
-  }).join("");
+    copy.append(strong, detail);
+    const pill = document.createElement("span");
+    if (on) {
+      pill.className = "chip connected";
+      pill.textContent = "Connected";
+    } else if (network.limited) {
+      pill.className = "chip limited";
+      pill.textContent = "Limited";
+    } else {
+      pill.className = "chip needed";
+      pill.textContent = "Not connected";
+    }
+    item.append(platformIcon(network.key), copy, pill);
+    networkList.append(item);
+  }
+  const mcpConfig = document.getElementById("mcp-config");
+  if (mcpConfig && data.mcp_config) {
+    mcpConfig.textContent = JSON.stringify(data.mcp_config, null, 2);
+  }
 
   redirectUri.textContent = data.oauth_redirect_uri || "http://127.0.0.1:47831/oauth/callback";
   const googleRedirect = document.getElementById("google-redirect-uri");
@@ -285,9 +339,14 @@ function renderStatus(data) {
   const oauth = data.oauth || {};
   for (const [key, value] of Object.entries(oauth)) {
     const input = oauthForm.elements.namedItem(key);
-    if (!input || typeof value !== "string") continue;
+    if (!input || typeof value !== "string" || input instanceof RadioNodeList) continue;
+    if (key.endsWith("_SECRET")) {
+      input.placeholder = secretPlaceholder(value);
+      if (input.value && value && input.value === value && !/[•*]/.test(value)) input.value = "";
+      continue;
+    }
     if (String(value).includes("••••")) continue;
-    if (key.endsWith("_ID") || key.endsWith("_KEY") || key.endsWith("_SECRET")) {
+    if (key.endsWith("_ID") || key.endsWith("_KEY")) {
       input.value = value;
     }
   }
@@ -352,6 +411,17 @@ document.getElementById("copy-google-redirect").addEventListener("click", () => 
   const node = document.getElementById("google-redirect-uri");
   copyText(node?.textContent || "", "Google loopback URI");
 });
+
+document.getElementById("copy-mcp")?.addEventListener("click", () => {
+  copyText(document.getElementById("mcp-config")?.textContent || "", "MCP config");
+});
+
+for (const input of oauthForm.querySelectorAll('input[type="password"]')) {
+  input.readOnly = true;
+  input.addEventListener("focus", () => {
+    input.readOnly = false;
+  });
+}
 
 document.getElementById("connect-form").addEventListener("submit", async (event) => {
   event.preventDefault();
