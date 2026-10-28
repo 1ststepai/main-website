@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { writeFileSync } from "node:fs";
 import { startStdioServer, createEngine } from "../src/index.js";
-import { paths } from "../src/home.js";
+import { paths, resolveHome } from "../src/home.js";
 import { loadOAuthEnvFile } from "../src/envFile.js";
 import { createDeskServer } from "../src/desk/server.js";
 import { installCursorMcp } from "../src/cursorConfig.js";
@@ -72,8 +72,12 @@ TIKTOK_CLIENT_SECRET=
 
   if (command === "install-cursor") {
     const pilot = args.includes("--pilot");
+    const homeIdx = args.indexOf("--home");
+    const homeFlag = homeIdx >= 0 ? args[homeIdx + 1] : "";
+    // Pilot entries always pin the home in use so Cursor drafts land in the broker's vault.
+    const home = homeFlag || (pilot || String(process.env.SOCIAL_MCP_HOME || "").trim() ? resolveHome(process.env) : "");
     const result = installCursorMcp({
-      entry: buildSocialMcpServerEntry({ pilot }),
+      entry: buildSocialMcpServerEntry({ pilot, home }),
     });
     console.log(JSON.stringify(result, null, 2));
     console.log(pilot ? `Restart Cursor to load ${PRODUCT_NAME} in pilot mode. Publish stays mock and draft-only.` : `Restart Cursor to load ${PRODUCT_NAME}.`);

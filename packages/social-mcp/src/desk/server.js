@@ -425,7 +425,7 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
       if (req.method === "POST" && url.pathname === "/api/install-cursor") {
         requireOwner(req, {});
         const installed = installCursorMcp({
-          entry: buildSocialMcpServerEntry({ pilot: pilotActive() }),
+          entry: buildSocialMcpServerEntry({ pilot: pilotActive(), home: engine.store.homePaths.root }),
         });
         sendJson(res, 200, { ok: true, installed, ...deskState() });
         return;

@@ -62,26 +62,66 @@ export function youtubeScript(topic, goal, banner) {
   return lines.filter(Boolean).join("\n").slice(0, 2200);
 }
 
+function joinLines(lines) {
+  return lines
+    .filter((line, index, all) => line !== "" || (index > 0 && all[index - 1] !== ""))
+    .join("\n")
+    .trim();
+}
+
+export const INSTAGRAM_HASHTAGS = "#openenrollment #healthinsurance #healthplan #insurancebroker";
+
+// Each network gets its own voice. None of them quote a rate, savings, or subsidy; the banner is added after.
+export function networkTemplate(platform, topic, goal, banner) {
+  const title = String(topic.title || "").trim();
+  const angle = String(topic.angle || "").trim();
+  const points = bullet(topic.points);
+  if (platform === "youtube") return youtubeScript(topic, goal, banner);
+  if (platform === "facebook") {
+    return joinLines([
+      `${title}`,
+      "",
+      `Open enrollment can feel like a lot. ${angle}`,
+      "",
+      "Here is what helps most people get started:",
+      ...points,
+      "",
+      "No pressure and no sales pitch. If you have questions about your own situation, we are happy to talk it through with you.",
+    ]);
+  }
+  if (platform === "instagram") {
+    return joinLines([
+      `${title} 📋`,
+      "",
+      ...points.slice(0, 3),
+      "",
+      INSTAGRAM_HASHTAGS,
+    ]);
+  }
+  if (platform === "linkedin") {
+    return joinLines([
+      `${title}`,
+      "",
+      `During open enrollment, a short, structured review helps households and employees make informed coverage decisions. ${angle}`,
+      "",
+      "Key points:",
+      ...points.map((line) => line.replace(/^• /, "– ")),
+      "",
+      "Our office works with individuals and families to review their options clearly and compliantly.",
+    ]);
+  }
+  return joinLines([title, "", angle, "", ...points]);
+}
+
 export function templateCaptions({ topic, goal, platforms, banner }) {
-  const body = [topic.title, "", topic.angle, "", ...bullet(topic.points)].filter((line, index, all) => {
-    if (line !== "") return true;
-    return all[index - 1] !== "";
-  });
-  const caption = body.join("\n").trim();
+  const caption = joinLines([topic.title, "", topic.angle, "", ...bullet(topic.points)]);
   const networks = {};
   for (const platform of platforms) {
-    networks[platform] =
-      platform === "youtube"
-        ? {
-            title: String(topic.title || "").slice(0, 100),
-            caption: youtubeScript(topic, goal, banner),
-            tags: ["openenrollment", "healthplan"],
-          }
-        : {
-            title: String(topic.title || "").slice(0, 100),
-            caption,
-            tags: ["openenrollment"],
-          };
+    networks[platform] = {
+      title: String(topic.title || "").slice(0, 100),
+      caption: networkTemplate(platform, topic, goal, banner),
+      tags: platform === "youtube" ? ["openenrollment", "healthplan"] : ["openenrollment"],
+    };
   }
   return applyCompliance(
     {

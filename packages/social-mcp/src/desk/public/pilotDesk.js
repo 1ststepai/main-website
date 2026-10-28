@@ -20,6 +20,10 @@ function button(className, label, attrs = {}) {
   return node;
 }
 
+function target(node) {
+  return node.dataset.kind === "post" ? { post_id: node.dataset.bundle } : { bundle_id: node.dataset.bundle };
+}
+
 function renderGoals(pilot) {
   const host = document.getElementById("pilot-goals");
   host.replaceChildren();
@@ -65,7 +69,14 @@ function renderQueue(pilot) {
     const banner = document.createElement("p");
     banner.className = "compliance-banner";
     banner.textContent = item.compliance_banner || pilot.compliance_banner || "";
-    li.append(title, state, banner);
+    li.append(title, state);
+    if (item.source && item.source !== "topic") {
+      const from = document.createElement("span");
+      from.className = "chip";
+      from.textContent = item.source === "cli" ? "From the command line" : item.source === "mcp" ? "From your AI assistant" : "Added outside the topic picker";
+      li.append(from);
+    }
+    li.append(banner);
     if (item.change_request) {
       const note = document.createElement("p");
       note.className = "hint";
@@ -76,24 +87,28 @@ function renderQueue(pilot) {
       const block = document.createElement("label");
       block.className = "field";
       const name = document.createElement("span");
-      name.textContent = network.label || network.platform;
+      name.textContent = `${network.label || network.platform}${network.edited ? " (edited)" : ""}`;
       const input = document.createElement("textarea");
       input.rows = network.platform === "youtube" ? 8 : 5;
       input.maxLength = 2200;
       input.value = network.caption || "";
       input.dataset.bundle = item.id;
+      input.dataset.kind = item.kind || "bundle";
       input.dataset.platform = network.platform;
       block.append(name, input);
-      const save = button("btn tiny pilot-save", "Save edit", { bundle: item.id, platform: network.platform });
+      const save = button("btn tiny pilot-save", "Save edit", { bundle: item.id, kind: item.kind || "bundle", platform: network.platform });
       li.append(block, save);
     }
     const actions = document.createElement("div");
     actions.className = "queue-actions";
     if (item.status !== "approved") {
-      actions.append(button("btn primary pilot-approve", "Approve", { bundle: item.id }));
+      actions.append(button("btn primary pilot-approve", "Approve", { bundle: item.id, kind: item.kind || "bundle" }));
     }
-    actions.append(button("btn secondary pilot-changes", "Request changes", { bundle: item.id }));
-    actions.append(button("btn tiny pilot-regenerate", "Regenerate", { bundle: item.id }));
+    actions.append(button("btn secondary pilot-changes", "Request changes", { bundle: item.id, kind: item.kind || "bundle" }));
+    if (item.can_regenerate !== false) {
+      const edited = (item.networks || []).filter((network) => network.edited).map((network) => network.label || network.platform);
+      actions.append(button("btn tiny pilot-regenerate", "Regenerate", { bundle: item.id, edited: edited.join(", ") }));
+    }
     li.append(actions);
     list.append(li);
   }
@@ -159,21 +174,26 @@ export function bindPilot(render) {
     const approve = event.target.closest(".pilot-approve");
     if (approve) {
       approve.disabled = true;
-      const data = await pilotApi("/api/approve", { bundle_id: approve.dataset.bundle });
+      const data = await pilotApi("/api/approve", target(approve));
       render(data);
       return;
     }
     const changes = event.target.closest(".pilot-changes");
     if (changes) {
       const note = window.prompt("What should change?") || "";
-      const data = await pilotApi("/api/pilot/changes", { bundle_id: changes.dataset.bundle, note });
+      const data = await pilotApi("/api/pilot/changes", { ...target(changes), note });
       render(data);
       return;
     }
     const again = event.target.closest(".pilot-regenerate");
     if (again) {
+      let replaceEdits = false;
+      if (again.dataset.edited) {
+        // Ask before touching edited captions. Cancel keeps them and refreshes the rest.
+        replaceEdits = window.confirm(`You edited ${again.dataset.edited}. Replace those edits too? Choose Cancel to keep your edits and refresh only the other networks.`);
+      }
       again.disabled = true;
-      const data = await pilotApi("/api/pilot/regenerate", { bundle_id: again.dataset.bundle });
+      const data = await pilotApi("/api/pilot/regenerate", { bundle_id: again.dataset.bundle, replace_edits: replaceEdits });
       render(data);
       return;
     }
@@ -181,7 +201,7 @@ export function bindPilot(render) {
     if (save) {
       const field = root.querySelector(`textarea[data-bundle="${save.dataset.bundle}"][data-platform="${save.dataset.platform}"]`);
       const data = await pilotApi("/api/pilot/edit", {
-        bundle_id: save.dataset.bundle,
+        ...target(save),
         platform: save.dataset.platform,
         caption: field?.value || "",
       });

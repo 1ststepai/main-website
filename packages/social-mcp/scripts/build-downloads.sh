@@ -49,6 +49,10 @@ for item in "$ROOT"/*; do
   cp -a "$item" "$APP_STAGE/"
 done
 tar -czf "$STAGE/postpath-app.tgz" -C "$STAGE" postpath-app
+# Build id: the launcher compares this with the installed copy and replaces the app files when it differs.
+APP_SHA="$(sha256sum "$STAGE/postpath-app.tgz" 2>/dev/null | awk '{print $1}' || shasum -a 256 "$STAGE/postpath-app.tgz" | awk '{print $1}')"
+BUILD_ID="${VERSION}-${APP_SHA:0:16}"
+printf '%s\n' "$BUILD_ID" > "$STAGE/postpath-app.build"
 
 stamp_version() {
   local file="$1"
@@ -60,7 +64,7 @@ stamp_version() {
 
 MAC="$STAGE/PostPath-macOS"
 mkdir -p "$MAC"
-cp "$STAGE/postpath-app.tgz" "$MAC/"
+cp "$STAGE/postpath-app.tgz" "$STAGE/postpath-app.build" "$MAC/"
 cat > "$MAC/Open PostPath.command" <<'EOF'
 #!/bin/bash
 # PostPath by 1stStep.ai — macOS developer preview __POSTPATH_VERSION__
@@ -100,13 +104,33 @@ if [ -z "$NODE_VER" ] || [ "${NODE_MAJOR}" -lt 20 ]; then
   require_node "Found ${NODE_VER:-unknown} — PostPath requires 20+."
 fi
 
+BUNDLE_BUILD="$(head -n 1 "${DIR}/postpath-app.build" 2>/dev/null | tr -d '[:space:]' || true)"
+INSTALLED_BUILD="$(head -n 1 "${APP}/.postpath-build" 2>/dev/null | tr -d '[:space:]' || true)"
+
+# Unpack into a staging folder first, so a failed unpack or npm install leaves the old app working.
+# Only ~/.postpath/app is replaced. The data home (~/.social-mcp: db.json, master.key, pilot.json) is never touched.
+stage_app() {
+  local next="${HOME}/.postpath/app.next"
+  rm -rf "${next}"
+  mkdir -p "${next}"
+  tar -xzf "${DIR}/postpath-app.tgz" -C "${next}" --strip-components=1
+  (cd "${next}" && npm install --omit=dev)
+  if [ -n "${BUNDLE_BUILD}" ]; then printf '%s\n' "${BUNDLE_BUILD}" > "${next}/.postpath-build"; fi
+  rm -rf "${HOME}/.postpath/app.old"
+  if [ -d "${APP}" ]; then mv "${APP}" "${HOME}/.postpath/app.old"; fi
+  mv "${next}" "${APP}"
+  rm -rf "${HOME}/.postpath/app.old"
+}
+
 if [ ! -f "${APP}/bin/social-mcp.js" ]; then
   echo "First run: unpacking PostPath developer preview __POSTPATH_VERSION__ and installing dependencies..."
-  mkdir -p "${APP}"
-  tar -xzf "${DIR}/postpath-app.tgz" -C "${APP}" --strip-components=1
-  (cd "${APP}" && npm install --omit=dev)
+  stage_app
+elif [ -n "${BUNDLE_BUILD}" ] && [ "${BUNDLE_BUILD}" != "${INSTALLED_BUILD}" ]; then
+  echo "Update: installed app ${INSTALLED_BUILD:-unknown} differs from this download ${BUNDLE_BUILD}. Replacing the app files at ${APP}."
+  echo "Your data home is left as it is."
+  stage_app
 else
-  echo "Relaunch: using existing app at ${APP}"
+  echo "Relaunch: using existing app at ${APP} (${INSTALLED_BUILD:-unknown})"
 fi
 
 cd "${APP}"
@@ -170,10 +194,11 @@ Redirect URI for every developer console:
 http://127.0.0.1:47831/oauth/callback
 
 Relaunch:
-Run "Open PostPath.command" again. When ~/.postpath/app is already present, the launcher starts it without unpacking again.
+Run "Open PostPath.command" again. When ~/.postpath/app matches this download, the launcher starts it without unpacking again.
 
 Upgrade:
-Quit PostPath. Delete ~/.postpath/app only. Unzip the newer developer preview and run the launcher.
+Quit PostPath. Unzip the newer developer preview and run its launcher. It sees the different build,
+replaces ~/.postpath/app, and leaves your data in ~/.social-mcp alone.
 Do not delete ~/.social-mcp.
 
 Credentials:
@@ -192,7 +217,7 @@ stamp_version "$MAC/README.txt"
 
 WIN="$STAGE/PostPath-Windows"
 mkdir -p "$WIN"
-cp "$STAGE/postpath-app.tgz" "$WIN/"
+cp "$STAGE/postpath-app.tgz" "$STAGE/postpath-app.build" "$WIN/"
 cat > "$WIN/Open-PostPath.ps1" <<'EOF'
 # PostPath by 1stStep.ai — Windows developer preview __POSTPATH_VERSION__
 # Not a one-click installer. Requires Node.js 20+. Unsigned; do not disable SmartScreen.
@@ -230,15 +255,46 @@ if ($major -lt 20) {
 
 New-Item -ItemType Directory -Force -Path (Join-Path $env:USERPROFILE ".postpath") | Out-Null
 $entry = Join-Path $App "bin\social-mcp.js"
-if (-not (Test-Path $entry)) {
-  Write-Host "First run: unpacking PostPath developer preview __POSTPATH_VERSION__ and installing dependencies..."
-  New-Item -ItemType Directory -Force -Path $App | Out-Null
-  tar -xzf (Join-Path $Dir "postpath-app.tgz") -C $App --strip-components=1
-  Push-Location $App
+$Root = Join-Path $env:USERPROFILE ".postpath"
+$bundleFile = Join-Path $Dir "postpath-app.build"
+$installedFile = Join-Path $App ".postpath-build"
+$BundleBuild = if (Test-Path -LiteralPath $bundleFile) { (Get-Content -LiteralPath $bundleFile -TotalCount 1).Trim() } else { "" }
+$InstalledBuild = if (Test-Path -LiteralPath $installedFile) { (Get-Content -LiteralPath $installedFile -TotalCount 1).Trim() } else { "" }
+
+# Unpack into a staging folder first so a failed unpack or npm install leaves the old app working.
+# Only %USERPROFILE%\.postpath\app is replaced. The data home (.social-mcp: db.json, master.key, pilot.json) is never touched.
+function Install-AppFiles {
+  $next = Join-Path $Root "app.next"
+  $old = Join-Path $Root "app.old"
+  if (Test-Path -LiteralPath $next) { Remove-Item -LiteralPath $next -Recurse -Force }
+  New-Item -ItemType Directory -Force -Path $next | Out-Null
+  tar -xzf (Join-Path $Dir "postpath-app.tgz") -C $next --strip-components=1
+  if ($LASTEXITCODE -ne 0) { throw "Could not unpack postpath-app.tgz." }
+  Push-Location $next
   npm install --omit=dev
+  $npmCode = $LASTEXITCODE
   Pop-Location
+  if ($npmCode -ne 0) { throw "npm install failed." }
+  if ($BundleBuild) { Set-Content -LiteralPath (Join-Path $next ".postpath-build") -Value $BundleBuild }
+  if (Test-Path -LiteralPath $old) { Remove-Item -LiteralPath $old -Recurse -Force }
+  try {
+    if (Test-Path -LiteralPath $App) { Move-Item -LiteralPath $App -Destination $old }
+  } catch {
+    throw "Close every PostPath window, then run the launcher again. The app folder is in use."
+  }
+  Move-Item -LiteralPath $next -Destination $App
+  if (Test-Path -LiteralPath $old) { Remove-Item -LiteralPath $old -Recurse -Force }
+}
+
+if (-not (Test-Path -LiteralPath $entry)) {
+  Write-Host "First run: unpacking PostPath developer preview __POSTPATH_VERSION__ and installing dependencies..."
+  Install-AppFiles
+} elseif ($BundleBuild -and ($BundleBuild -ne $InstalledBuild)) {
+  Write-Host "Update: installed app $InstalledBuild differs from this download $BundleBuild. Replacing the app files at $App."
+  Write-Host "Your data home is left as it is."
+  Install-AppFiles
 } else {
-  Write-Host "Relaunch: using existing app at $App"
+  Write-Host "Relaunch: using existing app at $App ($InstalledBuild)"
 }
 
 function Enable-PilotFromFile {
@@ -323,10 +379,11 @@ Redirect URI for every developer console:
 http://127.0.0.1:47831/oauth/callback
 
 Relaunch:
-Run Open-PostPath.bat again. When %USERPROFILE%\.postpath\app is already present, the launcher starts it without unpacking again.
+Run Open-PostPath.bat again. When %USERPROFILE%\.postpath\app matches this download, the launcher starts it without unpacking again.
 
 Upgrade:
-Quit PostPath. Delete %USERPROFILE%\.postpath\app only. Unzip the newer developer preview and run the launcher.
+Quit PostPath. Unzip the newer developer preview and run its launcher. It sees the different build,
+replaces %USERPROFILE%\.postpath\app, and leaves your data in %USERPROFILE%\.social-mcp alone.
 Do not delete %USERPROFILE%\.social-mcp.
 
 Credentials:

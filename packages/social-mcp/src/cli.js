@@ -111,7 +111,7 @@ export async function draftsCreate({ home, args, env = process.env } = {}) {
       title: flag(args, "--title") || "",
       caption,
       description: caption,
-      source: "desk",
+      source: "cli",
     });
     return { id: created.bundle?.id || created.post?.id, status: created.bundle?.status || created.post?.status };
   } finally {

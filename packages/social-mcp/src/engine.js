@@ -508,7 +508,7 @@ export function createEngine({
     const platforms = knownPlatforms(shaped.platforms);
     if (!platforms.length) throw mcpError("invalid_platform", `Platform must be one of: ${PLATFORMS.join(", ")}`);
     const stamp = new Date(now()).toISOString();
-    const source = input.source === "mcp" ? "mcp" : "desk";
+    const source = ["mcp", "cli"].includes(input.source) ? input.source : "desk";
     const bundle = {
       id: store.newId("bnd"),
       profile_id: profile.id,
@@ -595,7 +595,7 @@ export function createEngine({
       media_path: optionalMediaPath(input.media_path, mediaRoot),
       media_url: input.media_url ? String(input.media_url).slice(0, 2000) : null,
       media_content_type: String(input.media_content_type || "video/mp4").slice(0, 80),
-      source: input.source === "mcp" ? "mcp" : undefined,
+      source: ["mcp", "cli"].includes(input.source) ? input.source : undefined,
       scheduled_at: null,
       published_url: null,
       platform_post_id: null,
