@@ -25,6 +25,7 @@ import {
   toggleChannel,
 } from "./guide.js";
 import { DRAFT_FIELD_LIMITS, PLATFORM_TEXT_LIMITS } from "./limits.js";
+import { SOURCE_NOTES, checkNetwork, groupSuggestions, readMp4Meta } from "./optimize.js";
 
 const NETWORKS = [
   { key: "youtube", label: "YouTube" },
@@ -357,6 +358,8 @@ function renderStatus(data) {
 
   renderScheduled(data.scheduled_posts);
   renderSessionDrafts();
+  renderTagSets();
+  renderSuggestions();
   for (const node of document.querySelectorAll("[data-channel-status]")) {
     node.textContent = connectPlan(node.dataset.channelStatus, data).message;
   }
@@ -1057,6 +1060,248 @@ accountList.addEventListener("click", async (event) => {
   }
 });
 
+const variantState = {};
+let mediaMeta = null;
+
+function variantFor(key) {
+  if (!variantState[key]) {
+    variantState[key] = { same_as_base: true, title: "", description: "", caption: "", hashtags: "", tags: "", subreddit: "" };
+  }
+  return variantState[key];
+}
+
+function readVariantFields() {
+  for (const node of document.querySelectorAll("[data-variant]")) {
+    const [platform, field] = node.dataset.variant.split(":");
+    const state = variantFor(platform);
+    if (field === "same") state.same_as_base = node.checked;
+    else state[field] = node.value;
+  }
+}
+
+function splitTags(value) {
+  return String(value || "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function variantsPayload(platform) {
+  const state = variantFor(platform);
+  if (state.same_as_base) return { [platform]: { same_as_base: true } };
+  return {
+    [platform]: {
+      same_as_base: false,
+      title: state.title,
+      description: state.description,
+      caption: state.caption,
+      hashtags: splitTags(state.hashtags),
+      tags: splitTags(state.tags),
+      subreddit: state.subreddit,
+    },
+  };
+}
+
+function composePost(platform) {
+  const form = new FormData(youtubeForm);
+  return {
+    platform,
+    title: String(form.get("title") || ""),
+    description: String(form.get("description") || ""),
+    caption: String(form.get("description") || ""),
+    tags: splitTags(document.getElementById("base-tags").value),
+    variants: variantsPayload(platform),
+  };
+}
+
+function renderVariants() {
+  readVariantFields();
+  const host = document.getElementById("variant-list");
+  if (!host) return;
+  host.replaceChildren();
+  for (const key of selectedList()) {
+    const state = variantFor(key);
+    const network = NETWORKS.find((item) => item.key === key);
+    const card = document.createElement("article");
+    card.className = "variant";
+    const title = document.createElement("h3");
+    title.textContent = network?.label || key;
+    const same = document.createElement("label");
+    same.className = "field";
+    const box = document.createElement("input");
+    box.type = "checkbox";
+    box.checked = state.same_as_base;
+    box.dataset.variant = `${key}:same`;
+    same.append(box, document.createTextNode(" Same as the base post"));
+    card.append(title, same);
+    if (!state.same_as_base) {
+      card.append(variantField(key, "title", "Title", state.title));
+      card.append(variantField(key, "caption", "Caption", state.caption));
+      card.append(variantField(key, "description", "Description", state.description));
+      card.append(variantField(key, "hashtags", "Hashtags", state.hashtags));
+      if (key === "youtube") card.append(variantField(key, "tags", "YouTube keyword tags", state.tags));
+      if (key === "reddit") card.append(variantField(key, "subreddit", "Community", state.subreddit));
+    }
+    host.append(card);
+  }
+  host.querySelectorAll("[data-variant]").forEach((node) => {
+    node.addEventListener("change", () => {
+      renderVariants();
+      renderChecks();
+    });
+  });
+}
+
+function variantField(platform, field, label, value) {
+  const wrap = document.createElement("label");
+  wrap.className = "field";
+  const span = document.createElement("span");
+  span.textContent = label;
+  const input = document.createElement(field === "caption" || field === "description" ? "textarea" : "input");
+  input.dataset.variant = `${platform}:${field}`;
+  input.value = value || "";
+  wrap.append(span, input);
+  return wrap;
+}
+
+function renderChecks() {
+  readVariantFields();
+  const host = document.getElementById("check-list");
+  if (!host) return;
+  host.replaceChildren();
+  for (const key of selectedList()) {
+    const items = checkNetwork({ platform: key, post: composePost(key), media: key === "youtube" ? mediaMeta : null });
+    for (const item of items) {
+      const row = document.createElement("p");
+      row.className = `check ${item.kind}`;
+      const network = NETWORKS.find((entry) => entry.key === key);
+      row.textContent = `${network?.label || key}: ${item.message}`;
+      host.append(row);
+    }
+  }
+}
+
+function savedPosts() {
+  const fromStatus = latestStatus?.posts || [];
+  const ids = new Set(sessionDrafts.map((post) => post.id));
+  return [...sessionDrafts, ...fromStatus.filter((post) => !ids.has(post.id))];
+}
+
+function renderSuggestions() {
+  const host = document.getElementById("suggestion-groups");
+  const notes = document.getElementById("source-notes");
+  if (notes) notes.textContent = `${SOURCE_NOTES.vidiq} ${SOURCE_NOTES.tubebuddy}`;
+  if (!host) return;
+  host.replaceChildren();
+  const groups = groupSuggestions(
+    savedPosts().flatMap((post) => (post.suggestions || []).map((item) => ({ ...item, post_id: post.id }))),
+  );
+  if (!groups.length) {
+    const empty = document.createElement("p");
+    empty.className = "quiet";
+    empty.textContent = "No suggestions yet.";
+    host.append(empty);
+    return;
+  }
+  for (const group of groups) {
+    const card = document.createElement("article");
+    card.className = "variant";
+    const heading = document.createElement("h3");
+    const network = NETWORKS.find((item) => item.key === group.platform);
+    heading.textContent = `${network?.label || group.platform} ${group.field}`;
+    card.append(heading);
+    for (const item of group.items) {
+      const row = document.createElement("div");
+      row.className = "opinion";
+      const head = document.createElement("header");
+      const who = document.createElement("strong");
+      who.textContent = item.source;
+      head.append(who);
+      if (item.agreement === "agree" && item.status !== "rejected") {
+        const mark = document.createElement("span");
+        mark.className = "agree";
+        mark.textContent = "Agrees with another source";
+        head.append(mark);
+      }
+      const body = document.createElement("p");
+      body.textContent = Array.isArray(item.value) ? item.value.join(", ") : String(item.value);
+      row.append(head, body);
+      if (item.score) {
+        const score = document.createElement("p");
+        score.className = "quiet";
+        score.textContent = `${item.score.name}: ${item.score.value}`;
+        row.append(score);
+      }
+      if (item.note) {
+        const note = document.createElement("p");
+        note.className = "quiet";
+        note.textContent = item.note;
+        row.append(note);
+      }
+      const actions = document.createElement("div");
+      actions.className = "cta-row";
+      if (item.status === "pending") {
+        actions.append(suggestionButton(item, "accept", "Use this"), suggestionButton(item, "reject", "Not this"));
+      } else {
+        const state = document.createElement("p");
+        state.className = "quiet";
+        state.textContent = item.status === "accepted" ? "Using this" : "Set aside";
+        actions.append(state);
+      }
+      row.append(actions);
+      card.append(row);
+    }
+    host.append(card);
+  }
+}
+
+function suggestionButton(item, decision, label) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "btn tiny";
+  button.textContent = label;
+  button.addEventListener("click", async () => {
+    button.disabled = true;
+    try {
+      const data = await api("/api/suggestions", {
+        method: "POST",
+        body: JSON.stringify({ post_id: item.post_id, suggestion_id: item.id, decision }),
+      });
+      if (decision === "accept" && data.post) applyServerVariant(data.post);
+      renderStatus(data);
+      renderVariants();
+      showToast(decision === "accept" ? "Saved that wording on the draft." : "Set that opinion aside.");
+    } catch (error) {
+      showToast(error.message, true);
+      button.disabled = false;
+    }
+  });
+  return button;
+}
+
+function applyServerVariant(post) {
+  const variant = post?.variants?.[post.platform];
+  if (!variant) return;
+  const state = variantFor(post.platform);
+  state.same_as_base = variant.same_as_base !== false;
+  state.title = variant.title || "";
+  state.caption = variant.caption || "";
+  state.description = variant.description || "";
+  state.hashtags = (variant.hashtags || []).join(", ");
+  state.tags = (variant.tags || []).join(", ");
+  state.subreddit = variant.subreddit || "";
+}
+
+function renderTagSets() {
+  const select = document.getElementById("tag-set-select");
+  if (!select) return;
+  const current = select.value;
+  const sets = latestStatus?.profiles?.[0]?.tag_sets || [];
+  select.replaceChildren(new Option("Choose a set", ""));
+  for (const set of sets) select.append(new Option(set.name, set.id));
+  if ([...select.options].some((option) => option.value === current)) select.value = current;
+}
+
 function selectedList() {
   return [...selectedNetworks];
 }
@@ -1152,6 +1397,8 @@ document.getElementById("network-chips").addEventListener("click", (event) => {
   chip.setAttribute("aria-pressed", selectedNetworks.has(key) ? "true" : "false");
   document.getElementById("privacy-field").hidden = !selectedNetworks.has("youtube");
   renderLengthHints();
+  renderVariants();
+  renderChecks();
 });
 
 for (const field of youtubeForm.querySelectorAll("input, textarea")) {
@@ -1160,10 +1407,19 @@ for (const field of youtubeForm.querySelectorAll("input, textarea")) {
 
 const drop = document.getElementById("drop-zone");
 const videoInput = document.getElementById("video-input");
-function labelFile() {
+async function labelFile() {
   const file = videoInput.files && videoInput.files[0];
   document.getElementById("drop-label").textContent = file ? file.name : "Drop a video here, or choose a file";
+  mediaMeta = null;
+  if (file) {
+    try {
+      mediaMeta = readMp4Meta(new Uint8Array(await file.arrayBuffer()));
+    } catch {
+      mediaMeta = null;
+    }
+  }
   renderLengthHints();
+  renderChecks();
 }
 videoInput.addEventListener("change", labelFile);
 drop.addEventListener("dragover", (event) => {
@@ -1235,6 +1491,8 @@ youtubeForm.addEventListener("submit", async (event) => {
           privacy_status: privacy,
           media_path: saved.media.filename,
           media_content_type: file.type || "video/mp4",
+          tags: splitTags(document.getElementById("base-tags").value),
+          variants: variantsPayload("youtube"),
         }),
       });
       currentDraftId = data.post?.id || "";
@@ -1257,7 +1515,7 @@ youtubeForm.addEventListener("submit", async (event) => {
       if (!plan.canSave) continue;
       const data = await api("/api/draft", {
         method: "POST",
-        body: JSON.stringify(draftRequest(plan, profile)),
+        body: JSON.stringify({ ...draftRequest(plan, profile), tags: splitTags(document.getElementById("base-tags").value), variants: variantsPayload(plan.platform) }),
       });
       rememberDraft(data.post);
       latestStatus = data;
@@ -1313,7 +1571,44 @@ document.getElementById("forget-vault").addEventListener("click", async () => {
   }
 });
 
+document.getElementById("insert-tag-set").addEventListener("click", () => {
+  const select = document.getElementById("tag-set-select");
+  const set = (latestStatus?.profiles?.[0]?.tag_sets || []).find((item) => item.id === select.value);
+  if (!set) {
+    showToast("Choose a saved tag set.", true);
+    return;
+  }
+  const input = document.getElementById("base-tags");
+  const tags = splitTags(input.value);
+  for (const tag of set.tags) if (!tags.includes(tag)) tags.push(tag);
+  input.value = tags.join(", ");
+  renderChecks();
+  showToast("Tags inserted.");
+});
+
+document.getElementById("save-tag-set").addEventListener("click", async () => {
+  try {
+    const profile = ensureProfile();
+    const data = await api("/api/tag-sets", {
+      method: "POST",
+      body: JSON.stringify({
+        profile_id: profile.id,
+        profile_name: profile.name,
+        name: document.getElementById("tag-set-name").value,
+        tags: splitTags(document.getElementById("base-tags").value),
+      }),
+    });
+    renderStatus(data);
+    showToast("Tag set saved on this computer.");
+  } catch (error) {
+    showToast(error.message, true);
+  }
+});
+
 renderLengthHints();
+renderVariants();
+renderChecks();
+renderSuggestions();
 renderSessionDrafts();
 showView("compose");
 

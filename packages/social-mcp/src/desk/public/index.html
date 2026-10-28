@@ -85,6 +85,31 @@
                 <span class="drop-title" id="drop-label">Drop a video here, or choose a file</span>
                 <span class="quiet">Used for a YouTube draft. The file stays on this computer.</span>
               </label>
+              <label class="field">
+                <span>Tags</span>
+                <input id="base-tags" name="tags" placeholder="trading, first step" autocomplete="off" />
+              </label>
+              <div class="tag-sets">
+                <label class="field">
+                  <span>Saved tag sets</span>
+                  <select id="tag-set-select">
+                    <option value="">Choose a set</option>
+                  </select>
+                </label>
+                <div class="cta-row">
+                  <button type="button" class="btn secondary" id="insert-tag-set">Insert tags</button>
+                  <input id="tag-set-name" placeholder="Name this set" autocomplete="off" />
+                  <button type="button" class="btn tiny" id="save-tag-set">Save tag set</button>
+                </div>
+              </div>
+              <div id="variant-list" class="variant-list"></div>
+              <div id="check-list" class="checks" aria-live="polite"></div>
+              <section class="suggestions" id="suggestions" aria-labelledby="suggestions-title">
+                <h2 id="suggestions-title">Suggestions</h2>
+                <p class="quiet">After you save a draft, your assistant can send opinions. PostPath holds no keys for other tools. You pick what to keep.</p>
+                <p class="quiet" id="source-notes"></p>
+                <div id="suggestion-groups"></div>
+              </section>
               <div id="length-hints" class="hints" aria-live="polite"></div>
               <div class="cta-row">
                 <button type="button" class="btn primary" id="review-draft">Review</button>

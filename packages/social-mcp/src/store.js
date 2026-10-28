@@ -130,14 +130,55 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
     const stamp = new Date(now()).toISOString();
     const existing = db.profiles[profileId];
     const profile = {
+      ...(existing || {}),
       id: profileId,
       name: String(name || existing?.name || profileId).trim().slice(0, 120) || profileId,
+      tag_sets: Array.isArray(existing?.tag_sets) ? existing.tag_sets : [],
       created_at: existing?.created_at || stamp,
       updated_at: stamp,
     };
     db.profiles[profileId] = profile;
     persist();
     return profile;
+  }
+
+  function saveTagSet(profileId, { id, name, tags }) {
+    return locked(() => {
+      const keyName = normalizeProfileId(profileId);
+      const profile = db.profiles[keyName];
+      if (!profile) throw mcpError("unknown_profile", "Unknown profile.", 404);
+      const sets = Array.isArray(profile.tag_sets) ? [...profile.tag_sets] : [];
+      const clean = [];
+      for (const tag of Array.isArray(tags) ? tags : []) {
+        const text = String(tag || "").trim().slice(0, 40);
+        if (text && !clean.includes(text)) clean.push(text);
+        if (clean.length >= 30) break;
+      }
+      if (!clean.length) throw mcpError("invalid_tags", "Add at least one tag.", 400);
+      const set = {
+        id: String(id || socialId("tags")).slice(0, 40),
+        name: String(name || "Tags").trim().slice(0, 60) || "Tags",
+        tags: clean,
+      };
+      const index = sets.findIndex((item) => item.id === set.id);
+      if (index >= 0) sets[index] = set;
+      else sets.push(set);
+      profile.tag_sets = sets.slice(0, 30);
+      profile.updated_at = new Date(now()).toISOString();
+      persist();
+      return set;
+    });
+  }
+
+  function deleteTagSet(profileId, id) {
+    return locked(() => {
+      const profile = db.profiles[normalizeProfileId(profileId)];
+      if (!profile) throw mcpError("unknown_profile", "Unknown profile.", 404);
+      profile.tag_sets = (profile.tag_sets || []).filter((item) => item.id !== id);
+      profile.updated_at = new Date(now()).toISOString();
+      persist();
+      return { removed: id };
+    });
   }
 
   function listConnections(profileId) {
@@ -282,6 +323,8 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
     listProfiles,
     getProfile,
     upsertProfile,
+    saveTagSet,
+    deleteTagSet,
     listConnections,
     getConnection,
     saveConnection,

@@ -169,6 +169,40 @@ export function createSocialMcpServer({ engine } = {}) {
   );
 
   server.tool(
+    "get_draft_constraints",
+    "Read one local draft with the per-network checks and any suggestions already saved. Does not call vidIQ, TubeBuddy, or any other service.",
+    { post_id: z.string().min(8) },
+    tool(async (args) => eng.getDraftConstraints(args)),
+  );
+
+  server.tool(
+    "propose_suggestions",
+    "Save opinions on a draft without changing it. Tag each one with source assistant, vidiq, tubebuddy, or another short name. Include score only when that source reported a score, using the source's own name for it. The person accepts or rejects each one in the PostPath desk.",
+    {
+      post_id: z.string().min(8),
+      suggestions: z
+        .array(
+          z.object({
+            source: z.string().min(1).max(32),
+            platform: z.string().min(2).max(32),
+            field: z.enum(["title", "description", "caption", "hashtags", "tags", "subreddit"]),
+            value: z.union([z.string().min(1).max(5000), z.array(z.string().min(1).max(80)).min(1).max(60)]),
+            note: z.string().max(240).optional(),
+            score: z
+              .object({
+                name: z.string().min(1).max(40),
+                value: z.union([z.string().min(1).max(40), z.number()]),
+              })
+              .optional(),
+          }),
+        )
+        .min(1)
+        .max(40),
+    },
+    tool(async (args) => eng.proposeSuggestions(args)),
+  );
+
+  server.tool(
     "list_posts",
     "List local drafts and posts.",
     {
