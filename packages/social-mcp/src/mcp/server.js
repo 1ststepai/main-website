@@ -26,6 +26,18 @@ const platformOverride = z
     caption: z.string().max(2200).optional().describe("Network-specific caption."),
     tags: z.array(z.string().max(40)).max(30).optional().describe("Network-specific tags or hashtags."),
     privacy_status: z.enum(["private", "unlisted", "public"]).optional().describe("Network privacy. YouTube defaults to private."),
+    placement: z.string().max(40).optional().describe("Network preset id, such as youtube_long or instagram_story."),
+    generate: z
+      .object({
+        prompt: z.string().min(1).max(2000).describe("Prompt used only for this network."),
+        type: z.enum(["image", "video"]).optional().describe("image or video. Video is stored silent."),
+        style: z.string().max(200).optional().describe("Optional style note."),
+        duration: z.number().min(1).max(3600).optional().describe("Video length in seconds."),
+        provider: z.enum(["mock", "openai", "google", "xai", "replicate", "fal"]).optional().describe("Provider for this network."),
+        placement: z.string().max(40).optional().describe("Network preset id."),
+      })
+      .optional()
+      .describe("Optional generation for this network only."),
   })
   .optional();
 
@@ -52,6 +64,23 @@ const draftShape = {
   media_content_type: z.string().optional().describe("MIME type, usually video/mp4."),
   instagram_public_confirmed: z.boolean().optional().describe("Set true only after the user agrees Instagram will be public."),
   facebook_public: z.boolean().optional().describe("Set true to make a Facebook Reel public. Otherwise it stays a Page draft."),
+  media: z
+    .object({
+      generate: z
+        .object({
+          prompt: z.string().min(1).max(2000).describe("What the image or video should show."),
+          type: z.enum(["image", "video"]).describe("image or video. Generated video is silent: no music and no voice."),
+          style: z.string().max(200).optional().describe("Optional style note."),
+          duration: z.number().min(1).max(3600).optional().describe("Video length in seconds. Network presets can reject a length that does not fit."),
+          provider: z.enum(["mock", "openai", "google", "xai", "replicate", "fal"]).describe("Bring-your-own-key provider. mock writes a local demo file and does not call a paid API."),
+          placement: z.string().max(40).optional().describe("Preset id such as youtube_short, youtube_long, instagram_reel, or instagram_story."),
+        })
+        .optional()
+        .describe("Generate the asset. Omit this and pass media_path to use a file you already have."),
+    })
+    .optional()
+    .describe("Optional generated asset. A draft is still not published."),
+  wait: z.boolean().optional().describe("Wait until generation finishes. Omit to return while generation continues."),
 };
 
 function safeMediaName(name) {
@@ -209,6 +238,45 @@ export function createSocialMcpServer({ engine, auth } = {}) {
     {},
     draftShape,
     async (args) => eng.createDraft({ ...args, source: "mcp" }),
+  );
+
+  add(
+    "generate_media",
+    "Generate media",
+    "Generate an image or a silent video for an existing draft. Video is stored with no music and no voice. The result stays in the approval queue and is not published.",
+    "drafts:write",
+    { open: true },
+    {
+      bundle_id: z.string().min(8).optional().describe("Multi-network draft id."),
+      post_id: z.string().min(8).optional().describe("Single post id."),
+      platform: z.enum(PLATFORMS).optional().describe("Limit generation to one network in the draft."),
+      prompt: z.string().min(1).max(2000).optional().describe("What to generate. Omit to reuse the draft's saved prompt."),
+      type: z.enum(["image", "video"]).optional().describe("image or video. Video is silent."),
+      style: z.string().max(200).optional().describe("Optional style note."),
+      duration: z.number().min(1).max(3600).optional().describe("Video length in seconds."),
+      provider: z.enum(["mock", "openai", "google", "xai", "replicate", "fal"]).optional().describe("Provider. mock does not call a paid API."),
+      placement: z.string().max(40).optional().describe("Network preset id."),
+      wait: z.boolean().optional().describe("Wait until the file is ready. Omit to return while status stays generating."),
+    },
+    async (args) => eng.generateMedia(args),
+  );
+
+  add(
+    "attach_media",
+    "Attach media",
+    "Attach a file that is already in the PostPath media folder, including a file made by the client's own model. A generated video is stored silent. This does not publish.",
+    "drafts:write",
+    {},
+    {
+      bundle_id: z.string().min(8).optional().describe("Multi-network draft id."),
+      post_id: z.string().min(8).optional().describe("Single post id."),
+      platform: z.enum(PLATFORMS).optional().describe("Attach to one network. Omit to attach a derived file for each network in the draft."),
+      media_path: z.string().min(1).describe("File name returned by stage_media, inside the PostPath media folder."),
+      type: z.enum(["image", "video"]).optional().describe("image or video. Defaults to the draft's type, or video."),
+      ai_generated: z.boolean().optional().describe("True when the file was generated. Defaults to true, which strips audio from video and sets the AI disclosure flag."),
+      prompt: z.string().max(2000).optional().describe("Prompt to store with the file, when the client made it."),
+    },
+    async (args) => eng.attachMedia(args),
   );
 
   add(

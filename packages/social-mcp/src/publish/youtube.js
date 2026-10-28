@@ -9,6 +9,29 @@ const PRIVACY = new Set(["private", "unlisted", "public"]);
 const TOKEN_URL = "https://oauth2.googleapis.com/token";
 const CHUNK = 2 * 1024 * 1024;
 
+export function youtubeUploadMetadata(post) {
+  const privacy = PRIVACY.has(post?.privacy_status) ? post.privacy_status : "private";
+  const tags = Array.isArray(post?.tags)
+    ? post.tags.map((tag) => String(tag).trim().slice(0, 40)).filter(Boolean).slice(0, 30)
+    : [];
+  const snippet = {
+    title: String(post?.title || "Untitled").slice(0, 100),
+    description: String(post?.description || post?.caption || "").slice(0, 5000),
+    categoryId: "22",
+  };
+  if (tags.length) snippet.tags = tags;
+  const status = {
+    privacyStatus: privacy,
+    selfDeclaredMadeForKids: false,
+    embeddable: privacy === "public",
+    notifySubscribers: privacy === "public",
+  };
+  if (post?.ai_generated === true || post?.media_provenance?.ai_generated === true) {
+    status.containsSyntheticMedia = true;
+  }
+  return { snippet, status };
+}
+
 async function refreshAccess({ secrets, oauth, fetchImpl, now = Date.now() }) {
   if (!secrets.refresh_token) throw mcpError("youtube_not_connected", "Reconnect YouTube.", 409);
   const response = await fetchImpl(TOKEN_URL, {
@@ -58,25 +81,7 @@ export async function publishYouTubeFromFile({
 
   const stat = statSync(filePath);
   if (!stat.size) throw mcpError("invalid_media", "The video file is empty.", 400);
-  const privacy = PRIVACY.has(post.privacy_status) ? post.privacy_status : "private";
-  const tags = Array.isArray(post.tags)
-    ? post.tags.map((tag) => String(tag).trim().slice(0, 40)).filter(Boolean).slice(0, 30)
-    : [];
-  const snippet = {
-    title: String(post.title || "Untitled").slice(0, 100),
-    description: String(post.description || post.caption || "").slice(0, 5000),
-    categoryId: "22",
-  };
-  if (tags.length) snippet.tags = tags;
-  const metadata = {
-    snippet,
-    status: {
-      privacyStatus: privacy,
-      selfDeclaredMadeForKids: false,
-      embeddable: privacy === "public",
-      notifySubscribers: privacy === "public",
-    },
-  };
+  const metadata = youtubeUploadMetadata(post);
 
   const opened = await sendWithRefresh({
     budget,
@@ -154,7 +159,7 @@ export async function publishYouTubeFromFile({
     throw mcpError("youtube_upload_failed", "YouTube did not return a video id.", 502);
   }
 
-  const privacyStatus = finalPayload.status?.privacyStatus || privacy;
+  const privacyStatus = finalPayload.status?.privacyStatus || metadata.status.privacyStatus;
   return {
     platform_post_id: finalPayload.id,
     published_url: `https://www.youtube.com/watch?v=${finalPayload.id}`,
@@ -162,7 +167,7 @@ export async function publishYouTubeFromFile({
     result_source: "platform",
     note:
       privacyStatus === "private"
-        ? "YouTube accepted the video as private. A vertical file of 3 minutes or less is what YouTube classifies as a Short after processing. PostPath does not crop or transcode it."
+        ? "YouTube accepted the video as private. A vertical file of 3 minutes or less is what YouTube classifies as a Short after processing."
         : "YouTube accepted the video. Confirm the privacy in YouTube Studio. An unverified app can be limited to private uploads.",
   };
 }

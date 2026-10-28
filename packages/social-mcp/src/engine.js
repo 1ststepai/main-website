@@ -27,6 +27,11 @@ import {
   rollupStatus,
   vidiqRecord,
 } from "./multiPost.js";
+import { normalizeGenerate, prepareAttachedFile, produceMedia } from "./media/run.js";
+import { planFor } from "./media/specs.js";
+import { randomBytes } from "node:crypto";
+import { rmSync } from "node:fs";
+import { join } from "node:path";
 
 const ISO_OFFSET = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$/i;
 const DISPATCH_STARTED_MESSAGE =
@@ -108,6 +113,160 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
     }
   }
   const mediaRoot = store.homePaths.mediaDir;
+  const mediaRunning = new Set();
+
+  function mediaKeys() {
+    return {
+      openai: env.OPENAI_API_KEY || "",
+      google: env.GEMINI_API_KEY || "",
+      xai: env.XAI_API_KEY || "",
+      replicate: env.REPLICATE_API_TOKEN || "",
+      fal: env.FAL_KEY || "",
+    };
+  }
+
+  function processAlive(pid) {
+    const id = Number(pid);
+    if (!id) return false;
+    try {
+      process.kill(id, 0);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  function recoverInterruptedMedia() {
+    for (const bundle of store.listBundles()) {
+      if (bundle.media_status !== "generating" || processAlive(bundle.media_owner)) continue;
+      bundle.media_status = "failed";
+      bundle.media_error = "Generation stopped when PostPath closed. Regenerate to try again.";
+      store.saveBundle(bundle);
+    }
+    for (const post of store.listPosts()) {
+      if (post.media_status !== "generating" || post.bundle_id || processAlive(post.media_owner)) continue;
+      post.media_status = "failed";
+      post.media_error = "Generation stopped when PostPath closed. Regenerate to try again.";
+      store.savePost(post);
+    }
+  }
+  recoverInterruptedMedia();
+
+  function applyBundleMedia(bundleId, result) {
+    const current = store.getBundle(bundleId);
+    if (!current) return null;
+    current.media_assets = { ...(current.media_assets || {}), ...result.assets };
+    current.media_provenance = result.provenance;
+    current.media_status = "ready";
+    current.media_error = null;
+    current.ai_generated = result.provenance?.ai_generated === true;
+    const first = current.platforms?.map((platform) => result.assets[platform]).find(Boolean);
+    if (first) {
+      current.media_path = first.path;
+      current.media_content_type = first.content_type;
+    }
+    current.updated_at = new Date(now()).toISOString();
+    store.saveBundle(current);
+    for (const [platform, asset] of Object.entries(result.assets)) {
+      const post = store.getPost(current.child_ids?.[platform]);
+      if (!post) continue;
+      post.media_path = asset.path;
+      post.media_content_type = asset.content_type;
+      post.media_asset = asset;
+      post.media_provenance = result.provenance;
+      post.ai_generated = result.provenance?.ai_generated === true;
+      post.media_status = "ready";
+      post.media_error = null;
+      post.updated_at = current.updated_at;
+      store.savePost(post);
+    }
+    return store.getBundle(bundleId);
+  }
+
+  function applyPostMedia(postId, result) {
+    const post = store.getPost(postId);
+    if (!post) return null;
+    const asset = result.assets[post.platform];
+    if (asset) {
+      post.media_path = asset.path;
+      post.media_content_type = asset.content_type;
+      post.media_asset = asset;
+    }
+    post.media_provenance = result.provenance;
+    post.ai_generated = result.provenance?.ai_generated === true;
+    post.media_status = "ready";
+    post.media_error = null;
+    post.updated_at = new Date(now()).toISOString();
+    store.savePost(post);
+    return post;
+  }
+
+  function failBundleMedia(bundleId, error) {
+    const bundle = store.getBundle(bundleId);
+    if (!bundle) return;
+    bundle.media_status = "failed";
+    bundle.media_error = error?.message || "Generation failed.";
+    bundle.updated_at = new Date(now()).toISOString();
+    store.saveBundle(bundle);
+  }
+
+  function failPostMedia(postId, error) {
+    const post = store.getPost(postId);
+    if (!post) return;
+    post.media_status = "failed";
+    post.media_error = error?.message || "Generation failed.";
+    post.updated_at = new Date(now()).toISOString();
+    store.savePost(post);
+  }
+
+  function assertMediaReady(record) {
+    if (!record) return;
+    if (record.media_status === "generating") {
+      throw mcpError("media_pending", "Media is still generating. Nothing was posted.");
+    }
+    if (record.media_status === "failed") {
+      throw mcpError("media_failed", record.media_error || "Media generation failed. Nothing was posted.");
+    }
+    const assets = record.media_assets || (record.media_asset ? { [record.platform]: record.media_asset } : {});
+    for (const asset of Object.values(assets)) {
+      if (asset?.spec_ok === false) {
+        throw mcpError("media_spec", asset.spec_message || "The file does not match that network. Nothing was posted.");
+      }
+    }
+  }
+
+  async function startGeneration({ bundle, post, request, overrides, platforms, wait, onlyPlatform }) {
+    const key = bundle?.id || post?.id;
+    if (!key) throw mcpError("invalid_request", "Choose a draft to generate for.");
+    if (mediaRunning.has(key)) throw mcpError("media_busy", "Generation is already running for this draft.", 409);
+    mediaRunning.add(key);
+    const task = (async () => {
+      try {
+        const result = await produceMedia({
+          platforms,
+          request,
+          overrides,
+          mediaDir: mediaRoot,
+          keys: mediaKeys(),
+          fetchImpl,
+          env,
+          onlyPlatform,
+        });
+        if (bundle) applyBundleMedia(bundle.id, result);
+        else applyPostMedia(post.id, result);
+        return result;
+      } catch (error) {
+        if (bundle) failBundleMedia(bundle.id, error);
+        else failPostMedia(post.id, error);
+        throw error;
+      } finally {
+        mediaRunning.delete(key);
+      }
+    })();
+    if (wait) return task;
+    task.catch(() => {});
+    return null;
+  }
 
   function requireProfile(profileId) {
     const profile = store.getProfile(profileId);
@@ -277,7 +436,25 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
       platform: platforms.join(","),
       detail: source,
     });
-    return { bundle, posts, post: posts[0] };
+    const request = normalizeGenerate(input);
+    if (request) {
+      bundle.media_request = request;
+      bundle.media_status = "generating";
+      bundle.media_owner = process.pid;
+      bundle.media_error = null;
+      bundle.media_content_type = request.type === "image" ? "image/jpeg" : "video/mp4";
+      store.saveBundle(bundle);
+      await startGeneration({
+        bundle,
+        request,
+        overrides: bundle.overrides,
+        platforms,
+        wait: input.wait === true,
+      });
+    }
+    const saved = store.getBundle(bundle.id);
+    const freshPosts = platforms.map((platform) => store.getPost(saved.child_ids?.[platform])).filter(Boolean);
+    return { bundle: saved, posts: freshPosts.length ? freshPosts : posts, post: freshPosts[0] || posts[0] };
   }
 
   async function createDraft(input) {
@@ -316,7 +493,23 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
       post_id: post.id,
       platform,
     });
-    return { post };
+    const request = normalizeGenerate(input);
+    if (request) {
+      post.media_request = request;
+      post.media_status = "generating";
+      post.media_owner = process.pid;
+      post.media_error = null;
+      post.media_content_type = request.type === "image" ? "image/jpeg" : post.media_content_type;
+      store.savePost(post);
+      await startGeneration({
+        post,
+        request,
+        overrides: input.overrides,
+        platforms: [platform],
+        wait: input.wait === true,
+      });
+    }
+    return { post: store.getPost(post.id) };
   }
 
   async function updateDraft(input) {
@@ -640,6 +833,7 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
     if (!["draft", "scheduled", "partial"].includes(bundle.status)) {
       throw mcpError("invalid_status", "That draft can no longer be approved.", 409);
     }
+    assertMediaReady(bundle);
     if (bundle.platforms?.includes("instagram")) {
       const confirmed = instagram_public_confirmed === true || bundle.instagram_public_confirmed === true;
       if (!confirmed) {
@@ -755,6 +949,14 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
     const post = store.getPost(post_id);
     if (!post) throw mcpError("not_found", "Post not found.", 404);
     assertActionAllowed("publish", getEntitlement(env));
+    assertMediaReady(post);
+    if (String(post.media_content_type || "").startsWith("image/")) {
+      throw mcpError(
+        "image_publish_unsupported",
+        `${post.platform} image stays in the queue. PostPath did not upload it.`,
+        400,
+      );
+    }
     assertYouTubeVidiq(post);
     assertPublishable(post, force, acknowledge);
     if (claimFrom && !claimFrom.includes(post.status)) {
@@ -845,6 +1047,150 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
     return { count: results.length, results, quarantined };
   }
 
+  async function generateMedia(input = {}) {
+    const supplied = normalizeGenerate({ media: { generate: input.prompt ? input : null }, provider: input.provider });
+    if (input.bundle_id) {
+      const bundle = store.getBundle(input.bundle_id);
+      if (!bundle) throw mcpError("not_found", "Draft not found.", 404);
+      const next = supplied || bundle.media_request;
+      if (!next?.prompt) throw mcpError("invalid_request", "Add a prompt, a type, and a provider.");
+      bundle.media_request = next;
+      bundle.media_status = "generating";
+      bundle.media_owner = process.pid;
+      bundle.media_error = null;
+      bundle.updated_at = new Date(now()).toISOString();
+      store.saveBundle(bundle);
+      await startGeneration({
+        bundle,
+        request: next,
+        overrides: input.overrides || bundle.overrides,
+        platforms: bundle.platforms,
+        wait: input.wait === true,
+        onlyPlatform: input.platform,
+      });
+      const saved = store.getBundle(bundle.id);
+      return { bundle: saved, media_status: saved?.media_status || "generating" };
+    }
+    const post = store.getPost(input.post_id);
+    if (!post) throw mcpError("not_found", "Draft not found.", 404);
+    const next = supplied || post.media_request;
+    if (!next?.prompt) throw mcpError("invalid_request", "Add a prompt, a type, and a provider.");
+    post.media_request = next;
+    post.media_status = "generating";
+    post.media_owner = process.pid;
+    post.media_error = null;
+    store.savePost(post);
+    await startGeneration({
+      post,
+      request: next,
+      platforms: [input.platform || post.platform],
+      wait: input.wait === true,
+    });
+    const saved = store.getPost(post.id);
+    return { post: saved, media_status: saved?.media_status || "generating" };
+  }
+
+  async function attachMedia(input = {}) {
+    const source = optionalMediaPath(input.media_path, mediaRoot);
+    if (!source) throw mcpError("invalid_media", "Attach a file saved in the PostPath media folder.");
+    const ai = input.ai_generated !== false;
+    const bundle = input.bundle_id ? store.getBundle(input.bundle_id) : null;
+    const post = !bundle && input.post_id ? store.getPost(input.post_id) : null;
+    if (input.bundle_id && !bundle) throw mcpError("not_found", "Draft not found.", 404);
+    if (!bundle && !post) throw mcpError("not_found", "Draft not found.", 404);
+    const platforms = input.platform ? [input.platform] : bundle ? bundle.platforms : [post.platform];
+    const type = input.type === "image" || input.type === "video" ? input.type : bundle?.media_request?.type || post?.media_request?.type || "video";
+    const targets = planFor(platforms, { type, placement: input.placement, overrides: bundle?.overrides });
+    const assets = {};
+    const stamp = randomBytes(4).toString("hex");
+    for (const spec of targets) {
+      const image = spec.kind === "image" || type === "image";
+      const name = `attach-${stamp}-${spec.platform}.${image ? "jpg" : "mp4"}`;
+      await prepareAttachedFile({
+        sourcePath: source,
+        destPath: join(mediaRoot, name),
+        spec,
+        strip: ai && !image,
+      });
+      assets[spec.platform] = {
+        path: name,
+        label: spec.label,
+        placement: spec.id,
+        aspect: spec.aspect,
+        content_type: image ? "image/jpeg" : "video/mp4",
+        spec_ok: true,
+        spec_message: `${spec.label} fits ${spec.aspect}.`,
+        prompt: String(input.prompt || "").slice(0, 2000),
+        provider: ai ? "client" : "file",
+        model: ai ? "client" : "file",
+      };
+    }
+    const provenance = {
+      provider: ai ? "client" : "file",
+      model: ai ? "client" : "file",
+      prompt: String(input.prompt || "").slice(0, 2000),
+      type,
+      ai_generated: ai,
+      silent: ai && type === "video",
+      generated_at: new Date(now()).toISOString(),
+    };
+    if (bundle) {
+      applyBundleMedia(bundle.id, { assets, provenance });
+      return { bundle: store.getBundle(bundle.id) };
+    }
+    applyPostMedia(post.id, { assets, provenance });
+    return { post: store.getPost(post.id) };
+  }
+
+  async function removeMedia(input = {}) {
+    if (input.bundle_id) {
+      const bundle = store.getBundle(input.bundle_id);
+      if (!bundle) throw mcpError("not_found", "Draft not found.", 404);
+      const platforms = input.platform ? [input.platform] : [...(bundle.platforms || [])];
+      bundle.media_assets = { ...(bundle.media_assets || {}) };
+      for (const platform of platforms) {
+        const asset = bundle.media_assets[platform];
+        if (asset?.path) {
+          try {
+            rmSync(optionalMediaPath(asset.path, mediaRoot), { force: true });
+          } catch {
+            // The preview file is already gone.
+          }
+        }
+        delete bundle.media_assets[platform];
+        const child = store.getPost(bundle.child_ids?.[platform]);
+        if (child && ["draft", "scheduled", "failed"].includes(child.status)) {
+          child.media_path = null;
+          child.media_asset = null;
+          child.media_status = "empty";
+          child.updated_at = new Date(now()).toISOString();
+          store.savePost(child);
+        }
+      }
+      const left = Object.keys(bundle.media_assets).length;
+      bundle.media_status = left ? bundle.media_status : "empty";
+      if (!left) bundle.media_path = null;
+      bundle.updated_at = new Date(now()).toISOString();
+      store.saveBundle(bundle);
+      return { bundle: store.getBundle(bundle.id) };
+    }
+    const post = store.getPost(input.post_id);
+    if (!post) throw mcpError("not_found", "Draft not found.", 404);
+    if (post.media_asset?.path || post.media_path) {
+      try {
+        rmSync(optionalMediaPath(post.media_asset?.path || post.media_path, mediaRoot), { force: true });
+      } catch {
+        // The preview file is already gone.
+      }
+    }
+    post.media_path = null;
+    post.media_asset = null;
+    post.media_status = "empty";
+    post.updated_at = new Date(now()).toISOString();
+    store.savePost(post);
+    return { post };
+  }
+
   return {
     store,
     oauth,
@@ -855,6 +1201,9 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
     connectBluesky,
     createDraft,
     updateDraft,
+    generateMedia,
+    attachMedia,
+    removeMedia,
     approveBundle,
     discardItem,
     attachVidiqCheck,

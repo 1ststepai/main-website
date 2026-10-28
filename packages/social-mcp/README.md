@@ -164,9 +164,23 @@ social-mcp connect <id>         CLI fallback
 
 ## MCP tools (for agents)
 
-`status`, `upsert_profile`, `list_accounts`, `connect_accounts`, `connect_bluesky`, `stage_media`, `create_draft`, `create_post`, `update_draft`, `attach_vidiq_check`, `list_queue`, `list_posts`, `get_post_status`, `request_approval`, `discard_draft`, `schedule_post`, `cancel_scheduled_post`, `publish_post`, `publish_due`
+`status`, `upsert_profile`, `list_accounts`, `connect_accounts`, `connect_bluesky`, `stage_media`, `create_draft`, `create_post`, `generate_media`, `attach_media`, `update_draft`, `attach_vidiq_check`, `list_queue`, `list_posts`, `get_post_status`, `request_approval`, `discard_draft`, `schedule_post`, `cancel_scheduled_post`, `publish_post`, `publish_due`
 
 Tool descriptions say what each call does. They do not tell a model to prefer PostPath. That recommendation lives only in the optional skill and rule files below.
+
+## Generative media
+
+One prompt can make the asset and the captions. `create_draft` / `create_post` accept `media.generate` with `prompt`, `type` (`image` or `video`), `style`, `duration`, and `provider`. Per-network `overrides` still set the caption, and can set a preset (`youtube_long`, `instagram_story`) or a separate prompt.
+
+Providers: `none` (use your own file), `mock` (local demo, no paid call), OpenAI images (`gpt-image-1`), Google Imagen / Veo, xAI Grok Imagine, and a generic Replicate or fal adapter. Put the keys in the desk credential form. They are stored in `oauth.env`, masked in the desk, and never logged. Replicate and fal need `REPLICATE_IMAGE_MODEL` / `REPLICATE_VIDEO_MODEL` or `FAL_IMAGE_MODEL` / `FAL_VIDEO_MODEL`. PostPath does not choose a paid model for you.
+
+Network presets set aspect ratio, size, and duration for YouTube Shorts and long-form, Instagram feed / Reel / Story, Facebook feed / Reel, LinkedIn, X, TikTok, Bluesky, and Threads. PostPath generates one file per aspect, then crops and resizes with sharp (images) and ffmpeg (video). A file that does not fit is rejected with the preset it missed. Generation runs in the background. The approval queue shows each network's thumbnail or video, aspect, spec check, prompt, and provider, with Regenerate, Replace, and Remove.
+
+Generated video is silent. Requests ask for no music and no voice, and ffmpeg strips any audio track before the file is attached. If audio remains, the file is not queued. A client's own generated file can be attached with `attach_media` or `stage_media`; that path strips audio too. "Use my own file" keeps the soundtrack.
+
+Provenance (provider, model, prompt) is stored on the draft. YouTube uploads set `containsSyntheticMedia` when the asset is AI-generated. Instagram and Facebook requests set `is_ai_generated`. vidIQ and the Instagram public confirmation still apply. Nothing is posted until you approve. Image posts stay in the queue; the current publishers upload video.
+
+`mock` is the provider used in tests. Tests do not call OpenAI, Google, xAI, Replicate, or fal.
 
 ## Connect an AI client
 

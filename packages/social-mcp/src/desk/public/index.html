@@ -98,8 +98,37 @@
             <label>Description <textarea name="description" maxlength="5000" rows="2" placeholder="What this post says"></textarea></label>
             <div class="pair file-pair">
               <label>Tags <input name="tags" placeholder="comma, separated" maxlength="400" /></label>
-              <label>Video file <input name="video" type="file" accept="video/mp4,video/*" /></label>
+              <label>Your file <input name="video" type="file" accept="video/mp4,video/*,image/*" /></label>
             </div>
+            <fieldset class="generate-box">
+              <legend>Generate the asset</legend>
+              <label>Provider
+                <select id="media-provider">
+                  <option value="none" selected>None — use my own file</option>
+                  <option value="mock">Mock demo</option>
+                  <option value="openai">OpenAI images</option>
+                  <option value="google">Google Imagen / Veo</option>
+                  <option value="xai">xAI Grok Imagine</option>
+                  <option value="replicate">Replicate</option>
+                  <option value="fal">fal</option>
+                </select>
+              </label>
+              <label>Prompt <textarea id="media-prompt" rows="2" maxlength="2000" placeholder="What the image or video should show"></textarea></label>
+              <div class="pair">
+                <label>Type
+                  <select id="media-type">
+                    <option value="video" selected>Silent video</option>
+                    <option value="image">Image</option>
+                  </select>
+                </label>
+                <label>Style <input id="media-style" maxlength="200" placeholder="Optional" /></label>
+              </div>
+              <div class="pair">
+                <label>Duration seconds <input id="media-duration" inputmode="numeric" placeholder="4" /></label>
+                <label class="check"><input type="checkbox" id="youtube-long" /> YouTube long-form 16:9</label>
+              </div>
+              <p class="hint">Generated video is silent. No music and no voice. Nothing posts until you approve.</p>
+            </fieldset>
             <label class="check" id="instagram-confirm-label">
               <input type="checkbox" id="instagram-confirm" />
               Instagram goes public when you approve. Facebook stays a Page draft unless you choose Public below.
@@ -349,6 +378,14 @@
             <legend>Snapchat (Marketing API approval)</legend>
             <label>Client ID <input name="SNAPCHAT_CLIENT_ID" autocomplete="off" /></label>
             <label>Client secret <input name="SNAPCHAT_CLIENT_SECRET" type="password" autocomplete="new-password" /></label>
+          </fieldset>
+          <fieldset>
+            <legend>Media generation</legend>
+            <label>OpenAI API key <input name="OPENAI_API_KEY" type="password" autocomplete="new-password" /></label>
+            <label>Google Gemini API key <input name="GEMINI_API_KEY" type="password" autocomplete="new-password" /></label>
+            <label>xAI API key <input name="XAI_API_KEY" type="password" autocomplete="new-password" /></label>
+            <label>Replicate token <input name="REPLICATE_API_TOKEN" type="password" autocomplete="new-password" /></label>
+            <label>fal key <input name="FAL_KEY" type="password" autocomplete="new-password" /></label>
           </fieldset>
           <button type="submit" class="btn secondary">Save credentials</button>
         </form>

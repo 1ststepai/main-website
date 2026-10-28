@@ -90,9 +90,12 @@ export function childFields(bundle, platform) {
     caption: String(over.caption || shared).slice(0, 2200),
     tags: Array.isArray(over.tags) ? over.tags : bundle.tags || [],
     privacy_status: privacy,
-    media_path: bundle.media_path || null,
+    media_path: bundle.media_assets?.[platform]?.path || bundle.media_path || null,
     media_url: bundle.media_url || null,
-    media_content_type: bundle.media_content_type || "video/mp4",
+    media_content_type: bundle.media_assets?.[platform]?.content_type || bundle.media_content_type || "video/mp4",
+    media_asset: bundle.media_assets?.[platform] || null,
+    media_provenance: bundle.media_provenance || null,
+    ai_generated: bundle.media_provenance?.ai_generated === true,
     bundle_id: bundle.id,
     source: bundle.source || "desk",
   };
@@ -120,6 +123,21 @@ export function vidiqRecord(input = {}, nowIso) {
     score: Number.isFinite(score) ? score : null,
     notes: String(input.notes || "").slice(0, 2000),
     checked_at: checkedAt,
+  };
+}
+
+function assetView(platform, asset, provenance = {}) {
+  return {
+    platform,
+    label: asset?.label || platform,
+    aspect: asset?.aspect || "",
+    spec_ok: asset ? asset.spec_ok !== false : null,
+    spec_message: asset?.spec_message || "",
+    media_path: asset?.path || "",
+    content_type: asset?.content_type || "",
+    prompt: asset?.prompt || provenance?.prompt || "",
+    provider: asset?.provider || provenance?.provider || "",
+    model: asset?.model || provenance?.model || "",
   };
 }
 
@@ -151,6 +169,12 @@ export function queueItems({ bundles = [], posts = [], profiles = [] } = {}) {
       instagram_needs_confirm: Boolean(bundle.platforms?.includes("instagram") && !bundle.instagram_public_confirmed),
       scheduled_at: bundle.scheduled_at || null,
       updated_at: bundle.updated_at,
+      media_status: bundle.media_status || "",
+      media_error: bundle.media_error || "",
+      prompt: bundle.media_provenance?.prompt || bundle.media_request?.prompt || "",
+      provider: bundle.media_provenance?.provider || bundle.media_request?.provider || "",
+      model: bundle.media_provenance?.model || "",
+      assets: (bundle.platforms || []).map((platform) => assetView(platform, bundle.media_assets?.[platform], bundle.media_provenance)),
     });
   }
   for (const post of posts) {
@@ -170,6 +194,12 @@ export function queueItems({ bundles = [], posts = [], profiles = [] } = {}) {
       instagram_needs_confirm: false,
       scheduled_at: post.scheduled_at || null,
       updated_at: post.updated_at,
+      media_status: post.media_status || "",
+      media_error: post.media_error || "",
+      prompt: post.media_provenance?.prompt || post.media_request?.prompt || "",
+      provider: post.media_provenance?.provider || post.media_request?.provider || "",
+      model: post.media_provenance?.model || "",
+      assets: post.media_asset ? [assetView(post.platform, post.media_asset, post.media_provenance)] : [],
     });
   }
   return items.sort((a, b) => String(b.updated_at).localeCompare(String(a.updated_at)));

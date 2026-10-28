@@ -4,7 +4,9 @@ status reports the local setup. list_accounts lists connected networks. upsert_p
 
 connect_accounts starts browser sign-in for a network. connect_bluesky stores a Bluesky app password. Neither call publishes.
 
-stage_media saves a file into the local media folder and returns media_path. create_draft and create_post save a draft for one network (platform) or several (platforms), with optional per-network overrides for title, caption, tags, and privacy. A draft is not published. YouTube privacy defaults to private. Facebook stays a Page draft unless facebook_public is true. Instagram has no private publish.
+stage_media saves a file into the local media folder and returns media_path. create_draft and create_post save a draft for one network (platform) or several (platforms), with optional per-network overrides for title, caption, tags, and privacy. Optional media.generate creates an image or a silent video from a prompt and a bring-your-own-key provider. Generated video has no music and no voice. A file from the client can be attached with attach_media. A draft is not published. YouTube privacy defaults to private. Facebook stays a Page draft unless facebook_public is true. Instagram has no private publish.
+
+generate_media starts or repeats generation for an existing draft. attach_media stores a file the client already made. Neither call publishes.
 
 update_draft changes a draft that has not been sent. attach_vidiq_check records a vidIQ score and notes on a YouTube draft. Profiles that require a vidIQ check, including the profile id 1ststep-ai unless that setting is turned off, cannot be approved without one.
 

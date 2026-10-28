@@ -340,7 +340,7 @@ function renderStatus(data) {
   for (const [key, value] of Object.entries(oauth)) {
     const input = oauthForm.elements.namedItem(key);
     if (!input || typeof value !== "string" || input instanceof RadioNodeList) continue;
-    if (key.endsWith("_SECRET")) {
+    if (key.endsWith("_SECRET") || key.endsWith("_API_KEY") || key.endsWith("_API_TOKEN") || key === "FAL_KEY") {
       input.placeholder = secretPlaceholder(value);
       if (input.value && value && input.value === value && !/[•*]/.test(value)) input.value = "";
       continue;
@@ -1147,9 +1147,13 @@ youtubeForm.addEventListener("submit", async (event) => {
   try {
     const form = new FormData(youtubeForm);
     const file = form.get("video");
-    if (!file || !file.size) throw new Error("Choose the video file before saving the draft.");
+    const provider = document.getElementById("media-provider")?.value || "none";
+    const prompt = document.getElementById("media-prompt")?.value.trim() || "";
+    const generate = provider !== "none";
+    if (generate && !prompt) throw new Error("Write a prompt for the generated image or video.");
+    if (!generate && (!file || !file.size)) throw new Error("Choose your file, or pick a provider and write a prompt.");
     let mediaPath = "";
-    if (file && typeof file === "object" && file.size) {
+    if (!generate && file && typeof file === "object" && file.size) {
       const saved = await api("/api/media", {
         method: "POST",
         headers: {
@@ -1166,6 +1170,12 @@ youtubeForm.addEventListener("submit", async (event) => {
     if (!platforms.length) throw new Error("Pick at least one platform.");
     const score = document.getElementById("vidiq-score")?.value.trim();
     const notes = document.getElementById("vidiq-notes")?.value.trim();
+    const duration = document.getElementById("media-duration")?.value.trim();
+    const overrides = {
+      facebook: { caption: document.getElementById("facebook-caption")?.value || undefined },
+      instagram: { caption: document.getElementById("instagram-caption")?.value || undefined },
+    };
+    if (document.getElementById("youtube-long")?.checked) overrides.youtube = { placement: "youtube_long" };
     const data = await api("/api/draft", {
       method: "POST",
       body: JSON.stringify({
@@ -1178,13 +1188,27 @@ youtubeForm.addEventListener("submit", async (event) => {
         tags: String(form.get("tags") || ""),
         privacy_status: String(form.get("privacy_status") || "private"),
         media_path: mediaPath || undefined,
-        media_content_type: file && file.type ? file.type : "video/mp4",
+        media_content_type: generate
+          ? document.getElementById("media-type")?.value === "image"
+            ? "image/jpeg"
+            : "video/mp4"
+          : file && file.type
+            ? file.type
+            : "video/mp4",
+        media: generate
+          ? {
+              generate: {
+                prompt,
+                type: document.getElementById("media-type")?.value || "video",
+                style: document.getElementById("media-style")?.value.trim() || undefined,
+                duration: duration ? Number(duration) : undefined,
+                provider,
+              },
+            }
+          : undefined,
         instagram_public_confirmed: document.getElementById("instagram-confirm")?.checked === true,
         facebook_public: document.getElementById("facebook-public")?.checked === true,
-        overrides: {
-          facebook: { caption: document.getElementById("facebook-caption")?.value || undefined },
-          instagram: { caption: document.getElementById("instagram-caption")?.value || undefined },
-        },
+        overrides,
         vidiq: score || notes ? { score: score ? Number(score) : undefined, notes } : undefined,
       }),
     });
@@ -1192,7 +1216,9 @@ youtubeForm.addEventListener("submit", async (event) => {
     currentBundleId = data.bundle?.id || "";
     const privacy = data.post?.privacy_status || "private";
     draftResult.textContent = data.bundle
-      ? `Draft saved for ${(data.bundle.platforms || []).join(", ")}. Nothing posts until you approve it.`
+      ? data.bundle.media_status === "generating"
+        ? `Draft saved for ${(data.bundle.platforms || []).join(", ")}. The asset is generating. Nothing posts until you approve it.`
+        : `Draft saved for ${(data.bundle.platforms || []).join(", ")}. Nothing posts until you approve it.`
       : currentDraftId
         ? `Draft ${currentDraftId} saved. Privacy is ${privacy}. Read it, then publish only if this is the approved video.`
         : "Draft was not saved.";
@@ -1265,6 +1291,74 @@ function renderQueue(items) {
     discard.dataset.kind = item.kind;
     discard.textContent = "Discard";
     actions.append(now, when, later, edit, discard);
+    li.append(top);
+    if (item.media_status === "generating") {
+      const pending = document.createElement("p");
+      pending.className = "hint";
+      pending.textContent = `Generating${item.provider ? ` with ${item.provider}` : ""}…`;
+      li.append(pending);
+    } else if (item.media_status === "failed") {
+      const failed = document.createElement("p");
+      failed.className = "hint";
+      failed.textContent = item.media_error || "Generation failed.";
+      li.append(failed);
+    }
+    const cards = document.createElement("div");
+    cards.className = "asset-row";
+    for (const asset of item.assets || []) {
+      if (!asset.media_path && !asset.prompt && !asset.provider) continue;
+      const card = document.createElement("article");
+      card.className = "asset-card";
+      if (asset.media_path) {
+        const visual = String(asset.content_type || "").startsWith("video/") ? document.createElement("video") : document.createElement("img");
+        visual.src = `/media/${encodeURIComponent(asset.media_path)}`;
+        if (visual.tagName === "VIDEO") {
+          visual.controls = true;
+          visual.preload = "metadata";
+        } else {
+          visual.alt = asset.label || asset.platform;
+        }
+        card.append(visual);
+      }
+      const meta = document.createElement("div");
+      meta.className = "asset-meta";
+      const badge = document.createElement("span");
+      badge.className = "chip aspect-badge";
+      badge.textContent = [asset.label, asset.aspect].filter(Boolean).join(" ");
+      const check = document.createElement("p");
+      check.textContent = asset.spec_message || (asset.spec_ok === false ? "Does not match the network preset." : "");
+      const who = document.createElement("p");
+      who.textContent = [asset.provider, asset.model, asset.prompt].filter(Boolean).join(" · ");
+      const assetActions = document.createElement("div");
+      assetActions.className = "queue-actions";
+      for (const [className, label] of [
+        ["regenerate-asset", "Regenerate"],
+        ["swap-asset", "Replace"],
+        ["remove-asset", "Remove"],
+      ]) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = `btn tiny ${className}`;
+        button.dataset.id = item.id;
+        button.dataset.kind = item.kind;
+        button.dataset.platform = asset.platform;
+        button.textContent = label;
+        assetActions.append(button);
+      }
+      meta.append(badge, check, who, assetActions);
+      card.append(meta);
+      cards.append(card);
+    }
+    if (cards.childElementCount) li.append(cards);
+    else if (item.prompt || item.media_status === "failed" || item.media_status === "generating") {
+      const again = document.createElement("button");
+      again.type = "button";
+      again.className = "btn tiny regenerate-asset";
+      again.dataset.id = item.id;
+      again.dataset.kind = item.kind;
+      again.textContent = "Regenerate";
+      li.append(again);
+    }
     if (item.instagram_needs_confirm) {
       const label = document.createElement("label");
       label.className = "check";
@@ -1274,7 +1368,7 @@ function renderQueue(items) {
       label.append(box, document.createTextNode("Instagram will be public"));
       actions.append(label);
     }
-    li.append(top, actions);
+    li.append(actions);
     list.append(li);
   }
 }
@@ -1312,15 +1406,91 @@ async function approveQueue(button, scheduledAt) {
       }),
     });
     renderStatus(data);
-    const failed = (data.results || []).filter((item) => item.ok === false);
-    showToast(scheduledAt ? "Approved for that time. Nothing is posted yet." : failed.length ? "Approved. Check each platform in Results." : "Approved and sent. Nothing posted before this click.");
+    const results = data.results || [];
+    const failed = results.filter((item) => item.ok === false);
+    const messages = [...new Set(failed.map((item) => item.error?.message).filter(Boolean))];
+    const note = scheduledAt
+      ? "Approved for that time. Nothing is posted yet."
+      : failed.length && failed.length === results.length
+        ? messages.join(" ") || "Nothing was posted."
+        : failed.length
+          ? "Approved. Check each platform in Results."
+          : "Approved and sent. Nothing posted before this click.";
+    showToast(note);
   } catch (error) {
     showToast(error.message, true);
     button.disabled = false;
   }
 }
 
-document.getElementById("queue-list")?.addEventListener("click", (event) => {
+const replaceInput = document.createElement("input");
+replaceInput.type = "file";
+replaceInput.accept = "video/mp4,video/*,image/*";
+replaceInput.hidden = true;
+document.body.append(replaceInput);
+let replaceTarget = null;
+replaceInput.addEventListener("change", async () => {
+  const file = replaceInput.files?.[0];
+  const target = replaceTarget;
+  replaceInput.value = "";
+  replaceTarget = null;
+  if (!file || !target) return;
+  try {
+    const saved = await api("/api/media", {
+      method: "POST",
+      headers: {
+        "content-type": file.type || "application/octet-stream",
+        "x-postpath-filename": file.name || "upload.bin",
+      },
+      body: file,
+    });
+    const data = await api("/api/media/attach", {
+      method: "POST",
+      body: JSON.stringify({
+        bundle_id: target.kind === "bundle" ? target.id : undefined,
+        post_id: target.kind === "post" ? target.id : undefined,
+        platform: target.platform,
+        media_path: saved.media.filename,
+        ai_generated: false,
+        type: String(file.type || "").startsWith("image/") ? "image" : "video",
+      }),
+    });
+    renderStatus(data);
+    showToast("Asset replaced. Nothing posts until you approve.");
+  } catch (error) {
+    showToast(error.message, true);
+  }
+});
+
+document.getElementById("queue-list")?.addEventListener("click", async (event) => {
+  const regen = event.target.closest(".regenerate-asset");
+  const swap = event.target.closest(".swap-asset");
+  const remove = event.target.closest(".remove-asset");
+  if (regen || remove) {
+    const button = regen || remove;
+    button.disabled = true;
+    try {
+      const data = await api(regen ? "/api/media/generate" : "/api/media/remove", {
+        method: "POST",
+        body: JSON.stringify({
+          bundle_id: button.dataset.kind === "bundle" ? button.dataset.id : undefined,
+          post_id: button.dataset.kind === "post" ? button.dataset.id : undefined,
+          platform: button.dataset.platform,
+        }),
+      });
+      renderStatus(data);
+      showToast(regen ? "Regenerating. Nothing posts until you approve." : "Asset removed.");
+    } catch (error) {
+      showToast(error.message, true);
+      button.disabled = false;
+    }
+    return;
+  }
+  if (swap) {
+    replaceTarget = { id: swap.dataset.id, kind: swap.dataset.kind, platform: swap.dataset.platform };
+    replaceInput.click();
+    return;
+  }
   const now = event.target.closest(".approve-now");
   const later = event.target.closest(".approve-later");
   const discard = event.target.closest(".discard-queue");

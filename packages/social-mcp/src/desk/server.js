@@ -15,6 +15,7 @@ import { allowedHost, clientSetup } from "../mcp/clients.js";
 import { createPat, listPats, revokePat } from "../mcp/auth.js";
 import { openDesktopApp } from "../openApp.js";
 import { mcpError } from "../errors.js";
+import { resolveSafeMediaPath } from "../mediaPath.js";
 import { PRODUCT_NAME, PRODUCT_TITLE } from "../brand.js";
 
 const PUBLIC_DIR = join(dirname(fileURLToPath(import.meta.url)), "public");
@@ -25,6 +26,10 @@ const CONTENT_TYPES = {
   ".js": "text/javascript; charset=utf-8",
   ".svg": "image/svg+xml",
   ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".mp4": "video/mp4",
+  ".webp": "image/webp",
   ".ico": "image/x-icon",
 };
 
@@ -336,6 +341,8 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
           instagram_public_confirmed: body.instagram_public_confirmed === true,
           facebook_public: body.facebook_public === true,
           vidiq: body.vidiq,
+          media: body.media,
+          wait: body.wait === true,
           source: "desk",
         });
         sendJson(res, 200, { ok: true, ...created, ...snapshot() });
@@ -367,6 +374,41 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
         const body = await readJson(req);
         const result = await engine.discardItem({ bundle_id: body.bundle_id, post_id: body.post_id });
         sendJson(res, 200, { ok: true, ...result, ...snapshot() });
+        return;
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/media/generate") {
+        const body = await readJson(req);
+        const result = await engine.generateMedia(body);
+        sendJson(res, 200, { ok: true, ...result, ...snapshot() });
+        return;
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/media/attach") {
+        const body = await readJson(req);
+        const result = await engine.attachMedia(body);
+        sendJson(res, 200, { ok: true, ...result, ...snapshot() });
+        return;
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/media/remove") {
+        const body = await readJson(req);
+        const result = await engine.removeMedia(body);
+        sendJson(res, 200, { ok: true, ...result, ...snapshot() });
+        return;
+      }
+
+      if (req.method === "GET" && url.pathname.startsWith("/media/")) {
+        const name = decodeURIComponent(url.pathname.slice("/media/".length));
+        try {
+          const file = resolveSafeMediaPath(name, homePaths.mediaDir);
+          const body = readFileSync(file);
+          const type = CONTENT_TYPES[extname(file)] || "application/octet-stream";
+          res.writeHead(200, { "content-type": type, "cache-control": "no-store" });
+          res.end(body);
+        } catch {
+          sendJson(res, 404, { ok: false, message: "Media not found" });
+        }
         return;
       }
 

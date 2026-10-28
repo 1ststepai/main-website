@@ -1,5 +1,14 @@
 # Architecture Decision Log
 
+## 2026-10-28: PostPath can generate a silent asset, then wait for approval
+
+- **Status / owner:** Draft, not deployed. Evan owns any real provider key and any live generation spend. Tests use the mock provider only.
+- **Decision:** A draft can include `media.generate` (prompt, image or video, style, duration, provider). Providers are OpenAI images, Google Imagen/Veo, xAI Grok Imagine, Replicate, fal, a local mock, or none (use your own file). Keys live in `oauth.env` and are masked. Network presets pick aspect, size, and duration. One file is generated per aspect, then cropped with sharp or ffmpeg. Generated video is silent: the request disables provider audio, and ffmpeg strips any track that remains. A file that still has audio is not attached. Provenance is stored on the draft. YouTube sets `containsSyntheticMedia`. Meta requests set `is_ai_generated`. The queue shows the asset, the preset check, and Regenerate, Replace, and Remove. Approval, the vidIQ gate, and the Instagram public confirmation are unchanged. Image publishing is not added; an image stays in the queue.
+- **Rationale:** The differentiator is one prompt that produces the captions and the creative, without posting and without an AI voice or soundtrack.
+- **Affected systems:** `packages/social-mcp` media providers, desk queue, MCP tools. No live generation and no deploy.
+- **Verification:** Mock-provider tests for presets, validation, queue fields, and audio stripping. Provider HTTP tests use a fake fetch.
+- **Rollback:** Leave this draft unmerged. Drafts without `media.generate` stay file-based.
+
 ## 2026-10-28: PostPath MCP is a local Streamable HTTP server with owner approval
 
 - **Status / owner:** Draft, not deployed, not submitted to any directory or npm. Evan owns any public URL, DNS, and directory submission.
