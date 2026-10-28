@@ -7,6 +7,7 @@ import { formatToolError, formatToolResult, mcpError } from "../errors.js";
 import { paths, PLATFORMS } from "../home.js";
 import { loadOAuthEnvFile } from "../envFile.js";
 import { POSTPATH_INSTRUCTIONS } from "./instructions.js";
+import { QUEUE_URI } from "../queueStatus.js";
 
 const outputSchema = z
   .object({
@@ -121,6 +122,19 @@ export function createSocialMcpServer({ engine, auth } = {}) {
     };
   }
 
+  async function notifyQueueResource() {
+    if (!server.isConnected?.()) return false;
+    const resources = server.server.getClientCapabilities?.()?.resources;
+    if (!resources) return false;
+    try {
+      if (resources.subscribe) await server.server.sendResourceUpdated({ uri: QUEUE_URI });
+      await server.sendResourceListChanged();
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   function add(name, title, description, scope, hints, inputSchema, handler) {
     server.registerTool(
       name,
@@ -137,7 +151,11 @@ export function createSocialMcpServer({ engine, auth } = {}) {
           openWorldHint: Boolean(hints.open),
         },
       },
-      gated(scope, handler),
+      gated(scope, async (args) => {
+        const result = await handler(args);
+        if (!hints.queue || !result || typeof result !== "object") return result;
+        return { ...result, queue_note: eng.getQueueStatus().note };
+      }),
     );
   }
 
@@ -229,7 +247,7 @@ export function createSocialMcpServer({ engine, auth } = {}) {
     "Create draft",
     "Create a draft post for one or more social networks. It lands in the approval queue and is not published.",
     "drafts:write",
-    {},
+    { queue: true },
     draftShape,
     async (args) => eng.createDraft({ ...args, source: "mcp" }),
   );
@@ -239,7 +257,7 @@ export function createSocialMcpServer({ engine, auth } = {}) {
     "Create multi-network draft",
     "Create one draft for several networks from one media file and a shared caption, with optional per-network overrides. It is not published.",
     "drafts:write",
-    {},
+    { queue: true },
     draftShape,
     async (args) => eng.createDraft({ ...args, source: "mcp" }),
   );
@@ -259,7 +277,7 @@ export function createSocialMcpServer({ engine, auth } = {}) {
     "Save interview drafts",
     "Save posts the assistant already wrote as drafts for one brand. Each draft can set platforms and per-network overrides. The drafts wait for approval and are not published.",
     "drafts:write",
-    {},
+    { queue: true },
     {
       profile_id: z.string().min(2).max(64).describe("Brand that owns the drafts."),
       posts: z
@@ -326,9 +344,9 @@ export function createSocialMcpServer({ engine, auth } = {}) {
   add(
     "update_draft",
     "Edit draft",
-    "Change the copy or media on a draft, scheduled, or failed post that has not been sent.",
+    "Change the copy or media on a draft, scheduled, or failed post that has not been sent. Use this when a draft fails a check. This does not publish.",
     "drafts:write",
-    { idempotent: true },
+    { idempotent: true, queue: true },
     {
       post_id: z.string().min(8).describe("Post id to edit."),
       title: z.string().max(100).optional().describe("Replacement title."),
@@ -360,6 +378,16 @@ export function createSocialMcpServer({ engine, auth } = {}) {
   );
 
   add(
+    "get_queue_status",
+    "Queue status",
+    "Read drafts waiting for the owner, drafts that fail a check, scheduled posts, and failed publishes. Call this at the start of a session and after saving drafts. This does not publish.",
+    "posts:read",
+    { read: true, idempotent: true, queue: true },
+    { profile_id: z.string().min(2).max(64).optional().describe("Limit to one brand. Omit for every brand.") },
+    async (args) => eng.getQueueStatus(args),
+  );
+
+  add(
     "list_queue",
     "List approval queue",
     "List drafts waiting for approval, including drafts created by an AI client.",
@@ -374,7 +402,7 @@ export function createSocialMcpServer({ engine, auth } = {}) {
     "List posts",
     "List drafts and posts saved on this computer, including each network's status.",
     "posts:read",
-    { read: true, idempotent: true },
+    { read: true, idempotent: true, queue: true },
     {
       profile_id: z.string().min(2).max(64).optional().describe("Limit to one profile."),
       status: z.enum(["draft", "scheduled", "publishing", "published", "handed_off", "failed", "needs_review"]).optional().describe("Limit to one status."),
@@ -397,7 +425,7 @@ export function createSocialMcpServer({ engine, auth } = {}) {
     "Request approval",
     "Publish a queued draft now, or schedule it for an ISO time. Requires queue:approve. Instagram is refused until instagram_public_confirmed is true. YouTube is refused when the profile requires a vidIQ check and none is attached.",
     "queue:approve",
-    { destructive: true, open: true },
+    { destructive: true, open: true, queue: true },
     {
       bundle_id: z.string().min(8).optional().describe("Multi-network draft id."),
       post_id: z.string().min(8).optional().describe("Single post id, when there is no bundle."),
@@ -485,7 +513,7 @@ export function createSocialMcpServer({ engine, auth } = {}) {
     "Publish one post",
     "Send one post that is already a draft or due. Requires queue:approve. Instagram must be public. YouTube on a gated profile needs a vidIQ check. A needs_review post is not sent again unless acknowledge is true.",
     "queue:approve",
-    { destructive: true, open: true },
+    { destructive: true, open: true, queue: true },
     {
       post_id: z.string().min(8).describe("Post id."),
       force: z.boolean().optional().describe("Send a scheduled post before its time."),
@@ -499,7 +527,7 @@ export function createSocialMcpServer({ engine, auth } = {}) {
     "Publish due posts",
     "Send scheduled posts whose time has arrived. Requires queue:approve. Skips posts that need review.",
     "queue:approve",
-    { destructive: true, open: true },
+    { destructive: true, open: true, queue: true },
     {
       profile_id: z.string().min(2).max(64).optional().describe("Limit to one profile."),
       limit: z.number().int().min(1).max(20).optional().describe("Maximum posts to send."),
@@ -507,5 +535,25 @@ export function createSocialMcpServer({ engine, auth } = {}) {
     async (args) => eng.publishDue(args),
   );
 
-  return { server, engine: eng };
+  server.registerResource(
+    "queue",
+    QUEUE_URI,
+    {
+      title: "Approval queue",
+      description: "Drafts waiting for the owner, drafts that fail a check, scheduled posts, and failed publishes.",
+      mimeType: "application/json",
+    },
+    async () => ({
+      contents: [
+        {
+          uri: QUEUE_URI,
+          mimeType: "application/json",
+          text: JSON.stringify(eng.getQueueStatus(), null, 2),
+        },
+      ],
+    }),
+  );
+
+  const stopQueueWatch = typeof eng.onQueueChange === "function" ? eng.onQueueChange(() => notifyQueueResource()) : () => {};
+  return { server, engine: eng, stopQueueWatch };
 }

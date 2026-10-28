@@ -15,6 +15,20 @@ export function chooseBrandId(profiles, remembered) {
   return rows[0]?.id || "";
 }
 
+export function waitingOnYouCount(queue, brandId) {
+  const id = String(brandId || "");
+  return (Array.isArray(queue) ? queue : []).filter((item) => {
+    if (!item || item.scheduled_at) return false;
+    return !id || item.profile_id === id;
+  }).length;
+}
+
+export function waitingOnYouLabel(count) {
+  const n = Number(count) || 0;
+  if (n <= 0) return "";
+  return n === 1 ? "Waiting on you" : `Waiting on you · ${n}`;
+}
+
 export function scopeToBrand(items, brandId) {
   const id = String(brandId || "");
   const rows = Array.isArray(items) ? items : [];

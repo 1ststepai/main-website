@@ -26,6 +26,7 @@
         <div class="brand-switch">
           <button type="button" class="brand-switch-btn" id="brand-switch-btn" aria-haspopup="menu" aria-expanded="false" aria-controls="brand-menu">
             <span id="brand-switch-name">No brand yet</span>
+            <span id="brand-waiting" class="waiting-badge" hidden>Waiting on you</span>
           </button>
           <div id="brand-menu" class="brand-menu" role="menu" hidden>
             <div id="brand-menu-list"></div>
@@ -234,6 +235,7 @@
             </div>
           </div>
           <p class="approval-line">Nothing posts without your approval.</p>
+          <p class="waiting-badge" id="queue-waiting" hidden>Waiting on you</p>
           <p class="hint">One approval posts every selected platform. A failure on one does not stop the others.</p>
           <ul class="queue-list" id="queue-list"></ul>
           <p class="hint" id="queue-empty">No drafts waiting. Saved drafts and AI drafts show up here.</p>

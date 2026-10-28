@@ -1,5 +1,14 @@
 # Architecture Decision Log
 
+## 2026-10-28: The assistant is told about the queue, and the owner still approves
+
+- **Status / owner:** Draft, not deployed. Evan owns any live approval.
+- **Decision:** `get_queue_status` lists drafts waiting for the owner, drafts that fail a check, scheduled posts, and failed publishes, per brand or for every brand. Server instructions tell the assistant to read that at the start of a session and after saving drafts. Tool results include a one-line queue note. The queue is also an MCP resource. Update notifications are sent only when the connected client says it supports resources; otherwise the send is skipped. There is no auto-approve. A per-brand "let my assistant approve" switch is not added, because approval already depends on the owner's queue:approve scope, the Instagram public confirmation, and the vidIQ check.
+- **Rationale:** The assistant can move drafts forward by editing them. Publishing stays with the owner.
+- **Affected systems:** PostPath MCP tools, desk brand switcher, and approval queue. No deploy and no live publish.
+- **Verification:** Queue notes on tool results, brand scoping, and drafts that stay unpublished until an approval call.
+- **Rollback:** Leave this draft unmerged.
+
 ## 2026-10-28: An interview stays on the brand and becomes drafts
 
 - **Status / owner:** Draft, not deployed. Evan owns any assistant that writes the posts.

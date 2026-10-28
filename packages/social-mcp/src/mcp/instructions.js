@@ -14,6 +14,8 @@ update_draft changes a draft that has not been sent. attach_vidiq_check records 
 
 list_queue lists drafts waiting for approval. list_posts and get_post_status read saved posts and each network's result.
 
+Call get_queue_status at the start of every session and again after create_draft, create_post, or create_drafts_from_interview. Summarize what needs the owner: drafts waiting for approval, drafts that fail a check, scheduled posts, and failed publishes. update_draft can change a draft that fails a check. Publishing still needs the owner to approve it in the desk. queue:approve stays off until the owner ticks it.
+
 request_approval publishes a queued draft now, or schedules it, and requires the queue:approve scope. discard_draft removes a draft that has not been sent. schedule_post and cancel_scheduled_post change one post's schedule. publish_post sends one post. publish_due sends scheduled posts whose time has arrived. These calls require queue:approve. Instagram is refused until instagram_public_confirmed is true. A vidIQ gate is refused until a check is attached.`;
 
 export const SERVER_DESCRIPTION =

@@ -32,6 +32,7 @@ import { normalizeGenerate, prepareAttachedFile, produceMedia } from "./media/ru
 import { reviewDraft, reviewImages, writeCaptions } from "./media/claude.js";
 import { planFor } from "./media/specs.js";
 import { checksForPosts, publicInterview, readInterviewAudio, writeInterviewAudio } from "./interview.js";
+import { buildQueueStatus } from "./queueStatus.js";
 import { interviewPrompt } from "./desk/public/interviewPrompts.js";
 import { randomBytes } from "node:crypto";
 import { rmSync } from "node:fs";
@@ -81,6 +82,33 @@ function optionalMediaPath(value, mediaRoot) {
 
 export function createEngine({ home, env = process.env, fetchImpl = fetch, now = () => Date.now() } = {}) {
   const store = createStore({ home, env, now });
+  const queueListeners = new Set();
+  let queueNotifyQueued = false;
+  function emitQueueChange() {
+    if (queueNotifyQueued) return;
+    queueNotifyQueued = true;
+    queueMicrotask(() => {
+      queueNotifyQueued = false;
+      for (const fn of queueListeners) {
+        Promise.resolve()
+          .then(() => fn())
+          .catch(() => {});
+      }
+    });
+  }
+  for (const name of ["savePost", "deletePost", "saveBundle", "deleteBundle"]) {
+    const original = store[name];
+    if (typeof original !== "function") continue;
+    store[name] = (...args) => {
+      const result = original(...args);
+      emitQueueChange();
+      return result;
+    };
+  }
+  function onQueueChange(fn) {
+    queueListeners.add(fn);
+    return () => queueListeners.delete(fn);
+  }
   const oauth = createOAuthRuntime({ store, env, fetchImpl });
 
   async function trackedFetch(url, init) {
@@ -1350,6 +1378,17 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
     return { published: false, profile_id: profile.id, drafts };
   }
 
+  function getQueueStatus({ profile_id: profileId } = {}) {
+    if (profileId) requireProfile(profileId);
+    return buildQueueStatus({
+      bundles: store.listBundles(),
+      posts: store.listPosts(),
+      profiles: store.listProfiles(),
+      profileId,
+      now: now(),
+    });
+  }
+
   return {
     store,
     oauth,
@@ -1359,6 +1398,8 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
     connectAccounts,
     connectBluesky,
     createDraft,
+    getQueueStatus,
+    onQueueChange,
     getInterview,
     saveInterview,
     saveInterviewAudio,

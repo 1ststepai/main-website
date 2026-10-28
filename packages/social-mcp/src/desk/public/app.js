@@ -25,7 +25,7 @@ import {
 } from "./guide.js";
 import { platformIcon } from "./icons.js";
 import { checkNetwork, readMp4Meta } from "./optimize.js";
-import { BRAND_STORAGE_KEY, brandCapMessage, chooseBrandId, scopeToBrand } from "./brand.js";
+import { BRAND_STORAGE_KEY, brandCapMessage, chooseBrandId, scopeToBrand, waitingOnYouCount, waitingOnYouLabel } from "./brand.js";
 
 const NETWORKS = [
   { key: "youtube", label: "YouTube" },
@@ -287,11 +287,22 @@ function applyBrand(id, profiles) {
   if (latestStatus) renderStatus(latestStatus);
 }
 
-function renderBrandControls(profiles, license) {
+function renderBrandControls(profiles, license, queue) {
   const rows = Array.isArray(profiles) ? profiles : [];
   const current = rows.find((row) => row.id === selectedBrandId) || null;
   const name = document.getElementById("brand-switch-name");
   if (name) name.textContent = current?.name || current?.id || "No brand yet";
+  const currentWaiting = waitingOnYouLabel(waitingOnYouCount(queue, current?.id));
+  const headerBadge = document.getElementById("brand-waiting");
+  if (headerBadge) {
+    headerBadge.hidden = !currentWaiting;
+    headerBadge.textContent = currentWaiting;
+  }
+  const queueBadge = document.getElementById("queue-waiting");
+  if (queueBadge) {
+    queueBadge.hidden = !currentWaiting;
+    queueBadge.textContent = currentWaiting;
+  }
   const live = document.getElementById("brand-live");
   if (live) live.textContent = current ? current.name || current.id : "No brand yet";
   const list = document.getElementById("brand-menu-list");
@@ -302,6 +313,13 @@ function renderBrandControls(profiles, license) {
       button.type = "button";
       button.role = "menuitem";
       button.textContent = profile.name || profile.id;
+      const waiting = waitingOnYouLabel(waitingOnYouCount(queue, profile.id));
+      if (waiting) {
+        const badge = document.createElement("span");
+        badge.className = "waiting-badge";
+        badge.textContent = waiting;
+        button.append(badge);
+      }
       if (profile.id === selectedBrandId) button.setAttribute("aria-current", "true");
       button.addEventListener("click", () => {
         document.getElementById("brand-menu").hidden = true;
@@ -358,7 +376,7 @@ function renderStatus(data) {
   const profiles = data.profiles || [];
   selectedBrandId = chooseBrandId(profiles, selectedBrandId);
   if (selectedBrandId) rememberBrand(selectedBrandId);
-  renderBrandControls(profiles, data.license);
+  renderBrandControls(profiles, data.license, data.queue);
   renderInterview(profiles.find((row) => row.id === selectedBrandId) || null);
   renderMode(data);
   renderResults(scopeToBrand(data.recent_posts, selectedBrandId), data.publish_mode);

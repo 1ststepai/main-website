@@ -90,6 +90,17 @@ body { min-height: 100vh; position: relative; overflow-x: hidden; }
   cursor: pointer;
 }
 .brand-switch-btn span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.waiting-badge {
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(240, 212, 138, 0.16);
+  color: var(--warn);
+  font-size: 0.75rem;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+.brand-menu .waiting-badge { margin-left: 6px; }
 .brand-menu[hidden] { display: none; }
 .brand-menu {
   position: absolute;
