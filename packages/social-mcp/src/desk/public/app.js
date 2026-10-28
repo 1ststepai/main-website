@@ -1,6 +1,7 @@
 import {
   AI_NOT_IN_APP,
   CREATION,
+  assistantConfigured,
   INTENTS,
   YOUTUBE_APP_MISSING,
   channelCatalog,
@@ -112,9 +113,137 @@ async function api(path, options = {}) {
   });
   const payload = await response.json().catch(() => ({}));
   if (!response.ok || payload.ok === false) {
-    throw new Error(payload.message || "Request failed");
+    const error = new Error(payload.message || "Request failed");
+    error.snippet = payload.snippet || "";
+    error.configPath = payload.configPath || "";
+    throw error;
   }
   return payload;
+}
+
+let openAssistantId = "";
+
+function groupTitle(group) {
+  if (group === "paste") return "Copy the steps";
+  if (group === "cloud") return "On the internet";
+  return "On this computer";
+}
+
+function renderAssistants(data) {
+  const list = document.getElementById("assistant-list");
+  if (!list) return;
+  const clients = Array.isArray(data.clients) ? data.clients : [];
+  list.replaceChildren();
+  let lastGroup = "";
+  for (const client of clients) {
+    if (client.group !== lastGroup) {
+      lastGroup = client.group;
+      const heading = document.createElement("h3");
+      heading.className = "assistant-group";
+      heading.textContent = groupTitle(client.group);
+      list.append(heading);
+    }
+    const row = document.createElement("article");
+    row.className = "assistant-row";
+    const head = document.createElement("div");
+    head.className = "assistant-head";
+    const name = document.createElement("h4");
+    name.textContent = client.label;
+    const pill = document.createElement("span");
+    pill.className = `pill ${client.status === "ready" ? "on" : client.status === "invalid" ? "off" : "wait"}`;
+    pill.textContent = client.statusLabel;
+    head.append(name, pill);
+    const detail = document.createElement("p");
+    detail.className = "assistant-detail";
+    detail.textContent = client.detail;
+    row.append(head, detail);
+    if (client.configPath) {
+      const path = document.createElement("p");
+      path.className = "assistant-path";
+      path.textContent = client.configPath;
+      row.append(path);
+    }
+    const actions = document.createElement("div");
+    actions.className = "assistant-actions";
+    const action = document.createElement("button");
+    action.type = "button";
+    action.className = "btn secondary";
+    action.textContent = client.actionLabel || "Set up";
+    action.addEventListener("click", async () => {
+      if (client.mode === "write") {
+        setupAssistant(client.id, action);
+        return;
+      }
+      openAssistantId = client.id;
+      renderAssistants(data);
+      try {
+        await navigator.clipboard.writeText(client.snippet || client.detail);
+        showToast(client.group === "cloud" ? "Explanation copied" : "Steps copied");
+      } catch {
+        showToast("The steps are open below. Select them and copy.", true);
+      }
+    });
+    actions.append(action);
+    row.append(actions);
+    if (openAssistantId === client.id && client.snippet) {
+      row.append(snippetBlock(client));
+    }
+    list.append(row);
+  }
+}
+
+function snippetBlock(client) {
+  const wrap = document.createElement("div");
+  wrap.className = "assistant-snippet";
+  const pre = document.createElement("textarea");
+  pre.readOnly = true;
+  pre.rows = Math.min(12, String(client.snippet).split("\n").length + 1);
+  pre.value = client.snippet;
+  pre.setAttribute("aria-label", `${client.label} setup steps`);
+  const copy = document.createElement("button");
+  copy.type = "button";
+  copy.className = "btn tiny";
+  copy.textContent = "Copy";
+  copy.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(client.snippet);
+      showToast("Steps copied");
+    } catch {
+      pre.focus();
+      pre.select();
+      showToast("Select the steps and copy them", true);
+    }
+  });
+  wrap.append(pre, copy);
+  return wrap;
+}
+
+async function setupAssistant(id, button) {
+  button.disabled = true;
+  try {
+    const data = await api("/api/install-client", {
+      method: "POST",
+      body: JSON.stringify({ id }),
+    });
+    const client = (data.clients || []).find((item) => item.id === id);
+    renderStatus(data);
+    const name = client?.label || "That app";
+    const lead = data.installed?.changed ? `${name} is set up.` : `${name} already had PostPath.`;
+    const restart = client?.restart ? ` ${client.restart}` : "";
+    showToast(`${lead}${restart}`);
+  } catch (error) {
+    if (error.snippet) openAssistantId = id;
+    showToast(error.message, true);
+    if (error.snippet) {
+      const current = latestStatus || {};
+      const clients = (current.clients || []).map((item) =>
+        item.id === id ? { ...item, snippet: error.snippet } : item,
+      );
+      renderAssistants({ ...current, clients });
+    }
+  } finally {
+    button.disabled = false;
+  }
 }
 
 function slugify(name) {
@@ -161,8 +290,10 @@ function renderStatus(data) {
   }).join("");
 
   redirectUri.textContent = data.oauth_redirect_uri || "http://127.0.0.1:47831/oauth/callback";
-  const cursor = data.cursor?.installed ? "PostPath enabled in Cursor" : "PostPath not enabled in Cursor yet";
-  pathMeta.textContent = `${cursor} · vault ${data.home || ""} · media ${data.media_dir || ""}`;
+  const readyClients = (data.clients || []).filter((client) => client.installed).map((client) => client.label);
+  const assistantLine = readyClients.length ? `Set up: ${readyClients.join(", ")}` : "No assistant set up yet";
+  pathMeta.textContent = `${assistantLine} · vault ${data.home || ""} · media ${data.media_dir || ""}`;
+  renderAssistants(data);
 
   if (data.profiles?.[0] && !profileId.dataset.touched) {
     profileId.value = data.profiles[0].id;
@@ -181,8 +312,8 @@ function renderStatus(data) {
 
   if (data.next_step === "save_apps") {
     connectHint.textContent = "Save at least one provider’s credentials below, then connect.";
-  } else if (data.cursor && !data.cursor.installed) {
-    connectHint.textContent = "Connect accounts, then click Enable in Cursor so any AI can use them.";
+  } else if (!assistantConfigured(data)) {
+    connectHint.textContent = "Connect accounts here. To let an assistant post, use Connect your AI assistant below.";
   } else {
     connectHint.textContent = "Connect opens each configured OAuth provider in order. Bluesky uses the form below.";
   }
@@ -249,20 +380,6 @@ document.getElementById("connect-form").addEventListener("submit", async (event)
     } else {
       showToast(data.connect?.message || "Accounts connected");
     }
-  } catch (error) {
-    showToast(error.message, true);
-  } finally {
-    button.disabled = false;
-  }
-});
-
-document.getElementById("cursor-btn").addEventListener("click", async () => {
-  const button = document.getElementById("cursor-btn");
-  button.disabled = true;
-  try {
-    const data = await api("/api/install-cursor", { method: "POST", body: "{}" });
-    renderStatus(data);
-    showToast(`Cursor MCP installed at ${data.installed?.configPath || "mcp.json"}. Restart Cursor.`);
   } catch (error) {
     showToast(error.message, true);
   } finally {
@@ -606,7 +723,7 @@ function renderContent() {
           renderGuide();
           try {
             await navigator.clipboard.writeText(item.text);
-            showToast("Request copied. Paste it in Cursor. PostPath did not run it.");
+            showToast("Request copied. Paste it into your assistant. PostPath did not run it.");
           } catch {
             showToast("Select the request and copy it. PostPath did not run it.");
           }
@@ -635,37 +752,21 @@ function renderCreation() {
   }
   guideBody.append(list);
   if (guide.creation === "ai") {
-    const enabled = Boolean(latestStatus?.cursor?.installed);
+    const enabled = assistantConfigured(latestStatus || {});
     addNote(
       guideBody,
       enabled
-        ? "PostPath is listed in Cursor's config file. Restart Cursor before asking it for help. That file is not proof Cursor is connected."
+        ? "PostPath is listed in an assistant's settings. Restart that app before asking it for help. That file is not proof the app has connected."
         : AI_NOT_IN_APP,
     );
-    if (!enabled) {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "btn secondary";
-      button.textContent = "Enable in Cursor";
-      button.addEventListener("click", async () => {
-        button.disabled = true;
-        try {
-          const data = await api("/api/install-cursor", { method: "POST", body: "{}" });
-          latestStatus = data;
-          renderStatus(data);
-          guide = { ...guide, error: "" };
-          persistGuide();
-          renderGuide();
-          showToast("PostPath was written into Cursor's config. Restart Cursor. Nothing was published.");
-        } catch (error) {
-          guide = { ...guide, error: error.message };
-          showGuideError(error.message);
-        } finally {
-          button.disabled = false;
-        }
-      });
-      guideBody.append(button);
-    }
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "btn secondary";
+    button.textContent = "Connect your AI assistant";
+    button.addEventListener("click", () => {
+      document.getElementById("assistants")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    guideBody.append(button);
   }
 }
 
@@ -695,7 +796,7 @@ function renderReview() {
   addReviewRow(list, "Privacy", view.privacy);
   addReviewRow(list, "Timing", view.timing);
   addReviewRow(list, "Publishing", view.publish);
-  if (view.assistantRequest) addReviewRow(list, "Request for Cursor", view.assistantRequest);
+  if (view.assistantRequest) addReviewRow(list, "Request for your assistant", view.assistantRequest);
   if (view.aiNote) addReviewRow(list, "AI", view.aiNote);
   guideBody.append(list);
   for (const plan of view.plans) {

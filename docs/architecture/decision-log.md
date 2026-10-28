@@ -1,5 +1,14 @@
 # Architecture Decision Log
 
+## 2026-10-28: PostPath connects local assistants from the desk, and does not tunnel for cloud apps
+
+- **Status / owner:** Draft on the PostPath release-candidate branch. Not deployed. Evan owns any merge.
+- **Decision:** The desk section Connect your AI assistant writes the local stdio config for Cursor, Claude Desktop, Claude Code (user scope in `~/.claude.json`), VS Code / Copilot, Codex, Windsurf Cascade, Gemini CLI, the Grok terminal, Cline, Zed, LM Studio, and Copilot CLI. Each write backs up the existing file, merges one `postpath` server, and does nothing when the file would not change. Continue gets copy-paste steps because its config is YAML or a per-project folder. ChatGPT, Grok on the web, and Grok Bot stay unavailable: they require a public HTTPS address, and PostPath does not add a relay, tunnel, or cloud service. A settings write is not proof the assistant has connected.
+- **Rationale:** People use more than Cursor. Local apps already start a stdio process from a file on disk. Reaching ChatGPT or grok.com would mean exposing `127.0.0.1`, which this product does not do.
+- **Affected systems:** `packages/social-mcp` desk, `clientConfigs.js`, setup guide, `docs/SOCIAL_MCP.md`. No marketing-page claim changes. No change to the vault, OAuth, or publish path.
+- **Verification:** Config writer tests cover merge, backup, idempotency, and Windows and macOS paths. The desk was rendered locally. No assistant app was launched, so none are called connected.
+- **Rollback:** Leave this pull request unmerged. The release candidate keeps Enable in Cursor.
+
 ## 2026-10-27: First-run guide saves a draft and does not publish
 
 - **Status / owner:** In review on PR #51. Not deployed. Evan still owns the Windows run, the Google Desktop client, and any real YouTube upload.

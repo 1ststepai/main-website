@@ -6,7 +6,7 @@ import { dirname, extname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { DEFAULT_DESK_PORT } from "../home.js";
 import { loadOAuthEnvFile, publicOAuthConfig, saveOAuthEnvFile, parseEnvFile } from "../envFile.js";
-import { installCursorMcp, readCursorMcpStatus } from "../cursorConfig.js";
+import { installClient, installCursorMcp, listClientStatus, readCursorMcpStatus } from "../cursorConfig.js";
 import { openDesktopApp } from "../openApp.js";
 import { mcpError } from "../errors.js";
 import { PRODUCT_NAME, PRODUCT_TITLE } from "../brand.js";
@@ -174,6 +174,7 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
       : {};
     const status = engine.publicStatus();
     const cursor = readCursorMcpStatus();
+    const clients = listClientStatus();
     const ready = oauthReady(envValues);
     const scheduled_posts = engine.store.listPosts({ status: "scheduled" });
     return {
@@ -191,6 +192,7 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
       oauth: publicOAuthConfig(envValues),
       oauth_ready: ready,
       cursor,
+      clients,
       next_step: !anyOauthReady(ready)
         ? "save_apps"
         : status.profiles.length === 0
@@ -255,6 +257,14 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
 
       if (req.method === "POST" && url.pathname === "/api/install-cursor") {
         const installed = installCursorMcp();
+        sendJson(res, 200, { ok: true, installed, ...snapshot() });
+        return;
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/install-client") {
+        const body = await readJson(req);
+        const id = String(body.id || "").trim();
+        const installed = installClient(id);
         sendJson(res, 200, { ok: true, installed, ...snapshot() });
         return;
       }
@@ -328,6 +338,8 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
         ok: false,
         code: error.code || "error",
         message: error.message || "Unexpected error",
+        snippet: error.snippet || undefined,
+        configPath: error.configPath || undefined,
       });
     }
   });

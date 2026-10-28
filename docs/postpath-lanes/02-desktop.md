@@ -36,7 +36,7 @@ bash packages/social-mcp/scripts/build-downloads.sh
 3. macOS: double-click `Open PostPath.command`. If Gatekeeper reports an unidentified developer, right-click that file and choose Open. Do not turn Gatekeeper off.
 4. Windows: double-click `Open-PostPath.bat`. SmartScreen may warn because the preview is unsigned. Do not turn SmartScreen off.
 5. The first launch creates `~/.postpath/app` (`%USERPROFILE%\.postpath\app` on Windows), unpacks `postpath-app.tgz`, and runs `npm install --omit=dev` once.
-6. In the desk, save OAuth credentials, register `http://127.0.0.1:47831/oauth/callback`, connect accounts, then Enable in Cursor.
+6. In the desk, save OAuth credentials, register `http://127.0.0.1:47831/oauth/callback`, connect accounts, then use Connect your AI assistant.
 
 `POSTPATH_NO_OPEN=1` starts the desk without asking the OS to open a browser. The default launch still opens the desk.
 

@@ -4,7 +4,7 @@ import { startStdioServer, createEngine } from "../src/index.js";
 import { paths } from "../src/home.js";
 import { loadOAuthEnvFile } from "../src/envFile.js";
 import { createDeskServer } from "../src/desk/server.js";
-import { installCursorMcp } from "../src/cursorConfig.js";
+import { installClient, installCursorMcp, listClientStatus } from "../src/cursorConfig.js";
 import { PRODUCT_NAME, PRODUCT_TITLE } from "../src/brand.js";
 
 const args = process.argv.slice(2);
@@ -68,6 +68,26 @@ TIKTOK_CLIENT_SECRET=
     return;
   }
 
+  if (command === "clients") {
+    console.log(JSON.stringify(listClientStatus(), null, 2));
+    return;
+  }
+
+  if (command === "install-client") {
+    const id = args[1];
+    if (!id) {
+      console.error("Usage: social-mcp install-client <id>");
+      console.error("List ids with: social-mcp clients");
+      process.exitCode = 1;
+      return;
+    }
+    const result = installClient(id);
+    console.log(JSON.stringify(result, null, 2));
+    const row = listClientStatus().find((client) => client.id === id);
+    if (row?.restart) console.log(row.restart);
+    return;
+  }
+
   if (command === "connect") {
     const profileId = args[1];
     const name = args[2] || profileId;
@@ -91,8 +111,10 @@ ${PRODUCT_TITLE}
 
 Usage:
   social-mcp app             # desktop Connect UI (recommended)
-  social-mcp                 # stdio MCP server for Cursor/Claude
-  social-mcp install-cursor  # write ~/.cursor/mcp.json entry
+  social-mcp                 # stdio MCP server for a local assistant
+  social-mcp clients         # show assistant setup status
+  social-mcp install-client <id>
+  social-mcp install-cursor  # same as install-client cursor
   social-mcp init            # create local vault
   social-mcp status
   social-mcp connect <id>    # CLI fallback

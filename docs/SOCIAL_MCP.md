@@ -27,8 +27,8 @@ OAuth callback: `http://127.0.0.1:47831/oauth/callback`
 
 1. Save Google / Meta / TikTok app credentials in the desk (stored in `~/.social-mcp/oauth.env`)
 2. **Connect accounts** — browser chain YouTube → Meta → TikTok
-3. **Enable in Cursor** — merges `postpath` into `~/.cursor/mcp.json`
-4. Restart Cursor — agents can draft / schedule / publish
+3. **Connect your AI assistant** — merges `postpath` into that app's local config. Cursor is one of the apps. ChatGPT and Grok on the web are listed as unavailable because they need a public address and PostPath does not open a tunnel.
+4. Restart that app — it can draft / schedule / publish
 
 ## Relationship to studio
 

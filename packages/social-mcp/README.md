@@ -33,9 +33,9 @@ That opens the **PostPath** desk in an app window.
 
 3. Enter a brand name → **Connect accounts** (browser chain for configured providers)
 4. Bluesky: use the Bluesky form (handle + app password)
-5. Click **Enable in Cursor** → restart Cursor
+5. Open **Connect your AI assistant**, pick the app, then restart it
 
-No MCP JSON paste. No `&&` in chat.
+ChatGPT and Grok on the web need a public address. PostPath stays on this computer and does not open a tunnel, so those two stay unavailable. No MCP JSON paste into chat.
 
 ## First run — macOS / Linux
 
@@ -61,7 +61,7 @@ npx postpath app
 
 3. Enter a brand name → **Connect accounts**
 4. Bluesky: handle + app password form
-5. Click **Enable in Cursor** → restart Cursor
+5. Open **Connect your AI assistant**, pick the app, then restart it
 
 ## Download zips (optional)
 
@@ -83,7 +83,7 @@ These are not one-click installers. Each requires Node.js 20+ and unpacks into `
 
 | Piece | Role |
 | --- | --- |
-| Desk UI (`postpath app` / `social-mcp app`) | Human face: connect, credentials, Enable in Cursor |
+| Desk UI (`postpath app` / `social-mcp app`) | Human face: connect, credentials, connect an assistant |
 | Local vault `~/.social-mcp` | Encrypted tokens + oauth.env + media |
 | MCP server key `postpath` | What Cursor/Claude call for draft / schedule / publish |
 
@@ -112,7 +112,9 @@ Real-account acceptance is **not** claimed. Tests mock `fetch`. Nothing here is 
 ```text
 postpath app / social-mcp app   Desktop Connect UI (default product path)
 postpath / social-mcp           stdio MCP server
-social-mcp install-cursor       write ~/.cursor/mcp.json (server key: postpath)
+social-mcp clients              list assistant setup status
+social-mcp install-client <id>  write that assistant's local config (server key: postpath)
+social-mcp install-cursor       same as install-client cursor
 social-mcp init                 create vault
 social-mcp status
 social-mcp connect <id>         CLI fallback

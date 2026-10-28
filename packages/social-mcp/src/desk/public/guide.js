@@ -12,7 +12,7 @@ export const SCHEDULE_NOT_IN_GUIDE =
   "Not scheduled. A scheduled post sends only while PostPath is open and this computer is on. This guide does not schedule one.";
 
 export const AI_NOT_IN_APP =
-  "PostPath does not write the post. Enable PostPath in Cursor, restart Cursor, and paste a request there. The assistant must not publish unless you approve it. A config entry is not proof Cursor has connected.";
+  "PostPath does not write the post. Use Connect your AI assistant in the desk, restart that app, and paste a request there. The assistant must not publish unless you approve it. A settings file is not proof the app has connected.";
 
 export const SNAPCHAT_RESTRICTED = "Restricted. PostPath does not publish to Snapchat.";
 export const WHATSAPP_RESTRICTED = "Restricted. PostPath does not publish to WhatsApp.";
@@ -35,13 +35,13 @@ export const INTENTS = [
   {
     id: "ai",
     label: "Connect an AI",
-    detail: "Turn on the Cursor connector. PostPath does not write posts.",
+    detail: "Connect the assistant you already use. PostPath does not write posts.",
   },
 ];
 
 export const CREATION = [
   { id: "manual", label: "I'll write it", detail: "Use the title and description you entered." },
-  { id: "ai", label: "Ask Cursor for help", detail: AI_NOT_IN_APP },
+  { id: "ai", label: "Ask an assistant for help", detail: AI_NOT_IN_APP },
 ];
 
 const CHANNELS = [
@@ -214,7 +214,7 @@ export function leaveBlocker(guide, { hasProfile = false } = {}) {
       return "Choose a suggested request or describe the idea.";
     }
   }
-  if (guide.step === "creation" && !guide.creation) return "Choose whether you will write it, or ask Cursor for help.";
+  if (guide.step === "creation" && !guide.creation) return "Choose whether you will write it, or ask an assistant for help.";
   return "";
 }
 
@@ -320,8 +320,14 @@ export function reviewView(guide, status = {}, { hasFile = false } = {}) {
     canSave: plans.length > 0 && blockers.length === 0,
     blockers,
     cursorInstalled: Boolean(status.cursor?.installed),
+    assistantConfigured: assistantConfigured(status),
     aiNote: guide.creation === "ai" ? AI_NOT_IN_APP : "",
   };
+}
+
+export function assistantConfigured(status = {}) {
+  if (status.cursor?.installed) return true;
+  return (status.clients || []).some((client) => client.mode === "write" && client.installed);
 }
 
 export function suggestedRequests(guide, status = {}) {
@@ -333,17 +339,17 @@ export function suggestedRequests(guide, status = {}) {
       show: guide.intent === "video" || Boolean(guide.filename),
       runsInPostPath: false,
       note: connected
-        ? "Copy this into Cursor. PostPath does not run it and does not publish."
-        : "No channel is connected yet. You can still copy this into Cursor to draft a title and description. It will not post anywhere.",
+        ? "Copy this into your assistant. PostPath does not run it and does not publish."
+        : "No channel is connected yet. You can still copy this into your assistant to draft a title and description. It will not post anywhere.",
     },
     {
       id: "do-not-publish",
       text: SUGGESTED_DO_NOT_PUBLISH,
       show: true,
       runsInPostPath: false,
-      note: status.cursor?.installed
-        ? "PostPath is listed in Cursor's config file. Restart Cursor, then paste this. That file is not proof Cursor is connected."
-        : "Enable PostPath in Cursor first, restart Cursor, then paste this. PostPath will not send it.",
+      note: assistantConfigured(status)
+        ? "PostPath is listed in an assistant's settings. Restart that app, then paste this. That file is not proof the app has connected."
+        : "Use Connect your AI assistant in the desk, restart that app, then paste this. PostPath will not send it.",
     },
   ];
   return items.filter((item) => item.show);
