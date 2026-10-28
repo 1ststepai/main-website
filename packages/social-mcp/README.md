@@ -164,7 +164,23 @@ social-mcp connect <id>         CLI fallback
 
 ## MCP tools (for agents)
 
-`status`, `upsert_profile`, `list_accounts`, `connect_accounts`, `connect_bluesky`, `create_draft`, `update_draft`, `schedule_post`, `cancel_scheduled_post`, `publish_post`, `publish_due`, `list_posts`, `get_post_status`
+`status`, `upsert_profile`, `list_accounts`, `connect_accounts`, `connect_bluesky`, `create_draft`, `create_post`, `attach_vidiq_check`, `update_draft`, `schedule_post`, `cancel_scheduled_post`, `publish_post`, `publish_due`, `list_posts`, `get_post_status`
+
+## One post, many platforms
+
+`create_draft` with `platform` still saves one network. `create_draft` or `create_post` with `platforms: ["youtube", "facebook", "instagram"]` saves one draft: one media file, one shared caption, and optional `overrides` per platform. That call does not publish.
+
+YouTube privacy defaults to private. Facebook stays a Page draft unless `facebook_public` is true or the Facebook override sets privacy to public. Instagram is public-only. The draft stores `instagram_public_confirmed`; approval refuses to run until that is true.
+
+Approve once in the desk. PostPath publishes each selected platform on its own. One failure does not stop the others. Each platform keeps its own Posted, Draft, Needs review, Failed, or Rate limited result.
+
+The approval queue lists waiting drafts for every brand, including drafts an AI client saved (`source: "mcp"`, labeled From AI). Approve and post now, or approve for a date and time. Edit returns to the composer. Discard drops a draft that has not been sent.
+
+## vidIQ and presets
+
+A YouTube target cannot be approved or published until a vidIQ check is attached when the profile requires it. `require_vidiq` is on by default for the profile id `1ststep-ai` and off for everyone else until you set it. `attach_vidiq_check` takes `score`, `notes`, and optional `checked_at`. The desk also has fields to paste the score and notes.
+
+`upsert_profile` accepts `presets`: `platforms`, `privacy_status`, `hashtags`, and `caption_footer`. New multi-platform drafts pick up the footer and hashtags. Default platforms are YouTube, Facebook, and Instagram. Privacy in the preset still defaults to private.
 
 ## Scheduling
 

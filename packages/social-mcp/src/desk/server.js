@@ -209,6 +209,7 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
       connections: status.connections,
       platforms: status.platforms,
       scheduled_posts,
+      queue: engine.listQueue().queue,
       due_interval_ms: dueIntervalMs,
       oauth: publicOAuthConfig(envValues),
       oauth_ready: ready,
@@ -237,6 +238,8 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
         const result = await engine.upsertProfile({
           id: body.id || body.profile_id,
           name: body.name,
+          require_vidiq: typeof body.require_vidiq === "boolean" ? body.require_vidiq : undefined,
+          presets: body.presets,
         });
         sendJson(res, 200, { ok: true, ...result, ...snapshot() });
         return;
@@ -306,24 +309,66 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
         const name = String(body.name || profileId).trim();
         if (!profileId) throw mcpError("invalid_profile", "Profile id is required.");
         await engine.upsertProfile({ id: profileId, name });
+        const tags = Array.isArray(body.tags)
+          ? body.tags
+          : String(body.tags || "")
+              .split(",")
+              .map((tag) => tag.trim())
+              .filter(Boolean);
         const created = await engine.createDraft({
           profile_id: profileId,
-          platform: body.platform || "youtube",
+          platform: body.platforms ? undefined : body.platform || "youtube",
+          platforms: body.platforms,
+          overrides: body.overrides,
           title: body.title,
           description: body.description,
-          caption: body.caption,
-          tags: Array.isArray(body.tags)
-            ? body.tags
-            : String(body.tags || "")
-                .split(",")
-                .map((tag) => tag.trim())
-                .filter(Boolean),
+          caption: body.caption || body.description,
+          tags,
           privacy_status: body.privacy_status,
           media_path: body.media_path,
           media_url: body.media_url,
           media_content_type: body.media_content_type,
+          instagram_public_confirmed: body.instagram_public_confirmed === true,
+          facebook_public: body.facebook_public === true,
+          vidiq: body.vidiq,
+          source: "desk",
         });
         sendJson(res, 200, { ok: true, ...created, ...snapshot() });
+        return;
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/approve") {
+        const body = await readJson(req);
+        if (body.bundle_id) {
+          const result = await engine.approveBundle({
+            bundle_id: body.bundle_id,
+            scheduled_at: body.scheduled_at,
+            instagram_public_confirmed: body.instagram_public_confirmed === true,
+          });
+          sendJson(res, 200, { ok: true, ...result, ...snapshot() });
+          return;
+        }
+        if (body.scheduled_at) {
+          const result = await engine.schedulePost({ post_id: body.post_id, scheduled_at: body.scheduled_at });
+          sendJson(res, 200, { ok: true, ...result, ...snapshot() });
+          return;
+        }
+        const result = await engine.publishPost({ post_id: body.post_id, force: true });
+        sendJson(res, 200, { ok: true, ...result, ...snapshot() });
+        return;
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/discard") {
+        const body = await readJson(req);
+        const result = await engine.discardItem({ bundle_id: body.bundle_id, post_id: body.post_id });
+        sendJson(res, 200, { ok: true, ...result, ...snapshot() });
+        return;
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/vidiq") {
+        const body = await readJson(req);
+        const result = await engine.attachVidiqCheck(body);
+        sendJson(res, 200, { ok: true, ...result, ...snapshot() });
         return;
       }
 

@@ -3,6 +3,7 @@ import { decryptJson, encryptJson, loadOrCreateKey } from "./crypto.js";
 import { mcpError } from "./errors.js";
 import { paths } from "./home.js";
 import { socialId } from "./ids.js";
+import { defaultPresets } from "./multiPost.js";
 
 export const POST_STATUSES = [
   "draft",
@@ -20,6 +21,7 @@ function emptyDb() {
     profiles: {},
     connections: {},
     posts: {},
+    bundles: {},
     audit: [],
   };
 }
@@ -122,7 +124,7 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
     return db.profiles[String(profileId || "")] || null;
   }
 
-  function upsertProfile({ id, name }) {
+  function upsertProfile({ id, name, require_vidiq, presets } = {}) {
     const profileId = normalizeProfileId(id);
     if (profileId.length < 2 || !/^[a-z0-9]/.test(profileId)) {
       throw mcpError("invalid_profile", "Profile id must be 2–64 chars: letters, numbers, _ or -.");
@@ -130,11 +132,18 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
     const stamp = new Date(now()).toISOString();
     const existing = db.profiles[profileId];
     const profile = {
+      ...(existing || {}),
       id: profileId,
       name: String(name || existing?.name || profileId).trim().slice(0, 120) || profileId,
       created_at: existing?.created_at || stamp,
       updated_at: stamp,
+      presets: existing?.presets || defaultPresets(),
     };
+    if (typeof require_vidiq === "boolean") profile.require_vidiq = require_vidiq;
+    else if (profile.require_vidiq === undefined && profileId === "1ststep-ai") profile.require_vidiq = true;
+    if (presets && typeof presets === "object") {
+      profile.presets = { ...defaultPresets(), ...existing?.presets, ...presets };
+    }
     db.profiles[profileId] = profile;
     persist();
     return profile;
@@ -262,6 +271,38 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
     return inFlight.has(String(postId || ""));
   }
 
+  function listBundles() {
+    return Object.values(db.bundles || {}).sort((a, b) => String(b.updated_at).localeCompare(String(a.updated_at)));
+  }
+
+  function getBundle(bundleId) {
+    return (db.bundles || {})[String(bundleId || "")] || null;
+  }
+
+  function saveBundle(bundle) {
+    return locked(() => {
+      if (!db.bundles) db.bundles = {};
+      db.bundles[bundle.id] = bundle;
+      persist();
+      return { ...bundle };
+    });
+  }
+
+  function deletePost(postId) {
+    return locked(() => {
+      delete db.posts[String(postId || "")];
+      persist();
+    });
+  }
+
+  function deleteBundle(bundleId) {
+    return locked(() => {
+      if (!db.bundles) return;
+      delete db.bundles[String(bundleId || "")];
+      persist();
+    });
+  }
+
   function appendAudit(entry) {
     db.audit.push(entry);
     if (db.audit.length > 1000) db.audit = db.audit.slice(-1000);
@@ -292,6 +333,11 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
     listPosts,
     getPost,
     savePost,
+    deletePost,
+    listBundles,
+    getBundle,
+    saveBundle,
+    deleteBundle,
     claimPost,
     compareAndSetPost,
     releaseClaim,
@@ -313,6 +359,7 @@ function loadDb(file) {
       profiles: parsed.profiles || {},
       connections: parsed.connections || {},
       posts: parsed.posts || {},
+      bundles: parsed.bundles || {},
       audit: Array.isArray(parsed.audit) ? parsed.audit : [],
     };
   } catch {

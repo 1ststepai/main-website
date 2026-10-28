@@ -79,11 +79,10 @@
             </div>
             <button type="submit" class="btn primary" id="save-draft" form="youtube-form">Save draft</button>
           </div>
-          <div class="composer-tools">
-            <p class="hint" id="youtube-readiness">
-              YouTube sign-in needs a Google OAuth Desktop client saved on this computer. PostPath does not include a Google app.
-            </p>
-            <button type="button" class="btn secondary" id="connect-youtube">Connect YouTube</button>
+          <div class="toggles" id="platform-toggles" role="group" aria-label="Platforms">
+            <label class="toggle"><input type="checkbox" name="target-youtube" value="youtube" checked /> YouTube</label>
+            <label class="toggle"><input type="checkbox" name="target-facebook" value="facebook" checked /> Facebook</label>
+            <label class="toggle"><input type="checkbox" name="target-instagram" value="instagram" checked /> Instagram</label>
           </div>
           <form id="youtube-form" class="oauth-form">
             <div class="pair">
@@ -101,7 +100,23 @@
               <label>Tags <input name="tags" placeholder="comma, separated" maxlength="400" /></label>
               <label>Video file <input name="video" type="file" accept="video/mp4,video/*" /></label>
             </div>
+            <label class="check" id="instagram-confirm-label">
+              <input type="checkbox" id="instagram-confirm" />
+              Instagram goes public when you approve. Facebook stays a Page draft unless you choose Public below.
+            </label>
+            <label class="check">
+              <input type="checkbox" id="facebook-public" />
+              Facebook public
+            </label>
+            <div class="vidiq-row" id="vidiq-row">
+              <label>vidIQ score <input id="vidiq-score" inputmode="decimal" placeholder="Score" /></label>
+              <label>vidIQ notes <input id="vidiq-notes" placeholder="Paste the vidIQ result" maxlength="2000" /></label>
+            </div>
           </form>
+          <p class="hint" id="youtube-readiness">
+            YouTube sign-in needs a Google OAuth Desktop client saved on this computer. PostPath does not include a Google app.
+          </p>
+          <button type="button" class="btn tiny" id="connect-youtube">Connect YouTube</button>
         </section>
 
         <section class="panel approval" aria-labelledby="approval-title">
@@ -112,12 +127,14 @@
             </div>
           </div>
           <p class="approval-line">Nothing posts without your approval.</p>
-          <p class="hint">Save a draft first. Publish sends only that draft, and only when you press the button.</p>
-          <div class="approval-block">
+          <p class="hint">One approval posts every selected platform. A failure on one does not stop the others.</p>
+          <ul class="queue-list" id="queue-list"></ul>
+          <p class="hint" id="queue-empty">No drafts waiting. Saved drafts and AI drafts show up here.</p>
+          <div class="approval-block" hidden>
             <p class="hint" id="draft-result">No draft yet. Publishing uses the draft you just saved.</p>
             <button type="button" class="btn primary" id="publish-draft" disabled>Publish this draft</button>
           </div>
-          <div class="approval-block">
+          <div class="approval-block" hidden>
             <p class="hint" id="meta-result">No Meta draft yet.</p>
             <button type="button" class="btn secondary" id="publish-meta" disabled>Publish this draft</button>
           </div>

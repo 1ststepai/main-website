@@ -39,6 +39,15 @@ export function createSocialMcpServer({ engine } = {}) {
     {
       id: z.string().min(2).max(64).describe("Stable profile id, e.g. swingtradepros or acme"),
       name: z.string().min(1).max(120).optional().describe("Display name"),
+      require_vidiq: z.boolean().optional().describe("YouTube cannot be approved until a vidIQ check is attached. Defaults on for 1ststep-ai."),
+      presets: z
+        .object({
+          platforms: z.array(z.enum(PLATFORMS)).max(8).optional(),
+          privacy_status: z.enum(["private", "unlisted", "public"]).optional(),
+          hashtags: z.array(z.string().max(40)).max(30).optional(),
+          caption_footer: z.string().max(500).optional(),
+        })
+        .optional(),
     },
     tool(async (args) => eng.upsertProfile(args)),
   );
@@ -93,22 +102,70 @@ export function createSocialMcpServer({ engine } = {}) {
     ),
   );
 
-  server.tool(
-    "create_draft",
-    "Create a local draft post for a profile and platform. YouTube uses media_path. Instagram and Facebook use a local media_path (uploaded to Meta) or an https media_url.",
-    {
-      profile_id: z.string().min(2).max(64),
-      platform: z.enum(PLATFORMS),
+  const platformOverride = z
+    .object({
       title: z.string().max(100).optional(),
       description: z.string().max(5000).optional(),
       caption: z.string().max(2200).optional(),
       tags: z.array(z.string().max(40)).max(30).optional(),
       privacy_status: z.enum(["private", "unlisted", "public"]).optional(),
-      media_path: z.string().optional(),
-      media_url: z.string().url().optional(),
-      media_content_type: z.string().optional(),
+    })
+    .optional();
+
+  const draftShape = {
+    profile_id: z.string().min(2).max(64),
+    platform: z.enum(PLATFORMS).optional().describe("Single-platform draft. Omit when platforms is set."),
+    platforms: z
+      .array(z.enum(PLATFORMS))
+      .min(1)
+      .max(8)
+      .optional()
+      .describe("One post for many platforms. One media file, shared caption, per-platform overrides."),
+    overrides: z
+      .object({
+        youtube: platformOverride,
+        facebook: platformOverride,
+        instagram: platformOverride,
+        tiktok: platformOverride,
+      })
+      .optional(),
+    title: z.string().max(100).optional(),
+    description: z.string().max(5000).optional(),
+    caption: z.string().max(2200).optional(),
+    tags: z.array(z.string().max(40)).max(30).optional(),
+    privacy_status: z.enum(["private", "unlisted", "public"]).optional(),
+    media_path: z.string().optional(),
+    media_url: z.string().url().optional(),
+    media_content_type: z.string().optional(),
+    instagram_public_confirmed: z.boolean().optional().describe("Required later to approve an Instagram target. Instagram publishes public."),
+    facebook_public: z.boolean().optional().describe("Facebook stays a Page draft unless this is true."),
+  };
+
+  server.tool(
+    "create_draft",
+    "Create a local draft. Pass platform for one network, or platforms for one video on many networks. Does not publish. YouTube defaults to private. Instagram stays unapproved until instagram_public_confirmed. Facebook stays a Page draft unless facebook_public or an override sets privacy public.",
+    draftShape,
+    tool(async (args) => eng.createDraft({ ...args, source: "mcp" })),
+  );
+
+  server.tool(
+    "create_post",
+    "Same as create_draft with platforms. One media file and shared caption, optional overrides. Saves a draft for approval. Does not publish.",
+    draftShape,
+    tool(async (args) => eng.createDraft({ ...args, source: "mcp" })),
+  );
+
+  server.tool(
+    "attach_vidiq_check",
+    "Attach a vidIQ check to a YouTube draft or multi-platform post. Required before approval when the profile requires it (on by default for 1ststep-ai). Does not publish.",
+    {
+      post_id: z.string().min(8).optional(),
+      bundle_id: z.string().min(8).optional(),
+      score: z.number().optional(),
+      notes: z.string().max(2000).optional(),
+      checked_at: z.string().optional().describe("ISO time. Defaults to now."),
     },
-    tool(async (args) => eng.createDraft(args)),
+    tool(async (args) => eng.attachVidiqCheck(args)),
   );
 
   server.tool(

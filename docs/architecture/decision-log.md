@@ -1,5 +1,14 @@
 # Architecture Decision Log
 
+## 2026-10-28: One PostPath draft can publish to many platforms after approval
+
+- **Status / owner:** Draft, not deployed. Evan still owns any real upload and the vidIQ review.
+- **Decision:** A multi-platform draft stores one media file, a shared caption, and per-platform overrides. Create does not publish. One desk approval fans out to the selected platforms. Each platform keeps its own result, and one failure does not stop the others. YouTube stays private by default. Facebook stays a Page draft unless public is chosen. Instagram is public and needs an explicit confirmation on that post. YouTube approval is blocked until a vidIQ check is attached when the profile requires it. That requirement is on by default for the profile id `1ststep-ai`. The approval queue shows drafts from the desk and from MCP, and MCP drafts are labeled From AI. Single-platform `create_draft` and `publish_post` stay as they are.
+- **Rationale:** Posting one video to YouTube, Facebook, and Instagram as three separate drafts took more steps than the native apps.
+- **Affected systems:** `packages/social-mcp` engine, desk, and MCP tools. No live publish.
+- **Verification:** Unit tests for fan-out, partial failure, the queue, scheduling, discard, the Instagram confirmation, and the vidIQ gate. Mock mode only.
+- **Rollback:** Leave this draft unmerged.
+
 ## 2026-10-28: Non-Google OAuth redirect host can be localhost
 
 - **Status / owner:** Draft, not deployed. Evan owns the Meta app and any redirect registered in a developer console.

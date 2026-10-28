@@ -360,6 +360,7 @@ function renderStatus(data) {
   }
 
   renderScheduled(data.scheduled_posts);
+  renderQueue(data.queue);
   for (const node of document.querySelectorAll("[data-channel-status]")) {
     node.textContent = connectPlan(node.dataset.channelStatus, data).message;
   }
@@ -502,6 +503,7 @@ const youtubeForm = document.getElementById("youtube-form");
 const publishDraftButton = document.getElementById("publish-draft");
 const draftResult = document.getElementById("draft-result");
 let currentDraftId = "";
+let currentBundleId = "";
 let latestStatus = null;
 let guideFile = null;
 let guide = emptyGuide();
@@ -1074,25 +1076,42 @@ youtubeForm.addEventListener("submit", async (event) => {
       });
       mediaPath = saved.media.filename;
     }
+    const platforms = ["youtube", "facebook", "instagram"].filter(
+      (key) => document.querySelector(`[name="target-${key}"]`)?.checked,
+    );
+    if (!platforms.length) throw new Error("Pick at least one platform.");
+    const score = document.getElementById("vidiq-score")?.value.trim();
+    const notes = document.getElementById("vidiq-notes")?.value.trim();
     const data = await api("/api/draft", {
       method: "POST",
       body: JSON.stringify({
         id: profileId.value.trim(),
         name: profileName.value.trim() || profileId.value.trim(),
-        platform: "youtube",
+        platforms,
         title: String(form.get("title") || ""),
         description: String(form.get("description") || ""),
+        caption: String(form.get("description") || ""),
         tags: String(form.get("tags") || ""),
         privacy_status: String(form.get("privacy_status") || "private"),
         media_path: mediaPath || undefined,
         media_content_type: file && file.type ? file.type : "video/mp4",
+        instagram_public_confirmed: document.getElementById("instagram-confirm")?.checked === true,
+        facebook_public: document.getElementById("facebook-public")?.checked === true,
+        overrides: {
+          facebook: { caption: document.getElementById("facebook-caption")?.value || undefined },
+          instagram: { caption: document.getElementById("instagram-caption")?.value || undefined },
+        },
+        vidiq: score || notes ? { score: score ? Number(score) : undefined, notes } : undefined,
       }),
     });
     currentDraftId = data.post?.id || "";
+    currentBundleId = data.bundle?.id || "";
     const privacy = data.post?.privacy_status || "private";
-    draftResult.textContent = currentDraftId
-      ? `Draft ${currentDraftId} saved. Privacy is ${privacy}. Read it, then publish only if this is the approved video.`
-      : "Draft was not saved.";
+    draftResult.textContent = data.bundle
+      ? `Draft saved for ${(data.bundle.platforms || []).join(", ")}. Nothing posts until you approve it.`
+      : currentDraftId
+        ? `Draft ${currentDraftId} saved. Privacy is ${privacy}. Read it, then publish only if this is the approved video.`
+        : "Draft was not saved.";
     publishDraftButton.disabled = !currentDraftId;
     showToast("Draft saved on this computer");
   } catch (error) {
@@ -1102,7 +1121,179 @@ youtubeForm.addEventListener("submit", async (event) => {
   }
 });
 
+function renderQueue(items) {
+  const list = document.getElementById("queue-list");
+  const empty = document.getElementById("queue-empty");
+  if (!list) return;
+  list.replaceChildren();
+  const rows = Array.isArray(items) ? items : [];
+  if (empty) empty.hidden = rows.length > 0;
+  for (const item of rows) {
+    const li = document.createElement("li");
+    const top = document.createElement("div");
+    top.className = "queue-top";
+    const strong = document.createElement("strong");
+    strong.textContent = `${item.profile_name || item.profile_id}: ${item.title || "Draft"}`;
+    top.append(strong);
+    if (item.source === "mcp") {
+      const ai = document.createElement("span");
+      ai.className = "chip ai";
+      ai.textContent = "From AI";
+      top.append(ai);
+    }
+    if (item.vidiq_needed) {
+      const chip = document.createElement("span");
+      chip.className = "chip vidiq";
+      chip.textContent = "vidIQ check needed";
+      top.append(chip);
+    }
+    for (const target of item.platforms || []) {
+      top.append(platformIcon(target.platform));
+    }
+    const actions = document.createElement("div");
+    actions.className = "queue-actions";
+    const now = document.createElement("button");
+    now.type = "button";
+    now.className = "btn primary approve-now";
+    now.dataset.id = item.id;
+    now.dataset.kind = item.kind;
+    now.textContent = "Approve and post now";
+    const when = document.createElement("input");
+    when.type = "datetime-local";
+    when.className = "queue-when";
+    when.setAttribute("aria-label", `Approve ${item.title || "draft"} for date and time`);
+    const later = document.createElement("button");
+    later.type = "button";
+    later.className = "btn secondary approve-later";
+    later.dataset.id = item.id;
+    later.dataset.kind = item.kind;
+    later.textContent = "Approve for time";
+    const edit = document.createElement("button");
+    edit.type = "button";
+    edit.className = "btn tiny edit-queue";
+    edit.dataset.id = item.id;
+    edit.dataset.kind = item.kind;
+    edit.textContent = "Edit";
+    const discard = document.createElement("button");
+    discard.type = "button";
+    discard.className = "btn danger discard-queue";
+    discard.dataset.id = item.id;
+    discard.dataset.kind = item.kind;
+    discard.textContent = "Discard";
+    actions.append(now, when, later, edit, discard);
+    if (item.instagram_needs_confirm) {
+      const label = document.createElement("label");
+      label.className = "check";
+      const box = document.createElement("input");
+      box.type = "checkbox";
+      box.className = "queue-ig";
+      label.append(box, document.createTextNode("Instagram will be public"));
+      actions.append(label);
+    }
+    li.append(top, actions);
+    list.append(li);
+  }
+}
+
+function isoFromLocal(value) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(String(value || ""));
+  if (!match) throw new Error("Pick a date and time.");
+  const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]), Number(match[4]), Number(match[5]));
+  if (!Number.isFinite(date.getTime())) throw new Error("Pick a date and time.");
+  return date.toISOString();
+}
+
+async function approveQueue(button, scheduledAt) {
+  const row = button.closest("li");
+  const kind = button.dataset.kind;
+  const id = button.dataset.id;
+  const confirmed = row?.querySelector(".queue-ig")?.checked === true || document.getElementById("instagram-confirm")?.checked === true;
+  button.disabled = true;
+  try {
+    const score = document.getElementById("vidiq-score")?.value.trim();
+    const notes = document.getElementById("vidiq-notes")?.value.trim();
+    if (kind === "bundle" && (score || notes)) {
+      await api("/api/vidiq", {
+        method: "POST",
+        body: JSON.stringify({ bundle_id: id, score: score ? Number(score) : undefined, notes }),
+      });
+    }
+    const data = await api("/api/approve", {
+      method: "POST",
+      body: JSON.stringify({
+        bundle_id: kind === "bundle" ? id : undefined,
+        post_id: kind === "post" ? id : undefined,
+        scheduled_at: scheduledAt || undefined,
+        instagram_public_confirmed: confirmed,
+      }),
+    });
+    renderStatus(data);
+    const failed = (data.results || []).filter((item) => item.ok === false);
+    showToast(scheduledAt ? "Approved for that time. Nothing is posted yet." : failed.length ? "Approved. Check each platform in Results." : "Approved and sent. Nothing posted before this click.");
+  } catch (error) {
+    showToast(error.message, true);
+    button.disabled = false;
+  }
+}
+
+document.getElementById("queue-list")?.addEventListener("click", (event) => {
+  const now = event.target.closest(".approve-now");
+  const later = event.target.closest(".approve-later");
+  const discard = event.target.closest(".discard-queue");
+  const edit = event.target.closest(".edit-queue");
+  if (now) {
+    approveQueue(now).catch((error) => showToast(error.message, true));
+    return;
+  }
+  if (later) {
+    const when = later.parentElement?.querySelector(".queue-when")?.value;
+    approveQueue(later, isoFromLocal(when)).catch((error) => showToast(error.message, true));
+    return;
+  }
+  if (edit) {
+    document.getElementById("youtube-title")?.scrollIntoView({ block: "center" });
+    showToast("Edit the composer, then save the draft again.");
+    return;
+  }
+  if (!discard) return;
+  discard.disabled = true;
+  api("/api/discard", {
+    method: "POST",
+    body: JSON.stringify({
+      bundle_id: discard.dataset.kind === "bundle" ? discard.dataset.id : undefined,
+      post_id: discard.dataset.kind === "post" ? discard.dataset.id : undefined,
+    }),
+  })
+    .then((data) => {
+      renderStatus(data);
+      showToast("Draft discarded");
+    })
+    .catch((error) => {
+      showToast(error.message, true);
+      discard.disabled = false;
+    });
+});
+
 publishDraftButton.addEventListener("click", async () => {
+  if (currentBundleId) {
+    publishDraftButton.disabled = true;
+    try {
+      const data = await api("/api/approve", {
+        method: "POST",
+        body: JSON.stringify({
+          bundle_id: currentBundleId,
+          instagram_public_confirmed: document.getElementById("instagram-confirm")?.checked === true,
+        }),
+      });
+      renderStatus(data);
+      draftResult.textContent = "Approved. Each platform has its own result.";
+      showToast("Approved and sent");
+    } catch (error) {
+      showToast(error.message, true);
+      publishDraftButton.disabled = false;
+    }
+    return;
+  }
   if (!currentDraftId) return;
   const privacy = String(new FormData(youtubeForm).get("privacy_status") || "private");
   if (privacy !== "private") {

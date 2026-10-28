@@ -18,6 +18,15 @@ import { publishSnapchatScaffold, publishWhatsAppScaffold } from "./publish/rest
 import { validateDraftForPublish } from "./publish/validate.js";
 import { displayOutcome, publishMode } from "./publish/outcome.js";
 import { assertActionAllowed, assertProfileAllowed, getEntitlement } from "./license.js";
+import {
+  applyPresets,
+  childFields,
+  knownPlatforms,
+  profileRequiresVidiq,
+  queueItems,
+  rollupStatus,
+  vidiqRecord,
+} from "./multiPost.js";
 
 const ISO_OFFSET = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$/i;
 const DISPATCH_STARTED_MESSAGE =
@@ -201,7 +210,78 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
     };
   }
 
+  function stampPost(fields, profile, source) {
+    const stamp = new Date(now()).toISOString();
+    return {
+      id: store.newId("post"),
+      profile_id: profile.id,
+      status: "draft",
+      scheduled_at: null,
+      published_url: null,
+      platform_post_id: null,
+      error: null,
+      created_at: stamp,
+      updated_at: stamp,
+      source: source || undefined,
+      ...fields,
+    };
+  }
+
+  async function createMultiDraft(input) {
+    const profile = requireProfile(input.profile_id);
+    const shaped = applyPresets(input, profile.presets);
+    const platforms = knownPlatforms(shaped.platforms);
+    if (!platforms.length) throw mcpError("invalid_platform", `Platform must be one of: ${PLATFORMS.join(", ")}`);
+    const stamp = new Date(now()).toISOString();
+    const source = input.source === "mcp" ? "mcp" : "desk";
+    const bundle = {
+      id: store.newId("bnd"),
+      profile_id: profile.id,
+      status: "draft",
+      source,
+      title: shaped.title,
+      description: String(shaped.description || "").slice(0, 5000),
+      caption: String(shaped.caption || "").slice(0, 2200),
+      tags: shaped.tags.map((tag) => String(tag).slice(0, 40)).slice(0, 30),
+      privacy_status: shaped.privacy_status || "private",
+      platforms,
+      overrides: input.overrides && typeof input.overrides === "object" ? input.overrides : {},
+      media_path: optionalMediaPath(input.media_path, mediaRoot),
+      media_url: input.media_url ? String(input.media_url).slice(0, 2000) : null,
+      media_content_type: String(input.media_content_type || "video/mp4").slice(0, 80),
+      instagram_public_confirmed: input.instagram_public_confirmed === true,
+      vidiq: vidiqRecord(input.vidiq || {}, stamp),
+      child_ids: {},
+      scheduled_at: null,
+      created_at: stamp,
+      updated_at: stamp,
+    };
+    if (input.facebook_public === true) {
+      bundle.overrides = { ...bundle.overrides, facebook: { ...(bundle.overrides.facebook || {}), privacy_status: "public" } };
+    }
+    const posts = [];
+    for (const platform of platforms) {
+      const post = stampPost(childFields(bundle, platform), profile, source);
+      if (bundle.vidiq) post.vidiq = bundle.vidiq;
+      store.savePost(post, { create: true });
+      bundle.child_ids[platform] = post.id;
+      posts.push(post);
+    }
+    store.saveBundle(bundle);
+    store.appendAudit({
+      id: store.newId("aud"),
+      at: stamp,
+      action: "draft_created",
+      profile_id: profile.id,
+      post_id: bundle.id,
+      platform: platforms.join(","),
+      detail: source,
+    });
+    return { bundle, posts, post: posts[0] };
+  }
+
   async function createDraft(input) {
+    if (Array.isArray(input?.platforms) && input.platforms.length) return createMultiDraft(input);
     const profile = requireProfile(input.profile_id);
     const platform = String(input.platform || "");
     if (!PLATFORMS.includes(platform)) throw mcpError("invalid_platform", `Platform must be one of: ${PLATFORMS.join(", ")}`);
@@ -219,6 +299,7 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
       media_path: optionalMediaPath(input.media_path, mediaRoot),
       media_url: input.media_url ? String(input.media_url).slice(0, 2000) : null,
       media_content_type: String(input.media_content_type || "video/mp4").slice(0, 80),
+      source: input.source === "mcp" ? "mcp" : undefined,
       scheduled_at: null,
       published_url: null,
       platform_post_id: null,
@@ -526,10 +607,155 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
     store.savePost(working);
   }
 
+  function assertYouTubeVidiq(post) {
+    if (post.platform !== "youtube") return;
+    const profile = store.getProfile(post.profile_id);
+    if (!profileRequiresVidiq(profile)) return;
+    const bundle = post.bundle_id ? store.getBundle(post.bundle_id) : null;
+    const check = bundle?.vidiq || post.vidiq;
+    if (!check?.checked_at) {
+      throw mcpError(
+        "vidiq_required",
+        "YouTube needs a vidIQ check before this can be approved or published.",
+        409,
+      );
+    }
+  }
+
+  function refreshBundle(bundleId) {
+    const bundle = store.getBundle(bundleId);
+    if (!bundle) return null;
+    const children = Object.values(bundle.child_ids || {})
+      .map((id) => store.getPost(id))
+      .filter(Boolean);
+    bundle.status = rollupStatus(children);
+    bundle.updated_at = new Date(now()).toISOString();
+    store.saveBundle(bundle);
+    return bundle;
+  }
+
+  async function approveBundle({ bundle_id, scheduled_at, instagram_public_confirmed } = {}) {
+    const bundle = store.getBundle(bundle_id);
+    if (!bundle) throw mcpError("not_found", "Draft not found.", 404);
+    if (!["draft", "scheduled", "partial"].includes(bundle.status)) {
+      throw mcpError("invalid_status", "That draft can no longer be approved.", 409);
+    }
+    if (bundle.platforms?.includes("instagram")) {
+      const confirmed = instagram_public_confirmed === true || bundle.instagram_public_confirmed === true;
+      if (!confirmed) {
+        throw mcpError(
+          "instagram_confirm_required",
+          "Instagram publishes as a public Reel. Confirm that on this post before approval.",
+          409,
+        );
+      }
+      bundle.instagram_public_confirmed = true;
+      store.saveBundle(bundle);
+    }
+    const profile = store.getProfile(bundle.profile_id);
+    if (bundle.platforms?.includes("youtube") && profileRequiresVidiq(profile) && !bundle.vidiq?.checked_at) {
+      throw mcpError("vidiq_required", "YouTube needs a vidIQ check before this can be approved or published.", 409);
+    }
+    const children = (bundle.platforms || [])
+      .map((platform) => store.getPost(bundle.child_ids?.[platform]))
+      .filter(Boolean);
+    if (scheduled_at) {
+      const scheduled = [];
+      const errors = [];
+      for (const child of children) {
+        try {
+          scheduled.push(await schedulePost({ post_id: child.id, scheduled_at }));
+        } catch (error) {
+          errors.push({ ok: false, platform: child.platform, post_id: child.id, error: { code: error.code, message: error.message } });
+        }
+      }
+      const saved = store.getBundle(bundle.id);
+      const first = scheduled[0]?.post;
+      if (first?.scheduled_at) saved.scheduled_at = first.scheduled_at;
+      store.saveBundle(saved);
+      const next = refreshBundle(bundle.id);
+      return { bundle: next, scheduled: true, results: [...scheduled.map((row) => ({ ok: true, post: row.post })), ...errors] };
+    }
+    const results = [];
+    for (const child of children) {
+      try {
+        const published = await publishPost({ post_id: child.id });
+        results.push({ ok: true, platform: child.platform, post: published.post });
+      } catch (error) {
+        results.push({
+          ok: false,
+          platform: child.platform,
+          post_id: child.id,
+          error: { code: error.code || "publish_failed", message: error.message || "Publish failed." },
+        });
+      }
+    }
+    return { bundle: refreshBundle(bundle.id), results };
+  }
+
+  async function discardItem({ bundle_id, post_id } = {}) {
+    if (bundle_id) {
+      const bundle = store.getBundle(bundle_id);
+      if (!bundle) throw mcpError("not_found", "Draft not found.", 404);
+      for (const id of Object.values(bundle.child_ids || {})) {
+        const child = store.getPost(id);
+        if (child && ["draft", "scheduled", "failed"].includes(child.status)) store.deletePost(id);
+      }
+      bundle.status = "discarded";
+      bundle.updated_at = new Date(now()).toISOString();
+      store.saveBundle(bundle);
+      return { discarded: true, bundle };
+    }
+    const post = store.getPost(post_id);
+    if (!post) throw mcpError("not_found", "Post not found.", 404);
+    if (!["draft", "scheduled", "failed"].includes(post.status)) {
+      throw mcpError("invalid_status", "Only a draft, scheduled, or failed post can be discarded.", 409);
+    }
+    store.deletePost(post.id);
+    return { discarded: true, post_id: post.id };
+  }
+
+  async function attachVidiqCheck(input = {}) {
+    const record = vidiqRecord(input, new Date(now()).toISOString());
+    if (!record) throw mcpError("invalid_vidiq", "vidIQ check needs checked_at or it is stamped now.", 400);
+    if (!input.checked_at) record.checked_at = new Date(now()).toISOString();
+    const bundle = input.bundle_id ? store.getBundle(input.bundle_id) : input.post_id ? store.getBundle(store.getPost(input.post_id)?.bundle_id) : null;
+    if (bundle) {
+      bundle.vidiq = record;
+      bundle.updated_at = record.checked_at;
+      store.saveBundle(bundle);
+      const youtubeId = bundle.child_ids?.youtube;
+      const youtube = youtubeId ? store.getPost(youtubeId) : null;
+      if (youtube && ["draft", "scheduled", "failed"].includes(youtube.status)) {
+        youtube.vidiq = record;
+        youtube.updated_at = record.checked_at;
+        store.savePost(youtube);
+      }
+      return { bundle, vidiq: record };
+    }
+    const post = store.getPost(input.post_id);
+    if (!post) throw mcpError("not_found", "Post not found.", 404);
+    post.vidiq = record;
+    post.updated_at = record.checked_at;
+    store.savePost(post);
+    return { post, vidiq: record };
+  }
+
+  function listQueue() {
+    return {
+      queue: queueItems({
+        bundles: store.listBundles(),
+        posts: store.listPosts(),
+        profiles: store.listProfiles(),
+      }),
+    };
+  }
+
   async function publishPost({ post_id, force = false, acknowledge = false, claimFrom = null } = {}) {
     const post = store.getPost(post_id);
     if (!post) throw mcpError("not_found", "Post not found.", 404);
     assertActionAllowed("publish", getEntitlement(env));
+    assertYouTubeVidiq(post);
     assertPublishable(post, force, acknowledge);
     if (claimFrom && !claimFrom.includes(post.status)) {
       return { post, skipped: "cancelled_before_dispatch" };
@@ -590,6 +816,7 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
       throw error;
     } finally {
       store.releaseClaim(working.id);
+      if (working.bundle_id) refreshBundle(working.bundle_id);
     }
   }
 
@@ -628,6 +855,10 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
     connectBluesky,
     createDraft,
     updateDraft,
+    approveBundle,
+    discardItem,
+    attachVidiqCheck,
+    listQueue,
     schedulePost,
     cancelScheduledPost,
     getPostStatus,
