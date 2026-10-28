@@ -790,3 +790,14 @@ input:focus-visible, textarea:focus-visible, select:focus-visible, summary:focus
   }
   .btn:hover, .network-list li:hover, .guide-choice:hover { transform: none; }
 }
+
+.auto-post-list { display: grid; gap: 14px; }
+.auto-brand { border: 1px solid var(--line, rgba(194, 210, 255, 0.16)); border-radius: 16px; padding: 14px 16px; }
+.auto-brand h3 { margin: 0 0 8px; }
+.auto-conn { border-top: 1px solid rgba(194, 210, 255, 0.1); padding: 10px 0; display: grid; gap: 8px; }
+.auto-state { font-weight: 700; }
+.auto-state.on { color: #ff5a6a; }
+.auto-risk { color: #ff5a6a; font-weight: 700; margin: 0; }
+.auto-nets { display: flex; flex-wrap: wrap; gap: 10px; }
+.auto-pending { color: #ffd27a; }
+.auto-pin { display: flex; gap: 8px; align-items: center; margin: 8px 0 12px; }

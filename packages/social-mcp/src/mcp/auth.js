@@ -174,7 +174,7 @@ export function takeConsent(store, id) {
   });
 }
 
-export function issueCode(store, consent, scopes) {
+export function issueCode(store, consent, scopes, { autoPost = null } = {}) {
   const code = randomId("pp_code_", 32);
   const record = {
     client_id: consent.client_id,
@@ -185,6 +185,7 @@ export function issueCode(store, consent, scopes) {
     expires_at: Date.now() + CODE_TTL_MS,
     used: false,
   };
+  if (autoPost) record.auto_post = autoPost;
   store.withMcpAuth((auth) => {
     auth.codes[tokenHash(code)] = record;
   });
@@ -281,7 +282,12 @@ export function exchangeCode(store, { code, redirectUri, verifier, resource }) {
       throw error;
     }
     record.used = true;
-    return { ...issueGrant(auth, { clientId: record.client_id, scope: record.scope, resource: record.resource }), token_type: "Bearer" };
+    const tokens = { ...issueGrant(auth, { clientId: record.client_id, scope: record.scope, resource: record.resource }), token_type: "Bearer" };
+    const grantId = auth.tokens[tokenHash(tokens.access_token)]?.grant_id;
+    // Kept off the JSON token response: the HTTP layer uses these to record an owner-approved auto-post choice.
+    Object.defineProperty(tokens, "grantId", { value: grantId, enumerable: false });
+    Object.defineProperty(tokens, "autoPost", { value: record.auto_post || null, enumerable: false });
+    return tokens;
   });
 }
 
@@ -298,13 +304,13 @@ export function authenticateBearer(store, presented, resource) {
         if (row) row.last_used_at = new Date().toISOString();
       });
     }
-    return { kind: "pat", clientId: pat.id, scopes: pat.scopes, tokenHash: hash };
+    return { kind: "pat", clientId: pat.id, connectionId: pat.id, scopes: pat.scopes, tokenHash: hash };
   }
   const token = auth.tokens?.[hash];
   const grant = token ? auth.grants?.[token.grant_id] : null;
   if (!token || token.kind !== "access" || !grant || grant.revoked || token.expires_at < Date.now()) return null;
   if (grant.resource !== resource) return null;
-  return { kind: "oauth", clientId: grant.client_id, scopes: grant.scope, tokenHash: hash, resource: grant.resource };
+  return { kind: "oauth", clientId: grant.client_id, connectionId: token.grant_id, scopes: grant.scope, tokenHash: hash, resource: grant.resource };
 }
 
 export function createPat(store, { name, scopes, expiresInDays } = {}) {
@@ -357,6 +363,19 @@ function publicPat(pat) {
     last_used_at: pat.last_used_at,
     created_at: pat.created_at,
   };
+}
+
+/** Active OAuth grants, for the desk's auto-post list. No token material. */
+export function listGrants(store) {
+  const auth = store.readMcpAuth();
+  return Object.entries(auth.grants || {})
+    .filter(([, grant]) => !grant.revoked)
+    .map(([id, grant]) => ({
+      id,
+      kind: "oauth",
+      name: auth.clients?.[grant.client_id]?.client_name || "MCP client",
+      scopes: grant.scope || [],
+    }));
 }
 
 export function canonicalResource(env, port) {

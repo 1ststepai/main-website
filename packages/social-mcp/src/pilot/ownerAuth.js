@@ -8,7 +8,7 @@ function authPath(homePaths) {
 }
 
 function pinPath(homePaths) {
-  return homePathFile(homePaths);
+  return pinPathFile(homePaths);
 }
 
 function pinPathFile(homePaths) {

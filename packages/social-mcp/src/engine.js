@@ -18,6 +18,8 @@ import { publishSnapchatScaffold, publishWhatsAppScaffold } from "./publish/rest
 import { validateDraftForPublish } from "./publish/validate.js";
 import { displayOutcome, publishMode } from "./publish/outcome.js";
 import { isPilotMode, PILOT_PUBLISH_MESSAGE } from "./pilot/config.js";
+import { containsBannedPromise } from "./pilot/captions.js";
+import { autoPostAllows } from "./autoPost.js";
 import { assertActionAllowed, assertProfileAllowed, getEntitlement } from "./license.js";
 import {
   applyPresets,
@@ -596,6 +598,7 @@ export function createEngine({
       media_url: input.media_url ? String(input.media_url).slice(0, 2000) : null,
       media_content_type: String(input.media_content_type || "video/mp4").slice(0, 80),
       source: ["mcp", "cli"].includes(input.source) ? input.source : undefined,
+      instagram_public_confirmed: platform === "instagram" && input.instagram_public_confirmed === true ? true : undefined,
       scheduled_at: null,
       published_url: null,
       platform_post_id: null,
@@ -1125,6 +1128,55 @@ export function createEngine({
     }
   }
 
+  /**
+   * Auto-post: publish fresh drafts from one connection only where the owner turned auto-post on
+   * for that brand and network. The usual gates still stop a post; a stopped post stays a draft.
+   */
+  async function autoPublishDrafts({ posts = [], connection_id } = {}) {
+    const results = [];
+    for (const draft of posts) {
+      if (!draft?.id) continue;
+      const base = { post_id: draft.id, platform: draft.platform };
+      // Read the setting fresh for every post so turning it off applies to the very next one.
+      if (!autoPostAllows(store, { profile_id: draft.profile_id, connection_id, platform: draft.platform })) {
+        results.push({ ...base, auto_post: "off" });
+        continue;
+      }
+      const hold = (code, message) => {
+        const current = store.getPost(draft.id);
+        if (current) {
+          current.auto_post = { status: "held", code, message, at: new Date(now()).toISOString() };
+          store.savePost(current);
+        }
+        results.push({ ...base, auto_post: "held", code, message });
+      };
+      if (pilotOn()) {
+        hold("pilot_publish_disabled", PILOT_PUBLISH_MESSAGE);
+        continue;
+      }
+      const current = store.getPost(draft.id);
+      const bundle = current?.bundle_id ? store.getBundle(current.bundle_id) : null;
+      if (current.platform === "instagram" && !(current.instagram_public_confirmed || bundle?.instagram_public_confirmed)) {
+        hold("instagram_public_unconfirmed", "Instagram posts are public. Confirm that before it can post.");
+        continue;
+      }
+      if (containsBannedPromise([current.title, current.caption, current.description].join("\n"))) {
+        hold("compliance_promise", "The text makes a promise PostPath will not auto-post. Edit it and approve it yourself.");
+        continue;
+      }
+      try {
+        const out = await publishPost({ post_id: draft.id });
+        const saved = store.getPost(draft.id) || out.post;
+        saved.auto_post = { status: "published", at: new Date(now()).toISOString() };
+        store.savePost(saved);
+        results.push({ ...base, auto_post: "published", status: saved.status, published_url: saved.published_url || null });
+      } catch (error) {
+        hold(error.code || "publish_failed", error.message);
+      }
+    }
+    return results;
+  }
+
   async function publishDue({ profile_id, limit = 5 } = {}) {
     if (pilotOn()) return { count: 0, results: [], quarantined: [], skipped: "pilot_publish_disabled" };
     const quarantined = quarantinePublishing(profile_id);
@@ -1331,6 +1383,8 @@ export function createEngine({
     listPosts,
     publishPost,
     publishDue,
+    autoPublishDrafts,
+    pilotOn,
     publisherCalls: () => publishStats.calls,
     statuses: POST_STATUSES,
   };

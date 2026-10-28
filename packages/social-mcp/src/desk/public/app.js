@@ -1825,3 +1825,114 @@ window.addEventListener("focus", () => {
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "visible") refresh().catch(() => {});
 });
+
+// Auto-post: owner-only. The assistant can request it; only this panel (or the consent screen) turns it on.
+const AUTO_NETWORKS = ["youtube", "facebook", "instagram", "tiktok", "linkedin", "x", "threads", "pinterest", "bluesky", "google_business", "reddit"];
+
+function autoPostPinHeaders() {
+  const pin = document.getElementById("auto-post-pin")?.value || "";
+  return { "content-type": "application/json", ...(pin ? { "x-postpath-owner-pin": pin } : {}) };
+}
+
+function el(tag, attrs = {}, text) {
+  const node = document.createElement(tag);
+  for (const [key, value] of Object.entries(attrs)) {
+    if (key === "className") node.className = value;
+    else if (key === "dataset") Object.assign(node.dataset, value);
+    else node.setAttribute(key, value);
+  }
+  if (text !== undefined) node.textContent = text;
+  return node;
+}
+
+function renderAutoPost(view) {
+  const list = document.getElementById("auto-post-list");
+  if (!list) return;
+  list.replaceChildren();
+  document.getElementById("auto-post-pin-row").hidden = !view.pin_required;
+  if (!view.brands.length) {
+    list.append(el("p", { className: "hint" }, "Add a brand first."));
+    return;
+  }
+  for (const brand of view.brands) {
+    const card = el("div", { className: "auto-brand", dataset: { profile: brand.profile_id } });
+    card.append(el("h3", {}, brand.name || brand.profile_id));
+    if (!brand.connections.length) card.append(el("p", { className: "hint" }, "No AI connections yet. Auto-post is off."));
+    for (const conn of brand.connections) {
+      const row = el("div", { className: "auto-conn", dataset: { connection: conn.connection_id } });
+      row.append(el("div", {}, `${conn.name} (${conn.kind === "pat" ? "access token" : conn.kind === "oauth" ? "OAuth" : "inactive"})`));
+      const state = conn.enabled
+        ? `On for ${conn.networks.join(", ")} since ${new Date(conn.enabled_at).toLocaleString()} (${conn.enabled_by})`
+        : "Off: every draft waits for your approval";
+      row.append(el("div", { className: `auto-state ${conn.enabled ? "on" : "off"}` }, state));
+      if (conn.pending_request) {
+        row.append(el("div", { className: "auto-pending" }, `Assistant asked for: ${conn.pending_request.networks.join(", ")} (${new Date(conn.pending_request.requested_at).toLocaleString()}). Not on until you confirm.`));
+      }
+      if (conn.active) {
+        const nets = el("div", { className: "auto-nets" });
+        const chosen = conn.enabled ? conn.networks : conn.pending_request?.networks || [];
+        for (const net of view.networks || AUTO_NETWORKS) {
+          const label = el("label", { className: "check" });
+          const box = el("input", { type: "checkbox", value: net, className: "auto-net" });
+          box.checked = chosen.includes(net);
+          label.append(box, document.createTextNode(` ${net}`));
+          nets.append(label);
+        }
+        const risk = el("p", { className: "auto-risk" }, view.risk_label);
+        const confirmLabel = el("label", { className: "check" });
+        const confirm = el("input", { type: "checkbox", className: "auto-confirm" });
+        confirmLabel.append(confirm, document.createTextNode(" I understand. Post without asking me for the ticked networks."));
+        const enable = el("button", { type: "button", className: "btn danger auto-enable" }, conn.enabled ? "Update auto-post" : "Turn on auto-post");
+        row.append(nets, risk, confirmLabel, enable);
+      }
+      if (conn.enabled || conn.pending_request) {
+        row.append(el("button", { type: "button", className: "btn secondary auto-disable" }, conn.enabled ? "Turn off now" : "Clear request"));
+      }
+      card.append(row);
+    }
+    list.append(card);
+  }
+}
+
+async function loadAutoPost() {
+  const panel = document.getElementById("auto-post-panel");
+  if (!panel) return;
+  const response = await fetch("/api/auto-post");
+  if (response.status === 403) {
+    panel.hidden = true;
+    return;
+  }
+  const payload = await response.json();
+  if (payload.auto_post) renderAutoPost(payload.auto_post);
+}
+
+document.getElementById("auto-post-list")?.addEventListener("click", async (event) => {
+  const button = event.target.closest(".auto-enable, .auto-disable");
+  if (!button) return;
+  const row = button.closest(".auto-conn");
+  const card = button.closest(".auto-brand");
+  const body = { profile_id: card.dataset.profile, connection_id: row.dataset.connection };
+  try {
+    if (button.classList.contains("auto-enable")) {
+      const networks = [...row.querySelectorAll(".auto-net:checked")].map((box) => box.value);
+      if (!networks.length) throw new Error("Tick at least one network.");
+      if (!row.querySelector(".auto-confirm").checked) throw new Error("Tick the confirm box first.");
+      if (!window.confirm(`Highest risk: the assistant will post without asking you each time.\n\nTurn on auto-post for ${networks.join(", ")}?`)) return;
+      const data = await api("/api/auto-post/enable", {
+        method: "POST",
+        headers: autoPostPinHeaders(),
+        body: JSON.stringify({ ...body, networks, confirm: true }),
+      });
+      renderAutoPost(data.auto_post);
+      showToast("Auto-post is on for this connection.");
+    } else {
+      const data = await api("/api/auto-post/disable", { method: "POST", body: JSON.stringify(body) });
+      renderAutoPost(data.auto_post);
+      showToast("Auto-post is off. The next draft waits for approval.");
+    }
+  } catch (error) {
+    showToast(error.message, true);
+  }
+});
+
+loadAutoPost().catch(() => {});

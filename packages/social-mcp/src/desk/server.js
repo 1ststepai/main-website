@@ -1,3 +1,4 @@
+import { PLATFORMS } from "../platforms.js";
 import { createServer } from "node:http";
 import { randomBytes } from "node:crypto";
 import { execFileSync } from "node:child_process";
@@ -13,7 +14,8 @@ import { installCursorMcp, publicMcpClientConfig, readCursorMcpStatus } from "..
 import { googleLoopbackUri, providerRedirectUri } from "../oauth/redirect.js";
 import { handleRemoteMcp } from "../mcp/http.js";
 import { allowedHost, clientSetup } from "../mcp/clients.js";
-import { createPat, listPats, revokePat } from "../mcp/auth.js";
+import { createPat, listGrants, listPats, revokePat } from "../mcp/auth.js";
+import { AUTO_POST_RISK_LABEL, disableAutoPost, enableAutoPost, listAutoPost } from "../autoPost.js";
 import { openDesktopApp } from "../openApp.js";
 import { mcpError } from "../errors.js";
 import { resolveSafeMediaPath } from "../mediaPath.js";
@@ -302,6 +304,30 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
     };
   }
 
+  function autoPostConnections() {
+    return [
+      ...listPats(engine.store).map((pat) => ({ id: pat.id, kind: "pat", name: pat.name || "Access token", scopes: pat.scopes || [] })),
+      ...listGrants(engine.store),
+    ];
+  }
+
+  function autoPostView() {
+    const connections = autoPostConnections();
+    const brands = engine.store.listProfiles().map((profile) => {
+      const rows = new Map(listAutoPost(engine.store, profile.id).map((row) => [row.connection_id, row]));
+      const list = connections.map((conn) => ({ connection_id: conn.id, kind: conn.kind, name: conn.name, ...blankAuto(), ...(rows.get(conn.id) || {}), active: true }));
+      for (const [id, row] of rows) {
+        if (!connections.some((conn) => conn.id === id)) list.push({ ...row, connection_id: id, kind: "unknown", name: "Revoked or unknown connection", active: false });
+      }
+      return { profile_id: profile.id, name: profile.name, connections: list };
+    });
+    return { auto_post: { risk_label: AUTO_POST_RISK_LABEL, pin_required: ownerPinConfigured(homePaths), networks: PLATFORMS, brands } };
+  }
+
+  function blankAuto() {
+    return { enabled: false, networks: [], enabled_at: null, enabled_by: null, pending_request: null };
+  }
+
   function deskState() {
     return pilotActive() ? publicSnapshot() : snapshot();
   }
@@ -563,6 +589,41 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
         const result = await engine.attachVidiqCheck(body);
         sendJson(res, 200, { ok: true, ...result, ...deskState() });
         return;
+      }
+
+      if (url.pathname.startsWith("/api/auto-post")) {
+        if (pilotActive()) {
+          sendJson(res, 403, { ok: false, code: "pilot_auto_post_disabled", message: "Auto-post is off in pilot mode. Every draft waits for approval." });
+          return;
+        }
+        if (req.method === "GET" && url.pathname === "/api/auto-post") {
+          sendJson(res, 200, { ok: true, ...autoPostView() });
+          return;
+        }
+        if (req.method === "POST" && url.pathname === "/api/auto-post/enable") {
+          const body = await readJson(req);
+          requireOwner(req, body);
+          if (body.confirm !== true) {
+            throw mcpError("confirm_required", `${AUTO_POST_RISK_LABEL} Send confirm: true to turn it on.`, 400);
+          }
+          const known = autoPostConnections().some((row) => row.id === body.connection_id);
+          if (!known) throw mcpError("not_found", "That connection is not active.", 404);
+          enableAutoPost(engine.store, {
+            profile_id: String(body.profile_id || ""),
+            connection_id: String(body.connection_id || ""),
+            networks: body.networks,
+            enabled_by: "desk",
+          });
+          sendJson(res, 200, { ok: true, ...autoPostView() });
+          return;
+        }
+        if (req.method === "POST" && url.pathname === "/api/auto-post/disable") {
+          // Turning auto-post off is always allowed and takes effect for the next draft.
+          const body = await readJson(req);
+          disableAutoPost(engine.store, { profile_id: String(body.profile_id || ""), connection_id: body.connection_id ? String(body.connection_id) : null });
+          sendJson(res, 200, { ok: true, ...autoPostView() });
+          return;
+        }
       }
 
       if (req.method === "POST" && url.pathname === "/api/pat") {

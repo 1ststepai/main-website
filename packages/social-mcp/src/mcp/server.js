@@ -11,6 +11,8 @@ import { registerSeoTools } from "../seo/tools.js";
 import { registerHookTools } from "../hook/tools.js";
 import { DRAFT_ONLY_SCOPES } from "./clients.js";
 import { isDraftOnly } from "../pilot/config.js";
+import { assertOwnerPin, ownerPinConfigured } from "../pilot/ownerAuth.js";
+import { getBrandContext, saveBrandContext } from "../brand/context.js";
 
 const outputSchema = z
   .object({
@@ -154,6 +156,22 @@ export function createSocialMcpServer({ engine, auth, env = process.env } = {}) 
     );
   }
 
+  /** Drafts land in the queue. Only an owner-enabled auto-post for this exact connection, brand and network publishes them. */
+  async function createThenMaybeAutoPost(args) {
+    const out = await eng.createDraft({ ...args, source: "mcp" });
+    const connectionId = gate?.connectionId;
+    if (!connectionId || !eng.autoPublishDrafts) return out;
+    const posts = out.posts || (out.post ? [out.post] : []);
+    const results = await eng.autoPublishDrafts({ posts, connection_id: connectionId });
+    if (!results.some((row) => row.auto_post !== "off")) return out;
+    const fresh = posts.map((post) => eng.store.getPost(post.id) || post);
+    return { ...out, posts: out.posts ? fresh : undefined, post: fresh[0], auto_post: results };
+  }
+
+  function callerScopes() {
+    return gate ? [...(gate.scopes || [])] : null;
+  }
+
   add("status", "Desk status", "Read the local PostPath setup: home path, profiles, connected networks, and redirect URIs.", "posts:read", { read: true, idempotent: true }, {}, async () => eng.publicStatus());
 
   add(
@@ -177,6 +195,64 @@ export function createSocialMcpServer({ engine, auth, env = process.env } = {}) 
         .describe("Defaults applied to new multi-network drafts."),
     },
     async (args) => eng.upsertProfile(args),
+  );
+
+  add(
+    "get_brand_context",
+    "Get brand context",
+    "Call this first. Returns each brand's identity, networks, voice, topics, rules, what this connection may do, auto-post state, and the list of missing fields. Blank fields stay blank: ask the user about missing fields once, then draft. Read-only.",
+    "posts:read",
+    { read: true, idempotent: true },
+    { profile_id: z.string().min(2).max(64).optional().describe("One brand. Omit for every brand.") },
+    async (args) => getBrandContext(eng, { profile_id: args.profile_id, scopes: callerScopes(), connectionId: gate?.connectionId || null }),
+  );
+
+  add(
+    "save_brand_context",
+    "Save brand context",
+    "Save the user's answers in one all-or-nothing call: profile basics, default networks and privacy, hashtags, caption footer, audience, search terms (primary, secondary, negative), voice, and an optional auto-post request. The auto-post request is only recorded as pending; it never turns auto-post on. Only the owner can do that in the PostPath desk. Requires accounts:write; in pilot mode it also needs the owner PIN.",
+    "accounts:write",
+    { idempotent: true },
+    {
+      profile_id: z.string().min(2).max(64).describe("Brand id, such as acme or 1ststep-ai."),
+      name: z.string().min(1).max(120).optional().describe("Display name."),
+      audience: z.string().max(400).optional().describe("Who the brand talks to, in the user's words."),
+      default_platforms: z.array(z.enum(PLATFORMS)).max(16).optional().describe("Default networks for new drafts."),
+      privacy_status: z.enum(["private", "unlisted", "public"]).optional().describe("Default privacy. Private is the usual value."),
+      hashtags: z.array(z.string().max(40)).max(30).optional(),
+      caption_footer: z.string().max(500).optional(),
+      require_vidiq: z.boolean().optional(),
+      search_terms: z
+        .object({
+          primary: z.array(z.string().max(80)).max(40).optional(),
+          secondary: z.array(z.string().max(80)).max(40).optional(),
+          negative: z.array(z.string().max(80)).max(40).optional(),
+        })
+        .optional(),
+      voice: z
+        .object({
+          tone: z.string().max(200).optional(),
+          avoid: z.array(z.string().max(80)).max(20).optional(),
+          on_camera_style: z.string().max(200).optional(),
+          energy: z.string().max(80).optional(),
+          appears_on_camera: z.boolean().optional(),
+        })
+        .optional(),
+      auto_post: z
+        .object({ networks: z.array(z.enum(PLATFORMS)).max(16).describe("Networks the user would like auto-posted. Saved as a pending request only.") })
+        .optional()
+        .describe("Only send when the user asked for auto-post. Skipped means off."),
+      owner_pin: z.string().max(80).optional().describe("Owner PIN. Needed in pilot mode."),
+    },
+    async ({ owner_pin, search_terms, ...args }) => {
+      const pilot = eng.pilotOn ? eng.pilotOn() : false;
+      if (pilot) {
+        if (!ownerPinConfigured(eng.store.homePaths)) throw mcpError("owner_auth", "Pilot mode: set an owner PIN in the desk before saving brand context.", 403);
+        if (!owner_pin) throw mcpError("owner_auth", "Pilot mode: saving brand context needs the owner PIN.", 401);
+        assertOwnerPin(eng.store.homePaths, owner_pin);
+      }
+      return saveBrandContext(eng, { ...args, search_terms }, { connectionId: gate?.connectionId || null, scopes: callerScopes(), pilot });
+    },
   );
 
   add(
@@ -244,7 +320,7 @@ export function createSocialMcpServer({ engine, auth, env = process.env } = {}) 
     "drafts:write",
     {},
     draftShape,
-    async (args) => eng.createDraft({ ...args, source: "mcp" }),
+    async (args) => createThenMaybeAutoPost(args),
   );
 
   add(
@@ -254,7 +330,7 @@ export function createSocialMcpServer({ engine, auth, env = process.env } = {}) 
     "drafts:write",
     {},
     draftShape,
-    async (args) => eng.createDraft({ ...args, source: "mcp" }),
+    async (args) => createThenMaybeAutoPost(args),
   );
 
   add(
