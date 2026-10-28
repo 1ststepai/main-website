@@ -103,8 +103,8 @@ test("cancelScheduledPost returns draft with null scheduled_at", async () => {
 test("desk due loop calls publishDue and clears on stop", async () => {
   const home = mkdtempSync(join(tmpdir(), "social-mcp-loop-"));
   const env = {
-    SOCIAL_MCP_OAUTH_PORT: "47994",
-    SOCIAL_MCP_DESK_PORT: "47993",
+    SOCIAL_MCP_OAUTH_PORT: "48014",
+    SOCIAL_MCP_DESK_PORT: "48013",
     SOCIAL_MCP_DUE_INTERVAL_MS: "1000",
   };
   const engine = createEngine({ home, env, now: () => Date.parse("2026-10-27T12:00:00.000Z") });
@@ -114,7 +114,7 @@ test("desk due loop calls publishDue and clears on stop", async () => {
     calls += 1;
     return original(...args);
   };
-  const desk = createDeskServer({ engine, env, port: 47993 });
+  const desk = createDeskServer({ engine, env, port: 48013 });
   try {
     const started = await desk.start({ open: false });
     assert.equal(started.due_interval_ms, 1000);
