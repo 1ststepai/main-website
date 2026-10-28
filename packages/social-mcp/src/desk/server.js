@@ -188,6 +188,7 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
       connections: status.connections,
       platforms: status.platforms,
       scheduled_posts,
+      posts: engine.store.listPosts(),
       due_interval_ms: dueIntervalMs,
       oauth: publicOAuthConfig(envValues),
       oauth_ready: ready,
@@ -297,8 +298,33 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
           privacy_status: body.privacy_status,
           media_path: body.media_path,
           media_content_type: body.media_content_type,
+          tags: body.tags,
+          variants: body.variants,
         });
         sendJson(res, 200, { ok: true, ...created, ...snapshot() });
+        return;
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/suggestions") {
+        const body = await readJson(req);
+        const result = await engine.decideSuggestion({
+          post_id: body.post_id,
+          suggestion_id: body.suggestion_id,
+          decision: body.decision,
+        });
+        sendJson(res, 200, { ok: true, ...result, ...snapshot() });
+        return;
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/tag-sets") {
+        const body = await readJson(req);
+        const result = await engine.saveTagSet({
+          profile_id: body.profile_id || body.id,
+          profile_name: body.profile_name,
+          set_name: body.name,
+          tags: body.tags,
+        });
+        sendJson(res, 200, { ok: true, ...result, ...snapshot() });
         return;
       }
 

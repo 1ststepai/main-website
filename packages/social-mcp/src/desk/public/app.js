@@ -7,6 +7,7 @@ import {
   channelCatalog,
   connectPlan,
   dismissGuide,
+  draftPlans,
   draftRequest,
   emptyGuide,
   goBack,
@@ -23,6 +24,8 @@ import {
   suggestedRequests,
   toggleChannel,
 } from "./guide.js";
+import { DRAFT_FIELD_LIMITS, PLATFORM_TEXT_LIMITS } from "./limits.js";
+import { SOURCE_NOTES, checkNetwork, groupSuggestions, readMp4Meta } from "./optimize.js";
 
 const NETWORKS = [
   { key: "youtube", label: "YouTube" },
@@ -41,8 +44,9 @@ const NETWORKS = [
 ];
 
 const toastEl = document.getElementById("toast");
-const networkList = document.getElementById("network-list");
+const accountList = document.getElementById("account-list");
 const scheduledList = document.getElementById("scheduled-list");
+const draftList = document.getElementById("draft-list");
 const pathMeta = document.getElementById("path-meta");
 const redirectUri = document.getElementById("redirect-uri");
 const connectHint = document.getElementById("connect-hint");
@@ -50,6 +54,9 @@ const profileName = document.getElementById("profile-name");
 const profileId = document.getElementById("profile-id");
 const oauthForm = document.getElementById("oauth-form");
 const blueskyForm = document.getElementById("bluesky-form");
+const selectedNetworks = new Set(["youtube"]);
+const sessionDrafts = [];
+let toastTimer = 0;
 
 const DISPATCH_HONESTY =
   "After dispatch starts, PostPath cannot guarantee the platform did not accept the post. Cancel only works while a post is still scheduled. Dispatch-started posts stay needs review and are not auto-retried or undone.";
@@ -104,6 +111,52 @@ function showToast(message, isError = false) {
   toastEl.hidden = false;
   toastEl.textContent = message;
   toastEl.classList.toggle("error", isError);
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    toastEl.hidden = true;
+  }, 4200);
+}
+
+function showView(name) {
+  for (const button of document.querySelectorAll("[data-view]")) {
+    const on = button.dataset.view === name;
+    button.setAttribute("aria-current", on ? "page" : "false");
+    const view = document.getElementById(`view-${button.dataset.view}`);
+    if (view) view.hidden = !on;
+  }
+}
+
+function rememberDraft(post) {
+  if (!post?.id) return;
+  const index = sessionDrafts.findIndex((item) => item.id === post.id);
+  if (index >= 0) sessionDrafts[index] = post;
+  else sessionDrafts.unshift(post);
+  renderSessionDrafts();
+}
+
+function renderSessionDrafts() {
+  if (!draftList) return;
+  draftList.replaceChildren();
+  if (!sessionDrafts.length) {
+    const empty = document.createElement("li");
+    empty.className = "empty";
+    empty.textContent = "No drafts saved in this window.";
+    draftList.append(empty);
+    return;
+  }
+  for (const post of sessionDrafts) {
+    const item = document.createElement("li");
+    const copy = document.createElement("div");
+    const strong = document.createElement("strong");
+    strong.textContent = String(post.title || post.caption || post.description || post.id);
+    const when = document.createElement("div");
+    when.className = "when";
+    const state = post.status === "draft" ? "Draft, not published" : String(post.status || "saved");
+    when.textContent = `${post.platform || "post"} · ${state}${post.privacy_status ? ` · ${post.privacy_status}` : ""}`;
+    copy.append(strong, when);
+    item.append(copy);
+    draftList.append(item);
+  }
 }
 
 async function api(path, options = {}) {
@@ -271,28 +324,13 @@ function renderStatus(data) {
   if (dispatchHonesty) dispatchHonesty.textContent = DISPATCH_HONESTY;
 
   const byPlatform = new Map((data.connections || []).map((row) => [row.platform, row]));
-  networkList.innerHTML = NETWORKS.map((network) => {
-    const row = byPlatform.get(network.key);
-    const detail = row
-      ? row.account_label || "Connected"
-      : network.limited
-        ? "API approval required"
-        : "Not connected";
-    const on = Boolean(row);
-    const pill = on ? "Live" : network.limited ? "Limited" : "Needed";
-    return `<li>
-      <div>
-        <strong>${network.label}</strong>
-        <div class="meta" style="margin:0.2rem 0 0">${detail}</div>
-      </div>
-      <span class="pill ${on ? "on" : "off"}">${pill}</span>
-    </li>`;
-  }).join("");
+  renderAccounts(byPlatform, data);
 
   redirectUri.textContent = data.oauth_redirect_uri || "http://127.0.0.1:47831/oauth/callback";
   const readyClients = (data.clients || []).filter((client) => client.installed).map((client) => client.label);
-  const assistantLine = readyClients.length ? `Set up: ${readyClients.join(", ")}` : "No assistant set up yet";
-  pathMeta.textContent = `${assistantLine} · vault ${data.home || ""} · media ${data.media_dir || ""}`;
+  pathMeta.textContent = readyClients.length
+    ? `Set up: ${readyClients.join(", ")}. Restart each one before you ask it to post.`
+    : "No assistant is set up yet. Use Assistant when you want one.";
   renderAssistants(data);
 
   if (data.profiles?.[0] && !profileId.dataset.touched) {
@@ -311,14 +349,17 @@ function renderStatus(data) {
   }
 
   if (data.next_step === "save_apps") {
-    connectHint.textContent = "Save at least one provider’s credentials below, then connect.";
+    connectHint.textContent = "Sign-in apps are not set up yet. You can still write a draft. Owner setup is in Settings.";
   } else if (!assistantConfigured(data)) {
-    connectHint.textContent = "Connect accounts here. To let an assistant post, use Connect your AI assistant below.";
+    connectHint.textContent = "Connect a channel when you are ready. An assistant is optional.";
   } else {
-    connectHint.textContent = "Connect opens each configured OAuth provider in order. Bluesky uses the form below.";
+    connectHint.textContent = "Connect opens each ready network in your browser. Bluesky uses the form on this page.";
   }
 
   renderScheduled(data.scheduled_posts);
+  renderSessionDrafts();
+  renderTagSets();
+  renderSuggestions();
   for (const node of document.querySelectorAll("[data-channel-status]")) {
     node.textContent = connectPlan(node.dataset.channelStatus, data).message;
   }
@@ -362,16 +403,69 @@ document.getElementById("copy-redirect").addEventListener("click", async () => {
   }
 });
 
+function renderAccounts(byPlatform, data) {
+  if (!accountList) return;
+  accountList.replaceChildren();
+  const ordered = [...NETWORKS].sort((a, b) => Number(!byPlatform.has(a.key)) - Number(!byPlatform.has(b.key)));
+  for (const network of ordered) {
+    const row = byPlatform.get(network.key);
+    const card = document.createElement("article");
+    card.className = "account-card";
+    const top = document.createElement("div");
+    top.className = "account-top";
+    const title = document.createElement("h3");
+    title.textContent = network.label;
+    const state = document.createElement("span");
+    state.className = `status-label${row ? " on" : ""}`;
+    state.textContent = row ? "Connected" : "Not connected";
+    top.append(title, state);
+    card.append(top);
+    const note = document.createElement("p");
+    note.className = "note";
+    if (row) note.textContent = row.account_label || "Connected on this computer.";
+    else if (network.key === "youtube" && !data.oauth_ready?.google) note.textContent = "YouTube sign-in is not included yet. You can still save a private draft.";
+    else if (network.key === "bluesky") note.textContent = "Use the app password form below.";
+    else if (network.key === "tiktok") note.textContent = "TikTok is not available from this window.";
+    else if (network.limited) note.textContent = `${network.label} is not available from this window.`;
+    else note.textContent = "Sign-in is not set up yet. You can still save a draft. It will not be sent.";
+    card.append(note);
+    if (!row && network.key !== "bluesky" && network.key !== "tiktok" && !network.limited) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "btn secondary";
+      button.dataset.connect = network.key;
+      button.textContent = `Connect ${network.label}`;
+      card.append(button);
+    }
+    accountList.append(card);
+  }
+}
+
+function currentProfile() {
+  const id = profileId.value.trim();
+  const name = profileName.value.trim() || id;
+  return { id, name };
+}
+
+function ensureProfile() {
+  const profile = currentProfile();
+  if (profile.id) return profile;
+  showView("settings");
+  profileName.focus();
+  throw new Error("Add a name in Settings first.");
+}
+
 document.getElementById("connect-form").addEventListener("submit", async (event) => {
   event.preventDefault();
   const button = document.getElementById("connect-btn");
   button.disabled = true;
   try {
+    ensureProfile();
     const data = await api("/api/connect", {
       method: "POST",
       body: JSON.stringify({
-        id: profileId.value.trim(),
-        name: profileName.value.trim() || profileId.value.trim(),
+        id: currentProfile().id,
+        name: currentProfile().name,
       }),
     });
     renderStatus(data);
@@ -764,7 +858,7 @@ function renderCreation() {
     button.className = "btn secondary";
     button.textContent = "Connect your AI assistant";
     button.addEventListener("click", () => {
-      document.getElementById("assistants")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      showView("assistant");
     });
     guideBody.append(button);
   }
@@ -866,6 +960,7 @@ async function saveGuideDrafts() {
         body: JSON.stringify(draftRequest(plan, profile, mediaPath)),
       });
       saves.push({ ok: true, post: data.post });
+      rememberDraft(data.post);
       if (data.post?.platform === "youtube" && data.post.id) {
         currentDraftId = data.post.id;
         publishDraftButton.disabled = false;
@@ -897,11 +992,13 @@ function bootGuide() {
   renderGuide();
 }
 
-document.getElementById("reopen-guide").addEventListener("click", () => {
-  guide = reopenGuide(guide.step ? guide : emptyGuide());
-  persistGuide();
-  renderGuide();
-});
+for (const button of document.querySelectorAll("[data-reopen-guide]")) {
+  button.addEventListener("click", () => {
+    guide = reopenGuide(guide.step ? guide : emptyGuide());
+    persistGuide();
+    renderGuide();
+  });
+}
 
 guideBack.addEventListener("click", () => {
   guide = goBack(guide);
@@ -935,24 +1032,27 @@ guideNext.addEventListener("click", () => {
   renderGuide();
 });
 
-document.getElementById("connect-youtube").addEventListener("click", async () => {
-  const button = document.getElementById("connect-youtube");
-  if (!latestStatus?.oauth_ready?.google) {
+accountList.addEventListener("click", async (event) => {
+  const button = event.target.closest("[data-connect]");
+  if (!button) return;
+  const platform = button.dataset.connect;
+  if (platform === "youtube" && !latestStatus?.oauth_ready?.google) {
     showToast(YOUTUBE_APP_MISSING, true);
     return;
   }
   button.disabled = true;
   try {
+    const profile = ensureProfile();
     const data = await api("/api/connect", {
       method: "POST",
       body: JSON.stringify({
-        id: profileId.value.trim(),
-        name: profileName.value.trim() || profileId.value.trim(),
-        platforms: ["youtube"],
+        id: profile.id,
+        name: profile.name,
+        platforms: [platform],
       }),
     });
     renderStatus(data);
-    showToast(data.connect?.message || "Continue YouTube sign-in in your browser");
+    showToast(data.connect?.message || "Continue sign-in in your browser");
   } catch (error) {
     showToast(error.message, true);
   } finally {
@@ -960,17 +1060,418 @@ document.getElementById("connect-youtube").addEventListener("click", async () =>
   }
 });
 
+const variantState = {};
+let mediaMeta = null;
+
+function variantFor(key) {
+  if (!variantState[key]) {
+    variantState[key] = { same_as_base: true, title: "", description: "", caption: "", hashtags: "", tags: "", subreddit: "" };
+  }
+  return variantState[key];
+}
+
+function readVariantFields() {
+  for (const node of document.querySelectorAll("[data-variant]")) {
+    const [platform, field] = node.dataset.variant.split(":");
+    const state = variantFor(platform);
+    if (field === "same") state.same_as_base = node.checked;
+    else state[field] = node.value;
+  }
+}
+
+function splitTags(value) {
+  return String(value || "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function variantsPayload(platform) {
+  const state = variantFor(platform);
+  if (state.same_as_base) return { [platform]: { same_as_base: true } };
+  return {
+    [platform]: {
+      same_as_base: false,
+      title: state.title,
+      description: state.description,
+      caption: state.caption,
+      hashtags: splitTags(state.hashtags),
+      tags: splitTags(state.tags),
+      subreddit: state.subreddit,
+    },
+  };
+}
+
+function composePost(platform) {
+  const form = new FormData(youtubeForm);
+  return {
+    platform,
+    title: String(form.get("title") || ""),
+    description: String(form.get("description") || ""),
+    caption: String(form.get("description") || ""),
+    tags: splitTags(document.getElementById("base-tags").value),
+    variants: variantsPayload(platform),
+  };
+}
+
+function renderVariants() {
+  readVariantFields();
+  const host = document.getElementById("variant-list");
+  if (!host) return;
+  host.replaceChildren();
+  for (const key of selectedList()) {
+    const state = variantFor(key);
+    const network = NETWORKS.find((item) => item.key === key);
+    const card = document.createElement("article");
+    card.className = "variant";
+    const title = document.createElement("h3");
+    title.textContent = network?.label || key;
+    const same = document.createElement("label");
+    same.className = "field";
+    const box = document.createElement("input");
+    box.type = "checkbox";
+    box.checked = state.same_as_base;
+    box.dataset.variant = `${key}:same`;
+    same.append(box, document.createTextNode(" Same as the base post"));
+    card.append(title, same);
+    if (!state.same_as_base) {
+      card.append(variantField(key, "title", "Title", state.title));
+      card.append(variantField(key, "caption", "Caption", state.caption));
+      card.append(variantField(key, "description", "Description", state.description));
+      card.append(variantField(key, "hashtags", "Hashtags", state.hashtags));
+      if (key === "youtube") card.append(variantField(key, "tags", "YouTube keyword tags", state.tags));
+      if (key === "reddit") card.append(variantField(key, "subreddit", "Community", state.subreddit));
+    }
+    host.append(card);
+  }
+  host.querySelectorAll("[data-variant]").forEach((node) => {
+    node.addEventListener("change", () => {
+      renderVariants();
+      renderChecks();
+    });
+  });
+}
+
+function variantField(platform, field, label, value) {
+  const wrap = document.createElement("label");
+  wrap.className = "field";
+  const span = document.createElement("span");
+  span.textContent = label;
+  const input = document.createElement(field === "caption" || field === "description" ? "textarea" : "input");
+  input.dataset.variant = `${platform}:${field}`;
+  input.value = value || "";
+  wrap.append(span, input);
+  return wrap;
+}
+
+function renderChecks() {
+  readVariantFields();
+  const host = document.getElementById("check-list");
+  if (!host) return;
+  host.replaceChildren();
+  for (const key of selectedList()) {
+    const items = checkNetwork({ platform: key, post: composePost(key), media: key === "youtube" ? mediaMeta : null });
+    for (const item of items) {
+      const row = document.createElement("p");
+      row.className = `check ${item.kind}`;
+      const network = NETWORKS.find((entry) => entry.key === key);
+      row.textContent = `${network?.label || key}: ${item.message}`;
+      host.append(row);
+    }
+  }
+}
+
+function savedPosts() {
+  const fromStatus = latestStatus?.posts || [];
+  const ids = new Set(sessionDrafts.map((post) => post.id));
+  return [...sessionDrafts, ...fromStatus.filter((post) => !ids.has(post.id))];
+}
+
+function renderSuggestions() {
+  const host = document.getElementById("suggestion-groups");
+  const notes = document.getElementById("source-notes");
+  if (notes) notes.textContent = `${SOURCE_NOTES.vidiq} ${SOURCE_NOTES.tubebuddy}`;
+  if (!host) return;
+  host.replaceChildren();
+  const groups = groupSuggestions(
+    savedPosts().flatMap((post) => (post.suggestions || []).map((item) => ({ ...item, post_id: post.id }))),
+  );
+  if (!groups.length) {
+    const empty = document.createElement("p");
+    empty.className = "quiet";
+    empty.textContent = "No suggestions yet.";
+    host.append(empty);
+    return;
+  }
+  for (const group of groups) {
+    const card = document.createElement("article");
+    card.className = "variant";
+    const heading = document.createElement("h3");
+    const network = NETWORKS.find((item) => item.key === group.platform);
+    heading.textContent = `${network?.label || group.platform} ${group.field}`;
+    card.append(heading);
+    for (const item of group.items) {
+      const row = document.createElement("div");
+      row.className = "opinion";
+      const head = document.createElement("header");
+      const who = document.createElement("strong");
+      who.textContent = item.source;
+      head.append(who);
+      if (item.agreement === "agree" && item.status !== "rejected") {
+        const mark = document.createElement("span");
+        mark.className = "agree";
+        mark.textContent = "Agrees with another source";
+        head.append(mark);
+      }
+      const body = document.createElement("p");
+      body.textContent = Array.isArray(item.value) ? item.value.join(", ") : String(item.value);
+      row.append(head, body);
+      if (item.score) {
+        const score = document.createElement("p");
+        score.className = "quiet";
+        score.textContent = `${item.score.name}: ${item.score.value}`;
+        row.append(score);
+      }
+      if (item.note) {
+        const note = document.createElement("p");
+        note.className = "quiet";
+        note.textContent = item.note;
+        row.append(note);
+      }
+      const actions = document.createElement("div");
+      actions.className = "cta-row";
+      if (item.status === "pending") {
+        actions.append(suggestionButton(item, "accept", "Use this"), suggestionButton(item, "reject", "Not this"));
+      } else {
+        const state = document.createElement("p");
+        state.className = "quiet";
+        state.textContent = item.status === "accepted" ? "Using this" : "Set aside";
+        actions.append(state);
+      }
+      row.append(actions);
+      card.append(row);
+    }
+    host.append(card);
+  }
+}
+
+function suggestionButton(item, decision, label) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "btn tiny";
+  button.textContent = label;
+  button.addEventListener("click", async () => {
+    button.disabled = true;
+    try {
+      const data = await api("/api/suggestions", {
+        method: "POST",
+        body: JSON.stringify({ post_id: item.post_id, suggestion_id: item.id, decision }),
+      });
+      if (decision === "accept" && data.post) applyServerVariant(data.post);
+      renderStatus(data);
+      renderVariants();
+      showToast(decision === "accept" ? "Saved that wording on the draft." : "Set that opinion aside.");
+    } catch (error) {
+      showToast(error.message, true);
+      button.disabled = false;
+    }
+  });
+  return button;
+}
+
+function applyServerVariant(post) {
+  const variant = post?.variants?.[post.platform];
+  if (!variant) return;
+  const state = variantFor(post.platform);
+  state.same_as_base = variant.same_as_base !== false;
+  state.title = variant.title || "";
+  state.caption = variant.caption || "";
+  state.description = variant.description || "";
+  state.hashtags = (variant.hashtags || []).join(", ");
+  state.tags = (variant.tags || []).join(", ");
+  state.subreddit = variant.subreddit || "";
+}
+
+function renderTagSets() {
+  const select = document.getElementById("tag-set-select");
+  if (!select) return;
+  const current = select.value;
+  const sets = latestStatus?.profiles?.[0]?.tag_sets || [];
+  select.replaceChildren(new Option("Choose a set", ""));
+  for (const set of sets) select.append(new Option(set.name, set.id));
+  if ([...select.options].some((option) => option.value === current)) select.value = current;
+}
+
+function selectedList() {
+  return [...selectedNetworks];
+}
+
+function bodyText() {
+  return String(new FormData(youtubeForm).get("description") || "");
+}
+
+function renderLengthHints() {
+  const host = document.getElementById("length-hints");
+  if (!host) return;
+  host.replaceChildren();
+  const title = String(new FormData(youtubeForm).get("title") || "");
+  const body = bodyText();
+  const pills = [{ label: "Title", used: title.length, limit: DRAFT_FIELD_LIMITS.title }];
+  for (const key of selectedList()) {
+    const limit = PLATFORM_TEXT_LIMITS[key];
+    if (!limit) continue;
+    const network = NETWORKS.find((item) => item.key === key);
+    pills.push({ label: network?.label || key, used: body.length, limit });
+  }
+  for (const pill of pills) {
+    const node = document.createElement("span");
+    node.className = `hint-pill${pill.used > pill.limit ? " over" : ""}`;
+    node.textContent = `${pill.label} ${pill.used} / ${pill.limit}`;
+    host.append(node);
+  }
+}
+
+function reviewIssues() {
+  const form = new FormData(youtubeForm);
+  const title = String(form.get("title") || "").trim();
+  const description = String(form.get("description") || "").trim();
+  const file = form.get("video");
+  const issues = [];
+  if (!selectedList().length) issues.push("Choose at least one network.");
+  if (!currentProfile().id) issues.push("Add a name in Settings first.");
+  if (!title && !description) issues.push("Add a title or the words for the post.");
+  if (selectedNetworks.has("youtube") && (!file || !file.size)) issues.push("Choose the video file before saving a YouTube draft.");
+  for (const key of selectedList()) {
+    if (key === "youtube") continue;
+    const plans = draftPlans({ channels: [key], title, description, intent: "post" }, { hasFile: false });
+    if (plans[0] && !plans[0].canSave) issues.push(`${plans[0].label}: ${plans[0].reason}`);
+  }
+  return issues;
+}
+
+function renderComposeReview() {
+  const summary = document.getElementById("review-summary");
+  const form = new FormData(youtubeForm);
+  const title = String(form.get("title") || "").trim();
+  const description = String(form.get("description") || "").trim();
+  const privacy = String(form.get("privacy_status") || "private");
+  const file = form.get("video");
+  const issues = reviewIssues();
+  summary.replaceChildren();
+  const lines = [
+    ["Networks", selectedList().map((key) => NETWORKS.find((item) => item.key === key)?.label || key).join(", ") || "None"],
+    ["Title", title || "No title"],
+    ["Words", description || "No words yet"],
+  ];
+  if (selectedNetworks.has("youtube")) {
+    lines.push(["YouTube privacy", privacy]);
+    lines.push(["Video", file && file.name ? file.name : "No video file"]);
+  }
+  for (const [label, value] of lines) {
+    const row = document.createElement("p");
+    const strong = document.createElement("strong");
+    strong.textContent = `${label}: `;
+    row.append(strong, document.createTextNode(value));
+    summary.append(row);
+  }
+  if (issues.length) {
+    for (const issue of issues) {
+      const row = document.createElement("p");
+      row.textContent = issue;
+      summary.append(row);
+    }
+  } else {
+    const row = document.createElement("p");
+    row.textContent = "Saving keeps this on this computer. It does not publish.";
+    summary.append(row);
+  }
+  document.getElementById("save-draft").disabled = issues.length > 0;
+}
+
+document.getElementById("network-chips").addEventListener("click", (event) => {
+  const chip = event.target.closest("[data-network]");
+  if (!chip || chip.disabled) return;
+  const key = chip.dataset.network;
+  if (selectedNetworks.has(key)) selectedNetworks.delete(key);
+  else selectedNetworks.add(key);
+  chip.setAttribute("aria-pressed", selectedNetworks.has(key) ? "true" : "false");
+  document.getElementById("privacy-field").hidden = !selectedNetworks.has("youtube");
+  renderLengthHints();
+  renderVariants();
+  renderChecks();
+});
+
+for (const field of youtubeForm.querySelectorAll("input, textarea")) {
+  field.addEventListener("input", renderLengthHints);
+}
+
+const drop = document.getElementById("drop-zone");
+const videoInput = document.getElementById("video-input");
+async function labelFile() {
+  const file = videoInput.files && videoInput.files[0];
+  document.getElementById("drop-label").textContent = file ? file.name : "Drop a video here, or choose a file";
+  mediaMeta = null;
+  if (file) {
+    try {
+      mediaMeta = readMp4Meta(new Uint8Array(await file.arrayBuffer()));
+    } catch {
+      mediaMeta = null;
+    }
+  }
+  renderLengthHints();
+  renderChecks();
+}
+videoInput.addEventListener("change", labelFile);
+drop.addEventListener("dragover", (event) => {
+  event.preventDefault();
+  drop.classList.add("drag");
+});
+drop.addEventListener("dragleave", () => drop.classList.remove("drag"));
+drop.addEventListener("drop", (event) => {
+  event.preventDefault();
+  drop.classList.remove("drag");
+  const file = event.dataTransfer?.files?.[0];
+  if (!file) return;
+  const transfer = new DataTransfer();
+  transfer.items.add(file);
+  videoInput.files = transfer.files;
+  labelFile();
+});
+
+document.getElementById("review-draft").addEventListener("click", () => {
+  renderComposeReview();
+  document.getElementById("compose-editor").hidden = true;
+  document.getElementById("compose-review").hidden = false;
+});
+
+document.getElementById("review-back").addEventListener("click", () => {
+  document.getElementById("compose-review").hidden = true;
+  document.getElementById("compose-editor").hidden = false;
+});
+
+for (const button of document.querySelectorAll("[data-view]")) {
+  button.addEventListener("click", () => showView(button.dataset.view));
+}
+
 youtubeForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const button = document.getElementById("save-draft");
+  const issues = reviewIssues();
+  if (issues.length) {
+    renderComposeReview();
+    showToast(issues[0], true);
+    return;
+  }
   button.disabled = true;
   publishDraftButton.disabled = true;
   try {
     const form = new FormData(youtubeForm);
     const file = form.get("video");
-    if (!file || !file.size) throw new Error("Choose the video file before saving the draft.");
-    let mediaPath = "";
-    if (file && typeof file === "object" && file.size) {
+    const title = String(form.get("title") || "");
+    const description = String(form.get("description") || "");
+    const privacy = String(form.get("privacy_status") || "private");
+    const profile = ensureProfile();
+    if (selectedNetworks.has("youtube")) {
       const saved = await api("/api/media", {
         method: "POST",
         headers: {
@@ -979,30 +1480,50 @@ youtubeForm.addEventListener("submit", async (event) => {
         },
         body: file,
       });
-      mediaPath = saved.media.filename;
+      const data = await api("/api/draft", {
+        method: "POST",
+        body: JSON.stringify({
+          id: profile.id,
+          name: profile.name,
+          platform: "youtube",
+          title,
+          description,
+          privacy_status: privacy,
+          media_path: saved.media.filename,
+          media_content_type: file.type || "video/mp4",
+          tags: splitTags(document.getElementById("base-tags").value),
+          variants: variantsPayload("youtube"),
+        }),
+      });
+      currentDraftId = data.post?.id || "";
+      rememberDraft(data.post);
+      draftResult.textContent = currentDraftId
+        ? `Draft ${currentDraftId} saved. Privacy is ${data.post?.privacy_status || privacy}. Read it, then publish only if this is the approved video.`
+        : "Draft was not saved.";
+      publishDraftButton.disabled = !currentDraftId;
+      latestStatus = data;
+    } else {
+      currentDraftId = "";
+      publishDraftButton.disabled = true;
+      draftResult.textContent = "Draft saved on this computer. It is not published. Publish from this window is only for a YouTube draft you just saved.";
     }
-    const data = await api("/api/draft", {
-      method: "POST",
-      body: JSON.stringify({
-        id: profileId.value.trim(),
-        name: profileName.value.trim() || profileId.value.trim(),
-        platform: "youtube",
-        title: String(form.get("title") || ""),
-        description: String(form.get("description") || ""),
-        privacy_status: String(form.get("privacy_status") || "private"),
-        media_path: mediaPath || undefined,
-        media_content_type: file && file.type ? file.type : "video/mp4",
-      }),
-    });
-    currentDraftId = data.post?.id || "";
-    const privacy = data.post?.privacy_status || "private";
-    draftResult.textContent = currentDraftId
-      ? `Draft ${currentDraftId} saved. Privacy is ${privacy}. Read it, then publish only if this is the approved video.`
-      : "Draft was not saved.";
-    publishDraftButton.disabled = !currentDraftId;
+    const plans = draftPlans(
+      { channels: selectedList().filter((key) => key !== "youtube"), title, description, intent: "post" },
+      { hasFile: false },
+    );
+    for (const plan of plans) {
+      if (!plan.canSave) continue;
+      const data = await api("/api/draft", {
+        method: "POST",
+        body: JSON.stringify({ ...draftRequest(plan, profile), tags: splitTags(document.getElementById("base-tags").value), variants: variantsPayload(plan.platform) }),
+      });
+      rememberDraft(data.post);
+      latestStatus = data;
+    }
     showToast("Draft saved on this computer");
   } catch (error) {
     showToast(error.message, true);
+    publishDraftButton.disabled = !currentDraftId;
   } finally {
     button.disabled = false;
   }
@@ -1021,6 +1542,7 @@ publishDraftButton.addEventListener("click", async () => {
       method: "POST",
       body: JSON.stringify({ post_id: currentDraftId }),
     });
+    if (data.post) rememberDraft(data.post);
     const url = data.result?.published_url || data.post?.published_url || "";
     draftResult.textContent = url
       ? `Published ${data.post?.privacy_status || privacy}. Open ${url} and confirm it, then delete it on YouTube when the check is done.`
@@ -1048,6 +1570,47 @@ document.getElementById("forget-vault").addEventListener("click", async () => {
     showToast(error.message, true);
   }
 });
+
+document.getElementById("insert-tag-set").addEventListener("click", () => {
+  const select = document.getElementById("tag-set-select");
+  const set = (latestStatus?.profiles?.[0]?.tag_sets || []).find((item) => item.id === select.value);
+  if (!set) {
+    showToast("Choose a saved tag set.", true);
+    return;
+  }
+  const input = document.getElementById("base-tags");
+  const tags = splitTags(input.value);
+  for (const tag of set.tags) if (!tags.includes(tag)) tags.push(tag);
+  input.value = tags.join(", ");
+  renderChecks();
+  showToast("Tags inserted.");
+});
+
+document.getElementById("save-tag-set").addEventListener("click", async () => {
+  try {
+    const profile = ensureProfile();
+    const data = await api("/api/tag-sets", {
+      method: "POST",
+      body: JSON.stringify({
+        profile_id: profile.id,
+        profile_name: profile.name,
+        name: document.getElementById("tag-set-name").value,
+        tags: splitTags(document.getElementById("base-tags").value),
+      }),
+    });
+    renderStatus(data);
+    showToast("Tag set saved on this computer.");
+  } catch (error) {
+    showToast(error.message, true);
+  }
+});
+
+renderLengthHints();
+renderVariants();
+renderChecks();
+renderSuggestions();
+renderSessionDrafts();
+showView("compose");
 
 refresh()
   .then(() => bootGuide())

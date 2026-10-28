@@ -16,7 +16,18 @@ import { publishGoogleBusinessPost } from "./publish/google_business.js";
 import { publishRedditPost } from "./publish/reddit.js";
 import { publishSnapchatScaffold, publishWhatsAppScaffold } from "./publish/restricted.js";
 import { validateDraftForPublish } from "./publish/validate.js";
+import { readFileSync } from "node:fs";
 import { assertActionAllowed, assertProfileAllowed, getEntitlement } from "./license.js";
+import {
+  applySuggestion,
+  checkNetwork,
+  groupSuggestions,
+  normalizeSuggestion,
+  normalizeVariants,
+  readMp4Meta,
+  resolvePostForPublish,
+  SOURCE_NOTES,
+} from "./desk/public/optimize.js";
 
 const ISO_OFFSET = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$/i;
 const DISPATCH_STARTED_MESSAGE =
@@ -181,6 +192,8 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
       description: String(input.description || "").slice(0, 5000),
       caption: String(input.caption || input.description || "").slice(0, 2200),
       tags: Array.isArray(input.tags) ? input.tags.map((tag) => String(tag).slice(0, 40)).slice(0, 30) : [],
+      variants: normalizeVariants(input.variants),
+      suggestions: [],
       privacy_status: ["private", "unlisted", "public"].includes(input.privacy_status) ? input.privacy_status : "private",
       media_path: optionalMediaPath(input.media_path, mediaRoot),
       media_url: input.media_url ? String(input.media_url).slice(0, 2000) : null,
@@ -219,6 +232,9 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
     if (input.media_path !== undefined) post.media_path = optionalMediaPath(input.media_path, mediaRoot);
     if (Array.isArray(input.tags)) {
       post.tags = input.tags.map((tag) => String(tag).slice(0, 40)).slice(0, 30);
+    }
+    if (input.variants && typeof input.variants === "object") {
+      post.variants = { ...(post.variants || {}), ...normalizeVariants(input.variants) };
     }
     post.updated_at = new Date(now()).toISOString();
     store.savePost(post);
@@ -497,7 +513,7 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
       return { post, skipped: "cancelled_before_dispatch" };
     }
 
-    const validation = validateDraftForPublish(post);
+    const validation = validateDraftForPublish(resolvePostForPublish(post));
     if (!validation.ok) {
       const error = mcpError("validation_failed", validation.errors.join(" "), 400);
       error.details = { errors: validation.errors, warnings: validation.warnings };
@@ -528,7 +544,7 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
     const working = claim.post;
     try {
       const config = oauthConfig(env, oauth.redirectUri);
-      const result = await dispatchPublish(working, connection, secrets, config);
+      const result = await dispatchPublish(resolvePostForPublish(working), connection, secrets, config);
       working.platform_post_id = result.platform_post_id || null;
       working.published_url = result.published_url || null;
       working.status = result.handoff ? "handed_off" : "published";
@@ -577,6 +593,73 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
     return { count: results.length, results, quarantined };
   }
 
+  function mediaMeta(post) {
+    if (!post?.media_path) return null;
+    try {
+      return readMp4Meta(readFileSync(post.media_path));
+    } catch {
+      return null;
+    }
+  }
+
+  function draftConstraints(post) {
+    const media = mediaMeta(post);
+    return {
+      post,
+      resolved: resolvePostForPublish(post),
+      checks: checkNetwork({ platform: post.platform, post, media }),
+      suggestions: groupSuggestions(post.suggestions || []),
+      sources: SOURCE_NOTES,
+    };
+  }
+
+  async function getDraftConstraints({ post_id }) {
+    const post = store.getPost(post_id);
+    if (!post) throw mcpError("not_found", "Post not found.", 404);
+    return draftConstraints(post);
+  }
+
+  async function proposeSuggestions({ post_id, suggestions }) {
+    const post = store.getPost(post_id);
+    if (!post) throw mcpError("not_found", "Post not found.", 404);
+    const incoming = (Array.isArray(suggestions) ? suggestions : [])
+      .map((item, index) => normalizeSuggestion(item, index))
+      .filter(Boolean)
+      .map((item) => ({ ...item, id: store.newId("sug"), status: "pending" }));
+    if (!incoming.length) throw mcpError("invalid_suggestion", "Send at least one suggestion with a source, network, field, and value.", 400);
+    post.suggestions = [...(post.suggestions || []), ...incoming].slice(-80);
+    post.updated_at = new Date(now()).toISOString();
+    store.savePost(post);
+    return { post, groups: groupSuggestions(post.suggestions) };
+  }
+
+  async function decideSuggestion({ post_id, suggestion_id, decision }) {
+    const post = store.getPost(post_id);
+    if (!post) throw mcpError("not_found", "Post not found.", 404);
+    const suggestion = (post.suggestions || []).find((item) => item.id === suggestion_id);
+    if (!suggestion) throw mcpError("not_found", "Suggestion not found.", 404);
+    if (decision === "accept") {
+      suggestion.status = "accepted";
+      post.variants = applySuggestion(post, suggestion);
+    } else if (decision === "reject") {
+      suggestion.status = "rejected";
+    } else {
+      throw mcpError("invalid_decision", "Choose accept or reject.", 400);
+    }
+    post.updated_at = new Date(now()).toISOString();
+    store.savePost(post);
+    return { post, groups: groupSuggestions(post.suggestions) };
+  }
+
+  async function saveTagSet(input) {
+    const profileId = input.profile_id || input.id;
+    if (!store.getProfile(profileId)) {
+      await upsertProfile({ id: profileId, name: input.profile_name || profileId });
+    }
+    const set = store.saveTagSet(profileId, { id: input.set_id, name: input.set_name, tags: input.tags });
+    return { tag_set: set, profile: store.getProfile(profileId) };
+  }
+
   return {
     store,
     oauth,
@@ -593,6 +676,10 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
     listPosts,
     publishPost,
     publishDue,
+    getDraftConstraints,
+    proposeSuggestions,
+    decideSuggestion,
+    saveTagSet,
     statuses: POST_STATUSES,
   };
 }
