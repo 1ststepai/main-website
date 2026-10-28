@@ -67,7 +67,7 @@ Ordinary customers are not asked to create a Google Cloud app. This preview does
 
 The shipped installer above still shows the older credential form. The PKCE change is in source only until a later installer is built.
 
-The YouTube connection requests `youtube.upload` and `youtube.readonly`, with offline access. Upload uses the resumable `videos.insert` call. Privacy defaults to `private`. The code sets category 22 and made-for-kids to false. PostPath cannot delete the YouTube video afterward.
+The YouTube connection requests `youtube.upload`, `youtube.readonly` and `youtube.force-ssl`, with offline access. Upload uses the resumable `videos.insert` call. Privacy defaults to `private`. The code sets category 22 and made-for-kids to false. After the owner approves it in the desk (with a typed second confirmation), PostPath can change a video's visibility or delete it. See [POSTPATH_FULL_MANAGE.md](POSTPATH_FULL_MANAGE.md).
 
 `youtube.upload` is a sensitive Google scope. If the OAuth consent screen is in Testing, only listed test users can connect, and refresh tokens can expire after seven days. An unverified production app shows Google's unverified-app warning and may block that scope until Google verifies the app. This repository does not record that verification status. Use the existing Swing Trade Pros Google client, and make sure that Google account is allowed on its consent screen.
 
@@ -82,3 +82,8 @@ Prepared test, still not uploaded:
 | Privacy | Private |
 
 After a private upload, open the returned `youtube.com/watch` URL while signed into that channel. Then in YouTube Studio, delete that video.
+
+
+## Full account management, recorder, and Score it
+
+See [POSTPATH_FULL_MANAGE.md](POSTPATH_FULL_MANAGE.md) for the Google consent screen scopes and test users, Meta permissions and App Review, creating the X app, the reconnect order, the session recorder, and the Score it button.

@@ -1,7 +1,7 @@
 import { mcpError } from "../errors.js";
 import { invalidGrantError, isInvalidGrantPayload, readJson, sendWithRefresh } from "./authRetry.js";
 
-async function refreshAccess({ secrets, oauth, fetchImpl, now = Date.now() }) {
+export async function refreshAccess({ secrets, oauth, fetchImpl, now = Date.now() }) {
   if (!secrets.refresh_token || !oauth?.clientId || !oauth?.clientSecret) {
     throw mcpError("x_not_connected", "Reconnect X.", 409);
   }
@@ -33,7 +33,7 @@ async function refreshAccess({ secrets, oauth, fetchImpl, now = Date.now() }) {
   };
 }
 
-async function ensureAccess({ secrets, oauth, fetchImpl, now = Date.now(), onSecrets }) {
+export async function ensureAccess({ secrets, oauth, fetchImpl, now = Date.now(), onSecrets }) {
   if (secrets.access_token && secrets.expires_at && Date.parse(secrets.expires_at) > now + 60_000) {
     return secrets;
   }

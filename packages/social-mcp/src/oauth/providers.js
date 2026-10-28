@@ -25,6 +25,10 @@ const THREADS_GRAPH = "https://graph.threads.net/v1.0";
 export const YOUTUBE_SCOPES = [
   "https://www.googleapis.com/auth/youtube.upload",
   "https://www.googleapis.com/auth/youtube.readonly",
+  // youtube.force-ssl covers every manage call PostPath makes (channels.update,
+  // channelBanners.insert, playlists, playlistItems, videos.update, videos.delete)
+  // plus comments and captions, which the broader "youtube" scope does not.
+  "https://www.googleapis.com/auth/youtube.force-ssl",
 ];
 
 export const GBP_SCOPES = [
@@ -39,12 +43,18 @@ export const META_SCOPES = [
   "instagram_basic",
   "instagram_content_publish",
   "business_management",
+  "pages_manage_engagement",
+  "pages_manage_metadata",
+  "pages_read_user_content",
+  "read_insights",
+  "instagram_manage_comments",
+  "instagram_manage_insights",
 ];
 
 export const THREADS_SCOPES = ["threads_basic", "threads_content_publish"];
 export const TIKTOK_SCOPES = ["video.upload"];
 export const LINKEDIN_SCOPES = ["openid", "profile", "w_member_social"];
-export const X_SCOPES = ["tweet.read", "tweet.write", "users.read", "offline.access"];
+export const X_SCOPES = ["tweet.read", "tweet.write", "users.read", "offline.access", "like.write", "follows.write", "media.write"];
 export const PINTEREST_SCOPES = ["boards:read", "pins:read", "pins:write", "user_accounts:read"];
 export const REDDIT_SCOPES = ["identity", "submit", "read"];
 export const SNAP_SCOPES = ["snapchat-marketing-api"];

@@ -1,3 +1,4 @@
+import { scopesForNewConnection } from "../manage/scopes.js";
 import { existsSync } from "node:fs";
 import { createServer } from "node:http";
 import { spawn } from "node:child_process";
@@ -76,7 +77,7 @@ function isOAuthCallback(pathname) {
   return pathname === "/oauth/callback" || pathname === "/oauth/callback/" || pathname === "/" || pathname === "";
 }
 
-export function createOAuthRuntime({ store, env = process.env, fetchImpl = fetch, port = Number(env.SOCIAL_MCP_OAUTH_PORT || DEFAULT_OAUTH_PORT) }) {
+export function createOAuthRuntime({ store, env = process.env, fetchImpl = fetch, onEvent = () => {}, port = Number(env.SOCIAL_MCP_OAUTH_PORT || DEFAULT_OAUTH_PORT) }) {
   let server = null;
   const redirectUri = providerRedirectUri(env, port);
   const googleRedirectUri = googleLoopbackUri(env, port);
@@ -124,6 +125,9 @@ export function createOAuthRuntime({ store, env = process.env, fetchImpl = fetch
             {
               profile_id: state.profile_id,
               ...bundle.record,
+              // Scopes are not secrets. They drive the desk's "Reconnect for full access" view.
+              granted_scopes: scopesForNewConnection(platform, bundle.secrets?.scope),
+              status: "connected",
             },
             bundle.secrets,
           );
@@ -135,6 +139,7 @@ export function createOAuthRuntime({ store, env = process.env, fetchImpl = fetch
             platform,
             detail: bundle.record.account_label,
           });
+          onEvent("account_connected", { platform, provider: state.provider });
         }
 
         const chain = Array.isArray(state.chain) ? state.chain : [];
@@ -153,6 +158,7 @@ export function createOAuthRuntime({ store, env = process.env, fetchImpl = fetch
           ),
         );
       } catch (error) {
+        onEvent("connect_error", { code: error?.code || "oauth_failed" });
         res.writeHead(error.statusCode || 500, { "content-type": "text/html; charset=utf-8" });
         res.end(htmlPage("Connection failed", `<p>${error.message || "Unexpected error."}</p>`));
       }

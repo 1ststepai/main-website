@@ -32,7 +32,7 @@ export function youtubeUploadMetadata(post) {
   return { snippet, status };
 }
 
-async function refreshAccess({ secrets, oauth, fetchImpl, now = Date.now() }) {
+export async function refreshAccess({ secrets, oauth, fetchImpl, now = Date.now() }) {
   if (!secrets.refresh_token) throw mcpError("youtube_not_connected", "Reconnect YouTube.", 409);
   const response = await fetchImpl(TOKEN_URL, {
     method: "POST",
@@ -58,7 +58,7 @@ async function refreshAccess({ secrets, oauth, fetchImpl, now = Date.now() }) {
   };
 }
 
-async function ensureAccess({ secrets, oauth, fetchImpl, now = Date.now() }) {
+export async function ensureAccess({ secrets, oauth, fetchImpl, now = Date.now() }) {
   if (secrets.access_token && secrets.expires_at && Date.parse(secrets.expires_at) > now + 60_000) {
     return secrets;
   }

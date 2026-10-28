@@ -18,6 +18,8 @@ import { createPat, listGrants, listPats, revokePat } from "../mcp/auth.js";
 import { AUTO_POST_RISK_LABEL, disableAutoPost, enableAutoPost, listAutoPost } from "../autoPost.js";
 import { openDesktopApp } from "../openApp.js";
 import { mcpError } from "../errors.js";
+import { createRecorder } from "../recorder.js";
+import { createReadStream, statSync } from "node:fs";
 import { resolveSafeMediaPath } from "../mediaPath.js";
 import { PRODUCT_NAME, PRODUCT_TITLE } from "../brand.js";
 import { handleSeoRoutes } from "../seo/http.js";
@@ -173,6 +175,10 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
   let dueTimer = null;
   let dueInFlight = false;
   let ffmpegCache = { at: 0, ok: true, message: "" };
+  // Session recorder: off until the owner starts it in the desk. Local files only.
+  const recorder = createRecorder({ root: homePaths.recordingsDir || join(homePaths.root, "recordings") });
+  const onAppEvent = (event) => recorder.record(event.type, event);
+  engine.events?.on?.("event", onAppEvent);
 
   function ffmpegNote() {
     if (Date.now() - ffmpegCache.at < 60_000) return { ok: ffmpegCache.ok, message: ffmpegCache.message };
@@ -402,6 +408,25 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
         const body = await readJson(req);
         const result = requestPilotChanges(engine, body);
         sendJson(res, 200, { ok: true, ...result, ...deskState() });
+        return;
+      }
+
+      if (req.method === "GET" && url.pathname === "/api/vidiq-upsell") {
+        sendJson(res, 200, { ok: true, upsell: engine.vidiqUpsellInfo() });
+        return;
+      }
+      if (req.method === "POST" && url.pathname === "/api/settings/vidiq") {
+        const body = await readJson(req);
+        requireOwner(req, body);
+        sendJson(res, 200, { ok: true, upsell: engine.saveVidiqUpsell(body) });
+        return;
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/score") {
+        // Open to every desk user (owner and pilot). Opt-in per click; nothing is saved or blocked.
+        const body = await readJson(req);
+        const interest = ["youtube_suggest", "google_trends"].includes(body.interest) ? body.interest : "off";
+        sendJson(res, 200, { ok: true, ...(await engine.score(body, { interest })) });
         return;
       }
 
@@ -737,6 +762,96 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
         return;
       }
 
+      if (url.pathname === "/api/manage" || url.pathname.startsWith("/api/manage/")) {
+        if (!engine.manage) throw mcpError("not_found", "Not found", 404);
+        if (req.method === "GET" && url.pathname === "/api/manage") {
+          sendJson(res, 200, { ok: true, ...engine.manage.view(String(url.searchParams.get("profile_id") || "")) });
+          return;
+        }
+        if (req.method === "POST" && url.pathname === "/api/manage/queue") {
+          const body = await readJson(req);
+          requireOwner(req, body);
+          const result = engine.manage.queue({ ...body, source: "desk" });
+          sendJson(res, 200, { ok: true, ...result });
+          return;
+        }
+        if (req.method === "POST" && url.pathname === "/api/manage/approve") {
+          const body = await readJson(req);
+          requireOwner(req, body);
+          // The desk is the only place that can approve; destructive changes take a second, typed confirmation.
+          const result = await engine.manage.approve({
+            id: body.action_id,
+            approved_by: "desk",
+            confirm_nonce: body.confirm_nonce,
+            confirm_text: body.confirm_text,
+          });
+          sendJson(res, 200, { ok: true, ...result });
+          return;
+        }
+        if (req.method === "POST" && url.pathname === "/api/manage/discard") {
+          const body = await readJson(req);
+          const result = engine.manage.discard({ id: body.action_id });
+          sendJson(res, 200, { ok: true, ...result });
+          return;
+        }
+      }
+
+      if (url.pathname === "/api/recordings" || url.pathname.startsWith("/api/recordings/")) {
+        if (req.method === "GET" && url.pathname === "/api/recordings") {
+          sendJson(res, 200, { ok: true, active: recorder.active, recordings: recorder.list(), saved_in: "recordings folder in your PostPath home" });
+          return;
+        }
+        if (req.method === "POST" && url.pathname === "/api/recordings/start") {
+          const body = await readJson(req);
+          requireOwner(req, body);
+          sendJson(res, 200, { ok: true, ...recorder.start({ name: body.name, screen: body.screen === true }) });
+          return;
+        }
+        if (req.method === "POST" && url.pathname === "/api/recordings/stop") {
+          // Stopping is always allowed, one click.
+          sendJson(res, 200, { ok: true, ...recorder.stop() });
+          return;
+        }
+        if (req.method === "POST" && url.pathname === "/api/recordings/event") {
+          const body = await readJson(req, 8_000);
+          const allowed = ["desk_error", "reconnect_started", "screen_capture_started", "screen_capture_stopped"];
+          if (!allowed.includes(body.type)) throw mcpError("invalid_event", "Unknown event.", 400);
+          sendJson(res, 200, { ok: true, recorded: recorder.record(body.type, body) });
+          return;
+        }
+        if (req.method === "POST" && url.pathname === "/api/recordings/video") {
+          const id = String(url.searchParams.get("id") || "");
+          if (recorder.active?.id !== id && !recorder.list().some((row) => row.id === id)) throw mcpError("not_found", "Unknown recording.", 404);
+          const type = String(req.headers["content-type"] || "");
+          if (!type.startsWith("video/webm")) throw mcpError("invalid_media", "Only a desk.webm screen recording is saved.", 400);
+          const result = await recorder.saveVideo(id, req);
+          sendJson(res, 200, { ok: true, ...result });
+          return;
+        }
+        const fileMatch = url.pathname.match(/^\/api\/recordings\/(rec_[A-Za-z0-9_]+)\/(events\.jsonl|desk\.webm|summary\.md)$/);
+        if (req.method === "GET" && fileMatch) {
+          const path = recorder.filePath(fileMatch[1], fileMatch[2]);
+          const types = { "events.jsonl": "application/x-ndjson", "desk.webm": "video/webm", "summary.md": "text/markdown; charset=utf-8" };
+          const headers = { "content-type": types[fileMatch[2]], "content-length": statSync(path).size, "cache-control": "no-store" };
+          if (url.searchParams.get("download") === "1") headers["content-disposition"] = `attachment; filename="${fileMatch[1]}-${fileMatch[2]}"`;
+          res.writeHead(200, headers);
+          createReadStream(path).pipe(res);
+          return;
+        }
+        if (req.method === "POST" && url.pathname === "/api/recordings/rename") {
+          const body = await readJson(req);
+          sendJson(res, 200, { ok: true, ...recorder.rename(String(body.id || ""), body.name) });
+          return;
+        }
+        if (req.method === "POST" && url.pathname === "/api/recordings/delete") {
+          const body = await readJson(req);
+          requireOwner(req, body);
+          if (body.confirm !== true) throw mcpError("confirm_required", "Confirm to delete this recording.", 400);
+          sendJson(res, 200, { ok: true, ...recorder.remove(String(body.id || "")) });
+          return;
+        }
+      }
+
       if (req.method === "POST" && url.pathname === "/api/forget-vault") {
         const body = await readJson(req);
         requireOwner(req, body);
@@ -759,6 +874,7 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
 
       sendJson(res, 404, { ok: false, message: "Not found" });
     } catch (error) {
+      recorder.record("error", { code: error.code || "error", route: String(req.url || "").split("?")[0] });
       sendJson(res, error.statusCode || 500, {
         ok: false,
         code: error.code || "error",
@@ -786,9 +902,11 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
 
   async function stop() {
     stopDueLoop();
+    recorder.stop();
+    engine.events?.off?.("event", onAppEvent);
     await new Promise((resolve) => server.close(() => resolve()));
     await engine.oauth.stop();
   }
 
-  return { start, stop, snapshot, port, startDueLoop, stopDueLoop };
+  return { start, stop, snapshot, port, startDueLoop, stopDueLoop, recorder };
 }

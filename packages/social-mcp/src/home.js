@@ -31,6 +31,7 @@ export function paths(home = resolveHome()) {
     keyFile: join(root, "master.key"),
     dbFile: join(root, "db.json"),
     mediaDir: join(root, "media"),
+    recordingsDir: join(root, "recordings"),
     oauthEnv: join(root, "oauth.env"),
     envExample: join(root, "oauth.env.example"),
     pilotFile: join(root, "pilot.json"),

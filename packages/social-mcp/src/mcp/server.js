@@ -556,6 +556,70 @@ export function createSocialMcpServer({ engine, auth, env = process.env } = {}) 
     async (args) => eng.publishDue(args),
   );
 
+  // Account management: assistants can only queue a change. The owner approves it in the desk; deletes need a typed confirmation there.
+  if (eng.manage) {
+    add(
+      "account_access_status",
+      "Account access status",
+      "Read which permissions each connected network granted and which are missing for full account management. When something is missing, ask the owner to press Reconnect in the PostPath desk. Read-only.",
+      "accounts:read",
+      { read: true, idempotent: true },
+      { profile_id: z.string().min(2).max(64).describe("Brand profile id.") },
+      async (args) => {
+        const view = eng.manage.view(args.profile_id);
+        return { access: view.access, limits: view.limits };
+      },
+    );
+    add(
+      "queue_account_action",
+      "Queue an account change",
+      `Queue a change to a connected account for the owner to approve in the PostPath desk. Nothing changes until the owner approves; deletes and unlisting also need a typed confirmation there. Types: ${(eng.manage.types || []).join(", ")}. Read account_access_status first; a missing permission means the owner must reconnect.`,
+      "drafts:write",
+      {},
+      {
+        profile_id: z.string().min(2).max(64).describe("Brand profile id."),
+        type: z.string().min(3).max(60).describe("Action type, such as youtube.update_channel or x.create_post."),
+        params: z.record(z.any()).optional().describe("Fields for the action; see the catalog in list_account_actions."),
+        note: z.string().max(500).optional().describe("Why this change, shown to the owner."),
+      },
+      async (args) => eng.manage.queue({ ...args, source: "mcp" }),
+    );
+    add(
+      "list_account_actions",
+      "List account changes",
+      "List queued, waiting, done, and failed account changes, plus the catalog of action types and what each network's API cannot do. Read-only.",
+      "posts:read",
+      { read: true, idempotent: true },
+      {
+        profile_id: z.string().min(2).max(64).optional().describe("Brand profile id."),
+        status: z.string().max(40).optional().describe("Filter by status."),
+      },
+      async (args) => {
+        const view = args.profile_id ? eng.manage.view(args.profile_id) : null;
+        return { actions: eng.manage.list(args), catalog: view?.catalog || eng.manage.types, limits: view?.limits };
+      },
+    );
+  }
+
+  add(
+    "score_content",
+    "Score it",
+    "Score a title, description, tags, and thumbnail with PostPath's free built-in scorer. Returns checklist scores (0-100) with tips; not a prediction and not a vidIQ score. Informational only; nothing is blocked or saved. No vidIQ account is used; pass vidiq_score only from the user's own vidIQ account.",
+    "posts:read",
+    { read: true, idempotent: true },
+    {
+      title: z.string().max(200).optional(),
+      description: z.string().max(5000).optional(),
+      tags: z.union([z.array(z.string().max(100)).max(60), z.string().max(1000)]).optional(),
+      main_term: z.string().max(100).optional().describe("Main search term; defaults to the first tag."),
+      thumbnail_path: z.string().max(500).optional().describe("Image inside the PostPath media folder."),
+      thumbnail_text: z.string().max(200).optional().describe("Words written on the thumbnail."),
+      interest: z.enum(["off", "youtube_suggest", "google_trends"]).optional().describe("Optional search-interest lookup. Off by default."),
+      vidiq_score: z.number().min(0).max(100).optional().describe("A score the user got from their own vidIQ account."),
+    },
+    async ({ interest, ...args }) => eng.score(args, { interest: interest || "off" }),
+  );
+
   registerSeoTools(server, { engine: eng, gated, scopeAllowed });
   registerHookTools(server, { engine: eng, gated });
 

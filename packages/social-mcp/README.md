@@ -151,6 +151,10 @@ The desk and the OAuth callback server still bind to `127.0.0.1` only. `localhos
 | Snapchat | OAuth scaffold | API-restricted until Marketing API approval | restricted scaffold |
 | WhatsApp Channels | — | API-restricted (no free third-party publish path) | restricted scaffold |
 
+## Account changes, recorder, Score it
+
+PostPath can edit YouTube channels, playlists and videos, Facebook posts and Page details, Instagram and Facebook comments, and post, reply, like and follow on X. Every change is queued and approved in the desk; deletes need a typed second confirmation. The desk also has an opt-in session recorder (saved only under `<home>/recordings/`) and a free **Score it** button for titles, descriptions, tags and thumbnails. Setup and limits: [docs/POSTPATH_FULL_MANAGE.md](../../docs/POSTPATH_FULL_MANAGE.md).
+
 ## CLI reference
 
 ```text

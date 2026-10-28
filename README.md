@@ -194,6 +194,9 @@ client use.
 
 The Social page in the studio is a multi-brand draft queue. Setup, env var names, and the disabled cron are in `docs/SOCIAL_POSTING.md`. It reuses the KV store above and adds `SOCIAL_TOKEN_ENC_KEY`, `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`, `GOOGLE_OAUTH_REDIRECT_URI`, `SOCIAL_CRON_SECRET`, and `BLOB_READ_WRITE_TOKEN`.
 
+PostPath (the local desk in `packages/social-mcp`) also manages connected accounts: YouTube channel, playlists and videos; Facebook posts, Page details and comments; Instagram comments; and X posts, replies, likes and follows. Every change waits for owner approval in the desk. Setup (Google consent scopes, Meta permissions, the X app), the session recorder and the Score it button are in `docs/POSTPATH_FULL_MANAGE.md`.
+
+
 Saved quotes can also be sent through the authenticated backend using the
 existing `RESEND_API_KEY`. The sender and Reply-To are fixed to
 `Evan at 1stStep.ai <evan@1ststep.ai>`; recipients come only from the saved

@@ -36,6 +36,11 @@ import { createSeo } from "./seo/index.js";
 import { createHooks } from "./hook/index.js";
 import { planFor } from "./media/specs.js";
 import { randomBytes } from "node:crypto";
+import { scoreContent } from "./score/score.js";
+import { vidiqUpsell, cleanAffiliateUrl, cleanPromoCode } from "./score/vidiq.js";
+import { trendsStub } from "./seo/stubs.js";
+import { EventEmitter } from "node:events";
+import { createManageQueue, mockManageExecutors } from "./manage/queue.js";
 import { rmSync } from "node:fs";
 import { join } from "node:path";
 
@@ -92,7 +97,16 @@ export function createEngine({
   publishers = null,
 } = {}) {
   const store = createStore({ home, env, now });
-  const oauth = createOAuthRuntime({ store, env, fetchImpl });
+  // App events for the optional session recorder. Payloads carry ids and codes only, never tokens or text.
+  const events = new EventEmitter();
+  const emit = (type, data = {}) => {
+    try {
+      events.emit("event", { ...data, type });
+    } catch {
+      // A listener must never break a publish.
+    }
+  };
+  const oauth = createOAuthRuntime({ store, env, fetchImpl, onEvent: emit });
   let seo;
   let hooks;
   const publishStats = { calls: 0 };
@@ -573,6 +587,7 @@ export function createEngine({
     }
     const saved = store.getBundle(bundle.id);
     const freshPosts = platforms.map((platform) => store.getPost(saved.child_ids?.[platform])).filter(Boolean);
+    emit("item_queued", { bundle_id: saved.id, platforms, source: saved.source || "desk" });
     return { bundle: saved, posts: freshPosts.length ? freshPosts : posts, post: freshPosts[0] || posts[0] };
   }
 
@@ -631,6 +646,7 @@ export function createEngine({
         wait: input.wait === true,
       });
     }
+    emit("item_queued", { post_id: post.id, platform, source: post.source || "desk" });
     return { post: store.getPost(post.id) };
   }
 
@@ -981,6 +997,7 @@ export function createEngine({
     const children = (bundle.platforms || [])
       .map((platform) => store.getPost(bundle.child_ids?.[platform]))
       .filter(Boolean);
+    emit("item_approved", { bundle_id: bundle.id, platforms: bundle.platforms || [], scheduled: Boolean(scheduled_at) });
     if (scheduled_at) {
       const scheduled = [];
       const errors = [];
@@ -1118,8 +1135,10 @@ export function createEngine({
         post_id: working.id,
         detail: result.note || working.published_url || working.platform_post_id,
       });
+      emit("publish_result", { post_id: working.id, platform: working.platform, status: working.status, url: working.published_url || null });
       return { post: working, result, warnings: validation.warnings };
     } catch (error) {
+      emit("publish_error", { post_id: working.id, platform: working.platform, code: error?.code || "publish_failed" });
       settlePublishError(working, error);
       throw error;
     } finally {
@@ -1358,9 +1377,49 @@ export function createEngine({
   });
   hooks = createHooks({ store, env, fetchImpl, now, hookGenerator, structureProvider });
 
+  const manage = createManageQueue({
+    store,
+    getConfig: () => oauthConfig(env, oauth.redirectUri),
+    fetchImpl: trackedFetch,
+    mediaRoot,
+    now,
+    pilotOn,
+    emit,
+    executors: publishers?.manage || (publishMode(env) === "mock" ? mockManageExecutors() : undefined),
+  });
+
+  // Free built-in scorer. Informational only; never blocks a save. No vidIQ call is made here.
+  async function score(input = {}, { interest = "off" } = {}) {
+    const result = await scoreContent(input, { mediaRoot, fetchImpl: trackedFetch, interest, trends: () => trendsStub(env) });
+    return { ...result, upsell: vidiqUpsellInfo() };
+  }
+
+  function vidiqUpsellInfo() {
+    return vidiqUpsell({ env, settings: store.readSection("vidiqUpsell") });
+  }
+
+  function saveVidiqUpsell({ affiliate_url = "", promo_code = "" } = {}) {
+    const url = String(affiliate_url || "").trim();
+    const code = String(promo_code || "").trim();
+    if (url && !cleanAffiliateUrl(url)) throw mcpError("invalid_input", "The affiliate link must be a full https:// address.", 400);
+    if (code && !cleanPromoCode(code)) throw mcpError("invalid_input", "The promo code can use letters, numbers, - and _ only.", 400);
+    store.updateSection("vidiqUpsell", (section) => {
+      section.affiliate_url = url;
+      section.promo_code = code;
+      return section;
+    });
+    return vidiqUpsellInfo();
+  }
+
   return {
+    score,
+    vidiqUpsellInfo,
+    saveVidiqUpsell,
     store,
     oauth,
+    events,
+    emit,
+    manage,
     seo,
     hooks,
     publicStatus,

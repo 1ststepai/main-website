@@ -139,6 +139,10 @@ Why bytes still pass through Blob for YouTube: Google's resumable-upload docs sh
 
 Docs: https://developers.google.com/youtube/v3/guides/using_resumable_upload_protocol · https://developers.google.com/youtube/v3/docs/videos/update · https://developers.tiktok.com/doc/content-posting-api-reference-upload-video · https://developers.tiktok.com/doc/content-posting-api-media-transfer-guide · https://developers.facebook.com/docs/graph-api/reference/page/videos/
 
+## Account changes
+
+Queue with `queue_account_action` (scope `drafts:write`) or the desk; approve only in the desk with the owner PIN. Destructive changes need a typed second confirmation. Catalog and API limits: `list_account_actions`, and [POSTPATH_FULL_MANAGE.md](POSTPATH_FULL_MANAGE.md). Scoring: `score_content` / the Score it button. Session recordings stay in `<home>/recordings/`.
+
 ## Known limits
 
 - Rate limits are in memory on each function instance. They are not a global counter.
