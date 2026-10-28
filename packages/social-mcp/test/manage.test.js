@@ -241,7 +241,7 @@ test("desk routes: queue, two-step delete, and the recorder log it with secrets 
     assert.match(summary, /hook in the first 1-2 seconds/);
     const renamed = await post("/api/recordings/rename", { id, name: "Launch demo" });
     assert.equal(renamed.recording.name, "Launch demo");
-    const upload = await fetch(`${base}/api/recordings/video?id=${id}`, { method: "POST", headers: { "content-type": "video/webm" }, body: Buffer.from("webm") }).then((r) => r.json());
+    const upload = await fetch(`${base}/api/recordings/video?id=${id}`, { method: "POST", headers: { "content-type": "video/webm", "x-postpath-desk": "1" }, body: Buffer.from("webm") }).then((r) => r.json());
     assert.equal(upload.ok, true);
     const dl = await fetch(`${base}/api/recordings/${id}/desk.webm?download=1`);
     assert.match(dl.headers.get("content-disposition"), /attachment/);

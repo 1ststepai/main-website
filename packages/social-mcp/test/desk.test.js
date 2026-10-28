@@ -101,7 +101,7 @@ test("desk status and profile APIs stay on localhost", async () => {
     assert.equal(status.google_redirect_uri, "http://127.0.0.1:47992");
     const media = await fetch(`${url}api/media`, {
       method: "POST",
-      headers: { "content-type": "video/mp4", "x-postpath-filename": "clip.mp4" },
+      headers: { "content-type": "video/mp4", "x-postpath-desk": "1", "x-postpath-filename": "clip.mp4" },
       body: Buffer.from("not-a-real-video"),
     }).then((res) => res.json());
     assert.equal(media.ok, true);

@@ -52,7 +52,7 @@ function make(tag, attrs = {}, text) {
 
 function pinHeaders() {
   const pin = document.getElementById("manage-pin")?.value || "";
-  return { "content-type": "application/json", ...(pin ? { "x-postpath-owner-pin": pin } : {}) };
+  return { "content-type": "application/json", "x-postpath-desk": "1", ...(pin ? { "x-postpath-owner-pin": pin } : {}) };
 }
 
 async function call(path, body) {
@@ -327,7 +327,7 @@ async function finishScreen() {
   const id = rec.id;
   rec.media = rec.recorder = rec.id = null;
   rec.chunks = [];
-  await fetch(`/api/recordings/video?id=${encodeURIComponent(id)}`, { method: "POST", headers: { "content-type": "video/webm" }, body: blob });
+  await fetch(`/api/recordings/video?id=${encodeURIComponent(id)}`, { method: "POST", headers: { "content-type": "video/webm", "x-postpath-desk": "1" }, body: blob });
 }
 
 let stopping = false;
