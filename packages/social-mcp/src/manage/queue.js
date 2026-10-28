@@ -1,3 +1,4 @@
+import { assertXAvailable, isXPlatform, xAvailable } from "../xAccess.js";
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
 import { mcpError } from "../errors.js";
 import { actionSpec, isDestructive, requiredScopes, API_LIMITS, MANAGE_ACTIONS } from "./actions.js";
@@ -59,6 +60,7 @@ export function createManageQueue({ store, getConfig, fetchImpl, mediaRoot, now 
   function queue({ profile_id, type, params = {}, source = "desk", note = "" } = {}) {
     if (!profile_id || !store.getProfile(profile_id)) throw mcpError("not_found", "Brand not found.", 404);
     const spec = actionSpec(type);
+    if (isXPlatform(spec.platform)) assertXAvailable(store.homePaths);
     const clean = Object.fromEntries(Object.entries(spec.validate(params || {})).filter(([, v]) => v !== undefined));
     const connection = store.getConnection(profile_id, spec.platform);
     const missing = connection ? hasScopes(connection, requiredScopes(type, clean)) : requiredScopes(type, clean);
@@ -129,6 +131,7 @@ export function createManageQueue({ store, getConfig, fetchImpl, mediaRoot, now 
   }
 
   async function execute(row) {
+    if (isXPlatform(row.platform)) assertXAvailable(store.homePaths);
     const connection = store.getConnection(row.profile_id, row.platform);
     if (!connection) throw mcpError("not_connected", `${row.platform} is not connected for this brand.`, 409);
     const missing = hasScopes(connection, requiredScopes(row.type, row.params));
@@ -176,11 +179,14 @@ export function createManageQueue({ store, getConfig, fetchImpl, mediaRoot, now 
   }
 
   function view(profileId) {
+    const xOk = xAvailable(store.homePaths);
+    const keep = (platform) => xOk || !isXPlatform(platform);
     return {
-      access: profileId ? accessStatus(store, profileId) : [],
-      actions: list({ profile_id: profileId }),
-      catalog: Object.entries(MANAGE_ACTIONS).map(([type, spec]) => ({ type, platform: spec.platform, label: spec.label, destructive: spec.destructive === true ? true : typeof spec.destructive === "function" ? "depends" : false })),
-      limits: API_LIMITS,
+      x_available: xOk,
+      access: profileId ? accessStatus(store, profileId).filter((row) => keep(row.platform)) : [],
+      actions: list({ profile_id: profileId }).filter((row) => keep(row.platform)),
+      catalog: Object.entries(MANAGE_ACTIONS).filter(([, spec]) => keep(spec.platform)).map(([type, spec]) => ({ type, platform: spec.platform, label: spec.label, destructive: spec.destructive === true ? true : typeof spec.destructive === "function" ? "depends" : false })),
+      limits: xOk ? API_LIMITS : Object.fromEntries(Object.entries(API_LIMITS).filter(([key]) => !isXPlatform(key))),
     };
   }
 

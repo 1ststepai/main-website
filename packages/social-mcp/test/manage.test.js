@@ -1,3 +1,4 @@
+import { giveOwnX } from "./helpers/ownX.js";
 import assert from "node:assert/strict";
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -93,7 +94,7 @@ const EXPECT = {
 };
 
 function setup({ fetchImpl, env = {} } = {}) {
-  const home = mkdtempSync(join(tmpdir(), "pp-manage-"));
+  const home = giveOwnX(mkdtempSync(join(tmpdir(), "pp-manage-")));
   const engine = createEngine({ home, env: { SOCIAL_MCP_PUBLISH_MODE: "real", GOOGLE_OAUTH_CLIENT_ID: "g", GOOGLE_OAUTH_CLIENT_SECRET: "s", X_CLIENT_ID: "x", ...env }, fetchImpl, now: () => Date.now() });
   engine.upsertProfile({ id: "acme", name: "Acme" });
   mkdirSync(engine.store.homePaths.mediaDir, { recursive: true });

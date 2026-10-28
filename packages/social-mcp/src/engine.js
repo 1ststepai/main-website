@@ -1,3 +1,4 @@
+import { assertXAvailable, isXPlatform, withOwnX } from "./xAccess.js";
 import { PLATFORMS } from "./home.js";
 import { mcpError } from "./errors.js";
 import { resolveSafeMediaPath } from "./mediaPath.js";
@@ -523,6 +524,7 @@ export function createEngine({
     const shaped = applyPresets(input, profile.presets);
     const platforms = knownPlatforms(shaped.platforms);
     if (!platforms.length) throw mcpError("invalid_platform", `Platform must be one of: ${PLATFORMS.join(", ")}`);
+    if (platforms.some(isXPlatform)) assertXAvailable(store.homePaths);
     const stamp = new Date(now()).toISOString();
     const source = ["mcp", "cli"].includes(input.source) ? input.source : "desk";
     const bundle = {
@@ -596,6 +598,7 @@ export function createEngine({
     const profile = requireProfile(input.profile_id);
     const platform = String(input.platform || "");
     if (!PLATFORMS.includes(platform)) throw mcpError("invalid_platform", `Platform must be one of: ${PLATFORMS.join(", ")}`);
+    if (isXPlatform(platform)) assertXAvailable(store.homePaths);
     input = await withCaptions(input, [platform]);
     const stamp = new Date(now()).toISOString();
     const post = {
@@ -1071,6 +1074,7 @@ export function createEngine({
     refusePilotPublish();
     const post = store.getPost(post_id);
     if (!post) throw mcpError("not_found", "Post not found.", 404);
+    if (isXPlatform(post.platform)) assertXAvailable(store.homePaths);
     assertActionAllowed("publish", getEntitlement(env));
     assertMediaReady(post);
     if (String(post.media_content_type || "").startsWith("image/")) {
@@ -1116,7 +1120,7 @@ export function createEngine({
 
     const working = claim.post;
     try {
-      const config = oauthConfig(env, oauth.redirectUri);
+      const config = withOwnX(oauthConfig(env, oauth.redirectUri), store.homePaths);
       const result = await dispatchPublish(working, connection, secrets, config);
       working.platform_post_id = result.platform_post_id || null;
       working.published_url = result.published_url || null;
@@ -1379,7 +1383,7 @@ export function createEngine({
 
   const manage = createManageQueue({
     store,
-    getConfig: () => oauthConfig(env, oauth.redirectUri),
+    getConfig: () => withOwnX(oauthConfig(env, oauth.redirectUri), store.homePaths),
     fetchImpl: trackedFetch,
     mediaRoot,
     now,

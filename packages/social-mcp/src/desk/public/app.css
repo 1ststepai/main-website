@@ -849,3 +849,8 @@ input:focus-visible, textarea:focus-visible, select:focus-visible, summary:focus
 .vidiq-promo{font-weight:600}
 .score-box{display:flex;flex-direction:column;gap:.5rem;margin:.5rem 0}
 .score-box #score-it{align-self:flex-start}
+
+/* X is bring-your-own-app: hidden until this desk saves its own X app. */
+body:not(.x-on) [data-x-only] { display: none !important; }
+.x-own-app { grid-column: 1 / -1; }
+.x-own-app > summary { cursor: pointer; font-weight: 600; }

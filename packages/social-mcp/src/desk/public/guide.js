@@ -171,8 +171,13 @@ export function dismissGuide(guide) {
   return { ...guide, open: false };
 }
 
+let xOnDesk = false;
+export function setXAvailable(value) {
+  xOnDesk = value === true;
+}
+
 export function channelCatalog() {
-  return CHANNELS.map((channel) => ({ ...channel }));
+  return CHANNELS.filter((channel) => xOnDesk || channel.key !== "x").map((channel) => ({ ...channel }));
 }
 
 export function connectPlan(channelKey, status = {}) {

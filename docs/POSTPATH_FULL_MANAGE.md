@@ -41,14 +41,18 @@ Add these permissions under App Review → Permissions and Features (or Use case
 
 **Is App Review needed?** Not for you in development mode. People with a role on the app (admin, developer, tester) can grant every permission and use it on Pages and Instagram accounts they manage, with no review. App Review plus Advanced Access is only needed when people *without* a role on the app connect their own Pages, and that needs the app switched to Live.
 
-### 3. X app (none exists in this repo's config yet)
+### 3. X: bring your own X developer app (optional)
+
+X is **off and hidden on every desk by default**, including pilot desks and Evan's own desk. PostPath does not ship, share, or fall back to anyone else's X credentials: the zip and pilot builds contain no X Client ID, no X Client Secret, and no switch that turns X on, and X keys in the process environment are ignored. X shows up on a desk only after that desk's user saves their **own** X Client ID and Secret in the desk (App credentials → **Use your own X developer app**, a collapsed option). On a pilot desk, where the setup form is owner-locked, put them in that desk's own `oauth.env`. Until then the desk and the MCP tools refuse X with "X isn't available on this desk". X developer access may be pay-per-use, billed to you by X.
+
+To set up your own app:
 
 1. In the X developer portal, create a Project and an App.
 2. User authentication settings: OAuth 2.0, type **Native App** or **Web App**, permissions **Read and write** (likes and follows are included in read and write for OAuth 2.0 scopes).
 3. Callback / redirect URI: `http://127.0.0.1:47831/oauth/callback`. Website URL: `https://1ststep.ai`.
 4. Copy the OAuth 2.0 **Client ID** and **Client Secret** into the desk's setup form as `X_CLIENT_ID` and `X_CLIENT_SECRET` (they are stored encrypted on this computer).
 5. PostPath requests: `tweet.read tweet.write users.read offline.access like.write follows.write media.write`, with PKCE.
-6. Check the portal for which plan your app is on and what it includes and costs.
+6. Check the portal for which plan your app is on and what it includes and costs; X may bill per use, and that bill is yours.
 
 ### 4. Reconnect in the desk
 

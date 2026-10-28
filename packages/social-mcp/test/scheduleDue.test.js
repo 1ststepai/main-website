@@ -1,3 +1,4 @@
+import { giveOwnX } from "./helpers/ownX.js";
 import assert from "node:assert/strict";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -33,7 +34,7 @@ async function seedYoutubeDraft(engine, media) {
 }
 
 test("schedule then advance clock then publish_due", async () => {
-  const home = mkdtempSync(join(tmpdir(), "social-mcp-due-"));
+  const home = giveOwnX(mkdtempSync(join(tmpdir(), "social-mcp-due-")));
   const mediaDir = join(home, "media");
   mkdirSync(mediaDir, { recursive: true });
   const media = join(mediaDir, "clip.mp4");
@@ -73,7 +74,7 @@ test("schedule then advance clock then publish_due", async () => {
 });
 
 test("cancelScheduledPost returns draft with null scheduled_at", async () => {
-  const home = mkdtempSync(join(tmpdir(), "social-mcp-cancel-"));
+  const home = giveOwnX(mkdtempSync(join(tmpdir(), "social-mcp-cancel-")));
   try {
     const engine = createEngine({
       home,
@@ -101,7 +102,7 @@ test("cancelScheduledPost returns draft with null scheduled_at", async () => {
 });
 
 test("desk due loop calls publishDue and clears on stop", async () => {
-  const home = mkdtempSync(join(tmpdir(), "social-mcp-loop-"));
+  const home = giveOwnX(mkdtempSync(join(tmpdir(), "social-mcp-loop-")));
   const env = {
     SOCIAL_MCP_OAUTH_PORT: "48014",
     SOCIAL_MCP_DESK_PORT: "48013",
@@ -140,7 +141,7 @@ test("desk due loop calls publishDue and clears on stop", async () => {
 });
 
 test("desk cancel-scheduled API restores draft", async () => {
-  const home = mkdtempSync(join(tmpdir(), "social-mcp-desk-cancel-"));
+  const home = giveOwnX(mkdtempSync(join(tmpdir(), "social-mcp-desk-cancel-")));
   const env = {
     SOCIAL_MCP_OAUTH_PORT: "47996",
     SOCIAL_MCP_DESK_PORT: "47995",

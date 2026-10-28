@@ -1,3 +1,4 @@
+import { assertXAvailable, isXPlatform, withOwnX, xAvailable } from "../xAccess.js";
 import { scopesForNewConnection } from "../manage/scopes.js";
 import { existsSync } from "node:fs";
 import { createServer } from "node:http";
@@ -83,7 +84,7 @@ export function createOAuthRuntime({ store, env = process.env, fetchImpl = fetch
   const googleRedirectUri = googleLoopbackUri(env, port);
 
   function currentConfig() {
-    return oauthConfig(env, redirectUri, googleRedirectUri);
+    return withOwnX(oauthConfig(env, redirectUri, googleRedirectUri), store.homePaths);
   }
 
   async function ensureListening() {
@@ -172,6 +173,7 @@ export function createOAuthRuntime({ store, env = process.env, fetchImpl = fetch
   }
 
   async function beginProvider(profileId, provider, remainingChain = [], { open = true } = {}) {
+    if (isXPlatform(provider)) assertXAvailable(store.homePaths);
     await ensureListening();
     const config = currentConfig();
     const pkce = provider === "x" || provider === "youtube" || provider === "google_business" || provider === "google_search" ? createPkcePair() : null;
@@ -199,9 +201,13 @@ export function createOAuthRuntime({ store, env = process.env, fetchImpl = fetch
     const requested = platforms?.length
       ? platforms.map(normalizeProvider).filter((item) => CONNECT_ORDER.includes(item))
       : missingProviders(connections);
+    // X is bring-your-own-app: refuse it when named, skip it when defaulting.
+    if (platforms?.length && requested.some(isXPlatform)) assertXAvailable(store.homePaths);
+    const xOk = xAvailable(store.homePaths);
     const steps = [];
     for (const item of requested.length ? requested : CONNECT_ORDER) {
       const provider = normalizeProvider(item);
+      if (isXPlatform(provider) && !xOk) continue;
       if (!steps.includes(provider) && CONNECT_ORDER.includes(provider)) steps.push(provider);
     }
     // Reconnect (force) always starts a fresh consent for the named networks so the

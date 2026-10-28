@@ -24,6 +24,7 @@ import {
   stepContent,
   suggestedRequests,
   toggleChannel,
+  setXAvailable,
 } from "./guide.js";
 import { platformIcon } from "./icons.js";
 import { bindPilot, renderPilot } from "./pilotDesk.js";
@@ -258,6 +259,8 @@ function renderResults(posts, publishMode) {
 
 function renderStatus(data) {
   latestStatus = data;
+  setXAvailable(data.x_available === true);
+  document.body.classList.toggle("x-on", data.x_available === true);
   if (renderPilot(data)) return;
   document.body.classList.add("owner-mode");
   const dispatchHonesty = document.getElementById("dispatch-honesty");
@@ -277,6 +280,7 @@ function renderStatus(data) {
   }
   networkList.replaceChildren();
   for (const network of NETWORKS) {
+    if (network.key === "x" && latestStatus?.x_available !== true) continue;
     const row = byPlatform.get(network.key);
     const on = Boolean(row);
     const item = document.createElement("li");
@@ -524,7 +528,7 @@ document.getElementById("connect-form").addEventListener("submit", async (event)
       body: JSON.stringify({
         id,
         name: profileName.value.trim() || id,
-        platforms: ["youtube", "meta", "tiktok", "linkedin", "x", "threads", "pinterest", "google_business", "reddit", "snapchat"],
+        platforms: ["youtube", "meta", "tiktok", "linkedin", ...(latestStatus?.x_available === true ? ["x"] : []), "threads", "pinterest", "google_business", "reddit", "snapchat"],
       }),
     });
     renderStatus(data);
@@ -1871,7 +1875,7 @@ function renderAutoPost(view) {
       if (conn.active) {
         const nets = el("div", { className: "auto-nets" });
         const chosen = conn.enabled ? conn.networks : conn.pending_request?.networks || [];
-        for (const net of view.networks || AUTO_NETWORKS) {
+        for (const net of (view.networks || AUTO_NETWORKS).filter((item) => item !== "x" || latestStatus?.x_available === true)) {
           const label = el("label", { className: "check" });
           const box = el("input", { type: "checkbox", value: net, className: "auto-net" });
           box.checked = chosen.includes(net);

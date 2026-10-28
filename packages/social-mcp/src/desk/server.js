@@ -1,3 +1,4 @@
+import { xAvailable } from "../xAccess.js";
 import { PLATFORMS } from "../platforms.js";
 import { createServer } from "node:http";
 import { randomBytes } from "node:crypto";
@@ -272,6 +273,7 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
           ? "create_profile"
           : "connect",
       pilot_mode: pilotActive(),
+      x_available: xAvailable(engine.store.homePaths),
       publisher_calls: engine.publisherCalls?.() || 0,
     };
   }
@@ -287,6 +289,7 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
       home: full.home,
       media_dir: full.media_dir,
       pilot_mode: true,
+      x_available: xAvailable(engine.store.homePaths),
       publish_mode: "disabled",
       publisher_calls: engine.publisherCalls?.() || 0,
       profiles: (full.profiles || []).map((profile) => ({ id: profile.id, name: profile.name })),

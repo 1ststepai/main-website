@@ -1,3 +1,4 @@
+import { giveOwnX } from "./helpers/ownX.js";
 import assert from "node:assert/strict";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -9,7 +10,7 @@ import { createDeskServer } from "../src/desk/server.js";
 const NOW = () => Date.parse("2026-06-01T12:00:00.000Z");
 
 async function rig(profile = { id: "acme", name: "Acme" }) {
-  const home = mkdtempSync(join(tmpdir(), "social-multi-"));
+  const home = giveOwnX(mkdtempSync(join(tmpdir(), "social-multi-")));
   const mediaDir = join(home, "media");
   mkdirSync(mediaDir, { recursive: true });
   const media = join(mediaDir, "clip.mp4");
@@ -242,7 +243,7 @@ test("a single-platform draft stays compatible and presets fill the caption", as
 });
 
 test("desk approve queue posts the bundle and keeps each result", async () => {
-  const home = mkdtempSync(join(tmpdir(), "social-multi-desk-"));
+  const home = giveOwnX(mkdtempSync(join(tmpdir(), "social-multi-desk-")));
   const mediaDir = join(home, "media");
   mkdirSync(mediaDir, { recursive: true });
   const media = join(mediaDir, "clip.mp4");

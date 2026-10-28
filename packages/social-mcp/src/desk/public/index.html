@@ -122,7 +122,7 @@
             <label class="toggle"><input type="checkbox" name="target-instagram" value="instagram" checked /> Instagram</label>
             <label class="toggle"><input type="checkbox" name="target-tiktok" value="tiktok" /> TikTok</label>
             <label class="toggle"><input type="checkbox" name="target-linkedin" value="linkedin" /> LinkedIn</label>
-            <label class="toggle"><input type="checkbox" name="target-x" value="x" /> X</label>
+            <label class="toggle" data-x-only><input type="checkbox" name="target-x" value="x" /> X</label>
             <label class="toggle"><input type="checkbox" name="target-threads" value="threads" /> Threads</label>
             <label class="toggle"><input type="checkbox" name="target-pinterest" value="pinterest" /> Pinterest</label>
             <label class="toggle"><input type="checkbox" name="target-bluesky" value="bluesky" /> Bluesky</label>
@@ -587,11 +587,15 @@
             <label>Client ID <input name="LINKEDIN_CLIENT_ID" autocomplete="off" /></label>
             <label>Client secret <input name="LINKEDIN_CLIENT_SECRET" type="password" autocomplete="new-password" /></label>
           </fieldset>
+          <details class="x-own-app" id="x-own-app">
+            <summary>Use your own X developer app (optional)</summary>
+            <p class="hint">X stays hidden on this desk until you add your own X developer app here. PostPath never ships, shares, or falls back to anyone else's X app, so X runs on your app and your X account only. X developer access may be pay-per-use and is billed to you by X. In your X app, set the callback to the redirect URI above, then paste its OAuth 2.0 Client ID and Secret.</p>
           <fieldset>
             <legend>X</legend>
             <label>Client ID <input name="X_CLIENT_ID" autocomplete="off" /></label>
             <label>Client secret <input name="X_CLIENT_SECRET" type="password" autocomplete="new-password" /></label>
           </fieldset>
+          </details>
           <fieldset>
             <legend>Pinterest</legend>
             <label>App ID <input name="PINTEREST_APP_ID" autocomplete="off" /></label>
