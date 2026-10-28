@@ -64,7 +64,7 @@ Off by default. Turn it on per session in the desk (**Recordings → Start recor
 
 - Saves only to `<PostPath home>/recordings/<id>/` (for the default home, `~/.postpath/recordings/`). Nothing is uploaded or posted, ever.
 - `events.jsonl`: desk events (draft queued, approved, published, accounts connected, errors), timestamped.
-- `desk.webm` (optional): if you tick "Also record the desk window", your browser asks you to pick a window or tab. No audio, no system-wide capture.
+- `desk.webm` (optional): if you tick "Also record a window (you pick it, no audio)", your browser asks you to pick a window or tab. No audio, no system-wide capture.
 - `summary.md`: demo moments with mm:ss offsets, written when you stop.
 - Tokens, secrets, email addresses and customer data are removed before anything is written. Only allowlisted fields are kept.
 - The Recordings tab lists sessions and lets you play, rename, export (download) and delete them. Delete needs a confirmation.
