@@ -319,3 +319,53 @@ test("one approve click fans out a caption and media to every network in the bun
     await rigged.stop();
   }
 });
+
+test("a network override is what that network's draft stores, and the base caption stays", async () => {
+  const rigged = await rig();
+  try {
+    const created = await rigged.engine.createDraft({
+      profile_id: "acme",
+      platforms: ["youtube", "instagram", "reddit"],
+      title: "Base title",
+      caption: "Base caption",
+      tags: ["shared"],
+      media_path: rigged.media,
+      instagram_public_confirmed: true,
+      overrides: {
+        youtube: { title: "Short title", tags: ["shortform"], hashtags: ["Shorts"] },
+        instagram: { caption: "IG only", hashtags: ["one", "two"] },
+        reddit: { subreddit: "news" },
+      },
+    });
+    const youtube = created.posts.find((post) => post.platform === "youtube");
+    const instagram = created.posts.find((post) => post.platform === "instagram");
+    const reddit = created.posts.find((post) => post.platform === "reddit");
+    assert.equal(youtube.title, "Short title");
+    assert.deepEqual(youtube.tags, ["shortform"]);
+    assert.match(youtube.description, /#Shorts/);
+    assert.match(instagram.caption, /^IG only/);
+    assert.match(instagram.caption, /#one #two/);
+    assert.equal(instagram.title, "Base title");
+    assert.equal(reddit.tags[0], "news");
+    assert.equal(created.bundle.caption, "Base caption");
+    assert.equal(created.bundle.overrides.youtube.title, "Short title");
+    const placed = await rigged.engine.createDraft({
+      profile_id: "acme",
+      platforms: ["youtube"],
+      title: "Base title",
+      caption: "Base caption",
+      media_path: rigged.media,
+      overrides: {
+        youtube: {
+          placement: "youtube_long",
+          generate: { prompt: "A quiet desk", type: "image", provider: "mock" },
+        },
+      },
+    });
+    assert.equal(placed.bundle.overrides.youtube.placement, "youtube_long");
+    assert.equal(placed.bundle.overrides.youtube.generate.prompt, "A quiet desk");
+    assert.equal(placed.bundle.overrides.youtube.generate.provider, "mock");
+  } finally {
+    await rigged.stop();
+  }
+});

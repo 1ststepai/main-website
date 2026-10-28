@@ -25,6 +25,7 @@ import {
   profileRequiresVidiq,
   queueItems,
   rollupStatus,
+  sanitizeOverrides,
   vidiqRecord,
 } from "./multiPost.js";
 import { normalizeGenerate, prepareAttachedFile, produceMedia } from "./media/run.js";
@@ -494,7 +495,7 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
       tags: shaped.tags.map((tag) => String(tag).slice(0, 40)).slice(0, 30),
       privacy_status: shaped.privacy_status || "private",
       platforms,
-      overrides: input.overrides && typeof input.overrides === "object" ? input.overrides : {},
+      overrides: sanitizeOverrides(input.overrides),
       media_path: optionalMediaPath(input.media_path, mediaRoot),
       media_url: input.media_url ? String(input.media_url).slice(0, 2000) : null,
       media_content_type: String(input.media_content_type || "video/mp4").slice(0, 80),

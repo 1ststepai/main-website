@@ -151,6 +151,8 @@
               <label class="check"><input type="checkbox" id="claude-review" /> Ask Claude for advisory notes. This does not approve the post.</label>
               <p class="hint">Connect accounts, connect your AI, one prompt, then review the queue. Generated video is silent. Claude cards are drawings, not photos or video.</p>
             </fieldset>
+            <div id="network-editors" class="network-editors"></div>
+            <div id="check-list" class="checks" aria-live="polite"></div>
             <label class="check" id="instagram-confirm-label">
               <input type="checkbox" id="instagram-confirm" />
               Instagram goes public when you approve. Facebook stays a Page draft unless you choose Public below.
@@ -268,7 +270,8 @@
         <div class="connect-copy">
           <p class="step-kicker">Connect to your AI</p>
           <h2 id="connect-ai-title">Same accounts. Any MCP client.</h2>
-          <p class="lede">OAuth for clients that support it. A personal access token for clients that do not. The server key is <code>postpath</code>.</p>
+          <p class="lede">OAuth for clients that can reach this computer's MCP address. A personal access token for clients that do not. Or write a local config for an app on this machine. The server key is <code>postpath</code>. A settings file is not proof the app has connected.</p>
+          <p class="hint">ChatGPT and Grok on the web need a public https address. This MCP address stays on this computer unless you set one yourself. PostPath does not open a tunnel, so those two are not connected from here.</p>
           <div id="mcp-remote" class="mcp-remote"></div>
           <form id="pat-form" class="oauth-form">
             <label>Token name <input name="name" placeholder="Claude on this Mac" required /></label>
@@ -309,6 +312,7 @@
           </ol>
         </div>
         <div class="connect-actions">
+          <div id="assistant-list" class="assistant-list"></div>
           <button type="button" class="btn primary" id="cursor-btn">Enable in Cursor</button>
           <pre class="mcp-config" id="mcp-config">{
   "mcpServers": {

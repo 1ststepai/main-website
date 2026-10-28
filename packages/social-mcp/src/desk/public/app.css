@@ -574,6 +574,20 @@ input:focus, textarea:focus, select:focus {
 .connect-actions { display: grid; align-content: start; gap: 12px; }
 .connect-actions .btn.primary { justify-self: start; min-width: 180px; }
 
+.network-editors, .checks, .assistant-list { display: grid; gap: 0.55rem; margin: 0.6rem 0; }
+.network-editor, .assistant-row {
+  border: 1px solid var(--line, rgba(148, 163, 184, 0.25));
+  border-radius: 14px;
+  padding: 0.7rem 0.8rem;
+}
+.network-editor h3, .assistant-row h3 { margin: 0 0 0.35rem; font-size: 0.95rem; }
+.check { margin: 0; font-size: 0.88rem; color: var(--muted, #cbd5e1); }
+.check.rule { color: #fecdd3; }
+.check.ok { color: #bfdbfe; }
+.check.tip { color: var(--muted, #cbd5e1); }
+.assistant-row { display: grid; gap: 0.35rem; }
+.assistant-head { display: flex; justify-content: space-between; gap: 0.5rem; align-items: baseline; }
+
 .mcp-config, code {
   color: #d7f6ff;
   font-family: var(--mono);

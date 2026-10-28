@@ -24,8 +24,14 @@ const platformOverride = z
     title: z.string().max(100).optional().describe("Network-specific title. YouTube uses this when the draft title is omitted."),
     description: z.string().max(5000).optional().describe("Network-specific description."),
     caption: z.string().max(2200).optional().describe("Network-specific caption."),
-    tags: z.array(z.string().max(40)).max(30).optional().describe("Network-specific tags or hashtags."),
-    privacy_status: z.enum(["private", "unlisted", "public"]).optional().describe("Network privacy. YouTube defaults to private."),
+    tags: z.array(z.string().max(40)).max(30).optional().describe("Network-specific tags. YouTube uses these as snippet tags."),
+    hashtags: z
+      .array(z.string().max(80))
+      .max(60)
+      .optional()
+      .describe("Hashtags for this network only. Added to the caption, or to the YouTube description. Omit to keep the base post."),
+    subreddit: z.string().max(40).optional().describe("Reddit community name, without r/. Used only on the reddit override."),
+    privacy_status: z.enum(["private", "unlisted", "public"]).optional().describe("Network privacy. YouTube defaults to private. Instagram stays public."),
     placement: z.string().max(40).optional().describe("Network preset id, such as youtube_long or instagram_story."),
     generate: z
       .object({
@@ -41,19 +47,14 @@ const platformOverride = z
   })
   .optional();
 
-const draftShape = {
+export const draftShape = {
   profile_id: z.string().min(2).max(64).describe("Brand profile id."),
   platform: z.enum(PLATFORMS).optional().describe("One network. Omit when platforms is set."),
   platforms: z.array(z.enum(PLATFORMS)).min(1).max(8).optional().describe("Networks that share this draft. Example: youtube, facebook, instagram."),
   overrides: z
-    .object({
-      youtube: platformOverride,
-      facebook: platformOverride,
-      instagram: platformOverride,
-      tiktok: platformOverride,
-    })
+    .object(Object.fromEntries(PLATFORMS.map((platform) => [platform, platformOverride])))
     .optional()
-    .describe("Optional per-network title, caption, tags, or privacy."),
+    .describe("Optional per-network title, caption, description, hashtags, tags, Reddit community, privacy, placement, or generation. Omit a network's copy fields to use the base post."),
   title: z.string().max(100).optional().describe("Draft title. If omitted, the YouTube override title is used, otherwise a shortened caption."),
   description: z.string().max(5000).optional().describe("Shared description."),
   caption: z.string().max(2200).optional().describe("Shared caption."),

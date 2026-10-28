@@ -24,6 +24,7 @@ import {
   toggleChannel,
 } from "./guide.js";
 import { platformIcon } from "./icons.js";
+import { checkNetwork, readMp4Meta } from "./optimize.js";
 
 const NETWORKS = [
   { key: "youtube", label: "YouTube" },
@@ -362,6 +363,8 @@ function renderStatus(data) {
   renderScheduled(data.scheduled_posts);
   renderQueue(data.queue);
   renderMcpRemote(data);
+  renderAssistants(data);
+  renderChecks();
   for (const node of document.querySelectorAll("[data-channel-status]")) {
     node.textContent = connectPlan(node.dataset.channelStatus, data).message;
   }
@@ -535,6 +538,217 @@ document.getElementById("connect-form").addEventListener("submit", async (event)
   } finally {
     button.disabled = false;
   }
+});
+
+const editorState = {};
+let mediaMeta = null;
+
+function selectedPlatforms() {
+  return [...document.querySelectorAll("#platform-toggles input:checked")].map((node) => node.value);
+}
+
+function editorFor(key) {
+  if (!editorState[key]) editorState[key] = { same: true, title: "", caption: "", description: "", hashtags: "", tags: "", subreddit: "" };
+  return editorState[key];
+}
+
+function readEditors() {
+  for (const node of document.querySelectorAll("[data-override]")) {
+    const [platform, field] = node.dataset.override.split(":");
+    const state = editorFor(platform);
+    if (field === "same") state.same = node.checked;
+    else state[field] = node.value;
+  }
+}
+
+function splitList(value) {
+  return String(value || "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function collectOverrides(platforms) {
+  readEditors();
+  const overrides = {};
+  for (const key of platforms) {
+    const state = editorState[key];
+    if (!state || state.same) continue;
+    const over = {};
+    if (state.title.trim()) over.title = state.title.trim();
+    if (state.caption.trim()) over.caption = state.caption.trim();
+    if (state.description.trim()) over.description = state.description.trim();
+    const hashtags = splitList(state.hashtags);
+    const tags = splitList(state.tags);
+    if (hashtags.length) over.hashtags = hashtags;
+    if (tags.length) over.tags = tags;
+    if (state.subreddit.trim()) over.subreddit = state.subreddit.trim();
+    if (Object.keys(over).length) overrides[key] = over;
+  }
+  return overrides;
+}
+
+function resolvedPreview(platform) {
+  readEditors();
+  const form = document.getElementById("youtube-form");
+  const data = new FormData(form);
+  const description = String(data.get("description") || "");
+  const base = {
+    title: String(data.get("title") || ""),
+    description,
+    caption: description,
+    tags: splitList(data.get("tags")),
+  };
+  const state = editorFor(platform);
+  if (state.same) {
+    if (platform === "reddit" && !base.tags[0]) return base;
+    return base;
+  }
+  const hashtags = splitList(state.hashtags).map((tag) => (tag.startsWith("#") ? tag : `#${tag}`));
+  const caption = state.caption.trim() || base.caption;
+  const nextDescription = state.description.trim() || base.description;
+  const withTags = hashtags.length ? `${platform === "youtube" ? nextDescription : caption}\n${hashtags.join(" ")}`.trim() : "";
+  return {
+    title: state.title.trim() || base.title,
+    description: platform === "youtube" && withTags ? withTags : nextDescription,
+    caption: platform !== "youtube" && withTags ? withTags : caption,
+    tags: splitList(state.tags).length ? splitList(state.tags) : platform === "reddit" && state.subreddit.trim() ? [state.subreddit.trim()] : base.tags,
+  };
+}
+
+function renderEditors() {
+  readEditors();
+  const host = document.getElementById("network-editors");
+  if (!host) return;
+  host.replaceChildren();
+  for (const key of selectedPlatforms()) {
+    const state = editorFor(key);
+    const network = NETWORKS.find((item) => item.key === key);
+    const card = document.createElement("article");
+    card.className = "network-editor";
+    const heading = document.createElement("h3");
+    heading.textContent = network?.label || key;
+    const same = document.createElement("label");
+    same.className = "check";
+    const box = document.createElement("input");
+    box.type = "checkbox";
+    box.checked = state.same !== false;
+    box.dataset.override = `${key}:same`;
+    same.append(box, document.createTextNode(" Same as the base post"));
+    card.append(heading, same);
+    if (!state.same) {
+      card.append(overrideField(key, "title", "Title", state.title));
+      card.append(overrideField(key, "caption", "Caption", state.caption));
+      card.append(overrideField(key, "description", "Description", state.description));
+      card.append(overrideField(key, "hashtags", "Hashtags", state.hashtags));
+      if (key === "youtube") card.append(overrideField(key, "tags", "YouTube keyword tags", state.tags));
+      if (key === "reddit") card.append(overrideField(key, "subreddit", "Community", state.subreddit));
+    }
+    host.append(card);
+  }
+  host.querySelectorAll("[data-override]").forEach((node) => {
+    node.addEventListener("change", () => {
+      renderEditors();
+      renderChecks();
+    });
+    node.addEventListener("input", renderChecks);
+  });
+  renderChecks();
+}
+
+function overrideField(platform, field, label, value) {
+  const wrap = document.createElement("label");
+  wrap.className = "field";
+  const span = document.createElement("span");
+  span.textContent = label;
+  const input = field === "caption" || field === "description" ? document.createElement("textarea") : document.createElement("input");
+  input.dataset.override = `${platform}:${field}`;
+  input.value = value || "";
+  wrap.append(span, input);
+  return wrap;
+}
+
+function renderChecks() {
+  const host = document.getElementById("check-list");
+  if (!host) return;
+  host.replaceChildren();
+  for (const key of selectedPlatforms()) {
+    const items = checkNetwork({ platform: key, post: resolvedPreview(key), media: key === "youtube" ? mediaMeta : null });
+    const network = NETWORKS.find((item) => item.key === key);
+    for (const item of items) {
+      const row = document.createElement("p");
+      row.className = `check ${item.kind}`;
+      row.textContent = `${network?.label || key}: ${item.message}`;
+      host.append(row);
+    }
+  }
+}
+
+function renderAssistants(data) {
+  const host = document.getElementById("assistant-list");
+  if (!host) return;
+  host.replaceChildren();
+  const clients = Array.isArray(data?.clients) ? data.clients : [];
+  for (const client of clients) {
+    if (client.id === "cursor") continue;
+    const row = document.createElement("article");
+    row.className = "assistant-row";
+    const head = document.createElement("div");
+    head.className = "assistant-head";
+    const title = document.createElement("h3");
+    title.textContent = client.label;
+    const status = document.createElement("span");
+    status.textContent = client.statusLabel;
+    head.append(title, status);
+    const detail = document.createElement("p");
+    detail.className = "hint";
+    detail.textContent = client.detail;
+    row.append(head, detail);
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "btn secondary";
+    button.textContent = client.actionLabel || "Set up";
+    button.addEventListener("click", async () => {
+      if (client.mode !== "write") {
+        try {
+          await navigator.clipboard.writeText(client.snippet || client.detail);
+          showToast(client.group === "cloud" ? "Explanation copied" : "Steps copied");
+        } catch {
+          showToast(client.detail, client.group === "cloud");
+        }
+        return;
+      }
+      button.disabled = true;
+      try {
+        const next = await api("/api/install-client", { method: "POST", body: JSON.stringify({ id: client.id }) });
+        renderStatus(next);
+        showToast(`${client.label} settings were written. ${client.restart || ""}`.trim());
+      } catch (error) {
+        showToast(error.message, true);
+      } finally {
+        button.disabled = false;
+      }
+    });
+    row.append(button);
+    host.append(row);
+  }
+}
+
+document.getElementById("platform-toggles")?.addEventListener("change", () => {
+  renderEditors();
+});
+
+document.querySelector("#youtube-form input[name=video]")?.addEventListener("change", async (event) => {
+  const file = event.target.files?.[0];
+  mediaMeta = null;
+  if (file) {
+    try {
+      mediaMeta = readMp4Meta(new Uint8Array(await file.arrayBuffer()));
+    } catch {
+      mediaMeta = null;
+    }
+  }
+  renderChecks();
 });
 
 document.getElementById("cursor-btn").addEventListener("click", async () => {
@@ -1227,16 +1441,15 @@ youtubeForm.addEventListener("submit", async (event) => {
       });
       mediaPath = saved.media.filename;
     }
-    const platforms = [...document.querySelectorAll("#platform-toggles input:checked")].map((input) => input.value);
+    const platforms = selectedPlatforms();
     if (!platforms.length) throw new Error("Pick at least one platform.");
     const score = document.getElementById("vidiq-score")?.value.trim();
     const notes = document.getElementById("vidiq-notes")?.value.trim();
     const duration = document.getElementById("media-duration")?.value.trim();
-    const overrides = {
-      facebook: { caption: document.getElementById("facebook-caption")?.value || undefined },
-      instagram: { caption: document.getElementById("instagram-caption")?.value || undefined },
-    };
-    if (document.getElementById("youtube-long")?.checked) overrides.youtube = { placement: "youtube_long" };
+    const overrides = collectOverrides(platforms);
+    if (document.getElementById("youtube-long")?.checked) {
+      overrides.youtube = { ...(overrides.youtube || {}), placement: "youtube_long" };
+    }
     const data = await api("/api/draft", {
       method: "POST",
       body: JSON.stringify({
@@ -1778,6 +1991,9 @@ document.getElementById("forget-vault").addEventListener("click", async () => {
     showToast(error.message, true);
   }
 });
+
+document.getElementById("youtube-form")?.addEventListener("input", renderChecks);
+renderEditors();
 
 refresh()
   .then(() => bootGuide())

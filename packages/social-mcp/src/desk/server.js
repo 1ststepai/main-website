@@ -8,7 +8,7 @@ import { DEFAULT_DESK_PORT } from "../home.js";
 import { OAUTH_KEYS, loadOAuthEnvFile, mergeOAuthInput, publicOAuthConfig, saveOAuthEnvFile, parseEnvFile } from "../envFile.js";
 import { assessOAuthValues, assertOAuthValues } from "../oauth/credentials.js";
 import { displayOutcome } from "../publish/outcome.js";
-import { installCursorMcp, publicMcpClientConfig, readCursorMcpStatus } from "../cursorConfig.js";
+import { installClient, installCursorMcp, listClientStatus, publicMcpClientConfig, readCursorMcpStatus } from "../cursorConfig.js";
 import { googleLoopbackUri, providerRedirectUri } from "../oauth/redirect.js";
 import { handleRemoteMcp } from "../mcp/http.js";
 import { allowedHost, clientSetup } from "../mcp/clients.js";
@@ -223,6 +223,7 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
       cursor,
       mcp_config: publicMcpClientConfig(),
       mcp_remote: clientSetup(env, port),
+      clients: listClientStatus(),
       pats: listPats(engine.store),
       next_step: !anyOauthReady(ready)
         ? "save_apps"
@@ -296,6 +297,13 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
 
       if (req.method === "POST" && url.pathname === "/api/install-cursor") {
         const installed = installCursorMcp();
+        sendJson(res, 200, { ok: true, installed, ...snapshot() });
+        return;
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/install-client") {
+        const body = await readJson(req);
+        const installed = installClient(String(body.id || "").trim());
         sendJson(res, 200, { ok: true, installed, ...snapshot() });
         return;
       }
@@ -476,6 +484,7 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
         ok: false,
         code: error.code || "error",
         message: error.message || "Unexpected error",
+        snippet: error.snippet || undefined,
       });
     }
   });
