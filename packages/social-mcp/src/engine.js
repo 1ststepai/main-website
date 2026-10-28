@@ -33,12 +33,14 @@ import { reviewDraft, reviewImages, writeCaptions } from "./media/claude.js";
 import { planFor } from "./media/specs.js";
 import { checksForPosts, publicInterview, readInterviewAudio, writeInterviewAudio } from "./interview.js";
 import { buildQueueStatus } from "./queueStatus.js";
+import { nextOpenSlot, occurrences } from "./desk/public/schedulePlan.js";
 import { interviewPrompt } from "./desk/public/interviewPrompts.js";
 import { randomBytes } from "node:crypto";
 import { rmSync } from "node:fs";
 import { join } from "node:path";
 
 const ISO_OFFSET = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$/i;
+const MISSED_GRACE_MS = 2 * 60 * 60 * 1000;
 const DISPATCH_STARTED_MESSAGE =
   "Dispatch already started. PostPath cannot guarantee the platform did not accept the post, and it cannot undo it. The local row is not returned to draft and publish_due will not retry it.";
 
@@ -677,6 +679,8 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
     }
     post.scheduled_at = iso;
     post.status = "scheduled";
+    post.schedule_missed = false;
+    post.schedule_note = "";
     post.updated_at = new Date(now()).toISOString();
     store.savePost(post);
     store.appendAudit({
@@ -951,7 +955,20 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
     return bundle;
   }
 
-  async function approveBundle({ bundle_id, scheduled_at, instagram_public_confirmed } = {}) {
+  function brandPosts(profileId) {
+    return store.listPosts({ profileId, status: "scheduled" });
+  }
+
+  function slotFor(profile, platform, after) {
+    return nextOpenSlot({
+      plan: profile?.posting_plan,
+      platform,
+      from: after,
+      posts: brandPosts(profile?.id),
+    });
+  }
+
+  async function approveBundle({ bundle_id, scheduled_at, instagram_public_confirmed, into_next_slot } = {}) {
     const bundle = store.getBundle(bundle_id);
     if (!bundle) throw mcpError("not_found", "Draft not found.", 404);
     if (!["draft", "scheduled", "partial"].includes(bundle.status)) {
@@ -977,12 +994,16 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
     const children = (bundle.platforms || [])
       .map((platform) => store.getPost(bundle.child_ids?.[platform]))
       .filter(Boolean);
-    if (scheduled_at) {
+    if (scheduled_at || into_next_slot) {
       const scheduled = [];
       const errors = [];
       for (const child of children) {
         try {
-          scheduled.push(await schedulePost({ post_id: child.id, scheduled_at }));
+          const when = scheduled_at || slotFor(profile, child.platform, now())?.starts_at;
+          if (!when) {
+            throw mcpError("no_open_slot", `No open ${child.platform} slot is on this brand's plan.`, 409);
+          }
+          scheduled.push(await schedulePost({ post_id: child.id, scheduled_at: when }));
         } catch (error) {
           errors.push({ ok: false, platform: child.platform, post_id: child.id, error: { code: error.code, message: error.message } });
         }
@@ -1148,10 +1169,24 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
 
   async function publishDue({ profile_id, limit = 5 } = {}) {
     const quarantined = quarantinePublishing(profile_id);
-    const due = store
-      .listPosts({ profileId: profile_id, status: "scheduled" })
-      .filter((post) => post.scheduled_at && Date.parse(post.scheduled_at) <= now())
-      .slice(0, Math.max(1, Math.min(20, Number(limit) || 5)));
+    const stamp = new Date(now()).toISOString();
+    const missed = [];
+    const due = [];
+    for (const post of store.listPosts({ profileId: profile_id, status: "scheduled" })) {
+      if (!post.scheduled_at || post.schedule_missed) continue;
+      const when = Date.parse(post.scheduled_at);
+      if (!Number.isFinite(when) || when > now()) continue;
+      if (now() - when > MISSED_GRACE_MS) {
+        post.schedule_missed = true;
+        post.schedule_note = "missed, reschedule?";
+        post.updated_at = stamp;
+        store.savePost(post);
+        missed.push({ id: post.id, profile_id: post.profile_id, platform: post.platform, schedule_note: post.schedule_note });
+        continue;
+      }
+      due.push(post);
+      if (due.length >= Math.max(1, Math.min(20, Number(limit) || 5))) break;
+    }
     await Promise.resolve();
     const settled = await Promise.allSettled(
       due.map((post) => publishPost({ post_id: post.id, force: true, claimFrom: ["scheduled"] })),
@@ -1168,7 +1203,7 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
         error: { code: item.reason?.code || "publish_failed", message: item.reason?.message || "Publish failed." },
       });
     });
-    return { count: results.length, results, quarantined };
+    return { count: results.length, results, quarantined, missed };
   }
 
   async function generateMedia(input = {}) {
@@ -1378,6 +1413,47 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
     return { published: false, profile_id: profile.id, drafts };
   }
 
+  function setPostingPlan(profileId, input = {}) {
+    requireProfile(profileId);
+    const profile = store.savePostingPlan(profileId, input);
+    return getSchedule(profile.id);
+  }
+
+  function getSchedule(profileId) {
+    const profile = requireProfile(profileId);
+    const posts = brandPosts(profile.id);
+    const upcoming = occurrences({ plan: profile.posting_plan, from: now(), days: 7, posts });
+    return {
+      profile_id: profile.id,
+      name: profile.name,
+      timezone: profile.posting_plan?.timezone || "",
+      slots: profile.posting_plan?.slots || [],
+      upcoming,
+    };
+  }
+
+  function suggestSlot({ profile_id: profileId, platform } = {}) {
+    const profile = requireProfile(profileId);
+    const slot = slotFor(profile, platform, now());
+    if (!slot) throw mcpError("no_open_slot", `No open ${platform} slot is on this brand's plan.`, 404);
+    return { profile_id: profile.id, ...slot, scheduled: false };
+  }
+
+  async function scheduleApprovedPost({ post_id, confirm, scheduled_at } = {}) {
+    const post = store.getPost(post_id);
+    if (!post) throw mcpError("not_found", "Post not found.", 404);
+    if (confirm !== true) {
+      throw mcpError("confirm_required", "Confirm this post before it can be scheduled. Nothing was scheduled.", 409);
+    }
+    if (!["draft", "scheduled", "failed"].includes(post.status)) {
+      throw mcpError("invalid_status", "This post can no longer be scheduled.", 409);
+    }
+    const when = scheduled_at || slotFor(store.getProfile(post.profile_id), post.platform, now())?.starts_at;
+    if (!when) throw mcpError("no_open_slot", `No open ${post.platform} slot is on this brand's plan.`, 409);
+    const scheduled = await schedulePost({ post_id: post.id, scheduled_at: when });
+    return { published: false, post: scheduled.post };
+  }
+
   function getQueueStatus({ profile_id: profileId } = {}) {
     if (profileId) requireProfile(profileId);
     return buildQueueStatus({
@@ -1399,6 +1475,10 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
     connectBluesky,
     createDraft,
     getQueueStatus,
+    setPostingPlan,
+    getSchedule,
+    suggestSlot,
+    scheduleApprovedPost,
     onQueueChange,
     getInterview,
     saveInterview,

@@ -388,6 +388,66 @@ export function createSocialMcpServer({ engine, auth } = {}) {
   );
 
   add(
+    "get_schedule",
+    "Read posting plan",
+    "Read one brand's posting plan and the filled and empty slots for the next 7 days. This does not publish.",
+    "posts:read",
+    { read: true, idempotent: true },
+    { profile_id: z.string().min(2).max(64).describe("Brand profile id.") },
+    async (args) => eng.getSchedule(args.profile_id),
+  );
+
+  add(
+    "set_posting_plan",
+    "Save posting plan",
+    "Save recurring slots for one brand. This does not schedule drafts and does not publish.",
+    "drafts:write",
+    { idempotent: true },
+    {
+      profile_id: z.string().min(2).max(64).describe("Brand profile id."),
+      timezone: z.string().min(1).max(80).describe("IANA time zone, such as America/New_York."),
+      slots: z
+        .array(
+          z.object({
+            id: z.string().max(40).optional(),
+            platform: z.enum(PLATFORMS),
+            weekday: z.union([z.number().int().min(0).max(6), z.literal("daily")]).describe("0 is Sunday. daily repeats every day."),
+            time: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/).describe("Local time HH:mm."),
+          }),
+        )
+        .max(40),
+    },
+    async (args) => eng.setPostingPlan(args.profile_id, args),
+  );
+
+  add(
+    "suggest_slot",
+    "Suggest a slot",
+    "Name the next open slot for one network. This does not schedule the post and does not publish.",
+    "posts:read",
+    { read: true, idempotent: true },
+    {
+      profile_id: z.string().min(2).max(64).describe("Brand profile id."),
+      platform: z.enum(PLATFORMS).describe("Network that needs a slot."),
+    },
+    async (args) => eng.suggestSlot(args),
+  );
+
+  add(
+    "schedule_approved_post",
+    "Schedule an approved post",
+    "Put one post on the next open slot, or on scheduled_at when the owner picked a time. confirm must be true. Otherwise nothing is scheduled and nothing is published.",
+    "drafts:write",
+    { queue: true },
+    {
+      post_id: z.string().min(8).describe("Post id."),
+      confirm: z.boolean().describe("True only when the owner is approving this post onto the schedule."),
+      scheduled_at: z.string().optional().describe("Owner-picked ISO time with Z or a numeric offset. Omit to use the next open slot."),
+    },
+    async (args) => eng.scheduleApprovedPost(args),
+  );
+
+  add(
     "list_queue",
     "List approval queue",
     "List drafts waiting for approval, including drafts created by an AI client.",

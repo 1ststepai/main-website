@@ -1,5 +1,14 @@
 # Architecture Decision Log
 
+## 2026-10-28: A brand posting plan fills the existing schedule
+
+- **Status / owner:** Draft, not deployed. Evan owns any live post.
+- **Decision:** A brand can store recurring slots and an IANA time zone on its profile. Approving a post for the next open slot uses the existing scheduled-post path. Approve and post now still sends immediately. A scheduled time more than 2 hours in the past is marked missed, reschedule? and is not sent on its own. Unconfirmed posts are not scheduled.
+- **Rationale:** The due checker already sends posts while PostPath is open. The plan only chooses the time.
+- **Affected systems:** PostPath desk schedule panel and MCP schedule tools. No deploy and no live publish.
+- **Verification:** New York clock-change times, brand scoping, a missed slot that is not sent, and a draft that stays unscheduled without confirm.
+- **Rollback:** Leave this draft unmerged.
+
 ## 2026-10-28: The assistant is told about the queue, and the owner still approves
 
 - **Status / owner:** Draft, not deployed. Evan owns any live approval.

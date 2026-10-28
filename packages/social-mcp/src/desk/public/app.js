@@ -25,6 +25,7 @@ import {
 } from "./guide.js";
 import { platformIcon } from "./icons.js";
 import { checkNetwork, readMp4Meta } from "./optimize.js";
+import { occurrences } from "./schedulePlan.js";
 import { BRAND_STORAGE_KEY, brandCapMessage, chooseBrandId, scopeToBrand, waitingOnYouCount, waitingOnYouLabel } from "./brand.js";
 
 const NETWORKS = [
@@ -119,6 +120,66 @@ function formatWhen(iso) {
   }
 }
 
+function renderPlan(profile, posts) {
+  const list = document.getElementById("plan-slots");
+  const week = document.getElementById("week-view");
+  const zone = document.getElementById("plan-timezone");
+  if (!list || !week) return;
+  const plan = profile?.posting_plan;
+  if (zone && document.activeElement !== zone) {
+    zone.value = plan?.timezone || "";
+    if (!zone.value) {
+      try {
+        zone.value = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
+      } catch {
+        zone.value = "";
+      }
+    }
+  }
+  list.replaceChildren();
+  for (const slot of plan?.slots || []) {
+    const item = document.createElement("li");
+    const day = slot.weekday === "daily" ? "Daily" : ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][slot.weekday];
+    item.textContent = `${slot.platform} · ${day} ${slot.time}`;
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.className = "btn tiny remove-slot";
+    remove.dataset.id = slot.id;
+    remove.textContent = "Remove";
+    item.append(remove);
+    list.append(item);
+  }
+  week.replaceChildren();
+  if (!plan?.slots?.length) {
+    const empty = document.createElement("p");
+    empty.className = "hint";
+    empty.textContent = profile ? "No slots yet for this brand." : "Add a brand before saving a posting plan.";
+    week.append(empty);
+    return;
+  }
+  const rows = occurrences({
+    plan,
+    from: Date.now(),
+    days: 7,
+    posts: (posts || []).filter((post) => post.profile_id === profile.id),
+  });
+  if (!rows.length) {
+    const empty = document.createElement("p");
+    empty.className = "hint";
+    empty.textContent = "No slots in the next 7 days.";
+    week.append(empty);
+    return;
+  }
+  for (const row of rows) {
+    const line = document.createElement("p");
+    line.className = row.state === "filled" ? "slot-filled" : row.state === "missed" ? "slot-missed" : "slot-empty";
+    const when = new Date(row.starts_at).toLocaleString();
+    const detail = row.state === "filled" ? `filled · ${row.title || "Scheduled"}` : row.state === "missed" ? "missed, reschedule?" : "empty";
+    line.textContent = `${row.local_label} · ${row.platform} · ${when} · ${detail}`;
+    week.append(line);
+  }
+}
+
 function renderScheduled(posts) {
   scheduledList.replaceChildren();
   const rows = Array.isArray(posts) ? posts : [];
@@ -140,7 +201,9 @@ function renderScheduled(posts) {
     strong.textContent = String(title || "");
     const when = document.createElement("div");
     when.className = "when";
-    when.textContent = `${platform} · ${formatWhen(post.scheduled_at)}`;
+    when.textContent = post.schedule_missed
+      ? `${platform} · missed, reschedule?`
+      : `${platform} · ${formatWhen(post.scheduled_at)}`;
     copy.append(strong, when);
 
     const button = document.createElement("button");
@@ -469,6 +532,7 @@ function renderStatus(data) {
   }
 
   renderScheduled(scopeToBrand(data.scheduled_posts, selectedBrandId));
+  renderPlan(profiles.find((row) => row.id === selectedBrandId) || null, data.scheduled_posts);
   renderQueue(scopeToBrand(data.queue, selectedBrandId));
   renderMcpRemote(data);
   renderAssistants(data);
@@ -1734,6 +1798,12 @@ function renderQueue(items) {
     later.dataset.id = item.id;
     later.dataset.kind = item.kind;
     later.textContent = "Approve for time";
+    const slot = document.createElement("button");
+    slot.type = "button";
+    slot.className = "btn tiny approve-slot";
+    slot.dataset.id = item.id;
+    slot.dataset.kind = item.kind;
+    slot.textContent = "Next open slot";
     const edit = document.createElement("button");
     edit.type = "button";
     edit.className = "btn tiny edit-queue";
@@ -1746,7 +1816,7 @@ function renderQueue(items) {
     discard.dataset.id = item.id;
     discard.dataset.kind = item.kind;
     discard.textContent = "Discard";
-    actions.append(now, when, later, edit, discard);
+    actions.append(now, when, later, slot, edit, discard);
     li.append(top);
     if (item.media_status === "generating") {
       const pending = document.createElement("p");
@@ -1855,7 +1925,7 @@ function isoFromLocal(value) {
   return date.toISOString();
 }
 
-async function approveQueue(button, scheduledAt) {
+async function approveQueue(button, scheduledAt, intoNextSlot) {
   const row = button.closest("li");
   const kind = button.dataset.kind;
   const id = button.dataset.id;
@@ -1876,6 +1946,7 @@ async function approveQueue(button, scheduledAt) {
         bundle_id: kind === "bundle" ? id : undefined,
         post_id: kind === "post" ? id : undefined,
         scheduled_at: scheduledAt || undefined,
+        into_next_slot: intoNextSlot === true,
         instagram_public_confirmed: confirmed,
       }),
     });
@@ -1883,7 +1954,11 @@ async function approveQueue(button, scheduledAt) {
     const results = data.results || [];
     const failed = results.filter((item) => item.ok === false);
     const messages = [...new Set(failed.map((item) => item.error?.message).filter(Boolean))];
-    const note = scheduledAt
+    const note = intoNextSlot
+      ? failed.length
+        ? messages.join(" ") || "No open slot. Nothing was scheduled."
+        : "Approved onto the next open slot. Nothing is posted yet."
+      : scheduledAt
       ? "Approved for that time. Nothing is posted yet."
       : failed.length && failed.length === results.length
         ? messages.join(" ") || "Nothing was posted."
@@ -1967,10 +2042,15 @@ document.getElementById("queue-list")?.addEventListener("click", async (event) =
   }
   const now = event.target.closest(".approve-now");
   const later = event.target.closest(".approve-later");
+  const slot = event.target.closest(".approve-slot");
   const discard = event.target.closest(".discard-queue");
   const edit = event.target.closest(".edit-queue");
   if (now) {
     approveQueue(now).catch((error) => showToast(error.message, true));
+    return;
+  }
+  if (slot) {
+    approveQueue(slot, undefined, true).catch((error) => showToast(error.message, true));
     return;
   }
   if (later) {
@@ -2165,6 +2245,55 @@ document.getElementById("forget-vault").addEventListener("click", async () => {
     });
     draftResult.textContent = data.message || "Saved accounts were removed. Quit PostPath and open it again.";
     showToast(draftResult.textContent);
+  } catch (error) {
+    showToast(error.message, true);
+  }
+});
+
+document.getElementById("plan-form")?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const brandId = selectedBrandId || document.getElementById("compose-brand")?.value || "";
+  if (!brandId) {
+    showToast("Add a brand before saving a posting plan.", true);
+    return;
+  }
+  const profile = (latestStatus?.profiles || []).find((row) => row.id === brandId);
+  const weekdayRaw = document.getElementById("plan-weekday").value;
+  const slot = {
+    platform: document.getElementById("plan-platform").value,
+    weekday: weekdayRaw === "daily" ? "daily" : Number(weekdayRaw),
+    time: document.getElementById("plan-time").value,
+  };
+  const slots = [...(profile?.posting_plan?.slots || []), slot];
+  try {
+    const data = await api("/api/posting-plan", {
+      method: "POST",
+      body: JSON.stringify({
+        profile_id: brandId,
+        timezone: document.getElementById("plan-timezone").value.trim(),
+        slots,
+      }),
+    });
+    renderStatus(data);
+    showToast("Slot saved on this computer. Nothing is scheduled yet.");
+  } catch (error) {
+    showToast(error.message, true);
+  }
+});
+
+document.getElementById("plan-slots")?.addEventListener("click", async (event) => {
+  const button = event.target.closest(".remove-slot");
+  if (!button) return;
+  const brandId = selectedBrandId;
+  const profile = (latestStatus?.profiles || []).find((row) => row.id === brandId);
+  if (!profile?.posting_plan) return;
+  const slots = profile.posting_plan.slots.filter((slot) => slot.id !== button.dataset.id);
+  try {
+    const data = await api("/api/posting-plan", {
+      method: "POST",
+      body: JSON.stringify({ profile_id: brandId, timezone: profile.posting_plan.timezone, slots }),
+    });
+    renderStatus(data);
   } catch (error) {
     showToast(error.message, true);
   }

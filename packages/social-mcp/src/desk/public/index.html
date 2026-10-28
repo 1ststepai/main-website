@@ -389,11 +389,47 @@
           <p class="panel-note">Local queue</p>
         </div>
         <p class="hint" id="schedule-honesty">
-          Schedules only fire while PostPath is running. Closing this desk pauses the due checker until you open it again.
+          Schedules only fire while PostPath is running. Closing this desk pauses the due checker until you open it again. A time more than 2 hours ago is marked missed, reschedule? It is not sent on its own.
         </p>
         <p class="hint" id="dispatch-honesty">
           After dispatch starts, PostPath cannot guarantee the platform did not accept the post. Cancel only works while a post is still scheduled. Dispatch-started posts stay needs review and are not auto-retried or undone.
         </p>
+        <form id="plan-form" class="oauth-form">
+          <div class="pair">
+            <label>Time zone <input id="plan-timezone" name="timezone" placeholder="America/New_York" required /></label>
+            <label>Network
+              <select id="plan-platform" name="platform">
+                <option value="youtube">YouTube</option>
+                <option value="instagram">Instagram</option>
+                <option value="facebook">Facebook</option>
+                <option value="linkedin">LinkedIn</option>
+                <option value="x">X</option>
+                <option value="threads">Threads</option>
+                <option value="tiktok">TikTok</option>
+                <option value="reddit">Reddit</option>
+                <option value="bluesky">Bluesky</option>
+              </select>
+            </label>
+          </div>
+          <div class="pair">
+            <label>Day
+              <select id="plan-weekday" name="weekday">
+                <option value="daily">Daily</option>
+                <option value="0">Sunday</option>
+                <option value="1">Monday</option>
+                <option value="2" selected>Tuesday</option>
+                <option value="3">Wednesday</option>
+                <option value="4">Thursday</option>
+                <option value="5">Friday</option>
+                <option value="6">Saturday</option>
+              </select>
+            </label>
+            <label>Time <input id="plan-time" name="time" type="time" value="10:00" required /></label>
+          </div>
+          <button type="submit" class="btn secondary">Add slot</button>
+        </form>
+        <ul class="plan-slots" id="plan-slots"></ul>
+        <div id="week-view" class="week-view"></div>
         <ul class="scheduled-list" id="scheduled-list"></ul>
       </section>
 

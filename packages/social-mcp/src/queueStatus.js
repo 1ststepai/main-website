@@ -1,4 +1,5 @@
 import { checkNetwork } from "./desk/public/optimize.js";
+import { openSlotSummary } from "./desk/public/schedulePlan.js";
 
 export const QUEUE_URI = "postpath://queue";
 
@@ -19,8 +20,13 @@ export function ageLabel(seconds) {
   return `${days} day${days === 1 ? "" : "s"}`;
 }
 
-export function queueNote(waiting, fixes) {
-  return `Queue: ${waiting} waiting for approval, ${fixes} need fixes`;
+export function queueNote(waiting, fixes, openSlots = []) {
+  let note = `Queue: ${waiting} waiting for approval, ${fixes} need fixes`;
+  for (const row of openSlots) {
+    const noun = row.count === 1 ? "open slot" : "open slots";
+    note += `. ${row.count} ${noun} this week for ${row.name}`;
+  }
+  return note;
 }
 
 function rulesFor(post) {
@@ -110,6 +116,11 @@ export function buildQueueStatus({ bundles = [], posts = [], profiles = [], prof
   const fixes = items.filter((item) => item.category === "failing_checks");
   const ages = [...waiting, ...fixes].map((item) => item.age_seconds).filter((value) => value != null);
   const oldest = ages.length ? Math.max(...ages) : null;
+  const openSlots = openSlotSummary(
+    wanted ? profiles.filter((profile) => profile.id === wanted) : profiles,
+    posts.filter((post) => post.status === "scheduled" && !post.schedule_missed),
+    now,
+  );
   return {
     profile_id: wanted || null,
     waiting_for_approval: waiting.length,
@@ -119,7 +130,8 @@ export function buildQueueStatus({ bundles = [], posts = [], profiles = [], prof
     needs_review: items.filter((item) => item.category === "needs_review").length,
     oldest_waiting_seconds: oldest,
     oldest_waiting_label: ageLabel(oldest),
-    note: queueNote(waiting.length, fixes.length),
+    open_slots: openSlots,
+    note: queueNote(waiting.length, fixes.length, openSlots),
     items,
   };
 }

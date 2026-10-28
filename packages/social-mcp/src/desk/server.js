@@ -403,14 +403,30 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
         return;
       }
 
+      if (req.method === "POST" && url.pathname === "/api/posting-plan") {
+        const body = await readJson(req);
+        const saved = engine.setPostingPlan(body.profile_id || body.id, {
+          timezone: body.timezone,
+          slots: body.slots,
+        });
+        sendJson(res, 200, { ok: true, schedule: saved, ...snapshot() });
+        return;
+      }
+
       if (req.method === "POST" && url.pathname === "/api/approve") {
         const body = await readJson(req);
         if (body.bundle_id) {
           const result = await engine.approveBundle({
             bundle_id: body.bundle_id,
             scheduled_at: body.scheduled_at,
+            into_next_slot: body.into_next_slot === true,
             instagram_public_confirmed: body.instagram_public_confirmed === true,
           });
+          sendJson(res, 200, { ok: true, ...result, ...snapshot() });
+          return;
+        }
+        if (body.into_next_slot === true) {
+          const result = await engine.scheduleApprovedPost({ post_id: body.post_id, confirm: true });
           sendJson(res, 200, { ok: true, ...result, ...snapshot() });
           return;
         }

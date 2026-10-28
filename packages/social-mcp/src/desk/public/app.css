@@ -136,6 +136,11 @@ body { min-height: 100vh; position: relative; overflow-x: hidden; }
 .interview-list { display: grid; gap: 10px; margin: 10px 0; }
 .interview-audio { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .interview audio { max-width: 100%; height: 32px; }
+.plan-slots, .week-view { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 6px; }
+.week-view p, .plan-slots li { margin: 0; }
+.slot-empty { color: var(--quiet); }
+.slot-filled { color: var(--ok); }
+.slot-missed { color: var(--warn); }
 
 .brand {
   margin: 0;

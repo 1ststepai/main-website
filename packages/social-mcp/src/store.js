@@ -2,6 +2,8 @@ import { closeSync, constants, existsSync, openSync, readFileSync, renameSync, r
 import { decryptJson, encryptJson, loadOrCreateKey } from "./crypto.js";
 import { mcpError } from "./errors.js";
 import { cleanAnswers, interviewPrompt } from "./interview.js";
+import { normalizePlan } from "./desk/public/schedulePlan.js";
+import { PLATFORMS } from "./platforms.js";
 import { paths } from "./home.js";
 import { socialId } from "./ids.js";
 import { defaultPresets } from "./multiPost.js";
@@ -200,6 +202,22 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
       }
       profile.interview = { updated_at: stamp, answers: next };
       profile.updated_at = stamp;
+      persist();
+      return profile;
+    });
+  }
+
+  function savePostingPlan(profileId, input = {}) {
+    return locked(() => {
+      const profile = requireStoredProfile(profileId);
+      let plan;
+      try {
+        plan = normalizePlan(input, PLATFORMS);
+      } catch (error) {
+        throw mcpError(error.code || "invalid_timezone", error.message);
+      }
+      profile.posting_plan = plan;
+      profile.updated_at = new Date(now()).toISOString();
       persist();
       return profile;
     });
@@ -435,6 +453,7 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
     getProfile,
     upsertProfile,
     saveInterview,
+    savePostingPlan,
     setInterviewAudio,
     listConnections,
     getConnection,
