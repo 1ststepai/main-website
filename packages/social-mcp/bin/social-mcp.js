@@ -8,6 +8,8 @@ import { installCursorMcp } from "../src/cursorConfig.js";
 import { PRODUCT_NAME, PRODUCT_TITLE } from "../src/brand.js";
 import { DEFAULT_OAUTH_PORT } from "../src/home.js";
 import { providerRedirectUri } from "../src/oauth/redirect.js";
+import { runPilotCommands } from "../src/cli.js";
+import { buildSocialMcpServerEntry } from "../src/cursorConfig.js";
 
 const args = process.argv.slice(2);
 const command = args[0];
@@ -69,9 +71,18 @@ TIKTOK_CLIENT_SECRET=
   }
 
   if (command === "install-cursor") {
-    const result = installCursorMcp();
+    const pilot = args.includes("--pilot");
+    const result = installCursorMcp({
+      entry: buildSocialMcpServerEntry({ pilot }),
+    });
     console.log(JSON.stringify(result, null, 2));
-    console.log(`Restart Cursor to load ${PRODUCT_NAME}.`);
+    console.log(pilot ? `Restart Cursor to load ${PRODUCT_NAME} in pilot mode. Publish stays mock and draft-only.` : `Restart Cursor to load ${PRODUCT_NAME}.`);
+    return;
+  }
+
+  const pilotCode = await runPilotCommands(args);
+  if (pilotCode !== null) {
+    process.exitCode = pilotCode;
     return;
   }
 
@@ -99,8 +110,13 @@ ${PRODUCT_TITLE}
 Usage:
   social-mcp app             # desktop Connect UI (recommended)
   social-mcp                 # stdio MCP server for Cursor/Claude
-  social-mcp install-cursor  # write ~/.cursor/mcp.json entry
+  social-mcp install-cursor [--pilot]  # write ~/.cursor/mcp.json entry
   social-mcp init            # create local vault
+  social-mcp pilot init --home <dir> [--pin <pin>]
+  social-mcp pat create --scopes posts:read,drafts:write --out <file> [--home <dir>]
+  social-mcp pat revoke <id> [--home <dir>]
+  social-mcp drafts list --home <dir>
+  social-mcp drafts create --home <dir> --goal <id> --topic <id>
   social-mcp status
   social-mcp connect <id>    # CLI fallback
 `);

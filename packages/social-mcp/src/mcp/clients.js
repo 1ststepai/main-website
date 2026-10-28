@@ -1,7 +1,8 @@
 import { SERVER_DESCRIPTION } from "./instructions.js";
 
-export const SCOPES = ["posts:read", "drafts:write", "accounts:read", "queue:approve"];
+export const SCOPES = ["posts:read", "drafts:write", "accounts:read", "accounts:write", "owner", "queue:approve"];
 export const DEFAULT_SCOPES = ["posts:read", "drafts:write", "accounts:read"];
+export const DRAFT_ONLY_SCOPES = ["posts:read", "drafts:write", "accounts:read"];
 
 export function publicBase(env, port) {
   const raw = String(env.SOCIAL_MCP_PUBLIC_URL || "").trim().replace(/\/$/, "");

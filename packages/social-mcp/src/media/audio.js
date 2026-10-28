@@ -6,16 +6,41 @@ import { mcpError } from "../errors.js";
 
 const exec = promisify(execFile);
 
+export const FFMPEG_MISSING_MESSAGE =
+  "ffmpeg is not installed. Captions, drafts, and approval still work. Install ffmpeg only when you attach or generate video.";
+
+export function ffmpegMissingError(error) {
+  const code = error?.code || error?.cause?.code;
+  const message = String(error?.message || "");
+  if (code === "ENOENT" || /\bENOENT\b/.test(message)) {
+    return mcpError("ffmpeg_missing", FFMPEG_MISSING_MESSAGE, 400);
+  }
+  return null;
+}
+
+export async function runFfmpeg(args, options = {}) {
+  try {
+    return await exec("ffmpeg", args, { timeout: options.timeout || 120000, env: options.env || process.env });
+  } catch (error) {
+    const missing = ffmpegMissingError(error);
+    if (missing) throw missing;
+    throw error;
+  }
+}
+
 const IMAGE_CODECS = new Set(["png", "mjpeg", "jpeg", "webp", "gif", "bmp"]);
 
-export async function probeMedia(file) {
+export async function probeMedia(file, options = {}) {
   let stdout = "";
   try {
     const result = await exec("ffprobe", ["-v", "error", "-print_format", "json", "-show_streams", "-show_format", file], {
       timeout: 20000,
+      env: options.env || process.env,
     });
     stdout = result.stdout;
   } catch (error) {
+    const missing = ffmpegMissingError(error);
+    if (missing) throw missing;
     throw mcpError("media_probe", `Could not read the media file. ${error?.message || ""}`.trim());
   }
   const data = JSON.parse(stdout || "{}");
@@ -39,13 +64,20 @@ export async function probeMedia(file) {
 export async function stripAudio(file) {
   const tmp = join(dirname(file), `.silent-${basename(file)}`);
   try {
-    await exec("ffmpeg", ["-y", "-i", file, "-map", "0:v:0", "-an", "-c:v", "copy", tmp], { timeout: 120000 });
-  } catch {
-    await exec(
-      "ffmpeg",
-      ["-y", "-i", file, "-map", "0:v:0", "-an", "-c:v", "libx264", "-preset", "ultrafast", "-pix_fmt", "yuv420p", tmp],
-      { timeout: 120000 },
-    );
+    await runFfmpeg(["-y", "-i", file, "-map", "0:v:0", "-an", "-c:v", "copy", tmp], { timeout: 120000 });
+  } catch (error) {
+    if (error?.code === "ffmpeg_missing") throw error;
+    try {
+      await runFfmpeg(
+        ["-y", "-i", file, "-map", "0:v:0", "-an", "-c:v", "libx264", "-preset", "ultrafast", "-pix_fmt", "yuv420p", tmp],
+        { timeout: 120000 },
+      );
+    } catch (fallback) {
+      if (fallback?.code === "ffmpeg_missing" || error?.code === "ffmpeg_missing") {
+        throw fallback?.code === "ffmpeg_missing" ? fallback : error;
+      }
+      throw fallback;
+    }
   }
   const probe = await probeMedia(tmp);
   if (probe.hasAudio) {

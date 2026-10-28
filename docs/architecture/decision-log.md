@@ -1,5 +1,14 @@
 # Architecture Decision Log
 
+## 2026-10-28: PostPath pilot desk queues drafts and does not publish
+
+- **Status / owner:** Draft, not deployed. Evan owns the broker home, the owner PIN, and any later manual post. No live accounts are connected for this slice.
+- **Decision:** Pilot mode is local-only on the broker's Mac or Windows computer. The desk is a goal picker, generated captions, and Approve. Approve stores "approved, waiting to post" and does not call a publisher. Export (copy, CSV, zip) is how those captions leave the desk. Connect, settings, keys, and the OAuth consent page require the owner PIN set by `pilot init`. `drafts:write` cannot connect accounts or change profiles. A pilot home refuses approve and publish on stdio as well as over HTTP. Install is the existing download zip, not npm.
+- **Rationale:** The broker should be able to finish topic, draft, and approve before any network is connected, and an assistant on that laptop must not be able to publish.
+- **Affected systems:** `packages/social-mcp` desk, vault, MCP scopes, download launchers. Publishing modules stay as they are when pilot mode is off.
+- **Verification:** Package tests cover the desk loop, publisher spy, PIN, stdio draft-only, concurrent vault writes, and an unpacked-zip walkthrough.
+- **Rollback:** Leave this draft unmerged.
+
 ## 2026-10-28: PostPath stays free and one approve covers the bundle
 
 - **Status / owner:** Draft, not deployed. Evan still owns developer apps, OAuth verification, and any live post.
