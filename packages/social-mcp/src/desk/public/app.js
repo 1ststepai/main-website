@@ -1936,3 +1936,135 @@ document.getElementById("auto-post-list")?.addEventListener("click", async (even
 });
 
 loadAutoPost().catch(() => {});
+
+// Guided onboarding: one screen at a time, every step after the name has "Set up later".
+const ONB_LABELS = { name: "Name", pack: "Starter pack", connect: "Connect", draft: "First draft", approve: "Approve", done: "Done" };
+
+function pinHeaders(inputId) {
+  const pin = document.getElementById(inputId)?.value || "";
+  return { "content-type": "application/json", ...(pin ? { "x-postpath-owner-pin": pin } : {}) };
+}
+
+async function onbStep(body) {
+  const data = await api("/api/onboarding/step", { method: "POST", headers: pinHeaders("onboarding-pin"), body: JSON.stringify(body) });
+  renderOnboarding(data.onboarding, data.pin_required);
+}
+
+function onbButton(text, className, handler) {
+  const button = el("button", { type: "button", className }, text);
+  button.addEventListener("click", async () => {
+    button.disabled = true;
+    try {
+      await handler();
+    } catch (error) {
+      showToast(error.message, true);
+    } finally {
+      button.disabled = false;
+    }
+  });
+  return button;
+}
+
+function laterLink(step) {
+  return onbButton("Set up later", "onb-later", () => onbStep({ step, later: true }));
+}
+
+function renderOnboarding(state, pinRequired) {
+  const body = document.getElementById("onboarding-body");
+  const steps = document.getElementById("onboarding-steps");
+  if (!body || !steps) return;
+  document.getElementById("onboarding-pin-row").hidden = !pinRequired;
+  steps.replaceChildren();
+  const index = state.steps.indexOf(state.step);
+  state.steps.forEach((step, i) => steps.append(el("li", { className: i === index ? "now" : i < index ? "past" : "" }, ONB_LABELS[step])));
+  body.replaceChildren();
+  const title = document.getElementById("onboarding-title");
+  if (state.step === "name") {
+    title.textContent = "What's the brand called?";
+    const input = el("input", { id: "onb-name", placeholder: "Harbor Realty", autocomplete: "off" });
+    body.append(el("label", {}, "Brand name"), input, onbButton("Continue", "btn primary", () => onbStep({ step: "name", name: input.value })));
+  } else if (state.step === "pack") {
+    title.textContent = "Start from a pack, or blank";
+    body.append(el("p", { className: "hint" }, "A pack fills audience, voice, words to avoid, hashtags, footer and search terms. You can edit every field after."));
+    const packs = el("div", { className: "onb-packs" });
+    for (const pack of state.packs) packs.append(onbButton(pack.label, "btn secondary onb-pack", () => onbStep({ step: "pack", pack: pack.id })));
+    packs.append(onbButton("Start blank", "btn secondary onb-pack", () => onbStep({ step: "pack", pack: "blank" })));
+    body.append(packs, laterLink("pack"));
+  } else if (state.step === "connect") {
+    title.textContent = "Connect one account";
+    body.append(
+      el("p", { className: "hint" }, state.connected.length ? `Connected: ${state.connected.join(", ")}` : "Use Connect accounts on this page for one network, then come back here."),
+      el("div", { className: "onb-actions" }),
+    );
+    const actions = body.lastChild;
+    actions.append(onbButton("Check again", "btn secondary", async () => {
+      const data = await api("/api/onboarding");
+      renderOnboarding(data.onboarding, data.pin_required);
+    }));
+    if (state.connected.length) actions.append(onbButton("Continue", "btn primary", () => onbStep({ step: "connect" })));
+    actions.append(laterLink("connect"));
+  } else if (state.step === "draft") {
+    title.textContent = "Write a first draft";
+    const caption = el("textarea", { id: "onb-caption", rows: "4", placeholder: "What should the first post say?" });
+    body.append(el("label", {}, "Caption"), caption, el("div", { className: "onb-actions" }));
+    body.lastChild.append(onbButton("Save draft", "btn primary", () => onbStep({ step: "draft", caption: caption.value })), laterLink("draft"));
+  } else if (state.step === "approve") {
+    title.textContent = state.pilot ? "Approve it" : "Approve and pick a time";
+    body.append(el("p", { className: "hint" }, state.pilot ? "Approval puts it in the queue as approved, waiting to post. Nothing posts from here." : "Pick when it should post. Nothing posts right away."));
+    const when = el("input", { id: "onb-when", type: "datetime-local" });
+    if (!state.pilot) body.append(el("label", {}, "Post at"), when);
+    body.append(el("div", { className: "onb-actions" }));
+    body.lastChild.append(
+      onbButton("Approve", "btn primary", () => onbStep(state.pilot ? { step: "approve" } : { step: "approve", scheduled_at: when.value ? new Date(when.value).toISOString() : "" })),
+      laterLink("approve"),
+    );
+  } else {
+    title.textContent = "You're set up";
+    const outcome = { "approved, waiting to post": "Your first draft is approved, waiting to post.", scheduled: "Your first draft is scheduled.", draft_saved: "Your first draft is saved for later.", no_draft: "Your brand is saved. Draft whenever you're ready." }[state.outcome] || "Your brand is saved.";
+    body.append(el("p", {}, outcome));
+    if (state.skipped.length) body.append(el("p", { className: "hint" }, `Left for later: ${state.skipped.map((s) => ONB_LABELS[s]).join(", ")}.`));
+    body.append(onbButton("Set up another brand", "btn secondary", () => onbStep({ step: "restart" })));
+  }
+}
+
+async function loadOnboarding() {
+  const data = await api("/api/onboarding");
+  renderOnboarding(data.onboarding, data.pin_required);
+}
+
+// Shareable brand page: owner opt-in, off by default.
+function renderBrandPages(view) {
+  const list = document.getElementById("brand-page-list");
+  if (!list) return;
+  document.getElementById("brand-page-pin-row").hidden = !view.pin_required;
+  list.replaceChildren();
+  if (!view.brands.length) list.append(el("li", { className: "hint" }, "Add a brand first."));
+  for (const brand of view.brands) {
+    const row = el("li", { className: "bp-row" });
+    row.append(el("strong", {}, brand.name || brand.profile_id));
+    if (brand.enabled) {
+      const link = el("a", { href: brand.path, target: "_blank", rel: "noopener" }, `${location.origin}${brand.path}`);
+      const exportLink = el("a", { href: `/api/brand-page/export.html?profile_id=${encodeURIComponent(brand.profile_id)}` }, "Download static HTML");
+      row.append(el("div", { className: "meta" }, "On. Anyone with this link on this computer can read it:"), link, exportLink);
+      row.append(onbButton("Turn off", "btn secondary", async () => {
+        const data = await api("/api/brand-page/disable", { method: "POST", body: JSON.stringify({ profile_id: brand.profile_id }) });
+        renderBrandPages(data.brand_page);
+      }));
+    } else {
+      row.append(el("div", { className: "meta" }, "Off"));
+      row.append(onbButton("Share a read-only page", "btn secondary", async () => {
+        const data = await api("/api/brand-page/enable", { method: "POST", headers: pinHeaders("brand-page-pin"), body: JSON.stringify({ profile_id: brand.profile_id }) });
+        renderBrandPages(data.brand_page);
+      }));
+    }
+    list.append(row);
+  }
+}
+
+async function loadBrandPages() {
+  const data = await api("/api/brand-page");
+  renderBrandPages(data.brand_page);
+}
+
+loadOnboarding().catch(() => {});
+loadBrandPages().catch(() => {});

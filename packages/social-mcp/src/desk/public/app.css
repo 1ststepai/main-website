@@ -801,3 +801,13 @@ input:focus-visible, textarea:focus-visible, select:focus-visible, summary:focus
 .auto-nets { display: flex; flex-wrap: wrap; gap: 10px; }
 .auto-pending { color: #ffd27a; }
 .auto-pin { display: flex; gap: 8px; align-items: center; margin: 8px 0 12px; }
+
+.onb-steps { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; padding: 0; margin: 8px 0 14px; }
+.onb-steps li { font-size: 0.8rem; padding: 4px 10px; border-radius: 999px; border: 1px solid rgba(194, 210, 255, 0.16); color: #9aa6c4; }
+.onb-steps li.now { color: #fff; border-color: #8fb8ff; }
+.onb-steps li.past { color: #7ee2a8; }
+.onb-body { display: grid; gap: 12px; max-width: 640px; }
+.onb-packs { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px; }
+.onb-actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.onb-later { background: none; border: 0; color: #9aa6c4; text-decoration: underline; cursor: pointer; padding: 0; font: inherit; }
+.bp-row { display: grid; gap: 6px; }

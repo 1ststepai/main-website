@@ -27,6 +27,8 @@ import { editPilotCaption, exportApproved, generateFromTopic, pilotDeskView, que
 import { assertOwnerPin, ownerPinConfigured, pinFromRequest } from "../pilot/ownerAuth.js";
 import { FFMPEG_MISSING_MESSAGE } from "../media/audio.js";
 import { buildSocialMcpServerEntry } from "../cursorConfig.js";
+import { onboardingState, onboardingStep } from "../onboarding.js";
+import { brandPageData, brandPageSettings, disableBrandPage, enableBrandPage, profileForSlug, renderBrandPage } from "../brand/brandPage.js";
 
 const PUBLIC_DIR = join(dirname(fileURLToPath(import.meta.url)), "public");
 const MEDIA_LIMIT = 200 * 1024 * 1024;
@@ -322,6 +324,16 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
       return { profile_id: profile.id, name: profile.name, connections: list };
     });
     return { auto_post: { risk_label: AUTO_POST_RISK_LABEL, pin_required: ownerPinConfigured(homePaths), networks: PLATFORMS, brands } };
+  }
+
+  function brandPageView() {
+    const pages = brandPageSettings(engine.store);
+    const brands = engine.store.listProfiles().map((profile) => {
+      const page = pages[profile.id] || {};
+      const enabled = page.enabled === true;
+      return { profile_id: profile.id, name: profile.name, enabled, path: enabled ? `/b/${page.slug}` : null, enabled_at: enabled ? page.enabled_at : null };
+    });
+    return { brand_page: { pin_required: ownerPinConfigured(homePaths), hosting: "local desk only", brands } };
   }
 
   function blankAuto() {
@@ -624,6 +636,74 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
           sendJson(res, 200, { ok: true, ...autoPostView() });
           return;
         }
+      }
+
+      if (url.pathname === "/api/onboarding" || url.pathname === "/api/onboarding/step") {
+        if (req.method === "GET" && url.pathname === "/api/onboarding") {
+          sendJson(res, 200, { ok: true, onboarding: onboardingState(engine), pin_required: ownerPinConfigured(homePaths) });
+          return;
+        }
+        if (req.method === "POST" && url.pathname === "/api/onboarding/step") {
+          const body = await readJson(req);
+          requireOwner(req, body);
+          const onboarding = await onboardingStep(engine, body);
+          sendJson(res, 200, { ok: true, onboarding, pin_required: ownerPinConfigured(homePaths) });
+          return;
+        }
+      }
+
+      if (url.pathname.startsWith("/api/brand-page")) {
+        if (req.method === "GET" && url.pathname === "/api/brand-page") {
+          sendJson(res, 200, { ok: true, ...brandPageView() });
+          return;
+        }
+        if (req.method === "POST" && url.pathname === "/api/brand-page/enable") {
+          const body = await readJson(req);
+          requireOwner(req, body);
+          enableBrandPage(engine.store, { profile_id: String(body.profile_id || "") });
+          sendJson(res, 200, { ok: true, ...brandPageView() });
+          return;
+        }
+        if (req.method === "POST" && url.pathname === "/api/brand-page/disable") {
+          // Turning the page off is always allowed and kills the old link.
+          const body = await readJson(req);
+          disableBrandPage(engine.store, { profile_id: String(body.profile_id || "") });
+          sendJson(res, 200, { ok: true, ...brandPageView() });
+          return;
+        }
+        if (req.method === "GET" && url.pathname === "/api/brand-page/export.html") {
+          const profileId = String(url.searchParams.get("profile_id") || "");
+          const page = brandPageSettings(engine.store)[profileId];
+          const data = page?.enabled ? brandPageData(engine.store, profileId) : null;
+          if (!data) {
+            sendJson(res, 404, { ok: false, code: "not_found", message: "Turn the brand page on first." });
+            return;
+          }
+          res.writeHead(200, {
+            "content-type": "text/html; charset=utf-8",
+            "content-disposition": `attachment; filename="${profileId}-brand-page.html"`,
+            "cache-control": "no-store",
+          });
+          res.end(renderBrandPage(data));
+          return;
+        }
+      }
+
+      if (req.method === "GET" && url.pathname.startsWith("/b/")) {
+        const profileId = profileForSlug(engine.store, url.pathname.slice(3));
+        const data = profileId ? brandPageData(engine.store, profileId) : null;
+        if (!data) {
+          sendText(res, 404, "Not found");
+          return;
+        }
+        res.writeHead(200, {
+          "content-type": "text/html; charset=utf-8",
+          "cache-control": "no-store",
+          "x-robots-tag": "noindex, nofollow",
+          "referrer-policy": "no-referrer",
+        });
+        res.end(renderBrandPage(data));
+        return;
       }
 
       if (req.method === "POST" && url.pathname === "/api/pat") {
