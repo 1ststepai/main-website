@@ -281,3 +281,41 @@ test("desk approve queue posts the bundle and keeps each result", async () => {
     rmSync(home, { recursive: true, force: true });
   }
 });
+
+test("one approve click fans out a caption and media to every network in the bundle", async () => {
+  const rigged = await rig();
+  try {
+    for (const platform of ["bluesky", "linkedin", "x", "threads"]) {
+      rigged.engine.store.saveConnection(
+        { profile_id: "acme", platform, account_label: platform },
+        { access_token: "token", refresh_token: "rt", page_access_token: "page", expires_at: "2099-01-01T00:00:00.000Z" },
+      );
+    }
+    const platforms = ["youtube", "facebook", "instagram", "bluesky", "linkedin", "x", "threads"];
+    const overrides = {};
+    for (const platform of platforms) overrides[platform] = { caption: `${platform} caption` };
+    const created = await rigged.engine.createDraft({
+      profile_id: "acme",
+      platforms,
+      title: "One click",
+      caption: "Shared caption",
+      media_path: rigged.media,
+      instagram_public_confirmed: true,
+      overrides,
+    });
+    const queue = rigged.engine.listQueue().queue[0];
+    assert.equal(queue.instagram_needs_confirm, false);
+    assert.equal(queue.platforms.length, platforms.length);
+    assert.ok(created.posts.every((post) => post.caption.includes(post.platform)));
+    const approved = await rigged.engine.approveBundle({ bundle_id: created.bundle.id });
+    assert.equal(approved.results.length, platforms.length);
+    assert.deepEqual(
+      approved.results.map((row) => row.platform).sort(),
+      [...platforms].sort(),
+    );
+    assert.equal(approved.results.every((row) => row.ok), true);
+    assert.equal(rigged.calls(), 0);
+  } finally {
+    await rigged.stop();
+  }
+});

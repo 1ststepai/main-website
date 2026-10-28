@@ -1,5 +1,14 @@
 # Architecture Decision Log
 
+## 2026-10-28: PostPath stays free and one approve covers the bundle
+
+- **Status / owner:** Draft, not deployed. Evan still owns developer apps, OAuth verification, and any live post.
+- **Decision:** PostPath has no billing, paywall, plan, or profile cap. License environment flags do not create one. Connect accounts is one flow for YouTube, Facebook, Instagram, TikTok, LinkedIn, X, Threads, Pinterest, Google Business, Reddit, and Snapchat. Bluesky is the app-password form in that same panel, and `connect_bluesky` is the matching MCP call. One Approve on a bundle sends each network that already has its caption and media. Instagram still has to be confirmed before that click. The vidIQ gate still applies when the profile requires it.
+- **Rationale:** The product is the collapsed checklist, not a priced plan.
+- **Affected systems:** `packages/social-mcp` license helper, desk Connect panel, composer toggles, MCP connect tools.
+- **Verification:** Free-forever license tests, and one approve call across YouTube, Facebook, Instagram, Bluesky, LinkedIn, X, and Threads in mock mode.
+- **Rollback:** Leave this draft unmerged.
+
 ## 2026-10-28: Claude drafts captions and cards, and never approves
 
 - **Status / owner:** Draft, not deployed. Evan owns the Anthropic key and any live Claude call. Tests use a fake response or the mock writer.

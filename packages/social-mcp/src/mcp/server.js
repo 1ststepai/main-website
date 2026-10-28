@@ -178,7 +178,7 @@ export function createSocialMcpServer({ engine, auth } = {}) {
   add(
     "connect_accounts",
     "Start account sign-in",
-    "Open the browser so the user can sign in to a social network. This does not publish.",
+    "Open the browser so the user can sign in. One call chains the networks that are not connected yet: YouTube, Facebook, Instagram, TikTok, LinkedIn, X, Threads, Pinterest, Google Business, Reddit, and Snapchat. Bluesky uses connect_bluesky in the same Connect flow. This does not publish.",
     "drafts:write",
     { open: true },
     {
@@ -191,7 +191,7 @@ export function createSocialMcpServer({ engine, auth } = {}) {
   add(
     "connect_bluesky",
     "Connect Bluesky",
-    "Store a Bluesky handle and app password for a profile. This does not publish.",
+    "Store a Bluesky handle and app password for a profile. Use this from the same Connect flow as connect_accounts. This does not publish.",
     "drafts:write",
     { open: true },
     {

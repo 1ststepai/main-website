@@ -352,11 +352,11 @@ function renderStatus(data) {
   }
 
   if (data.next_step === "save_apps") {
-    connectHint.textContent = "Save at least one provider’s credentials below, then connect.";
+    connectHint.textContent = "Save the app credentials for the networks you use, then Connect accounts. One click chains YouTube, Facebook, Instagram, and the other browser logins. Bluesky uses the handle and app password in this panel. Nothing is posted.";
   } else if (data.cursor && !data.cursor.installed) {
-    connectHint.textContent = "Connect accounts, then click Enable in Cursor so Cursor can use them.";
+    connectHint.textContent = "Connect accounts signs in to every network that is not connected yet. Bluesky uses the handle and app password in this panel. Then enable PostPath in Cursor. Nothing is posted.";
   } else {
-    connectHint.textContent = "Connect opens each configured OAuth provider in order. Bluesky uses the form below.";
+    connectHint.textContent = "Connect accounts signs in to every network that is not connected yet. Bluesky uses the handle and app password in this panel. Nothing is posted.";
   }
 
   renderScheduled(data.scheduled_posts);
@@ -513,18 +513,22 @@ document.getElementById("connect-form").addEventListener("submit", async (event)
   const button = document.getElementById("connect-btn");
   button.disabled = true;
   try {
+    const id = profileId.value.trim();
     const data = await api("/api/connect", {
       method: "POST",
       body: JSON.stringify({
-        id: profileId.value.trim(),
-        name: profileName.value.trim() || profileId.value.trim(),
+        id,
+        name: profileName.value.trim() || id,
+        platforms: ["youtube", "meta", "tiktok", "linkedin", "x", "threads", "pinterest", "google_business", "reddit", "snapchat"],
       }),
     });
     renderStatus(data);
+    const bluesky = (data.connections || []).some((row) => row.platform === "bluesky" && row.profile_id === id);
+    const blueskyNote = bluesky ? "" : " Bluesky uses the handle and app password in this panel.";
     if (data.connect?.authorize_url) {
-      showToast(data.connect.message || "Sign-in opened in your browser");
+      showToast(`${data.connect.message || "Sign-in opened in your browser"}${blueskyNote}`);
     } else {
-      showToast(data.connect?.message || "Accounts connected");
+      showToast(`${data.connect?.message || "Accounts connected"}${blueskyNote}`);
     }
   } catch (error) {
     showToast(error.message, true);
@@ -1223,9 +1227,7 @@ youtubeForm.addEventListener("submit", async (event) => {
       });
       mediaPath = saved.media.filename;
     }
-    const platforms = ["youtube", "facebook", "instagram"].filter(
-      (key) => document.querySelector(`[name="target-${key}"]`)?.checked,
-    );
+    const platforms = [...document.querySelectorAll("#platform-toggles input:checked")].map((input) => input.value);
     if (!platforms.length) throw new Error("Pick at least one platform.");
     const score = document.getElementById("vidiq-score")?.value.trim();
     const notes = document.getElementById("vidiq-notes")?.value.trim();

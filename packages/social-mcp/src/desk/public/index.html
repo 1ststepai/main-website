@@ -65,9 +65,14 @@
               </label>
             </div>
             <button type="submit" class="btn primary" id="connect-btn">Connect accounts</button>
-            <p class="hint" id="connect-hint">Connect YouTube below for the first post. Enable in Cursor only if Cursor should use the same saved accounts.</p>
+            <p class="hint" id="connect-hint">One button signs in to YouTube, Facebook, Instagram, TikTok, LinkedIn, X, Threads, Pinterest, Google Business, Reddit, and Snapchat. Bluesky uses the handle and app password here. Nothing is posted.</p>
           </form>
           <ul class="network-list" id="network-list"></ul>
+          <form id="bluesky-form" class="oauth-form">
+            <label>Bluesky handle <input name="handle" placeholder="you.bsky.social" autocomplete="off" /></label>
+            <label>Bluesky app password <input name="app_password" type="password" autocomplete="new-password" /></label>
+            <button type="submit" class="btn secondary">Connect Bluesky</button>
+          </form>
           <p class="meta" id="path-meta"></p>
         </section>
 
@@ -83,6 +88,14 @@
             <label class="toggle"><input type="checkbox" name="target-youtube" value="youtube" checked /> YouTube</label>
             <label class="toggle"><input type="checkbox" name="target-facebook" value="facebook" checked /> Facebook</label>
             <label class="toggle"><input type="checkbox" name="target-instagram" value="instagram" checked /> Instagram</label>
+            <label class="toggle"><input type="checkbox" name="target-tiktok" value="tiktok" /> TikTok</label>
+            <label class="toggle"><input type="checkbox" name="target-linkedin" value="linkedin" /> LinkedIn</label>
+            <label class="toggle"><input type="checkbox" name="target-x" value="x" /> X</label>
+            <label class="toggle"><input type="checkbox" name="target-threads" value="threads" /> Threads</label>
+            <label class="toggle"><input type="checkbox" name="target-pinterest" value="pinterest" /> Pinterest</label>
+            <label class="toggle"><input type="checkbox" name="target-bluesky" value="bluesky" /> Bluesky</label>
+            <label class="toggle"><input type="checkbox" name="target-google_business" value="google_business" /> Google Business</label>
+            <label class="toggle"><input type="checkbox" name="target-reddit" value="reddit" /> Reddit</label>
           </div>
           <form id="youtube-form" class="oauth-form">
             <div class="pair">
@@ -321,18 +334,6 @@
           After dispatch starts, PostPath cannot guarantee the platform did not accept the post. Cancel only works while a post is still scheduled. Dispatch-started posts stay needs review and are not auto-retried or undone.
         </p>
         <ul class="scheduled-list" id="scheduled-list"></ul>
-      </section>
-
-      <section class="panel" aria-labelledby="bluesky-title">
-        <div class="panel-head">
-          <h2 id="bluesky-title">Bluesky</h2>
-          <p class="panel-note">App password — not browser OAuth.</p>
-        </div>
-        <form id="bluesky-form" class="oauth-form">
-          <label>Handle <input name="handle" placeholder="you.bsky.social" autocomplete="off" /></label>
-          <label>App password <input name="app_password" type="password" autocomplete="new-password" /></label>
-          <button type="submit" class="btn secondary">Connect Bluesky</button>
-        </form>
       </section>
 
       <section class="panel" aria-labelledby="apps-title">
