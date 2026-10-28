@@ -29,6 +29,8 @@ import {
 } from "./multiPost.js";
 import { normalizeGenerate, prepareAttachedFile, produceMedia } from "./media/run.js";
 import { reviewDraft, reviewImages, writeCaptions } from "./media/claude.js";
+import { createSeo } from "./seo/index.js";
+import { createHooks } from "./hook/index.js";
 import { planFor } from "./media/specs.js";
 import { randomBytes } from "node:crypto";
 import { rmSync } from "node:fs";
@@ -76,9 +78,19 @@ function optionalMediaPath(value, mediaRoot) {
   return resolveSafeMediaPath(String(value), mediaRoot);
 }
 
-export function createEngine({ home, env = process.env, fetchImpl = fetch, now = () => Date.now() } = {}) {
+export function createEngine({
+  home,
+  env = process.env,
+  fetchImpl = fetch,
+  now = () => Date.now(),
+  captionProvider = null,
+  hookGenerator = null,
+  structureProvider = null,
+} = {}) {
   const store = createStore({ home, env, now });
   const oauth = createOAuthRuntime({ store, env, fetchImpl });
+  let seo;
+  let hooks;
 
   async function trackedFetch(url, init) {
     const method = String(init?.method || "GET").toUpperCase();
@@ -1003,39 +1015,16 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
   }
 
   async function attachVidiqCheck(input = {}) {
-    const record = vidiqRecord(input, new Date(now()).toISOString());
-    if (!record) throw mcpError("invalid_vidiq", "vidIQ check needs checked_at or it is stamped now.", 400);
-    if (!input.checked_at) record.checked_at = new Date(now()).toISOString();
-    const bundle = input.bundle_id ? store.getBundle(input.bundle_id) : input.post_id ? store.getBundle(store.getPost(input.post_id)?.bundle_id) : null;
-    if (bundle) {
-      bundle.vidiq = record;
-      bundle.updated_at = record.checked_at;
-      store.saveBundle(bundle);
-      const youtubeId = bundle.child_ids?.youtube;
-      const youtube = youtubeId ? store.getPost(youtubeId) : null;
-      if (youtube && ["draft", "scheduled", "failed"].includes(youtube.status)) {
-        youtube.vidiq = record;
-        youtube.updated_at = record.checked_at;
-        store.savePost(youtube);
-      }
-      return { bundle, vidiq: record };
-    }
-    const post = store.getPost(input.post_id);
-    if (!post) throw mcpError("not_found", "Post not found.", 404);
-    post.vidiq = record;
-    post.updated_at = record.checked_at;
-    store.savePost(post);
-    return { post, vidiq: record };
+    return seo.attachKeywordResearch({ ...input, source: "vidiq" });
   }
 
   function listQueue() {
-    return {
-      queue: queueItems({
-        bundles: store.listBundles(),
-        posts: store.listPosts(),
-        profiles: store.listProfiles(),
-      }),
-    };
+    const queue = queueItems({
+      bundles: store.listBundles(),
+      posts: store.listPosts(),
+      profiles: store.listProfiles(),
+    });
+    return { queue: queue.map((item) => hooks.annotate(seo.annotateQueueItem(item))) };
   }
 
   async function publishPost({ post_id, force = false, acknowledge = false, claimFrom = null } = {}) {
@@ -1284,9 +1273,22 @@ export function createEngine({ home, env = process.env, fetchImpl = fetch, now =
     return { post };
   }
 
+  seo = createSeo({
+    store,
+    env,
+    fetchImpl,
+    now,
+    captionProvider,
+    connectSearch: (profileId) => oauth.connectSearchData(profileId),
+    createDraft,
+  });
+  hooks = createHooks({ store, env, fetchImpl, now, hookGenerator, structureProvider });
+
   return {
     store,
     oauth,
+    seo,
+    hooks,
     publicStatus,
     upsertProfile,
     listAccounts,

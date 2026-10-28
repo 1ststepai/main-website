@@ -1,5 +1,23 @@
 # Architecture Decision Log
 
+## 2026-10-28: PostPath hook capture keeps the pattern and not the footage
+
+- **Status / owner:** Draft, not deployed. Evan owns any YouTube quota, Gemini key, and Anthropic key. Voice fields stay blank until Evan fills them.
+- **Decision:** For one topic, PostPath can search public YouTube videos from about the last 90 days, rank them by views divided by subscribers, and store only the opening structure plus the video link, title, and public counts. Gemini, with the owner's key, is asked for seconds 0 to 10 of the public URL and is not given a downloaded file. A transcript is not stored. A quote longer than six words is dropped and is not sent to the writer. Claude, or a mock in tests, writes three original openings. More than four consecutive source words rejects that opening. The chosen opening becomes the on-camera script, the caption lead, and the media prompt, then the existing SEO notes and one Approve still apply. vidIQ is not used. Nothing posts by itself.
+- **Rationale:** The useful part is the shape of an opening the owner can film. Copying footage or wording is not.
+- **Affected systems:** `packages/social-mcp/src/hook`, the desk Opening panel, and three MCP tools. No live YouTube, Gemini, or Claude call in tests.
+- **Verification:** Mocked search, a mocked Gemini body limited to 10 seconds, originality rejection, and an attached draft that stays unapproved.
+- **Rollback:** Leave this draft unmerged.
+
+## 2026-10-28: PostPath SEO step is free, advisory, and separate from publish sign-in
+
+- **Status / owner:** Draft, not deployed. Evan owns any Google re-consent, Search Console properties, and a future Ads developer token.
+- **Decision:** Keyword lists live with the existing brand profiles. One topic drafts title, description, caption, hashtags, and on-screen text for YouTube, Facebook, Instagram, Bluesky, and copy-only TikTok, X, and LinkedIn. The approval queue shows checklist notes. Those notes do not auto-approve. 1stStep.ai YouTube still requires an attached vidIQ check. Search volumes are stored only when the caller sends a number with a source and date. YouTube Analytics (`insightTrafficSourceDetail` for `YT_SEARCH`) and Search Console use a separate search-data sign-in with `yt-analytics.readonly` and `webmasters.readonly`. The YouTube upload scopes stay as they are. Keyword Planner and Trends are stubbed and off. The owner-facing step count is in `docs/seo-step.md`.
+- **Rationale:** Repeating keyword research and four-channel captions by hand is a long list of actions. The measured comparison is a step count, not a promised amount of time.
+- **Affected systems:** `packages/social-mcp/src/seo`, the desk Keywords and copy panel, and new MCP tools. No live publish and no paid keyword API.
+- **Verification:** Unit tests with mocked autocomplete, Analytics, and Search Console. No live Google calls.
+- **Rollback:** Leave this draft unmerged. Publish sign-in and the vidIQ gate stay on the parent branch.
+
 ## 2026-10-28: PostPath stays free and one approve covers the bundle
 
 - **Status / owner:** Draft, not deployed. Evan still owns developer apps, OAuth verification, and any live post.

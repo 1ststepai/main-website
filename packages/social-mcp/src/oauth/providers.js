@@ -1,6 +1,7 @@
 import { createHash, randomBytes } from "node:crypto";
 import { mcpError } from "../errors.js";
 import { CONNECT_ORDER, PLATFORMS } from "../platforms.js";
+import { SEARCH_DATA_SCOPES } from "../seo/searchData.js";
 
 const GOOGLE_AUTH = "https://accounts.google.com/o/oauth2/v2/auth";
 const GOOGLE_TOKEN = "https://oauth2.googleapis.com/token";
@@ -102,6 +103,7 @@ export function oauthConfig(env, redirectUri, googleRedirectUri = redirectUri) {
 
 const PROVIDER_CHECKS = {
   youtube: (c) => c.google.clientId && c.google.clientSecret,
+  google_search: (c) => c.google.clientId && c.google.clientSecret,
   google_business: (c) => c.google.clientId && c.google.clientSecret,
   meta: (c) => c.meta.appId && c.meta.appSecret,
   threads: (c) => c.meta.appId && c.meta.appSecret,
@@ -151,6 +153,16 @@ export function authorizationUrl(provider, { state, config, pkce }) {
       clientId: config.google.clientId,
       redirectUri: config.google.redirectUri,
       scope: YOUTUBE_SCOPES.join(" "),
+      state,
+      pkce,
+      includeGrantedScopes: true,
+    });
+  }
+  if (provider === "google_search") {
+    return googleAuthorizationUrl({
+      clientId: config.google.clientId,
+      redirectUri: config.google.redirectUri,
+      scope: SEARCH_DATA_SCOPES.join(" "),
       state,
       pkce,
       includeGrantedScopes: true,
@@ -293,6 +305,19 @@ async function exchangeGoogleCode(code, config, fetchImpl, platform = "youtube",
           record: {
             platform: "google_business",
             account_label: "Google Business Profile",
+          },
+          secrets,
+        },
+      },
+    };
+  }
+  if (platform === "search_data") {
+    return {
+      platforms: {
+        search_data: {
+          record: {
+            platform: "search_data",
+            account_label: "Search data",
           },
           secrets,
         },
@@ -640,6 +665,7 @@ async function exchangeSnapchatCode(code, config, fetchImpl) {
 export async function exchangeCode(provider, { code, config, fetchImpl = fetch, codeVerifier } = {}) {
   assertProviderConfigured(provider, config);
   if (provider === "youtube") return exchangeGoogleCode(code, config, fetchImpl, "youtube", codeVerifier);
+  if (provider === "google_search") return exchangeGoogleCode(code, config, fetchImpl, "search_data", codeVerifier);
   if (provider === "google_business") return exchangeGoogleCode(code, config, fetchImpl, "google_business", codeVerifier);
   if (provider === "meta") return exchangeMetaCode(code, config, fetchImpl);
   if (provider === "threads") return exchangeThreadsCode(code, config, fetchImpl);

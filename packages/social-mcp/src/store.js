@@ -22,6 +22,7 @@ function emptyDb() {
     connections: {},
     posts: {},
     bundles: {},
+    seo: {},
     mcpAuth: emptyMcpAuth(),
     audit: [],
   };
@@ -121,6 +122,21 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
       } finally {
         lockDepth -= 1;
       }
+    });
+  }
+
+  function readSeo() {
+    ensureFresh();
+    const seo = db.seo && typeof db.seo === "object" ? db.seo : {};
+    return structuredClone(seo);
+  }
+
+  function updateSeo(mutator) {
+    return locked(() => {
+      if (!db.seo || typeof db.seo !== "object") db.seo = {};
+      const result = mutator(db.seo);
+      persist();
+      return result;
     });
   }
 
@@ -412,6 +428,8 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
     releaseClaim,
     isClaimed,
     appendAudit,
+    readSeo,
+    updateSeo,
     exportPublic,
     forgetVault,
     newId: socialId,
@@ -438,6 +456,7 @@ function loadDb(file) {
       connections: parsed.connections || {},
       posts: parsed.posts || {},
       bundles: parsed.bundles || {},
+      seo: parsed.seo && typeof parsed.seo === "object" ? parsed.seo : {},
       mcpAuth: { ...emptyMcpAuth(), ...(parsed.mcpAuth || {}) },
       audit: Array.isArray(parsed.audit) ? parsed.audit : [],
     };
