@@ -14,7 +14,7 @@ PostPath has its **own product logo and system**. It does not replace the locked
 | `public/assets/postpath/postpath-mark-on-dark.svg` | SVG app-icon fallback |
 | `public/assets/postpath/postpath-lockup.svg` | SVG lockup fallback |
 
-The marketing site at `/postpath/` copies the kit: Midnight canvas, Electric/Violet/Sunrise glass, Sora + Inter, neon rings + light trails, laptop Connected Accounts hero, capability icons, keyword pills, glowing social tiles, and tagline **Connect once. Any AI can post.**
+The marketing site at `/postpath/` copies the kit’s visual system: Midnight canvas, Electric/Violet/Sunrise glass, Sora + Inter, neon rings + light trails, laptop hero, capability icons, keyword pills, and glowing social tiles. Do not use the kit line **Connect once. Any AI can post.** as public copy. The page says PostPath is a private desk on your computer, in early access. It is not a scheduler and not an AI writer.
 
 ## Mark
 
@@ -28,7 +28,7 @@ The marketing site at `/postpath/` copies the kit: Midnight canvas, Electric/Vio
 
 ## Tagline
 
-`CONNECT ONCE. ANY AI CAN POST.` — with **ANY AI** in cyan.
+The hero banner (`postpath-hero-banner.png`, 981×259) reads `YOUR PRIVATE DESK FOR SOCIAL POSTS.` Do not restore `CONNECT ONCE. ANY AI CAN POST.` as public copy. Public pages say PostPath is a private desk on your computer, in early access. It is not a scheduler and not an AI writer. Live publishing is not yet verified.
 
 ## Palette
 
