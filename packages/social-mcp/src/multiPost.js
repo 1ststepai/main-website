@@ -26,11 +26,31 @@ export function knownPlatforms(list) {
   return out;
 }
 
+export function draftTitle(input = {}) {
+  const explicit = String(input.title || "").trim();
+  if (explicit) return explicit.slice(0, 100);
+  const youtubeTitle = String(input.overrides?.youtube?.title || "").trim();
+  if (youtubeTitle) return youtubeTitle.slice(0, 100);
+  return titleFromCaption(input.caption || input.description || "");
+}
+
+export function titleFromCaption(caption) {
+  const text = String(caption || "")
+    .replace(/#[^\s#]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (text.length <= 100) return text;
+  const cut = text.slice(0, 100);
+  const space = cut.lastIndexOf(" ");
+  return (space > 40 ? cut.slice(0, space) : cut).trim();
+}
+
 export function applyPresets(input = {}, presets = defaultPresets()) {
   const base = { ...defaultPresets(), ...(presets || {}) };
   const explicit = knownPlatforms(input.platforms);
   const platforms = explicit.length ? explicit : knownPlatforms(base.platforms);
-  let caption = String(input.caption || input.description || "");
+  const sourceCaption = String(input.caption || input.description || "");
+  let caption = sourceCaption;
   const footer = String(base.caption_footer || "").trim();
   if (footer && !caption.includes(footer)) {
     caption = caption ? `${caption}\n\n${footer}` : footer;
@@ -44,7 +64,7 @@ export function applyPresets(input = {}, presets = defaultPresets()) {
     platforms,
     caption,
     description: String(input.description || caption),
-    title: String(input.title || caption).slice(0, 100),
+    title: draftTitle({ title: input.title, caption: sourceCaption, overrides: input.overrides }),
     tags,
     privacy_status: ["private", "unlisted", "public"].includes(input.privacy_status)
       ? input.privacy_status

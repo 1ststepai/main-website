@@ -220,6 +220,22 @@ test("a single-platform draft stays compatible and presets fill the caption", as
     assert.match(multi.bundle.caption, /Link in bio/);
     assert.ok(multi.bundle.tags.includes("postpath"));
     assert.equal(rigged.engine.store.getProfile("acme").require_vidiq, undefined);
+    const titled = await rigged.engine.createDraft({
+      profile_id: "acme",
+      platforms: ["youtube", "facebook", "instagram"],
+      caption: "Every social media scheduler I tried was garbage. So I built my own. #buildinpublic #indiehacker #so",
+      media_path: rigged.media,
+      overrides: { youtube: { title: "I built my own scheduler" } },
+    });
+    assert.equal(titled.bundle.title, "I built my own scheduler");
+    const trimmed = await rigged.engine.createDraft({
+      profile_id: "acme",
+      platforms: ["youtube"],
+      caption: "Every social media scheduler I tried was garbage. So I built my own. #buildinpublic #indiehacker #so",
+      media_path: rigged.media,
+    });
+    assert.equal(trimmed.bundle.title, "Every social media scheduler I tried was garbage. So I built my own.");
+    assert.doesNotMatch(trimmed.bundle.title, /#/);
   } finally {
     await rigged.stop();
   }

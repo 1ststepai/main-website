@@ -86,16 +86,36 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
   const key = loadOrCreateKey(homePaths, env);
   const lockFile = `${homePaths.dbFile}.lock`;
   let db = loadDb(homePaths.dbFile);
+  let loadedStamp = fileStamp(homePaths.dbFile);
+  let lockDepth = 0;
   const inFlight = new Set();
   let removed = false;
+
+  function rememberStamp() {
+    loadedStamp = fileStamp(homePaths.dbFile);
+  }
+
+  function ensureFresh() {
+    if (removed || lockDepth > 0) return;
+    const stamp = fileStamp(homePaths.dbFile);
+    if (stamp === loadedStamp) return;
+    db = loadDb(homePaths.dbFile);
+    loadedStamp = stamp;
+  }
 
   function locked(fn) {
     if (removed) {
       throw mcpError("vault_removed", "Saved accounts were removed. Quit PostPath and open it again.", 409);
     }
     return withVaultLock(lockFile, () => {
-      db = loadDb(homePaths.dbFile);
-      return fn();
+      lockDepth += 1;
+      try {
+        db = loadDb(homePaths.dbFile);
+        rememberStamp();
+        return fn();
+      } finally {
+        lockDepth -= 1;
+      }
     });
   }
 
@@ -114,17 +134,24 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
     const tmp = `${homePaths.dbFile}.${process.pid}.tmp`;
     writeFileSync(tmp, `${JSON.stringify(db, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
     renameSync(tmp, homePaths.dbFile);
+    rememberStamp();
   }
 
   function listProfiles() {
+    ensureFresh();
     return Object.values(db.profiles).sort((a, b) => a.name.localeCompare(b.name));
   }
 
   function getProfile(profileId) {
+    ensureFresh();
     return db.profiles[String(profileId || "")] || null;
   }
 
   function upsertProfile({ id, name, require_vidiq, presets } = {}) {
+    return locked(() => upsertProfileBody({ id, name, require_vidiq, presets }));
+  }
+
+  function upsertProfileBody({ id, name, require_vidiq, presets } = {}) {
     const profileId = normalizeProfileId(id);
     if (profileId.length < 2 || !/^[a-z0-9]/.test(profileId)) {
       throw mcpError("invalid_profile", "Profile id must be 2–64 chars: letters, numbers, _ or -.");
@@ -150,16 +177,22 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
   }
 
   function listConnections(profileId) {
+    ensureFresh();
     return Object.values(db.connections)
       .filter((row) => !profileId || row.profile_id === profileId)
       .map(publicConnection);
   }
 
   function getConnection(profileId, platform) {
+    ensureFresh();
     return db.connections[connectionKey(profileId, platform)] || null;
   }
 
   function saveConnection(record, secrets) {
+    return locked(() => saveConnectionBody(record, secrets));
+  }
+
+  function saveConnectionBody(record, secrets) {
     const stamp = new Date(now()).toISOString();
     const keyName = connectionKey(record.profile_id, record.platform);
     const existing = db.connections[keyName];
@@ -190,6 +223,10 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
   }
 
   function updateConnection(profileId, platform, patch) {
+    return locked(() => updateConnectionBody(profileId, platform, patch));
+  }
+
+  function updateConnectionBody(profileId, platform, patch) {
     const row = getConnection(profileId, platform);
     if (!row) return null;
     const safe = { ...patch };
@@ -202,11 +239,14 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
   }
 
   function deleteConnection(profileId, platform) {
-    delete db.connections[connectionKey(profileId, platform)];
-    persist();
+    locked(() => {
+      delete db.connections[connectionKey(profileId, platform)];
+      persist();
+    });
   }
 
   function listPosts({ profileId, status } = {}) {
+    ensureFresh();
     return Object.values(db.posts)
       .filter((post) => !profileId || post.profile_id === profileId)
       .filter((post) => !status || post.status === status)
@@ -215,6 +255,7 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
   }
 
   function getPost(postId) {
+    ensureFresh();
     return db.posts[String(postId || "")] || null;
   }
 
@@ -272,10 +313,12 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
   }
 
   function listBundles() {
+    ensureFresh();
     return Object.values(db.bundles || {}).sort((a, b) => String(b.updated_at).localeCompare(String(a.updated_at)));
   }
 
   function getBundle(bundleId) {
+    ensureFresh();
     return (db.bundles || {})[String(bundleId || "")] || null;
   }
 
@@ -304,9 +347,11 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
   }
 
   function appendAudit(entry) {
-    db.audit.push(entry);
-    if (db.audit.length > 1000) db.audit = db.audit.slice(-1000);
-    persist();
+    locked(() => {
+      db.audit.push(entry);
+      if (db.audit.length > 1000) db.audit = db.audit.slice(-1000);
+      persist();
+    });
   }
 
   function exportPublic() {
@@ -347,6 +392,15 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
     forgetVault,
     newId: socialId,
   };
+}
+
+function fileStamp(file) {
+  try {
+    const stat = statSync(file);
+    return `${stat.mtimeMs}:${stat.size}`;
+  } catch {
+    return "missing";
+  }
 }
 
 function loadDb(file) {
