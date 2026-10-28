@@ -146,6 +146,21 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
     return structuredClone(db.autoPost && typeof db.autoPost === "object" ? db.autoPost : {});
   }
 
+  function readSection(name) {
+    ensureFresh();
+    return structuredClone(db[name] && typeof db[name] === "object" ? db[name] : {});
+  }
+
+  function updateSection(name, mutator) {
+    if (!["onboarding", "brandPages"].includes(name)) throw new Error(`Unknown store section: ${name}`);
+    return locked(() => {
+      if (!db[name] || typeof db[name] !== "object") db[name] = {};
+      const result = mutator(db[name]);
+      persist();
+      return structuredClone(result);
+    });
+  }
+
   function updateAutoPost(mutator) {
     return locked(() => {
       if (!db.autoPost || typeof db.autoPost !== "object") db.autoPost = {};
@@ -468,6 +483,8 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
     readSeo,
     updateSeo,
     readAutoPost,
+    readSection,
+    updateSection,
     updateAutoPost,
     atomic,
     exportPublic,
