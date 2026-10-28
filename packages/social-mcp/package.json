@@ -1,7 +1,7 @@
 {
   "name": "@1ststep/social-mcp",
   "version": "0.1.0",
-  "description": "PostPath by 1stStep.ai — a private desk on your computer, in early access. Social logins stay encrypted locally, not on 1stStep servers, and are sent to the network you connect or post to. Every post waits for your approval. Built to show what posted and what failed. Live publishing is not yet verified. Not a scheduler and not an AI writer.",
+  "description": "PostPath by 1stStep.ai — one desk on your computer for social posts. Ask your assistant for posts; they land as drafts for each network, and nothing goes out until you approve it. Social logins stay encrypted locally, never sent to 1stStep, and go only to the network you connect or post to. Early access.",
   "private": true,
   "type": "module",
   "bin": {

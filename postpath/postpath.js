@@ -1,88 +1,50 @@
-const channels = [...document.querySelectorAll(".account")];
-const runBtn = document.getElementById("run-demo");
-const result = document.getElementById("result");
-const timeline = document.getElementById("timeline");
-const promptEl = document.getElementById("prompt");
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-channels.forEach((button) => {
-  button.addEventListener("click", () => {
-    button.classList.toggle("active");
-    button.setAttribute("aria-pressed", button.classList.contains("active") ? "true" : "false");
+// Opening story: CSS-driven; the pause button toggles a class.
+document.querySelectorAll("[data-pause-target]").forEach((btn) => {
+  const target = document.querySelector(btn.dataset.pauseTarget);
+  if (!target) return;
+  if (reduceMotion) { btn.hidden = true; return; }
+  btn.addEventListener("click", () => {
+    const paused = target.classList.toggle("paused");
+    btn.setAttribute("aria-pressed", String(paused));
+    btn.textContent = paused ? "Play animation" : "Pause animation";
   });
 });
 
-function sleep(ms) {
-  if (reduceMotion) return Promise.resolve();
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
+// Demo: five looping frames, also controllable as tabs.
+const demo = document.querySelector("[data-demo]");
+if (demo) {
+  const tabs = [...demo.querySelectorAll('[role="tab"]')];
+  const panels = tabs.map((t) => document.getElementById(t.getAttribute("aria-controls")));
+  const pauseBtn = demo.querySelector("[data-demo-pause]");
+  let index = 0;
+  let timer = null;
 
-function setStep(name, state) {
-  const row = timeline?.querySelector(`[data-step="${name}"]`);
-  if (!row) return;
-  row.classList.remove("on", "run");
-  if (state) row.classList.add(state);
-}
+  const show = (i, focus = false) => {
+    index = (i + tabs.length) % tabs.length;
+    tabs.forEach((tab, n) => {
+      const on = n === index;
+      tab.setAttribute("aria-selected", String(on));
+      tab.tabIndex = on ? 0 : -1;
+      panels[n].hidden = !on;
+    });
+    if (focus) tabs[index].focus();
+  };
+  const stop = () => { clearInterval(timer); timer = null; if (pauseBtn) { pauseBtn.textContent = "Play demo"; pauseBtn.setAttribute("aria-pressed", "true"); } };
+  const start = () => { stop(); timer = setInterval(() => show(index + 1), 3800); if (pauseBtn) { pauseBtn.textContent = "Pause demo"; pauseBtn.setAttribute("aria-pressed", "false"); } };
 
-async function runDemo() {
-  const chosen = channels.filter((b) => b.classList.contains("active")).map((b) => b.dataset.channel);
-  const prompt = String(promptEl?.value || "").trim();
-  result.classList.remove("show");
-  result.textContent = "";
-
-  if (!chosen.length) {
-    result.classList.add("show");
-    result.textContent = "Select at least one sample network to preview the simulation.";
-    return;
-  }
-  if (!prompt) {
-    result.classList.add("show");
-    result.textContent = "Add a few words to preview the simulation.";
-    return;
-  }
-
-  runBtn.disabled = true;
-  timeline.hidden = false;
-  ["connect", "create", "distribute", "review"].forEach((step) => setStep(step, null));
-
-  setStep("connect", "run");
-  await sleep(500);
-  setStep("connect", "on");
-
-  setStep("create", "run");
-  await sleep(650);
-  setStep("create", "on");
-
-  setStep("distribute", "run");
-  await sleep(700);
-  setStep("distribute", "on");
-
-  setStep("review", "run");
-  await sleep(500);
-  setStep("review", "on");
-
-  result.classList.add("show");
-  result.textContent = [
-    "SIMULATED PREVIEW",
-    "",
-    `1. You wrote: “${prompt}”`,
-    `2. Sample networks on screen: ${chosen.join(", ")}. Live publishing is not yet verified.`,
-    "3. On the private desk, the post would wait for your approval.",
-    "4. The desk is built to show what posted and what failed, including rate-limited and needs review. This preview uses simulated responses.",
-    "",
-    "Nothing was sent. No real account is connected.",
-  ].join("\n");
-
-  runBtn.disabled = false;
-}
-
-runBtn?.addEventListener("click", () => {
-  runDemo().catch(() => {
-    runBtn.disabled = false;
-    result.classList.add("show");
-    result.textContent = "Demo hit a snag. Refresh and try again.";
+  tabs.forEach((tab, n) => {
+    tab.addEventListener("click", () => { stop(); show(n); });
+    tab.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight") { e.preventDefault(); stop(); show(index + 1, true); }
+      if (e.key === "ArrowLeft") { e.preventDefault(); stop(); show(index - 1, true); }
+    });
   });
-});
+  pauseBtn?.addEventListener("click", () => (timer ? stop() : start()));
+  show(0);
+  if (reduceMotion) stop(); else start();
+}
 
 document.getElementById("access-form")?.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -95,6 +57,6 @@ document.getElementById("access-form")?.addEventListener("submit", (event) => {
     `Name: ${name}\nEmail: ${email}\nNeed: ${need}\n\nSource: postpath.1ststep.ai`,
   );
   const note = document.getElementById("access-note");
-  if (note) note.textContent = "Email draft opened. Send it to join early access—we reply from 1stStep.ai.";
+  if (note) note.textContent = "Email draft opened. Send it to join early access. We reply from 1stStep.ai.";
   window.location.href = `mailto:evan@1ststep.ai?subject=${subject}&body=${body}`;
 });
