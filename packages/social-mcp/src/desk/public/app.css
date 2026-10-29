@@ -854,3 +854,16 @@ input:focus-visible, textarea:focus-visible, select:focus-visible, summary:focus
 body:not(.x-on) [data-x-only] { display: none !important; }
 .x-own-app { grid-column: 1 / -1; }
 .x-own-app > summary { cursor: pointer; font-weight: 600; }
+
+/* Multi-brand: switcher, per-brand accounts table, Add brand, Page chooser */
+.brand-switcher { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+.brand-switcher select { min-width: 180px; padding: 6px 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface-2); color: inherit; font-weight: 600; }
+.accounts-table { width: 100%; border-collapse: collapse; margin: 8px 0 18px; font-size: 14px; }
+.accounts-table th, .accounts-table td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+.accounts-table th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+.access-badge.limited { color: var(--warn); border-color: var(--warn); }
+.access-badge.full { color: var(--ok); border-color: var(--ok); }
+.add-brand { border: 1px dashed var(--line); border-radius: 16px; padding: 12px 14px; margin: 12px 0; }
+.add-brand summary { cursor: pointer; font-weight: 600; }
+.page-chooser { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 8px 0; }
+.page-chooser input, .page-chooser select { padding: 6px 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: inherit; min-width: 200px; }

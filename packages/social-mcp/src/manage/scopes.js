@@ -57,6 +57,12 @@ export function grantedScopes(connection) {
   return LEGACY_SCOPES[connection.platform] || [];
 }
 
+function pageName(store, profileId, connection) {
+  if (connection.platform === "facebook") return connection.account_label || null;
+  const page = store.getConnection(profileId, "facebook");
+  return page && page.page_id === connection.page_id ? page.account_label || null : null;
+}
+
 export function accessStatus(store, profileId) {
   const rows = [];
   for (const [platform, meta] of Object.entries(MANAGED_NETWORKS)) {
@@ -69,6 +75,9 @@ export function accessStatus(store, profileId) {
       provider: meta.provider,
       connected: Boolean(connection),
       account_label: connection?.account_label || null,
+      // Meta rows also say which Facebook Page they are tied to (ids and names are not secrets).
+      page_id: connection?.page_id || null,
+      page_name: connection?.page_id ? pageName(store, profileId, connection) : null,
       scopes_known: Boolean(connection && Array.isArray(connection.granted_scopes)),
       granted: meta.required.filter((scope) => granted.includes(scope)).map((scope) => ({ scope, label: scopeLabel(scope) })),
       missing: missing.map((scope) => ({ scope, label: scopeLabel(scope) })),

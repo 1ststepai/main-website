@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { deskUrl, DESK_ROUTES } from "../src/desk/public/deskApi.js";
+import { deskUrl, DESK_ROUTES, profileBody } from "../src/desk/public/deskApi.js";
+import { readFileSync } from "node:fs";
 import { safeFfmpegBinary, assertThumbnailPath, THUMBNAIL_ARGS } from "../src/score/score.js";
 
 const ORIGIN = "http://127.0.0.1:47840";
@@ -32,4 +33,16 @@ test("ffmpeg runs only as ffmpeg, with fixed args and a file: input", () => {
   for (const bad of ["-y", "thumb.png", "/m/x.sh", "/m/a.png\0b", "concat:/a.png|/b.png", "http://x/a.png"]) {
     assert.throws(() => assertThumbnailPath(bad), /not allowed/);
   }
+});
+
+test("profile route body allows only a valid brand id, name and Page", () => {
+  assert.deepEqual(profileBody({ id: "acme", name: " Acme ", metaPage: "Acme Page" }), { id: "acme", name: "Acme", presets: { meta_page: "Acme Page" } });
+  for (const id of ["", "../x", "a b", "-x", "x".repeat(70)]) assert.throws(() => profileBody({ id, name: "A" }), /brand id/);
+  assert.throws(() => profileBody({ id: "acme", name: "" }), /name/);
+  assert.throws(() => profileBody({ id: "acme", name: "A", metaPage: "p".repeat(201) }), /too long/);
+});
+
+test("manage.js never passes a raw /api path to call()", () => {
+  const src = readFileSync(new URL("../src/desk/public/manage.js", import.meta.url), "utf8");
+  assert.doesNotMatch(src, /call\(\s*["'`]\//);
 });

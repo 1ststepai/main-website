@@ -25,6 +25,11 @@
           <span>PostPath</span>
         </p>
         <p class="byline">by 1stStep.ai</p>
+        <label class="brand-switcher owner-surface" id="brand-switcher-wrap">
+          <span>Brand</span>
+          <select id="brand-switcher" aria-label="Switch brand"></select>
+        </label>
+        <button type="button" class="btn ghost owner-surface" id="add-brand-open">Add brand</button>
         <button type="button" class="btn ghost owner-surface" id="reopen-guide">Setup guide</button>
         <div class="recording-indicator" id="recording-indicator" role="status" aria-live="polite" hidden>
           <span class="rec-dot" aria-hidden="true"></span> Recording <span class="rec-name"></span>
@@ -499,8 +504,27 @@
           <label>Brand <select id="manage-profile"></select></label>
         </div>
         <label class="auto-pin" id="manage-pin-row">Owner PIN (if you set one) <input type="password" id="manage-pin" autocomplete="current-password" /></label>
+        <details class="add-brand" id="add-brand">
+          <summary>Add brand</summary>
+          <p class="hint">Pick the Facebook Page first. One Meta login can cover several Pages; this brand will only use the one you name here.</p>
+          <div class="pair">
+            <label class="field"><span>Brand name</span><input id="add-brand-name" type="text" placeholder="Swing Trade Pros" maxlength="120" /></label>
+            <label class="field"><span>Brand id</span><input id="add-brand-id" type="text" placeholder="swing-trade-pros" pattern="[a-zA-Z0-9][a-zA-Z0-9_-]{1,63}" /></label>
+          </div>
+          <label class="field"><span>Facebook Page (name or Page id)</span><input id="add-brand-page" type="text" list="known-pages" placeholder="Swing Trade Pros" maxlength="200" /></label>
+          <datalist id="known-pages"></datalist>
+          <div class="row-buttons">
+            <button type="button" class="btn ghost" id="add-brand-save">Save brand</button>
+            <button type="button" class="btn primary" id="add-brand-connect">Save and connect Facebook &amp; Instagram</button>
+          </div>
+        </details>
+        <h3 id="manage-accounts-title">Accounts for <span id="manage-brand-name">this brand</span></h3>
+        <table class="accounts-table" id="manage-accounts" aria-labelledby="manage-accounts-title">
+          <thead><tr><th scope="col">Network</th><th scope="col">Account</th><th scope="col">Page</th><th scope="col">Access</th></tr></thead>
+          <tbody></tbody>
+        </table>
         <h3>Reconnect for full access</h3>
-        <p class="hint">Older connections keep posting until you reconnect. Reconnect asks each network for the new permissions.</p>
+        <p class="hint">Older connections keep posting until you reconnect. Reconnect asks each network for the new permissions. For Facebook and Instagram, choose the Page first.</p>
         <div id="manage-access" class="access-grid"><p class="hint">Loading…</p></div>
         <details class="manage-new">
           <summary>Queue a change yourself</summary>

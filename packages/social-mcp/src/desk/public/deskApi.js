@@ -4,6 +4,7 @@ export const DESK_ROUTES = Object.freeze({
   status: "/api/status",
   manage: "/api/manage",
   connect: "/api/connect",
+  profile: "/api/profile",
   manageApprove: "/api/manage/approve",
   manageDiscard: "/api/manage/discard",
   manageQueue: "/api/manage/queue",
@@ -37,4 +38,18 @@ export function deskUrl(route, query = {}, origin = globalThis.location?.origin 
   const url = new URL(DESK_ROUTES[route], origin);
   if (parts.length) url.search = parts.join("&");
   return url.href;
+}
+
+const PROFILE_ID = /^[a-z0-9][a-z0-9_-]{0,63}$/i;
+
+// Body for the "profile" route: only a brand id, a display name and the chosen
+// Facebook Page are allowed through, each checked before it leaves the page.
+export function profileBody({ id, name, metaPage = "" } = {}) {
+  const brandId = String(id ?? "").trim();
+  if (!PROFILE_ID.test(brandId)) throw new Error("Invalid brand id.");
+  const brandName = String(name ?? "").replace(/[\u0000-\u001f\u007f]/g, "").trim().slice(0, 120);
+  if (!brandName) throw new Error("Give the brand a name.");
+  const page = String(metaPage ?? "").replace(/[\u0000-\u001f\u007f]/g, "").trim();
+  if (page.length > 200) throw new Error("Facebook Page name is too long.");
+  return { id: brandId, name: brandName, presets: { meta_page: page } };
 }
