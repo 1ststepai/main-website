@@ -25,6 +25,7 @@ import {
   suggestedRequests,
   toggleChannel,
   setXAvailable,
+  reconnectMessage,
 } from "./guide.js";
 import { platformIcon } from "./icons.js";
 import { bindPilot, renderPilot } from "./pilotDesk.js";
@@ -281,6 +282,8 @@ function renderStatus(data) {
   networkList.replaceChildren();
   for (const network of NETWORKS) {
     if (network.key === "x" && latestStatus?.x_available !== true) continue;
+    // TikTok is bring-your-own-app: hide it until this desk has its own client key and secret.
+    if (network.key === "tiktok" && latestStatus?.oauth_ready?.tiktok !== true && !byPlatform.get("tiktok")) continue;
     const row = byPlatform.get(network.key);
     const on = Boolean(row);
     const item = document.createElement("li");
@@ -290,14 +293,20 @@ function renderStatus(data) {
     strong.textContent = network.label;
     const detail = document.createElement("div");
     detail.className = "meta";
-    detail.textContent = row
+    const stale = row?.status === "needs_reconnect";
+    detail.textContent = stale
+      ? reconnectMessage(network.key)
+      : row
       ? row.account_label || "Connected"
       : network.limited
         ? "API approval required"
         : "Not connected";
     copy.append(strong, detail);
     const pill = document.createElement("span");
-    if (on) {
+    if (stale) {
+      pill.className = "chip needed";
+      pill.textContent = "Reconnect";
+    } else if (on) {
       pill.className = "chip connected";
       pill.textContent = "Connected";
     } else if (network.limited) {
@@ -528,7 +537,7 @@ document.getElementById("connect-form").addEventListener("submit", async (event)
       body: JSON.stringify({
         id,
         name: profileName.value.trim() || id,
-        platforms: ["youtube", "meta", "tiktok", "linkedin", ...(latestStatus?.x_available === true ? ["x"] : []), "threads", "pinterest", "google_business", "reddit", "snapchat"],
+        platforms: ["youtube", "meta", ...(latestStatus?.oauth_ready?.tiktok === true ? ["tiktok"] : []), "linkedin", ...(latestStatus?.x_available === true ? ["x"] : []), "threads", "pinterest", "google_business", "reddit", "snapchat"],
       }),
     });
     renderStatus(data);

@@ -64,6 +64,8 @@ test("mock publish paths for each implemented platform", async () => {
     {
       PINTEREST_APP_ID: "pid",
       PINTEREST_APP_SECRET: "psecret",
+      TIKTOK_CLIENT_KEY: "tkey",
+      TIKTOK_CLIENT_SECRET: "tsecret",
     },
   );
   try {
