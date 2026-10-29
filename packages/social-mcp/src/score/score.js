@@ -4,6 +4,7 @@
  * never calls vidIQ itself, so nobody's scoring runs through the owner's vidIQ account.
  */
 import { execFileSync } from "node:child_process";
+import { basename, isAbsolute } from "node:path";
 import { resolveSafeMediaPath } from "../mediaPath.js";
 import { scoreTitle } from "./title.js";
 
@@ -108,6 +109,26 @@ export async function scoreText(input = {}, { fetchImpl = fetch, interest = "off
   return { score, keyword, feedback: checks.map((c) => c.line), checks, interest: interestResult };
 }
 
+const IMAGE_EXT = /\.(png|jpe?g|webp|gif|bmp)$/i;
+
+// Only the ffmpeg program itself may run: the bare name "ffmpeg" (found on PATH) or an
+// absolute path whose file name is ffmpeg / ffmpeg.exe. Anything else is refused.
+export function safeFfmpegBinary(value = "ffmpeg") {
+  const bin = String(value || "");
+  if (bin === "ffmpeg") return bin;
+  if (!bin.includes("\0") && isAbsolute(bin) && /^ffmpeg(\.exe)?$/i.test(basename(bin))) return bin;
+  throw new Error("ffmpeg binary is not allowed.");
+}
+
+// Fixed ffmpeg arguments. The only variable is the input, which must be an absolute
+// path to an image already validated inside the media folder. The "file:" protocol
+// prefix stops ffmpeg reading it as an option or as another protocol (http:, concat:).
+export function thumbnailArgs(file) {
+  const path = String(file || "");
+  if (!isAbsolute(path) || path.includes("\0") || !IMAGE_EXT.test(path)) throw new Error("Thumbnail path is not allowed.");
+  return ["-nostdin", "-v", "error", "-i", `file:${path}`, "-frames:v", "1", "-vf", "scale=64:36,format=gray", "-f", "rawvideo", "pipe:1"];
+}
+
 /** Thumbnail: text word count, contrast, and readability at small size (via ffmpeg, if installed). */
 export function scoreThumbnail({ media_path, text = "" } = {}, { mediaRoot, ffmpeg = "ffmpeg", sample } = {}) {
   const checks = [];
@@ -123,7 +144,7 @@ export function scoreThumbnail({ media_path, text = "" } = {}, { mediaRoot, ffmp
     const file = resolveSafeMediaPath(media_path, mediaRoot);
     try {
       // 64x36 grayscale: roughly how the image reads in a phone's search list.
-      pixels = execFileSync(ffmpeg, ["-v", "error", "-i", file, "-frames:v", "1", "-vf", "scale=64:36,format=gray", "-f", "rawvideo", "-"], { maxBuffer: 1 << 20, timeout: 10_000 });
+      pixels = execFileSync(safeFfmpegBinary(ffmpeg), thumbnailArgs(file), { maxBuffer: 1 << 20, timeout: 10_000, shell: false });
     } catch {
       pixels = null;
     }
