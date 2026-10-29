@@ -884,3 +884,18 @@ body:not(.x-on) [data-x-only] { display: none !important; }
 .mode-pill.auto { color: #ff5a6a; border-color: #ff5a6a; }
 .mode-pill.review { color: #7ee2a8; border-color: #7ee2a8; }
 .auto-advanced { margin-top: 12px; }
+
+/* What your assistant has learned */
+.learning-list { display: grid; gap: 14px; }
+.learning-card { border: 1px solid var(--line, #e3e3e3); border-radius: 12px; padding: 14px; }
+.learning-card h3 { margin: 0 0 4px; }
+.learning-card h4 { margin: 12px 0 6px; font-size: 0.95rem; }
+.learning-bullets, .learning-rejections { margin: 8px 0; padding-left: 0; list-style: none; display: grid; gap: 6px; }
+.learning-bullet { display: flex; gap: 10px; align-items: baseline; }
+.learning-bullet > span:first-child { flex: 1; }
+.learning-source { font-size: 0.8rem; opacity: 0.7; }
+.learning-network { font-weight: 600; margin-top: 6px; }
+.learning-suggestion { background: rgba(255, 196, 0, 0.12); border-radius: 10px; padding: 10px; margin-bottom: 8px; }
+.learning-suggestion p { margin: 0 0 6px; }
+.discard-reason { display: inline-flex; gap: 6px; align-items: center; font-size: 0.85rem; }
+.discard-reason input { min-width: 180px; }
