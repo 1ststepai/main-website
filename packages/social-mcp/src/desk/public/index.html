@@ -195,7 +195,7 @@
                 <label class="check"><input type="checkbox" id="youtube-long" /> YouTube long-form 16:9</label>
               </div>
               <label class="check"><input type="checkbox" id="claude-review" /> Ask Claude for advisory notes. This does not approve the post.</label>
-              <p class="hint">Connect accounts, connect your AI, one prompt, then review the queue. Generated video is silent. Claude cards are drawings, not photos or video.</p>
+              <p class="hint">Connect accounts, connect your assistant, one prompt, then review the queue. Generated video is silent. Claude cards are drawings, not photos or video.</p>
             </fieldset>
             <label class="check" id="instagram-confirm-label">
               <input type="checkbox" id="instagram-confirm" />
@@ -226,7 +226,7 @@
           <p class="approval-line">Nothing posts without your approval.</p>
           <p class="hint">One approval posts every selected platform. A failure on one does not stop the others.</p>
           <ul class="queue-list" id="queue-list"></ul>
-          <p class="hint" id="queue-empty">No drafts waiting. Saved drafts and AI drafts show up here.</p>
+          <p class="hint" id="queue-empty">No drafts waiting. Saved drafts and assistant drafts show up here.</p>
           <div class="approval-block" hidden>
             <p class="hint" id="draft-result">No draft yet. Publishing uses the draft you just saved.</p>
             <button type="button" class="btn primary" id="publish-draft" disabled>Publish this draft</button>
@@ -409,7 +409,7 @@
 
       <section class="panel connect-ai owner-surface" id="connect-ai" aria-labelledby="connect-ai-title">
         <div class="connect-copy">
-          <p class="step-kicker">Connect to your AI</p>
+          <p class="step-kicker">Connect your assistant</p>
           <h2 id="connect-ai-title">Same accounts. Any MCP client.</h2>
           <p class="lede">OAuth for clients that support it. A personal access token for clients that do not. The server key is <code>postpath</code>.</p>
           <div id="mcp-remote" class="mcp-remote"></div>
@@ -487,11 +487,40 @@
           <div>
             <p class="step-kicker">Auto-post</p>
             <h2 id="auto-post-title">Off unless you turn it on</h2>
-            <p class="lede">Per brand, per AI connection, per network. An assistant can only ask; you decide here. vidIQ, Instagram-public and no-promise checks still stop a post.</p>
+            <p class="lede">Per brand, per assistant connection, per network. An assistant can only ask; you decide here with your owner PIN. vidIQ, Instagram-public and no-promise checks still stop a post.</p>
           </div>
         </div>
+        <div id="earned-prompts" class="earned-prompts" aria-live="polite"></div>
+        <div id="earned-pin-step" class="earned-pin-step" hidden>
+          <h3 id="earned-pin-title">Turn on auto-post</h3>
+          <p class="lede" id="earned-pin-what"></p>
+          <p class="auto-risk">Your assistant will post here without asking you each time. vidIQ, Instagram-public, TikTok private-by-default and no-promise checks still stop a post. Turning it off is one click and needs no PIN.</p>
+          <label class="auto-pin" id="earned-pin-row">Owner PIN <input type="password" id="earned-pin" autocomplete="current-password" /></label>
+          <div id="earned-nopin" hidden>
+            <p class="hint earned-nudge">No owner PIN is set, so anyone at this computer could flip this switch. Set an owner PIN to protect it.</p>
+            <label class="check"><input type="checkbox" id="earned-confirm" /> I understand. Post without asking me on this brand and network.</label>
+          </div>
+          <div class="earned-actions">
+            <button type="button" class="btn danger" id="earned-pin-go">Turn on auto-post</button>
+            <button type="button" class="btn secondary" id="earned-pin-cancel">Cancel</button>
+          </div>
+        </div>
+        <div class="posting-modes">
+          <h3>Posting mode by brand and network</h3>
+          <p class="hint">Default is Review each post. Assistants can never change this; only you can, here. Disconnecting accounts and deleting always need your PIN.</p>
+          <table class="posting-table">
+            <thead><tr><th scope="col">Brand</th><th scope="col">Network</th><th scope="col">Mode</th><th scope="col">Your recent decisions</th><th scope="col"><span class="visually-hidden">Change</span></th></tr></thead>
+            <tbody id="posting-modes-body"><tr><td colspan="5" class="hint">Loading…</td></tr></tbody>
+          </table>
+        </div>
+        <div class="auto-activity">
+          <h3>Auto-post activity</h3>
+          <ul class="queue-list" id="auto-activity-list"><li class="hint">Nothing auto-posted yet.</li></ul>
+        </div>
+        <details class="auto-advanced"><summary>Per-connection auto-post (advanced)</summary>
         <label class="auto-pin" id="auto-post-pin-row" hidden>Owner PIN <input type="password" id="auto-post-pin" autocomplete="current-password" /></label>
         <div id="auto-post-list" class="auto-post-list"><p class="hint">Loading…</p></div>
+        </details>
       </section>
 
       <section class="panel manage owner-surface" id="manage-panel" aria-labelledby="manage-title">
@@ -672,5 +701,6 @@
     </div>
     <script type="module" src="/app.js"></script>
     <script type="module" src="/manage.js"></script>
+    <script type="module" src="/earnedAutoPost.js"></script>
   </body>
 </html>

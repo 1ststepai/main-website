@@ -152,7 +152,7 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
   }
 
   function updateSection(name, mutator) {
-    if (!["onboarding", "brandPages", "manageActions", "vidiqUpsell"].includes(name)) throw new Error(`Unknown store section: ${name}`);
+    if (!["onboarding", "brandPages", "manageActions", "vidiqUpsell", "approvalHistory", "autoPostActivity"].includes(name)) throw new Error(`Unknown store section: ${name}`);
     return locked(() => {
       if (!db[name] || typeof db[name] !== "object") db[name] = {};
       const result = mutator(db[name]);

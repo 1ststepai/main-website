@@ -16,7 +16,9 @@ import { googleLoopbackUri, providerRedirectUri } from "../oauth/redirect.js";
 import { handleRemoteMcp } from "../mcp/http.js";
 import { allowedHost, clientSetup } from "../mcp/clients.js";
 import { createPat, listGrants, listPats, revokePat } from "../mcp/auth.js";
-import { AUTO_POST_RISK_LABEL, disableAutoPost, enableAutoPost, listAutoPost } from "../autoPost.js";
+import { AUTO_POST_RISK_LABEL, disableAutoPost, enableAutoPost, listAutoPost, listAutoPostActivity, setNetworkAutoPost } from "../autoPost.js";
+import { recordDecision, snoozeReadiness } from "../approvalHistory.js";
+import { postingPermissions } from "../postingPermissions.js";
 import { openDesktopApp } from "../openApp.js";
 import { mcpError } from "../errors.js";
 import { createRecorder } from "../recorder.js";
@@ -363,7 +365,42 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
       }
       return { profile_id: profile.id, name: profile.name, connections: list };
     });
-    return { auto_post: { risk_label: AUTO_POST_RISK_LABEL, pin_required: ownerPinConfigured(homePaths), networks: PLATFORMS, brands } };
+    return {
+      auto_post: { risk_label: AUTO_POST_RISK_LABEL, pin_required: ownerPinConfigured(homePaths), networks: PLATFORMS, brands },
+      posting: { ...postingPermissions(engine.store), pin_required: ownerPinConfigured(homePaths), activity: listAutoPostActivity(engine.store, { limit: 25 }) },
+    };
+  }
+
+  function cleanProfileId(value) {
+    const id = String(value || "");
+    if (!/^[a-z0-9][a-z0-9_-]{0,63}$/i.test(id)) throw mcpError("invalid_request", "Pick a brand.", 400);
+    return id;
+  }
+
+  function cleanPlatform(value) {
+    const platform = String(value || "");
+    if (!PLATFORMS.includes(platform)) throw mcpError("invalid_platform", "Pick a network.", 400);
+    return platform;
+  }
+
+  /** The owner decided on these posts at the desk. Assistant drafts only; see approvalHistory.js. */
+  function recordDecisions(posts, decision, reason = "") {
+    for (const post of posts) {
+      try {
+        if (post) recordDecision(engine.store, post, { decision, reason });
+      } catch {
+        // History is advisory; never block the owner's decision on it.
+      }
+    }
+  }
+
+  function decisionPosts({ bundle_id, post_id }) {
+    if (bundle_id) {
+      const bundle = engine.store.getBundle(bundle_id);
+      return (bundle?.platforms || []).map((platform) => engine.store.getPost(bundle.child_ids?.[platform])).filter(Boolean);
+    }
+    const post = post_id ? engine.store.getPost(post_id) : null;
+    return post ? [post] : [];
   }
 
   function brandPageView() {
@@ -592,28 +629,34 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
           sendJson(res, 200, { ok: true, ...result, publishers_called: engine.publisherCalls?.() || 0, ...deskState() });
           return;
         }
+        const decided = decisionPosts(body);
         if (body.bundle_id) {
           const result = await engine.approveBundle({
             bundle_id: body.bundle_id,
             scheduled_at: body.scheduled_at,
             instagram_public_confirmed: body.instagram_public_confirmed === true,
           });
+          recordDecisions(decided, "approved");
           sendJson(res, 200, { ok: true, ...result, ...deskState() });
           return;
         }
         if (body.scheduled_at) {
           const result = await engine.schedulePost({ post_id: body.post_id, scheduled_at: body.scheduled_at });
+          recordDecisions(decided, "approved");
           sendJson(res, 200, { ok: true, ...result, ...deskState() });
           return;
         }
         const result = await engine.publishPost({ post_id: body.post_id, force: true });
+        recordDecisions(decided, "approved");
         sendJson(res, 200, { ok: true, ...result, ...deskState() });
         return;
       }
 
       if (req.method === "POST" && url.pathname === "/api/discard") {
         const body = await readJson(req);
+        const decided = decisionPosts(body).filter((post) => ["draft", "scheduled", "failed"].includes(post.status));
         const result = await engine.discardItem({ bundle_id: body.bundle_id, post_id: body.post_id });
+        recordDecisions(decided, "rejected", typeof body.reason === "string" ? body.reason : "");
         sendJson(res, 200, { ok: true, ...result, ...deskState() });
         return;
       }
@@ -690,6 +733,33 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
             networks: body.networks,
             enabled_by: "desk",
           });
+          sendJson(res, 200, { ok: true, ...autoPostView() });
+          return;
+        }
+        if (req.method === "POST" && url.pathname === "/api/auto-post/network") {
+          // Brand + network mode. On needs the owner PIN when one is set, or an explicit confirm when not.
+          // Off is one click and needs no PIN.
+          const body = await readJson(req);
+          const profileId = cleanProfileId(body.profile_id);
+          const platform = cleanPlatform(body.platform);
+          if (body.enabled === true) {
+            if (ownerPinConfigured(homePaths)) {
+              assertOwnerPin(homePaths, pinFromRequest(req, body));
+            } else if (body.confirm !== true) {
+              throw mcpError("confirm_required", `${AUTO_POST_RISK_LABEL} Confirm to turn it on. Setting an owner PIN is recommended.`, 400);
+            }
+            setNetworkAutoPost(engine.store, { profile_id: profileId, platform, enabled: true, enabled_by: "desk" });
+          } else {
+            setNetworkAutoPost(engine.store, { profile_id: profileId, platform, enabled: false });
+          }
+          sendJson(res, 200, { ok: true, ...autoPostView() });
+          return;
+        }
+        if (req.method === "POST" && url.pathname === "/api/auto-post/snooze") {
+          const body = await readJson(req);
+          const profileId = cleanProfileId(body.profile_id);
+          if (!engine.store.getProfile(profileId)) throw mcpError("not_found", "Brand not found.", 404);
+          snoozeReadiness(engine.store, profileId, cleanPlatform(body.platform));
           sendJson(res, 200, { ok: true, ...autoPostView() });
           return;
         }

@@ -21,6 +21,7 @@ import { displayOutcome, publishMode } from "./publish/outcome.js";
 import { isPilotMode, PILOT_PUBLISH_MESSAGE } from "./pilot/config.js";
 import { containsBannedPromise } from "./pilot/captions.js";
 import { autoPostAllows } from "./autoPost.js";
+import { draftText } from "./approvalHistory.js";
 import { assertActionAllowed, assertProfileAllowed, getEntitlement } from "./license.js";
 import {
   applyPresets,
@@ -500,6 +501,18 @@ export function createEngine({
     };
   }
 
+  /** Keep the assistant's original words so the owner's later decision can be recorded against them. */
+  function markAssistantDraft(post, input) {
+    if (input?.source !== "mcp") return;
+    post.draft_original = draftText(post);
+    const by = input.drafted_by && typeof input.drafted_by === "object" ? input.drafted_by : {};
+    post.drafted_by = {
+      source: "mcp",
+      connection_id: by.connection_id ? String(by.connection_id).slice(0, 80) : null,
+      assistant: String(by.assistant || "assistant").slice(0, 120),
+    };
+  }
+
   function stampPost(fields, profile, source) {
     const stamp = new Date(now()).toISOString();
     return {
@@ -557,6 +570,7 @@ export function createEngine({
     for (const platform of platforms) {
       const post = stampPost(childFields(bundle, platform), profile, source);
       if (bundle.vidiq) post.vidiq = bundle.vidiq;
+      markAssistantDraft(post, input);
       store.savePost(post, { create: true });
       bundle.child_ids[platform] = post.id;
       posts.push(post);
@@ -624,6 +638,7 @@ export function createEngine({
       created_at: stamp,
       updated_at: stamp,
     };
+    markAssistantDraft(post, input);
     store.savePost(post, { create: true });
     store.appendAudit({
       id: store.newId("aud"),
