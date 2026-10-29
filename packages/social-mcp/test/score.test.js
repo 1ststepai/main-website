@@ -4,6 +4,7 @@ import { mkdtempSync, writeFileSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { scoreText, scoreThumbnail, scoreContent, youtubeSuggest } from "../src/score/score.js";
+import { freePort, freePorts } from "./helpers/ports.js";
 
 const good = { title: "Resume tips: 5 mistakes that cost you interviews", description: "Resume tips for new grads. ".repeat(10), tags: ["resume tips", "resume", "jobs", "career", "interview"] };
 
@@ -71,8 +72,8 @@ test("desk /api/score works without an owner PIN and UI has a Score it button", 
   assert.match(html, /id="score-it"[^>]*>Score it</);
   assert.ok(!/\bAI\b/.test(readFileSync(new URL("../src/desk/public/manage.js", import.meta.url), "utf8")));
   const home = mkdtempSync(join(tmpdir(), "pp-score-home-"));
-  const engine = createEngine({ home, env: { SOCIAL_MCP_PUBLISH_MODE: "mock" } });
-  const port = 47980 + Math.floor(Math.random() * 8);
+  const [port, oauthPort] = await freePorts(2);
+  const engine = createEngine({ home, env: { SOCIAL_MCP_PUBLISH_MODE: "mock", SOCIAL_MCP_OAUTH_PORT: String(oauthPort) } });
   const desk = createDeskServer({ engine, env: { SOCIAL_MCP_DESK_PORT: String(port) }, port });
   await desk.start({ open: false });
   try {

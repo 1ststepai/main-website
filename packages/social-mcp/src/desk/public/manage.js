@@ -1,3 +1,4 @@
+import { cleanBrandId, deskUrl, profileBody } from "./deskApi.js";
 // Manage accounts and the session recorder. Owner-only panels.
 // Assistants can only queue account changes; approval happens here, and deletes need a typed confirmation.
 
@@ -52,11 +53,11 @@ function make(tag, attrs = {}, text) {
 
 function pinHeaders() {
   const pin = document.getElementById("manage-pin")?.value || "";
-  return { "content-type": "application/json", ...(pin ? { "x-postpath-owner-pin": pin } : {}) };
+  return { "content-type": "application/json", "x-postpath-desk": "1", ...(pin ? { "x-postpath-owner-pin": pin } : {}) };
 }
 
-async function call(path, body) {
-  const response = await fetch(path, body === undefined ? {} : { method: "POST", headers: pinHeaders(), body: JSON.stringify(body) });
+async function call(route, body, query) {
+  const response = await fetch(deskUrl(route, query), body === undefined ? {} : { method: "POST", headers: pinHeaders(), body: JSON.stringify(body) });
   const payload = await response.json().catch(() => ({}));
   if (!response.ok || payload.ok === false) {
     const error = new Error(payload.message || "Request failed");
@@ -77,13 +78,112 @@ function toast(message, isError = false) {
 const manageState = { profiles: [], profile: "", view: null, confirm: {} };
 
 async function loadProfiles() {
-  const status = await call("/api/status");
+  const status = await call("status");
   manageState.profiles = (status.profiles || []).map((row) => ({ id: row.id, name: row.name || row.id }));
-  const select = document.getElementById("manage-profile");
-  if (!select) return;
-  const current = manageState.profile || select.value || manageState.profiles[0]?.id || "";
-  select.replaceChildren(...manageState.profiles.map((row) => make("option", { value: row.id, selected: row.id === current }, row.name)));
+  const saved = readSavedBrand();
+  let current = manageState.profile || saved || manageState.profiles[0]?.id || "";
+  if (current && !manageState.profiles.some((row) => row.id === current)) current = manageState.profiles[0]?.id || "";
   manageState.profile = current;
+  for (const id of ["manage-profile", "brand-switcher"]) {
+    const select = document.getElementById(id);
+    if (!select) continue;
+    const options = manageState.profiles.map((row) => make("option", { value: row.id, selected: row.id === current }, row.name));
+    if (!options.length) options.push(make("option", { value: "" }, "No brand yet"));
+    select.replaceChildren(...options);
+    select.value = current;
+  }
+  const wrap = document.getElementById("brand-switcher-wrap");
+  if (wrap) wrap.dataset.count = String(manageState.profiles.length);
+}
+
+const BRAND_KEY = "postpath.brand";
+function readSavedBrand() {
+  try {
+    return cleanBrandId(localStorage.getItem(BRAND_KEY));
+  } catch {
+    return "";
+  }
+}
+
+// One brand at a time across the desk: the switcher drives Manage, Connect, SEO and Hook.
+function selectBrand(id, { announce = true } = {}) {
+  const row = manageState.profiles.find((item) => item.id === id);
+  if (!row) return;
+  const safeId = cleanBrandId(row.id);
+  if (!safeId) return;
+  id = safeId;
+  manageState.profile = id;
+  manageState.confirm = {};
+  try {
+    localStorage.setItem(BRAND_KEY, safeId);
+  } catch {}
+  for (const selectId of ["manage-profile", "brand-switcher"]) {
+    const select = document.getElementById(selectId);
+    if (select) select.value = id;
+  }
+  const nameInput = document.getElementById("profile-name");
+  const idInput = document.getElementById("profile-id");
+  if (idInput && nameInput) {
+    idInput.value = row.id;
+    nameInput.value = row.name;
+    idInput.dispatchEvent(new Event("input", { bubbles: true }));
+  }
+  for (const selectId of ["seo-brand", "hook-brand"]) {
+    const select = document.getElementById(selectId);
+    if (select && [...select.options].some((option) => option.value === id) && select.value !== id) {
+      select.value = id;
+      select.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+  }
+  document.dispatchEvent(new CustomEvent("postpath:brand", { detail: { id, name: row.name } }));
+  if (announce) toast(`Switched to ${row.name}.`);
+  loadManage().catch((error) => toast(error.message, true));
+}
+
+function accessLabel(row) {
+  if (!row.connected) return { text: "Not connected", cls: "connect" };
+  if (row.full_access) return { text: "Full", cls: "full" };
+  return { text: "Limited", cls: "limited" };
+}
+
+function renderAccounts(view) {
+  const table = document.getElementById("manage-accounts");
+  const name = document.getElementById("manage-brand-name");
+  if (name) name.textContent = view.brand?.name || manageState.profile || "this brand";
+  if (!table) return;
+  const body = table.querySelector("tbody");
+  body.replaceChildren();
+  for (const row of view.access || []) {
+    const tr = make("tr", { dataset: { platform: row.platform } });
+    tr.append(make("td", {}, row.label));
+    tr.append(make("td", {}, row.connected ? row.account_label || "Connected account" : "—"));
+    const isMeta = row.provider === "meta";
+    tr.append(make("td", {}, isMeta ? row.page_name || (row.page_id ? `Page ${row.page_id}` : view.brand?.meta_page ? `${view.brand.meta_page} (chosen, not connected yet)` : "—") : "—"));
+    const badge = accessLabel(row);
+    const cell = make("td", {});
+    cell.append(make("span", { className: `access-badge ${badge.cls}` }, badge.text));
+    tr.append(cell);
+    body.append(tr);
+  }
+}
+
+function renderKnownPages(pages) {
+  const list = document.getElementById("known-pages");
+  if (!list) return;
+  list.replaceChildren(...(pages || []).map((page) => make("option", { value: page.name }, `${page.name} · ${page.id}`)));
+}
+
+function pageChooser(view) {
+  const box = make("div", { className: "page-chooser" });
+  const id = `page-choice-${Math.random().toString(36).slice(2, 8)}`;
+  box.append(make("label", { for: id }, "Facebook Page for this brand"));
+  const input = make("input", { id, type: "text", className: "page-choice", list: "known-pages", maxlength: "200", placeholder: "Page name or id", value: view.brand?.meta_page || "" });
+  box.append(input);
+  return box;
+}
+
+async function saveMetaPage(profileId, name, page) {
+  await call("profile", profileBody({ id: profileId, name, metaPage: page }));
 }
 
 function renderAccess(access) {
@@ -104,6 +204,7 @@ function renderAccess(access) {
     if (row.granted.length) lists.append(make("div", {}, "Granted"), granted);
     if (row.missing.length) lists.append(make("div", {}, "Missing"), missing);
     card.append(lists);
+    if (row.provider === "meta" && row.action !== "ok") card.append(pageChooser(manageState.view || {}));
     if (row.action !== "ok") {
       card.append(make("button", { type: "button", className: "btn primary manage-reconnect", dataset: { provider: row.provider, platform: row.platform } }, row.action === "connect" ? "Connect" : "Reconnect"));
     }
@@ -191,8 +292,10 @@ async function loadManage() {
     document.getElementById("manage-access").replaceChildren(make("p", { className: "hint" }, "Add a brand first."));
     return;
   }
-  const view = await call(`/api/manage?profile_id=${encodeURIComponent(manageState.profile)}`);
+  const view = await call("manage", undefined, { profile_id: manageState.profile });
   manageState.view = view;
+  renderAccounts(view);
+  renderKnownPages(view.known_pages);
   renderAccess(view.access);
   renderCatalog(view.catalog);
   renderActions(view.actions);
@@ -205,14 +308,17 @@ async function onManageClick(event) {
   try {
     if (target.classList.contains("manage-reconnect")) {
       const provider = target.dataset.provider;
-      fetch("/api/recordings/event", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ type: "reconnect_started", provider, platform: target.dataset.platform }) }).catch(() => {});
-      const data = await call("/api/connect", { id: manageState.profile, name: manageState.profile, platforms: [provider], reconnect: true });
+      call("recordingsEvent", { type: "reconnect_started", provider, platform: target.dataset.platform }).catch(() => {});
+      const brandName = manageState.view?.brand?.name || manageState.profile;
+      const choice = target.closest(".access-row")?.querySelector(".page-choice");
+      if (provider === "meta" && choice) await saveMetaPage(manageState.profile, brandName, choice.value);
+      const data = await call("connect", { id: manageState.profile, name: brandName, platforms: [provider], reconnect: true });
       toast(data.connect?.message || "Sign-in opened in your browser. Approve every permission, then come back.");
       return;
     }
     const id = target.dataset.id;
     if (target.classList.contains("manage-approve")) {
-      const data = await call("/api/manage/approve", { action_id: id });
+      const data = await call("manageApprove", { action_id: id });
       if (data.needs_confirm) {
         manageState.confirm[id] = { nonce: data.confirm_nonce, phrase: data.confirm_phrase };
         toast(`Type ${data.confirm_phrase} to confirm.`);
@@ -220,15 +326,30 @@ async function onManageClick(event) {
     } else if (target.classList.contains("manage-confirm")) {
       const pending = manageState.confirm[id];
       const text = target.parentElement.querySelector(".confirm-input").value;
-      const data = await call("/api/manage/approve", { action_id: id, confirm_nonce: pending?.nonce, confirm_text: text });
+      const data = await call("manageApprove", { action_id: id, confirm_nonce: pending?.nonce, confirm_text: text });
       delete manageState.confirm[id];
       toast(data.action?.status === "done" ? "Change applied." : "Approved.");
     } else if (target.classList.contains("manage-cancel-confirm")) {
       delete manageState.confirm[id];
     } else if (target.classList.contains("manage-discard")) {
-      await call("/api/manage/discard", { action_id: id });
+      await call("manageDiscard", { action_id: id });
       delete manageState.confirm[id];
       toast("Discarded.");
+    } else if (target.id === "add-brand-save" || target.id === "add-brand-connect") {
+      const name = document.getElementById("add-brand-name").value.trim();
+      const brandId = (document.getElementById("add-brand-id").value.trim() || name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")).slice(0, 64);
+      const page = document.getElementById("add-brand-page").value.trim();
+      if (!name || brandId.length < 2) throw new Error("Give the brand a name (and an id of 2+ letters or numbers).");
+      if (target.id === "add-brand-connect" && !page) throw new Error("Choose the Facebook Page first, so this brand doesn't grab another brand's Page.");
+      await saveMetaPage(brandId, name, page);
+      await loadProfiles();
+      selectBrand(brandId, { announce: false });
+      if (target.id === "add-brand-connect") {
+        const data = await call("connect", { id: brandId, name, platforms: ["meta"] });
+        toast(data.connect?.message || `Saved ${name}. Sign in to Meta and tick ${page}.`);
+      } else toast(`Saved ${name}${page ? ` with Page ${page}` : ""}.`);
+      for (const field of ["add-brand-name", "add-brand-id", "add-brand-page"]) document.getElementById(field).value = "";
+      document.getElementById("add-brand").open = false;
     } else if (target.id === "manage-queue-btn") {
       let params;
       try {
@@ -236,7 +357,7 @@ async function onManageClick(event) {
       } catch {
         throw new Error("Details must be valid JSON.");
       }
-      await call("/api/manage/queue", {
+      await call("manageQueue", {
         profile_id: manageState.profile,
         type: document.getElementById("manage-type").value,
         params,
@@ -298,7 +419,7 @@ function renderRecordings(payload) {
 
 async function loadRecordings() {
   if (!document.getElementById("recordings-panel") || document.body.classList.contains("pilot-mode")) return;
-  renderRecordings(await call("/api/recordings"));
+  renderRecordings(await call("recordings"));
 }
 
 async function startScreen(id) {
@@ -313,7 +434,7 @@ async function startScreen(id) {
   recorder.ondataavailable = (event) => event.data.size && rec.chunks.push(event.data);
   recorder.start(1000);
   media.getVideoTracks()[0].addEventListener("ended", () => stopRecording().catch(() => {}));
-  fetch("/api/recordings/event", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ type: "screen_capture_started" }) }).catch(() => {});
+  call("recordingsEvent", { type: "screen_capture_started" }).catch(() => {});
 }
 
 async function finishScreen() {
@@ -327,7 +448,7 @@ async function finishScreen() {
   const id = rec.id;
   rec.media = rec.recorder = rec.id = null;
   rec.chunks = [];
-  await fetch(`/api/recordings/video?id=${encodeURIComponent(id)}`, { method: "POST", headers: { "content-type": "video/webm" }, body: blob });
+  await fetch(deskUrl("recordingsVideo", { id }), { method: "POST", headers: { "content-type": "video/webm", "x-postpath-desk": "1" }, body: blob });
 }
 
 let stopping = false;
@@ -335,8 +456,8 @@ async function stopRecording() {
   if (stopping) return;
   stopping = true;
   try {
-    await call("/api/recordings/event", { type: "screen_capture_stopped" }).catch(() => {});
-    await call("/api/recordings/stop", {});
+    await call("recordingsEvent", { type: "screen_capture_stopped" }).catch(() => {});
+    await call("recordingsStop", {});
     await finishScreen();
     toast("Recording stopped and saved on this computer.");
   } finally {
@@ -351,7 +472,7 @@ async function onRecordingsClick(event) {
   try {
     if (target.id === "rec-start") {
       const screen = document.getElementById("rec-screen").checked;
-      const data = await call("/api/recordings/start", { name: document.getElementById("rec-name").value, screen });
+      const data = await call("recordingsStart", { name: document.getElementById("rec-name").value, screen });
       if (screen) {
         try {
           await startScreen(data.recording.id);
@@ -365,10 +486,10 @@ async function onRecordingsClick(event) {
     } else if (target.classList.contains("rec-rename")) {
       const name = window.prompt("New name for this recording");
       if (!name) return;
-      await call("/api/recordings/rename", { id: target.dataset.id, name });
+      await call("recordingsRename", { id: target.dataset.id, name });
     } else if (target.classList.contains("rec-delete")) {
       if (!window.confirm("Delete this recording and its files from this computer?")) return;
-      await call("/api/recordings/delete", { id: target.dataset.id, confirm: true });
+      await call("recordingsDelete", { id: target.dataset.id, confirm: true });
       toast("Recording deleted.");
     }
     await loadRecordings();
@@ -380,20 +501,30 @@ async function onRecordingsClick(event) {
 function boot() {
   document.getElementById("manage-panel")?.addEventListener("click", onManageClick);
   document.getElementById("manage-type")?.addEventListener("change", fillExample);
-  document.getElementById("manage-profile")?.addEventListener("change", (event) => {
-    manageState.profile = event.target.value;
-    manageState.confirm = {};
-    loadManage().catch((error) => toast(error.message, true));
+  document.getElementById("manage-profile")?.addEventListener("change", (event) => selectBrand(event.target.value));
+  document.getElementById("brand-switcher")?.addEventListener("change", (event) => selectBrand(event.target.value));
+  document.getElementById("add-brand-open")?.addEventListener("click", () => {
+    const box = document.getElementById("add-brand");
+    if (!box) return;
+    box.open = true;
+    box.scrollIntoView({ behavior: "smooth", block: "center" });
+    document.getElementById("add-brand-name")?.focus();
   });
   document.getElementById("recordings-panel")?.addEventListener("click", onRecordingsClick);
   document.getElementById("recording-indicator")?.addEventListener("click", onRecordingsClick);
   const tick = () => {
-    if (document.querySelector(".confirm-input:focus")) return;
+    if (document.querySelector(".confirm-input:focus, #manage-panel input:focus")) return;
     loadProfiles()
       .then(loadManage)
       .catch(() => {});
     loadRecordings().catch(() => {});
   };
+  loadProfiles()
+    .then(() => {
+      const idInput = document.getElementById("profile-id");
+      if (manageState.profile && idInput && !idInput.value) selectBrand(manageState.profile, { announce: false });
+    })
+    .catch(() => {});
   tick();
   setInterval(tick, 5000);
 }
@@ -480,7 +611,7 @@ if (vidiqForm) {
     event.preventDefault();
     const fd = new FormData(vidiqForm);
     try {
-      await call("/api/settings/vidiq", { affiliate_url: fd.get("affiliate_url") || "", promo_code: fd.get("promo_code") || "" });
+      await call("settingsVidiq", { affiliate_url: fd.get("affiliate_url") || "", promo_code: fd.get("promo_code") || "" });
       toast("vidIQ link saved.");
     } catch (error) {
       toast(error.message || "Couldn't save.");

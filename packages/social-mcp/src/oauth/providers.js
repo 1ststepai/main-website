@@ -52,7 +52,9 @@ export const META_SCOPES = [
 ];
 
 export const THREADS_SCOPES = ["threads_basic", "threads_content_publish"];
-export const TIKTOK_SCOPES = ["video.upload"];
+// user.info.basic reads the account label; video.upload sends drafts to the TikTok inbox;
+// video.publish allows Direct Post (private-only until the desk's own app passes TikTok audit).
+export const TIKTOK_SCOPES = ["user.info.basic", "video.upload", "video.publish"];
 export const LINKEDIN_SCOPES = ["openid", "profile", "w_member_social"];
 export const X_SCOPES = ["tweet.read", "tweet.write", "users.read", "offline.access", "like.write", "follows.write", "media.write"];
 export const PINTEREST_SCOPES = ["boards:read", "pins:read", "pins:write", "user_accounts:read"];
@@ -349,21 +351,34 @@ async function exchangeGoogleCode(code, config, fetchImpl, platform = "youtube",
   };
 }
 
-function metaSecrets(pageToken, userToken, expiresIn) {
+// Only the chosen Page's token is kept. The Meta user token can act on every Page
+// in that login, so it is never stored on a brand profile. Publishing uses the
+// Page token alone, and a Page token minted from a long-lived user token does not expire.
+function metaSecrets(pageToken, expiresIn) {
   return {
     page_access_token: pageToken,
-    user_access_token: userToken,
     expires_at: new Date(Date.now() + expiresIn * 1000).toISOString(),
   };
 }
 
 // Pick the Facebook Page for this profile. A Meta login can cover several Pages,
 // so prefer the profile's saved choice (page id or exact name, case-insensitive)
-// and only fall back to the first Page when nothing was chosen.
+// A login with one Page uses it; with several and no choice, ask (names and ids only).
 export function pickMetaPage(pages, preference) {
   const list = Array.isArray(pages) ? pages : [];
   const wanted = String(preference || "").trim();
-  if (!wanted) return list[0] || null;
+  if (!wanted) {
+    if (list.length <= 1) return list[0] || null;
+    const choices = list.map((page) => ({ id: String(page.id), name: String(page.name || "") }));
+    const pageList = choices.map((p) => p.name + " (" + p.id + ")").join(", ");
+    const error = mcpError(
+      "page_choice_required",
+      `This Meta login covers ${choices.length} Facebook Pages: ${pageList}. Choose this brand's Page in its profile (Facebook Page), then reconnect.`,
+      400,
+    );
+    error.details = { pages: choices };
+    throw error;
+  }
   const byId = list.find((page) => page.id === wanted);
   if (byId) return byId;
   const lower = wanted.toLowerCase();
@@ -406,7 +421,7 @@ async function exchangeMetaCode(code, config, fetchImpl, pagePreference = "") {
     throw mcpError("oauth_failed", "No Facebook Pages were found for that Meta login.", 502);
   }
   const page = pickMetaPage(pages, pagePreference);
-  const secrets = metaSecrets(page.access_token, userToken, expiresIn);
+  const secrets = metaSecrets(page.access_token, expiresIn);
   const platforms = {
     facebook: {
       record: {

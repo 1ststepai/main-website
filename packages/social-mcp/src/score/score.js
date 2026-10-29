@@ -4,6 +4,8 @@
  * never calls vidIQ itself, so nobody's scoring runs through the owner's vidIQ account.
  */
 import { execFileSync } from "node:child_process";
+import { closeSync, openSync, statSync } from "node:fs";
+import { isAbsolute } from "node:path";
 import { resolveSafeMediaPath } from "../mediaPath.js";
 import { scoreTitle } from "./title.js";
 
@@ -108,7 +110,47 @@ export async function scoreText(input = {}, { fetchImpl = fetch, interest = "off
   return { score, keyword, feedback: checks.map((c) => c.line), checks, interest: interestResult };
 }
 
+const IMAGE_EXT = /\.(png|jpe?g|webp|gif|bmp)$/i;
+
+// Only the ffmpeg program itself may run, found on PATH. The returned value is always
+// the literal "ffmpeg", never the caller's string; any other value is refused (tests use
+// this to simulate a missing ffmpeg).
+const FFMPEG = "ffmpeg";
+export function safeFfmpegBinary(value = FFMPEG) {
+  if (value === FFMPEG) return FFMPEG;
+  throw new Error("ffmpeg binary is not allowed.");
+}
+
+// ffmpeg's argv is a constant: the image is piped in on stdin, so no user-derived
+// value ever reaches the command line. The path is still checked (absolute, image
+// extension, no NUL) before the file is read.
+export const THUMBNAIL_ARGS = Object.freeze(["-nostdin", "-v", "error", "-i", "pipe:0", "-frames:v", "1", "-vf", "scale=64:36,format=gray", "-f", "rawvideo", "pipe:1"]);
+const MAX_THUMBNAIL_BYTES = 20 * 1024 * 1024;
+export function assertThumbnailPath(file) {
+  const path = String(file || "");
+  if (!isAbsolute(path) || path.includes("\0") || !IMAGE_EXT.test(path)) throw new Error("Thumbnail path is not allowed.");
+  return path;
+}
+
 /** Thumbnail: text word count, contrast, and readability at small size (via ffmpeg, if installed). */
+// 64x36 grayscale: roughly how the image reads in a phone's search list. Null when it can't be read.
+function readThumbnailPixels(media_path, mediaRoot, ffmpeg) {
+  const file = resolveSafeMediaPath(media_path, mediaRoot);
+  try {
+    const path = assertThumbnailPath(file);
+    if (statSync(path).size > MAX_THUMBNAIL_BYTES) return null;
+    // The image is handed to ffmpeg as an open file descriptor on stdin; argv stays constant.
+    const fd = openSync(path, "r");
+    try {
+      return execFileSync(safeFfmpegBinary(ffmpeg), THUMBNAIL_ARGS, { stdio: [fd, "pipe", "ignore"], maxBuffer: 1 << 20, timeout: 10_000, shell: false });
+    } finally {
+      closeSync(fd);
+    }
+  } catch {
+    return null;
+  }
+}
+
 export function scoreThumbnail({ media_path, text = "" } = {}, { mediaRoot, ffmpeg = "ffmpeg", sample } = {}) {
   const checks = [];
   const add = (id, weight, pass, line, partial = pass ? 1 : 0) => checks.push({ id, weight, pass, points: Math.round(weight * partial), line });
@@ -118,16 +160,7 @@ export function scoreThumbnail({ media_path, text = "" } = {}, { mediaRoot, ffmp
   else if (count <= 6) add("text_words", 30, false, `${count} words of text. Cut to 4 or fewer.`, 0.5);
   else add("text_words", 30, false, `${count} words is too many for a thumbnail. Cut to 4 or fewer.`);
 
-  let pixels = sample || null;
-  if (!pixels && media_path) {
-    const file = resolveSafeMediaPath(media_path, mediaRoot);
-    try {
-      // 64x36 grayscale: roughly how the image reads in a phone's search list.
-      pixels = execFileSync(ffmpeg, ["-v", "error", "-i", file, "-frames:v", "1", "-vf", "scale=64:36,format=gray", "-f", "rawvideo", "-"], { maxBuffer: 1 << 20, timeout: 10_000 });
-    } catch {
-      pixels = null;
-    }
-  }
+  const pixels = sample || (media_path ? readThumbnailPixels(media_path, mediaRoot, ffmpeg) : null);
   if (!pixels?.length) {
     add("contrast", 35, false, "Couldn't read the image here, so contrast wasn't checked.", 0);
     add("small_size", 35, false, "Couldn't check readability at small size.", 0);

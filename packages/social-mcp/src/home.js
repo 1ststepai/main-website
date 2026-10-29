@@ -18,6 +18,9 @@ export function ensureHome(home = resolveHome()) {
   mkdirSync(join(home, "media"), { recursive: true, mode: 0o700 });
   try {
     chmodSync(home, 0o700);
+    // Uploaded media can be unpublished drafts: keep the folder owner-only even if
+    // an older version created it world-readable.
+    chmodSync(join(home, "media"), 0o700);
   } catch {
     // Best effort on platforms that ignore mode.
   }

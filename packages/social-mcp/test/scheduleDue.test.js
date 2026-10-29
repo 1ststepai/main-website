@@ -7,6 +7,7 @@ import { test } from "node:test";
 import { createEngine } from "../src/engine.js";
 import { createDeskServer } from "../src/desk/server.js";
 import { youtubeFetchMock } from "./helpers/youtubeFetchMock.js";
+import { freePort, freePorts } from "./helpers/ports.js";
 
 async function seedYoutubeDraft(engine, media) {
   await engine.upsertProfile({ id: "acme", name: "Acme Co" });
@@ -102,10 +103,11 @@ test("cancelScheduledPost returns draft with null scheduled_at", async () => {
 });
 
 test("desk due loop calls publishDue and clears on stop", async () => {
+  const [deskPort, oauthPort] = await freePorts(2);
   const home = giveOwnX(mkdtempSync(join(tmpdir(), "social-mcp-loop-")));
   const env = {
-    SOCIAL_MCP_OAUTH_PORT: "48014",
-    SOCIAL_MCP_DESK_PORT: "48013",
+    SOCIAL_MCP_OAUTH_PORT: String(oauthPort),
+    SOCIAL_MCP_DESK_PORT: String(deskPort),
     SOCIAL_MCP_DUE_INTERVAL_MS: "1000",
   };
   const engine = createEngine({ home, env, now: () => Date.parse("2026-10-27T12:00:00.000Z") });
@@ -115,7 +117,7 @@ test("desk due loop calls publishDue and clears on stop", async () => {
     calls += 1;
     return original(...args);
   };
-  const desk = createDeskServer({ engine, env, port: 48013 });
+  const desk = createDeskServer({ engine, env, port: deskPort });
   try {
     const started = await desk.start({ open: false });
     assert.equal(started.due_interval_ms, 1000);
@@ -141,10 +143,11 @@ test("desk due loop calls publishDue and clears on stop", async () => {
 });
 
 test("desk cancel-scheduled API restores draft", async () => {
+  const [deskPort, oauthPort] = await freePorts(2);
   const home = giveOwnX(mkdtempSync(join(tmpdir(), "social-mcp-desk-cancel-")));
   const env = {
-    SOCIAL_MCP_OAUTH_PORT: "47996",
-    SOCIAL_MCP_DESK_PORT: "47995",
+    SOCIAL_MCP_OAUTH_PORT: String(oauthPort),
+    SOCIAL_MCP_DESK_PORT: String(deskPort),
     SOCIAL_MCP_DUE_INTERVAL_MS: "60000",
   };
   const engine = createEngine({
@@ -152,7 +155,7 @@ test("desk cancel-scheduled API restores draft", async () => {
     env,
     now: () => Date.parse("2026-10-27T12:00:00.000Z"),
   });
-  const desk = createDeskServer({ engine, env, port: 47995 });
+  const desk = createDeskServer({ engine, env, port: deskPort });
   try {
     await engine.upsertProfile({ id: "acme", name: "Acme" });
     const { post } = await engine.createDraft({
