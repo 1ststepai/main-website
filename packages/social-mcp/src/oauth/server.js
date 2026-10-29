@@ -9,6 +9,12 @@ import { signState, verifyState } from "../crypto.js";
 import { mcpError } from "../errors.js";
 import { authorizationUrl, createPkcePair, exchangeCode, missingProviders, oauthConfig } from "./providers.js";
 
+export function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[ch]);
+}
+
+const STATE_TTL_MS = 15 * 60 * 1000;
+
 function htmlPage(title, body) {
   return `<!doctype html>
 <html><head><meta charset="utf-8"><title>${title}</title>
@@ -80,6 +86,22 @@ function isOAuthCallback(pathname) {
 
 export function createOAuthRuntime({ store, env = process.env, fetchImpl = fetch, onEvent = () => {}, port = Number(env.SOCIAL_MCP_OAUTH_PORT || DEFAULT_OAUTH_PORT) }) {
   let server = null;
+  // PKCE verifiers stay in this process, keyed by the state nonce. Each nonce is
+  // usable once: it is removed before the code exchange, so a replayed state fails.
+  const pending = new Map();
+  function prunePending(now = Date.now()) {
+    for (const [nonce, entry] of pending) if (now - entry.ts > STATE_TTL_MS) pending.delete(nonce);
+  }
+  function takePending(state) {
+    prunePending();
+    const nonce = String(state?.nonce || "");
+    const entry = nonce ? pending.get(nonce) : null;
+    if (nonce) pending.delete(nonce);
+    if (!entry || entry.provider !== state.provider || entry.profile_id !== state.profile_id) {
+      throw mcpError("invalid_state", "This connection link was already used or is unknown. Start again.");
+    }
+    return entry;
+  }
   const redirectUri = providerRedirectUri(env, port);
   const googleRedirectUri = googleLoopbackUri(env, port);
 
@@ -100,7 +122,7 @@ export function createOAuthRuntime({ store, env = process.env, fetchImpl = fetch
         const error = url.searchParams.get("error");
         if (error) {
           res.writeHead(400, { "content-type": "text/html; charset=utf-8" });
-          res.end(htmlPage("Connection cancelled", `<p>${String(error)}</p>`));
+          res.end(htmlPage("Connection cancelled", `<p>${escapeHtml(error)}</p>`));
           return;
         }
         const code = url.searchParams.get("code");
@@ -111,15 +133,16 @@ export function createOAuthRuntime({ store, env = process.env, fetchImpl = fetch
           return;
         }
         const state = verifyState(stateToken, store.key);
-        if (Date.now() - Number(state.ts || 0) > 15 * 60 * 1000) {
+        if (Date.now() - Number(state.ts || 0) > STATE_TTL_MS) {
           throw mcpError("invalid_state", "The connection attempt expired. Start again.");
         }
+        const pendingEntry = takePending(state);
         const config = currentConfig();
         const exchanged = await exchangeCode(state.provider, {
           code,
           config,
           fetchImpl,
-          codeVerifier: state.code_verifier || "",
+          codeVerifier: pendingEntry.verifier || "",
           // Keep each brand on its own Facebook Page: the profile's saved choice wins,
           // then the Page it is already linked to.
           pagePreference:
@@ -129,6 +152,22 @@ export function createOAuthRuntime({ store, env = process.env, fetchImpl = fetch
                 ""
               : "",
         });
+        // Never bind a Page that another brand profile already uses.
+        for (const bundle of Object.values(exchanged.platforms || {})) {
+          const pageId = bundle.record?.page_id;
+          if (!pageId) continue;
+          for (const other of store.listProfiles()) {
+            if (other.id === state.profile_id) continue;
+            const taken = store.listConnections(other.id).some((conn) => conn.page_id && String(conn.page_id) === String(pageId));
+            if (taken) {
+              throw mcpError(
+                "page_in_use",
+                `The Facebook Page "${bundle.record.account_label || pageId}" is already linked to profile ${other.id}. Choose a different Page for this brand.`,
+                409,
+              );
+            }
+          }
+        }
         for (const [platform, bundle] of Object.entries(exchanged.platforms || {})) {
           store.saveConnection(
             {
@@ -163,13 +202,13 @@ export function createOAuthRuntime({ store, env = process.env, fetchImpl = fetch
         res.end(
           htmlPage(
             "Connected",
-            `<p>Profile <strong>${state.profile_id}</strong> is linked. You can close this tab and return to your AI client.</p>`,
+            `<p>Profile <strong>${escapeHtml(state.profile_id)}</strong> is linked. You can close this tab and return to your AI client.</p>`,
           ),
         );
       } catch (error) {
         onEvent("connect_error", { code: error?.code || "oauth_failed" });
         res.writeHead(error.statusCode || 500, { "content-type": "text/html; charset=utf-8" });
-        res.end(htmlPage("Connection failed", `<p>${error.message || "Unexpected error."}</p>`));
+        res.end(htmlPage("Connection failed", `<p>${escapeHtml(error.message || "Unexpected error.")}</p>`));
       }
     });
 
@@ -185,17 +224,11 @@ export function createOAuthRuntime({ store, env = process.env, fetchImpl = fetch
     await ensureListening();
     const config = currentConfig();
     const pkce = provider === "x" || provider === "youtube" || provider === "google_business" || provider === "google_search" ? createPkcePair() : null;
-    const state = signState(
-      {
-        profile_id: profileId,
-        provider,
-        chain: remainingChain,
-        ts: Date.now(),
-        nonce: store.newId("nonce"),
-        code_verifier: pkce?.verifier || "",
-      },
-      store.key,
-    );
+    const nonce = store.newId("nonce");
+    const ts = Date.now();
+    prunePending(ts);
+    pending.set(nonce, { verifier: pkce?.verifier || "", provider, profile_id: profileId, ts });
+    const state = signState({ profile_id: profileId, provider, chain: remainingChain, ts, nonce }, store.key);
     const url = authorizationUrl(provider, { state, config, pkce });
     if (open) openBrowser(url);
     return url;
