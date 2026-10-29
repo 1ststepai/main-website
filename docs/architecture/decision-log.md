@@ -9,6 +9,15 @@
 - **Verification:** `npm test` discoverability; visual screenshot of `/postpath/`. DNS + Vercel domain `postpath.1ststep.ai` still require Evan to attach in the Vercel project.
 - **Rollback:** Remove `postpath/` route and host rewrites; drop sitemap entries.
 
+## 2026-10-29: Public SEO, local business data, and PostPath canonical
+
+- **Status / owner:** Evan asked for SEO and AI-search fixes, official social profiles, and a sitemap that lists only canonical 200 URLs. Draft PR only. No production deploy, DNS, env, or database change.
+- **Decision:** Homepage JSON-LD gains a ProfessionalService for Morris Plains, NJ, phone 973-800-3729, and the offer of GoHighLevel workflow automations, apps, websites, and integrations for insurance agencies, real estate brokers, and new business owners. No ratings, reviews, or prices are added to that graph. sameAs uses profiles Evan named (X, YouTube @1ststepdotai) plus profiles already in `public/llms.txt`. Footer social links use `rel="me noopener"`. Vercel Web Analytics was already injected by `src/site-analytics.js`; Speed Insights is added and the public Content-Security-Policy allows its beacon. GA4 is an empty `PUBLIC_GA4_MEASUREMENT_ID` and is not loaded. PostPath's canonical stays `https://postpath.1ststep.ai/`. Middleware rewrites that host root to the marketing file so it can return 200. `https://postpath.1ststep.ai/postpath/` permanently redirects there. The sitemap lists the canonical and drops `https://www.1ststep.ai/postpath/`, which remains a 200 alternate. Two GoHighLevel landing pages are draft copy for Evan's review. `resume.1ststep.ai` stays a separate project.
+- **Rationale:** The live host root was a 307, so the declared canonical was not a 200, and Google had just fetched the duplicate path.
+- **Affected systems:** homepage JSON-LD, footers, `vercel.json`, `middleware.js`, sitemaps, `llms.txt`, `llms-full.txt`, service pages, analytics CSP.
+- **Verification:** `npm test` and `npm run build`. Production status codes stay unchanged until a deploy Evan approves.
+- **Rollback:** Revert this commit. No production config was changed by the branch itself.
+
 ## 2026-10-27: Product name is PostPath by 1stStep.ai
 
 - **Status / owner:** Evan chose the name. Same branch `cursor/social-local-mcp-c683`. No production website deploy.

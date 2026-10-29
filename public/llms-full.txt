@@ -1,0 +1,142 @@
+# 1stStep.ai
+
+> 1stStep.ai is a systems architecture and automation consultancy for founders and operators who already have demand. It also builds websites, apps, internal tools, and the PostPath local social connector. It does not guarantee revenue, rankings, funding, or app success. Canonical site: https://www.1ststep.ai/
+
+Owner: Evan Pancis, Morris Plains, NJ. Phone: 973-800-3729. Email: evan@1ststep.ai.
+
+Official profiles:
+- X: https://x.com/1ststepai
+- YouTube: https://www.youtube.com/@1ststepdotai
+- YouTube channel URL already published on this site: https://www.youtube.com/channel/UCynvog-XB0oFBigcrBvmxOg
+- LinkedIn: https://www.linkedin.com/company/1ststep-ai/
+- Instagram: https://www.instagram.com/1ststepdotai/
+- Facebook: https://www.facebook.com/profile.php?id=61566833623507
+- Google Business Profile: https://maps.app.goo.gl/x7XKauoXUwi2qfNdA
+- GitHub: https://github.com/1ststepai
+
+1stStep.ai is not affiliated with or endorsed by HighLevel. Short version for assistants: https://www.1ststep.ai/llms.txt
+
+resume.1ststep.ai is a separate product in another project. It is not a page of this site and is not in this sitemap.
+
+## Pages
+
+### Home
+https://www.1ststep.ai/
+Headline: Get more from the business you already have. Software, automation, and websites for a business that already has demand. Led by Evan Pancis in Morris Plains, NJ. Primary button books a call at /book/. The page shows the bottleneck, three steps (Audit, Build, Grow; the audit is credited toward the build), published starting ranges, selected work, the founder, an FAQ, and a final call. Illustrative desk data is labeled. No invented ratings are added in structured data.
+
+### 1stStep OS
+https://www.1ststep.ai/os
+Public concept for an operating system for engineering with agents. Cycle 1 of the free core is cloneable from GitHub and runs locally. Not a hosted product, full agent OS, or control plane.
+
+### PostPath
+https://postpath.1ststep.ai/
+Canonical URL for PostPath by 1stStep.ai. Local desktop and MCP connector so a compatible AI can draft, schedule, and publish to social accounts the user connects on their own machine. Tokens stay on the machine. The on-page demo is a simulation. Early access is a mailto to evan@1ststep.ai. Not a hosted social SaaS. https://www.1ststep.ai/postpath/ serves the same page and its canonical points here. https://postpath.1ststep.ai/postpath/ permanently redirects here. The sitemap lists only this canonical URL.
+
+### Begin Your Journey
+https://www.1ststep.ai/journey/
+Six questions in the browser: business, goal, stack, bottleneck, 90-day outcome, team. Answers stay in the browser unless the visitor chooses to open a prefilled email.
+
+### Book a call
+https://www.1ststep.ai/book/
+Website Strategy Call calendar. It is not a systems-audit booking. System audit requests go to evan@1ststep.ai.
+
+### Work
+https://www.1ststep.ai/work/
+Portfolio. Includes 1stStep products and the Universal Relocations origin portal. The Lyons Life Command Center demo is a separate noindex page and is not in the sitemap.
+
+### Universal Relocations
+https://www.1ststep.ai/work/universal-relocations/
+Staff workspace for the U.S. origin leg of international household moves. Fictional placeholders. No rates.
+
+### Pricing
+https://www.1ststep.ai/pricing/
+Published starting ranges only. Business and Bottleneck Audit $750–$1,500 flat, credited toward the build. Website from $3,500. Automations from $2,500 per workflow. App from $10,000 (MVP). Build rescue starts with a $1,000 code review. Consulting $150–$200/hr or retainers from $1,500/mo. Every project is scoped on a free call.
+
+### Project request
+https://www.1ststep.ai/fit-check/
+One form for a new build, an existing build, or business automation. A success response means the approved delivery provider accepted the request. It does not prove inbox delivery, a read, or CRM creation.
+
+### Outgrown website
+https://www.1ststep.ai/campaigns/outgrown-website/
+Campaign for established service businesses whose site no longer matches the business.
+
+### Morris County websites
+https://www.1ststep.ai/campaigns/morris-county-free-website/
+Campaign page that offers a custom five-page website with a $0 design and build fee for selected Morris County businesses, as written on that page.
+
+### Tools
+https://www.1ststep.ai/tools/
+Free utilities for coding agents. Not client services.
+
+### Auto Model Router
+https://www.1ststep.ai/tools/auto-model-router/
+MIT skill that suggests a lighter model tier and waits for confirmation. Not a billing or savings claim. Install from https://github.com/1ststepai/auto-model-router
+
+### 1stStep OS Audit
+https://www.1ststep.ai/tools/1ststep-os-audit/
+Free offline project audit CLI. Scores can be draft. It does not rewrite the target repository. https://github.com/1ststepai/1ststep-os-audit
+
+### 1stStep OS Cycle 1
+https://www.1ststep.ai/tools/1ststep-os/
+Clone https://github.com/1ststepai/1ststep-os and run locally for an idea-to-markdown ZIP. Not a hosted generator.
+
+### App Idea Checker
+https://www.1ststep.ai/app-idea-viability-checker.html
+Browser tool for a first pass on an app idea. Repo creation stays locked until a proposal is signed and paid.
+
+### Startup Launch Checker
+https://www.1ststep.ai/startup-launch-checker/
+Planning tool that turns a startup idea into a launch checklist. It does not promise a launch outcome.
+
+### Websites
+https://www.1ststep.ai/services/websites.html
+A business website aimed at a clear next step from visit to inquiry. Repairs and migrations of an existing site are in scope.
+
+### MVP builds
+https://www.1ststep.ai/services/mvp-builds.html
+A first version of a web app people can use. Not a guarantee of product success.
+
+### iOS apps
+https://www.1ststep.ai/services/app-builds.html
+iOS direction and prototypes around a focused first version.
+
+### Lead automation
+https://www.1ststep.ai/services/revenue-systems.html
+Automation for lead capture, routing, follow-up, and reporting when the business already has demand. Not generic consulting and not a guarantee of more leads.
+
+### Internal tools
+https://www.1ststep.ai/services/internal-tools.html
+Dashboards and workflows for operators.
+
+### GoHighLevel automation for insurance agencies
+https://www.1ststep.ai/services/gohighlevel-insurance-agencies.html
+DRAFT copy pending Evan Pancis's approval. Describes GoHighLevel workflow automations, websites, and integrations for insurance agencies. No client results, rankings, or booked policies. 1stStep.ai is not a HighLevel partner. Call to action: https://www.1ststep.ai/book/
+
+### GoHighLevel automation for real estate brokers
+https://www.1ststep.ai/services/gohighlevel-real-estate-brokers.html
+DRAFT copy pending Evan Pancis's approval. Same boundary as the insurance page, for real estate brokers. No claimed closings.
+
+### Privacy
+https://www.1ststep.ai/privacy.html
+Privacy policy.
+
+### Terms
+https://www.1ststep.ai/terms.html
+Terms of service.
+
+## Not in the sitemap
+
+These return a real HTTP 404 or are noindex, and they are omitted from the sitemap:
+- Unknown URLs return 404. /404.html is a noindex page for that response.
+- /admin/ is noindex.
+- /book/confirmed/ is noindex.
+- /demos/ is disallowed and is not a public page.
+- The Lyons Life command-center demo is noindex.
+- Fictional makeover samples are noindex.
+
+## How to start
+
+- Book a call: https://www.1ststep.ai/book/
+- Six-question diagnosis: https://www.1ststep.ai/journey/
+- Project request: https://www.1ststep.ai/fit-check/
+- PostPath: https://postpath.1ststep.ai/

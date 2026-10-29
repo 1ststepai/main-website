@@ -2,10 +2,16 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "redirects": [
     {
-      "source": "/",
+      "source": "/postpath",
       "has": [{ "type": "host", "value": "postpath.1ststep.ai" }],
-      "destination": "/postpath/",
-      "permanent": false
+      "destination": "https://postpath.1ststep.ai/",
+      "permanent": true
+    },
+    {
+      "source": "/postpath/",
+      "has": [{ "type": "host", "value": "postpath.1ststep.ai" }],
+      "destination": "https://postpath.1ststep.ai/",
+      "permanent": true
     }
   ],
   "rewrites": [
@@ -31,7 +37,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; base-uri 'self'; connect-src 'self'; font-src 'self' https://fonts.gstatic.com data:; form-action 'self'; frame-ancestors 'self'; frame-src 'self' https://api.leadconnectorhq.com https://*.leadconnectorhq.com; img-src 'self' data: https:; media-src 'self'; object-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; upgrade-insecure-requests"
+          "value": "default-src 'self'; base-uri 'self'; connect-src 'self' https://vitals.vercel-insights.com; font-src 'self' https://fonts.gstatic.com data:; form-action 'self'; frame-ancestors 'self'; frame-src 'self' https://api.leadconnectorhq.com https://*.leadconnectorhq.com; img-src 'self' data: https:; media-src 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; upgrade-insecure-requests"
         },
         {
           "key": "Permissions-Policy",
