@@ -1,3 +1,4 @@
+import { initOwnerPin } from "../src/pilot/ownerAuth.js";
 import { giveOwnX } from "./helpers/ownX.js";
 import assert from "node:assert/strict";
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
@@ -205,15 +206,16 @@ async function deskFor(engine, port) {
   const desk = createDeskServer({ engine, env: { SOCIAL_MCP_DESK_PORT: String(port) }, port });
   await desk.start({ open: false });
   const base = `http://127.0.0.1:${port}`;
-  const post = (path, body) => fetch(base + path, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) }).then((r) => r.json());
-  return { desk, base, post };
+  let ownerPin = "";
+  const post = (path, body) => fetch(base + path, { method: "POST", headers: { "content-type": "application/json", ...(ownerPin ? { "x-postpath-owner-pin": ownerPin } : {}) }, body: JSON.stringify(body) }).then((r) => r.json());
+  return { desk, base, post, setPin: (pin) => { ownerPin = pin; } };
 }
 
 test("desk routes: queue, two-step delete, and the recorder log it with secrets removed", async () => {
   const { fetchImpl } = apiMock();
   const [port, oauthPort] = await freePorts(2);
   const { engine, cleanup } = setup({ fetchImpl, env: { SOCIAL_MCP_OAUTH_PORT: String(oauthPort) } });
-  const { desk, base, post } = await deskFor(engine, port);
+  const { desk, base, post, setPin } = await deskFor(engine, port);
   try {
     seed(engine, "x");
     const listed0 = await fetch(`${base}/api/recordings`).then((r) => r.json());
@@ -242,7 +244,12 @@ test("desk routes: queue, two-step delete, and the recorder log it with secrets 
     assert.match(summary, /hook in the first 1-2 seconds/);
     const renamed = await post("/api/recordings/rename", { id, name: "Launch demo" });
     assert.equal(renamed.recording.name, "Launch demo");
-    const upload = await fetch(`${base}/api/recordings/video?id=${id}`, { method: "POST", headers: { "content-type": "video/webm" }, body: Buffer.from("webm") }).then((r) => r.json());
+    initOwnerPin(engine.store.homePaths, "4826");
+    assert.equal((await post("/api/recordings/rename", { id, name: "No pin" })).ok, false, "rename needs the owner PIN once set");
+    const pinned = await fetch(base + "/api/recordings/rename", { method: "POST", headers: { "content-type": "application/json", "x-postpath-owner-pin": "4826" }, body: JSON.stringify({ id, name: "Launch demo" }) }).then((r) => r.json());
+    assert.equal(pinned.ok, true);
+    setPin("4826");
+    const upload = await fetch(`${base}/api/recordings/video?id=${id}`, { method: "POST", headers: { "content-type": "video/webm", "x-postpath-desk": "1" }, body: Buffer.from("webm") }).then((r) => r.json());
     assert.equal(upload.ok, true);
     const dl = await fetch(`${base}/api/recordings/${id}/desk.webm?download=1`);
     assert.match(dl.headers.get("content-disposition"), /attachment/);

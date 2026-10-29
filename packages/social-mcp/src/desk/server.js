@@ -53,6 +53,37 @@ function assertLocalHost(req, port, env) {
   if (!allowedHost(host, env, port)) throw mcpError("forbidden", "Desk is local-only.", 403);
 }
 
+export function deskOrigins(env, port) {
+  const list = [`http://127.0.0.1:${port}`, `http://localhost:${port}`];
+  const raw = String(env?.SOCIAL_MCP_PUBLIC_URL || "").trim();
+  if (raw) {
+    try {
+      list.push(new URL(raw).origin);
+    } catch {
+      // ignore a malformed public URL
+    }
+  }
+  return list;
+}
+
+// CSRF guard: a page on another site can send "simple" POSTs to the local desk.
+// Refuse cross-site requests, and require a JSON body or the desk's own header,
+// both of which force a browser preflight that a foreign origin cannot pass.
+export function assertSameOriginWrite(req, port, env) {
+  if (req.method === "GET" || req.method === "HEAD" || req.method === "OPTIONS") return;
+  const origin = String(req.headers.origin || "");
+  if (origin && !deskOrigins(env, port).includes(origin)) {
+    throw mcpError("forbidden", "Cross-site requests to the desk are refused.", 403);
+  }
+  if (String(req.headers["sec-fetch-site"] || "").toLowerCase() === "cross-site") {
+    throw mcpError("forbidden", "Cross-site requests to the desk are refused.", 403);
+  }
+  const type = String(req.headers["content-type"] || "").split(";")[0].trim().toLowerCase();
+  if (type !== "application/json" && req.headers["x-postpath-desk"] !== "1") {
+    throw mcpError("forbidden", "Desk requests must be JSON or carry the desk header.", 403);
+  }
+}
+
 async function readJson(req, limit = 64_000) {
   const chunks = [];
   let size = 0;
@@ -358,6 +389,7 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
       assertLocalHost(req, port, env);
       const url = new URL(req.url || "/", `http://127.0.0.1:${port}`);
       if (await handleRemoteMcp(req, res, { engine, store: engine.store, env, port })) return;
+      assertSameOriginWrite(req, port, env);
 
       if (req.method === "GET" && url.pathname === "/api/status") {
         sendJson(res, 200, { ok: true, ...deskState() });
@@ -847,6 +879,7 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
         }
         if (req.method === "POST" && url.pathname === "/api/recordings/rename") {
           const body = await readJson(req);
+          requireOwner(req, body);
           sendJson(res, 200, { ok: true, ...recorder.rename(String(body.id || ""), body.name) });
           return;
         }

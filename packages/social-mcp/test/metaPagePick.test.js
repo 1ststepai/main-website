@@ -8,8 +8,19 @@ const pages = [
   { id: "222", name: "Crypto Hacks" },
 ];
 
-test("no preference keeps the first Page", () => {
-  assert.equal(pickMetaPage(pages, "").id, "472124739310907");
+test("no preference with several Pages asks for a choice, names and ids only", () => {
+  try {
+    pickMetaPage(pages.map((p) => ({ ...p, access_token: "page-token-should-not-leak" })), "");
+    assert.fail("expected page_choice_required");
+  } catch (error) {
+    assert.equal(error.code, "page_choice_required");
+    assert.deepEqual(error.details.pages, pages.map(({ id, name }) => ({ id, name })));
+    assert.doesNotMatch(error.message + JSON.stringify(error.details), /page-token-should-not-leak/);
+  }
+});
+
+test("a single Page is used without a preference", () => {
+  assert.equal(pickMetaPage([pages[1]], "").id, "111");
 });
 
 test("picks by Page id", () => {
