@@ -4,6 +4,7 @@
  * never calls vidIQ itself, so nobody's scoring runs through the owner's vidIQ account.
  */
 import { execFileSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import { basename, isAbsolute } from "node:path";
 import { resolveSafeMediaPath } from "../mediaPath.js";
 import { scoreTitle } from "./title.js";
@@ -120,13 +121,15 @@ export function safeFfmpegBinary(value = "ffmpeg") {
   throw new Error("ffmpeg binary is not allowed.");
 }
 
-// Fixed ffmpeg arguments. The only variable is the input, which must be an absolute
-// path to an image already validated inside the media folder. The "file:" protocol
-// prefix stops ffmpeg reading it as an option or as another protocol (http:, concat:).
-export function thumbnailArgs(file) {
+// ffmpeg's argv is a constant: the image is piped in on stdin, so no user-derived
+// value ever reaches the command line. The path is still checked (absolute, image
+// extension, no NUL) before the file is read.
+export const THUMBNAIL_ARGS = Object.freeze(["-nostdin", "-v", "error", "-i", "pipe:0", "-frames:v", "1", "-vf", "scale=64:36,format=gray", "-f", "rawvideo", "pipe:1"]);
+const MAX_THUMBNAIL_BYTES = 20 * 1024 * 1024;
+export function assertThumbnailPath(file) {
   const path = String(file || "");
   if (!isAbsolute(path) || path.includes("\0") || !IMAGE_EXT.test(path)) throw new Error("Thumbnail path is not allowed.");
-  return ["-nostdin", "-v", "error", "-i", `file:${path}`, "-frames:v", "1", "-vf", "scale=64:36,format=gray", "-f", "rawvideo", "pipe:1"];
+  return path;
 }
 
 /** Thumbnail: text word count, contrast, and readability at small size (via ffmpeg, if installed). */
@@ -144,7 +147,9 @@ export function scoreThumbnail({ media_path, text = "" } = {}, { mediaRoot, ffmp
     const file = resolveSafeMediaPath(media_path, mediaRoot);
     try {
       // 64x36 grayscale: roughly how the image reads in a phone's search list.
-      pixels = execFileSync(safeFfmpegBinary(ffmpeg), thumbnailArgs(file), { maxBuffer: 1 << 20, timeout: 10_000, shell: false });
+      const image = readFileSync(assertThumbnailPath(file));
+      if (image.length > MAX_THUMBNAIL_BYTES) throw new Error("Thumbnail is too large to check.");
+      pixels = execFileSync(safeFfmpegBinary(ffmpeg), THUMBNAIL_ARGS, { input: image, maxBuffer: 1 << 20, timeout: 10_000, shell: false });
     } catch {
       pixels = null;
     }

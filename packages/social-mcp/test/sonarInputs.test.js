@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { deskUrl, DESK_ROUTES } from "../src/desk/public/deskApi.js";
-import { safeFfmpegBinary, thumbnailArgs } from "../src/score/score.js";
+import { safeFfmpegBinary, assertThumbnailPath, THUMBNAIL_ARGS } from "../src/score/score.js";
 
 const ORIGIN = "http://127.0.0.1:47840";
 
@@ -27,10 +27,10 @@ test("ffmpeg runs only as ffmpeg, with fixed args and a file: input", () => {
   for (const bad of ["sh", "/bin/sh", "ffmpeg; rm -rf /", "./ffmpeg", "/tmp/ffmpeg-evil", "-i"]) {
     assert.throws(() => safeFfmpegBinary(bad), /not allowed/);
   }
-  const args = thumbnailArgs("/home/u/.social-mcp/media/thumb.png");
-  assert.equal(args[args.indexOf("-i") + 1], "file:/home/u/.social-mcp/media/thumb.png");
-  assert.equal(args.at(-1), "pipe:1");
+  assert.ok(Object.isFrozen(THUMBNAIL_ARGS));
+  assert.equal(THUMBNAIL_ARGS[THUMBNAIL_ARGS.indexOf("-i") + 1], "pipe:0", "image goes in on stdin, never on argv");
+  assert.equal(assertThumbnailPath("/home/u/media/thumb.png"), "/home/u/media/thumb.png");
   for (const bad of ["-y", "thumb.png", "/m/x.sh", "/m/a.png\0b", "concat:/a.png|/b.png", "http://x/a.png"]) {
-    assert.throws(() => thumbnailArgs(bad), /not allowed/);
+    assert.throws(() => assertThumbnailPath(bad), /not allowed/);
   }
 });

@@ -19,7 +19,7 @@ export const DESK_ROUTES = Object.freeze({
 
 const QUERY_RULES = Object.freeze({
   manage: { profile_id: /^[a-z0-9][a-z0-9_-]{0,63}$/i },
-  recordingsVideo: { id: /^rec_[A-Za-z0-9_]{1,80}$/ },
+  recordingsVideo: { id: /^rec_\w{1,80}$/ },
 });
 
 export function deskUrl(route, query = {}, origin = globalThis.location?.origin || "http://127.0.0.1") {
