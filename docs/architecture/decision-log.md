@@ -1,5 +1,14 @@
 # Architecture Decision Log
 
+## 2026-10-29: Homepage and /book/ say a free 30-minute call
+
+- **Status / owner:** Evan requested the copy. Draft only. No deploy.
+- **Decision:** Visible “20-min” call labels now say 30 minutes. The homepage “Team Training — Coming soon” tile is removed. `/book/` is “Book a Free 30-Minute Call,” and the page covers a website, a GoHighLevel automation, an integration, or an app. The LeadConnector URL `https://api.leadconnectorhq.com/widget/booking/Rb4aqLM1NdU5kvZcqNmj` stays. `/book/` is still not a systems-audit booking. Pricing, packages, and layout stay.
+- **Rationale:** The calendar was already 30 minutes, and the page was still framed as a website-only strategy call.
+- **Affected systems:** `index.html`, shared header pills, `book/index.html`, `public/llms.txt`, conversion tests.
+- **Verification:** `npm test`, `npm run build`, local before/after screenshots.
+- **Rollback:** Revert this commit. No production change.
+
 ## 2026-10-27: PostPath marketing site on postpath.1ststep.ai
 
 - **Status / owner:** Evan named the product URL `postpath.1ststep.ai` and asked for a conversion-focused marketing site with live demo. Implemented on `cursor/social-local-mcp-c683`. Preview/PR only until domain is attached and deploy is approved.

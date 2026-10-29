@@ -80,7 +80,7 @@ test("llms.txt names the owner offer, start paths, and canonical www host", asyn
   assert.match(llms, /intent=build_new/);
   assert.match(llms, /intent=finish_build/);
   assert.match(llms, /intent=automate_business/);
-  assert.match(llms, /Website Strategy Call: https:\/\/www\.1ststep\.ai\/book\//);
+  assert.match(llms, /Free 30-Minute Call: https:\/\/www\.1ststep\.ai\/book\//);
   assert.match(llms, /services\/mvp-builds\.html/);
   assert.match(llms, /Use https:\/\/www\.1ststep\.ai\//);
   assert.match(llms, /evan@1ststep\.ai/);
@@ -112,7 +112,7 @@ test("homepage first screen books the call beside an example desk", async () => 
   const hero = html.slice(heroStart, html.indexOf("</section>", heroStart));
   const work = await source("work/index.html");
   assert.match(hero, /Get more from the business you/);
-  assert.match(hero, /href="\/book\/"[^>]*>Book a free 20-min call/);
+  assert.match(hero, /href="\/book\/"[^>]*>Book a free 30-minute call/);
   assert.match(hero, /Websites, integrations, automations, and custom apps/);
   assert.match(hero, /See pricing/);
   assert.doesNotMatch(hero, /See our work|btn ghost/);
