@@ -12,7 +12,7 @@ test("the homepage states the offer in HTML and leaves the signal-path figure un
   const hero = html.slice(html.indexOf('<section class="hero'), html.indexOf("</section>"));
   assert.match(hero, /id="hero-title"/);
   assert.match(hero, /Get more from the business you <em>already have\.<\/em>/);
-  assert.match(hero, /Book a free 20-min call/);
+  assert.match(hero, /Book a free 30-minute call/);
   assert.doesNotMatch(html, /id="signal-path"|Deploy Our OS/i);
   assert.doesNotMatch(html, /<h4>Capture<\/h4>|Illustrative example, not a client's data/);
   const js = await source("src/home-v2.js");
