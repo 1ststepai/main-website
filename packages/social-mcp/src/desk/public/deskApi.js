@@ -42,6 +42,12 @@ export function deskUrl(route, query = {}, origin = globalThis.location?.origin 
 
 const PROFILE_ID = /^[a-z0-9][a-z0-9_-]{0,63}$/i;
 
+// Returns the id only when it is a well-formed brand id, otherwise "".
+export function cleanBrandId(value) {
+  const text = String(value ?? "").trim();
+  return PROFILE_ID.test(text) ? text : "";
+}
+
 // Body for the "profile" route: only a brand id, a display name and the chosen
 // Facebook Page are allowed through, each checked before it leaves the page.
 export function profileBody({ id, name, metaPage = "" } = {}) {

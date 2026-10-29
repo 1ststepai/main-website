@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { deskUrl, DESK_ROUTES, profileBody } from "../src/desk/public/deskApi.js";
+import { deskUrl, DESK_ROUTES, profileBody, cleanBrandId } from "../src/desk/public/deskApi.js";
 import { readFileSync } from "node:fs";
 import { safeFfmpegBinary, assertThumbnailPath, THUMBNAIL_ARGS } from "../src/score/score.js";
 
@@ -45,4 +45,9 @@ test("profile route body allows only a valid brand id, name and Page", () => {
 test("manage.js never passes a raw /api path to call()", () => {
   const src = readFileSync(new URL("../src/desk/public/manage.js", import.meta.url), "utf8");
   assert.doesNotMatch(src, /call\(\s*["'`]\//);
+});
+
+test("a saved brand id from browser storage is used only when well formed", () => {
+  assert.equal(cleanBrandId("acme"), "acme");
+  for (const bad of [null, "", "<img>", "../x", "a b", "x".repeat(70)]) assert.equal(cleanBrandId(bad), "");
 });

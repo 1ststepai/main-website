@@ -1,4 +1,4 @@
-import { deskUrl, profileBody } from "./deskApi.js";
+import { cleanBrandId, deskUrl, profileBody } from "./deskApi.js";
 // Manage accounts and the session recorder. Owner-only panels.
 // Assistants can only queue account changes; approval happens here, and deletes need a typed confirmation.
 
@@ -99,7 +99,7 @@ async function loadProfiles() {
 const BRAND_KEY = "postpath.brand";
 function readSavedBrand() {
   try {
-    return localStorage.getItem(BRAND_KEY) || "";
+    return cleanBrandId(localStorage.getItem(BRAND_KEY));
   } catch {
     return "";
   }
@@ -109,10 +109,13 @@ function readSavedBrand() {
 function selectBrand(id, { announce = true } = {}) {
   const row = manageState.profiles.find((item) => item.id === id);
   if (!row) return;
+  const safeId = cleanBrandId(row.id);
+  if (!safeId) return;
+  id = safeId;
   manageState.profile = id;
   manageState.confirm = {};
   try {
-    localStorage.setItem(BRAND_KEY, id);
+    localStorage.setItem(BRAND_KEY, safeId);
   } catch {}
   for (const selectId of ["manage-profile", "brand-switcher"]) {
     const select = document.getElementById(selectId);
