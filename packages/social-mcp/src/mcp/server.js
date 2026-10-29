@@ -13,6 +13,10 @@ import { DRAFT_ONLY_SCOPES } from "./clients.js";
 import { isDraftOnly } from "../pilot/config.js";
 import { assertOwnerPin, ownerPinConfigured } from "../pilot/ownerAuth.js";
 import { getBrandContext, saveBrandContext } from "../brand/context.js";
+import { OWNER_ONLY_NOTE, autoPostAllows, logAutoPostActivity, publishRefusalMessage } from "../autoPost.js";
+import { postingPermissions } from "../postingPermissions.js";
+import { listGrants, listPats } from "./auth.js";
+import { isPilotMode } from "../pilot/config.js";
 
 const outputSchema = z
   .object({
@@ -156,21 +160,83 @@ export function createSocialMcpServer({ engine, auth, env = process.env } = {}) 
     );
   }
 
-  /** Drafts land in the queue. Only an owner-enabled auto-post for this exact connection, brand and network publishes them. */
+  function assistantName() {
+    const id = gate?.connectionId;
+    if (!id) return "Local assistant";
+    try {
+      const match = [...listGrants(eng.store), ...listPats(eng.store).map((pat) => ({ id: pat.id, name: pat.name || "Access token" }))].find((row) => row.id === id);
+      return match?.name || "assistant";
+    } catch {
+      return "assistant";
+    }
+  }
+
+  function draftedBy() {
+    return { connection_id: gate?.connectionId || null, assistant: assistantName() };
+  }
+
+  /** Drafts land in the queue. Only an owner-enabled auto-post for this brand and network publishes them. */
   async function createThenMaybeAutoPost(args) {
-    const out = await eng.createDraft({ ...args, source: "mcp" });
-    const connectionId = gate?.connectionId;
-    if (!connectionId || !eng.autoPublishDrafts) return out;
+    const out = await eng.createDraft({ ...args, source: "mcp", drafted_by: draftedBy() });
+    const connectionId = gate?.connectionId || null;
+    if (!eng.autoPublishDrafts) return out;
     const posts = out.posts || (out.post ? [out.post] : []);
     const results = await eng.autoPublishDrafts({ posts, connection_id: connectionId });
-    if (!results.some((row) => row.auto_post !== "off")) return out;
+    if (!results.some((row) => row.auto_post !== "off")) {
+      return { ...out, approval: "Saved to the approval queue. The owner reviews it on the PostPath desk." };
+    }
     const fresh = posts.map((post) => eng.store.getPost(post.id) || post);
+    for (const row of results) {
+      if (row.auto_post !== "published") continue;
+      const post = fresh.find((item) => item.id === row.post_id);
+      if (post) logAutoPostActivity(eng.store, { post, connection_id: connectionId, assistant: assistantName() });
+    }
     return { ...out, posts: out.posts ? fresh : undefined, post: fresh[0], auto_post: results };
+  }
+
+  /** Posts a publish-type call would send. Unknown ids are left to the engine to report. */
+  function publishTargets({ bundle_id, post_id }) {
+    if (bundle_id) {
+      const bundle = eng.store.getBundle(bundle_id);
+      if (!bundle) return null;
+      return (bundle.platforms || []).map((platform) => eng.store.getPost(bundle.child_ids?.[platform])).filter(Boolean);
+    }
+    const post = post_id ? eng.store.getPost(post_id) : null;
+    return post ? [post] : null;
+  }
+
+  /**
+   * Assistants never approve. A publish-type call goes through only when the owner
+   * turned auto-post on for every brand + network it touches; otherwise it is refused
+   * and the draft stays in the approval queue.
+   */
+  async function ownerGatedPublish(ids, run) {
+    if (isPilotMode(env, eng.store.homePaths)) return run();
+    const targets = publishTargets(ids);
+    if (!targets) return run();
+    const blocked = targets.filter((post) => !autoPostAllows(eng.store, { profile_id: post.profile_id, connection_id: gate?.connectionId || null, platform: post.platform }));
+    if (blocked.length) throw mcpError("owner_approval_required", publishRefusalMessage(blocked), 403);
+    const out = await run();
+    for (const target of targets) {
+      const post = eng.store.getPost(target.id);
+      if (post && ["published", "scheduled"].includes(post.status)) logAutoPostActivity(eng.store, { post, connection_id: gate?.connectionId || null, assistant: assistantName() });
+    }
+    return out;
   }
 
   function callerScopes() {
     return gate ? [...(gate.scopes || [])] : null;
   }
+
+  add(
+    "get_posting_permissions",
+    "Posting permissions",
+    `Read-only. Reports, for each brand and network, whether posts need the owner's review (the default) or the owner turned on auto-post, plus the real approval counts behind any auto-post suggestion. Use it to explain the rules honestly. ${OWNER_ONLY_NOTE}`,
+    "posts:read",
+    { read: true, idempotent: true },
+    { profile_id: z.string().min(2).max(64).optional().describe("Limit to one brand.") },
+    async (args) => postingPermissions(eng.store, { profile_id: args.profile_id }),
+  );
 
   add("status", "Desk status", "Read the local PostPath setup: home path, profiles, connected networks, and redirect URIs.", "posts:read", { read: true, idempotent: true }, {}, async () => eng.publicStatus());
 
@@ -444,7 +510,7 @@ export function createSocialMcpServer({ engine, auth, env = process.env } = {}) 
   add(
     "request_approval",
     "Request approval",
-    "Publish a queued draft now, or schedule it for an ISO time. Requires queue:approve. Instagram is refused until instagram_public_confirmed is true. YouTube is refused when the profile requires a vidIQ check and none is attached.",
+    "Publish or schedule a queued draft, only where the owner turned on auto-post for that brand and network (see get_posting_permissions). Otherwise it is refused and the draft stays in the approval queue for the owner to review on the PostPath desk. Requires queue:approve. Instagram is refused until instagram_public_confirmed is true. YouTube is refused when the profile requires a vidIQ check and none is attached.",
     "queue:approve",
     { destructive: true, open: true },
     {
@@ -453,7 +519,7 @@ export function createSocialMcpServer({ engine, auth, env = process.env } = {}) 
       scheduled_at: z.string().optional().describe("Future ISO time with Z or a numeric offset. Omit to publish now."),
       instagram_public_confirmed: z.boolean().optional().describe("True only after the user agrees that Instagram will be public."),
     },
-    async (args) => {
+    async (args) => ownerGatedPublish(args, async () => {
       if (args.bundle_id) {
         let confirmed = args.instagram_public_confirmed === true;
         const bundle = eng.store.getBundle(args.bundle_id);
@@ -490,33 +556,35 @@ export function createSocialMcpServer({ engine, auth, env = process.env } = {}) 
       if (!args.post_id) throw mcpError("invalid_request", "Provide bundle_id or post_id.");
       if (args.scheduled_at) return eng.schedulePost({ post_id: args.post_id, scheduled_at: args.scheduled_at });
       return eng.publishPost({ post_id: args.post_id, force: true });
-    },
+    }),
   );
 
   add(
     "discard_draft",
     "Discard draft",
-    "Remove a draft or scheduled post that has not been sent.",
+    "Deleting is the owner's call. This always refuses: the owner discards drafts on the PostPath desk. Ask the user to do it there.",
     "queue:approve",
     { destructive: true },
     {
       bundle_id: z.string().min(8).optional().describe("Multi-network draft id."),
       post_id: z.string().min(8).optional().describe("Single post id."),
     },
-    async (args) => eng.discardItem(args),
+    async () => {
+      throw mcpError("owner_approval_required", "Not discarded. Deleting a draft needs the owner on the PostPath desk. The draft stays in the approval queue.", 403);
+    },
   );
 
   add(
     "schedule_post",
     "Schedule post",
-    "Set a future ISO time on one draft. The desk sends it only while PostPath is open and the time has arrived. Requires queue:approve.",
+    "Set a future ISO time on one draft, only where the owner turned on auto-post for that brand and network. Otherwise it is refused and the draft stays in the approval queue. The desk sends it only while PostPath is open and the time has arrived. Requires queue:approve.",
     "queue:approve",
     { idempotent: true },
     {
       post_id: z.string().min(8).describe("Post id."),
       scheduled_at: z.string().describe("ISO-8601 time with Z or a numeric offset."),
     },
-    async (args) => eng.schedulePost(args),
+    async (args) => ownerGatedPublish({ post_id: args.post_id }, () => eng.schedulePost(args)),
   );
 
   add(
@@ -532,7 +600,7 @@ export function createSocialMcpServer({ engine, auth, env = process.env } = {}) 
   add(
     "publish_post",
     "Publish one post",
-    "Send one post that is already a draft or due. Requires queue:approve. Instagram must be public. YouTube on a gated profile needs a vidIQ check. A needs_review post is not sent again unless acknowledge is true.",
+    "Send one post, only where the owner turned on auto-post for that brand and network. Otherwise it is refused and the draft stays in the approval queue for the owner. Requires queue:approve. Instagram must be public. YouTube on a gated profile needs a vidIQ check. A needs_review post is not sent again unless acknowledge is true.",
     "queue:approve",
     { destructive: true, open: true },
     {
@@ -540,13 +608,13 @@ export function createSocialMcpServer({ engine, auth, env = process.env } = {}) 
       force: z.boolean().optional().describe("Send a scheduled post before its time."),
       acknowledge: z.boolean().optional().describe("Send a needs_review post again after a person has checked the network. Default false."),
     },
-    async (args) => eng.publishPost(args),
+    async (args) => ownerGatedPublish({ post_id: args.post_id }, () => eng.publishPost(args)),
   );
 
   add(
     "publish_due",
     "Publish due posts",
-    "Send scheduled posts whose time has arrived. Requires queue:approve. Skips posts that need review.",
+    "Send posts that are already scheduled and due. Only posts the owner approved, or that auto-post scheduled, are ever scheduled. Requires queue:approve. Skips posts that need review.",
     "queue:approve",
     { destructive: true, open: true },
     {
@@ -554,6 +622,70 @@ export function createSocialMcpServer({ engine, auth, env = process.env } = {}) 
       limit: z.number().int().min(1).max(20).optional().describe("Maximum posts to send."),
     },
     async (args) => eng.publishDue(args),
+  );
+
+  // Account management: assistants can only queue a change. The owner approves it in the desk; deletes need a typed confirmation there.
+  if (eng.manage) {
+    add(
+      "account_access_status",
+      "Account access status",
+      "Read which permissions each connected network granted and which are missing for full account management. When something is missing, ask the owner to press Reconnect in the PostPath desk. Read-only.",
+      "accounts:read",
+      { read: true, idempotent: true },
+      { profile_id: z.string().min(2).max(64).describe("Brand profile id.") },
+      async (args) => {
+        const view = eng.manage.view(args.profile_id);
+        return { access: view.access, limits: view.limits };
+      },
+    );
+    add(
+      "queue_account_action",
+      "Queue an account change",
+      `Queue a change to a connected account for the owner to approve in the PostPath desk. Nothing changes until the owner approves; deletes and unlisting also need a typed confirmation there. Types: ${(eng.manage.types || []).join(", ")}. Read account_access_status first; a missing permission means the owner must reconnect.`,
+      "drafts:write",
+      {},
+      {
+        profile_id: z.string().min(2).max(64).describe("Brand profile id."),
+        type: z.string().min(3).max(60).describe("Action type, such as youtube.update_channel or x.create_post."),
+        params: z.record(z.any()).optional().describe("Fields for the action; see the catalog in list_account_actions."),
+        note: z.string().max(500).optional().describe("Why this change, shown to the owner."),
+      },
+      async (args) => eng.manage.queue({ ...args, source: "mcp" }),
+    );
+    add(
+      "list_account_actions",
+      "List account changes",
+      "List queued, waiting, done, and failed account changes, plus the catalog of action types and what each network's API cannot do. Read-only.",
+      "posts:read",
+      { read: true, idempotent: true },
+      {
+        profile_id: z.string().min(2).max(64).optional().describe("Brand profile id."),
+        status: z.string().max(40).optional().describe("Filter by status."),
+      },
+      async (args) => {
+        const view = args.profile_id ? eng.manage.view(args.profile_id) : null;
+        return { actions: eng.manage.list(args), catalog: view?.catalog || eng.manage.types, limits: view?.limits };
+      },
+    );
+  }
+
+  add(
+    "score_content",
+    "Score it",
+    "Score a title, description, tags, and thumbnail with PostPath's free built-in scorer. Returns checklist scores (0-100) with tips; not a prediction and not a vidIQ score. Informational only; nothing is blocked or saved. No vidIQ account is used; pass vidiq_score only from the user's own vidIQ account.",
+    "posts:read",
+    { read: true, idempotent: true },
+    {
+      title: z.string().max(200).optional(),
+      description: z.string().max(5000).optional(),
+      tags: z.union([z.array(z.string().max(100)).max(60), z.string().max(1000)]).optional(),
+      main_term: z.string().max(100).optional().describe("Main search term; defaults to the first tag."),
+      thumbnail_path: z.string().max(500).optional().describe("Image inside the PostPath media folder."),
+      thumbnail_text: z.string().max(200).optional().describe("Words written on the thumbnail."),
+      interest: z.enum(["off", "youtube_suggest", "google_trends"]).optional().describe("Optional search-interest lookup. Off by default."),
+      vidiq_score: z.number().min(0).max(100).optional().describe("A score the user got from their own vidIQ account."),
+    },
+    async ({ interest, ...args }) => eng.score(args, { interest: interest || "off" }),
   );
 
   registerSeoTools(server, { engine: eng, gated, scopeAllowed });

@@ -8,6 +8,7 @@ import { createDeskServer } from "../src/desk/server.js";
 import { parseEnvFile, saveOAuthEnvFile, loadOAuthEnvFile, publicOAuthConfig } from "../src/envFile.js";
 import { buildSocialMcpServerEntry, mergeCursorMcpConfig, installCursorMcp } from "../src/cursorConfig.js";
 import { paths } from "../src/home.js";
+import { freePort, freePorts } from "./helpers/ports.js";
 
 test("oauth env file round trip masks secrets in public view", () => {
   const home = mkdtempSync(join(tmpdir(), "social-mcp-"));
@@ -58,16 +59,17 @@ test("installCursorMcp writes file", () => {
 });
 
 test("desk status and profile APIs stay on localhost", async () => {
+  const [deskPort, oauthPort] = await freePorts(2);
   const home = mkdtempSync(join(tmpdir(), "social-mcp-"));
   const env = {
-    SOCIAL_MCP_OAUTH_PORT: "47992",
-    SOCIAL_MCP_DESK_PORT: "47991",
+    SOCIAL_MCP_OAUTH_PORT: String(oauthPort),
+    SOCIAL_MCP_DESK_PORT: String(deskPort),
   };
   const engine = createEngine({ home, env });
-  const desk = createDeskServer({ engine, env, port: 47991 });
+  const desk = createDeskServer({ engine, env, port: deskPort });
   try {
     const { url } = await desk.start({ open: false });
-    assert.equal(url, "http://127.0.0.1:47991/");
+    assert.equal(url, `http://127.0.0.1:${deskPort}/`);
     const status = await fetch(`${url}api/status`).then((res) => res.json());
     assert.equal(status.ok, true);
     assert.equal(status.product, "PostPath");
@@ -98,10 +100,10 @@ test("desk status and profile APIs stay on localhost", async () => {
     assert.match(html, /name="GOOGLE_OAUTH_CLIENT_SECRET" type="password"/);
     assert.doesNotMatch(html, /YouTube sign-in is not included in this preview/);
     assert.equal(status.publish_mode, "live");
-    assert.equal(status.google_redirect_uri, "http://127.0.0.1:47992");
+    assert.equal(status.google_redirect_uri, `http://127.0.0.1:${oauthPort}`);
     const media = await fetch(`${url}api/media`, {
       method: "POST",
-      headers: { "content-type": "video/mp4", "x-postpath-filename": "clip.mp4" },
+      headers: { "content-type": "video/mp4", "x-postpath-desk": "1", "x-postpath-filename": "clip.mp4" },
       body: Buffer.from("not-a-real-video"),
     }).then((res) => res.json());
     assert.equal(media.ok, true);
@@ -141,10 +143,11 @@ test("desk status and profile APIs stay on localhost", async () => {
 });
 
 test("oauth config rejects a bad Google client id and accepts a Desktop client", async () => {
+  const [deskPort, oauthPort] = await freePorts(2);
   const home = mkdtempSync(join(tmpdir(), "social-mcp-oauth-"));
-  const env = { SOCIAL_MCP_OAUTH_PORT: "47994", SOCIAL_MCP_DESK_PORT: "47993" };
+  const env = { SOCIAL_MCP_OAUTH_PORT: String(oauthPort), SOCIAL_MCP_DESK_PORT: String(deskPort) };
   const engine = createEngine({ home, env });
-  const desk = createDeskServer({ engine, env, port: 47993 });
+  const desk = createDeskServer({ engine, env, port: deskPort });
   try {
     const { url } = await desk.start({ open: false });
     const bad = await fetch(`${url}api/oauth-config`, {
@@ -167,7 +170,7 @@ test("oauth config rejects a bad Google client id and accepts a Desktop client",
     }).then((res) => res.json());
     assert.equal(good.ok, true);
     assert.equal(good.oauth_ready.google, true);
-    assert.equal(good.google_redirect_uri, "http://127.0.0.1:47994");
+    assert.equal(good.google_redirect_uri, `http://127.0.0.1:${oauthPort}`);
     assert.match(good.oauth.GOOGLE_OAUTH_CLIENT_SECRET, /••••/);
     assert.equal(JSON.stringify(good).includes("GOCSPX-real-secret-value"), false);
     assert.equal(good.mcp_config.mcpServers.postpath.command, process.execPath);

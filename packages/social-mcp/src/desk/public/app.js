@@ -24,6 +24,8 @@ import {
   stepContent,
   suggestedRequests,
   toggleChannel,
+  setXAvailable,
+  reconnectMessage,
 } from "./guide.js";
 import { platformIcon } from "./icons.js";
 import { bindPilot, renderPilot } from "./pilotDesk.js";
@@ -163,8 +165,8 @@ function showToast(message, isError = false) {
 
 async function api(path, options = {}) {
   const response = await fetch(path, {
-    headers: { "content-type": "application/json", ...(options.headers || {}) },
     ...options,
+    headers: { "content-type": "application/json", ...options.headers, "x-postpath-desk": "1" },
   });
   const payload = await response.json().catch(() => ({}));
   if (!response.ok || payload.ok === false) {
@@ -258,6 +260,8 @@ function renderResults(posts, publishMode) {
 
 function renderStatus(data) {
   latestStatus = data;
+  setXAvailable(data.x_available === true);
+  document.body.classList.toggle("x-on", data.x_available === true);
   if (renderPilot(data)) return;
   document.body.classList.add("owner-mode");
   const dispatchHonesty = document.getElementById("dispatch-honesty");
@@ -277,6 +281,9 @@ function renderStatus(data) {
   }
   networkList.replaceChildren();
   for (const network of NETWORKS) {
+    if (network.key === "x" && latestStatus?.x_available !== true) continue;
+    // TikTok is bring-your-own-app: hide it until this desk has its own client key and secret.
+    if (network.key === "tiktok" && latestStatus?.oauth_ready?.tiktok !== true && !byPlatform.get("tiktok")) continue;
     const row = byPlatform.get(network.key);
     const on = Boolean(row);
     const item = document.createElement("li");
@@ -286,14 +293,20 @@ function renderStatus(data) {
     strong.textContent = network.label;
     const detail = document.createElement("div");
     detail.className = "meta";
-    detail.textContent = row
+    const stale = row?.status === "needs_reconnect";
+    detail.textContent = stale
+      ? reconnectMessage(network.key)
+      : row
       ? row.account_label || "Connected"
       : network.limited
         ? "API approval required"
         : "Not connected";
     copy.append(strong, detail);
     const pill = document.createElement("span");
-    if (on) {
+    if (stale) {
+      pill.className = "chip needed";
+      pill.textContent = "Reconnect";
+    } else if (on) {
       pill.className = "chip connected";
       pill.textContent = "Connected";
     } else if (network.limited) {
@@ -524,7 +537,7 @@ document.getElementById("connect-form").addEventListener("submit", async (event)
       body: JSON.stringify({
         id,
         name: profileName.value.trim() || id,
-        platforms: ["youtube", "meta", "tiktok", "linkedin", "x", "threads", "pinterest", "google_business", "reddit", "snapchat"],
+        platforms: ["youtube", "meta", ...(latestStatus?.oauth_ready?.tiktok === true ? ["tiktok"] : []), "linkedin", ...(latestStatus?.x_available === true ? ["x"] : []), "threads", "pinterest", "google_business", "reddit", "snapchat"],
       }),
     });
     renderStatus(data);
@@ -1857,7 +1870,7 @@ function renderAutoPost(view) {
   for (const brand of view.brands) {
     const card = el("div", { className: "auto-brand", dataset: { profile: brand.profile_id } });
     card.append(el("h3", {}, brand.name || brand.profile_id));
-    if (!brand.connections.length) card.append(el("p", { className: "hint" }, "No AI connections yet. Auto-post is off."));
+    if (!brand.connections.length) card.append(el("p", { className: "hint" }, "No assistant connections yet. Auto-post is off."));
     for (const conn of brand.connections) {
       const row = el("div", { className: "auto-conn", dataset: { connection: conn.connection_id } });
       row.append(el("div", {}, `${conn.name} (${conn.kind === "pat" ? "access token" : conn.kind === "oauth" ? "OAuth" : "inactive"})`));
@@ -1871,7 +1884,7 @@ function renderAutoPost(view) {
       if (conn.active) {
         const nets = el("div", { className: "auto-nets" });
         const chosen = conn.enabled ? conn.networks : conn.pending_request?.networks || [];
-        for (const net of view.networks || AUTO_NETWORKS) {
+        for (const net of (view.networks || AUTO_NETWORKS).filter((item) => item !== "x" || latestStatus?.x_available === true)) {
           const label = el("label", { className: "check" });
           const box = el("input", { type: "checkbox", value: net, className: "auto-net" });
           box.checked = chosen.includes(net);

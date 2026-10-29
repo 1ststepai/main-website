@@ -1,3 +1,4 @@
+import { assertXAvailable, isXPlatform, withOwnX } from "./xAccess.js";
 import { PLATFORMS } from "./home.js";
 import { mcpError } from "./errors.js";
 import { resolveSafeMediaPath } from "./mediaPath.js";
@@ -20,6 +21,7 @@ import { displayOutcome, publishMode } from "./publish/outcome.js";
 import { isPilotMode, PILOT_PUBLISH_MESSAGE } from "./pilot/config.js";
 import { containsBannedPromise } from "./pilot/captions.js";
 import { autoPostAllows } from "./autoPost.js";
+import { draftText } from "./approvalHistory.js";
 import { assertActionAllowed, assertProfileAllowed, getEntitlement } from "./license.js";
 import {
   applyPresets,
@@ -36,6 +38,11 @@ import { createSeo } from "./seo/index.js";
 import { createHooks } from "./hook/index.js";
 import { planFor } from "./media/specs.js";
 import { randomBytes } from "node:crypto";
+import { scoreContent } from "./score/score.js";
+import { vidiqUpsell, cleanAffiliateUrl, cleanPromoCode } from "./score/vidiq.js";
+import { trendsStub } from "./seo/stubs.js";
+import { EventEmitter } from "node:events";
+import { createManageQueue, mockManageExecutors } from "./manage/queue.js";
 import { rmSync } from "node:fs";
 import { join } from "node:path";
 
@@ -92,7 +99,16 @@ export function createEngine({
   publishers = null,
 } = {}) {
   const store = createStore({ home, env, now });
-  const oauth = createOAuthRuntime({ store, env, fetchImpl });
+  // App events for the optional session recorder. Payloads carry ids and codes only, never tokens or text.
+  const events = new EventEmitter();
+  const emit = (type, data = {}) => {
+    try {
+      events.emit("event", { ...data, type });
+    } catch {
+      // A listener must never break a publish.
+    }
+  };
+  const oauth = createOAuthRuntime({ store, env, fetchImpl, onEvent: emit });
   let seo;
   let hooks;
   const publishStats = { calls: 0 };
@@ -485,6 +501,18 @@ export function createEngine({
     };
   }
 
+  /** Keep the assistant's original words so the owner's later decision can be recorded against them. */
+  function markAssistantDraft(post, input) {
+    if (input?.source !== "mcp") return;
+    post.draft_original = draftText(post);
+    const by = input.drafted_by && typeof input.drafted_by === "object" ? input.drafted_by : {};
+    post.drafted_by = {
+      source: "mcp",
+      connection_id: by.connection_id ? String(by.connection_id).slice(0, 80) : null,
+      assistant: String(by.assistant || "assistant").slice(0, 120),
+    };
+  }
+
   function stampPost(fields, profile, source) {
     const stamp = new Date(now()).toISOString();
     return {
@@ -509,6 +537,7 @@ export function createEngine({
     const shaped = applyPresets(input, profile.presets);
     const platforms = knownPlatforms(shaped.platforms);
     if (!platforms.length) throw mcpError("invalid_platform", `Platform must be one of: ${PLATFORMS.join(", ")}`);
+    if (platforms.some(isXPlatform)) assertXAvailable(store.homePaths);
     const stamp = new Date(now()).toISOString();
     const source = ["mcp", "cli"].includes(input.source) ? input.source : "desk";
     const bundle = {
@@ -541,6 +570,7 @@ export function createEngine({
     for (const platform of platforms) {
       const post = stampPost(childFields(bundle, platform), profile, source);
       if (bundle.vidiq) post.vidiq = bundle.vidiq;
+      markAssistantDraft(post, input);
       store.savePost(post, { create: true });
       bundle.child_ids[platform] = post.id;
       posts.push(post);
@@ -573,6 +603,7 @@ export function createEngine({
     }
     const saved = store.getBundle(bundle.id);
     const freshPosts = platforms.map((platform) => store.getPost(saved.child_ids?.[platform])).filter(Boolean);
+    emit("item_queued", { bundle_id: saved.id, platforms, source: saved.source || "desk" });
     return { bundle: saved, posts: freshPosts.length ? freshPosts : posts, post: freshPosts[0] || posts[0] };
   }
 
@@ -581,6 +612,7 @@ export function createEngine({
     const profile = requireProfile(input.profile_id);
     const platform = String(input.platform || "");
     if (!PLATFORMS.includes(platform)) throw mcpError("invalid_platform", `Platform must be one of: ${PLATFORMS.join(", ")}`);
+    if (isXPlatform(platform)) assertXAvailable(store.homePaths);
     input = await withCaptions(input, [platform]);
     const stamp = new Date(now()).toISOString();
     const post = {
@@ -606,6 +638,7 @@ export function createEngine({
       created_at: stamp,
       updated_at: stamp,
     };
+    markAssistantDraft(post, input);
     store.savePost(post, { create: true });
     store.appendAudit({
       id: store.newId("aud"),
@@ -631,6 +664,7 @@ export function createEngine({
         wait: input.wait === true,
       });
     }
+    emit("item_queued", { post_id: post.id, platform, source: post.source || "desk" });
     return { post: store.getPost(post.id) };
   }
 
@@ -981,6 +1015,7 @@ export function createEngine({
     const children = (bundle.platforms || [])
       .map((platform) => store.getPost(bundle.child_ids?.[platform]))
       .filter(Boolean);
+    emit("item_approved", { bundle_id: bundle.id, platforms: bundle.platforms || [], scheduled: Boolean(scheduled_at) });
     if (scheduled_at) {
       const scheduled = [];
       const errors = [];
@@ -1054,6 +1089,7 @@ export function createEngine({
     refusePilotPublish();
     const post = store.getPost(post_id);
     if (!post) throw mcpError("not_found", "Post not found.", 404);
+    if (isXPlatform(post.platform)) assertXAvailable(store.homePaths);
     assertActionAllowed("publish", getEntitlement(env));
     assertMediaReady(post);
     if (String(post.media_content_type || "").startsWith("image/")) {
@@ -1099,7 +1135,7 @@ export function createEngine({
 
     const working = claim.post;
     try {
-      const config = oauthConfig(env, oauth.redirectUri);
+      const config = withOwnX(oauthConfig(env, oauth.redirectUri), store.homePaths);
       const result = await dispatchPublish(working, connection, secrets, config);
       working.platform_post_id = result.platform_post_id || null;
       working.published_url = result.published_url || null;
@@ -1118,8 +1154,10 @@ export function createEngine({
         post_id: working.id,
         detail: result.note || working.published_url || working.platform_post_id,
       });
+      emit("publish_result", { post_id: working.id, platform: working.platform, status: working.status, url: working.published_url || null });
       return { post: working, result, warnings: validation.warnings };
     } catch (error) {
+      emit("publish_error", { post_id: working.id, platform: working.platform, code: error?.code || "publish_failed" });
       settlePublishError(working, error);
       throw error;
     } finally {
@@ -1358,9 +1396,49 @@ export function createEngine({
   });
   hooks = createHooks({ store, env, fetchImpl, now, hookGenerator, structureProvider });
 
+  const manage = createManageQueue({
+    store,
+    getConfig: () => withOwnX(oauthConfig(env, oauth.redirectUri), store.homePaths),
+    fetchImpl: trackedFetch,
+    mediaRoot,
+    now,
+    pilotOn,
+    emit,
+    executors: publishers?.manage || (publishMode(env) === "mock" ? mockManageExecutors() : undefined),
+  });
+
+  // Free built-in scorer. Informational only; never blocks a save. No vidIQ call is made here.
+  async function score(input = {}, { interest = "off" } = {}) {
+    const result = await scoreContent(input, { mediaRoot, fetchImpl: trackedFetch, interest, trends: () => trendsStub(env) });
+    return { ...result, upsell: vidiqUpsellInfo() };
+  }
+
+  function vidiqUpsellInfo() {
+    return vidiqUpsell({ env, settings: store.readSection("vidiqUpsell") });
+  }
+
+  function saveVidiqUpsell({ affiliate_url = "", promo_code = "" } = {}) {
+    const url = String(affiliate_url || "").trim();
+    const code = String(promo_code || "").trim();
+    if (url && !cleanAffiliateUrl(url)) throw mcpError("invalid_input", "The affiliate link must be a full https:// address.", 400);
+    if (code && !cleanPromoCode(code)) throw mcpError("invalid_input", "The promo code can use letters, numbers, - and _ only.", 400);
+    store.updateSection("vidiqUpsell", (section) => {
+      section.affiliate_url = url;
+      section.promo_code = code;
+      return section;
+    });
+    return vidiqUpsellInfo();
+  }
+
   return {
+    score,
+    vidiqUpsellInfo,
+    saveVidiqUpsell,
     store,
     oauth,
+    events,
+    emit,
+    manage,
     seo,
     hooks,
     publicStatus,

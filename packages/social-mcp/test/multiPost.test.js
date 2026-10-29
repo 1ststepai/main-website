@@ -1,3 +1,4 @@
+import { giveOwnX } from "./helpers/ownX.js";
 import assert from "node:assert/strict";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -5,11 +6,12 @@ import { join } from "node:path";
 import { test } from "node:test";
 import { createEngine } from "../src/engine.js";
 import { createDeskServer } from "../src/desk/server.js";
+import { freePort, freePorts } from "./helpers/ports.js";
 
 const NOW = () => Date.parse("2026-06-01T12:00:00.000Z");
 
 async function rig(profile = { id: "acme", name: "Acme" }) {
-  const home = mkdtempSync(join(tmpdir(), "social-multi-"));
+  const home = giveOwnX(mkdtempSync(join(tmpdir(), "social-multi-")));
   const mediaDir = join(home, "media");
   mkdirSync(mediaDir, { recursive: true });
   const media = join(mediaDir, "clip.mp4");
@@ -242,14 +244,15 @@ test("a single-platform draft stays compatible and presets fill the caption", as
 });
 
 test("desk approve queue posts the bundle and keeps each result", async () => {
-  const home = mkdtempSync(join(tmpdir(), "social-multi-desk-"));
+  const [deskPort, oauthPort] = await freePorts(2);
+  const home = giveOwnX(mkdtempSync(join(tmpdir(), "social-multi-desk-")));
   const mediaDir = join(home, "media");
   mkdirSync(mediaDir, { recursive: true });
   const media = join(mediaDir, "clip.mp4");
   writeFileSync(media, Buffer.alloc(32, 2));
-  const env = { SOCIAL_MCP_PUBLISH_MODE: "mock", SOCIAL_MCP_OAUTH_PORT: "48781", SOCIAL_MCP_DESK_PORT: "48780" };
+  const env = { SOCIAL_MCP_PUBLISH_MODE: "mock", SOCIAL_MCP_OAUTH_PORT: String(oauthPort), SOCIAL_MCP_DESK_PORT: String(deskPort) };
   const engine = createEngine({ home, env, fetchImpl: async () => { throw new Error("network"); }, now: NOW });
-  const desk = createDeskServer({ engine, env, port: 48780 });
+  const desk = createDeskServer({ engine, env, port: deskPort });
   try {
     await engine.upsertProfile({ id: "acme", name: "Acme" });
     engine.store.saveConnection(

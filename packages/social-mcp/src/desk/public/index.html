@@ -25,7 +25,16 @@
           <span>PostPath</span>
         </p>
         <p class="byline">by 1stStep.ai</p>
+        <label class="brand-switcher owner-surface" id="brand-switcher-wrap">
+          <span>Brand</span>
+          <select id="brand-switcher" aria-label="Switch brand"></select>
+        </label>
+        <button type="button" class="btn ghost owner-surface" id="add-brand-open">Add brand</button>
         <button type="button" class="btn ghost owner-surface" id="reopen-guide">Setup guide</button>
+        <div class="recording-indicator" id="recording-indicator" role="status" aria-live="polite" hidden>
+          <span class="rec-dot" aria-hidden="true"></span> Recording <span class="rec-name"></span>
+          <button type="button" class="btn danger rec-stop-now">Stop</button>
+        </div>
       </header>
 
       <section id="pilot-app" class="pilot-app" hidden>
@@ -118,7 +127,7 @@
             <label class="toggle"><input type="checkbox" name="target-instagram" value="instagram" checked /> Instagram</label>
             <label class="toggle"><input type="checkbox" name="target-tiktok" value="tiktok" /> TikTok</label>
             <label class="toggle"><input type="checkbox" name="target-linkedin" value="linkedin" /> LinkedIn</label>
-            <label class="toggle"><input type="checkbox" name="target-x" value="x" /> X</label>
+            <label class="toggle" data-x-only><input type="checkbox" name="target-x" value="x" /> X</label>
             <label class="toggle"><input type="checkbox" name="target-threads" value="threads" /> Threads</label>
             <label class="toggle"><input type="checkbox" name="target-pinterest" value="pinterest" /> Pinterest</label>
             <label class="toggle"><input type="checkbox" name="target-bluesky" value="bluesky" /> Bluesky</label>
@@ -140,6 +149,15 @@
             <div class="pair file-pair">
               <label>Tags <input name="tags" placeholder="comma, separated" maxlength="400" /></label>
               <label>Your file <input name="video" type="file" accept="video/mp4,video/*,image/*" /></label>
+            </div>
+            <div class="score-box">
+              <div class="pair">
+              <label>Main keyword <input name="score_keyword" maxlength="100" placeholder="optional" /></label>
+              <label>Thumbnail text <input name="thumbnail_text" maxlength="200" placeholder="words on the thumbnail" /></label>
+              <label class="toggle"><input type="checkbox" id="score-interest" /> Check YouTube searches</label>
+              </div>
+              <button type="button" class="btn" id="score-it">Score it</button>
+              <div id="score-result" class="score-result" aria-live="polite" hidden></div>
             </div>
             <fieldset class="generate-box">
               <legend>Generate the asset</legend>
@@ -177,7 +195,7 @@
                 <label class="check"><input type="checkbox" id="youtube-long" /> YouTube long-form 16:9</label>
               </div>
               <label class="check"><input type="checkbox" id="claude-review" /> Ask Claude for advisory notes. This does not approve the post.</label>
-              <p class="hint">Connect accounts, connect your AI, one prompt, then review the queue. Generated video is silent. Claude cards are drawings, not photos or video.</p>
+              <p class="hint">Connect accounts, connect your assistant, one prompt, then review the queue. Generated video is silent. Claude cards are drawings, not photos or video.</p>
             </fieldset>
             <label class="check" id="instagram-confirm-label">
               <input type="checkbox" id="instagram-confirm" />
@@ -208,7 +226,7 @@
           <p class="approval-line">Nothing posts without your approval.</p>
           <p class="hint">One approval posts every selected platform. A failure on one does not stop the others.</p>
           <ul class="queue-list" id="queue-list"></ul>
-          <p class="hint" id="queue-empty">No drafts waiting. Saved drafts and AI drafts show up here.</p>
+          <p class="hint" id="queue-empty">No drafts waiting. Saved drafts and assistant drafts show up here.</p>
           <div class="approval-block" hidden>
             <p class="hint" id="draft-result">No draft yet. Publishing uses the draft you just saved.</p>
             <button type="button" class="btn primary" id="publish-draft" disabled>Publish this draft</button>
@@ -391,7 +409,7 @@
 
       <section class="panel connect-ai owner-surface" id="connect-ai" aria-labelledby="connect-ai-title">
         <div class="connect-copy">
-          <p class="step-kicker">Connect to your AI</p>
+          <p class="step-kicker">Connect your assistant</p>
           <h2 id="connect-ai-title">Same accounts. Any MCP client.</h2>
           <p class="lede">OAuth for clients that support it. A personal access token for clients that do not. The server key is <code>postpath</code>.</p>
           <div id="mcp-remote" class="mcp-remote"></div>
@@ -469,11 +487,110 @@
           <div>
             <p class="step-kicker">Auto-post</p>
             <h2 id="auto-post-title">Off unless you turn it on</h2>
-            <p class="lede">Per brand, per AI connection, per network. An assistant can only ask; you decide here. vidIQ, Instagram-public and no-promise checks still stop a post.</p>
+            <p class="lede">Per brand, per assistant connection, per network. An assistant can only ask; you decide here with your owner PIN. vidIQ, Instagram-public and no-promise checks still stop a post.</p>
           </div>
         </div>
+        <div id="earned-prompts" class="earned-prompts" aria-live="polite"></div>
+        <div id="earned-pin-step" class="earned-pin-step" hidden>
+          <h3 id="earned-pin-title">Turn on auto-post</h3>
+          <p class="lede" id="earned-pin-what"></p>
+          <p class="auto-risk">Your assistant will post here without asking you each time. vidIQ, Instagram-public, TikTok private-by-default and no-promise checks still stop a post. Turning it off is one click and needs no PIN.</p>
+          <label class="auto-pin" id="earned-pin-row">Owner PIN <input type="password" id="earned-pin" autocomplete="current-password" /></label>
+          <div id="earned-nopin" hidden>
+            <p class="hint earned-nudge">No owner PIN is set, so anyone at this computer could flip this switch. Set an owner PIN to protect it.</p>
+            <label class="check"><input type="checkbox" id="earned-confirm" /> I understand. Post without asking me on this brand and network.</label>
+          </div>
+          <div class="earned-actions">
+            <button type="button" class="btn danger" id="earned-pin-go">Turn on auto-post</button>
+            <button type="button" class="btn secondary" id="earned-pin-cancel">Cancel</button>
+          </div>
+        </div>
+        <div class="posting-modes">
+          <h3>Posting mode by brand and network</h3>
+          <p class="hint">Default is Review each post. Assistants can never change this; only you can, here. Disconnecting accounts and deleting always need your PIN.</p>
+          <table class="posting-table">
+            <thead><tr><th scope="col">Brand</th><th scope="col">Network</th><th scope="col">Mode</th><th scope="col">Your recent decisions</th><th scope="col"><span class="visually-hidden">Change</span></th></tr></thead>
+            <tbody id="posting-modes-body"><tr><td colspan="5" class="hint">Loading…</td></tr></tbody>
+          </table>
+        </div>
+        <div class="auto-activity">
+          <h3>Auto-post activity</h3>
+          <ul class="queue-list" id="auto-activity-list"><li class="hint">Nothing auto-posted yet.</li></ul>
+        </div>
+        <details class="auto-advanced"><summary>Per-connection auto-post (advanced)</summary>
         <label class="auto-pin" id="auto-post-pin-row" hidden>Owner PIN <input type="password" id="auto-post-pin" autocomplete="current-password" /></label>
         <div id="auto-post-list" class="auto-post-list"><p class="hint">Loading…</p></div>
+        </details>
+      </section>
+
+      <section class="panel manage owner-surface" id="manage-panel" aria-labelledby="manage-title">
+        <div class="panel-head">
+          <div>
+            <p class="step-kicker">Manage accounts</p>
+            <h2 id="manage-title">Account changes wait for you</h2>
+            <p class="lede">Your assistant can queue a channel, page, video, or post change. Nothing changes until you approve it here. Deletes and unlisting ask you to type a confirmation.</p>
+          </div>
+          <label>Brand <select id="manage-profile"></select></label>
+        </div>
+        <label class="auto-pin" id="manage-pin-row">Owner PIN (if you set one) <input type="password" id="manage-pin" autocomplete="current-password" /></label>
+        <details class="add-brand" id="add-brand">
+          <summary>Add brand</summary>
+          <p class="hint">Pick the Facebook Page first. One Meta login can cover several Pages; this brand will only use the one you name here.</p>
+          <div class="pair">
+            <label class="field"><span>Brand name</span><input id="add-brand-name" type="text" placeholder="Swing Trade Pros" maxlength="120" /></label>
+            <label class="field"><span>Brand id</span><input id="add-brand-id" type="text" placeholder="swing-trade-pros" pattern="[a-zA-Z0-9][a-zA-Z0-9_-]{1,63}" /></label>
+          </div>
+          <label class="field"><span>Facebook Page (name or Page id)</span><input id="add-brand-page" type="text" list="known-pages" placeholder="Swing Trade Pros" maxlength="200" /></label>
+          <datalist id="known-pages"></datalist>
+          <div class="row-buttons">
+            <button type="button" class="btn ghost" id="add-brand-save">Save brand</button>
+            <button type="button" class="btn primary" id="add-brand-connect">Save and connect Facebook &amp; Instagram</button>
+          </div>
+        </details>
+        <h3 id="manage-accounts-title">Accounts for <span id="manage-brand-name">this brand</span></h3>
+        <table class="accounts-table" id="manage-accounts" aria-labelledby="manage-accounts-title">
+          <thead><tr><th scope="col">Network</th><th scope="col">Account</th><th scope="col">Page</th><th scope="col">Access</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <h3>Reconnect for full access</h3>
+        <p class="hint">Older connections keep posting until you reconnect. Reconnect asks each network for the new permissions. For Facebook and Instagram, choose the Page first.</p>
+        <div id="manage-access" class="access-grid"><p class="hint">Loading…</p></div>
+        <details class="manage-new">
+          <summary>Queue a change yourself</summary>
+          <label>Change <select id="manage-type"></select></label>
+          <label>Details <textarea id="manage-params" rows="5" spellcheck="false"></textarea></label>
+          <label>Note <input type="text" id="manage-note" maxlength="500" /></label>
+          <button type="button" class="btn primary" id="manage-queue-btn">Queue for approval</button>
+        </details>
+        <h3>Waiting and recent changes</h3>
+        <div id="manage-actions" class="manage-actions"></div>
+        <details class="manage-limits-wrap"><summary>What each network's API can't do</summary><div id="manage-limits" class="manage-limits"></div></details>
+      </section>
+
+      <section class="panel owner-surface" id="vidiq-settings-panel" aria-labelledby="vidiq-settings-title">
+        <h2 id="vidiq-settings-title">vidIQ link (optional)</h2>
+        <p class="hint">Shown next to Score it results. Leave blank to link to vidiq.com with no affiliate claim. The promo line only appears when a code is saved. VIDIQ_AFFILIATE_URL and VIDIQ_PROMO_CODE in the environment override these.</p>
+        <form id="vidiq-settings" class="oauth-form">
+          <label>Affiliate link <input name="affiliate_url" type="url" maxlength="500" placeholder="https://..." autocomplete="off" /></label>
+          <label>Promo code <input name="promo_code" maxlength="40" autocomplete="off" /></label>
+          <button type="submit" class="btn">Save</button>
+        </form>
+      </section>
+      <section class="panel recordings owner-surface" id="recordings-panel" aria-labelledby="recordings-title">
+        <div class="panel-head">
+          <div>
+            <p class="step-kicker">Recordings</p>
+            <h2 id="recordings-title">Record a desk session</h2>
+            <p class="lede">Off until you start it. Saves connects, queued items, approvals, errors, and publish results to a recordings folder on this computer, with tokens, emails, and customer text removed. Recordings are never uploaded or posted.</p>
+          </div>
+        </div>
+        <div class="rec-controls">
+          <label>Name <input type="text" id="rec-name" maxlength="80" placeholder="Desk session" /></label>
+          <label class="check"><input type="checkbox" id="rec-screen" /> Also record a window (you pick it, no audio)</label>
+          <button type="button" class="btn primary" id="rec-start">Start recording</button>
+          <button type="button" class="btn danger" id="rec-stop" disabled>Stop</button>
+        </div>
+        <div id="recordings-list" class="recordings-list"><p class="hint">Loading…</p></div>
       </section>
 
       <section class="panel owner-surface" aria-labelledby="scheduled-title">
@@ -523,11 +640,15 @@
             <label>Client ID <input name="LINKEDIN_CLIENT_ID" autocomplete="off" /></label>
             <label>Client secret <input name="LINKEDIN_CLIENT_SECRET" type="password" autocomplete="new-password" /></label>
           </fieldset>
+          <details class="x-own-app" id="x-own-app">
+            <summary>Use your own X developer app (optional)</summary>
+            <p class="hint">X stays hidden on this desk until you add your own X developer app here. PostPath never ships, shares, or falls back to anyone else's X app, so X runs on your app and your X account only. X developer access may be pay-per-use and is billed to you by X. In your X app, set the callback to the redirect URI above, then paste its OAuth 2.0 Client ID and Secret.</p>
           <fieldset>
             <legend>X</legend>
             <label>Client ID <input name="X_CLIENT_ID" autocomplete="off" /></label>
             <label>Client secret <input name="X_CLIENT_SECRET" type="password" autocomplete="new-password" /></label>
           </fieldset>
+          </details>
           <fieldset>
             <legend>Pinterest</legend>
             <label>App ID <input name="PINTEREST_APP_ID" autocomplete="off" /></label>
@@ -579,5 +700,7 @@
       </div>
     </div>
     <script type="module" src="/app.js"></script>
+    <script type="module" src="/manage.js"></script>
+    <script type="module" src="/earnedAutoPost.js"></script>
   </body>
 </html>

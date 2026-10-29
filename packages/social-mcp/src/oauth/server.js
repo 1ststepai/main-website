@@ -1,3 +1,5 @@
+import { assertXAvailable, isXPlatform, withOwnX, xAvailable } from "../xAccess.js";
+import { scopesForNewConnection } from "../manage/scopes.js";
 import { existsSync } from "node:fs";
 import { createServer } from "node:http";
 import { spawn } from "node:child_process";
@@ -6,6 +8,26 @@ import { googleLoopbackUri, providerRedirectUri } from "./redirect.js";
 import { signState, verifyState } from "../crypto.js";
 import { mcpError } from "../errors.js";
 import { authorizationUrl, createPkcePair, exchangeCode, missingProviders, oauthConfig } from "./providers.js";
+
+// The provider's ?error= value is never echoed back; only fixed text is shown.
+const CANCEL_MESSAGES = Object.freeze({
+  access_denied: "You declined the sign-in. Start again from your AI client when you're ready.",
+  consent_required: "The provider needs you to approve the permissions. Start again.",
+  login_required: "You need to sign in to the provider first. Start again.",
+  invalid_scope: "The provider rejected the requested permissions.",
+  server_error: "The provider had a problem. Try again in a minute.",
+  temporarily_unavailable: "The provider is busy. Try again in a minute."
+});
+export function cancelMessage(code) {
+  const key = String(code || "");
+  return Object.hasOwn(CANCEL_MESSAGES, key) ? CANCEL_MESSAGES[key] : "The sign-in was cancelled or failed. Start again from your AI client.";
+}
+
+export function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[ch]);
+}
+
+const STATE_TTL_MS = 15 * 60 * 1000;
 
 function htmlPage(title, body) {
   return `<!doctype html>
@@ -76,13 +98,29 @@ function isOAuthCallback(pathname) {
   return pathname === "/oauth/callback" || pathname === "/oauth/callback/" || pathname === "/" || pathname === "";
 }
 
-export function createOAuthRuntime({ store, env = process.env, fetchImpl = fetch, port = Number(env.SOCIAL_MCP_OAUTH_PORT || DEFAULT_OAUTH_PORT) }) {
+export function createOAuthRuntime({ store, env = process.env, fetchImpl = fetch, onEvent = () => {}, port = Number(env.SOCIAL_MCP_OAUTH_PORT || DEFAULT_OAUTH_PORT) }) {
   let server = null;
+  // PKCE verifiers stay in this process, keyed by the state nonce. Each nonce is
+  // usable once: it is removed before the code exchange, so a replayed state fails.
+  const pending = new Map();
+  function prunePending(now = Date.now()) {
+    for (const [nonce, entry] of pending) if (now - entry.ts > STATE_TTL_MS) pending.delete(nonce);
+  }
+  function takePending(state) {
+    prunePending();
+    const nonce = String(state?.nonce || "");
+    const entry = nonce ? pending.get(nonce) : null;
+    if (nonce) pending.delete(nonce);
+    if (!entry || entry.provider !== state.provider || entry.profile_id !== state.profile_id) {
+      throw mcpError("invalid_state", "This connection link was already used or is unknown. Start again.");
+    }
+    return entry;
+  }
   const redirectUri = providerRedirectUri(env, port);
   const googleRedirectUri = googleLoopbackUri(env, port);
 
   function currentConfig() {
-    return oauthConfig(env, redirectUri, googleRedirectUri);
+    return withOwnX(oauthConfig(env, redirectUri, googleRedirectUri), store.homePaths);
   }
 
   async function ensureListening() {
@@ -98,7 +136,7 @@ export function createOAuthRuntime({ store, env = process.env, fetchImpl = fetch
         const error = url.searchParams.get("error");
         if (error) {
           res.writeHead(400, { "content-type": "text/html; charset=utf-8" });
-          res.end(htmlPage("Connection cancelled", `<p>${String(error)}</p>`));
+          res.end(htmlPage("Connection cancelled", `<p>${cancelMessage(error)}</p>`));
           return;
         }
         const code = url.searchParams.get("code");
@@ -109,21 +147,49 @@ export function createOAuthRuntime({ store, env = process.env, fetchImpl = fetch
           return;
         }
         const state = verifyState(stateToken, store.key);
-        if (Date.now() - Number(state.ts || 0) > 15 * 60 * 1000) {
+        if (Date.now() - Number(state.ts || 0) > STATE_TTL_MS) {
           throw mcpError("invalid_state", "The connection attempt expired. Start again.");
         }
+        const pendingEntry = takePending(state);
         const config = currentConfig();
         const exchanged = await exchangeCode(state.provider, {
           code,
           config,
           fetchImpl,
-          codeVerifier: state.code_verifier || "",
+          codeVerifier: pendingEntry.verifier || "",
+          // Keep each brand on its own Facebook Page: the profile's saved choice wins,
+          // then the Page it is already linked to.
+          pagePreference:
+            state.provider === "meta"
+              ? store.getProfile(state.profile_id)?.presets?.meta_page ||
+                store.getConnection(state.profile_id, "facebook")?.page_id ||
+                ""
+              : "",
         });
+        // Never bind a Page that another brand profile already uses.
+        for (const bundle of Object.values(exchanged.platforms || {})) {
+          const pageId = bundle.record?.page_id;
+          if (!pageId) continue;
+          for (const other of store.listProfiles()) {
+            if (other.id === state.profile_id) continue;
+            const taken = store.listConnections(other.id).some((conn) => conn.page_id && String(conn.page_id) === String(pageId));
+            if (taken) {
+              throw mcpError(
+                "page_in_use",
+                `The Facebook Page "${bundle.record.account_label || pageId}" is already linked to profile ${other.id}. Choose a different Page for this brand.`,
+                409,
+              );
+            }
+          }
+        }
         for (const [platform, bundle] of Object.entries(exchanged.platforms || {})) {
           store.saveConnection(
             {
               profile_id: state.profile_id,
               ...bundle.record,
+              // Scopes are not secrets. They drive the desk's "Reconnect for full access" view.
+              granted_scopes: scopesForNewConnection(platform, bundle.secrets?.scope),
+              status: "connected",
             },
             bundle.secrets,
           );
@@ -135,6 +201,7 @@ export function createOAuthRuntime({ store, env = process.env, fetchImpl = fetch
             platform,
             detail: bundle.record.account_label,
           });
+          onEvent("account_connected", { platform, provider: state.provider });
         }
 
         const chain = Array.isArray(state.chain) ? state.chain : [];
@@ -149,12 +216,13 @@ export function createOAuthRuntime({ store, env = process.env, fetchImpl = fetch
         res.end(
           htmlPage(
             "Connected",
-            `<p>Profile <strong>${state.profile_id}</strong> is linked. You can close this tab and return to your AI client.</p>`,
+            `<p>Profile <strong>${escapeHtml(state.profile_id)}</strong> is linked. You can close this tab and return to your AI client.</p>`,
           ),
         );
       } catch (error) {
+        onEvent("connect_error", { code: error?.code || "oauth_failed" });
         res.writeHead(error.statusCode || 500, { "content-type": "text/html; charset=utf-8" });
-        res.end(htmlPage("Connection failed", `<p>${error.message || "Unexpected error."}</p>`));
+        res.end(htmlPage("Connection failed", `<p>${escapeHtml(error.message || "Unexpected error.")}</p>`));
       }
     });
 
@@ -166,26 +234,21 @@ export function createOAuthRuntime({ store, env = process.env, fetchImpl = fetch
   }
 
   async function beginProvider(profileId, provider, remainingChain = [], { open = true } = {}) {
+    if (isXPlatform(provider)) assertXAvailable(store.homePaths);
     await ensureListening();
     const config = currentConfig();
     const pkce = provider === "x" || provider === "youtube" || provider === "google_business" || provider === "google_search" ? createPkcePair() : null;
-    const state = signState(
-      {
-        profile_id: profileId,
-        provider,
-        chain: remainingChain,
-        ts: Date.now(),
-        nonce: store.newId("nonce"),
-        code_verifier: pkce?.verifier || "",
-      },
-      store.key,
-    );
+    const nonce = store.newId("nonce");
+    const ts = Date.now();
+    prunePending(ts);
+    pending.set(nonce, { verifier: pkce?.verifier || "", provider, profile_id: profileId, ts });
+    const state = signState({ profile_id: profileId, provider, chain: remainingChain, ts, nonce }, store.key);
     const url = authorizationUrl(provider, { state, config, pkce });
     if (open) openBrowser(url);
     return url;
   }
 
-  async function connectAccounts(profileId, { platforms, open = true } = {}) {
+  async function connectAccounts(profileId, { platforms, open = true, force = false } = {}) {
     const profile = store.getProfile(profileId);
     if (!profile) throw mcpError("unknown_profile", "Create the profile first with upsert_profile.");
     await ensureListening();
@@ -193,12 +256,18 @@ export function createOAuthRuntime({ store, env = process.env, fetchImpl = fetch
     const requested = platforms?.length
       ? platforms.map(normalizeProvider).filter((item) => CONNECT_ORDER.includes(item))
       : missingProviders(connections);
+    // X is bring-your-own-app: refuse it when named, skip it when defaulting.
+    if (platforms?.length && requested.some(isXPlatform)) assertXAvailable(store.homePaths);
+    const xOk = xAvailable(store.homePaths);
     const steps = [];
     for (const item of requested.length ? requested : CONNECT_ORDER) {
       const provider = normalizeProvider(item);
+      if (isXPlatform(provider) && !xOk) continue;
       if (!steps.includes(provider) && CONNECT_ORDER.includes(provider)) steps.push(provider);
     }
-    const filtered = steps.filter((provider) => providerStillNeeded(provider, connections));
+    // Reconnect (force) always starts a fresh consent for the named networks so the
+    // full current scope set is requested, even when an older connection exists.
+    const filtered = force && platforms?.length ? steps : steps.filter((provider) => providerStillNeeded(provider, connections));
     if (!filtered.length) {
       return {
         profile_id: profileId,
