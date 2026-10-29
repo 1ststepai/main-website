@@ -42,7 +42,10 @@ test("PKCE verifier stays server-side, state is single-use, callback pages escap
     const xss = await fetch(`http://127.0.0.1:48821/oauth/callback?error=${encodeURIComponent("<script>alert(1)</script>")}`);
     const html = await xss.text();
     assert.doesNotMatch(html, /<script>/);
-    assert.match(html, /&lt;script&gt;/);
+    assert.doesNotMatch(html, /alert/, "provider error text is never echoed");
+    assert.match(html, /cancelled or failed/);
+    const denied = await fetch("http://127.0.0.1:48821/oauth/callback?error=access_denied").then((r) => r.text());
+    assert.match(denied, /You declined the sign-in/);
     assert.equal(escapeHtml(`<a href="x">'&`), "&lt;a href=&quot;x&quot;&gt;&#39;&amp;");
   } finally {
     await oauth.stop();

@@ -368,9 +368,10 @@ export function pickMetaPage(pages, preference) {
   if (!wanted) {
     if (list.length <= 1) return list[0] || null;
     const choices = list.map((page) => ({ id: String(page.id), name: String(page.name || "") }));
+    const pageList = choices.map((p) => p.name + " (" + p.id + ")").join(", ");
     const error = mcpError(
       "page_choice_required",
-      `This Meta login covers ${choices.length} Facebook Pages: ${choices.map((p) => `${p.name} (${p.id})`).join(", ")}. Choose this brand's Page in its profile (Facebook Page), then reconnect.`,
+      `This Meta login covers ${choices.length} Facebook Pages: ${pageList}. Choose this brand's Page in its profile (Facebook Page), then reconnect.`,
       400,
     );
     error.details = { pages: choices };

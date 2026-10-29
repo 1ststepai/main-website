@@ -9,6 +9,20 @@ import { signState, verifyState } from "../crypto.js";
 import { mcpError } from "../errors.js";
 import { authorizationUrl, createPkcePair, exchangeCode, missingProviders, oauthConfig } from "./providers.js";
 
+// The provider's ?error= value is never echoed back; only fixed text is shown.
+const CANCEL_MESSAGES = Object.freeze({
+  access_denied: "You declined the sign-in. Start again from your AI client when you're ready.",
+  consent_required: "The provider needs you to approve the permissions. Start again.",
+  login_required: "You need to sign in to the provider first. Start again.",
+  invalid_scope: "The provider rejected the requested permissions.",
+  server_error: "The provider had a problem. Try again in a minute.",
+  temporarily_unavailable: "The provider is busy. Try again in a minute."
+});
+export function cancelMessage(code) {
+  const key = String(code || "");
+  return Object.hasOwn(CANCEL_MESSAGES, key) ? CANCEL_MESSAGES[key] : "The sign-in was cancelled or failed. Start again from your AI client.";
+}
+
 export function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[ch]);
 }
@@ -122,7 +136,7 @@ export function createOAuthRuntime({ store, env = process.env, fetchImpl = fetch
         const error = url.searchParams.get("error");
         if (error) {
           res.writeHead(400, { "content-type": "text/html; charset=utf-8" });
-          res.end(htmlPage("Connection cancelled", `<p>${escapeHtml(error)}</p>`));
+          res.end(htmlPage("Connection cancelled", `<p>${cancelMessage(error)}</p>`));
           return;
         }
         const code = url.searchParams.get("code");

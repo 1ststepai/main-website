@@ -165,7 +165,7 @@ function showToast(message, isError = false) {
 async function api(path, options = {}) {
   const response = await fetch(path, {
     ...options,
-    headers: { "content-type": "application/json", ...(options.headers || {}), "x-postpath-desk": "1" },
+    headers: { "content-type": "application/json", ...options.headers, "x-postpath-desk": "1" },
   });
   const payload = await response.json().catch(() => ({}));
   if (!response.ok || payload.ok === false) {
