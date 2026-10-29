@@ -879,6 +879,7 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
         }
         if (req.method === "POST" && url.pathname === "/api/recordings/rename") {
           const body = await readJson(req);
+          requireOwner(req, body);
           sendJson(res, 200, { ok: true, ...recorder.rename(String(body.id || ""), body.name) });
           return;
         }
