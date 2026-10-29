@@ -17,6 +17,7 @@ import { OWNER_ONLY_NOTE, autoPostAllows, logAutoPostActivity, publishRefusalMes
 import { postingPermissions } from "../postingPermissions.js";
 import { listGrants, listPats } from "./auth.js";
 import { isPilotMode } from "../pilot/config.js";
+import { proposeStyleNote, recordOwnerFeedback } from "../learning.js";
 
 const outputSchema = z
   .object({
@@ -266,11 +267,56 @@ export function createSocialMcpServer({ engine, auth, env = process.env } = {}) 
   add(
     "get_brand_context",
     "Get brand context",
-    "Call this first. Returns each brand's identity, networks, voice, topics, rules, what this connection may do, auto-post state, and the list of missing fields. Blank fields stay blank: ask the user about missing fields once, then draft. Read-only.",
+    "Call this first, before drafting for a brand. Returns each brand's identity, networks, voice, topics, rules, what this connection may do, auto-post state, what PostPath has learned (accepted style guide, per-network notes, recent rejection reasons, and how_to_use), and the list of missing fields. Follow the style guide. Blank fields stay blank: ask the user about missing fields once, then draft. Read-only.",
     "posts:read",
     { read: true, idempotent: true },
     { profile_id: z.string().min(2).max(64).optional().describe("One brand. Omit for every brand.") },
     async (args) => getBrandContext(eng, { profile_id: args.profile_id, scopes: callerScopes(), connectionId: gate?.connectionId || null }),
+  );
+
+  add(
+    "propose_style_note",
+    "Propose style note",
+    "Suggest one short style note for a brand's guide (tone, length, hashtags, emoji, hooks, calls to action, things the owner rejects). It lands as a PENDING suggestion; it is not in the guide until the owner accepts it on the PostPath desk. You cannot write the guide directly. Offer notes after the user tells you what they liked or disliked.",
+    "drafts:write",
+    {},
+    {
+      profile_id: z.string().min(2).max(64).describe("Brand profile id."),
+      text: z.string().min(3).max(200).describe("The note in one short plain-English sentence, e.g. 'Keep captions under 150 characters.'"),
+      network: z.enum(PLATFORMS).optional().describe("Only for this network. Omit for the whole brand."),
+      why: z.string().max(200).optional().describe("What the user said that led to this note."),
+    },
+    async (args) => {
+      const out = proposeStyleNote(eng.store, { ...args, proposed_by: assistantName() });
+      return { ...out, message: out.status === "pending" ? "Saved as a suggestion. Tell the user it waits for them to accept or dismiss on the desk under 'What your assistant has learned'." : "Already there; nothing new saved." };
+    },
+  );
+
+  server.registerPrompt(
+    "onboard_brand_style",
+    {
+      title: "Set up a brand's style",
+      description: "Walk the user through their brand's style, then propose style notes for the owner to accept.",
+      argsSchema: { profile_id: z.string().min(2).max(64).describe("Brand profile id.") },
+    },
+    ({ profile_id }) => ({
+      messages: [
+        {
+          role: "user",
+          content: {
+            type: "text",
+            text: [
+              `Help me set up the posting style for my brand "${profile_id}" in PostPath. You lead; keep it short.`,
+              `1. Call get_brand_context with profile_id "${profile_id}". Read learned.style_guide, learned.network_notes and learned.recent_rejection_reasons.`,
+              "2. In two or three sentences, tell me in plain words what PostPath has already learned (only what is listed; do not invent numbers). If nothing yet, say so.",
+              "3. Ask me a few quick questions, one at a time: tone, typical length, hashtags, emoji, how posts should open, calls to action, and anything I never want.",
+              "4. Turn each clear answer into one short note and call propose_style_note. Tell me the notes wait for me to accept or dismiss on the desk under 'What your assistant has learned'.",
+              "5. Offer to draft a first post that follows the guide. Never approve or publish for me.",
+            ].join("\n"),
+          },
+        },
+      ],
+    }),
   );
 
   add(
@@ -454,8 +500,19 @@ export function createSocialMcpServer({ engine, auth, env = process.env } = {}) 
       media_path: z.string().optional().describe("Replacement media path inside the media folder."),
       media_url: z.string().url().optional().describe("Replacement https media URL."),
       media_content_type: z.string().optional().describe("Replacement MIME type."),
+      owner_feedback: z.string().max(300).optional().describe("Optional. What the owner asked you to change, in their words. Saved so every assistant learns from it."),
     },
-    async (args) => eng.updateDraft(args),
+    async ({ owner_feedback, ...args }) => {
+      const out = await eng.updateDraft(args);
+      if (owner_feedback) {
+        try {
+          recordOwnerFeedback(eng.store, out.post, owner_feedback);
+        } catch {
+          // Learning is advisory; never block the edit on it.
+        }
+      }
+      return out;
+    },
   );
 
   add(

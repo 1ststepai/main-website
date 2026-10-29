@@ -482,6 +482,27 @@
         <ul class="queue-list" id="brand-page-list"></ul>
       </section>
 
+      <section class="panel learning owner-surface" id="learning-panel" aria-labelledby="learning-title">
+        <div class="panel-head">
+          <div>
+            <p class="step-kicker">Brand style</p>
+            <h2 id="learning-title">What your assistant has learned</h2>
+            <p class="lede">Every connected assistant reads this before drafting. Your assistant suggests notes; nothing joins the guide until you accept it. Tell your assistant what to change.</p>
+          </div>
+        </div>
+        <div id="learning-list" class="learning-list" aria-live="polite"><p class="hint">Loading…</p></div>
+        <div id="learning-reset-step" class="earned-pin-step" hidden>
+          <h3>Reset what was learned</h3>
+          <p class="lede" id="learning-reset-what"></p>
+          <label class="auto-pin" id="learning-pin-row">Owner PIN <input type="password" id="learning-pin" autocomplete="current-password" /></label>
+          <label class="check" id="learning-confirm-row"><input type="checkbox" id="learning-confirm" /> Yes, clear this brand's guide and start over.</label>
+          <div class="earned-actions">
+            <button type="button" class="btn danger" id="learning-reset-go">Reset</button>
+            <button type="button" class="btn secondary" id="learning-reset-cancel">Cancel</button>
+          </div>
+        </div>
+      </section>
+
       <section class="panel auto-post owner-surface" id="auto-post-panel" aria-labelledby="auto-post-title">
         <div class="panel-head">
           <div>
@@ -702,5 +723,6 @@
     <script type="module" src="/app.js"></script>
     <script type="module" src="/manage.js"></script>
     <script type="module" src="/earnedAutoPost.js"></script>
+    <script type="module" src="/learning.js"></script>
   </body>
 </html>

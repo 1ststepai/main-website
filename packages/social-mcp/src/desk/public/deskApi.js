@@ -19,6 +19,12 @@ export const DESK_ROUTES = Object.freeze({
   autoPost: "/api/auto-post",
   autoPostNetwork: "/api/auto-post/network",
   autoPostSnooze: "/api/auto-post/snooze",
+  learning: "/api/learning",
+  learningAccept: "/api/learning/accept",
+  learningDismiss: "/api/learning/dismiss",
+  learningDelete: "/api/learning/delete",
+  learningReset: "/api/learning/reset",
+  discard: "/api/discard",
 });
 
 const QUERY_RULES = Object.freeze({
@@ -84,4 +90,46 @@ export function autoPostSnoozeBody({ profileId, platform } = {}) {
   const network = String(platform ?? "");
   if (!NETWORK.test(network)) throw new Error("Invalid network.");
   return { profile_id: brandId, platform: network };
+}
+
+const SUGGESTION_ID = /^sug_[a-z0-9]{4,40}$/;
+const BULLET_ID = /^(derived:[a-z_]+:[a-z0-9-]{1,60}|note_[a-z0-9]{4,40})$/;
+
+// Body for "learningAccept" / "learningDismiss": one brand and one pending suggestion.
+export function learningSuggestionBody({ profileId, suggestionId } = {}) {
+  const brandId = cleanBrandId(profileId);
+  if (!brandId) throw new Error("Invalid brand id.");
+  const id = String(suggestionId ?? "");
+  if (!SUGGESTION_ID.test(id)) throw new Error("Invalid suggestion.");
+  return { profile_id: brandId, suggestion_id: id };
+}
+
+// Body for "learningDelete": one brand and one guide bullet.
+export function learningDeleteBody({ profileId, bulletId } = {}) {
+  const brandId = cleanBrandId(profileId);
+  if (!brandId) throw new Error("Invalid brand id.");
+  const id = String(bulletId ?? "");
+  if (!BULLET_ID.test(id)) throw new Error("Invalid bullet.");
+  return { profile_id: brandId, bullet_id: id };
+}
+
+// Body for "learningReset": the PIN travels as a header; with no PIN set, an explicit confirm.
+export function learningResetBody({ profileId, confirm = false } = {}) {
+  const brandId = cleanBrandId(profileId);
+  if (!brandId) throw new Error("Invalid brand id.");
+  const body = { profile_id: brandId };
+  if (confirm === true) body.confirm = true;
+  return body;
+}
+
+const DRAFT_ID = /^[A-Za-z0-9_-]{8,80}$/;
+
+// Body for "discard": one draft or bundle, plus an optional short reason the owner typed.
+export function discardBody({ kind, id, reason = "" } = {}) {
+  const draftId = String(id ?? "");
+  if (!DRAFT_ID.test(draftId)) throw new Error("Invalid draft id.");
+  const body = kind === "bundle" ? { bundle_id: draftId } : { post_id: draftId };
+  const text = String(reason ?? "").replace(/[\u0000-\u001f\u007f]/g, " ").trim().slice(0, 200);
+  if (text) body.reason = text;
+  return body;
 }
