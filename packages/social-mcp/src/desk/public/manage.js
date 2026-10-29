@@ -79,11 +79,107 @@ const manageState = { profiles: [], profile: "", view: null, confirm: {} };
 async function loadProfiles() {
   const status = await call("/api/status");
   manageState.profiles = (status.profiles || []).map((row) => ({ id: row.id, name: row.name || row.id }));
-  const select = document.getElementById("manage-profile");
-  if (!select) return;
-  const current = manageState.profile || select.value || manageState.profiles[0]?.id || "";
-  select.replaceChildren(...manageState.profiles.map((row) => make("option", { value: row.id, selected: row.id === current }, row.name)));
+  const saved = readSavedBrand();
+  let current = manageState.profile || saved || manageState.profiles[0]?.id || "";
+  if (current && !manageState.profiles.some((row) => row.id === current)) current = manageState.profiles[0]?.id || "";
   manageState.profile = current;
+  for (const id of ["manage-profile", "brand-switcher"]) {
+    const select = document.getElementById(id);
+    if (!select) continue;
+    const options = manageState.profiles.map((row) => make("option", { value: row.id, selected: row.id === current }, row.name));
+    if (!options.length) options.push(make("option", { value: "" }, "No brand yet"));
+    select.replaceChildren(...options);
+    select.value = current;
+  }
+  const wrap = document.getElementById("brand-switcher-wrap");
+  if (wrap) wrap.dataset.count = String(manageState.profiles.length);
+}
+
+const BRAND_KEY = "postpath.brand";
+function readSavedBrand() {
+  try {
+    return localStorage.getItem(BRAND_KEY) || "";
+  } catch {
+    return "";
+  }
+}
+
+// One brand at a time across the desk: the switcher drives Manage, Connect, SEO and Hook.
+function selectBrand(id, { announce = true } = {}) {
+  const row = manageState.profiles.find((item) => item.id === id);
+  if (!row) return;
+  manageState.profile = id;
+  manageState.confirm = {};
+  try {
+    localStorage.setItem(BRAND_KEY, id);
+  } catch {}
+  for (const selectId of ["manage-profile", "brand-switcher"]) {
+    const select = document.getElementById(selectId);
+    if (select) select.value = id;
+  }
+  const nameInput = document.getElementById("profile-name");
+  const idInput = document.getElementById("profile-id");
+  if (idInput && nameInput) {
+    idInput.value = row.id;
+    nameInput.value = row.name;
+    idInput.dispatchEvent(new Event("input", { bubbles: true }));
+  }
+  for (const selectId of ["seo-brand", "hook-brand"]) {
+    const select = document.getElementById(selectId);
+    if (select && [...select.options].some((option) => option.value === id) && select.value !== id) {
+      select.value = id;
+      select.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+  }
+  document.dispatchEvent(new CustomEvent("postpath:brand", { detail: { id, name: row.name } }));
+  if (announce) toast(`Switched to ${row.name}.`);
+  loadManage().catch((error) => toast(error.message, true));
+}
+
+function accessLabel(row) {
+  if (!row.connected) return { text: "Not connected", cls: "connect" };
+  if (row.full_access) return { text: "Full", cls: "full" };
+  return { text: "Limited", cls: "limited" };
+}
+
+function renderAccounts(view) {
+  const table = document.getElementById("manage-accounts");
+  const name = document.getElementById("manage-brand-name");
+  if (name) name.textContent = view.brand?.name || manageState.profile || "this brand";
+  if (!table) return;
+  const body = table.querySelector("tbody");
+  body.replaceChildren();
+  for (const row of view.access || []) {
+    const tr = make("tr", { dataset: { platform: row.platform } });
+    tr.append(make("td", {}, row.label));
+    tr.append(make("td", {}, row.connected ? row.account_label || "Connected account" : "—"));
+    const isMeta = row.provider === "meta";
+    tr.append(make("td", {}, isMeta ? row.page_name || (row.page_id ? `Page ${row.page_id}` : view.brand?.meta_page ? `${view.brand.meta_page} (chosen, not connected yet)` : "—") : "—"));
+    const badge = accessLabel(row);
+    const cell = make("td", {});
+    cell.append(make("span", { className: `access-badge ${badge.cls}` }, badge.text));
+    tr.append(cell);
+    body.append(tr);
+  }
+}
+
+function renderKnownPages(pages) {
+  const list = document.getElementById("known-pages");
+  if (!list) return;
+  list.replaceChildren(...(pages || []).map((page) => make("option", { value: page.name }, `${page.name} · ${page.id}`)));
+}
+
+function pageChooser(view) {
+  const box = make("div", { className: "page-chooser" });
+  const id = `page-choice-${Math.random().toString(36).slice(2, 8)}`;
+  box.append(make("label", { for: id }, "Facebook Page for this brand"));
+  const input = make("input", { id, type: "text", className: "page-choice", list: "known-pages", maxlength: "200", placeholder: "Page name or id", value: view.brand?.meta_page || "" });
+  box.append(input);
+  return box;
+}
+
+async function saveMetaPage(profileId, name, page) {
+  await call("/api/profile", { id: profileId, name, presets: { meta_page: String(page || "").trim() } });
 }
 
 function renderAccess(access) {
@@ -104,6 +200,7 @@ function renderAccess(access) {
     if (row.granted.length) lists.append(make("div", {}, "Granted"), granted);
     if (row.missing.length) lists.append(make("div", {}, "Missing"), missing);
     card.append(lists);
+    if (row.provider === "meta" && row.action !== "ok") card.append(pageChooser(manageState.view || {}));
     if (row.action !== "ok") {
       card.append(make("button", { type: "button", className: "btn primary manage-reconnect", dataset: { provider: row.provider, platform: row.platform } }, row.action === "connect" ? "Connect" : "Reconnect"));
     }
@@ -193,6 +290,8 @@ async function loadManage() {
   }
   const view = await call(`/api/manage?profile_id=${encodeURIComponent(manageState.profile)}`);
   manageState.view = view;
+  renderAccounts(view);
+  renderKnownPages(view.known_pages);
   renderAccess(view.access);
   renderCatalog(view.catalog);
   renderActions(view.actions);
@@ -206,7 +305,10 @@ async function onManageClick(event) {
     if (target.classList.contains("manage-reconnect")) {
       const provider = target.dataset.provider;
       fetch("/api/recordings/event", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ type: "reconnect_started", provider, platform: target.dataset.platform }) }).catch(() => {});
-      const data = await call("/api/connect", { id: manageState.profile, name: manageState.profile, platforms: [provider], reconnect: true });
+      const brandName = manageState.view?.brand?.name || manageState.profile;
+      const choice = target.closest(".access-row")?.querySelector(".page-choice");
+      if (provider === "meta" && choice) await saveMetaPage(manageState.profile, brandName, choice.value);
+      const data = await call("/api/connect", { id: manageState.profile, name: brandName, platforms: [provider], reconnect: true });
       toast(data.connect?.message || "Sign-in opened in your browser. Approve every permission, then come back.");
       return;
     }
@@ -229,6 +331,21 @@ async function onManageClick(event) {
       await call("/api/manage/discard", { action_id: id });
       delete manageState.confirm[id];
       toast("Discarded.");
+    } else if (target.id === "add-brand-save" || target.id === "add-brand-connect") {
+      const name = document.getElementById("add-brand-name").value.trim();
+      const brandId = (document.getElementById("add-brand-id").value.trim() || name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")).slice(0, 64);
+      const page = document.getElementById("add-brand-page").value.trim();
+      if (!name || brandId.length < 2) throw new Error("Give the brand a name (and an id of 2+ letters or numbers).");
+      if (target.id === "add-brand-connect" && !page) throw new Error("Choose the Facebook Page first, so this brand doesn't grab another brand's Page.");
+      await saveMetaPage(brandId, name, page);
+      await loadProfiles();
+      selectBrand(brandId, { announce: false });
+      if (target.id === "add-brand-connect") {
+        const data = await call("/api/connect", { id: brandId, name, platforms: ["meta"] });
+        toast(data.connect?.message || `Saved ${name}. Sign in to Meta and tick ${page}.`);
+      } else toast(`Saved ${name}${page ? ` with Page ${page}` : ""}.`);
+      for (const field of ["add-brand-name", "add-brand-id", "add-brand-page"]) document.getElementById(field).value = "";
+      document.getElementById("add-brand").open = false;
     } else if (target.id === "manage-queue-btn") {
       let params;
       try {
@@ -380,20 +497,30 @@ async function onRecordingsClick(event) {
 function boot() {
   document.getElementById("manage-panel")?.addEventListener("click", onManageClick);
   document.getElementById("manage-type")?.addEventListener("change", fillExample);
-  document.getElementById("manage-profile")?.addEventListener("change", (event) => {
-    manageState.profile = event.target.value;
-    manageState.confirm = {};
-    loadManage().catch((error) => toast(error.message, true));
+  document.getElementById("manage-profile")?.addEventListener("change", (event) => selectBrand(event.target.value));
+  document.getElementById("brand-switcher")?.addEventListener("change", (event) => selectBrand(event.target.value));
+  document.getElementById("add-brand-open")?.addEventListener("click", () => {
+    const box = document.getElementById("add-brand");
+    if (!box) return;
+    box.open = true;
+    box.scrollIntoView({ behavior: "smooth", block: "center" });
+    document.getElementById("add-brand-name")?.focus();
   });
   document.getElementById("recordings-panel")?.addEventListener("click", onRecordingsClick);
   document.getElementById("recording-indicator")?.addEventListener("click", onRecordingsClick);
   const tick = () => {
-    if (document.querySelector(".confirm-input:focus")) return;
+    if (document.querySelector(".confirm-input:focus, #manage-panel input:focus")) return;
     loadProfiles()
       .then(loadManage)
       .catch(() => {});
     loadRecordings().catch(() => {});
   };
+  loadProfiles()
+    .then(() => {
+      const idInput = document.getElementById("profile-id");
+      if (manageState.profile && idInput && !idInput.value) selectBrand(manageState.profile, { announce: false });
+    })
+    .catch(() => {});
   tick();
   setInterval(tick, 5000);
 }

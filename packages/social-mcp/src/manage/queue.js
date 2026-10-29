@@ -178,11 +178,30 @@ export function createManageQueue({ store, getConfig, fetchImpl, mediaRoot, now 
     }
   }
 
+  function brandSummary(profileId) {
+    const profile = store.getProfile(profileId);
+    if (!profile) return { id: profileId, name: profileId, meta_page: "", exists: false };
+    return { id: profile.id, name: profile.name || profile.id, meta_page: String(profile.presets?.meta_page || ""), exists: true };
+  }
+
+  // Facebook Pages this desk has already seen, so the Page chooser can offer them. Ids and names only.
+  function knownPages() {
+    const seen = new Map();
+    for (const row of store.listConnections()) {
+      if (row.platform !== "facebook" || !row.page_id) continue;
+      if (!seen.has(row.page_id)) seen.set(row.page_id, { id: row.page_id, name: row.account_label || row.page_id, brands: [] });
+      seen.get(row.page_id).brands.push(row.profile_id);
+    }
+    return [...seen.values()];
+  }
+
   function view(profileId) {
     const xOk = xAvailable(store.homePaths);
     const keep = (platform) => xOk || !isXPlatform(platform);
     return {
       x_available: xOk,
+      brand: profileId ? brandSummary(profileId) : null,
+      known_pages: knownPages(),
       access: profileId ? accessStatus(store, profileId).filter((row) => keep(row.platform)) : [],
       actions: list({ profile_id: profileId }).filter((row) => keep(row.platform)),
       catalog: Object.entries(MANAGE_ACTIONS).filter(([, spec]) => keep(spec.platform)).map(([type, spec]) => ({ type, platform: spec.platform, label: spec.label, destructive: spec.destructive === true ? true : typeof spec.destructive === "function" ? "depends" : false })),
