@@ -28,7 +28,17 @@ export const AI_NOT_IN_APP =
 
 export const SNAPCHAT_RESTRICTED = "Restricted. PostPath does not publish to Snapchat.";
 export const WHATSAPP_RESTRICTED = "Restricted. PostPath does not publish to WhatsApp.";
-export const TIKTOK_GUIDE = "TikTok is an inbox handoff. This guide does not upload to TikTok.";
+export const TIKTOK_GUIDE =
+  "TikTok needs your own TikTok developer app. Save its client key and secret in Settings first. PostPath has no built-in TikTok app.";
+
+export const YOUTUBE_RECONNECT =
+  "YouTube sign-in expired. Google ends sign-ins after 7 days while your Google Cloud app is in Testing mode. Click Connect YouTube to sign in again. To stop the weekly expiry, set the OAuth consent screen to In production.";
+
+// Clear text for a connection whose refresh token stopped working.
+export function reconnectMessage(platform) {
+  if (platform === "youtube") return YOUTUBE_RECONNECT;
+  return "Sign-in expired or was revoked. Connect this account again.";
+}
 
 export const SUGGESTED_PREPARE_VIDEO = "Help me prepare this video for my connected channels.";
 export const SUGGESTED_DO_NOT_PUBLISH = "Show me the saved accounts and do not publish anything.";
@@ -194,7 +204,7 @@ export function connectPlan(channelKey, status = {}) {
       message: channel.key === "whatsapp" ? WHATSAPP_RESTRICTED : SNAPCHAT_RESTRICTED,
     };
   }
-  if (channel.flow === "tiktok") return { action: "unavailable", message: TIKTOK_GUIDE };
+  if (channel.flow === "tiktok" && !status.oauth_ready?.tiktok) return { action: "unavailable", message: TIKTOK_GUIDE };
   if (channel.flow === "bluesky") {
     return {
       action: "bluesky",

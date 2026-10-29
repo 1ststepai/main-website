@@ -4,6 +4,9 @@ import { resolveSafeMediaPath } from "../mediaPath.js";
 import { invalidGrantError, isInvalidGrantPayload, readJson, sendWithRefresh } from "./authRetry.js";
 import { mapPlatformError } from "./outcome.js";
 
+export const YOUTUBE_REAUTH_MESSAGE =
+  "YouTube sign-in expired. Google ends sign-ins after 7 days while the Google Cloud app is in Testing mode (or the access was revoked). Reconnect YouTube in the desk. To stop the weekly expiry, set the OAuth consent screen to In production.";
+
 const PRIVACY = new Set(["private", "unlisted", "public"]);
 
 const TOKEN_URL = "https://oauth2.googleapis.com/token";
@@ -46,7 +49,7 @@ export async function refreshAccess({ secrets, oauth, fetchImpl, now = Date.now(
   });
   const payload = await readJson(response);
   if (isInvalidGrantPayload(payload)) {
-    throw invalidGrantError("YouTube refresh token was revoked. Reconnect.");
+    throw invalidGrantError(YOUTUBE_REAUTH_MESSAGE);
   }
   if (!response.ok || !payload.access_token) {
     throw mcpError("youtube_auth_failed", "YouTube needs to be connected again.", 502);

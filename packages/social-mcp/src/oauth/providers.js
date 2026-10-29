@@ -52,7 +52,9 @@ export const META_SCOPES = [
 ];
 
 export const THREADS_SCOPES = ["threads_basic", "threads_content_publish"];
-export const TIKTOK_SCOPES = ["video.upload"];
+// user.info.basic reads the account label; video.upload sends drafts to the TikTok inbox;
+// video.publish allows Direct Post (private-only until the desk's own app passes TikTok audit).
+export const TIKTOK_SCOPES = ["user.info.basic", "video.upload", "video.publish"];
 export const LINKEDIN_SCOPES = ["openid", "profile", "w_member_social"];
 export const X_SCOPES = ["tweet.read", "tweet.write", "users.read", "offline.access", "like.write", "follows.write", "media.write"];
 export const PINTEREST_SCOPES = ["boards:read", "pins:read", "pins:write", "user_accounts:read"];
