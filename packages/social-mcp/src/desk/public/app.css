@@ -899,3 +899,5 @@ body:not(.x-on) [data-x-only] { display: none !important; }
 .learning-suggestion p { margin: 0 0 6px; }
 .discard-reason { display: inline-flex; gap: 6px; align-items: center; font-size: 0.85rem; }
 .discard-reason input { min-width: 180px; }
+
+#learning-reset-step[hidden], #learning-pin-row[hidden], #learning-confirm-row[hidden] { display: none !important; }
