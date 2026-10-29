@@ -967,6 +967,8 @@ details p {
 .footer .brand img { width: 32px; height: 32px; }
 .footer .brand-text strong { font-size: 1.05rem; }
 .footer-links { display: flex; gap: 1rem; flex-wrap: wrap; }
+.footer .social-nav { flex: 1 0 100%; display: flex; flex-wrap: wrap; gap: 0.4rem 1rem; }
+.footer .social-nav a { text-decoration: underline; text-underline-offset: 2px; }
 .footer a:hover { color: #fff; }
 
 @keyframes rise {

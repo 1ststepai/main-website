@@ -23,3 +23,6 @@ Disallow: /demos/
 Disallow: /book/confirmed/
 
 Sitemap: https://www.1ststep.ai/sitemap.xml
+
+# https://www.1ststep.ai/llms.txt
+# https://www.1ststep.ai/llms-full.txt
