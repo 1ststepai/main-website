@@ -10,6 +10,7 @@ import { EXECUTORS } from "../src/manage/executors.js";
 import { MANAGE_ACTIONS, API_LIMITS } from "../src/manage/actions.js";
 import { accessStatus, LEGACY_SCOPES } from "../src/manage/scopes.js";
 import { META_SCOPES, X_SCOPES, YOUTUBE_SCOPES } from "../src/oauth/providers.js";
+import { freePort, freePorts } from "./helpers/ports.js";
 
 const FULL = { youtube: YOUTUBE_SCOPES, facebook: META_SCOPES, instagram: META_SCOPES, x: X_SCOPES };
 
@@ -210,8 +211,8 @@ async function deskFor(engine, port) {
 
 test("desk routes: queue, two-step delete, and the recorder log it with secrets removed", async () => {
   const { fetchImpl } = apiMock();
-  const { engine, cleanup } = setup({ fetchImpl });
-  const port = 47990 + Math.floor(Math.random() * 8);
+  const [port, oauthPort] = await freePorts(2);
+  const { engine, cleanup } = setup({ fetchImpl, env: { SOCIAL_MCP_OAUTH_PORT: String(oauthPort) } });
   const { desk, base, post } = await deskFor(engine, port);
   try {
     seed(engine, "x");
