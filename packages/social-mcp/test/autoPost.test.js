@@ -13,10 +13,10 @@ import { initPilot } from "../src/cli.js";
 import { initOwnerPin } from "../src/pilot/ownerAuth.js";
 import { createPat } from "../src/mcp/auth.js";
 import { enableAutoPost } from "../src/autoPost.js";
+import { freePort, freePorts } from "./helpers/ports.js";
 
 const FULL = ["posts:read", "drafts:write", "accounts:read", "accounts:write", "queue:approve"];
 const DRAFT = ["posts:read", "drafts:write", "accounts:read"];
-let nextPort = 47930;
 
 function mockPublishers() {
   const calls = [];
@@ -29,9 +29,8 @@ function mockPublishers() {
 
 async function setup({ pilot = false, pin = "246810" } = {}) {
   const home = mkdtempSync(path.join(tmpdir(), "postpath-autopost-"));
-  const port = nextPort;
-  nextPort += 2;
-  const env = { ANTHROPIC_API_KEY: "", SOCIAL_MCP_DESK_PORT: String(port), SOCIAL_MCP_OAUTH_PORT: String(port + 1) };
+  const [port, oauthPort] = await freePorts(2);
+  const env = { ANTHROPIC_API_KEY: "", SOCIAL_MCP_DESK_PORT: String(port), SOCIAL_MCP_OAUTH_PORT: String(oauthPort) };
   if (pilot) {
     env.SOCIAL_MCP_PILOT_MODE = "1";
     initPilot({ home, pin, env });

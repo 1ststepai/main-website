@@ -14,14 +14,12 @@ import { insuranceOpenEnrollmentPilot } from "../src/pilot/example.js";
 import { generateFromTopic } from "../src/pilot/loop.js";
 import { FFMPEG_MISSING_MESSAGE, probeMedia } from "../src/media/audio.js";
 import { zipStore } from "../src/pilot/zipStore.js";
+import { freePort, freePorts } from "./helpers/ports.js";
 
 function homeDir() {
   return mkdtempSync(path.join(tmpdir(), "postpath-pilot-"));
 }
 
-function nextPort() {
-  return 20000 + Math.floor(Math.random() * 20000);
-}
 
 function spyEngine(home, extraEnv = {}) {
   const calls = [];
@@ -187,13 +185,13 @@ test("claude captions are used when a key is set, and promises fall back to the 
 
 test("desk pilot loop approves without a pin and blocks publish, connect, and pat", async () => {
   const home = homeDir();
-  const port = nextPort();
+  const [port, oauthPort] = await freePorts(2);
   const env = {
     SOCIAL_MCP_PILOT_MODE: "1",
     SOCIAL_MCP_PUBLISH_MODE: "live",
     ANTHROPIC_API_KEY: "",
     SOCIAL_MCP_DESK_PORT: String(port),
-    SOCIAL_MCP_OAUTH_PORT: String(port + 1),
+    SOCIAL_MCP_OAUTH_PORT: String(oauthPort),
   };
   initPilot({ home, pin: "246810", env });
   const calls = [];
@@ -275,8 +273,8 @@ test("desk pilot loop approves without a pin and blocks publish, connect, and pa
 
 test("a draft-only token cannot connect or change a profile", async () => {
   const home = homeDir();
-  const port = nextPort();
-  const env = { SOCIAL_MCP_DESK_PORT: String(port), SOCIAL_MCP_OAUTH_PORT: String(port + 1), ANTHROPIC_API_KEY: "" };
+  const [port, oauthPort] = await freePorts(2);
+  const env = { SOCIAL_MCP_DESK_PORT: String(port), SOCIAL_MCP_OAUTH_PORT: String(oauthPort), ANTHROPIC_API_KEY: "" };
   const engine = createEngine({ home, env, fetchImpl: async () => { throw new Error("network"); } });
   const desk = createDeskServer({ engine, env, port });
   try {
@@ -303,12 +301,12 @@ test("a draft-only token cannot connect or change a profile", async () => {
 
 test("owner pin gates the consent decision and the broker approve does not need it", async () => {
   const home = homeDir();
-  const port = nextPort();
+  const [port, oauthPort] = await freePorts(2);
   const env = {
     SOCIAL_MCP_PILOT_MODE: "1",
     ANTHROPIC_API_KEY: "",
     SOCIAL_MCP_DESK_PORT: String(port),
-    SOCIAL_MCP_OAUTH_PORT: String(port + 1),
+    SOCIAL_MCP_OAUTH_PORT: String(oauthPort),
   };
   initPilot({ home, pin: "246810", env });
   const engine = createEngine({ home, env });

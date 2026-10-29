@@ -6,6 +6,7 @@ import { join } from "node:path";
 import { vidiqUpsell, VIDIQ_HOME, DISCLOSURE } from "../src/score/vidiq.js";
 import { createEngine } from "../src/engine.js";
 import { createDeskServer } from "../src/desk/server.js";
+import { freePort, freePorts } from "./helpers/ports.js";
 
 test("empty config: plain vidiq.com link, no affiliate claim, no promo", () => {
   const u = vidiqUpsell({ env: {} });
@@ -38,8 +39,8 @@ test("promo set: shows the 35% line only with a code; env overrides settings", (
 
 test("desk: score returns the upsell, settings save needs the owner route, score is never blocked", async () => {
   const home = mkdtempSync(join(tmpdir(), "pp-vidiq-"));
-  const engine = createEngine({ home, env: { SOCIAL_MCP_PUBLISH_MODE: "mock" } });
-  const port = 47970 + Math.floor(Math.random() * 8);
+  const [port, oauthPort] = await freePorts(2);
+  const engine = createEngine({ home, env: { SOCIAL_MCP_PUBLISH_MODE: "mock", SOCIAL_MCP_OAUTH_PORT: String(oauthPort) } });
   const desk = createDeskServer({ engine, env: { SOCIAL_MCP_DESK_PORT: String(port) }, port });
   await desk.start({ open: false });
   const post = (p, b) => fetch(`http://127.0.0.1:${port}${p}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(b) }).then(async (r) => ({ status: r.status, ...(await r.json()) }));

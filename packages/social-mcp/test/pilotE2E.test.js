@@ -8,6 +8,7 @@ import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
+import { freePort, freePorts } from "./helpers/ports.js";
 
 const exec = promisify(execFile);
 const packageRoot = fileURLToPath(new URL("..", import.meta.url));
@@ -50,7 +51,7 @@ test("unpacked download walks the pilot loop and keeps stdio draft-only", { time
     await run("tar", ["-xzf", path.join(macDir, "postpath-app.tgz"), "-C", work]);
     await run("mv", [path.join(work, "postpath-app"), app]);
     await run("npm", ["ci", "--ignore-scripts", "--omit=dev"], { cwd: app });
-    const port = 21000 + Math.floor(Math.random() * 20000);
+    const [port, oauthPort] = await freePorts(2);
     await run(process.execPath, ["bin/social-mcp.js", "pilot", "init", "--home", home, "--pin", "246810"], {
       cwd: app,
       env: { ...process.env, ANTHROPIC_API_KEY: "" },
@@ -61,7 +62,7 @@ test("unpacked download walks the pilot loop and keeps stdio draft-only", { time
         ...process.env,
         SOCIAL_MCP_HOME: home,
         SOCIAL_MCP_DESK_PORT: String(port),
-        SOCIAL_MCP_OAUTH_PORT: String(port + 1),
+        SOCIAL_MCP_OAUTH_PORT: String(oauthPort),
         ANTHROPIC_API_KEY: "",
         POSTPATH_NO_OPEN: "1",
       },

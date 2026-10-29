@@ -6,6 +6,7 @@ import { test } from "node:test";
 import { createEngine } from "../src/engine.js";
 import { paths } from "../src/home.js";
 import { xAvailable, withOwnX } from "../src/xAccess.js";
+import { freePort, freePorts } from "./helpers/ports.js";
 
 function makeHome(prefix) {
   return mkdtempSync(join(tmpdir(), prefix));
@@ -17,7 +18,7 @@ function saveOwnX(home) {
 
 test("X is hidden and refused on a desk with no X app of its own", async () => {
   const home = makeHome("pp-x-off-");
-  const engine = createEngine({ home, env: { SOCIAL_MCP_OAUTH_PORT: "48761" } });
+  const engine = createEngine({ home, env: { SOCIAL_MCP_OAUTH_PORT: String(await freePort()) } });
   try {
     await engine.upsertProfile({ id: "acme", name: "Acme" });
     assert.equal(xAvailable(engine.store.homePaths), false);
@@ -36,7 +37,7 @@ test("X is hidden and refused on a desk with no X app of its own", async () => {
 
 test("no shared fallback: X keys in the process env or pilot env do not enable X", async () => {
   const home = makeHome("pp-x-env-");
-  const env = { SOCIAL_MCP_OAUTH_PORT: "48762", X_CLIENT_ID: "shared-id", X_CLIENT_SECRET: "shared-value", POSTPATH_ENABLE_X: "1", SOCIAL_MCP_PILOT_MODE: "1" };
+  const env = { SOCIAL_MCP_OAUTH_PORT: String(await freePort()), X_CLIENT_ID: "shared-id", X_CLIENT_SECRET: "shared-value", POSTPATH_ENABLE_X: "1", SOCIAL_MCP_PILOT_MODE: "1" };
   const engine = createEngine({ home, env });
   try {
     await engine.upsertProfile({ id: "acme", name: "Acme" });
@@ -55,7 +56,7 @@ test("X becomes available after the desk saves its own X app, pilot included", a
   for (const pilot of ["0", "1"]) {
     const home = makeHome("pp-x-on-");
     saveOwnX(home);
-    const engine = createEngine({ home, env: { SOCIAL_MCP_OAUTH_PORT: pilot === "1" ? "48764" : "48763", SOCIAL_MCP_PILOT_MODE: pilot } });
+    const engine = createEngine({ home, env: { SOCIAL_MCP_OAUTH_PORT: String(await freePort()), SOCIAL_MCP_PILOT_MODE: pilot } });
     try {
       await engine.upsertProfile({ id: "acme", name: "Acme" });
       assert.equal(xAvailable(engine.store.homePaths), true);
