@@ -5,7 +5,7 @@
  */
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
-import { basename, isAbsolute } from "node:path";
+import { isAbsolute } from "node:path";
 import { resolveSafeMediaPath } from "../mediaPath.js";
 import { scoreTitle } from "./title.js";
 
@@ -112,12 +112,12 @@ export async function scoreText(input = {}, { fetchImpl = fetch, interest = "off
 
 const IMAGE_EXT = /\.(png|jpe?g|webp|gif|bmp)$/i;
 
-// Only the ffmpeg program itself may run: the bare name "ffmpeg" (found on PATH) or an
-// absolute path whose file name is ffmpeg / ffmpeg.exe. Anything else is refused.
-export function safeFfmpegBinary(value = "ffmpeg") {
-  const bin = String(value || "");
-  if (bin === "ffmpeg") return bin;
-  if (!bin.includes("\0") && isAbsolute(bin) && /^ffmpeg(\.exe)?$/i.test(basename(bin))) return bin;
+// Only the ffmpeg program itself may run, found on PATH. The returned value is always
+// the literal "ffmpeg", never the caller's string; any other value is refused (tests use
+// this to simulate a missing ffmpeg).
+const FFMPEG = "ffmpeg";
+export function safeFfmpegBinary(value = FFMPEG) {
+  if (value === FFMPEG) return FFMPEG;
   throw new Error("ffmpeg binary is not allowed.");
 }
 
@@ -133,6 +133,18 @@ export function assertThumbnailPath(file) {
 }
 
 /** Thumbnail: text word count, contrast, and readability at small size (via ffmpeg, if installed). */
+// 64x36 grayscale: roughly how the image reads in a phone's search list. Null when it can't be read.
+function readThumbnailPixels(media_path, mediaRoot, ffmpeg) {
+  const file = resolveSafeMediaPath(media_path, mediaRoot);
+  try {
+    const image = readFileSync(assertThumbnailPath(file));
+    if (image.length > MAX_THUMBNAIL_BYTES) return null;
+    return execFileSync(safeFfmpegBinary(ffmpeg), THUMBNAIL_ARGS, { input: image, maxBuffer: 1 << 20, timeout: 10_000, shell: false });
+  } catch {
+    return null;
+  }
+}
+
 export function scoreThumbnail({ media_path, text = "" } = {}, { mediaRoot, ffmpeg = "ffmpeg", sample } = {}) {
   const checks = [];
   const add = (id, weight, pass, line, partial = pass ? 1 : 0) => checks.push({ id, weight, pass, points: Math.round(weight * partial), line });
@@ -142,18 +154,7 @@ export function scoreThumbnail({ media_path, text = "" } = {}, { mediaRoot, ffmp
   else if (count <= 6) add("text_words", 30, false, `${count} words of text. Cut to 4 or fewer.`, 0.5);
   else add("text_words", 30, false, `${count} words is too many for a thumbnail. Cut to 4 or fewer.`);
 
-  let pixels = sample || null;
-  if (!pixels && media_path) {
-    const file = resolveSafeMediaPath(media_path, mediaRoot);
-    try {
-      // 64x36 grayscale: roughly how the image reads in a phone's search list.
-      const image = readFileSync(assertThumbnailPath(file));
-      if (image.length > MAX_THUMBNAIL_BYTES) throw new Error("Thumbnail is too large to check.");
-      pixels = execFileSync(safeFfmpegBinary(ffmpeg), THUMBNAIL_ARGS, { input: image, maxBuffer: 1 << 20, timeout: 10_000, shell: false });
-    } catch {
-      pixels = null;
-    }
-  }
+  const pixels = sample || (media_path ? readThumbnailPixels(media_path, mediaRoot, ffmpeg) : null);
   if (!pixels?.length) {
     add("contrast", 35, false, "Couldn't read the image here, so contrast wasn't checked.", 0);
     add("small_size", 35, false, "Couldn't check readability at small size.", 0);

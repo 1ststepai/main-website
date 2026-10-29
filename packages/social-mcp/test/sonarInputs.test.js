@@ -23,8 +23,7 @@ test("desk URLs come only from the route allowlist, pinned to the desk origin", 
 
 test("ffmpeg runs only as ffmpeg, with fixed args and a file: input", () => {
   assert.equal(safeFfmpegBinary(), "ffmpeg");
-  assert.equal(safeFfmpegBinary("/usr/bin/ffmpeg"), "/usr/bin/ffmpeg");
-  for (const bad of ["sh", "/bin/sh", "ffmpeg; rm -rf /", "./ffmpeg", "/tmp/ffmpeg-evil", "-i"]) {
+  for (const bad of ["sh", "/bin/sh", "/usr/bin/ffmpeg", "ffmpeg; rm -rf /", "./ffmpeg", "/tmp/ffmpeg-evil", "-i"]) {
     assert.throws(() => safeFfmpegBinary(bad), /not allowed/);
   }
   assert.ok(Object.isFrozen(THUMBNAIL_ARGS));
