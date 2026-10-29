@@ -4,7 +4,7 @@
  * never calls vidIQ itself, so nobody's scoring runs through the owner's vidIQ account.
  */
 import { execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { closeSync, openSync, statSync } from "node:fs";
 import { isAbsolute } from "node:path";
 import { resolveSafeMediaPath } from "../mediaPath.js";
 import { scoreTitle } from "./title.js";
@@ -137,9 +137,15 @@ export function assertThumbnailPath(file) {
 function readThumbnailPixels(media_path, mediaRoot, ffmpeg) {
   const file = resolveSafeMediaPath(media_path, mediaRoot);
   try {
-    const image = readFileSync(assertThumbnailPath(file));
-    if (image.length > MAX_THUMBNAIL_BYTES) return null;
-    return execFileSync(safeFfmpegBinary(ffmpeg), THUMBNAIL_ARGS, { input: image, maxBuffer: 1 << 20, timeout: 10_000, shell: false });
+    const path = assertThumbnailPath(file);
+    if (statSync(path).size > MAX_THUMBNAIL_BYTES) return null;
+    // The image is handed to ffmpeg as an open file descriptor on stdin; argv stays constant.
+    const fd = openSync(path, "r");
+    try {
+      return execFileSync(safeFfmpegBinary(ffmpeg), THUMBNAIL_ARGS, { stdio: [fd, "pipe", "ignore"], maxBuffer: 1 << 20, timeout: 10_000, shell: false });
+    } finally {
+      closeSync(fd);
+    }
   } catch {
     return null;
   }
