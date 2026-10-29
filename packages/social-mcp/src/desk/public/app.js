@@ -1870,7 +1870,7 @@ function renderAutoPost(view) {
   for (const brand of view.brands) {
     const card = el("div", { className: "auto-brand", dataset: { profile: brand.profile_id } });
     card.append(el("h3", {}, brand.name || brand.profile_id));
-    if (!brand.connections.length) card.append(el("p", { className: "hint" }, "No AI connections yet. Auto-post is off."));
+    if (!brand.connections.length) card.append(el("p", { className: "hint" }, "No assistant connections yet. Auto-post is off."));
     for (const conn of brand.connections) {
       const row = el("div", { className: "auto-conn", dataset: { connection: conn.connection_id } });
       row.append(el("div", {}, `${conn.name} (${conn.kind === "pat" ? "access token" : conn.kind === "oauth" ? "OAuth" : "inactive"})`));

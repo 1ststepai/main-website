@@ -867,3 +867,20 @@ body:not(.x-on) [data-x-only] { display: none !important; }
 .add-brand summary { cursor: pointer; font-weight: 600; }
 .page-chooser { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 8px 0; }
 .page-chooser input, .page-chooser select { padding: 6px 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: inherit; min-width: 200px; }
+
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.earned-prompts { display: grid; gap: 12px; margin: 0 0 14px; }
+.earned-card { border: 1px solid #7ee2a8; border-radius: 16px; padding: 14px 16px; background: rgba(126, 226, 168, 0.07); display: grid; gap: 10px; }
+.earned-card p { margin: 0; font-size: 1.05rem; }
+.earned-card .earned-sub { color: #9aa6c4; font-size: 0.9rem; }
+.earned-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.earned-pin-step { border: 1px solid #ff5a6a; border-radius: 16px; padding: 14px 16px; margin: 0 0 14px; display: grid; gap: 8px; }
+.earned-pin-step h3 { margin: 0; }
+.earned-nudge { color: #ffd27a; }
+.posting-modes { margin: 8px 0 16px; overflow-x: auto; }
+.posting-table { width: 100%; border-collapse: collapse; }
+.posting-table th, .posting-table td { text-align: left; padding: 8px 10px; border-top: 1px solid rgba(194, 210, 255, 0.1); }
+.mode-pill { font-weight: 700; padding: 2px 10px; border-radius: 999px; border: 1px solid rgba(194, 210, 255, 0.25); white-space: nowrap; }
+.mode-pill.auto { color: #ff5a6a; border-color: #ff5a6a; }
+.mode-pill.review { color: #7ee2a8; border-color: #7ee2a8; }
+.auto-advanced { margin-top: 12px; }

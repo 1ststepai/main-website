@@ -16,6 +16,9 @@ export const DESK_ROUTES = Object.freeze({
   recordingsRename: "/api/recordings/rename",
   recordingsDelete: "/api/recordings/delete",
   settingsVidiq: "/api/settings/vidiq",
+  autoPost: "/api/auto-post",
+  autoPostNetwork: "/api/auto-post/network",
+  autoPostSnooze: "/api/auto-post/snooze",
 });
 
 const QUERY_RULES = Object.freeze({
@@ -58,4 +61,27 @@ export function profileBody({ id, name, metaPage = "" } = {}) {
   const page = String(metaPage ?? "").replace(/[\u0000-\u001f\u007f]/g, "").trim();
   if (page.length > 200) throw new Error("Facebook Page name is too long.");
   return { id: brandId, name: brandName, presets: { meta_page: page } };
+}
+
+const NETWORK = /^[a-z][a-z_]{0,31}$/;
+
+// Body for "autoPostNetwork": one brand, one network, on or off. Only turning it on
+// carries the owner PIN (sent as a header) or, with no PIN set, an explicit confirm.
+export function autoPostNetworkBody({ profileId, platform, enabled, confirm = false } = {}) {
+  const brandId = cleanBrandId(profileId);
+  if (!brandId) throw new Error("Invalid brand id.");
+  const network = String(platform ?? "");
+  if (!NETWORK.test(network)) throw new Error("Invalid network.");
+  const body = { profile_id: brandId, platform: network, enabled: enabled === true };
+  if (body.enabled && confirm === true) body.confirm = true;
+  return body;
+}
+
+// Body for "autoPostSnooze": hide the suggestion for one brand + network for now.
+export function autoPostSnoozeBody({ profileId, platform } = {}) {
+  const brandId = cleanBrandId(profileId);
+  if (!brandId) throw new Error("Invalid brand id.");
+  const network = String(platform ?? "");
+  if (!NETWORK.test(network)) throw new Error("Invalid network.");
+  return { profile_id: brandId, platform: network };
 }
