@@ -1,45 +1,11 @@
 // Earned auto-post: the owner's posting mode per brand + network, the suggestion that
 // appears once they have approved enough drafts unchanged, and the auto-post activity log.
 // Turning auto-post on always goes through the PIN step; turning it off is one click.
-import { autoPostNetworkBody, autoPostSnoozeBody, deskUrl } from "./deskApi.js";
-
-const NETWORK_NAMES = {
-  youtube: "YouTube", facebook: "Facebook", instagram: "Instagram", tiktok: "TikTok", linkedin: "LinkedIn", x: "X",
-  threads: "Threads", pinterest: "Pinterest", bluesky: "Bluesky", google_business: "Google Business", reddit: "Reddit", snapchat: "Snapchat", whatsapp: "WhatsApp",
-};
-const netName = (id) => NETWORK_NAMES[id] || id;
+import { autoPostNetworkBody, autoPostSnoozeBody } from "./deskApi.js";
+import { netName, node, toast, post } from "./deskUi.js";
 
 let view = null;
 let pending = null;
-
-function node(tag, attrs = {}, text) {
-  const el = document.createElement(tag);
-  for (const [key, value] of Object.entries(attrs)) {
-    if (key === "className") el.className = value;
-    else if (key === "dataset") Object.assign(el.dataset, value);
-    else el.setAttribute(key, value);
-  }
-  if (text !== undefined) el.textContent = text;
-  return el;
-}
-
-function toast(message, bad = false) {
-  const box = document.getElementById("toast");
-  if (!box) return;
-  box.textContent = message;
-  box.classList.toggle("error", bad);
-  box.hidden = false;
-  setTimeout(() => { box.hidden = true; }, 4000);
-}
-
-async function post(route, body, pin = "") {
-  const headers = { "content-type": "application/json", "x-postpath-desk": "1" };
-  if (pin) headers["x-postpath-owner-pin"] = pin;
-  const response = await fetch(deskUrl(route), { method: "POST", headers, body: JSON.stringify(body) });
-  const payload = await response.json().catch(() => ({}));
-  if (!response.ok || payload.ok === false) throw new Error(payload.message || "Request failed");
-  return payload;
-}
 
 export function promptText(row) {
   const r = row.readiness;

@@ -172,7 +172,7 @@ export function brandGuide(store, profileId) {
     ...b.notes.filter((n) => !n.network).map((n) => ({ id: n.id, text: n.text, source: n.source, network: null })),
   ].filter((row) => !hidden.has(row.id));
   const networks = {};
-  for (const platform of [...new Set(records.map((r) => r.platform))].sort()) {
+  for (const platform of [...new Set(records.map((r) => r.platform))].sort((a, b) => a.localeCompare(b))) {
     const rows = derivedBullets(deriveStats(records.filter((r) => r.platform === platform)), platform).map((row) => ({ ...row, source: "history", network: platform }));
     if (rows.length) networks[platform] = rows;
   }

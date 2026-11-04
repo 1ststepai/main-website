@@ -1,13 +1,9 @@
 import assert from "node:assert/strict";
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { test } from "node:test";
-import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { createEngine } from "../src/engine.js";
-import { createSocialMcpServer } from "../src/mcp/server.js";
-import { createDeskServer } from "../src/desk/server.js";
 import { initOwnerPin } from "../src/pilot/ownerAuth.js";
 import { createPat } from "../src/mcp/auth.js";
 import { listDecisions } from "../src/approvalHistory.js";
@@ -15,6 +11,7 @@ import { brandGuide, deriveStats, derivedBullets, proposeStyleNote } from "../sr
 import { POSTPATH_INSTRUCTIONS } from "../src/mcp/instructions.js";
 import { DESK_ROUTES, discardBody, learningDeleteBody, learningResetBody, learningSuggestionBody } from "../src/desk/public/deskApi.js";
 import { freePorts } from "./helpers/ports.js";
+import { deskLifecycle, mcpFor } from "./helpers/harness.js";
 
 const DRAFT = ["posts:read", "drafts:write", "accounts:read"];
 
@@ -28,38 +25,12 @@ async function setup({ pin = "246810" } = {}) {
   engine.store.saveConnection({ profile_id: "acme", platform: "facebook", account_label: "acme-fb", page_id: "p1" }, { access_token: "tok-secret-value" });
   const media = path.join(engine.store.homePaths.mediaDir, "clip.mp4");
   writeFileSync(media, Buffer.alloc(2048, 1));
-  let desk;
   return {
     engine, env, media,
-    async deskUrl() {
-      desk = createDeskServer({ engine, env, port });
-      return (await desk.start({ open: false })).url;
-    },
-    async cleanup() {
-      await desk?.stop();
-      rmSync(home, { recursive: true, force: true });
-    },
+    ...deskLifecycle({ engine, env, port, home }),
   };
 }
 
-async function mcpFor(engine, env, auth) {
-  const { server } = createSocialMcpServer({ engine, env, auth });
-  const [a, b] = InMemoryTransport.createLinkedPair();
-  const client = new Client({ name: "t", version: "0" });
-  await Promise.all([server.connect(a), client.connect(b)]);
-  return {
-    client,
-    async call(name, args = {}) {
-      const res = await client.callTool({ name, arguments: args });
-      let body = res.structuredContent;
-      if (!body) {
-        try { body = JSON.parse(res.content?.[0]?.text || "{}"); } catch { body = { text: res.content?.[0]?.text }; }
-      }
-      return { error: res.isError === true, body, text: res.content?.map((c) => c.text).join("\n") || "" };
-    },
-    close: () => client.close(),
-  };
-}
 
 async function post(url, route, body, pin) {
   const headers = { "content-type": "application/json" };
