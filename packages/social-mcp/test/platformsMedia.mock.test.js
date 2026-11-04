@@ -224,3 +224,29 @@ test("smoke: --private-post refused on X; TikTok private post forces SELF_ONLY",
   assert.equal(tt.posted, true);
   assert.equal(bodies[0].post_info.privacy_level, "SELF_ONLY");
 });
+
+test("Pinterest: a local image/png file and an https image/jpeg both publish end to end (no image_publish_unsupported)", async () => {
+  const home = giveOwnX(mkdtempSync(join(tmpdir(), "pm-eng-")));
+  mkdirSync(join(home, "media"), { recursive: true });
+  writeFileSync(join(home, "media", "card.png"), Buffer.from("89504e470d0a1a0a0000000d49484452", "hex"));
+  const bodies = [];
+  const fetchImpl = async (url, init = {}) => {
+    if (String(url).endsWith("/v5/pins")) {
+      bodies.push(JSON.parse(init.body));
+      return res(201, { id: `pin${bodies.length}` });
+    }
+    throw new Error(String(url));
+  };
+  const engine = createEngine({ home, env: {}, fetchImpl, now: () => Date.parse("2026-06-01T12:00:00Z") });
+  await engine.upsertProfile({ id: "acme", name: "Acme" });
+  engine.store.saveConnection({ profile_id: "acme", platform: "pinterest", account_label: "A", board_id: "b1" }, { access_token: "a", refresh_token: "r", expires_at: "2027-01-01T00:00:00Z" });
+  const local = await engine.createDraft({ profile_id: "acme", platform: "pinterest", title: "local", media_path: join(home, "media", "card.png"), media_content_type: "image/png" });
+  const remote = await engine.createDraft({ profile_id: "acme", platform: "pinterest", title: "remote", media_url: "https://cdn.example/a.jpg", media_content_type: "image/jpeg" });
+  const a = await engine.publishPost({ post_id: local.post.id });
+  const b = await engine.publishPost({ post_id: remote.post.id });
+  assert.equal(a.post.status, "published");
+  assert.equal(b.post.status, "published");
+  assert.equal(bodies[0].media_source.source_type, "image_base64");
+  assert.equal(bodies[0].media_source.content_type, "image/png");
+  assert.equal(bodies[1].media_source.source_type, "image_url");
+});
