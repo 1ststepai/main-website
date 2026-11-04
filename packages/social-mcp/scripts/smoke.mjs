@@ -150,7 +150,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   runSmoke(process.argv.slice(2))
     .then((r) => console.log(JSON.stringify(r, null, 2)))
     .catch((e) => {
-      console.error(e.message);
+      console.error(String(e?.message || e).replace(/[\r\n\u001b]+/g, " ").slice(0, 300));
       process.exit(1);
     });
 }

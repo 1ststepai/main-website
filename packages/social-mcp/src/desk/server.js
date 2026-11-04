@@ -900,7 +900,6 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
         const created = createPat(engine.store, {
           name: body.name,
           scopes: body.scopes,
-          brands: body.brands,
           expiresInDays: body.expires_in_days,
           brands: body.all_brands === true ? ["*"] : (body.brands ?? body.profiles),
         });
