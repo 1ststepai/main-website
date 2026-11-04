@@ -58,10 +58,12 @@ test("createPat rejects unknown brands and stores the allowlist", () => {
   try {
     assert.throws(() => createPat(ctx.engine.store, { name: "x", profiles: ["nope"] }), /Unknown brand/);
     const { pat } = createPat(ctx.engine.store, { name: "x", profiles: ["skillsprout"] });
-    assert.deepEqual(pat.profiles, ["skillsprout"]);
-    assert.deepEqual(listPats(ctx.engine.store)[0].profiles, ["skillsprout"]);
+    assert.deepEqual(pat.brands, ["skillsprout"]);
+    assert.throws(() => createPat(ctx.engine.store, { name: "x", brands: [] }), /at least one brand/);
+    assert.deepEqual(createPat(ctx.engine.store, { name: "y", brands: ["1ststep-ai"] }).pat.brands, ["1ststep-ai"]);
+    assert.deepEqual(listPats(ctx.engine.store)[0].brands, ["skillsprout"]);
     const all = createPat(ctx.engine.store, { name: "y" });
-    assert.equal(all.pat.profiles, null);
+    assert.deepEqual(all.pat.brands, ["*"]);
   } finally {
     ctx.stop();
   }
@@ -163,11 +165,11 @@ test("desk /api/pat accepts a brand picker", async () => {
     const res = await fetch(`${url}api/pat`, {
       method: "POST",
       headers: { "content-type": "application/json", origin: url.replace(/\/$/, "") },
-      body: JSON.stringify({ name: "desk", scopes: ["posts:read"], profiles: ["skillsprout"] }),
+      body: JSON.stringify({ name: "desk", scopes: ["posts:read"], brands: ["skillsprout"] }),
     });
     const data = await res.json();
     assert.equal(res.status, 201, JSON.stringify(data.message || data));
-    assert.deepEqual(data.pat.profiles, ["skillsprout"]);
+    assert.deepEqual(data.pat.brands, ["skillsprout"]);
   } finally {
     await desk.stop();
     ctx.stop();

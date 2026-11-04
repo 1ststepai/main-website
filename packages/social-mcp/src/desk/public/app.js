@@ -487,7 +487,7 @@ function renderMcpRemote(data) {
     strong.textContent = `${pat.name} ${pat.prefix}…`;
     const meta = document.createElement("div");
     meta.className = "meta";
-    meta.textContent = `${(pat.scopes || []).join(" ")} · brands: ${pat.profiles ? pat.profiles.join(", ") : "all"} · last used ${pat.last_used_at || "never"}`;
+    meta.textContent = `${(pat.scopes || []).join(" ")} · brands: ${!pat.brands || pat.brands[0] === "*" ? "all" : pat.brands.join(", ")} · last used ${pat.last_used_at || "never"}`;
     const button = document.createElement("button");
     button.type = "button";
     button.className = "btn danger revoke-pat";
@@ -515,7 +515,7 @@ document.getElementById("pat-form")?.addEventListener("submit", async (event) =>
         name: String(form.get("name") || ""),
         scopes,
         all_brands: allBrands,
-        profiles: allBrands ? undefined : profiles,
+        brands: allBrands ? ["*"] : profiles,
         expires_in_days: form.get("expires_in_days") ? Number(form.get("expires_in_days")) : undefined,
       }),
     });

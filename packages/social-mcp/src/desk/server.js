@@ -848,7 +848,7 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
           name: body.name,
           scopes: body.scopes,
           expiresInDays: body.expires_in_days,
-          profiles: body.all_brands === true ? null : body.profiles,
+          brands: body.all_brands === true ? ["*"] : (body.brands ?? body.profiles),
         });
         sendJson(res, 201, { ok: true, ...created, ...deskState() });
         return;

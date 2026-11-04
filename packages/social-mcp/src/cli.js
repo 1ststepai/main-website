@@ -61,7 +61,7 @@ export function createPatFile({ home, scopes, out, name, brands, env = process.e
     } catch {
       // Mode is best effort on Windows.
     }
-    return { file: out, id: created.pat.id, scopes: created.pat.scopes, profiles: created.pat.profiles, printed: false };
+    return { file: out, id: created.pat.id, scopes: created.pat.scopes, brands: created.pat.brands, printed: false };
   } finally {
     engine.oauth.stop();
   }
@@ -167,7 +167,7 @@ export async function runPilotCommands(args, io = {}) {
       brands: flag(args, "--brands"),
       env,
     });
-    const brandText = result.profiles ? result.profiles.join(", ") : "all brands";
+    const brandText = result.brands?.[0] === "*" ? "all brands" : result.brands.join(", ");
     print(io, `Wrote a token for ${result.id} to ${result.file} (mode 0600). Scopes: ${result.scopes.join(" ")}. Brands: ${brandText}. The token was not printed.`);
     return 0;
   }
