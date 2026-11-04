@@ -8,6 +8,7 @@
  *   meta.json     name and timing
  * Nothing here uploads, posts, or shares a recording. Payloads are reduced to an allowlist and redacted.
  */
+import { redactValue } from "./redact.js";
 import { createWriteStream, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync, appendFileSync, renameSync } from "node:fs";
 import { join } from "node:path";
 import { randomBytes } from "node:crypto";
@@ -128,7 +129,7 @@ export function createRecorder({ root, now = () => Date.now() }) {
   function record(type, data = {}) {
     if (!active) return false;
     const row = { at: new Date(now()).toISOString(), ...redactEvent({ ...data, type: String(type).slice(0, 60) }) };
-    appendFileSync(join(dir, active.id, "events.jsonl"), `${JSON.stringify(row)}\n`, { mode: 0o600 });
+    appendFileSync(join(dir, active.id, "events.jsonl"), `${JSON.stringify(redactValue(row))}\n`, { mode: 0o600 });
     return true;
   }
 

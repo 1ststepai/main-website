@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import { installLogRedaction } from "../src/redact.js";
+installLogRedaction();
 import { writeFileSync } from "node:fs";
 import { startStdioServer, createEngine } from "../src/index.js";
 import { paths, resolveHome } from "../src/home.js";
@@ -10,6 +12,7 @@ import { DEFAULT_OAUTH_PORT } from "../src/home.js";
 import { providerRedirectUri } from "../src/oauth/redirect.js";
 import { runPilotCommands } from "../src/cli.js";
 import { buildSocialMcpServerEntry } from "../src/cursorConfig.js";
+import { formatDoctor, runDoctor } from "../src/doctor.js";
 
 const args = process.argv.slice(2);
 const command = args[0];
@@ -60,6 +63,13 @@ TIKTOK_CLIENT_SECRET=
     console.log(`${PRODUCT_TITLE} ready at ${homePaths.root}`);
     console.log(`Open the desk: node ./bin/social-mcp.js app`);
     console.log(`Redirect URI: ${redirectUri}`);
+    return;
+  }
+
+  if (command === "doctor") {
+    const report = await runDoctor({ env: process.env });
+    console.log(args.includes("--json") ? JSON.stringify(report, null, 2) : formatDoctor(report));
+    process.exitCode = report.ok ? 0 : 1;
     return;
   }
 

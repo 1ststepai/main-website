@@ -1,4 +1,5 @@
 import { mcpError } from "../errors.js";
+import { uploadXPostMedia } from "./xMedia.js";
 import { invalidGrantError, isInvalidGrantPayload, readJson, sendWithRefresh } from "./authRetry.js";
 
 export async function refreshAccess({ secrets, oauth, fetchImpl, now = Date.now() }) {
@@ -46,16 +47,22 @@ export async function ensureAccess({ secrets, oauth, fetchImpl, now = Date.now()
   return next;
 }
 
-export async function publishXPost({ post, secrets, oauth, fetchImpl = fetch, onSecrets, onNeedsReconnect }) {
+export async function publishXPost({ post, mediaRoot, secrets, oauth, fetchImpl = fetch, onSecrets, onNeedsReconnect, sleep }) {
   let fresh = await ensureAccess({ secrets, oauth, fetchImpl, onSecrets });
   const text = String(post.caption || post.description || post.title || "").slice(0, 280);
-  if (!text) throw mcpError("invalid_post", "X posts need caption or description text.", 400);
+  const hasMedia = Boolean(post.media_path || post.media_paths?.length);
+  if (!text && !hasMedia) throw mcpError("invalid_post", "X posts need caption or description text, or media.", 400);
 
   const budget = { used: false };
+  const refresh = (current) => refreshAccess({ secrets: current, oauth, fetchImpl });
+  const secretsRef = { current: fresh };
+  const mediaIds = await uploadXPostMedia({ post, mediaRoot, secretsRef, budget, refresh, onSecrets, onNeedsReconnect, fetchImpl, sleep });
+  fresh = secretsRef.current;
+  const body = { ...(text ? { text } : {}), ...(mediaIds.length ? { media: { media_ids: mediaIds } } : {}) };
   const sent = await sendWithRefresh({
     budget,
     secrets: fresh,
-    refresh: (current) => refreshAccess({ secrets: current, oauth, fetchImpl }),
+    refresh,
     onSecrets,
     onNeedsReconnect,
     send: (current) =>
@@ -65,7 +72,7 @@ export async function publishXPost({ post, secrets, oauth, fetchImpl = fetch, on
           authorization: `Bearer ${current.access_token}`,
           "content-type": "application/json",
         },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify(body),
       }),
   });
   fresh = sent.secrets;
@@ -78,5 +85,6 @@ export async function publishXPost({ post, secrets, oauth, fetchImpl = fetch, on
   return {
     platform_post_id: String(id),
     published_url: `https://x.com/i/web/status/${id}`,
+    ...(mediaIds.length ? { media_ids: mediaIds } : {}),
   };
 }

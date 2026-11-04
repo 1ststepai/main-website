@@ -463,6 +463,22 @@ function renderMcpRemote(data) {
   header.className = "mcp-config";
   header.textContent = JSON.stringify(remote.header_remote, null, 2);
   node.append(links, oauth, claude, header);
+  const brandBox = document.getElementById("pat-brand-list");
+  if (brandBox) {
+    const ticked = new Set([...brandBox.querySelectorAll("input:checked")].map((input) => input.value));
+    brandBox.replaceChildren();
+    for (const profile of data.profiles || []) {
+      const label = document.createElement("label");
+      label.className = "check";
+      const input = document.createElement("input");
+      input.type = "checkbox";
+      input.name = "pat_brand";
+      input.value = profile.id;
+      input.checked = ticked.has(profile.id);
+      label.append(input, ` ${profile.name || profile.id}`);
+      brandBox.append(label);
+    }
+  }
   const list = document.getElementById("pat-list");
   if (!list) return;
   list.replaceChildren();
@@ -472,7 +488,7 @@ function renderMcpRemote(data) {
     strong.textContent = `${pat.name} ${pat.prefix}…`;
     const meta = document.createElement("div");
     meta.className = "meta";
-    meta.textContent = `${(pat.scopes || []).join(" ")} · last used ${pat.last_used_at || "never"}`;
+    meta.textContent = `${(pat.scopes || []).join(" ")} · brands: ${!pat.brands || pat.brands[0] === "*" ? "all" : pat.brands.join(", ")} · last used ${pat.last_used_at || "never"}`;
     const button = document.createElement("button");
     button.type = "button";
     button.className = "btn danger revoke-pat";
@@ -487,12 +503,20 @@ document.getElementById("pat-form")?.addEventListener("submit", async (event) =>
   event.preventDefault();
   const form = new FormData(event.currentTarget);
   const scopes = form.getAll("scope");
+  const allBrands = form.get("all_brands") === "1";
+  const profiles = form.getAll("pat_brand").map(String);
+  if (!allBrands && !profiles.length) {
+    showToast("Pick at least one brand, or tick All brands.", true);
+    return;
+  }
   try {
     const data = await api("/api/pat", {
       method: "POST",
       body: JSON.stringify({
         name: String(form.get("name") || ""),
         scopes,
+        all_brands: allBrands,
+        brands: allBrands ? ["*"] : profiles,
         expires_in_days: form.get("expires_in_days") ? Number(form.get("expires_in_days")) : undefined,
       }),
     });
