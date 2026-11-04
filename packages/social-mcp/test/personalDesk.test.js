@@ -55,10 +55,13 @@ test("brands field: ids, all, unknown rejected", () => {
   assert.throws(() => normalizeBrands(["acme"]), /Unknown brand/);
 });
 
-test("PAT records carry brands and default to all", () => {
+test("PAT records carry brands and default to all", async () => {
   const home = mkdtempSync(join(tmpdir(), "pp-personal-"));
   try {
     const engine = createEngine({ home, env: {} });
+    // #77: a brand-scoped token needs the brand to exist first.
+    assert.throws(() => createPat(engine.store, { name: "early", brands: ["swing-trade-pros"] }), /Unknown brand/);
+    await engine.upsertProfile({ id: "swing-trade-pros", name: "Swing Trade Pros" });
     const a = createPat(engine.store, { name: "a", brands: ["swing-trade-pros"] });
     assert.deepEqual(a.pat.brands, ["swing-trade-pros"]);
     const b = createPat(engine.store, { name: "b" });

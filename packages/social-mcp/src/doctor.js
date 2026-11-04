@@ -116,7 +116,15 @@ export async function runDoctor({ env = process.env, home = resolveHome(env), no
       add("connections", "ok", `${matrix.filter((r) => r.connected).length} of ${matrix.length} brand x network slots connected`);
       pats = Object.values(db.mcpAuth?.pats || {})
         .filter((p) => !p.revoked)
-        .map((p) => ({ name: p.name, scopes: p.scopes || [], expires_at: p.expires_at || null }));
+        .map((p) => ({
+          name: p.name,
+          scopes: p.scopes || [],
+          // Brand scope (#77): brand ids, or ["*"] for every brand. Legacy `profiles` is read too.
+          brands: Array.isArray(p.brands) && p.brands.length ? p.brands : Array.isArray(p.profiles) && p.profiles.length ? p.profiles : ["*"],
+          expires_at: p.expires_at || null,
+        }));
+      const allBrands = pats.filter((p) => p.brands.includes("*"));
+      if (allBrands.length) add("mcp_token_brands", "warn", `${allBrands.map((p) => p.name).join(", ")} can draft for every brand; create one brand-scoped token per brand if you want isolation`);
       const owners = pats.filter((p) => p.scopes.includes("queue:approve") || p.scopes.includes("owner"));
       add("mcp_tokens", owners.length ? "warn" : "ok", `${pats.length} active PAT(s)${owners.length ? `; ${owners.map((p) => p.name).join(", ")} can approve/publish (draft-only is the default)` : ", all draft-only"}`);
     }
@@ -143,8 +151,8 @@ export function formatDoctor(report) {
     for (const r of report.connections) lines.push(`  ${r.profile_id.padEnd(20)} ${r.platform.padEnd(10)} ${r.status}${r.account_label ? ` (${r.account_label})` : ""}${r.expires_at ? ` expires ${r.expires_at}` : ""}`);
   }
   if (report.pats.length) {
-    lines.push("", "MCP tokens (names and scopes only):");
-    for (const p of report.pats) lines.push(`  ${p.name}: ${p.scopes.join(" ")}`);
+    lines.push("", "MCP tokens (names, scopes and brands only):");
+    for (const p of report.pats) lines.push(`  ${p.name}: ${p.scopes.join(" ")} | brands: ${p.brands.includes("*") ? "all" : p.brands.join(", ")}`);
   }
   return lines.join("\n");
 }

@@ -18,6 +18,7 @@ async function seeded() {
   await engine.upsertProfile({ id: "skillsprout", name: "SkillSprout", require_vidiq: false });
   engine.store.saveConnection({ profile_id: "skillsprout", platform: "youtube", account_label: "@skillsprout" }, { refresh_token: "DOCTOR_SECRET_RT" });
   createPat(engine.store, { name: "Marketing Desk" });
+  createPat(engine.store, { name: "SkillSprout only", brands: ["skillsprout"] });
   await engine.oauth?.stop?.();
   writeFileSync(join(home, "oauth.env"), "GOOGLE_OAUTH_CLIENT_ID=abc\nGOOGLE_OAUTH_CLIENT_SECRET=DOCTOR_SECRET_APP\nX_CLIENT_ID=\n", { mode: 0o600 });
   return { home, env, desk };
@@ -38,7 +39,10 @@ test("doctor reports permissions, app key names, brand x network matrix and port
     assert.equal(yt.status, "connected");
     assert.equal(report.connections.find((r) => r.platform === "tiktok").status, "not_connected");
     assert.equal(report.connections.length, 6);
-    assert.deepEqual(report.pats.map((p) => p.name), ["Marketing Desk"]);
+    assert.deepEqual(report.pats.map((p) => [p.name, p.brands]), [["Marketing Desk", ["*"]], ["SkillSprout only", ["skillsprout"]]]);
+    assert.match(formatDoctor(report), /SkillSprout only: .*\| brands: skillsprout/);
+    assert.match(formatDoctor(report), /Marketing Desk: .*\| brands: all/);
+    assert.equal(report.checks.find((c) => c.name === "mcp_token_brands").status, "warn");
     assert.equal(report.checks.find((c) => c.name === "mcp_tokens").status, "ok");
     assert.equal(report.checks.find((c) => c.name === "desk_port").status, "ok");
     assert.equal(report.ok, true);

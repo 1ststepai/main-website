@@ -62,7 +62,12 @@ const PROBES = {
     return { ok: r.ok && (b?.error?.code || "ok") === "ok", status: r.status, scopes: null, privacy_options: b?.data?.privacy_level_options || null };
   },
   async youtube(token, f) {
-    const r = await f(`https://oauth2.googleapis.com/tokeninfo?access_token=${encodeURIComponent(token)}`);
+    // Token goes in the POST body, never the URL (URLs land in proxy and access logs).
+    const r = await f("https://oauth2.googleapis.com/tokeninfo", {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ access_token: token }).toString(),
+    });
     const b = await json(r);
     return { ok: r.ok, status: r.status, scopes: b.scope ? String(b.scope).split(" ") : null };
   },

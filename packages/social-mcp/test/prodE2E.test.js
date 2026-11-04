@@ -151,3 +151,37 @@ test("draft-only PAT drafts over HTTP MCP, desk approves, mock publish hits ever
     await ctx.stop();
   }
 });
+
+test("brand-scoped PAT drafts for its brand only; another brand is refused and stays invisible", async () => {
+  const ctx = await boot();
+  try {
+    await ctx.engine.upsertProfile({ id: BRAND, name: "Swing Trade Pros", require_vidiq: false });
+    await ctx.engine.upsertProfile({ id: "skillsprout", name: "SkillSprout", require_vidiq: false });
+    for (const id of [BRAND, "skillsprout"]) {
+      ctx.engine.store.saveConnection({ profile_id: id, platform: "facebook", account_label: `${id}-fb`, page_id: `page-${id}` }, { access_token: `FAKE_ACCESS_${id}` });
+    }
+    const pat = await desk(ctx.url, "/api/pat", { name: "STP assistant", brands: [BRAND] });
+    assert.equal(pat.status, 201, JSON.stringify(pat.body));
+    assert.deepEqual(pat.body.pat.brands, [BRAND]);
+    const mcp = await mcpSession(ctx.url, pat.body.token);
+
+    const own = await mcp.call("create_draft", { profile_id: BRAND, platforms: ["facebook"], caption: "STP only" });
+    assert.equal(own.result.isError ?? false, false, JSON.stringify(own.result));
+
+    const other = await mcp.call("create_draft", { profile_id: "skillsprout", platforms: ["facebook"], caption: "should be refused" });
+    assert.equal(other.result?.isError ?? Boolean(other.error), true, "other brand is refused");
+    assert.match(JSON.stringify(other), /brand|not allowed|scope|forbidden/i);
+    assert.equal(ctx.engine.store.listPosts({ profileId: "skillsprout" }).length, 0, "nothing drafted for the other brand");
+
+    // A draft the owner made for SkillSprout stays invisible to the STP token.
+    await ctx.engine.createDraft({ profile_id: "skillsprout", platform: "facebook", caption: "owner draft", source: "desk" });
+    const queue = await mcp.call("list_queue", {});
+    const text = JSON.stringify(queue.result || queue);
+    assert.equal(text.includes("owner draft"), false);
+    assert.equal(text.includes("STP only"), true);
+    const posts = ctx.engine.store.listPosts();
+    assert.ok(posts.filter((p) => p.profile_id === BRAND).every((p) => p.status === "draft"));
+  } finally {
+    await ctx.stop();
+  }
+});
