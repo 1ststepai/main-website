@@ -185,3 +185,53 @@ test("brand-scoped PAT drafts for its brand only; another brand is refused and s
     await ctx.stop();
   }
 });
+
+test("one all-brands draft-only token: every draft must name its brand (brand_required), never a default", async () => {
+  const ctx = await boot();
+  try {
+    for (const [id, name] of [[BRAND, "Swing Trade Pros"], ["1ststep-ai", "1stStep.ai"], ["skillsprout", "SkillSprout"]]) {
+      await ctx.engine.upsertProfile({ id, name, require_vidiq: false });
+    }
+    const pat = await desk(ctx.url, "/api/pat", { name: "All brands assistant", all_brands: true });
+    assert.equal(pat.status, 201, JSON.stringify(pat.body));
+    assert.deepEqual(pat.body.pat.brands, ["*"]);
+    assert.deepEqual(pat.body.pat.scopes.includes("queue:approve"), false);
+    const mcp = await mcpSession(ctx.url, pat.body.token);
+
+    const before = ctx.engine.store.listPosts().length;
+    const missing = await mcp.call("create_draft", { platforms: ["facebook"], caption: "no brand named" });
+    assert.equal(missing.result?.isError, true, JSON.stringify(missing));
+    // create_draft's schema already requires profile_id; the guard covers every other write tool.
+    assert.match(JSON.stringify(missing), /brand_required|at profile_id/);
+    const blank = await mcp.call("create_draft", { profile_id: "", platforms: ["facebook"], caption: "blank brand" });
+    assert.match(JSON.stringify(blank), /brand_required|at profile_id/);
+    assert.equal(ctx.engine.store.listPosts().length, before, "nothing drafted to a default brand");
+
+    for (const id of [BRAND, "1ststep-ai", "skillsprout"]) {
+      const ok = await mcp.call("create_draft", { profile_id: id, platforms: ["facebook"], caption: `for ${id}` });
+      assert.equal(ok.result.isError ?? false, false, JSON.stringify(ok.result));
+    }
+    const posts = ctx.engine.store.listPosts();
+    assert.deepEqual([...new Set(posts.map((p) => p.profile_id))].sort(), ["1ststep-ai", "skillsprout", BRAND].sort());
+    assert.ok(posts.every((p) => p.status === "draft"));
+    // Reads still work without a brand and see all three.
+    const queue = await mcp.call("list_queue", {});
+    assert.equal(queue.result.isError ?? false, false);
+    // Publishing stays owner-only.
+    const pub = await mcp.call("publish_due", {});
+    assert.match(JSON.stringify(pub), /queue:approve/);
+  } finally {
+    await ctx.stop();
+  }
+});
+
+test("brand guard: an all-brands token needs a brand on every write tool that takes one", async () => {
+  const { requireBrandOnWrite, gateProfiles } = await import("../src/mcp/brandScope.js");
+  assert.equal(gateProfiles({ profiles: ["*"] }), null);
+  const keys = ["profile_id", "caption"];
+  assert.throws(() => requireBrandOnWrite({ args: { caption: "x" }, shapeKeys: keys, readOnly: false }), (e) => e.code === "brand_required");
+  assert.throws(() => requireBrandOnWrite({ args: { profile_id: "" }, shapeKeys: keys, readOnly: false }), (e) => e.code === "brand_required");
+  assert.deepEqual(requireBrandOnWrite({ args: { profile_id: "skillsprout" }, shapeKeys: keys, readOnly: false }), { profile_id: "skillsprout" });
+  assert.deepEqual(requireBrandOnWrite({ args: { post_id: "post_1" }, shapeKeys: keys, readOnly: false }), { post_id: "post_1" });
+  assert.deepEqual(requireBrandOnWrite({ args: {}, shapeKeys: keys, readOnly: true }), {});
+});

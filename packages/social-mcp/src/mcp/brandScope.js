@@ -6,7 +6,7 @@ const MAP_KEYS = new Set(["profiles", "brands", "by_profile", "by_brand"]);
 /** Brand allowlist from an auth gate. null = every brand. */
 export function gateProfiles(gate) {
   const list = gate && Array.isArray(gate.profiles) ? gate.profiles.filter(Boolean).map(String) : [];
-  return list.length ? list : null;
+  return list.length && !list.includes("*") ? list : null;
 }
 
 function refusal(id, allowed) {
@@ -35,7 +35,7 @@ function ownerOf(store, id) {
  * the call would otherwise touch every brand. Throws brand_not_allowed.
  */
 export function enforceBrandArgs({ allowed, store, args, shapeKeys, readOnly }) {
-  if (!allowed) return args;
+  if (!allowed) return requireBrandOnWrite({ args, shapeKeys, readOnly });
   const next = { ...(args || {}) };
   if (next.profile_id !== undefined && !allowed.includes(String(next.profile_id).toLowerCase())) throw refusal(next.profile_id, allowed);
   if (Array.isArray(next.profile_ids)) {
@@ -54,11 +54,24 @@ export function enforceBrandArgs({ allowed, store, args, shapeKeys, readOnly }) 
   if (next.profile_id === undefined && next.profile_ids === undefined && !hasId) {
     if (shapeKeys.includes("profile_ids")) next.profile_ids = [...allowed];
     else if (shapeKeys.includes("profile_id")) {
-      if (allowed.length === 1) next.profile_id = allowed[0];
-      else if (!readOnly) throw mcpError("brand_required", `This connector token covers several brands (${allowed.join(", ")}). Pass profile_id for this call.`, 400);
+      // Writes always name the brand (owner decision): no silent default, even for a one-brand token.
+      if (!readOnly) throw mcpError("brand_required", `This connector token covers several brands (${allowed.join(", ")}). Pass profile_id for this call.`, 400);
     }
   }
   return next;
+}
+
+/**
+ * Any token, including an all-brands ["*"] token: a write/draft tool that takes a brand
+ * must be told which brand (profile_id / profile_ids) or act on an existing record id.
+ */
+export function requireBrandOnWrite({ args, shapeKeys, readOnly }) {
+  if (readOnly) return args;
+  const a = args || {};
+  if (!shapeKeys.includes("profile_id") && !shapeKeys.includes("profile_ids")) return args;
+  const named = (a.profile_id !== undefined && a.profile_id !== null && a.profile_id !== "") || (Array.isArray(a.profile_ids) && a.profile_ids.length > 0);
+  if (named || ID_KEYS.some((key) => a[key])) return args;
+  throw mcpError("brand_required", "Name the brand for this call: pass profile_id (for example swing-trade-pros, 1ststep-ai or skillsprout). PostPath never drafts to a default brand.", 400);
 }
 
 /** Remove other brands' rows from a tool result. */
@@ -95,12 +108,14 @@ function shapeKeysOf(schema) {
  * on this server (core, SEO and hook tools alike) enforces the token's brand list.
  */
 export function installBrandGuard(server, { gate, store }) {
+  if (!gate) return null;
   const allowed = gateProfiles(gate);
-  if (!allowed) return null;
   const rawTool = server.registerTool.bind(server);
   server.registerTool = (name, config, handler) => {
     const shapeKeys = shapeKeysOf(config?.inputSchema);
-    const readOnly = Boolean(config?.annotations?.readOnlyHint);
+    // Approve/publish tools act on queued records and are gated by queue:approve; their own
+    // scope refusal comes first. Every other write that takes a brand must name it.
+    const readOnly = Boolean(config?.annotations?.readOnlyHint) || (!allowed && /Requires queue:approve/.test(config?.description || ""));
     return rawTool(name, config, async (args, extra) => {
       let checked;
       try {
@@ -109,12 +124,13 @@ export function installBrandGuard(server, { gate, store }) {
         return formatToolError(error);
       }
       const result = await handler(checked, extra);
+      if (!allowed) return result;
       if (!result || result.isError || !result.structuredContent) return result;
       const structuredContent = scrubForBrands(result.structuredContent, allowed);
       return { ...result, structuredContent, content: [{ type: "text", text: JSON.stringify(structuredContent, null, 2) }] };
     });
   };
-  if (typeof server.registerResource === "function") {
+  if (allowed && typeof server.registerResource === "function") {
     const rawResource = server.registerResource.bind(server);
     server.registerResource = (name, uriOrTemplate, metadata, reader) => rawResource(name, uriOrTemplate, metadata, async (uri, vars, extra) => {
       const brand = vars?.profile_id ?? vars?.brand ?? new URL(String(uri)).searchParams.get("profile_id");
