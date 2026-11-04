@@ -146,11 +146,16 @@ export async function runSmoke(argv, { env = process.env, fetchImpl = globalThis
   return report;
 }
 
+/** One printable line: drops line breaks and other non-printing characters before logging. */
+function printable(text, max = 4000) {
+  return Array.from(String(text), (ch) => (ch.charCodeAt(0) < 32 || ch.charCodeAt(0) === 127 ? " " : ch)).join("").slice(0, max);
+}
+
 if (import.meta.url === `file://${process.argv[1]}`) {
   runSmoke(process.argv.slice(2))
-    .then((r) => console.log(JSON.stringify(r, null, 2)))
+    .then((r) => process.stdout.write(`${JSON.stringify(r, null, 2)}\n`))
     .catch((e) => {
-      console.error(String(e?.message || e).replace(/[\r\n\u001b]+/g, " ").slice(0, 300));
+      process.stderr.write(`${printable(e?.message || e, 300)}\n`);
       process.exit(1);
     });
 }
