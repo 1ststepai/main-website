@@ -18,6 +18,7 @@ import { allowedHost, clientSetup } from "../mcp/clients.js";
 import { createPat, listGrants, listPats, revokePat } from "../mcp/auth.js";
 import { AUTO_POST_RISK_LABEL, disableAutoPost, enableAutoPost, listAutoPost, listAutoPostActivity, setNetworkAutoPost } from "../autoPost.js";
 import { recordDecision, snoozeReadiness } from "../approvalHistory.js";
+import { brandGuide, decideSuggestion, deleteBullet, resetLearning } from "../learning.js";
 import { postingPermissions } from "../postingPermissions.js";
 import { openDesktopApp } from "../openApp.js";
 import { mcpError } from "../errors.js";
@@ -708,6 +709,51 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
         const result = await engine.attachVidiqCheck(body);
         sendJson(res, 200, { ok: true, ...result, ...deskState() });
         return;
+      }
+
+      if (url.pathname === "/api/learning" || url.pathname.startsWith("/api/learning/")) {
+        // What assistants have learned per brand. Only the owner changes the guide here;
+        // assistants can only propose notes over MCP, which land as pending.
+        const learningView = () => ({
+          pin_required: ownerPinConfigured(homePaths),
+          brands: engine.store.listProfiles().map((profile) => ({ name: profile.name || profile.id, ...brandGuide(engine.store, profile.id) })),
+        });
+        const knownBrand = (value) => {
+          const id = cleanProfileId(value);
+          if (!engine.store.getProfile(id)) throw mcpError("not_found", "Brand not found.", 404);
+          return id;
+        };
+        const suggestionId = (value) => {
+          const id = String(value ?? "");
+          if (!/^sug_[a-z0-9]{4,40}$/.test(id)) throw mcpError("invalid_request", "Unknown suggestion.", 400);
+          return id;
+        };
+        if (req.method === "GET" && url.pathname === "/api/learning") {
+          sendJson(res, 200, { ok: true, learning: learningView() });
+          return;
+        }
+        if (req.method === "POST" && (url.pathname === "/api/learning/accept" || url.pathname === "/api/learning/dismiss")) {
+          const body = await readJson(req);
+          decideSuggestion(engine.store, knownBrand(body.profile_id), suggestionId(body.suggestion_id), url.pathname.endsWith("/accept"));
+          sendJson(res, 200, { ok: true, learning: learningView() });
+          return;
+        }
+        if (req.method === "POST" && url.pathname === "/api/learning/delete") {
+          const body = await readJson(req);
+          deleteBullet(engine.store, knownBrand(body.profile_id), body.bullet_id);
+          sendJson(res, 200, { ok: true, learning: learningView() });
+          return;
+        }
+        if (req.method === "POST" && url.pathname === "/api/learning/reset") {
+          // Reset needs the owner PIN when one is set, or an explicit confirm when not.
+          const body = await readJson(req);
+          const profileId = knownBrand(body.profile_id);
+          if (ownerPinConfigured(homePaths)) assertOwnerPin(homePaths, pinFromRequest(req, body));
+          else if (body.confirm !== true) throw mcpError("confirm_required", "Confirm to reset what was learned for this brand.", 400);
+          resetLearning(engine.store, profileId);
+          sendJson(res, 200, { ok: true, learning: learningView() });
+          return;
+        }
       }
 
       if (url.pathname.startsWith("/api/auto-post")) {

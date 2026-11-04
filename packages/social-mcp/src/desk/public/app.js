@@ -28,6 +28,7 @@ import {
   reconnectMessage,
 } from "./guide.js";
 import { platformIcon } from "./icons.js";
+import { discardBody } from "./deskApi.js";
 import { bindPilot, renderPilot } from "./pilotDesk.js";
 
 const NETWORKS = [
@@ -1626,13 +1627,33 @@ document.getElementById("queue-list")?.addEventListener("click", async (event) =
     return;
   }
   if (!discard) return;
+  // First click shows one optional "why" field; the second click discards.
+  let reasonBox = discard.parentElement?.querySelector(".discard-reason");
+  if (!reasonBox) {
+    reasonBox = document.createElement("label");
+    reasonBox.className = "discard-reason";
+    reasonBox.textContent = "Why not? (optional, helps your assistant learn) ";
+    const input = document.createElement("input");
+    input.type = "text";
+    input.maxLength = 200;
+    input.placeholder = "e.g. too salesy, too long";
+    reasonBox.append(input);
+    discard.before(reasonBox);
+    discard.textContent = "Confirm discard";
+    input.focus();
+    return;
+  }
+  let payload;
+  try {
+    payload = discardBody({ kind: discard.dataset.kind, id: discard.dataset.id, reason: reasonBox.querySelector("input")?.value || "" });
+  } catch (error) {
+    showToast(error.message, true);
+    return;
+  }
   discard.disabled = true;
   api("/api/discard", {
     method: "POST",
-    body: JSON.stringify({
-      bundle_id: discard.dataset.kind === "bundle" ? discard.dataset.id : undefined,
-      post_id: discard.dataset.kind === "post" ? discard.dataset.id : undefined,
-    }),
+    body: JSON.stringify(payload),
   })
     .then((data) => {
       renderStatus(data);
