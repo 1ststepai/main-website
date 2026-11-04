@@ -1,3 +1,4 @@
+import { connectionHealthRow, googleTestingMode } from "./connectionHealth.js";
 import { closeSync, constants, existsSync, openSync, readFileSync, renameSync, rmSync, statSync, unlinkSync, writeFileSync } from "node:fs";
 import { decryptJson, encryptJson, loadOrCreateKey } from "./crypto.js";
 import { mcpError } from "./errors.js";
@@ -278,6 +279,7 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
       // Bound to brand + network: a sealed token copied onto another brand's row does not open.
       secrets_enc: encryptJson(secrets, secretPurpose(record.profile_id, record.platform), key),
       secrets_aad: "brand_v2",
+      token_meta: tokenMeta(secrets, { authorized_at: stamp, refreshed_at: stamp }),
       connected_at: existing?.connected_at || stamp,
       updated_at: stamp,
     };
@@ -299,6 +301,10 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
       row.secrets_enc = encryptJson(secrets, secretPurpose(profileId, platform), key);
       row.secrets_aad = "brand_v2";
       row.updated_at = new Date(now()).toISOString();
+      row.token_meta = tokenMeta(secrets, {
+        authorized_at: row.token_meta?.authorized_at || row.connected_at || null,
+        refreshed_at: row.updated_at,
+      });
       persist();
     });
   }
@@ -530,12 +536,33 @@ function loadDb(file) {
   }
 }
 
+/**
+ * Non-secret token facts kept beside the encrypted blob so health checks never decrypt.
+ * Only timestamps and booleans; never token values.
+ */
+function tokenMeta(secrets, stamps) {
+  const value = secrets && typeof secrets === "object" ? secrets : {};
+  const pick = (v) => (typeof v === "string" && !Number.isNaN(Date.parse(v)) ? v : null);
+  return {
+    access_expires_at: pick(value.expires_at),
+    refresh_expires_at: pick(value.refresh_expires_at),
+    has_refresh_token: Boolean(value.refresh_token),
+    authorized_at: stamps.authorized_at || null,
+    refreshed_at: stamps.refreshed_at || null,
+  };
+}
+
 function publicConnection(row) {
   if (!row) return null;
   const { secrets_enc, secrets_aad, ...rest } = row;
   return {
     ...rest,
     has_secrets: Boolean(secrets_enc),
+    // Fields the UI lane's health view reads (PR 76). Derived from token_meta only; no decryption.
+    signed_in_at: rest.signed_in_at || rest.token_meta?.authorized_at || rest.connected_at || null,
+    refresh_expires_at:
+      rest.refresh_expires_at ||
+      connectionHealthRow({ profileId: rest.profile_id, platform: rest.platform, connection: { ...rest, has_secrets: true }, googleTesting: googleTestingMode() }).refresh_expires_at,
   };
 }
 

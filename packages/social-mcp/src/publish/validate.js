@@ -128,7 +128,9 @@ export function validateDraftForPublish(post) {
       break;
 
     case "tiktok":
-      requireMediaPath(post, errors, "TikTok");
+      if (!hasNonEmpty(post?.media_path) && !HTTPS_URL.test(String(post?.media_url || "").trim())) {
+        push(errors, "TikTok needs a local media_path, or a public https media_url on a domain verified for your TikTok app.");
+      }
       break;
 
     case "instagram":
@@ -152,7 +154,9 @@ export function validateDraftForPublish(post) {
       break;
 
     case "pinterest":
-      requireHttpsMediaUrl(post, errors, "Pinterest");
+      if (!hasNonEmpty(post?.media_path) && !HTTPS_URL.test(String(post?.media_url || "").trim())) {
+        push(errors, "Pinterest needs a local media_path (image or video), or a public https image media_url.");
+      }
       warnIfOver(
         warnings,
         "Pinterest description",
@@ -162,7 +166,7 @@ export function validateDraftForPublish(post) {
       break;
 
     case "x":
-      requireText(post, errors, "X");
+      if (!primaryText(post) && !hasNonEmpty(post?.media_path)) push(errors, "X posts need caption or description text, or media.");
       warnIfOver(warnings, "X caption", primaryText(post), PLATFORM_TEXT_LIMITS.x);
       break;
 

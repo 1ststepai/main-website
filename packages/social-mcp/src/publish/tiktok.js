@@ -70,6 +70,23 @@ function tiktokError(payload, fallback) {
   if (code === "scope_not_authorized") {
     return mcpError("needs_reconnect", "TikTok did not grant the posting permission. Reconnect TikTok and allow it.", 403);
   }
+  if (code === "unaudited_client_can_only_post_to_private_accounts") {
+    return mcpError(
+      "tiktok_unaudited_private_only",
+      "This TikTok app has not passed TikTok's audit, so it can only post to a private account with privacy SELF_ONLY. Set the TikTok account to private, or get the app audited for public posts.",
+      403,
+    );
+  }
+  if (code === "url_ownership_unverified") {
+    return mcpError(
+      "tiktok_url_unverified",
+      "TikTok will only pull videos from a domain or URL prefix verified on your TikTok app. Verify it in the TikTok developer portal, or save the file in PostPath (media_path) to upload it instead.",
+      403,
+    );
+  }
+  if (code === "privacy_level_option_mismatch") {
+    return mcpError("tiktok_privacy_unavailable", payload?.error?.message || "Pick one of this creator's TikTok privacy options.", 400);
+  }
   if (code === "rate_limit_exceeded" || code === "spam_risk_too_many_posts") {
     return mcpError("rate_limited", payload?.error?.message || "TikTok rate limit reached.", 429);
   }
@@ -123,7 +140,8 @@ export function chooseDirectPostInfo(post, creator) {
 }
 
 /**
- * Upload a local video to TikTok. Default mode is "inbox" (draft: the creator
+ * Send a video to TikTok: FILE_UPLOAD from media_path, or PULL_FROM_URL from an https media_url
+ * on a domain/URL prefix verified for the app (developers.tiktok.com/doc/content-posting-api-media-transfer-guide). Default mode is "inbox" (draft: the creator
  * finishes in the TikTok app, scope video.upload). post.tiktok_mode === "direct"
  * uses Direct Post (scope video.publish); unaudited apps can post SELF_ONLY only.
  * Uses only the desk's own TikTok client key and secret.
@@ -141,17 +159,18 @@ export async function publishTikTokFromFile({
     throw mcpError("oauth_not_configured", "TikTok needs this desk's own TikTok client key and secret.", 503);
   }
   const direct = post?.tiktok_mode === "direct";
-  const filePath = resolveSafeMediaPath(post.media_path, mediaRoot);
+  const pullUrl = !post?.media_path ? String(post?.media_url || "").trim() : "";
+  if (!post?.media_path && !/^https:\/\//i.test(pullUrl)) {
+    throw mcpError("media_required", "TikTok needs a video saved in PostPath (media_path) or a public https media_url on a domain verified for your TikTok app.", 400);
+  }
+  const filePath = post?.media_path ? resolveSafeMediaPath(post.media_path, mediaRoot) : "";
   let fresh = await ensureAccess({ secrets, oauth, fetchImpl });
   if (onSecrets && fresh !== secrets) await onSecrets(fresh);
   const budget = { used: false };
-  const plan = tiktokChunkPlan(statSync(filePath).size);
-  const sourceInfo = {
-    source: "FILE_UPLOAD",
-    video_size: plan.video_size,
-    chunk_size: plan.chunk_size,
-    total_chunk_count: plan.total_chunk_count,
-  };
+  const plan = filePath ? tiktokChunkPlan(statSync(filePath).size) : null;
+  const sourceInfo = plan
+    ? { source: "FILE_UPLOAD", video_size: plan.video_size, chunk_size: plan.chunk_size, total_chunk_count: plan.total_chunk_count }
+    : { source: "PULL_FROM_URL", video_url: pullUrl };
   const common = { budget, oauth, fetchImpl, onSecrets, onNeedsReconnect };
 
   let body = { source_info: sourceInfo };
@@ -171,12 +190,13 @@ export async function publishTikTokFromFile({
   fresh = opened.secrets;
   const uploadUrl = opened.payload.data?.upload_url;
   const publishId = opened.payload.data?.publish_id;
-  if (!opened.response.ok || !uploadUrl || !publishId) {
+  const initCode = opened.payload?.error?.code;
+  if (!opened.response.ok || (initCode && initCode !== "ok") || !publishId || (plan && !uploadUrl)) {
     throw tiktokError(opened.payload, "TikTok did not start the upload.");
   }
 
-  const bytes = readFileSync(filePath);
-  for (const range of plan.ranges) {
+  const bytes = plan ? readFileSync(filePath) : null;
+  for (const range of plan ? plan.ranges : []) {
     const chunk = bytes.subarray(range.first, range.last + 1);
     // upload_url is pre-signed; no bearer token is sent to it.
     const upload = await fetchImpl(uploadUrl, {
@@ -193,18 +213,24 @@ export async function publishTikTokFromFile({
     }
   }
 
+  const source = sourceInfo.source;
   if (direct) {
+    const privacy = body.post_info.privacy_level;
     return {
       platform_post_id: String(publishId),
       published_url: null,
       handoff: "tiktok_direct",
-      note: "TikTok is processing the post. Check status with publish_id; unaudited apps post as private (SELF_ONLY).",
+      source,
+      privacy_level: privacy,
+      privacy_status: privacy === "SELF_ONLY" ? "private" : "requested_" + privacy.toLowerCase(),
+      note: "TikTok is processing the post. Check status with publish_id. Until your TikTok app passes TikTok's audit, every post is private (SELF_ONLY), whatever privacy was picked.",
     };
   }
   return {
     platform_post_id: String(publishId),
     published_url: null,
     handoff: "tiktok_inbox",
+    source: sourceInfo.source,
     note: "Video is in the TikTok inbox for the creator to finish posting in the app.",
   };
 }
