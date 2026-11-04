@@ -1,0 +1,21 @@
+:root{--fg:#1b1f24;--muted:#57606a;--bg:#fff;--line:#d0d7de;--ok:#1a7f37;--warn:#9a6700;--bad:#cf222e;--off:#6e7781;--app:#8250df;--accent:#0969da}
+*{box-sizing:border-box}body{margin:0;font:16px/1.5 system-ui,sans-serif;color:var(--fg);background:var(--bg)}
+.skip{position:absolute;left:-999px}.skip:focus{left:8px;top:8px;background:#fff;padding:4px}
+.top,main{max-width:1040px;margin:0 auto;padding:16px 20px}.top h1{margin:0 0 4px}.lede{color:var(--muted);margin:0 0 8px}
+nav a{margin-right:12px;color:var(--accent)}section{margin:28px 0}h2{border-bottom:1px solid var(--line);padding-bottom:4px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.tablewrap{overflow-x:auto}table{border-collapse:collapse;width:100%}th,td{border:1px solid var(--line);padding:8px;text-align:left;vertical-align:top}
+#grid td{min-width:130px}.st{display:inline-block;font-size:13px;font-weight:600;padding:1px 8px;border-radius:10px;border:1px solid currentColor}
+.connected{color:var(--ok)}.expiring{color:var(--warn)}.expired{color:var(--bad)}.not_connected{color:var(--off)}.needs_app{color:var(--app)}
+.cell small{display:block;color:var(--muted);font-size:12px;margin:4px 0}
+button{font:inherit;padding:4px 12px;border:1px solid var(--accent);background:var(--accent);color:#fff;border-radius:6px;cursor:pointer}
+button.secondary{background:#fff;color:var(--accent)}button:focus-visible,select:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid #f5a623;outline-offset:2px}
+.nudge{background:#fff8c5;border:1px solid #d4a72c;padding:10px 14px;border-radius:6px}
+.flash:empty{display:none}.flash{background:#ddf4ff;padding:8px 12px;border-radius:6px}
+.queue{list-style:none;padding:0}.queue li{border:1px solid var(--line);border-radius:6px;padding:10px 12px;margin:8px 0}
+.queue .meta{color:var(--muted);font-size:13px}.queue p{margin:6px 0;white-space:pre-wrap}.queue .actions button{margin-right:8px}
+.panel{background:#f6f8fa;border:1px solid var(--line);border-radius:6px;padding:4px 16px;margin-bottom:16px}
+code{background:#eef1f4;padding:1px 5px;border-radius:4px;word-break:break-all}
+fieldset{border:1px solid var(--line);border-radius:6px;margin-bottom:10px}.boxes{margin:4px 0 0 24px}.boxes label,fieldset>label{display:block}
+form input:not([type]),form input[type=password]{padding:4px;margin-right:10px}.newtok{border:2px solid var(--ok);padding:8px 12px;border-radius:6px;margin:12px 0}
+.hint,.legend{color:var(--muted);font-size:14px}

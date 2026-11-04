@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PostPath — My desk</title>
+<link rel="stylesheet" href="/personal.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <h1>PostPath desk</h1>
+  <p class="lede">Your assistant writes the drafts. Here you approve, connect accounts and change settings.</p>
+  <nav aria-label="Sections"><a href="#review">Review</a> <a href="#connections">Connections</a> <a href="#tokens">Assistant access</a></nav>
+</header>
+<main id="main">
+  <div id="nudge" class="nudge" role="status" hidden></div>
+  <p id="flash" class="flash" role="status" aria-live="polite"></p>
+
+  <section id="review" aria-labelledby="review-h">
+    <h2 id="review-h">Review queue</h2>
+    <label for="brand-filter">Brand</label>
+    <select id="brand-filter"><option value="">All brands</option></select>
+    <ul id="queue" class="queue"></ul>
+  </section>
+
+  <section id="connections" aria-labelledby="conn-h">
+    <h2 id="conn-h">Connections</h2>
+    <div class="tablewrap"><table id="grid"><caption class="sr">Connection status per brand and network</caption></table></div>
+    <p class="legend"><span class="st connected">Connected</span> <span class="st expiring">Expiring</span> <span class="st expired">Expired</span> <span class="st not_connected">Not connected</span> <span class="st needs_app">Needs your app</span></p>
+  </section>
+
+  <section id="tokens" aria-labelledby="tok-h">
+    <h2 id="tok-h">Assistant access</h2>
+    <div class="panel" id="connect-assistant">
+      <h3>Connect your assistant</h3>
+      <ol>
+        <li>Add an MCP server with URL <code id="mcp-url">http://127.0.0.1:47840/mcp</code></li>
+        <li>Create a draft-only token below and copy it once.</li>
+        <li>Set the header <code>Authorization: Bearer &lt;your token&gt;</code>.</li>
+      </ol>
+      <p class="hint">Draft-only tokens can read and write drafts. Nothing posts until you approve it here.</p>
+    </div>
+    <form id="token-form">
+      <fieldset>
+        <legend>Brands this token can draft for</legend>
+        <label><input type="radio" name="scope" value="all" checked> All brands</label>
+        <label><input type="radio" name="scope" value="some"> Only these:</label>
+        <div id="brand-boxes" class="boxes"></div>
+      </fieldset>
+      <label for="tok-name">Name</label> <input id="tok-name" value="Marketing Desk" maxlength="80">
+      <label for="tok-pin" id="pin-label" hidden>Owner PIN</label> <input id="tok-pin" type="password" autocomplete="off" hidden>
+      <button type="submit">Create draft-only token</button>
+    </form>
+    <div id="new-token" class="newtok" hidden>
+      <p><strong>Copy this now. It won't be shown again.</strong></p>
+      <code id="new-token-value"></code> <button type="button" id="copy-token">Copy</button>
+    </div>
+    <table id="pats"><caption>Active tokens</caption><thead><tr><th scope="col">Name</th><th scope="col">Prefix</th><th scope="col">Brands</th><th scope="col">Access</th><th scope="col"><span class="sr">Revoke</span></th></tr></thead><tbody></tbody></table>
+  </section>
+</main>
+<script type="module" src="/personal.js"></script>
+</body>
+</html>
