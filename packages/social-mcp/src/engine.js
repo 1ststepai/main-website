@@ -10,6 +10,10 @@ import { publishTikTokInboxFromFile } from "./publish/tiktok.js";
 import { publishMetaReel } from "./publish/meta.js";
 import { publishLinkedInText } from "./publish/linkedin.js";
 import { publishXPost } from "./publish/x.js";
+import { connectionHealthSweep } from "./connectionHealth.js";
+
+// Publishers that upload images themselves (Pinterest image pins, X image media).
+const IMAGE_PUBLISH_PLATFORMS = new Set(["pinterest", "x"]);
 import { publishThreadsPost } from "./publish/threads.js";
 import { publishPinterestPin } from "./publish/pinterest.js";
 import { connectBlueskyAccount, publishBlueskyPost } from "./publish/bluesky.js";
@@ -852,6 +856,7 @@ export function createEngine({
     if (post.platform === "x") {
       return publishXPost({
         post,
+        mediaRoot,
         secrets,
         oauth: config.x,
         fetchImpl: trackedFetch,
@@ -873,6 +878,7 @@ export function createEngine({
       return publishPinterestPin({
         post,
         connection,
+        mediaRoot,
         secrets,
         oauth: config.pinterest,
         fetchImpl: trackedFetch,
@@ -1092,7 +1098,7 @@ export function createEngine({
     if (isXPlatform(post.platform)) assertXAvailable(store.homePaths);
     assertActionAllowed("publish", getEntitlement(env));
     assertMediaReady(post);
-    if (String(post.media_content_type || "").startsWith("image/")) {
+    if (String(post.media_content_type || "").startsWith("image/") && !IMAGE_PUBLISH_PLATFORMS.has(post.platform)) {
       throw mcpError(
         "image_publish_unsupported",
         `${post.platform} image stays in the queue. PostPath did not upload it.`,
@@ -1431,6 +1437,8 @@ export function createEngine({
   }
 
   return {
+    connectionHealth: ({ now } = {}) =>
+      connectionHealthSweep({ connections: store.listConnections(), profiles: store.listProfiles(), now, env }),
     score,
     vidiqUpsellInfo,
     saveVidiqUpsell,

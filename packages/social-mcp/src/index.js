@@ -11,3 +11,4 @@ export async function startStdioServer(options = {}) {
 }
 
 export { createEngine, createDeskServer, createSocialMcpServer };
+export { connectionHealthSweep, connectionHealthRow } from "./connectionHealth.js";
