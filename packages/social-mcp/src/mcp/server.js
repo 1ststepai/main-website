@@ -15,7 +15,8 @@ import { assertOwnerPin, ownerPinConfigured } from "../pilot/ownerAuth.js";
 import { getBrandContext, saveBrandContext } from "../brand/context.js";
 import { OWNER_ONLY_NOTE, autoPostAllows, logAutoPostActivity, publishRefusalMessage } from "../autoPost.js";
 import { postingPermissions } from "../postingPermissions.js";
-import { listGrants, listPats } from "./auth.js";
+import { listGrants, listPats, normalizeProfiles } from "./auth.js";
+import { installBrandGuard } from "./brandScope.js";
 import { isPilotMode } from "../pilot/config.js";
 
 const outputSchema = z
@@ -106,7 +107,10 @@ function safeMediaName(name) {
 export function createSocialMcpServer({ engine, auth, env = process.env } = {}) {
   if (!engine) loadOAuthEnvFile(paths(), env);
   const eng = engine || createEngine({ env });
-  const gate = auth === undefined ? (isDraftOnly(env, eng.store.homePaths) ? { scopes: [...DRAFT_ONLY_SCOPES] } : null) : auth;
+  let gate = auth === undefined ? (isDraftOnly(env, eng.store.homePaths) ? { scopes: [...DRAFT_ONLY_SCOPES] } : null) : auth;
+  // stdio has no bearer token; POSTPATH_MCP_BRANDS limits a local launch to those brands.
+  const envBrands = auth === undefined ? normalizeProfiles(env.POSTPATH_MCP_BRANDS) : null;
+  if (envBrands) gate = { ...(gate || { scopes: null }), profiles: envBrands };
   const server = new McpServer(
     { name: "postpath", version: "0.1.0" },
     {
@@ -114,9 +118,10 @@ export function createSocialMcpServer({ engine, auth, env = process.env } = {}) 
       capabilities: { elicitation: {} },
     },
   );
+  installBrandGuard(server, { gate, store: eng.store });
 
   function scopeAllowed(scope) {
-    if (!gate) return true;
+    if (!gate || gate.scopes === null) return true;
     const scopes = gate.scopes || [];
     if (scopes.includes(scope)) return true;
     if (scope === "accounts:write" && scopes.includes("owner")) return true;
@@ -225,7 +230,7 @@ export function createSocialMcpServer({ engine, auth, env = process.env } = {}) 
   }
 
   function callerScopes() {
-    return gate ? [...(gate.scopes || [])] : null;
+    return gate && gate.scopes !== null ? [...(gate.scopes || [])] : null;
   }
 
   add(

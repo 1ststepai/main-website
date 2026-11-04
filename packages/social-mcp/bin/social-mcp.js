@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import { installLogRedaction } from "../src/redact.js";
+installLogRedaction();
 import { writeFileSync } from "node:fs";
 import { startStdioServer, createEngine } from "../src/index.js";
 import { paths, resolveHome } from "../src/home.js";

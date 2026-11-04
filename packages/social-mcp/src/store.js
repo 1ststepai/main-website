@@ -33,6 +33,10 @@ function emptyMcpAuth() {
   return { clients: {}, codes: {}, grants: {}, tokens: {}, retiredRefresh: {}, pats: {}, consents: {} };
 }
 
+function secretPurpose(profileId, platform) {
+  return `conn:${String(profileId).toLowerCase()}:${platform}`;
+}
+
 function connectionKey(profileId, platform) {
   return `${profileId}:${platform}`;
 }
@@ -271,7 +275,9 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
     const existing = db.connections[keyName];
     db.connections[keyName] = {
       ...record,
-      secrets_enc: encryptJson(secrets, `conn:${record.platform}`, key),
+      // Bound to brand + network: a sealed token copied onto another brand's row does not open.
+      secrets_enc: encryptJson(secrets, secretPurpose(record.profile_id, record.platform), key),
+      secrets_aad: "brand_v2",
       connected_at: existing?.connected_at || stamp,
       updated_at: stamp,
     };
@@ -282,14 +288,16 @@ export function createStore({ home, env = process.env, now = () => Date.now() } 
   function readSecrets(profileId, platform) {
     const row = getConnection(profileId, platform);
     if (!row?.secrets_enc) return null;
-    return decryptJson(row.secrets_enc, `conn:${platform}`, key);
+    const purpose = row.secrets_aad === "brand_v2" ? secretPurpose(profileId, platform) : `conn:${platform}`;
+    return decryptJson(row.secrets_enc, purpose, key);
   }
 
   function updateSecrets(profileId, platform, secrets) {
     locked(() => {
       const row = getConnection(profileId, platform);
       if (!row) throw mcpError("not_connected", `${platform} is not connected for this profile.`, 409);
-      row.secrets_enc = encryptJson(secrets, `conn:${platform}`, key);
+      row.secrets_enc = encryptJson(secrets, secretPurpose(profileId, platform), key);
+      row.secrets_aad = "brand_v2";
       row.updated_at = new Date(now()).toISOString();
       persist();
     });
@@ -524,7 +532,7 @@ function loadDb(file) {
 
 function publicConnection(row) {
   if (!row) return null;
-  const { secrets_enc, ...rest } = row;
+  const { secrets_enc, secrets_aad, ...rest } = row;
   return {
     ...rest,
     has_secrets: Boolean(secrets_enc),

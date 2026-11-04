@@ -304,21 +304,53 @@ export function authenticateBearer(store, presented, resource) {
         if (row) row.last_used_at = new Date().toISOString();
       });
     }
-    return { kind: "pat", clientId: pat.id, connectionId: pat.id, scopes: pat.scopes, tokenHash: hash };
+    return { kind: "pat", clientId: pat.id, connectionId: pat.id, scopes: pat.scopes, profiles: normalizeProfiles(pat.profiles), tokenHash: hash };
   }
   const token = auth.tokens?.[hash];
   const grant = token ? auth.grants?.[token.grant_id] : null;
   if (!token || token.kind !== "access" || !grant || grant.revoked || token.expires_at < Date.now()) return null;
   if (grant.resource !== resource) return null;
-  return { kind: "oauth", clientId: grant.client_id, connectionId: token.grant_id, scopes: grant.scope, tokenHash: hash, resource: grant.resource };
+  return { kind: "oauth", clientId: grant.client_id, connectionId: token.grant_id, scopes: grant.scope, profiles: normalizeProfiles(grant.profiles), tokenHash: hash, resource: grant.resource };
 }
 
-export function createPat(store, { name, scopes, expiresInDays } = {}) {
+/**
+ * Brand allowlist for a connector token. null means every brand. An array limits
+ * every MCP tool call to those brand ids. "*" or "all" in the list means every brand.
+ */
+export function normalizeProfiles(value) {
+  if (value === undefined || value === null || value === "") return null;
+  const raw = Array.isArray(value) ? value : String(value).split(/[\s,]+/);
+  const out = [];
+  for (const item of raw) {
+    const id = String(item || "").trim().toLowerCase();
+    if (!id) continue;
+    if (id === "*" || id === "all") return null;
+    if (!/^[a-z0-9][a-z0-9_-]{1,63}$/.test(id)) {
+      const error = new Error(`Brand id "${id.slice(0, 64)}" is not valid.`);
+      error.statusCode = 400;
+      throw error;
+    }
+    if (!out.includes(id)) out.push(id);
+  }
+  return out.length ? out : null;
+}
+
+export function createPat(store, { name, scopes, expiresInDays, profiles } = {}) {
   const chosen = normalizeScopes(scopes || DEFAULT_SCOPES);
   if (!chosen.length) {
     const error = new Error("Pick at least one scope.");
     error.statusCode = 400;
     throw error;
+  }
+  const brands = normalizeProfiles(profiles);
+  if (brands) {
+    const known = store.listProfiles ? store.listProfiles().map((row) => row.id) : null;
+    const unknown = known ? brands.filter((id) => !known.includes(id)) : [];
+    if (unknown.length) {
+      const error = new Error(`Unknown brand: ${unknown.join(", ")}. Create the brand first, or pick from ${known.join(", ") || "none"}.`);
+      error.statusCode = 400;
+      throw error;
+    }
   }
   const token = randomId("pp_pat_");
   const record = {
@@ -327,6 +359,7 @@ export function createPat(store, { name, scopes, expiresInDays } = {}) {
     hash: tokenHash(token),
     prefix: token.slice(0, 12),
     scopes: chosen,
+    profiles: brands,
     expires_at: expiresInDays ? new Date(Date.now() + Number(expiresInDays) * 86400000).toISOString() : null,
     last_used_at: null,
     created_at: new Date().toISOString(),
@@ -359,6 +392,7 @@ function publicPat(pat) {
     name: pat.name,
     prefix: pat.prefix,
     scopes: pat.scopes,
+    profiles: normalizeProfiles(pat.profiles),
     expires_at: pat.expires_at,
     last_used_at: pat.last_used_at,
     created_at: pat.created_at,
