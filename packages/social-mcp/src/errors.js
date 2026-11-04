@@ -1,3 +1,5 @@
+import { redactText, stripSecretFields } from "./redact.js";
+
 export function mcpError(code, message, statusCode = 400) {
   const error = new Error(message);
   error.code = code;
@@ -7,7 +9,7 @@ export function mcpError(code, message, statusCode = 400) {
 
 export function formatToolError(error) {
   const code = error?.code || "error";
-  const message = error?.message || "Unexpected error.";
+  const message = redactText(error?.message || "Unexpected error.");
   return {
     content: [{ type: "text", text: JSON.stringify({ ok: false, code, message }, null, 2) }],
     isError: true,
@@ -17,7 +19,7 @@ export function formatToolError(error) {
 export function formatToolResult(payload) {
   const structuredContent = {
     ok: true,
-    ...(payload && typeof payload === "object" ? payload : { value: payload }),
+    ...(payload && typeof payload === "object" ? stripSecretFields(payload) : { value: payload }),
   };
   return {
     content: [{ type: "text", text: JSON.stringify(structuredContent, null, 2) }],

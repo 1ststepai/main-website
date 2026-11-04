@@ -484,7 +484,7 @@ export function createEngine({
   async function connectBluesky(profileId, { handle, app_password } = {}) {
     requireProfile(profileId);
     const bundle = await connectBlueskyAccount({ handle, appPassword: app_password, fetchImpl });
-    store.saveConnection({ profile_id: profileId, ...bundle.record }, bundle.secrets);
+    const saved = store.saveConnection({ profile_id: profileId, ...bundle.record }, bundle.secrets);
     store.appendAudit({
       id: store.newId("aud"),
       at: new Date(now()).toISOString(),
@@ -496,7 +496,8 @@ export function createEngine({
     return {
       profile_id: profileId,
       status: "complete",
-      connection: store.getConnection(profileId, "bluesky"),
+      // Public row only: never hand the sealed secrets to an MCP client.
+      connection: saved,
       message: "Bluesky connected with an app password.",
     };
   }

@@ -1,0 +1,24 @@
+# PostPath desk as a systemd *user* service (personal use, loopback only).
+# Installed by deploy/install-service.sh. Not enabled or started by the installer.
+[Unit]
+Description=PostPath desk (loopback only, personal)
+After=network-online.target
+
+[Service]
+Type=simple
+Environment=SOCIAL_MCP_HOME=%h/.postpath-real
+Environment=NODE_ENV=production
+# Desk binds 127.0.0.1 in code; no public tunnel is configured here.
+ExecStartPre=/bin/sh -c 'umask 077; mkdir -p "$SOCIAL_MCP_HOME"; chmod 700 "$SOCIAL_MCP_HOME"; find "$SOCIAL_MCP_HOME" -type d -exec chmod 700 {} +; find "$SOCIAL_MCP_HOME" -type f -exec chmod 600 {} +'
+ExecStart=@POSTPATH_BIN@ app --no-open
+UMask=0077
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ReadWritePaths=%h/.postpath-real
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+
+[Install]
+WantedBy=default.target

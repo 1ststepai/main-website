@@ -1,3 +1,4 @@
+import { redactText } from "../redact.js";
 import { xAvailable } from "../xAccess.js";
 import { PLATFORMS } from "../platforms.js";
 import { createServer } from "node:http";
@@ -847,6 +848,7 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
           name: body.name,
           scopes: body.scopes,
           expiresInDays: body.expires_in_days,
+          brands: body.all_brands === true ? ["*"] : (body.brands ?? body.profiles),
         });
         sendJson(res, 201, { ok: true, ...created, ...deskState() });
         return;
@@ -988,7 +990,7 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
       sendJson(res, error.statusCode || 500, {
         ok: false,
         code: error.code || "error",
-        message: error.message || "Unexpected error",
+        message: redactText(error.message || "Unexpected error"),
       });
     }
   });

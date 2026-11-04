@@ -1,3 +1,4 @@
+import { redactText } from "./redact.js";
 import { chmodSync, writeFileSync } from "node:fs";
 import { createStore } from "./store.js";
 import { createEngine } from "./engine.js";
@@ -15,11 +16,11 @@ function flag(args, name) {
 }
 
 function print(io, line) {
-  (io.stdout || ((text) => console.log(text)))(line);
+  (io.stdout || ((text) => console.log(text)))(redactText(line));
 }
 
 function fail(io, line) {
-  (io.stderr || ((text) => console.error(text)))(line);
+  (io.stderr || ((text) => console.error(text)))(redactText(line));
 }
 
 export function initPilot({ home, pin, env = process.env } = {}) {
@@ -44,7 +45,7 @@ export function initPilot({ home, pin, env = process.env } = {}) {
   };
 }
 
-export function createPatFile({ home, scopes, out, name, env = process.env } = {}) {
+export function createPatFile({ home, scopes, out, name, brands, env = process.env } = {}) {
   if (!out) {
     const error = new Error("pat create needs --out <file>.");
     error.statusCode = 400;
@@ -53,14 +54,14 @@ export function createPatFile({ home, scopes, out, name, env = process.env } = {
   const engine = createEngine({ home, env });
   try {
     const chosen = scopes ? String(scopes).split(/[\s,]+/).filter(Boolean) : DEFAULT_SCOPES;
-    const created = createPat(engine.store, { name: name || "draft-only", scopes: chosen });
+    const created = createPat(engine.store, { name: name || "draft-only", scopes: chosen, profiles: brands });
     writeFileSync(out, `${created.token}\n`, { encoding: "utf8", mode: 0o600 });
     try {
       chmodSync(out, 0o600);
     } catch {
       // Mode is best effort on Windows.
     }
-    return { file: out, id: created.pat.id, scopes: created.pat.scopes, printed: false };
+    return { file: out, id: created.pat.id, scopes: created.pat.scopes, brands: created.pat.brands, printed: false };
   } finally {
     engine.oauth.stop();
   }
@@ -163,9 +164,11 @@ export async function runPilotCommands(args, io = {}) {
       scopes: flag(args, "--scopes"),
       out: flag(args, "--out"),
       name: flag(args, "--name"),
+      brands: flag(args, "--brands"),
       env,
     });
-    print(io, `Wrote a token for ${result.id} to ${result.file} (mode 0600). Scopes: ${result.scopes.join(" ")}. The token was not printed.`);
+    const brandText = result.brands?.[0] === "*" ? "all brands" : result.brands.join(", ");
+    print(io, `Wrote a token for ${result.id} to ${result.file} (mode 0600). Scopes: ${result.scopes.join(" ")}. Brands: ${brandText}. The token was not printed.`);
     return 0;
   }
   if (command === "pat" && args[1] === "revoke") {
