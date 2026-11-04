@@ -33,6 +33,8 @@ import { assertOwnerPin, ownerPinConfigured, pinFromRequest } from "../pilot/own
 import { FFMPEG_MISSING_MESSAGE } from "../media/audio.js";
 import { buildSocialMcpServerEntry } from "../cursorConfig.js";
 import { onboardingState, onboardingStep } from "../onboarding.js";
+import { connectionGrid, normalizeBrands, PERSONAL_BRANDS } from "../personal/connectionHealth.js";
+import { DEFAULT_SCOPES } from "../mcp/auth.js";
 import { brandPageData, brandPageSettings, disableBrandPage, enableBrandPage, profileForSlug, renderBrandPage } from "../brand/brandPage.js";
 
 const PUBLIC_DIR = join(dirname(fileURLToPath(import.meta.url)), "public");
@@ -411,6 +413,26 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
       return { profile_id: profile.id, name: profile.name, enabled, path: enabled ? `/b/${page.slug}` : null, enabled_at: enabled ? page.enabled_at : null };
     });
     return { brand_page: { pin_required: ownerPinConfigured(homePaths), hosting: "local desk only", brands } };
+  }
+
+  /** Minimal personal desk: connections grid, per-brand review queue, tokens. No secrets. */
+  function personalView(brand) {
+    loadOAuthEnvFile(homePaths, env);
+    const fileValues = existsSync(homePaths.oauthEnv) ? parseEnvFile(readFileSync(homePaths.oauthEnv, "utf8")) : {};
+    const appReady = oauthReady(credentialValues(fileValues, env));
+    const googleTesting = String(env.SOCIAL_MCP_GOOGLE_PRODUCTION || "") !== "1";
+    const ids = new Set(PERSONAL_BRANDS.map((b) => b.id));
+    const filter = ids.has(brand) ? brand : "";
+    const queue = engine.listQueue().queue.filter((item) => ids.has(item.profile_id) && (!filter || item.profile_id === filter));
+    return {
+      brands: PERSONAL_BRANDS,
+      brand: filter,
+      grid: connectionGrid({ listConnections: (id) => engine.store.listConnections(id), appReady, googleTesting }),
+      queue,
+      pats: listPats(engine.store),
+      mcp_url: `http://127.0.0.1:${port}/mcp`,
+      pin_required: ownerPinConfigured(homePaths),
+    };
   }
 
   function blankAuto() {
@@ -840,12 +862,32 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
         return;
       }
 
+      if (req.method === "GET" && url.pathname === "/api/personal") {
+        sendJson(res, 200, { ok: true, ...personalView(String(url.searchParams.get("brand") || "")) });
+        return;
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/personal/token") {
+        const body = await readJson(req);
+        requireOwner(req, body);
+        // Draft-only always: read + drafts:write. No publish, approve, or owner scopes from this screen.
+        const created = createPat(engine.store, {
+          name: body.name || "Assistant (draft-only)",
+          scopes: DEFAULT_SCOPES,
+          brands: normalizeBrands(body.brands ?? []),
+          expiresInDays: body.expires_in_days,
+        });
+        sendJson(res, 201, { ok: true, ...created });
+        return;
+      }
+
       if (req.method === "POST" && url.pathname === "/api/pat") {
         const body = await readJson(req);
         requireOwner(req, body);
         const created = createPat(engine.store, {
           name: body.name,
           scopes: body.scopes,
+          brands: body.brands,
           expiresInDays: body.expires_in_days,
         });
         sendJson(res, 201, { ok: true, ...created, ...deskState() });
