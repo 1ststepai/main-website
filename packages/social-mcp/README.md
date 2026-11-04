@@ -142,7 +142,7 @@ The desk and the OAuth callback server still bind to `127.0.0.1` only. `localhos
 | Facebook | Meta OAuth | local `media_path` (Page Reel resumable upload, draft unless public) or https `media_url` | implemented (mock-tested, real-account acceptance NOT claimed) |
 | TikTok | Login Kit | `media_path` → creator inbox | handoff (TikTok inbox; mock-tested, real-account acceptance NOT claimed) |
 | LinkedIn | LinkedIn OAuth | text (`caption` / `description`) | implemented (mock-tested, real-account acceptance NOT claimed) |
-| X | X OAuth (PKCE) | text tweet | implemented (mock-tested, real-account acceptance NOT claimed) |
+| X | X OAuth (PKCE) | text tweet | implemented (mock-tested, real-account acceptance NOT claimed); off until the desk saves its own X app |
 | Threads | Threads OAuth (Meta app) | text and/or https `media_url` | implemented (mock-tested, real-account acceptance NOT claimed) |
 | Pinterest | Pinterest OAuth | https `media_url` pin | implemented (mock-tested, real-account acceptance NOT claimed) |
 | Bluesky | App password | text post | implemented (mock-tested, real-account acceptance NOT claimed) |
@@ -150,6 +150,10 @@ The desk and the OAuth callback server still bind to `127.0.0.1` only. `localhos
 | Reddit | Reddit OAuth | title + text; `tags[0]` = subreddit | implemented (mock-tested, real-account acceptance NOT claimed) |
 | Snapchat | OAuth scaffold | API-restricted until Marketing API approval | restricted scaffold |
 | WhatsApp Channels | — | API-restricted (no free third-party publish path) | restricted scaffold |
+
+## Account changes, recorder, Score it
+
+PostPath can edit YouTube channels, playlists and videos, Facebook posts and Page details, Instagram and Facebook comments, and post, reply, like and follow on X. Every change is queued and approved in the desk; deletes need a typed second confirmation. The desk also has an opt-in session recorder (saved only under `<home>/recordings/`) and a free **Score it** button for titles, descriptions, tags and thumbnails. Setup and limits: [docs/POSTPATH_FULL_MANAGE.md](../../docs/POSTPATH_FULL_MANAGE.md). X is bring-your-own-app: it stays hidden and refused until the desk saves its own X Client ID and Secret, and PostPath never ships or falls back to shared X credentials (see docs/POSTPATH_FULL_MANAGE.md).
 
 ## CLI reference
 

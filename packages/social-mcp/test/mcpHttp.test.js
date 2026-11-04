@@ -8,15 +8,18 @@ import { createEngine } from "../src/engine.js";
 import { createDeskServer } from "../src/desk/server.js";
 import { pkceS256, redirectAllowed } from "../src/mcp/auth.js";
 import { POSTPATH_INSTRUCTIONS, SERVER_DESCRIPTION } from "../src/mcp/instructions.js";
+import { freePort, freePorts } from "./helpers/ports.js";
 
 function verifierPair() {
   const verifier = randomBytes(32).toString("base64url");
   return { verifier, challenge: pkceS256(verifier) };
 }
 
-async function boot(port = 48891) {
+async function boot(port) {
+  if (!port) port = await freePort();
+  const oauthPort = await freePort();
   const home = mkdtempSync(join(tmpdir(), "social-mcp-http-"));
-  const env = { SOCIAL_MCP_OAUTH_PORT: String(port + 1), SOCIAL_MCP_DESK_PORT: String(port), SOCIAL_MCP_PUBLISH_MODE: "mock" };
+  const env = { SOCIAL_MCP_OAUTH_PORT: String(oauthPort), SOCIAL_MCP_DESK_PORT: String(port), SOCIAL_MCP_PUBLISH_MODE: "mock" };
   const engine = createEngine({ home, env, fetchImpl: async () => { throw new Error("network"); } });
   const desk = createDeskServer({ engine, env, port });
   const { url } = await desk.start({ open: false });
@@ -167,7 +170,7 @@ test("discovery metadata, DCR, PKCE, refresh rotation, and scope checks", async 
 });
 
 test("a personal access token can draft and then ask for approval", async () => {
-  const ctx = await boot(48895);
+  const ctx = await boot();
   try {
     await ctx.engine.upsertProfile({ id: "acme", name: "Acme", require_vidiq: false });
     const pat = await fetch(`${ctx.url}api/pat`, {

@@ -1,3 +1,5 @@
+import { redactText } from "../redact.js";
+import { xAvailable } from "../xAccess.js";
 import { PLATFORMS } from "../platforms.js";
 import { createServer } from "node:http";
 import { randomBytes } from "node:crypto";
@@ -15,9 +17,14 @@ import { googleLoopbackUri, providerRedirectUri } from "../oauth/redirect.js";
 import { handleRemoteMcp } from "../mcp/http.js";
 import { allowedHost, clientSetup } from "../mcp/clients.js";
 import { createPat, listGrants, listPats, revokePat } from "../mcp/auth.js";
-import { AUTO_POST_RISK_LABEL, disableAutoPost, enableAutoPost, listAutoPost } from "../autoPost.js";
+import { AUTO_POST_RISK_LABEL, disableAutoPost, enableAutoPost, listAutoPost, listAutoPostActivity, setNetworkAutoPost } from "../autoPost.js";
+import { recordDecision, snoozeReadiness } from "../approvalHistory.js";
+import { brandGuide, decideSuggestion, deleteBullet, resetLearning } from "../learning.js";
+import { postingPermissions } from "../postingPermissions.js";
 import { openDesktopApp } from "../openApp.js";
 import { mcpError } from "../errors.js";
+import { createRecorder } from "../recorder.js";
+import { createReadStream, statSync } from "node:fs";
 import { resolveSafeMediaPath } from "../mediaPath.js";
 import { PRODUCT_NAME, PRODUCT_TITLE } from "../brand.js";
 import { handleSeoRoutes } from "../seo/http.js";
@@ -28,6 +35,9 @@ import { assertOwnerPin, ownerPinConfigured, pinFromRequest } from "../pilot/own
 import { FFMPEG_MISSING_MESSAGE } from "../media/audio.js";
 import { buildSocialMcpServerEntry } from "../cursorConfig.js";
 import { onboardingState, onboardingStep } from "../onboarding.js";
+import { connectionGrid, normalizeBrands, PERSONAL_BRANDS, useEngineHealth } from "../personal/connectionHealth.js";
+import { connectionHealthRow, googleTestingMode } from "../connectionHealth.js";
+import { DEFAULT_SCOPES } from "../mcp/auth.js";
 import { brandPageData, brandPageSettings, disableBrandPage, enableBrandPage, profileForSlug, renderBrandPage } from "../brand/brandPage.js";
 
 const PUBLIC_DIR = join(dirname(fileURLToPath(import.meta.url)), "public");
@@ -48,6 +58,37 @@ const CONTENT_TYPES = {
 function assertLocalHost(req, port, env) {
   const host = String(req.headers.host || "");
   if (!allowedHost(host, env, port)) throw mcpError("forbidden", "Desk is local-only.", 403);
+}
+
+export function deskOrigins(env, port) {
+  const list = [`http://127.0.0.1:${port}`, `http://localhost:${port}`];
+  const raw = String(env?.SOCIAL_MCP_PUBLIC_URL || "").trim();
+  if (raw) {
+    try {
+      list.push(new URL(raw).origin);
+    } catch {
+      // ignore a malformed public URL
+    }
+  }
+  return list;
+}
+
+// CSRF guard: a page on another site can send "simple" POSTs to the local desk.
+// Refuse cross-site requests, and require a JSON body or the desk's own header,
+// both of which force a browser preflight that a foreign origin cannot pass.
+export function assertSameOriginWrite(req, port, env) {
+  if (req.method === "GET" || req.method === "HEAD" || req.method === "OPTIONS") return;
+  const origin = String(req.headers.origin || "");
+  if (origin && !deskOrigins(env, port).includes(origin)) {
+    throw mcpError("forbidden", "Cross-site requests to the desk are refused.", 403);
+  }
+  if (String(req.headers["sec-fetch-site"] || "").toLowerCase() === "cross-site") {
+    throw mcpError("forbidden", "Cross-site requests to the desk are refused.", 403);
+  }
+  const type = String(req.headers["content-type"] || "").split(";")[0].trim().toLowerCase();
+  if (type !== "application/json" && req.headers["x-postpath-desk"] !== "1") {
+    throw mcpError("forbidden", "Desk requests must be JSON or carry the desk header.", 403);
+  }
 }
 
 async function readJson(req, limit = 64_000) {
@@ -173,6 +214,10 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
   let dueTimer = null;
   let dueInFlight = false;
   let ffmpegCache = { at: 0, ok: true, message: "" };
+  // Session recorder: off until the owner starts it in the desk. Local files only.
+  const recorder = createRecorder({ root: homePaths.recordingsDir || join(homePaths.root, "recordings") });
+  const onAppEvent = (event) => recorder.record(event.type, event);
+  engine.events?.on?.("event", onAppEvent);
 
   function ffmpegNote() {
     if (Date.now() - ffmpegCache.at < 60_000) return { ok: ffmpegCache.ok, message: ffmpegCache.message };
@@ -266,6 +311,7 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
           ? "create_profile"
           : "connect",
       pilot_mode: pilotActive(),
+      x_available: xAvailable(engine.store.homePaths),
       publisher_calls: engine.publisherCalls?.() || 0,
     };
   }
@@ -281,6 +327,7 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
       home: full.home,
       media_dir: full.media_dir,
       pilot_mode: true,
+      x_available: xAvailable(engine.store.homePaths),
       publish_mode: "disabled",
       publisher_calls: engine.publisherCalls?.() || 0,
       profiles: (full.profiles || []).map((profile) => ({ id: profile.id, name: profile.name })),
@@ -323,7 +370,42 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
       }
       return { profile_id: profile.id, name: profile.name, connections: list };
     });
-    return { auto_post: { risk_label: AUTO_POST_RISK_LABEL, pin_required: ownerPinConfigured(homePaths), networks: PLATFORMS, brands } };
+    return {
+      auto_post: { risk_label: AUTO_POST_RISK_LABEL, pin_required: ownerPinConfigured(homePaths), networks: PLATFORMS, brands },
+      posting: { ...postingPermissions(engine.store), pin_required: ownerPinConfigured(homePaths), activity: listAutoPostActivity(engine.store, { limit: 25 }) },
+    };
+  }
+
+  function cleanProfileId(value) {
+    const id = String(value || "");
+    if (!/^[a-z0-9][a-z0-9_-]{0,63}$/i.test(id)) throw mcpError("invalid_request", "Pick a brand.", 400);
+    return id;
+  }
+
+  function cleanPlatform(value) {
+    const platform = String(value || "");
+    if (!PLATFORMS.includes(platform)) throw mcpError("invalid_platform", "Pick a network.", 400);
+    return platform;
+  }
+
+  /** The owner decided on these posts at the desk. Assistant drafts only; see approvalHistory.js. */
+  function recordDecisions(posts, decision, reason = "") {
+    for (const post of posts) {
+      try {
+        if (post) recordDecision(engine.store, post, { decision, reason });
+      } catch {
+        // History is advisory; never block the owner's decision on it.
+      }
+    }
+  }
+
+  function decisionPosts({ bundle_id, post_id }) {
+    if (bundle_id) {
+      const bundle = engine.store.getBundle(bundle_id);
+      return (bundle?.platforms || []).map((platform) => engine.store.getPost(bundle.child_ids?.[platform])).filter(Boolean);
+    }
+    const post = post_id ? engine.store.getPost(post_id) : null;
+    return post ? [post] : [];
   }
 
   function brandPageView() {
@@ -334,6 +416,37 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
       return { profile_id: profile.id, name: profile.name, enabled, path: enabled ? `/b/${page.slug}` : null, enabled_at: enabled ? page.enabled_at : null };
     });
     return { brand_page: { pin_required: ownerPinConfigured(homePaths), hosting: "local desk only", brands } };
+  }
+
+  /** The 3 x 6 grid, with the platforms lane's token_meta health (PR 78) as the probe. */
+  function gridWithEngineHealth({ appReady, googleTesting }) {
+    const off = useEngineHealth(connectionHealthRow, { googleTesting: () => googleTesting });
+    try {
+      return connectionGrid({ listConnections: (id) => engine.store.listConnections(id), appReady, googleTesting });
+    } finally {
+      off();
+    }
+  }
+
+  /** Minimal personal desk: connections grid, per-brand review queue, tokens. No secrets. */
+  function personalView(brand) {
+    loadOAuthEnvFile(homePaths, env);
+    const fileValues = existsSync(homePaths.oauthEnv) ? parseEnvFile(readFileSync(homePaths.oauthEnv, "utf8")) : {};
+    const appReady = oauthReady(credentialValues(fileValues, env));
+    // Either switch marks the Google app as published (no 7-day refresh expiry).
+    const googleTesting = String(env.SOCIAL_MCP_GOOGLE_PRODUCTION || "") !== "1" && googleTestingMode(env);
+    const ids = new Set(PERSONAL_BRANDS.map((b) => b.id));
+    const filter = ids.has(brand) ? brand : "";
+    const queue = engine.listQueue().queue.filter((item) => ids.has(item.profile_id) && (!filter || item.profile_id === filter));
+    return {
+      brands: PERSONAL_BRANDS,
+      brand: filter,
+      grid: gridWithEngineHealth({ appReady, googleTesting }),
+      queue,
+      pats: listPats(engine.store),
+      mcp_url: `http://127.0.0.1:${port}/mcp`,
+      pin_required: ownerPinConfigured(homePaths),
+    };
   }
 
   function blankAuto() {
@@ -349,6 +462,7 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
       assertLocalHost(req, port, env);
       const url = new URL(req.url || "/", `http://127.0.0.1:${port}`);
       if (await handleRemoteMcp(req, res, { engine, store: engine.store, env, port })) return;
+      assertSameOriginWrite(req, port, env);
 
       if (req.method === "GET" && url.pathname === "/api/status") {
         sendJson(res, 200, { ok: true, ...deskState() });
@@ -405,6 +519,25 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
         return;
       }
 
+      if (req.method === "GET" && url.pathname === "/api/vidiq-upsell") {
+        sendJson(res, 200, { ok: true, upsell: engine.vidiqUpsellInfo() });
+        return;
+      }
+      if (req.method === "POST" && url.pathname === "/api/settings/vidiq") {
+        const body = await readJson(req);
+        requireOwner(req, body);
+        sendJson(res, 200, { ok: true, upsell: engine.saveVidiqUpsell(body) });
+        return;
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/score") {
+        // Open to every desk user (owner and pilot). Opt-in per click; nothing is saved or blocked.
+        const body = await readJson(req);
+        const interest = ["youtube_suggest", "google_trends"].includes(body.interest) ? body.interest : "off";
+        sendJson(res, 200, { ok: true, ...(await engine.score(body, { interest })) });
+        return;
+      }
+
       if (req.method === "POST" && url.pathname === "/api/profile") {
         const body = await readJson(req);
         requireOwner(req, body);
@@ -440,7 +573,11 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
         if (!profileId) throw mcpError("invalid_profile", "Profile id is required.");
         loadOAuthEnvFile(homePaths, env);
         await engine.upsertProfile({ id: profileId, name });
-        const result = await engine.connectAccounts(profileId, { platforms: body.platforms });
+        const result = await engine.connectAccounts(profileId, {
+          platforms: body.platforms,
+          force: body.reconnect === true,
+          open: body.open !== false,
+        });
         sendJson(res, 200, { ok: true, connect: result, ...deskState() });
         return;
       }
@@ -528,28 +665,34 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
           sendJson(res, 200, { ok: true, ...result, publishers_called: engine.publisherCalls?.() || 0, ...deskState() });
           return;
         }
+        const decided = decisionPosts(body);
         if (body.bundle_id) {
           const result = await engine.approveBundle({
             bundle_id: body.bundle_id,
             scheduled_at: body.scheduled_at,
             instagram_public_confirmed: body.instagram_public_confirmed === true,
           });
+          recordDecisions(decided, "approved");
           sendJson(res, 200, { ok: true, ...result, ...deskState() });
           return;
         }
         if (body.scheduled_at) {
           const result = await engine.schedulePost({ post_id: body.post_id, scheduled_at: body.scheduled_at });
+          recordDecisions(decided, "approved");
           sendJson(res, 200, { ok: true, ...result, ...deskState() });
           return;
         }
         const result = await engine.publishPost({ post_id: body.post_id, force: true });
+        recordDecisions(decided, "approved");
         sendJson(res, 200, { ok: true, ...result, ...deskState() });
         return;
       }
 
       if (req.method === "POST" && url.pathname === "/api/discard") {
         const body = await readJson(req);
+        const decided = decisionPosts(body).filter((post) => ["draft", "scheduled", "failed"].includes(post.status));
         const result = await engine.discardItem({ bundle_id: body.bundle_id, post_id: body.post_id });
+        recordDecisions(decided, "rejected", typeof body.reason === "string" ? body.reason : "");
         sendJson(res, 200, { ok: true, ...result, ...deskState() });
         return;
       }
@@ -603,6 +746,51 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
         return;
       }
 
+      if (url.pathname === "/api/learning" || url.pathname.startsWith("/api/learning/")) {
+        // What assistants have learned per brand. Only the owner changes the guide here;
+        // assistants can only propose notes over MCP, which land as pending.
+        const learningView = () => ({
+          pin_required: ownerPinConfigured(homePaths),
+          brands: engine.store.listProfiles().map((profile) => ({ name: profile.name || profile.id, ...brandGuide(engine.store, profile.id) })),
+        });
+        const knownBrand = (value) => {
+          const id = cleanProfileId(value);
+          if (!engine.store.getProfile(id)) throw mcpError("not_found", "Brand not found.", 404);
+          return id;
+        };
+        const suggestionId = (value) => {
+          const id = String(value ?? "");
+          if (!/^sug_[a-z0-9]{4,40}$/.test(id)) throw mcpError("invalid_request", "Unknown suggestion.", 400);
+          return id;
+        };
+        if (req.method === "GET" && url.pathname === "/api/learning") {
+          sendJson(res, 200, { ok: true, learning: learningView() });
+          return;
+        }
+        if (req.method === "POST" && (url.pathname === "/api/learning/accept" || url.pathname === "/api/learning/dismiss")) {
+          const body = await readJson(req);
+          decideSuggestion(engine.store, knownBrand(body.profile_id), suggestionId(body.suggestion_id), url.pathname.endsWith("/accept"));
+          sendJson(res, 200, { ok: true, learning: learningView() });
+          return;
+        }
+        if (req.method === "POST" && url.pathname === "/api/learning/delete") {
+          const body = await readJson(req);
+          deleteBullet(engine.store, knownBrand(body.profile_id), body.bullet_id);
+          sendJson(res, 200, { ok: true, learning: learningView() });
+          return;
+        }
+        if (req.method === "POST" && url.pathname === "/api/learning/reset") {
+          // Reset needs the owner PIN when one is set, or an explicit confirm when not.
+          const body = await readJson(req);
+          const profileId = knownBrand(body.profile_id);
+          if (ownerPinConfigured(homePaths)) assertOwnerPin(homePaths, pinFromRequest(req, body));
+          else if (body.confirm !== true) throw mcpError("confirm_required", "Confirm to reset what was learned for this brand.", 400);
+          resetLearning(engine.store, profileId);
+          sendJson(res, 200, { ok: true, learning: learningView() });
+          return;
+        }
+      }
+
       if (url.pathname.startsWith("/api/auto-post")) {
         if (pilotActive()) {
           sendJson(res, 403, { ok: false, code: "pilot_auto_post_disabled", message: "Auto-post is off in pilot mode. Every draft waits for approval." });
@@ -626,6 +814,33 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
             networks: body.networks,
             enabled_by: "desk",
           });
+          sendJson(res, 200, { ok: true, ...autoPostView() });
+          return;
+        }
+        if (req.method === "POST" && url.pathname === "/api/auto-post/network") {
+          // Brand + network mode. On needs the owner PIN when one is set, or an explicit confirm when not.
+          // Off is one click and needs no PIN.
+          const body = await readJson(req);
+          const profileId = cleanProfileId(body.profile_id);
+          const platform = cleanPlatform(body.platform);
+          if (body.enabled === true) {
+            if (ownerPinConfigured(homePaths)) {
+              assertOwnerPin(homePaths, pinFromRequest(req, body));
+            } else if (body.confirm !== true) {
+              throw mcpError("confirm_required", `${AUTO_POST_RISK_LABEL} Confirm to turn it on. Setting an owner PIN is recommended.`, 400);
+            }
+            setNetworkAutoPost(engine.store, { profile_id: profileId, platform, enabled: true, enabled_by: "desk" });
+          } else {
+            setNetworkAutoPost(engine.store, { profile_id: profileId, platform, enabled: false });
+          }
+          sendJson(res, 200, { ok: true, ...autoPostView() });
+          return;
+        }
+        if (req.method === "POST" && url.pathname === "/api/auto-post/snooze") {
+          const body = await readJson(req);
+          const profileId = cleanProfileId(body.profile_id);
+          if (!engine.store.getProfile(profileId)) throw mcpError("not_found", "Brand not found.", 404);
+          snoozeReadiness(engine.store, profileId, cleanPlatform(body.platform));
           sendJson(res, 200, { ok: true, ...autoPostView() });
           return;
         }
@@ -706,6 +921,25 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
         return;
       }
 
+      if (req.method === "GET" && url.pathname === "/api/personal") {
+        sendJson(res, 200, { ok: true, ...personalView(String(url.searchParams.get("brand") || "")) });
+        return;
+      }
+
+      if (req.method === "POST" && url.pathname === "/api/personal/token") {
+        const body = await readJson(req);
+        requireOwner(req, body);
+        // Draft-only always: read + drafts:write. No publish, approve, or owner scopes from this screen.
+        const created = createPat(engine.store, {
+          name: body.name || "Assistant (draft-only)",
+          scopes: DEFAULT_SCOPES,
+          brands: normalizeBrands(body.brands ?? []),
+          expiresInDays: body.expires_in_days,
+        });
+        sendJson(res, 201, { ok: true, ...created });
+        return;
+      }
+
       if (req.method === "POST" && url.pathname === "/api/pat") {
         const body = await readJson(req);
         requireOwner(req, body);
@@ -713,6 +947,7 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
           name: body.name,
           scopes: body.scopes,
           expiresInDays: body.expires_in_days,
+          brands: body.all_brands === true ? ["*"] : (body.brands ?? body.profiles),
         });
         sendJson(res, 201, { ok: true, ...created, ...deskState() });
         return;
@@ -737,6 +972,97 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
         return;
       }
 
+      if (url.pathname === "/api/manage" || url.pathname.startsWith("/api/manage/")) {
+        if (!engine.manage) throw mcpError("not_found", "Not found", 404);
+        if (req.method === "GET" && url.pathname === "/api/manage") {
+          sendJson(res, 200, { ok: true, ...engine.manage.view(String(url.searchParams.get("profile_id") || "")) });
+          return;
+        }
+        if (req.method === "POST" && url.pathname === "/api/manage/queue") {
+          const body = await readJson(req);
+          requireOwner(req, body);
+          const result = engine.manage.queue({ ...body, source: "desk" });
+          sendJson(res, 200, { ok: true, ...result });
+          return;
+        }
+        if (req.method === "POST" && url.pathname === "/api/manage/approve") {
+          const body = await readJson(req);
+          requireOwner(req, body);
+          // The desk is the only place that can approve; destructive changes take a second, typed confirmation.
+          const result = await engine.manage.approve({
+            id: body.action_id,
+            approved_by: "desk",
+            confirm_nonce: body.confirm_nonce,
+            confirm_text: body.confirm_text,
+          });
+          sendJson(res, 200, { ok: true, ...result });
+          return;
+        }
+        if (req.method === "POST" && url.pathname === "/api/manage/discard") {
+          const body = await readJson(req);
+          const result = engine.manage.discard({ id: body.action_id });
+          sendJson(res, 200, { ok: true, ...result });
+          return;
+        }
+      }
+
+      if (url.pathname === "/api/recordings" || url.pathname.startsWith("/api/recordings/")) {
+        if (req.method === "GET" && url.pathname === "/api/recordings") {
+          sendJson(res, 200, { ok: true, active: recorder.active, recordings: recorder.list(), saved_in: "recordings folder in your PostPath home" });
+          return;
+        }
+        if (req.method === "POST" && url.pathname === "/api/recordings/start") {
+          const body = await readJson(req);
+          requireOwner(req, body);
+          sendJson(res, 200, { ok: true, ...recorder.start({ name: body.name, screen: body.screen === true }) });
+          return;
+        }
+        if (req.method === "POST" && url.pathname === "/api/recordings/stop") {
+          // Stopping is always allowed, one click.
+          sendJson(res, 200, { ok: true, ...recorder.stop() });
+          return;
+        }
+        if (req.method === "POST" && url.pathname === "/api/recordings/event") {
+          const body = await readJson(req, 8_000);
+          const allowed = ["desk_error", "reconnect_started", "screen_capture_started", "screen_capture_stopped"];
+          if (!allowed.includes(body.type)) throw mcpError("invalid_event", "Unknown event.", 400);
+          sendJson(res, 200, { ok: true, recorded: recorder.record(body.type, body) });
+          return;
+        }
+        if (req.method === "POST" && url.pathname === "/api/recordings/video") {
+          const id = String(url.searchParams.get("id") || "");
+          if (recorder.active?.id !== id && !recorder.list().some((row) => row.id === id)) throw mcpError("not_found", "Unknown recording.", 404);
+          const type = String(req.headers["content-type"] || "");
+          if (!type.startsWith("video/webm")) throw mcpError("invalid_media", "Only a desk.webm screen recording is saved.", 400);
+          const result = await recorder.saveVideo(id, req);
+          sendJson(res, 200, { ok: true, ...result });
+          return;
+        }
+        const fileMatch = url.pathname.match(/^\/api\/recordings\/(rec_[A-Za-z0-9_]+)\/(events\.jsonl|desk\.webm|summary\.md)$/);
+        if (req.method === "GET" && fileMatch) {
+          const path = recorder.filePath(fileMatch[1], fileMatch[2]);
+          const types = { "events.jsonl": "application/x-ndjson", "desk.webm": "video/webm", "summary.md": "text/markdown; charset=utf-8" };
+          const headers = { "content-type": types[fileMatch[2]], "content-length": statSync(path).size, "cache-control": "no-store" };
+          if (url.searchParams.get("download") === "1") headers["content-disposition"] = `attachment; filename="${fileMatch[1]}-${fileMatch[2]}"`;
+          res.writeHead(200, headers);
+          createReadStream(path).pipe(res);
+          return;
+        }
+        if (req.method === "POST" && url.pathname === "/api/recordings/rename") {
+          const body = await readJson(req);
+          requireOwner(req, body);
+          sendJson(res, 200, { ok: true, ...recorder.rename(String(body.id || ""), body.name) });
+          return;
+        }
+        if (req.method === "POST" && url.pathname === "/api/recordings/delete") {
+          const body = await readJson(req);
+          requireOwner(req, body);
+          if (body.confirm !== true) throw mcpError("confirm_required", "Confirm to delete this recording.", 400);
+          sendJson(res, 200, { ok: true, ...recorder.remove(String(body.id || "")) });
+          return;
+        }
+      }
+
       if (req.method === "POST" && url.pathname === "/api/forget-vault") {
         const body = await readJson(req);
         requireOwner(req, body);
@@ -759,10 +1085,11 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
 
       sendJson(res, 404, { ok: false, message: "Not found" });
     } catch (error) {
+      recorder.record("error", { code: error.code || "error", route: String(req.url || "").split("?")[0] });
       sendJson(res, error.statusCode || 500, {
         ok: false,
         code: error.code || "error",
-        message: error.message || "Unexpected error",
+        message: redactText(error.message || "Unexpected error"),
       });
     }
   });
@@ -786,9 +1113,11 @@ export function createDeskServer({ engine, env = process.env, port = Number(env.
 
   async function stop() {
     stopDueLoop();
+    recorder.stop();
+    engine.events?.off?.("event", onAppEvent);
     await new Promise((resolve) => server.close(() => resolve()));
     await engine.oauth.stop();
   }
 
-  return { start, stop, snapshot, port, startDueLoop, stopDueLoop };
+  return { start, stop, snapshot, port, startDueLoop, stopDueLoop, recorder };
 }

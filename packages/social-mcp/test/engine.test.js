@@ -1,3 +1,4 @@
+import { giveOwnX } from "./helpers/ownX.js";
 import assert from "node:assert/strict";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -41,7 +42,7 @@ test("missingProviders reports full OAuth chain gaps", () => {
 });
 
 test("draft schedule and due publish path for youtube", async () => {
-  const home = mkdtempSync(join(tmpdir(), "social-mcp-"));
+  const home = giveOwnX(mkdtempSync(join(tmpdir(), "social-mcp-")));
   const mediaDir = join(home, "media");
   mkdirSync(mediaDir, { recursive: true });
   const media = join(mediaDir, "clip.mp4");
@@ -113,7 +114,7 @@ test("draft schedule and due publish path for youtube", async () => {
 });
 
 test("rejects media_path outside the vault media directory", async () => {
-  const home = mkdtempSync(join(tmpdir(), "social-mcp-"));
+  const home = giveOwnX(mkdtempSync(join(tmpdir(), "social-mcp-")));
   const outside = join(home, "outside.mp4");
   writeFileSync(outside, Buffer.alloc(64, 1));
   try {
@@ -135,7 +136,7 @@ test("rejects media_path outside the vault media directory", async () => {
 });
 
 test("instagram publish without a file or https url is rejected before upload", async () => {
-  const home = mkdtempSync(join(tmpdir(), "social-mcp-"));
+  const home = giveOwnX(mkdtempSync(join(tmpdir(), "social-mcp-")));
   try {
     const engine = createEngine({ home, now: () => Date.parse("2026-10-27T12:00:00.000Z") });
     await engine.upsertProfile({ id: "acme", name: "Acme" });
@@ -162,7 +163,7 @@ test("instagram publish without a file or https url is rejected before upload", 
 });
 
 test("x publish posts text tweet", async () => {
-  const home = mkdtempSync(join(tmpdir(), "social-mcp-"));
+  const home = giveOwnX(mkdtempSync(join(tmpdir(), "social-mcp-")));
   try {
     const engine = createEngine({
       home,
@@ -188,7 +189,7 @@ test("x publish posts text tweet", async () => {
 });
 
 test("publish_post blocks validation errors and surfaces length warnings", async () => {
-  const home = mkdtempSync(join(tmpdir(), "social-mcp-"));
+  const home = giveOwnX(mkdtempSync(join(tmpdir(), "social-mcp-")));
   try {
     const engine = createEngine({
       home,
@@ -226,7 +227,7 @@ test("publish_post blocks validation errors and surfaces length warnings", async
 });
 
 test("snapchat and whatsapp publish stay honestly restricted", async () => {
-  const home = mkdtempSync(join(tmpdir(), "social-mcp-"));
+  const home = giveOwnX(mkdtempSync(join(tmpdir(), "social-mcp-")));
   try {
     const engine = createEngine({ home, now: () => Date.parse("2026-10-27T12:00:00.000Z") });
     await engine.upsertProfile({ id: "acme", name: "Acme" });
@@ -249,7 +250,7 @@ test("snapchat and whatsapp publish stay honestly restricted", async () => {
 });
 
 test("bluesky connect stores app password session", async () => {
-  const home = mkdtempSync(join(tmpdir(), "social-mcp-"));
+  const home = giveOwnX(mkdtempSync(join(tmpdir(), "social-mcp-")));
   const fetchImpl = async (url) => {
     if (String(url).includes("createSession")) {
       return {

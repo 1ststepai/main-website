@@ -25,6 +25,10 @@ const THREADS_GRAPH = "https://graph.threads.net/v1.0";
 export const YOUTUBE_SCOPES = [
   "https://www.googleapis.com/auth/youtube.upload",
   "https://www.googleapis.com/auth/youtube.readonly",
+  // youtube.force-ssl covers every manage call PostPath makes (channels.update,
+  // channelBanners.insert, playlists, playlistItems, videos.update, videos.delete)
+  // plus comments and captions, which the broader "youtube" scope does not.
+  "https://www.googleapis.com/auth/youtube.force-ssl",
 ];
 
 export const GBP_SCOPES = [
@@ -39,12 +43,20 @@ export const META_SCOPES = [
   "instagram_basic",
   "instagram_content_publish",
   "business_management",
+  "pages_manage_engagement",
+  "pages_manage_metadata",
+  "pages_read_user_content",
+  "read_insights",
+  "instagram_manage_comments",
+  "instagram_manage_insights",
 ];
 
 export const THREADS_SCOPES = ["threads_basic", "threads_content_publish"];
-export const TIKTOK_SCOPES = ["video.upload"];
+// user.info.basic reads the account label; video.upload sends drafts to the TikTok inbox;
+// video.publish allows Direct Post (private-only until the desk's own app passes TikTok audit).
+export const TIKTOK_SCOPES = ["user.info.basic", "video.upload", "video.publish"];
 export const LINKEDIN_SCOPES = ["openid", "profile", "w_member_social"];
-export const X_SCOPES = ["tweet.read", "tweet.write", "users.read", "offline.access"];
+export const X_SCOPES = ["tweet.read", "tweet.write", "users.read", "offline.access", "like.write", "follows.write", "media.write"];
 export const PINTEREST_SCOPES = ["boards:read", "pins:read", "pins:write", "user_accounts:read"];
 export const REDDIT_SCOPES = ["identity", "submit", "read"];
 export const SNAP_SCOPES = ["snapchat-marketing-api"];
@@ -339,15 +351,47 @@ async function exchangeGoogleCode(code, config, fetchImpl, platform = "youtube",
   };
 }
 
-function metaSecrets(pageToken, userToken, expiresIn) {
+// Only the chosen Page's token is kept. The Meta user token can act on every Page
+// in that login, so it is never stored on a brand profile. Publishing uses the
+// Page token alone, and a Page token minted from a long-lived user token does not expire.
+function metaSecrets(pageToken, expiresIn) {
   return {
     page_access_token: pageToken,
-    user_access_token: userToken,
     expires_at: new Date(Date.now() + expiresIn * 1000).toISOString(),
   };
 }
 
-async function exchangeMetaCode(code, config, fetchImpl) {
+// Pick the Facebook Page for this profile. A Meta login can cover several Pages,
+// so prefer the profile's saved choice (page id or exact name, case-insensitive)
+// A login with one Page uses it; with several and no choice, ask (names and ids only).
+export function pickMetaPage(pages, preference) {
+  const list = Array.isArray(pages) ? pages : [];
+  const wanted = String(preference || "").trim();
+  if (!wanted) {
+    if (list.length <= 1) return list[0] || null;
+    const choices = list.map((page) => ({ id: String(page.id), name: String(page.name || "") }));
+    const pageList = choices.map((p) => p.name + " (" + p.id + ")").join(", ");
+    const error = mcpError(
+      "page_choice_required",
+      `This Meta login covers ${choices.length} Facebook Pages: ${pageList}. Choose this brand's Page in its profile (Facebook Page), then reconnect.`,
+      400,
+    );
+    error.details = { pages: choices };
+    throw error;
+  }
+  const byId = list.find((page) => page.id === wanted);
+  if (byId) return byId;
+  const lower = wanted.toLowerCase();
+  const byName = list.find((page) => String(page.name || "").toLowerCase() === lower);
+  if (byName) return byName;
+  throw mcpError(
+    "page_not_found",
+    `The Facebook Page "${wanted}" was not in this Meta login. Reconnect and tick that Page on the Facebook screen.`,
+    400,
+  );
+}
+
+async function exchangeMetaCode(code, config, fetchImpl, pagePreference = "") {
   const short = await fetchImpl(`${META_GRAPH}/oauth/access_token`, {
     method: "POST",
     headers: { "content-type": "application/x-www-form-urlencoded" },
@@ -376,8 +420,8 @@ async function exchangeMetaCode(code, config, fetchImpl) {
   if (!pages.length) {
     throw mcpError("oauth_failed", "No Facebook Pages were found for that Meta login.", 502);
   }
-  const page = pages[0];
-  const secrets = metaSecrets(page.access_token, userToken, expiresIn);
+  const page = pickMetaPage(pages, pagePreference);
+  const secrets = metaSecrets(page.access_token, expiresIn);
   const platforms = {
     facebook: {
       record: {
@@ -662,12 +706,12 @@ async function exchangeSnapchatCode(code, config, fetchImpl) {
   };
 }
 
-export async function exchangeCode(provider, { code, config, fetchImpl = fetch, codeVerifier } = {}) {
+export async function exchangeCode(provider, { code, config, fetchImpl = fetch, codeVerifier, pagePreference = "" } = {}) {
   assertProviderConfigured(provider, config);
   if (provider === "youtube") return exchangeGoogleCode(code, config, fetchImpl, "youtube", codeVerifier);
   if (provider === "google_search") return exchangeGoogleCode(code, config, fetchImpl, "search_data", codeVerifier);
   if (provider === "google_business") return exchangeGoogleCode(code, config, fetchImpl, "google_business", codeVerifier);
-  if (provider === "meta") return exchangeMetaCode(code, config, fetchImpl);
+  if (provider === "meta") return exchangeMetaCode(code, config, fetchImpl, pagePreference);
   if (provider === "threads") return exchangeThreadsCode(code, config, fetchImpl);
   if (provider === "tiktok") return exchangeTikTokCode(code, config, fetchImpl);
   if (provider === "linkedin") return exchangeLinkedInCode(code, config, fetchImpl);

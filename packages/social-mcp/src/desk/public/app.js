@@ -24,8 +24,11 @@ import {
   stepContent,
   suggestedRequests,
   toggleChannel,
+  setXAvailable,
+  reconnectMessage,
 } from "./guide.js";
 import { platformIcon } from "./icons.js";
+import { discardBody } from "./deskApi.js";
 import { bindPilot, renderPilot } from "./pilotDesk.js";
 
 const NETWORKS = [
@@ -163,8 +166,8 @@ function showToast(message, isError = false) {
 
 async function api(path, options = {}) {
   const response = await fetch(path, {
-    headers: { "content-type": "application/json", ...(options.headers || {}) },
     ...options,
+    headers: { "content-type": "application/json", ...options.headers, "x-postpath-desk": "1" },
   });
   const payload = await response.json().catch(() => ({}));
   if (!response.ok || payload.ok === false) {
@@ -258,6 +261,8 @@ function renderResults(posts, publishMode) {
 
 function renderStatus(data) {
   latestStatus = data;
+  setXAvailable(data.x_available === true);
+  document.body.classList.toggle("x-on", data.x_available === true);
   if (renderPilot(data)) return;
   document.body.classList.add("owner-mode");
   const dispatchHonesty = document.getElementById("dispatch-honesty");
@@ -277,6 +282,9 @@ function renderStatus(data) {
   }
   networkList.replaceChildren();
   for (const network of NETWORKS) {
+    if (network.key === "x" && latestStatus?.x_available !== true) continue;
+    // TikTok is bring-your-own-app: hide it until this desk has its own client key and secret.
+    if (network.key === "tiktok" && latestStatus?.oauth_ready?.tiktok !== true && !byPlatform.get("tiktok")) continue;
     const row = byPlatform.get(network.key);
     const on = Boolean(row);
     const item = document.createElement("li");
@@ -286,14 +294,20 @@ function renderStatus(data) {
     strong.textContent = network.label;
     const detail = document.createElement("div");
     detail.className = "meta";
-    detail.textContent = row
+    const stale = row?.status === "needs_reconnect";
+    detail.textContent = stale
+      ? reconnectMessage(network.key)
+      : row
       ? row.account_label || "Connected"
       : network.limited
         ? "API approval required"
         : "Not connected";
     copy.append(strong, detail);
     const pill = document.createElement("span");
-    if (on) {
+    if (stale) {
+      pill.className = "chip needed";
+      pill.textContent = "Reconnect";
+    } else if (on) {
       pill.className = "chip connected";
       pill.textContent = "Connected";
     } else if (network.limited) {
@@ -449,6 +463,22 @@ function renderMcpRemote(data) {
   header.className = "mcp-config";
   header.textContent = JSON.stringify(remote.header_remote, null, 2);
   node.append(links, oauth, claude, header);
+  const brandBox = document.getElementById("pat-brand-list");
+  if (brandBox) {
+    const ticked = new Set([...brandBox.querySelectorAll("input:checked")].map((input) => input.value));
+    brandBox.replaceChildren();
+    for (const profile of data.profiles || []) {
+      const label = document.createElement("label");
+      label.className = "check";
+      const input = document.createElement("input");
+      input.type = "checkbox";
+      input.name = "pat_brand";
+      input.value = profile.id;
+      input.checked = ticked.has(profile.id);
+      label.append(input, ` ${profile.name || profile.id}`);
+      brandBox.append(label);
+    }
+  }
   const list = document.getElementById("pat-list");
   if (!list) return;
   list.replaceChildren();
@@ -458,7 +488,7 @@ function renderMcpRemote(data) {
     strong.textContent = `${pat.name} ${pat.prefix}…`;
     const meta = document.createElement("div");
     meta.className = "meta";
-    meta.textContent = `${(pat.scopes || []).join(" ")} · last used ${pat.last_used_at || "never"}`;
+    meta.textContent = `${(pat.scopes || []).join(" ")} · brands: ${!pat.brands || pat.brands[0] === "*" ? "all" : pat.brands.join(", ")} · last used ${pat.last_used_at || "never"}`;
     const button = document.createElement("button");
     button.type = "button";
     button.className = "btn danger revoke-pat";
@@ -473,12 +503,20 @@ document.getElementById("pat-form")?.addEventListener("submit", async (event) =>
   event.preventDefault();
   const form = new FormData(event.currentTarget);
   const scopes = form.getAll("scope");
+  const allBrands = form.get("all_brands") === "1";
+  const profiles = form.getAll("pat_brand").map(String);
+  if (!allBrands && !profiles.length) {
+    showToast("Pick at least one brand, or tick All brands.", true);
+    return;
+  }
   try {
     const data = await api("/api/pat", {
       method: "POST",
       body: JSON.stringify({
         name: String(form.get("name") || ""),
         scopes,
+        all_brands: allBrands,
+        brands: allBrands ? ["*"] : profiles,
         expires_in_days: form.get("expires_in_days") ? Number(form.get("expires_in_days")) : undefined,
       }),
     });
@@ -524,7 +562,7 @@ document.getElementById("connect-form").addEventListener("submit", async (event)
       body: JSON.stringify({
         id,
         name: profileName.value.trim() || id,
-        platforms: ["youtube", "meta", "tiktok", "linkedin", "x", "threads", "pinterest", "google_business", "reddit", "snapchat"],
+        platforms: ["youtube", "meta", ...(latestStatus?.oauth_ready?.tiktok === true ? ["tiktok"] : []), "linkedin", ...(latestStatus?.x_available === true ? ["x"] : []), "threads", "pinterest", "google_business", "reddit", "snapchat"],
       }),
     });
     renderStatus(data);
@@ -1613,13 +1651,33 @@ document.getElementById("queue-list")?.addEventListener("click", async (event) =
     return;
   }
   if (!discard) return;
+  // First click shows one optional "why" field; the second click discards.
+  let reasonBox = discard.parentElement?.querySelector(".discard-reason");
+  if (!reasonBox) {
+    reasonBox = document.createElement("label");
+    reasonBox.className = "discard-reason";
+    reasonBox.textContent = "Why not? (optional, helps your assistant learn) ";
+    const input = document.createElement("input");
+    input.type = "text";
+    input.maxLength = 200;
+    input.placeholder = "e.g. too salesy, too long";
+    reasonBox.append(input);
+    discard.before(reasonBox);
+    discard.textContent = "Confirm discard";
+    input.focus();
+    return;
+  }
+  let payload;
+  try {
+    payload = discardBody({ kind: discard.dataset.kind, id: discard.dataset.id, reason: reasonBox.querySelector("input")?.value || "" });
+  } catch (error) {
+    showToast(error.message, true);
+    return;
+  }
   discard.disabled = true;
   api("/api/discard", {
     method: "POST",
-    body: JSON.stringify({
-      bundle_id: discard.dataset.kind === "bundle" ? discard.dataset.id : undefined,
-      post_id: discard.dataset.kind === "post" ? discard.dataset.id : undefined,
-    }),
+    body: JSON.stringify(payload),
   })
     .then((data) => {
       renderStatus(data);
@@ -1857,7 +1915,7 @@ function renderAutoPost(view) {
   for (const brand of view.brands) {
     const card = el("div", { className: "auto-brand", dataset: { profile: brand.profile_id } });
     card.append(el("h3", {}, brand.name || brand.profile_id));
-    if (!brand.connections.length) card.append(el("p", { className: "hint" }, "No AI connections yet. Auto-post is off."));
+    if (!brand.connections.length) card.append(el("p", { className: "hint" }, "No assistant connections yet. Auto-post is off."));
     for (const conn of brand.connections) {
       const row = el("div", { className: "auto-conn", dataset: { connection: conn.connection_id } });
       row.append(el("div", {}, `${conn.name} (${conn.kind === "pat" ? "access token" : conn.kind === "oauth" ? "OAuth" : "inactive"})`));
@@ -1871,7 +1929,7 @@ function renderAutoPost(view) {
       if (conn.active) {
         const nets = el("div", { className: "auto-nets" });
         const chosen = conn.enabled ? conn.networks : conn.pending_request?.networks || [];
-        for (const net of view.networks || AUTO_NETWORKS) {
+        for (const net of (view.networks || AUTO_NETWORKS).filter((item) => item !== "x" || latestStatus?.x_available === true)) {
           const label = el("label", { className: "check" });
           const box = el("input", { type: "checkbox", value: net, className: "auto-net" });
           box.checked = chosen.includes(net);

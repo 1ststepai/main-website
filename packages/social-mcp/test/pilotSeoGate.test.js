@@ -9,11 +9,12 @@ import { initPilot } from "../src/cli.js";
 import { createSocialMcpServer } from "../src/mcp/server.js";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
+import { freePort, freePorts } from "./helpers/ports.js";
 
 test("pilot desk keeps SEO and Opening routes behind the owner PIN and never returns the owner snapshot", async () => {
   const home = mkdtempSync(path.join(tmpdir(), "postpath-pilot-seo-"));
-  const port = 20000 + Math.floor(Math.random() * 20000);
-  const env = { SOCIAL_MCP_PILOT_MODE: "1", ANTHROPIC_API_KEY: "", SOCIAL_MCP_DESK_PORT: String(port), SOCIAL_MCP_OAUTH_PORT: String(port + 1) };
+  const [port, oauthPort] = await freePorts(2);
+  const env = { SOCIAL_MCP_PILOT_MODE: "1", ANTHROPIC_API_KEY: "", SOCIAL_MCP_DESK_PORT: String(port), SOCIAL_MCP_OAUTH_PORT: String(oauthPort) };
   initPilot({ home, pin: "246810", env });
   const engine = createEngine({ home, env });
   const desk = createDeskServer({ engine, env, port });

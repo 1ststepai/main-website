@@ -6,6 +6,7 @@ import { keywordRecord, keywordsFor } from "../seo/keywords.js";
 import { buildVoiceRecord, voiceFor } from "../hook/voice.js";
 import { readPilotFile } from "../pilot/config.js";
 import { autoPostFor, recordAutoPostRequest } from "../autoPost.js";
+import { learnedForContext } from "../learning.js";
 
 const VOICE_FIELDS = ["tone", "avoid", "on_camera_style", "energy", "appears_on_camera"];
 
@@ -96,6 +97,7 @@ function contextFor(engine, profileId, { scopes, connectionId, pilot }) {
       pending_request: auto.pending_request || null,
     },
     imports: { enabled: false, note: "not built yet" },
+    learned: learnedForContext(store, profileId),
   };
 
   const missing = [];

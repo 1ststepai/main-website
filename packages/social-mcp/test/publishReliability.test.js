@@ -1,3 +1,4 @@
+import { giveOwnX } from "./helpers/ownX.js";
 import assert from "node:assert/strict";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -19,7 +20,7 @@ function jsonResponse(status, body, headers = {}) {
 }
 
 async function xEngine(fetchImpl, now = () => NOW) {
-  const home = mkdtempSync(join(tmpdir(), "social-mcp-rel-"));
+  const home = giveOwnX(mkdtempSync(join(tmpdir(), "social-mcp-rel-")));
   const engine = createEngine({
     home,
     env: { X_CLIENT_ID: "xid", X_CLIENT_SECRET: "xsecret" },
@@ -39,7 +40,7 @@ async function xDraft(engine, caption = "hello from postpath") {
 }
 
 test("list_posts schema includes needs_review", async () => {
-  const home = mkdtempSync(join(tmpdir(), "social-mcp-rel-"));
+  const home = giveOwnX(mkdtempSync(join(tmpdir(), "social-mcp-rel-")));
   try {
     const engine = createEngine({ home, now: () => NOW });
     createSocialMcpServer({ engine });
@@ -182,7 +183,7 @@ test("cancel during publishing returns dispatch_started and does not revert the 
 
 test("startup publishing rows become needs_review and are not sent", async () => {
   let fetches = 0;
-  const home = mkdtempSync(join(tmpdir(), "social-mcp-rel-"));
+  const home = giveOwnX(mkdtempSync(join(tmpdir(), "social-mcp-rel-")));
   let clock = Date.parse("2026-02-02T10:00:00.000Z");
   try {
     const first = createEngine({
@@ -321,7 +322,7 @@ test("HTTP 429 fails rate_limited without another attempt", async () => {
 });
 
 test("401 refreshes once and a second 401 or invalid_grant stops", async () => {
-  const home = mkdtempSync(join(tmpdir(), "social-mcp-rel-"));
+  const home = giveOwnX(mkdtempSync(join(tmpdir(), "social-mcp-rel-")));
   try {
     let mode = "refresh-once";
     let tweets = 0;
@@ -430,7 +431,7 @@ test("profile tokens are not shared across profiles", async () => {
 });
 
 test("scheduled_at requires an offset and stores distinct DST instants", async () => {
-  const home = mkdtempSync(join(tmpdir(), "social-mcp-rel-"));
+  const home = giveOwnX(mkdtempSync(join(tmpdir(), "social-mcp-rel-")));
   try {
     const engine = createEngine({ home, now: () => NOW });
     await engine.upsertProfile({ id: "acme", name: "Acme" });
@@ -493,7 +494,7 @@ test("scheduled_at requires an offset and stores distinct DST instants", async (
 });
 
 test("a second vault process cannot claim a post the first process already claimed", () => {
-  const home = mkdtempSync(join(tmpdir(), "social-mcp-rel-"));
+  const home = giveOwnX(mkdtempSync(join(tmpdir(), "social-mcp-rel-")));
   try {
     const first = createStore({ home, now: () => NOW });
     const postId = "postcross01";

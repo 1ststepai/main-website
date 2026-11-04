@@ -1,3 +1,4 @@
+import { giveOwnX } from "./helpers/ownX.js";
 import assert from "node:assert/strict";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -17,7 +18,7 @@ function jsonResponse(status, body, headers = {}) {
 }
 
 async function engineWith(fetchImpl, env = {}) {
-  const home = mkdtempSync(join(tmpdir(), "social-mcp-plat-"));
+  const home = giveOwnX(mkdtempSync(join(tmpdir(), "social-mcp-plat-")));
   const mediaDir = join(home, "media");
   mkdirSync(mediaDir, { recursive: true });
   const media = join(mediaDir, "clip.mp4");
@@ -63,6 +64,8 @@ test("mock publish paths for each implemented platform", async () => {
     {
       PINTEREST_APP_ID: "pid",
       PINTEREST_APP_SECRET: "psecret",
+      TIKTOK_CLIENT_KEY: "tkey",
+      TIKTOK_CLIENT_SECRET: "tsecret",
     },
   );
   try {

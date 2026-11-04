@@ -50,13 +50,14 @@ async function requireOk(sent, fallback) {
   throw mapPlatformError(sent.response, payload, fallback);
 }
 
-async function uploadBinary({ url, filePath, secrets, fetchImpl, onNeedsReconnect, budget }) {
+async function uploadBinary({ url, filePath, secrets, fetchImpl, onNeedsReconnect, budget, whole = false }) {
   const stat = statSync(filePath);
   if (!stat.size) throw mcpError("invalid_media", "The video file is empty.", 400);
   let offset = 0;
   let last = {};
   while (offset < stat.size) {
-    const end = Math.min(offset + CHUNK, stat.size) - 1;
+    // Instagram rupload documents one POST of the whole file at offset 0; Facebook accepts chunks.
+    const end = whole ? stat.size - 1 : Math.min(offset + CHUNK, stat.size) - 1;
     const body = await readSlice(filePath, offset, end);
     const sent = await sendWithRefresh({
       budget,
@@ -173,6 +174,7 @@ async function publishInstagram({ post, connection, secrets, mediaRoot, fetchImp
       fetchImpl,
       onNeedsReconnect,
       budget,
+      whole: true,
     });
     secrets = createdSent.secrets;
   } else {

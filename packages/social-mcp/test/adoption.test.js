@@ -10,9 +10,9 @@ import { initPilot } from "../src/cli.js";
 import { initOwnerPin } from "../src/pilot/ownerAuth.js";
 import { getBrandContext } from "../src/brand/context.js";
 import { STARTER_PACK_IDS, starterPack } from "../src/brand/starterPacks.js";
+import { freePort, freePorts } from "./helpers/ports.js";
 
 const PIN = "246810";
-let nextPort = 47980;
 
 function mockPublishers() {
   const ok = (platform) => async ({ post }) => ({ platform_post_id: `mock_${post.id}`, published_url: `https://example.test/${platform}/${post.id}`, result_source: "mock" });
@@ -21,9 +21,8 @@ function mockPublishers() {
 
 async function setup({ pilot = false } = {}) {
   const home = mkdtempSync(path.join(tmpdir(), "postpath-adopt-"));
-  const port = nextPort;
-  nextPort += 2;
-  const env = { ANTHROPIC_API_KEY: "", SOCIAL_MCP_DESK_PORT: String(port), SOCIAL_MCP_OAUTH_PORT: String(port + 1) };
+  const [port, oauthPort] = await freePorts(2);
+  const env = { ANTHROPIC_API_KEY: "", SOCIAL_MCP_DESK_PORT: String(port), SOCIAL_MCP_OAUTH_PORT: String(oauthPort) };
   if (pilot) {
     env.SOCIAL_MCP_PILOT_MODE = "1";
     initPilot({ home, pin: PIN, env });
