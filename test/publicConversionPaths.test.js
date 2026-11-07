@@ -16,7 +16,7 @@ test("the homepage leads with the studio offer and keeps products distinct", asy
   assert.match(html, /href="\/journey\/"/);
   assert.match(html, /firststep-logo-transparent-cleaned\.png/);
   assert.equal((html.match(/Book a call/g) || []).length, 15);
-  assert.equal((html.match(/href="\/book\/"/g) || []).length, 10);
+  assert.equal((html.match(/href="\/book\/"/g) || []).length, 11);
   assert.match(html, /Book a free 20-min call/);
   assert.doesNotMatch(html, /Book a 20-min call/);
   assert.match(llms, /Get more from the business you already have/);
@@ -56,7 +56,7 @@ test("the homepage keeps a short section order and service pages keep their own 
   assert.ok(html.indexOf('id="quotes"') < html.indexOf('id="book"'));
   assert.match(html, /class="book-bar"/);
   assert.doesNotMatch(html, /id="makeover"|id="flow"|id="paths"|id="works"|id="how"|id="example"|id="agents"/);
-  assert.equal((html.match(/href="\/book\/"/g) || []).length, 10);
+  assert.equal((html.match(/href="\/book\/"/g) || []).length, 11);
   assert.match(html, /Illustrative data/);
   assert.doesNotMatch(html, /Example console, simulated|SIMULATED|SAMPLE DEMO/);
   const demo = await source("public/work/lyons-life-demo/index.html");
