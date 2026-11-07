@@ -17,8 +17,9 @@ test("the homepage leads with the studio offer and keeps products distinct", asy
   assert.match(html, /firststep-logo-transparent-cleaned\.png/);
   assert.equal((html.match(/Book a call/g) || []).length, 15);
   assert.equal((html.match(/href="\/book\/"/g) || []).length, 10);
-  assert.match(html, /Book a free 20-min call/);
-  assert.doesNotMatch(html, /Book a 20-min call/);
+  assert.match(html, /Book a free 30-minute call/);
+  assert.match(html, /Or book the free 30-minute call/);
+  assert.doesNotMatch(html, /20-min|Team Training/);
   assert.match(llms, /Get more from the business you already have/);
   assert.match(llms, /1stStep OS/);
   assert.match(llms, /1stStep Job Agent/);
@@ -199,7 +200,15 @@ test("the booking path remains and commercial intake exposes three honest paths"
   const fitCheck = await source("fit-check/index.html");
   assert.match(booking, /https:\/\/api\.leadconnectorhq\.com\/widget\/booking\/Rb4aqLM1NdU5kvZcqNmj/);
   assert.match(booking, /class="calendar-shell"/);
-  assert.match(booking, /Loading secure Website Strategy Call calendar/);
+  assert.match(booking, /Book a Free 30-Minute Call/);
+  assert.match(booking, /Let&rsquo;s find what&rsquo;s slowing your/);
+  assert.match(booking, /where leads, follow-up or busywork get stuck/);
+  assert.match(booking, /Your current website, CRM and the tools you already use/);
+  assert.match(booking, /Where leads, follow-up or manual work slip through/);
+  assert.match(booking, /<h2 id="calendar-title">Free 30-Minute Call<\/h2>/);
+  assert.match(booking, /The calendar is hosted by LeadConnector/);
+  assert.match(booking, /Loading the booking calendar/);
+  assert.doesNotMatch(booking, /secure|guarantee/i);
   assert.match(booking, /No pressure\./);
   assert.match(booking, /payment schedule/i);
   for (const intent of ["build_new", "finish_build", "automate_business"]) assert.match(fitCheck, new RegExp(`value="${intent}"`));
