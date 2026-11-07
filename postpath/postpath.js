@@ -32,12 +32,12 @@ async function runDemo() {
 
   if (!chosen.length) {
     result.classList.add("show");
-    result.textContent = "Select at least one channel to preview your workflow.";
+    result.textContent = "Select at least one sample network to preview the simulation.";
     return;
   }
   if (!prompt) {
     result.classList.add("show");
-    result.textContent = "Add a prompt to preview your workflow.";
+    result.textContent = "Add a few words to preview the simulation.";
     return;
   }
 
@@ -63,13 +63,14 @@ async function runDemo() {
 
   result.classList.add("show");
   result.textContent = [
-    "WORKFLOW PREVIEW",
+    "SIMULATED PREVIEW",
     "",
-    `1. Your AI receives: “${prompt}”`,
-    `2. PostPath routes drafts toward: ${chosen.join(", ")}.`,
-    "3. You review before any intended publishing action.",
+    `1. You wrote: “${prompt}”`,
+    `2. Sample networks on screen: ${chosen.join(", ")}. Live publishing is not yet verified.`,
+    "3. On the private desk, the post would wait for your approval.",
+    "4. The desk is built to show what posted and what failed, including rate-limited and needs review. This preview uses simulated responses.",
     "",
-    "Simulation only — nothing was sent or published.",
+    "Nothing was sent. No real account is connected.",
   ].join("\n");
 
   runBtn.disabled = false;
