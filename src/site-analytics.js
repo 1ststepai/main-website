@@ -1,4 +1,9 @@
 import { inject, track } from "@vercel/analytics";
+import { injectSpeedInsights } from "@vercel/speed-insights";
+
+// Vercel Web Analytics and Speed Insights are the privacy-friendly measurement
+// on this site. Google Analytics 4 is not loaded. Set PUBLIC_GA4_MEASUREMENT_ID
+// only when Evan supplies a real measurement ID. Do not invent an ID.
 
 const ATTRIBUTION_KEYS = [
   "utm_source",
@@ -181,6 +186,7 @@ function handleTrackedClick(event) {
 
 captureAttribution();
 inject();
+injectSpeedInsights();
 decorateAttributionLinks();
 document.addEventListener("click", handleTrackedClick);
 

@@ -29,6 +29,8 @@ Official profiles:
 - Google Business Profile: https://maps.app.goo.gl/x7XKauoXUwi2qfNdA
 - YouTube: https://www.youtube.com/channel/UCynvog-XB0oFBigcrBvmxOg
 - GitHub: https://github.com/1ststepai
+- X: https://x.com/1ststepai
+- YouTube handle: https://www.youtube.com/@1ststepdotai
 
 Current design direction:
 - 1stStep OS is designed to give agent-assisted engineering explicit authority, isolated work, acceptance criteria, evidence, independent audits, and release gates.
@@ -84,4 +86,18 @@ FAQ for search and chat assistants:
 Contact:
 - Evan Pancis, founder
 - evan@1ststep.ai
+- 973-800-3729
+- Morris Plains, NJ
 - https://www.1ststep.ai/
+
+PostPath canonical:
+- https://postpath.1ststep.ai/ is the canonical URL and should return 200. https://www.1ststep.ai/postpath/ is the same page and points at that canonical. https://postpath.1ststep.ai/postpath/ permanently redirects to the canonical. The sitemap lists only the canonical.
+
+Full page summaries for assistants:
+- https://www.1ststep.ai/llms-full.txt
+
+Draft service pages (copy pending Evan Pancis's approval; no client results are claimed):
+- GoHighLevel automation for insurance agencies: https://www.1ststep.ai/services/gohighlevel-insurance-agencies.html
+- GoHighLevel automation for real estate brokers: https://www.1ststep.ai/services/gohighlevel-real-estate-brokers.html
+- 1stStep.ai is not affiliated with or endorsed by HighLevel.
+- resume.1ststep.ai is a separate product and is not part of this site's sitemap.

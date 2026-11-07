@@ -32,6 +32,8 @@ body.v2 > footer{display:flex;justify-content:space-between;align-items:center;g
 body.v2 > footer a{color:#A39B8C;text-decoration:none}
 body.v2 > footer a:hover{color:#F1EADB}
 body.v2 > footer nav{display:flex;flex-wrap:wrap;gap:8px 18px}
+body.v2 > footer .explore-nav,body.v2 > footer .social-nav{flex:1 0 100%}
+body.v2 > footer .explore-nav a,body.v2 > footer .social-nav a{text-decoration:underline;text-underline-offset:2px}
 body.v2 .aivc-nav{display:none}
 body.v2 #aivc-root{background:#0D0C0A!important;background-image:none!important;color:#F1EADB;overflow:visible}
 body.v2 .aivc-shell:before,body.v2 .aivc-shell:after{display:none}

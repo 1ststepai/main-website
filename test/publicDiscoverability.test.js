@@ -10,7 +10,6 @@ const wwwPages = [
   "/work/",
   "/work/universal-relocations/",
   "/os",
-  "/postpath/",
   "/journey/",
   "/book/",
   "/pricing/",
@@ -27,6 +26,8 @@ const wwwPages = [
   "/services/mvp-builds.html",
   "/services/websites.html",
   "/services/revenue-systems.html",
+  "/services/gohighlevel-insurance-agencies.html",
+  "/services/gohighlevel-real-estate-brokers.html",
   "/services/internal-tools.html",
   "/privacy.html",
   "/terms.html",
@@ -53,8 +54,12 @@ test("sitemaps use www, stay complete, and refresh lastmod on converted URLs", a
     assert.match(publicMap, new RegExp(`https://www\\.1ststep\\.ai${path.replaceAll("/", "\\/")}`));
     assert.match(rootMap, new RegExp(`https://www\\.1ststep\\.ai${path.replaceAll("/", "\\/")}`));
   }
-  assert.match(publicMap, /https:\/\/postpath\.1ststep\.ai\//);
-  assert.match(rootMap, /https:\/\/postpath\.1ststep\.ai\//);
+  assert.match(publicMap, /<loc>https:\/\/postpath\.1ststep\.ai\/<\/loc>/);
+  assert.match(rootMap, /<loc>https:\/\/postpath\.1ststep\.ai\/<\/loc>/);
+  assert.doesNotMatch(publicMap, /https:\/\/www\.1ststep\.ai\/postpath\//);
+  assert.doesNotMatch(rootMap, /https:\/\/www\.1ststep\.ai\/postpath\//);
+  assert.doesNotMatch(publicMap, /https:\/\/postpath\.1ststep\.ai\/postpath/);
+  assert.doesNotMatch(rootMap, /https:\/\/postpath\.1ststep\.ai\/postpath/);
   for (const path of ["/", "/book/", "/fit-check/", "/services/websites.html", "/services/mvp-builds.html", "/services/internal-tools.html", "/services/revenue-systems.html"]) {
     assert.match(publicMap, new RegExp(`${path.replaceAll("/", "\\/")}[\\s\\S]*?<lastmod>2026-09-20</lastmod>`));
   }

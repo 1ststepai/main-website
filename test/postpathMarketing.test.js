@@ -48,10 +48,20 @@ test("PostPath logo assets exist", async () => {
 test("Vercel maps postpath host and www path", async () => {
   const vercel = JSON.parse(await source("vercel.json"));
   const rewrites = vercel.rewrites.map((row) => JSON.stringify(row));
-  const redirects = (vercel.redirects || []).map((row) => JSON.stringify(row));
+  const redirects = vercel.redirects || [];
   assert.ok(
-    redirects.some((row) => row.includes("postpath.1ststep.ai") && row.includes("/postpath/")),
-    "host root should redirect to /postpath/ before filesystem index.html",
+    redirects.some(
+      (row) =>
+        row.source === "/postpath/" &&
+        row.destination === "https://postpath.1ststep.ai/" &&
+        row.permanent === true &&
+        row.has?.some((item) => item.value === "postpath.1ststep.ai"),
+    ),
+    "the duplicate /postpath/ path on the product host permanently redirects to the canonical root",
+  );
+  assert.equal(
+    redirects.some((row) => row.source === "/" && row.permanent === false),
+    false,
   );
   assert.ok(rewrites.some((row) => row.includes("postpath.1ststep.ai") && row.includes("/postpath")));
   assert.ok(rewrites.some((row) => row.includes('"/postpath/"')));

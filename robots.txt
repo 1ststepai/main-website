@@ -6,11 +6,23 @@ Disallow: /book/confirmed/
 
 User-agent: GPTBot
 Allow: /
+Disallow: /admin/
+Disallow: /demos/
+Disallow: /book/confirmed/
 
 User-agent: ClaudeBot
 Allow: /
+Disallow: /admin/
+Disallow: /demos/
+Disallow: /book/confirmed/
 
 User-agent: PerplexityBot
 Allow: /
+Disallow: /admin/
+Disallow: /demos/
+Disallow: /book/confirmed/
 
 Sitemap: https://www.1ststep.ai/sitemap.xml
+
+# https://www.1ststep.ai/llms.txt
+# https://www.1ststep.ai/llms-full.txt
