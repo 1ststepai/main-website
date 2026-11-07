@@ -260,6 +260,23 @@
 - **Alternatives:** Point the new CTA at `/book/` or `/fit-check/`; rewrite the page as React; delete the Signal Path module.
 - **Verification:** Local build, existing route tests updated for the homepage contract, and browser checks at 1440 and 390. Preview URL when Vercel provides one. Production verification is out of scope.
 - **Rollback:** Revert this branch. Do not alias the preview to production. The previous production homepage remains the live site until a separate release decision.
+## 2026-10-01: Pair the Newsletter Studio desktop app once
+
+- **Status / owner:** Evan approved cloud sync with one-time PC pairing. Implementation and local installation complete; independent security review, production approval, release and live pairing remain pending.
+- **Decision:** Reuse Studio's existing compiled interface and encrypted pipeline/workspace store in a local Node/Brave app. Add owner-approved, ten-minute pairing requests and persistent revocable device credentials restricted to pipeline/workspace methods. Windows DPAPI protects local credentials; cloud stores only hashes. Password, MFA and website session duration remain unchanged. No sending/payment permission, new packages, paid storage or Job Agent changes.
+- **Rationale:** A website shortcut still required repeated admin login. A separate paired credential addresses that friction while keeping owner approval and revocation explicit. The pairing screen follows the familiar code-confirmation/linked-device pattern; no retention or adoption outcome is claimed.
+- **Affected systems:** Desktop launcher/helper; Studio pairing/device management UI; desktop pairing API; pipeline/workspace authentication guards. `app.1ststep.ai` is outside scope.
+- **Verification:** Build and 142 tests passed, including actual Windows encryption round trip. Installed icon/loopback UI verified, anonymous loopback denied, isolated browser fixture verified wrong-code recovery and successful approval. Tests are implementation evidence, not independent audit or live cloud acceptance.
+- **Release / rollback:** Follow [desktop runbook](../newsletter-desktop.md). Current production remains `dpl_DXZirLrdQFDreQdHuBJYAdo79UDh`; explicit release approval and independent security review are required before changing it. Preserve existing pipeline/workspace keys. Real pairing and repeat-open cloud sync remain unverified.
+
+## 2026-09-30: Newsletter outreach lives in the consultancy's private Studio
+
+- **Status / owner:** Implementation authorized by Evan; local release candidate, deployment approval pending.
+- **Decision:** Add a Newsletter Pipeline section to the existing 1ststep.ai admin. Reuse owner auth, KV and encryption; use a separate encrypted key with atomic compare-and-set. Import the private CSV/ledger projection rather than embed contacts in public assets or add another sending service.
+- **Rationale:** One attention queue and saved next-action dates reduce missed follow-ups while preserving suppression, dated evidence and the independent sending hold.
+- **Affected systems:** Studio admin and a new protected API; no app.1ststep.ai or public proposal-site changes.
+- **Evidence / limits:** See `docs/newsletter-pipeline.md` and the scoped tests. Gmail/automation data is imported, not live-synced; production access and persistence are not yet verified.
+- **Rollback:** Revert this scoped release; preserve the separate encrypted KV key for recovery. No existing workspace migration or credential changes.
 
 ## 2026-09-21: 1stStep OS Cycle 1 is a public free core, not a hosted product
 
@@ -423,3 +440,60 @@
 - **Live Lighthouse, median of 3 (before -> after):** mobile perf 69 -> 71, LCP 7.20s -> 6.14s, CLS 0.105 -> 0.106. Desktop perf 96 -> 96, LCP 1.37s -> 1.38s, CLS 0.005 -> 0.009.
 - **Rollback:** Vercel instant rollback to `dpl_5uV2cw18AL1uRUmfJPWaeP9aa4wo` (`main-website-repo-75gz2vvt8-1ststep.vercel.app`, content `8af9397`).
 - **Still open:** `main` (324e589) does not contain `8af9397` or this slice. A Production deploy built from `main` would roll the live homepage back. Fast-forward `main` to `caa1468` (it contains all of `main`) before any main-based deploy.
+
+## 2026-09-30 — Newsletter pilot quote draft
+- Owner: Evan. Implementation: Codex. Status: locally verified; proposed pricing and deployment await owner approval.
+- Reuse Studio quote editor, existing payment-plan normalization and PDF/email paths. Add a one-time four-week pilot (four issues), proposed editable USD 600, full payment before starting, no automatic renewal. Existing owner price book is unchanged.
+- Scope includes supplied-brand layout, copy, subjects/preheaders, CTA/link checks and one revision per issue; client explicitly approves and sends through their own platform. Exclude platform fees/integration, list acquisition, photography and extra revisions. No outcome guarantees.
+- Create blank drafts or fill from a saved non-suppressed prospect; reuse client by email. Disable quote creation after failed workspace load or while prospect edits are unsaved. Draft creation never sends email, creates payment links or changes prospect follow-up dates.
+- Evidence: 139 tests pass, production build passes, sample PDF generation passes; desktop preview and mobile layout checked. Prospect recipient, duplicate-client reuse and suppression block verified in DEV-only memory preview. Production KV, live sending and deployment remain unverified. Rollback: prior production remains active; no deployment performed.
+
+## 2026-09-30 — Newsletter Studio production code release
+- Evan explicitly approved deploying dashboard and quote builder in this chat. Deployed clean tracked commit 6cb6913 to dpl_2HYyUG3rbQ6VbY2G6H7NKGDpYBZM, https://main-website-repo-8960cekak-1ststep.vercel.app, aliased to www.1ststep.ai and apex. The candidate contains origin/main 74d6062; public homepage source is unchanged by this feature.
+- Production checks: admin page and feature bundle load; newsletter and workspace APIs return 401/no-store without owner authentication. Browser verifies password + MFA login, including when preview=1 is requested. Public homepage retains Signal Path and Journey; journey, fit-check, foundry, os, tools, app checker and canonical logo return 200. Prior local evidence: 139 passing tests and build; Vercel build passed.
+- Important limitation: production environment list lacks KV_REST_API_URL and KV_REST_API_TOKEN, and no project storage integration is listed. Authenticated persistence/import/quote save are unverified and unavailable until existing KV storage is configured. No production contacts imported; no quote sent, payment link created or auth protection changed. Code deployed does not mean workflow activation complete.
+- Rollback: previous production dpl_236X6Ho5aV1PhLm8VNk7mWuPSNSt, https://main-website-repo-hs1eptzz6-1ststep.vercel.app. Local receipt .codex-qa/newsletter-release.json. Current branch must be reconciled into canonical main before a later main-based deployment, or these admin changes will be removed.
+
+## 2026-10-01 — Free Studio storage connected and verified
+- Evan authorized free storage and supplied the existing Upstash database. Verified Free Tier, USD 0.00, 256 MB / 500k monthly commands, no enabled payment method. No paid upgrade or additional database created; rate-limit keys untouched.
+- Added production KV_REST_API_URL and sensitive KV_REST_API_TOKEN to main-website-repo. Credentials stayed server-side, out of logs, repository and client assets. Redeployed unchanged code 6cb6913 as dpl_DXZirLrdQFDreQdHuBJYAdo79UDh, main-website-repo-dpwr06ssy-1ststep.vercel.app, aliased to www.1ststep.ai. Rollback deployment: dpl_2HYyUG3rbQ6VbY2G6H7NKGDpYBZM. Environment changes are separate from alias rollback.
+- Owner signed in. Imported the existing authorized 25-record snapshot through live admin; full reload retained all records, two suppressions and January 5, 2027 follow-up. Saved blank pilot quote FS-0001 through workspace API and verified reload. Client details required; USD 600 remains proposed and draft.
+- Independent read of the two Studio keys confirmed protected encrypted envelopes and no expiration. Anonymous APIs remain 401/no-store. No other database keys changed, outreach sent or payment link created. Sender authentication hold stays in effect. Temporary credentials/env files and clipboard cleared.
+- Receipt: .codex-qa/storage-persistence.json; private screenshot production-storage-connected.png. Runtime code unchanged; prior 139 tests/build remain current. Canonical main reconciliation remains necessary before any later main-based deployment.
+
+## 2026-10-01: Desktop pairing security review and approved release
+
+- Evan approved review and deployment. Independent review found an overbroad workspace write permission; `d158f10` enforces draft/client writes after normalization, protects pricing/templates and issued/payment-linked/delivery records, and clarifies read permissions. Re-review PASS; actual-handler valid saves and six rejected changes verified with isolated fake storage.
+- Build and all 143 tests passed. Production `dpl_96JTApXwier5uuHcnvbACDETMc3D` (`main-website-repo-qowxowe97-1ststep.vercel.app`) now serves www.1ststep.ai. Anonymous protected API checks are 401/no-store; home/admin are 200.
+- Installed desktop created a live pending pairing request. Owner password/MFA and code approval remain required once. Live saved-data sync/reopen/revocation remain unknown until owner pairing; no emails, payments or pipeline/workspace records changed. Rollback: `dpl_DXZirLrdQFDreQdHuBJYAdo79UDh`.
+- Private receipts: `.codex-qa/desktop-independent-review.md`, `.codex-qa/desktop-release.json`; screenshot `desktop-live-pair-request.png`. Public proposal copy was not changed by this deployment.
+
+## 2026-10-01: Newsletter desktop retrieves and generates newsletter quotes only
+
+- Evan narrowed quote scope to newsletters. Device GET/PUT responses expose only quotes using the newsletter-pilot agreement; writes preserve hidden other-service quotes, reject other quote types/reclassification and retain issued/payment/delivery safeguards. Supporting client/template/pricing reads remain available. The website owner session retains all quote types.
+- Desktop New quote uses the newsletter preset. Generic quote assistant, sending and payment actions are hidden; status changes are disabled. Numbering accounts for hidden quote numbers. Independent actual-handler security review PASS; all 143 tests/build PASS. Browser fixture verified newsletter FS-0100 and only newsletter agreement/no send-payment actions/no overflow.
+- Released ba4bdd3 as dpl_3h2AZffV7mwy9qCfch3nk7KsjMjx, aliased to www.1ststep.ai, under ongoing approved desktop pairing release. Live admin/bundle verified and anonymous APIs 401/no-store. Installed app files refreshed. Owner pairing and authenticated live device data remain pending. Receipt .codex-qa/newsletter-only-desktop.json; rollback dpl_96JTApXwier5uuHcnvbACDETMc3D.
+
+## 2026-10-01: UGC pipeline release candidate
+
+- Owner: Evan; implementation: Codex. Requested UGC pipeline capability alongside newsletters. Status: locally verified; deployment and installed desktop update pending approval.
+- Reused pipeline workflow with separate encrypted UGC storage, bounded creative briefs, revision checks, service-specific imports/exports and newsletter suppression checks. No new sending automation or account limit.
+- UGC draft quotes use creative-project agreements and editable price; zero is explicitly a placeholder. Creator consent, licensed usage and client approval are required in draft terms. Desktop access remains limited to newsletter/UGC draft quotes; unrelated quotes, delivery and payment actions remain protected.
+- Evidence: 146 tests and production build PASS; synthetic local prospect saved, converted to UGC quote and retained across navigation while newsletter preview stayed empty. No live prospect writes. Receipt: .codex-qa/ugc-pipeline.json.
+- Release dependency: current production baseline, deployment approval, desktop refresh and authenticated live verification. Existing deployed version remains unchanged; rollback is dpl_3h2AZffV7mwy9qCfch3nk7KsjMjx.
+
+## 2026-10-01: Studio native window for Windows taskbar identity
+
+- Owner: Evan; implementation: Codex. Request: replace Brave's taskbar appearance with the 1stStep logo. Installed locally; no website deployment or UGC/action-items desktop refresh.
+- Reused the existing loopback helper and DPAPI pairing in a WinForms/WebView2 window. Windows derives taskbar identity from the dedicated 1stStep Studio.exe; its icon and desktop/Start Menu shortcuts use the canonical 1stStep artwork. SDK Microsoft.Web.WebView2 1.0.4258.31 from official NuGet; existing Microsoft WebView2 runtime reused.
+- Helper communicates its existing short-lived bootstrap URL through a private redirected pipe. Existing loopback Host/Origin/cookie validation and cloud API restrictions are unchanged; the installed helper retains its existing newsletter-only API scope. The native window blocks nonlocal main-frame navigation and opens user-initiated HTTPS links in the default browser; permission requests are denied.
+- Verification: native compilation, four desktop security/workspace tests, protected URL launch, native titled window and navigation completion PASS. Executable icon extracted and inspected. Actual taskbar pin/appearance and cloud content rendering remain visually unverified because native UI controls are unavailable; user must pin the new native window. Receipt .codex-qa/studio-window.json.
+- Rollback: restore .codex-qa/studio-shortcut-before-native.lnk and .codex-qa/desktop-helper-before-native.mjs to their original installed paths. Credential file was not changed. New SDK binaries are local build/installation artifacts, not committed source.
+
+## 2026-10-01: User-reviewed reply queue through the existing Gmail connection
+
+- Owner: Evan; implementation: Codex. Evan selected the existing Gmail connection with queued/sent status instead of a new direct Gmail integration. Status: locally verified release candidate; production deployment, independent release challenge and installed desktop refresh remain pending.
+- The existing encrypted, revision-checked service pipelines persist inbound summaries, editable suggestions and an immutable recipient/thread/body approval. Only the explicit Studio review button queues a draft. Worker bridge reuses Windows-protected pairing and cannot approve replies. Suppression, requested dates, stale drafts, duplicate approvals, forged imports and recipient changes fail closed. Claimed sends with uncertain outcomes require reconciliation; only matching verified Gmail receipts complete a send.
+- Existing reply monitor updated in place to five-minute checks with a private disabled release gate. Until approved deployment and live verification, it retains monitoring-only behavior. No new Gmail permissions, no unreviewed sends and no email sent during this implementation.
+- Verification: 149 tests and production build PASS; synthetic rendered review/edit/queue/refresh/cancel path PASS; mobile reply form fits at 344 CSS pixels. Real paired bridge read succeeded against the existing newsletter pipeline (44 records, revision 11). Actual reviewed-send Gmail execution and new production queue operations remain unverified. Private receipt: .codex-qa/reviewed-replies.json.
+- Rollback: keep reply-worker-release.json disabled, restore prior five/15-minute monitor prompt as appropriate, and promote the verified prior deployment dpl_3h2AZffV7mwy9qCfch3nk7KsjMjx if a later release needs rollback. Preserve pairing credentials and pipeline data; do not reinstall the old VBS shortcut over the native window.

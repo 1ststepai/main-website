@@ -1,5 +1,7 @@
 import { isAdminAuthenticated, isSameOriginRequest } from "../lib/admin/auth.js";
+import { isDesktopAuthenticated } from "../lib/admin/desktopDevice.js";
 import { loadAdminWorkspace, saveAdminWorkspace } from "../lib/admin/workspaceStore.js";
+import { desktopWorkspaceView } from "../lib/admin/desktopWorkspace.js";
 
 const MAX_BODY_BYTES = 512 * 1024;
 
@@ -23,7 +25,8 @@ function parseBody(req) {
 }
 
 export default async function handler(req, res) {
-  if (!isAdminAuthenticated(req)) {
+  const ownerSession = isAdminAuthenticated(req);
+  if (!ownerSession && !await isDesktopAuthenticated(req, "workspace")) {
     return sendJson(res, 401, { ok: false, code: "unauthorized" });
   }
   if (!["GET", "PUT"].includes(req.method)) {
@@ -33,7 +36,8 @@ export default async function handler(req, res) {
 
   try {
     if (req.method === "GET") {
-      return sendJson(res, 200, { ok: true, workspace: await loadAdminWorkspace() });
+      const workspace = await loadAdminWorkspace();
+      return sendJson(res, 200, { ok: true, workspace: ownerSession ? workspace : desktopWorkspaceView(workspace) });
     }
     if (!isSameOriginRequest(req)) {
       return sendJson(res, 403, { ok: false, code: "origin_not_allowed" });
@@ -46,8 +50,8 @@ export default async function handler(req, res) {
     if (!Number.isInteger(expectedRevision) || expectedRevision < 0) {
       return sendJson(res, 400, { ok: false, code: "invalid_revision" });
     }
-    const workspace = await saveAdminWorkspace(body.workspace, expectedRevision);
-    return sendJson(res, 200, { ok: true, workspace });
+    const workspace = await saveAdminWorkspace(body.workspace, expectedRevision, !ownerSession);
+    return sendJson(res, 200, { ok: true, workspace: ownerSession ? workspace : desktopWorkspaceView(workspace) });
   } catch (error) {
     const statusCode = Number(error.statusCode) || (error instanceof SyntaxError ? 400 : 500);
     return sendJson(res, statusCode, {

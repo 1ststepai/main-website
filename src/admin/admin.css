@@ -724,6 +724,14 @@ button, select { cursor: pointer; }
 .status.failed, .status.rejected { color: var(--danger); border-color: rgba(255, 123, 145, .35); background: rgba(255, 123, 145, .08); }
 .status.published, .status.scheduled { color: var(--success); border-color: rgba(101, 226, 183, .3); background: rgba(101, 226, 183, .08); }
 .status.ready_for_review, .status.publishing { color: var(--cyan); border-color: rgba(86, 221, 255, .3); background: rgba(86, 221, 255, .08); }
+.studio-demos { max-width: 760px; margin: 0 auto; }
+.studio-demos h2 { margin: 0 0 8px; }
+.studio-demos > p { color: var(--muted); line-height: 1.6; }
+.studio-demo-links { display: grid; gap: 12px; margin-top: 24px; }
+.studio-demo-links a { display: grid; grid-template-columns: 1fr auto; gap: 5px 16px; padding: 18px; border: 1px solid var(--line-2); border-radius: 12px; color: var(--ink); text-decoration: none; background: var(--surface); }
+.studio-demo-links a:hover, .studio-demo-links a:focus-visible { border-color: var(--cyan); }
+.studio-demo-links span { grid-column: 1; color: var(--muted); }
+.studio-demo-links svg { grid-column: 2; grid-row: 1 / span 2; align-self: center; }
 
 @media (max-width: 720px) {
   .social-tools, .social-compose-grid { grid-template-columns: 1fr; }

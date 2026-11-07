@@ -57,6 +57,10 @@ import {
 import { draftQuoteFromBrief } from "../../lib/admin/quoteBriefAssistant.js";
 import SocialDesk from "./SocialDesk.jsx";
 import "./admin.css";
+import NewsletterPipeline from "./NewsletterPipeline.jsx";
+import DesktopPairing from "./DesktopPairing.jsx";
+import { newsletterQuoteClient, newsletterQuoteOverrides, newsletterQuoteTemplate } from "../../lib/admin/newsletterQuote.js";
+import { ugcQuoteOverrides, ugcQuoteTemplate } from "../../lib/admin/ugcQuote.js";
 
 const DEFAULT_TEMPLATES = DEFAULT_CONTRACT_TEMPLATES;
 const ADMIN_SESSION_EXPIRED_EVENT = "firststep:admin-session-expired";
@@ -73,6 +77,9 @@ const EMPTY_WORKSPACE = {
 
 const NAVIGATION = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
+  { id: "newsletter", label: "Newsletter Pipeline", icon: Mail },
+  { id: "ugc", label: "UGC Ads Pipeline", icon: FileText },
+  { id: "demos", label: "Website demos", icon: Eye },
   { id: "job-agent", label: "Job Agent", icon: Activity },
   { id: "social", label: "Social", icon: Share2 },
   { id: "clients", label: "Clients", icon: Users },
@@ -348,7 +355,7 @@ function Login({ onAuthenticated, mfaRequired, mobileTotpLoginAllowed }) {
   );
 }
 
-function Sidebar({ page, setPage, onLogout, mobileOpen, setMobileOpen }) {
+function Sidebar({ page, setPage, onLogout, mobileOpen, setMobileOpen, desktopMode = false }) {
   return (
     <aside className={`sidebar ${mobileOpen ? "open" : ""}`}>
       <div className="sidebar-head">
@@ -356,7 +363,7 @@ function Sidebar({ page, setPage, onLogout, mobileOpen, setMobileOpen }) {
         <button className="icon-button mobile-close" onClick={() => setMobileOpen(false)} aria-label="Close navigation"><X /></button>
       </div>
       <nav aria-label="Studio navigation">
-        {NAVIGATION.map(({ id, label, icon: Icon }) => (
+        {NAVIGATION.filter(item => !desktopMode || ["newsletter", "ugc", "demos", "clients", "quotes"].includes(item.id)).map(({ id, label, icon: Icon }) => (
           <button
             key={id}
             className={page === id ? "active" : ""}
@@ -370,7 +377,7 @@ function Sidebar({ page, setPage, onLogout, mobileOpen, setMobileOpen }) {
       <div className="sidebar-footer">
         <div className="owner-avatar">EP</div>
         <div><strong>Owner</strong><span>1stStep.ai</span></div>
-        <button className="icon-button" onClick={onLogout} aria-label="Log out"><LogOut size={17} /></button>
+        <button className="icon-button" onClick={onLogout} aria-label={desktopMode ? "Disconnect this PC" : "Log out"}><LogOut size={17} /></button>
       </div>
     </aside>
   );
@@ -840,7 +847,7 @@ function ContractsPage({ workspace, updateWorkspace }) {
               <label className="field"><span>Service type</span><select value={selected.service_type || "website"} onChange={(event) => updateTemplate((template) => ({ ...template, service_type: event.target.value }))}>
                 <option value="website">Website / web app</option>
                 <option value="app">iOS / mobile app</option>
-                <option value="retainer">Care plan / retainer</option>
+                <option value="retainer">Care plan / retainer</option><option value="project">Creative project / UGC</option>
               </select></label>
             </div>
             <Field label="Internal description" value={selected.description || ""} onChange={(value) => updateTemplate((template) => ({ ...template, description: value }))} />
@@ -1442,6 +1449,7 @@ function QuoteEditor({
   onCreatePaymentLink,
   onDeactivatePaymentLinks,
   previewMode,
+  desktopMode = false,
 }) {
   const quote = workspace.quotes.find((item) => item.id === quoteId);
   const client = workspace.clients.find((item) => item.id === quote?.client_id);
@@ -1479,7 +1487,7 @@ function QuoteEditor({
     <div className="quote-workspace">
       <RecentQuoteRail workspace={workspace} selectedId={quote.id} onSelect={onSelectQuote} />
       <main className="quote-document">
-        <QuoteBriefAssistant workspace={workspace} quote={quote} updateQuote={updateQuote} pricingLocked={pricingLocked} />
+        {!desktopMode && <QuoteBriefAssistant workspace={workspace} quote={quote} updateQuote={updateQuote} pricingLocked={pricingLocked} />}
         <section className="document-section client-details-section">
           <div className="document-section-heading client-section-heading">
             <div>
@@ -1524,7 +1532,7 @@ function QuoteEditor({
           </div>
           <div className="project-status-row">
             <label className="select-field">Quote status
-              <select aria-label="Quote status" value={quote.status} disabled={pricingLocked} onChange={(event) => updateQuote({ status: event.target.value })}>
+              <select aria-label="Quote status" value={quote.status} disabled={pricingLocked || desktopMode} onChange={(event) => updateQuote({ status: event.target.value })}>
                 <option value="draft">Draft</option>
                 <option value="sent">Sent</option>
                 <option value="approved">Approved</option>
@@ -1539,13 +1547,13 @@ function QuoteEditor({
           <Field label="Project summary" multiline value={quote.summary} onChange={(value) => updateQuote({ summary: value })} />
         </section>
         <LineItems quote={quote} updateQuote={updateQuote} pricingLocked={pricingLocked} />
-        <PaymentPlanEditor
+        {!desktopMode && <PaymentPlanEditor
           quote={quote}
           updateQuote={updateQuote}
           onCreatePaymentLink={onCreatePaymentLink}
           onDeactivatePaymentLinks={onDeactivatePaymentLinks}
           previewMode={previewMode}
-        />
+        />}
         <section className="document-section totals-section">
           <Field label="Notes" multiline value={quote.notes} onChange={(value) => updateQuote({ notes: value })} />
           <div className="totals">
@@ -1555,7 +1563,7 @@ function QuoteEditor({
           </div>
         </section>
       </main>
-      <ContractInspector quote={quote} templates={workspace.templates} updateQuote={updateQuote} />
+      <ContractInspector quote={quote} templates={desktopMode ? workspace.templates.filter(t => t.id === quote.contract_template_id) : workspace.templates} updateQuote={updateQuote} />
     </div>
   );
 }
@@ -1700,13 +1708,15 @@ function initialStudioPage(previewMode) {
   if (typeof window !== "undefined") {
     const params = new URLSearchParams(window.location.search);
     if (params.get("page") === "social" || params.get("social_oauth")) return "social";
+    if (["newsletter", "ugc"].includes(params.get("page"))) return params.get("page");
   }
   return previewMode ? "quote-editor" : "overview";
 }
 
-function StudioApp({ previewMode = false }) {
+function StudioApp({ previewMode = false, desktopMode = false }) {
   const [workspace, setWorkspace] = useState(previewMode ? previewWorkspace() : EMPTY_WORKSPACE);
   const [workspaceLoading, setWorkspaceLoading] = useState(!previewMode);
+  const [workspaceLoaded, setWorkspaceLoaded] = useState(previewMode);
   const [page, setPage] = useState(() => initialStudioPage(previewMode));
   const [selectedQuoteId, setSelectedQuoteId] = useState(previewMode ? workspace.quotes[0]?.id : null);
   const [previewQuoteId, setPreviewQuoteId] = useState(null);
@@ -1719,7 +1729,7 @@ function StudioApp({ previewMode = false }) {
   useEffect(() => {
     if (previewMode) return;
     api("/api/admin-workspace")
-      .then((data) => setWorkspace(data.workspace))
+      .then((data) => { setWorkspace(data.workspace); setWorkspaceLoaded(true); })
       .catch((error) => setMessage(error.message))
       .finally(() => setWorkspaceLoading(false));
   }, [previewMode]);
@@ -1742,6 +1752,7 @@ function StudioApp({ previewMode = false }) {
   }
 
   function newQuote(pricingStructure = null) {
+    if (desktopMode) return newNewsletterQuote();
     const structure = pricingStructure?.starting_price !== undefined ? pricingStructure : null;
     const preferredTemplateId = structure?.category === "app" ? "ios-app-build" : "website-build";
     const template = workspace.templates.find((item) => item.id === preferredTemplateId)
@@ -1780,6 +1791,20 @@ function StudioApp({ previewMode = false }) {
   function editQuote(id) {
     setSelectedQuoteId(id);
     setPage("quote-editor");
+  }
+
+  function newNewsletterQuote(prospect = null, service = "newsletter") {
+    if (!workspaceLoaded) { setMessage("Load the saved workspace before creating a quote. Reload to retry."); return; }
+    const matched = newsletterQuoteClient(workspace.clients, prospect);
+    const client = matched?.id ? matched : createClient(matched || {});
+    const sequence = desktopMode ? Math.max(workspace.next_quote_sequence || 1, 1 + Math.max(0, ...workspace.quotes.map(q => Number(/^FS-(\d+)$/.exec(q.quote_number)?.[1]) || 0))) : workspace.quotes.length + 1;
+    const template = service === "ugc" ? ugcQuoteTemplate() : newsletterQuoteTemplate();
+    const overrides = service === "ugc" ? ugcQuoteOverrides(recordId("item"), prospect) : newsletterQuoteOverrides(recordId("item"));
+    const quote = createQuote(client, template, sequence, overrides);
+    updateWorkspace((current) => ({ ...current, clients: matched?.id ? current.clients : [...current.clients, client], templates: current.templates.some(t => t.id === template.id) ? current.templates : [...current.templates, template], quotes: [...current.quotes, quote] }));
+    setSelectedQuoteId(quote.id);
+    setPage("quote-editor");
+    setMessage(service === "ugc" ? "UGC draft created. Price is not set: $0 is a placeholder. Confirm scope, creator consent, usage rights and price before issuing." : "Newsletter pilot draft created. Proposed $600 price: review scope, price and terms before saving or sending.");
   }
 
   async function save() {
@@ -1931,6 +1956,7 @@ function StudioApp({ previewMode = false }) {
   if (page === "overview") pageContent = <Overview workspace={workspace} onEditQuote={editQuote} onNewQuote={newQuote} />;
   if (page === "job-agent") pageContent = <JobAgentOperationsPage previewMode={previewMode} />;
   if (page === "social") pageContent = <SocialDesk previewMode={previewMode} request={api} />;
+  if (page === "demos") pageContent = <section className="studio-demos" aria-labelledby="studio-demos-title"><h2 id="studio-demos-title">Website demos</h2><p>Open the interactive demos from your website. The full work gallery has the other projects and the studio reel.</p><div className="studio-demo-links"><a href="https://www.1ststep.ai/work/lyons-life-demo/" target="_blank" rel="noopener noreferrer"><strong>Lyons Life Command Center</strong><span>Interactive command center demo</span><ExternalLink size={16} /></a><a href="https://www.1ststep.ai/work/universal-relocations/" target="_blank" rel="noopener noreferrer"><strong>Universal Relocations</strong><span>Origin Service portal demo</span><ExternalLink size={16} /></a><a href="https://www.1ststep.ai/work/" target="_blank" rel="noopener noreferrer"><strong>All website work</strong><span>Projects, demos, and studio reel</span><ExternalLink size={16} /></a></div></section>;
   if (page === "clients") pageContent = <ClientsPage workspace={workspace} updateWorkspace={updateWorkspace} />;
   if (page === "quotes") pageContent = <QuotesPage workspace={workspace} onEditQuote={editQuote} onNewQuote={newQuote} />;
   if (page === "pricing") pageContent = <PricingPage workspace={workspace} updateWorkspace={updateWorkspace} onStartQuote={newQuote} />;
@@ -1945,13 +1971,14 @@ function StudioApp({ previewMode = false }) {
         onCreatePaymentLink={createPaymentLink}
         onDeactivatePaymentLinks={deactivatePaymentLinks}
         previewMode={previewMode}
+        desktopMode={desktopMode}
       />
     : <EmptyState icon={FileText} title="Quote not found" body="Return to Quotes and choose another document." />;
 
   const editorActions = page === "quote-editor" && selectedQuote;
   return (
     <div className="studio-shell">
-      <Sidebar page={page === "quote-editor" ? "quotes" : page} setPage={setPage} onLogout={logout} mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
+      <Sidebar page={page === "quote-editor" ? "quotes" : page} setPage={setPage} onLogout={logout} mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} desktopMode={desktopMode} />
       <div className="studio-main">
         <Topbar
           title={pageTitle}
@@ -1961,13 +1988,14 @@ function StudioApp({ previewMode = false }) {
             <>
               {message && <span className="save-message" role="status">{message}</span>}
               {page === "quote-editor" && <button className="button ghost" onClick={() => setPage("quotes")}><ArrowLeft size={16} />All quotes</button>}
-              {page !== "job-agent" && page !== "social" && <button className="button" onClick={save} disabled={saving || (!dirty && !previewMode)}><Save size={16} />{saving ? "Saving…" : dirty ? "Save draft" : "Saved"}</button>}
-              {editorActions && <button className="button primary" disabled={saving} onClick={() => openPreview(selectedQuote.id)}><Eye size={17} />{dirty ? "Save, preview & send" : "Preview & send"}</button>}
+              {!["job-agent", "social", "newsletter", "ugc", "demos"].includes(page) && <button className="button" onClick={save} disabled={saving || (!dirty && !previewMode)}><Save size={16} />{saving ? "Saving…" : dirty ? "Save draft" : "Saved"}</button>}
+              {editorActions && !desktopMode && <button className="button primary" disabled={saving} onClick={() => openPreview(selectedQuote.id)}><Eye size={17} />{dirty ? "Save, preview & send" : "Preview & send"}</button>}
             </>
           )}
         />
         {previewMode && <div className="preview-banner"><Eye size={15} />Local design preview. Sample records stay in this browser session and are never uploaded.</div>}
-        <div className="workspace-body">{pageContent}</div>
+        {desktopMode && <div className="preview-banner"><ShieldCheck size={15} />Your pipelines and draft quotes sync with 1ststep.ai. Reviewed replies queue through your Gmail worker; quote delivery and payments stay on the website. <a href="https://www.1ststep.ai/admin/?desktop_devices=1" target="_blank" rel="noopener noreferrer">Manage linked PCs</a></div>}
+        <div className="workspace-body">{pageContent}<NewsletterPipeline api={api} previewMode={previewMode} visible={page === "newsletter"} onCreateQuote={newNewsletterQuote} quoteReady={workspaceLoaded} /><NewsletterPipeline service="ugc" api={api} previewMode={previewMode} visible={page === "ugc"} onCreateQuote={prospect => newNewsletterQuote(prospect, "ugc")} quoteReady={workspaceLoaded} /></div>
       </div>
       {previewQuote && previewClient && (
         <QuotePreview
@@ -1988,12 +2016,15 @@ function Root() {
   const [authenticated, setAuthenticated] = useState(previewMode);
   const [mfaRequired, setMfaRequired] = useState(import.meta.env.PROD);
   const [mobileTotpLoginAllowed, setMobileTotpLoginAllowed] = useState(false);
+  const [desktopMode, setDesktopMode] = useState(false);
+  const parameters = new URLSearchParams(window.location.search);
 
   async function checkSession() {
     setLoading(true);
     try {
       const data = await api("/api/admin-session");
       setAuthenticated(data.authenticated);
+      setDesktopMode(Boolean(data.desktop_client));
       if (typeof data.mfa_required === "boolean") {
         setMfaRequired(data.mfa_required);
       }
@@ -2010,15 +2041,19 @@ function Root() {
   useEffect(() => {
     if (previewMode) return undefined;
     const handleSessionExpired = () => {
+      if (desktopMode) { window.location.replace("/"); return; }
       setAuthenticated(false);
       setMobileTotpLoginAllowed(false);
     };
     window.addEventListener(ADMIN_SESSION_EXPIRED_EVENT, handleSessionExpired);
     return () => window.removeEventListener(ADMIN_SESSION_EXPIRED_EVENT, handleSessionExpired);
-  }, [previewMode]);
+  }, [previewMode, desktopMode]);
   if (loading) return <div className="loading-screen"><Logo /><span>Opening your studio…</span></div>;
   return authenticated
-    ? <StudioApp previewMode={previewMode} />
+    ? parameters.has("pair_device") || parameters.has("desktop_devices")
+      ? <DesktopPairing api={api} id={parameters.get("pair_device")} />
+      : <StudioApp previewMode={previewMode} desktopMode={desktopMode} />
+    : desktopMode ? <main className="login-page"><section className="login-card"><h1>Reconnect this PC</h1><p>The desktop connection was disconnected. Your cloud data is still saved.</p><a className="button primary" href="/">Pair this PC again</a></section></main>
     : <Login onAuthenticated={checkSession} mfaRequired={mfaRequired} mobileTotpLoginAllowed={mobileTotpLoginAllowed} />;
 }
 
