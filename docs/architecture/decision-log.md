@@ -1,5 +1,15 @@
 # Architecture Decision Log
 
+## 2026-10-27: PostPath roadmap executes on existing social-mcp
+
+- **Status / owner:** Evan supplied a multi-phase PostPath roadmap (vault, MCP tools, scheduling daemon, Electron/Tauri, license tiers). Grounded against repository evidence on `cursor/postpath-roadmap-c683`.
+- **Decision:** Continue PostPath on `packages/social-mcp` with the existing AES-256-GCM vault (`~/.social-mcp`), localhost desk (`social-mcp app`), MCP server key `postpath`, and current tool names (`list_accounts`, `create_draft`, `schedule_post`, `publish_post`, `publish_due`, etc.). Do not rename tools to `postpath_*`, do not big-bang rewrite to keytar/SQLite, and do not start Electron/Tauri or LemonSqueezy/Stripe license enforcement without a new explicit owner approval. Multi-profile already exists via `profile_id`. Scheduling remains local until a desk/daemon due-publisher ships; never imply cloud 24/7. Canonical map: `docs/POSTPATH_ROADMAP.md`.
+- **Rationale:** Phases 1–2 of the aspirational plan largely already ship under different names. Reinventing the vault, tool surface, or desktop shell would break installs, the publishing skill, and approved decisions.
+- **Affected systems:** `packages/social-mcp/`, Cursor skill `postpath-publishing`, marketing downloads, this log.
+- **Verification:** Roadmap status table matches `src/index.js` tools and README platform table; `npm --prefix packages/social-mcp test`.
+- **Rollback:** Revert the roadmap doc + this entry; product code unchanged by this decision alone.
+- **Reversal:** Requires Evan approval before tool renames, vault rewrite, Electron/Tauri shell, or paid license enforcement.
+
 ## 2026-10-27: PostPath marketing site on postpath.1ststep.ai
 
 - **Status / owner:** Evan named the product URL `postpath.1ststep.ai` and asked for a conversion-focused marketing site with live demo. Implemented on `cursor/social-local-mcp-c683`. Preview/PR only until domain is attached and deploy is approved.

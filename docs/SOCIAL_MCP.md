@@ -44,3 +44,5 @@ They do not share KV or Blob. Do not point PostPath at production website storag
 YouTube and TikTok publish only accept files under `~/.social-mcp/media`.
 
 Full tool list and security notes: [`packages/social-mcp/README.md`](../packages/social-mcp/README.md)
+
+Grounded product roadmap (what exists vs next slices): [`POSTPATH_ROADMAP.md`](./POSTPATH_ROADMAP.md)

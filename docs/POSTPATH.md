@@ -34,4 +34,5 @@ Early access form opens a prefilled email to `evan@1ststep.ai`. No waitlist data
 ## Related
 
 - Local product: `packages/social-mcp` (desk + MCP)
-- Decision log: PostPath marketing site entry
+- Roadmap (grounded): [`POSTPATH_ROADMAP.md`](./POSTPATH_ROADMAP.md)
+- Decision log: PostPath marketing site + roadmap execution entries
