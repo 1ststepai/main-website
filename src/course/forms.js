@@ -21,10 +21,10 @@ for (const form of document.querySelectorAll('form[data-kind]')) {
     const button = form.querySelector('button');
     button.disabled = true;
     try {
-      const result = await adapter.submit({kind:form.dataset.kind,email:form.elements.email.value,courseUpdates:form.dataset.kind === 'waitlist' || form.elements.courseUpdates?.checked === true});
+      const result = await adapter.submit({kind:form.dataset.kind,email:form.elements.email.value,courseUpdates:form.elements.courseUpdates?.checked === true});
       status.textContent = result.ok
         ? `Local simulation saved. No email sent; no real subscription created.${result.courseUpdates ? ' Course-update choice: yes (simulation only).' : ' Course-update choice: no.'}`
-        : result.code === 'invalid-email' ? 'Enter a valid email address to request the library.' : "We couldn't submit your request. Please try again. Local simulation was not saved.";
+        : result.code === 'consent-required' ? 'Choose course updates to simulate joining the waitlist.' : result.code === 'invalid-email' ? 'Enter a valid email address.' : "We couldn't submit your request. Please try again. Local simulation was not saved.";
     } catch {
       status.textContent = "We couldn't submit your request. Please try again. Local simulation was not saved.";
     } finally { button.disabled = false; }

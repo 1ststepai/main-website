@@ -21,10 +21,11 @@ test('library delivery simulation does not imply course consent or store email',
   assert.deepEqual(JSON.parse(stored), { simulation: true, kind: 'library', courseUpdates: false });
 });
 
-test('separate explicit opt-in and direct waitlist action simulate course consent', async () => {
+test('separate explicit opt-in is required for waitlist consent', async () => {
   const { adapter } = fixture();
   assert.equal((await adapter.submit({ kind: 'library', email: 'test@example.com', courseUpdates: true })).courseUpdates, true);
-  assert.equal((await adapter.submit({ kind: 'waitlist', email: 'test@example.com' })).courseUpdates, true);
+  assert.equal((await adapter.submit({ kind: 'waitlist', email: 'test@example.com' })).code, 'consent-required');
+  assert.equal((await adapter.submit({ kind: 'waitlist', email: 'test@example.com', courseUpdates: true })).courseUpdates, true);
 });
 
 test('invalid email and nonboolean consent do not persist anything', async () => {
@@ -50,6 +51,15 @@ test('throwing or silently failed persistence never reports acceptance', async (
 test('public hosts cannot submit to the local simulator', async () => {
   let writes = 0;
   const adapter = createLocalCourseAdapter({ hostname: '1ststep.ai', storage: { setItem() { writes++; } } });
-  assert.deepEqual(await adapter.submit({ kind: 'waitlist', email: 'test@example.com' }), { ok: false, code: 'unavailable' });
+  assert.deepEqual(await adapter.submit({ kind: 'waitlist', email: 'test@example.com', courseUpdates: true }), { ok: false, code: 'unavailable' });
   assert.equal(writes, 0);
+});
+
+
+test('unchecked waitlist consent does not write simulation state', async () => {
+  const { adapter, records } = fixture();
+  assert.deepEqual(await adapter.submit({kind: 'waitlist', email: 'fictional@example.com', courseUpdates: false}), {
+    ok: false, code: 'consent-required',
+  });
+  assert.equal(records.size, 0);
 });

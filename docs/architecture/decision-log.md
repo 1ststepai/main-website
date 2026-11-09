@@ -507,3 +507,16 @@
 - Visual system follows supplied ink/cream/lime mockups with local Archivo/Instrument Serif fonts and the intact canonical logo. Full source copy governs abbreviated mockups; all six prompt entries and optional bonus are provided as selectable text and downloadable Markdown. CSS steps are a local approximation of the reference illustration.
 - Evidence: tests/course-local-adapter.test.mjs; evidence/course/verify.mjs and screenshots. Five adapter tests plus 38 selected existing static regressions passed; isolated build with cached Vite 8.3.2 passed. Standard npm build blocked by absent worktree dependencies; repository-pinned Vite 6 build remains unverified. No lint/typecheck scripts. Independent integration, build and security concerns reviewed by separate agents with disjoint ownership in this already isolated worktree; no merges.
 - Release dependencies: owner review, real delivery workflow and privacy/retention/consent policy approval, approved test accounts, repository dependency installation/build, full release/accessibility gates and separate publication authorization. This draft grants no launch authority.
+
+
+## COURSE-COMPETITOR-LOCAL-2026-11-08 — Unpublished research-pattern revision
+
+- Owner: Evan (product approval); Codex root (UI), delegated build/platform/security reviewers.
+- Status: implemented local draft for review; no release authority.
+- Authority: current user task, specs/competitor-landing-page-research.md recommended outline; V4 copy/design remain the base.
+- Decision: separate early fit, fictional Oak Street lesson, workshop artifacts, live practice loop and instructor; hide all proof until owner supplies verified video/work links/permissioned results. Retain single repeated waitlist action, ink/cream/lime and existing fonts/logo.
+- Consent: explicit separate unchecked waitlist checkbox required for local simulation; library course opt-in stays optional and separate. No email persisted or sent. Adapter stays loopback-only.
+- Rationale: explain capability, fit and teaching method without manufacturing proof or changing public commitments. New labels and consent wording are DRAFT for Evan review (markup comments and visible consent marker).
+- Affected systems: course/index.html, src/course CSS/forms/local adapter, local tests/evidence only. Production configuration, library resource content, app authority and live integrations unchanged.
+- Evidence: evidence/course-competitor/; baseline b32cbac on course/competitor-patterns-local. Current request authorizes local implementation only.
+- Dependencies: Evan review of new copy/artifacts and verified proof inputs; production/privacy/delivery/accessibility/release gates remain unapproved. No push, PR, merge or deploy. Local rollback is reverting this scoped diff; no external state changed.

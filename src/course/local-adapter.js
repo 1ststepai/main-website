@@ -12,6 +12,7 @@ export function createLocalCourseAdapter(options = {}) {
       if (typeof email !== 'string' || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
         return { ok: false, code: 'invalid-email' };
       }
+      if (kind === 'waitlist' && !courseUpdates) return { ok: false, code: 'consent-required' };
       const hostname = options.hostname ?? globalThis.location?.hostname;
       if (!loopback.has(hostname)) return { ok: false, code: 'unavailable' };
       try {
@@ -21,7 +22,7 @@ export function createLocalCourseAdapter(options = {}) {
         const record = {
           simulation: true,
           kind,
-          courseUpdates: kind === 'waitlist' || courseUpdates === true,
+          courseUpdates: courseUpdates === true,
         };
         const encoded = JSON.stringify(record);
         storage.setItem(MOCK_STORAGE_KEY, encoded);
