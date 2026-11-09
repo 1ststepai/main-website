@@ -520,3 +520,15 @@
 - Affected systems: course/index.html, src/course CSS/forms/local adapter, local tests/evidence only. Production configuration, library resource content, app authority and live integrations unchanged.
 - Evidence: evidence/course-competitor/; baseline b32cbac on course/competitor-patterns-local. Current request authorizes local implementation only.
 - Dependencies: Evan review of new copy/artifacts and verified proof inputs; production/privacy/delivery/accessibility/release gates remain unapproved. No push, PR, merge or deploy. Local rollback is reverting this scoped diff; no external state changed.
+
+
+## COURSE-FAQ-OBJECTIONS-LOCAL-2026-11-08 — Honest objections and owner decisions
+
+- Owner: Evan (policy/product); Codex (local implementation). Status: unpublished local draft, no release authority.
+- Authority: current FAQ task; buyer-questions-objections-research.md Themes A/B/C/F/H/I and heytony-seo-methods-applied.md organization guidance. Baseline b4cc6f9 on course/faq-objections-local.
+- Decision: explain planned $297 as four structured live workshops on the buyer’s tasks with take-home prompts/checklists; explicitly disclaim income/ROI guarantees. Add coding and existing-ChatGPT fit answers. Keep question-first, answer-first FAQ in existing cream/divider layout.
+- Refunds, recordings/missed sessions, hours, tools/costs, feedback, post-cohort access and extra participation policies remain visible Evan-to-decide DRAFT stubs. No policy is resolved by this implementation. Existing advanced-builder exclusion remains consistent.
+- Affected systems: course HTML, narrowly scoped marker CSS, local evidence. Forms, consent, library, platform integrations, credentials, noindex and production configuration unchanged.
+- Rationale: address supplied buyer objections without manufactured proof or customer commitments. Alternatives rejected: inventing refund/recording terms or borrowing competitor outcomes.
+- Evidence: evidence/course-faq/STATUS.md, test/build logs, browser verifier and screenshots; separate read-only copy and platform/security review roles.
+- Dependencies: Evan policy decisions and separate release/privacy/integration/accessibility gates before publication. No push/PR/merge/deploy authorized. Rollback: revert scoped local source diff; no external state changed.

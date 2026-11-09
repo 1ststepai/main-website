@@ -1,0 +1,51 @@
+course desktop {
+  width: 1440,
+  height: 6810,
+  title: 'Practical AI Course for Business Beginners | 1stStep.ai'
+}
+course/library desktop {
+  width: 1440,
+  height: 7753,
+  title: 'AI Prompts for Small Business: A Beginner’s Practical Library | 1stStep.ai'
+}
+course laptop {
+  width: 1280,
+  height: 6810,
+  title: 'Practical AI Course for Business Beginners | 1stStep.ai'
+}
+course/library laptop {
+  width: 1280,
+  height: 7753,
+  title: 'AI Prompts for Small Business: A Beginner’s Practical Library | 1stStep.ai'
+}
+course tablet {
+  width: 768,
+  height: 7293,
+  title: 'Practical AI Course for Business Beginners | 1stStep.ai'
+}
+course/library tablet {
+  width: 768,
+  height: 8865,
+  title: 'AI Prompts for Small Business: A Beginner’s Practical Library | 1stStep.ai'
+}
+course mobile {
+  width: 390,
+  height: 9482,
+  title: 'Practical AI Course for Business Beginners | 1stStep.ai'
+}
+course/library mobile {
+  width: 390,
+  height: 12480,
+  title: 'AI Prompts for Small Business: A Beginner’s Practical Library | 1stStep.ai'
+}
+course small {
+  width: 320,
+  height: 10613,
+  title: 'Practical AI Course for Business Beginners | 1stStep.ai'
+}
+course/library small {
+  width: 320,
+  height: 14845,
+  title: 'AI Prompts for Small Business: A Beginner’s Practical Library | 1stStep.ai'
+}
+{"screenshots":28,"overflow":"none at 320,390,768,1280,1440","consent":"library off/on passed; waitlist initially unchecked, unchecked blocked, checked saved","persistenceFailure":"passed; input retained","download":"passed","pageErrors":[],"externalRequests":[]}
