@@ -57,6 +57,7 @@ import {
 import { draftQuoteFromBrief } from "../../lib/admin/quoteBriefAssistant.js";
 import SocialDesk from "./SocialDesk.jsx";
 import "./admin.css";
+import SkillSproutContacts from "./SkillSproutContacts.jsx";
 import NewsletterPipeline from "./NewsletterPipeline.jsx";
 import DesktopPairing from "./DesktopPairing.jsx";
 import { newsletterQuoteClient, newsletterQuoteOverrides, newsletterQuoteTemplate } from "../../lib/admin/newsletterQuote.js";
@@ -77,6 +78,7 @@ const EMPTY_WORKSPACE = {
 
 const NAVIGATION = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
+  { id: "skillsprout", label: "SkillSprout Contacts", icon: Mail },
   { id: "newsletter", label: "Newsletter Pipeline", icon: Mail },
   { id: "ugc", label: "UGC Ads Pipeline", icon: FileText },
   { id: "demos", label: "Website demos", icon: Eye },
@@ -1708,7 +1710,7 @@ function initialStudioPage(previewMode) {
   if (typeof window !== "undefined") {
     const params = new URLSearchParams(window.location.search);
     if (params.get("page") === "social" || params.get("social_oauth")) return "social";
-    if (["newsletter", "ugc"].includes(params.get("page"))) return params.get("page");
+    if (["newsletter", "ugc", "skillsprout"].includes(params.get("page"))) return params.get("page");
   }
   return previewMode ? "quote-editor" : "overview";
 }
@@ -1957,6 +1959,7 @@ function StudioApp({ previewMode = false, desktopMode = false }) {
   if (page === "job-agent") pageContent = <JobAgentOperationsPage previewMode={previewMode} />;
   if (page === "social") pageContent = <SocialDesk previewMode={previewMode} request={api} />;
   if (page === "demos") pageContent = <section className="studio-demos" aria-labelledby="studio-demos-title"><h2 id="studio-demos-title">Website demos</h2><p>Open the interactive demos from your website. The full work gallery has the other projects and the studio reel.</p><div className="studio-demo-links"><a href="https://www.1ststep.ai/work/lyons-life-demo/" target="_blank" rel="noopener noreferrer"><strong>Lyons Life Command Center</strong><span>Interactive command center demo</span><ExternalLink size={16} /></a><a href="https://www.1ststep.ai/work/universal-relocations/" target="_blank" rel="noopener noreferrer"><strong>Universal Relocations</strong><span>Origin Service portal demo</span><ExternalLink size={16} /></a><a href="https://www.1ststep.ai/work/" target="_blank" rel="noopener noreferrer"><strong>All website work</strong><span>Projects, demos, and studio reel</span><ExternalLink size={16} /></a></div></section>;
+  if (page === "skillsprout" && !desktopMode) pageContent = <SkillSproutContacts api={api} previewMode={previewMode} />;
   if (page === "clients") pageContent = <ClientsPage workspace={workspace} updateWorkspace={updateWorkspace} />;
   if (page === "quotes") pageContent = <QuotesPage workspace={workspace} onEditQuote={editQuote} onNewQuote={newQuote} />;
   if (page === "pricing") pageContent = <PricingPage workspace={workspace} updateWorkspace={updateWorkspace} onStartQuote={newQuote} />;
