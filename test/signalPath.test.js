@@ -11,11 +11,11 @@ test("the homepage states the offer in HTML and leaves the signal-path figure un
   const html = await source("index.html");
   const hero = html.slice(html.indexOf('<section class="hero'), html.indexOf("</section>"));
   assert.match(hero, /id="hero-title"/);
-  assert.match(hero, /Get more from the business you <em>already have\.<\/em>/);
-  assert.match(hero, /Book a free 20-min call/);
+  assert.match(hero, /lead-generating system\./);
+  assert.match(hero, /Get Started/);
   assert.doesNotMatch(html, /id="signal-path"|Deploy Our OS/i);
   assert.doesNotMatch(html, /<h4>Capture<\/h4>|Illustrative example, not a client's data/);
-  const js = await source("src/home-v2.js");
+  const js = await source("src/home-v3.js");
   assert.match(js, /prefers-reduced-motion: reduce/);
   assert.doesNotMatch(js, /staticFallback|new Lenis/);
 });
