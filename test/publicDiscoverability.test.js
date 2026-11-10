@@ -106,25 +106,22 @@ test("llms.txt names the owner offer, start paths, and canonical www host", asyn
   assert.match(llms, /does not guarantee billing or token savings/);
 });
 
-test("homepage first screen books the call beside an example desk", async () => {
+test("homepage first screen books the call beside the command center illustration", async () => {
   const html = await source("index.html");
   const heroStart = html.indexOf('<section class="hero');
   const hero = html.slice(heroStart, html.indexOf("</section>", heroStart));
   const work = await source("work/index.html");
-  assert.match(hero, /Get more from the business you/);
-  assert.match(hero, /href="\/book\/"[^>]*>Book a free 20-min call/);
-  assert.match(hero, /Websites, integrations, automations, and custom apps/);
-  assert.match(hero, /See pricing/);
-  assert.doesNotMatch(hero, /See our work|btn ghost/);
-  assert.match(hero, /Pause animation/);
+  assert.match(hero, /Turn your business/);
+  assert.match(hero, /href="\/book\/"[^>]*>Get Started/);
+  assert.match(hero, /Custom websites, automation workflows, and app solutions/);
+  assert.match(hero, /See Our Work/);
   assert.match(hero, /Illustrative data/);
   assert.doesNotMatch(hero, /SIMULATED|EXAMPLE/);
-  assert.match(hero, /Leads in/);
-  assert.match(hero, /Replies sent/);
-  assert.match(hero, /Today’s leads/);
-  assert.match(hero, /Lead in/);
-  assert.match(hero, /Added to CRM/);
-  assert.doesNotMatch(hero, /SPY|AAPL|TSLA|NVDA|\+0\.|\$/);
+  assert.match(hero, /Business Command Center/);
+  assert.match(hero, /New leads/);
+  assert.match(hero, /Lead captured/);
+  assert.match(hero, /Booked &amp; tracked/);
+  assert.doesNotMatch(hero, /SPY|AAPL|TSLA|NVDA|\+0\.|\$|\d+%/);
   assert.doesNotMatch(hero, /Tap for sound|poster_16x9|<video|Watch with sound|href="\/fit-check\//);
   assert.match(work, /Tap for sound/);
   assert.match(work, /poster="\/home-v2\/poster_16x9\.webp"/);
