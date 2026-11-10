@@ -497,3 +497,10 @@
 - Existing reply monitor updated in place to five-minute checks with a private disabled release gate. Until approved deployment and live verification, it retains monitoring-only behavior. No new Gmail permissions, no unreviewed sends and no email sent during this implementation.
 - Verification: 149 tests and production build PASS; synthetic rendered review/edit/queue/refresh/cancel path PASS; mobile reply form fits at 344 CSS pixels. Real paired bridge read succeeded against the existing newsletter pipeline (44 records, revision 11). Actual reviewed-send Gmail execution and new production queue operations remain unverified. Private receipt: .codex-qa/reviewed-replies.json.
 - Rollback: keep reply-worker-release.json disabled, restore prior five/15-minute monitor prompt as appropriate, and promote the verified prior deployment dpl_3h2AZffV7mwy9qCfch3nk7KsjMjx if a later release needs rollback. Preserve pairing credentials and pipeline data; do not reinstall the old VBS shortcut over the native window.
+
+## SkillSprout consent intake isolation (2026-11-09)
+- Owner: Evan Pancis; implementation: platform/integrations agent. Status: proposed in draft PR, locally verified; not deployed.
+- Authorized scope: store SkillSprout opt-ins in existing admin KV and expose a read-only admin view, without outreach enrollment or sending.
+- Decision: use a separate encrypted append-only Redis list, purpose-bound with existing data protection; fixed SkillSprout tag, explicit consent, two allowed sources, server timestamp; exact-origin public JSON intake with distributed rate limiting.
+- Evidence: `lib/admin/workspaceStore.js`, `lib/admin/newsletterPipelineStore.js`, `lib/security/dataProtection.js`; contract: `docs/skillsprout-intake.md`; checks: `test/skillsprout.test.js`.
+- Dependencies: sibling SkillSprout form must follow the documented contract; deployment is explicitly excluded. Existing workspace/pipeline keys, secrets, sending configuration and DNS are untouched.
