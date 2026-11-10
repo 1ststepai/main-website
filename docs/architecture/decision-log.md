@@ -506,6 +506,16 @@
 - Verification: 149 tests and production build PASS; synthetic rendered review/edit/queue/refresh/cancel path PASS; mobile reply form fits at 344 CSS pixels. Real paired bridge read succeeded against the existing newsletter pipeline (44 records, revision 11). Actual reviewed-send Gmail execution and new production queue operations remain unverified. Private receipt: .codex-qa/reviewed-replies.json.
 - Rollback: keep reply-worker-release.json disabled, restore prior five/15-minute monitor prompt as appropriate, and promote the verified prior deployment dpl_3h2AZffV7mwy9qCfch3nk7KsjMjx if a later release needs rollback. Preserve pairing credentials and pipeline data; do not reinstall the old VBS shortcut over the native window.
 
+## 2026-11-10 — Static blog and Free Bottleneck Call naming
+
+- Owner: Evan (scope/copy authorization); public-site agent (implementation).
+- Status: approved in current request; local implementation, no release approval.
+- Decision: publish three supplied drafts under `/blog/` as static HTML, lead-follow-up guide first, with existing site styling, explicit Vite inputs/Vercel rewrites and sitemap discovery. Retain source drafts unchanged; remove editorial notes from public HTML. Unconfirmed course details remain “Details coming soon”; no waitlist CTA until a verified destination exists.
+- Booking decision: current user instruction supersedes prior Website Strategy Call naming with Free Bottleneck Call, 30 minutes. Preserve calendar URL/embed ID, attribution/event identifiers, and separate email-based System Audit handoff.
+- Rationale/evidence: current user request; `content/blog-drafts/`; existing multipage routing in `vite.config.js` and `vercel.json`. No CMS, dependencies, payment or data handling changes.
+- Affected systems: public blog, booking copy, navigation/footer, search metadata and discovery, public conversion tests.
+- Verification dependencies: build, relevant tests, responsive browser/SEO checks. No deployment; live behavior and third-party calendar’s internal copy remain unverified. Rollback: revert this implementation commit.
+
 ## 2026-11-11 — Cache-busted homepage sharing and Evan’s digital card
 
 - Owner/approval: Evan Pancis; implementation: Codex on `site/og-card-page`, based on `3a56216`. Status: locally verified; draft PR for review, no merge or production deployment authorized in this task.

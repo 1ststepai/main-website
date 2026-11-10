@@ -9,6 +9,11 @@
     }
   ],
   "rewrites": [
+    {"source": "/blog", "destination": "/blog/index.html"},
+    {"source": "/blog/follow-up-every-lead-faster", "destination": "/blog/follow-up-every-lead-faster/index.html"},
+    {"source": "/blog/how-to-choose-a-web-designer", "destination": "/blog/how-to-choose-a-web-designer/index.html"},
+    {"source": "/blog/why-pay-for-an-ai-course-when-chatgpt-is-free", "destination": "/blog/why-pay-for-an-ai-course-when-chatgpt-is-free/index.html"},
+
     {
       "source": "/:path*",
       "has": [{ "type": "host", "value": "postpath.1ststep.ai" }],
