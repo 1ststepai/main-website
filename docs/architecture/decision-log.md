@@ -549,3 +549,12 @@
 - Rationale: replace unresolved policy placeholders with clear approved terms. This supersedes the open-policy state in COURSE-FAQ-OBJECTIONS-LOCAL-2026-11-08 only.
 - Affected: course/index.html FAQ; unused marker styling and local FAQ verification updated alongside it.
 - Dependencies: local regression and responsive verification; separate publication/release approval remains required. Still unpublished, payments closed; no form, adapter or publication behavior changes.
+
+## 2026-11-11: Course signup through same-origin API
+
+- Owner: Evan (product authorization); Codex (implementation). Status: implemented and committed locally; awaiting Evan push. Production Vite build not run (dependencies missing); isolated course build and mocked-API browser smoke test passed.
+- Authority: current task authorizes course email collection in GoHighLevel, publication copy cleanup and privacy disclosure. Supersedes the simulation-only implementation boundary above. Seven approved policy answers remain unchanged.
+- Decision: public hosts use `/api/course-signup`; loopback keeps offline simulation. Server validates consent, uses the isolated `course-signup` IP rate-limit scope under existing default limits, and existing best-effort in-memory idempotency with namespaced fingerprints. Upsert sends location, email and source only, followed by additive existing tags. Library requests do not opt into waitlist updates unless checked. Browser downloads begin after acceptance, without file-email promises.
+- Affected: course pages, privacy, browser adapter, API, GHL, Vite and Vercel routes. No raw email or upstream response logging; credentials stay server-side.
+- Evidence: tests/course-signup.test.mjs and evidence/course-faq/PRODUCTION-WIRING.md. No live API calls or deployment performed.
+- Dependencies: server configuration, restored project dependencies, build, responsive/browser checks, independent review and explicit release approval. Payments stay closed; dates unannounced. Rollback: revert local diff; no external state changed.

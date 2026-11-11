@@ -39,7 +39,7 @@ const siteAnalytics = {
 };
 
 function serveExactIndexPaths(server) {
-  const routes = ["/os", "/pricing", "/pricing/", "/work", "/work/", "/tools", "/tools/auto-model-router", "/tools/1ststep-os-audit", "/tools/1ststep-os", "/work/lyons-life-demo", "/work/lyons-life-demo/", "/work/universal-relocations", "/work/universal-relocations/"];
+  const routes = ["/course", "/course/", "/course/library", "/course/library/", "/os", "/pricing", "/pricing/", "/work", "/work/", "/tools", "/tools/auto-model-router", "/tools/1ststep-os-audit", "/tools/1ststep-os", "/work/lyons-life-demo", "/work/lyons-life-demo/", "/work/universal-relocations", "/work/universal-relocations/"];
   server.middlewares.use((request, _response, next) => {
     const url = request.url || "";
     const path = url.split("?")[0];
@@ -65,6 +65,8 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: "index.html",
+        course: "course/index.html",
+        courseLibrary: "course/library/index.html",
         foundry: "foundry/index.html",
         os: "os/index.html",
         postpath: "postpath/index.html",

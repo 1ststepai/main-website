@@ -1,6 +1,6 @@
 # AI Prompts for Small Business: A Beginner’s Practical Library
 
-UNPUBLISHED DRAFT / Fictional inputs, not tested results.
+Fictional inputs, not tested results.
 
 ## Start here
 1. Choose one prompt. Replace every bracketed input before submitting it to your chosen AI tool.
@@ -149,7 +149,7 @@ If the task needs sensitive information or high-stakes judgment, explain why thi
 - Keep the sequence manual and draft-only; this resource grants no execution permissions.
 
 ## Optional bonus / A simple place to keep practice files
-This is optional. One document also works. Aligned with `first-article-visual-brief.md`:
+This is optional. One document also works.
 ```text
 business-ai-practice/
 ├── 01-context/

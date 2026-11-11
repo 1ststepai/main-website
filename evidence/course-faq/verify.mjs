@@ -1,5 +1,7 @@
-import { chromium } from 'file:///C:/gh-runners/skillsprout/_work/skillsprout/skillsprout/node_modules/playwright-core/index.mjs';
-const browser = await chromium.launch({executablePath:'C:/Users/evanp/AppData/Local/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-win64/chrome-headless-shell.exe',headless:true,chromiumSandbox:true});
+import {readFile} from 'node:fs/promises';
+// Uses the Playwright install already on Evan's Codex PC; falls back to a project install if present.
+const { chromium } = await import('file:///C:/gh-runners/skillsprout/_work/skillsprout/skillsprout/node_modules/playwright-core/index.mjs').catch(() => import('playwright-core'));
+const browser = await chromium.launch({executablePath:process.env.PLAYWRIGHT_CHROMIUM_PATH || 'C:/Users/evanp/AppData/Local/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-win64/chrome-headless-shell.exe',headless:true,chromiumSandbox:true});
 const page = await browser.newPage();
 const errors=[], external=[];
 page.on('pageerror',e=>errors.push(e.message));
@@ -20,6 +22,15 @@ for(const [name,width,height] of [['desktop',1440,1000],['mobile',390,844]]){
  await page.setViewportSize({width,height}); await page.goto('http://127.0.0.1:4186/course/',{waitUntil:'networkidle'});
  for(const [label,selector] of [['answers','.faq h2'],['policies','.faq-decisions']]){await page.locator(selector).evaluate(el=>el.scrollIntoView({behavior:'instant'}));await page.screenshot({path:`evidence/course-faq/faq-${name}-${label}.png`});}
 }
+for (const path of ['course', 'course/library']) {
+ await page.goto('http://127.0.0.1:4186/'+path+'/');
+ const text=await page.locator('body').innerText();
+ if(/LOCAL DRAFT|NOT LIVE|UNPUBLISHED|Local simulation only|Evan to decide|evidence pending/.test(text))throw Error('Draft label');
+ if(await page.locator('meta[name=robots][content*=noindex]').count())throw Error('Noindex');
+ if(!await page.locator('form a[href="/privacy.html"]').count())throw Error('Privacy link missing');
+ if(!text.includes('No payment is taken'))throw Error('Payment status missing');
+ if(path==='course')for(const answer of JSON.parse(await readFile(new URL('./approved-policy-answers.json',import.meta.url),'utf8')))if(!text.includes(answer))throw Error('Policy answer changed');
+}
 await page.goto('http://127.0.0.1:4186/course/');
 if(await page.locator('.decision-marker').count()!==0)throw Error('Unexpected decision markers');
 if(/Evan to decide/i.test(await page.locator('body').innerText()))throw Error('Unresolved owner decision text');
@@ -32,9 +43,11 @@ for(const question of [
  'What can I access after the four workshops?',
  'Do I have to attend every session live?',
 ])if(await page.getByRole('heading',{name:question,exact:true}).count()!==1)throw Error('Missing policy question: '+question);
-await page.locator('.signup a').click();
+await page.locator('.signup a[href="/course/library/"]').click();
 if(await page.locator('[name=courseUpdates]').isChecked())throw Error('Prechecked library consent');
-await page.locator('[name=email]').fill('fictional@example.com');await page.locator('form button').click();
+await page.locator('[name=email]').fill('fictional@example.com');
+const automaticDownload=page.waitForEvent('download');await page.locator('form button').click();
+if((await automaticDownload).suggestedFilename()!=='business-prompt-library.md')throw Error('Automatic download failed');
 await page.getByRole('status').filter({hasText:'Course-update choice: no.'}).waitFor();
 await page.locator('[name=courseUpdates]').check();await page.locator('form button').click();
 await page.getByRole('status').filter({hasText:'Course-update choice: yes'}).waitFor();

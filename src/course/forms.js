@@ -1,3 +1,4 @@
+import { createCourseApiAdapter } from './api-adapter.js';
 import { createLocalCourseAdapter } from './local-adapter.js';
 import libraryText from './business-prompt-library.md?raw';
 for (const link of document.querySelectorAll('[data-library-download]')) {
@@ -13,7 +14,8 @@ for (const pre of document.querySelectorAll('.resource pre')) {
   });
   pre.after(button);
 }
-const adapter = createLocalCourseAdapter();
+const local = ['localhost', '127.0.0.1', '::1', '[::1]'].includes(location.hostname);
+const adapter = local ? createLocalCourseAdapter() : createCourseApiAdapter();
 for (const form of document.querySelectorAll('form[data-kind]')) {
   form.addEventListener('submit', async event => {
     event.preventDefault();
@@ -22,11 +24,21 @@ for (const form of document.querySelectorAll('form[data-kind]')) {
     button.disabled = true;
     try {
       const result = await adapter.submit({kind:form.dataset.kind,email:form.elements.email.value,courseUpdates:form.elements.courseUpdates?.checked === true});
-      status.textContent = result.ok
-        ? `Local simulation saved. No email sent; no real subscription created.${result.courseUpdates ? ' Course-update choice: yes (simulation only).' : ' Course-update choice: no.'}`
-        : result.code === 'consent-required' ? 'Choose course updates to simulate joining the waitlist.' : result.code === 'invalid-email' ? 'Enter a valid email address.' : "We couldn't submit your request. Please try again. Local simulation was not saved.";
+      if (result.ok) {
+        if (form.dataset.kind === 'library') document.querySelector('[data-library-download]')?.click();
+        status.textContent = local
+          ? `Local simulation saved. No real subscription created. Course-update choice: ${result.courseUpdates ? 'yes' : 'no'}.`
+          : form.dataset.kind === 'waitlist'
+            ? "You're on the waitlist. We'll email course updates, including dates when they're set. This isn't enrollment and no payment was taken."
+            : `Your download should start now. If it doesn't, use the download link.${result.courseUpdates ? " You'll also get course updates." : ''}`;
+      } else {
+        status.textContent = result.code === 'consent-required' ? 'Choose course updates to join the waitlist.'
+          : result.code === 'invalid-email' ? 'Enter a valid email address.'
+          : result.code === 'rate_limited' ? 'Too many requests. Please wait and try again.'
+          : `We couldn't submit your request. Please try again.${local ? ' Local simulation was not saved.' : ''}`;
+      }
     } catch {
-      status.textContent = "We couldn't submit your request. Please try again. Local simulation was not saved.";
+      status.textContent = `We couldn't submit your request. Please try again.${local ? ' Local simulation was not saved.' : ''}`;
     } finally { button.disabled = false; }
   });
 }
