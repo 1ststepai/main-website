@@ -1,5 +1,16 @@
 # Architecture Decision Log
 
+## 2026-11-11: Public conversion polish preview
+
+- **Owner / status:** Evan authorized implementation on `site/conversion-polish`, commit/push, and a draft PR only. Locally verified; no production deployment or merge authorized.
+- **Decision:** Use the approved “Get more from the business you already have.” hero outcome with one booking action. Standardize public booking actions as “Free Bottleneck Call,” a free 30-minute conversation with Evan, at `/book/`. This explicitly supersedes the older hero/CTA and website-only calendar-label decisions for this scope; the LeadConnector URL stays exactly unchanged.
+- **Rationale:** Reduce competing first-screen actions, align the offer through pricing/services/booking, and improve contrast and mobile readability while retaining PR #81’s dark/lime Archivo direction and intact official logo.
+- **Affected systems:** Homepage, pricing, service pages, booking/confirmation, work/tools chrome, and standard public header labels. Journey, fit check, campaign and tool behavior remain unchanged. No new data handling, APIs, integrations, payments, calendar configuration, or pricing changes.
+- **Preserved authority:** Commit `05bc3a9` remains an ancestor; `/card` and `og-home-v3` assets are unchanged. PR #82 is excluded and should be rebased later. Existing course mailto waitlist and approved prices remain.
+- **Evidence / dependencies:** See `docs/qa/conversion-polish/README.md`. Preview deployment is a review artifact, not production verification. Calendar booking submission and downstream notifications are not exercised. Production release requires separate approval and release verification.
+- **Rollback:** Revert the conversion-polish commit; do not remove the preceding share-image/card commit.
+
+
 ## 2026-11-09: Homepage redesign preview from Evan's mockup
 
 - **Status / owner:** Evan supplied a new homepage mockup and approved building it as a preview with truth corrections. Draft PR only. No merge, no production deploy, no domain or DNS change.
@@ -533,3 +544,11 @@
 - New pages shipped after Evan's go-live approval on Nov 11, 2026. Unconfirmed copy blanks were omitted rather than invented. Google-Extended and Applebot-Extended were left off the named robots list (the catch-all User-agent: * is unchanged). Directory sign-ups and outreach were not started.
 - Rationale: baseline search on 2026-11-11 showed 1stStep.ai absent from 19 of 20 buyer queries and the branded query summarized as a job-search tool.
 - Evidence: `npm test` 219 pass / 1 skip; `npm run build` passes locally.
+
+## 2026-11-11 — Replace public lime with restrained official logo blue
+
+- **Owner/approval:** Evan Pancis, explicitly approved in this session; implementation: Codex on `site/conversion-polish` for existing draft PR #84. Status: approved design decision; local verification recorded in `docs/qa/logo-blue/README.md`. No merge or production deployment authorized.
+- **Decision:** Evan dislikes lime. Supersede the earlier instruction to retain lime on buttons, eyebrows and example labels (and the digital card's dark/lime adaptation). Use exact official-logo blue `#007BF8` as the primary accent, sparingly for wordmarks, focus states and the card's thin bottom bar. Use paper `#F3F4F0`, existing cream and muted colors for labels, charts, secondary chrome and decorative effects; no blue/cyan/purple glow replacement.
+- **Accessible button variant:** white `#FFFFFF` on `#007BF8` measures **4.047:1**, failing normal-text AA. Filled primary buttons therefore use **`#006EEC`**, the common opaque logo pixel already documented above, with white text at **4.728:1**, passing 4.5:1. Preserve that pair on hover and mobile sticky CTAs.
+- **Affected systems:** public homepage/card, pricing/services, booking/confirmation, legal pages, Journey, fit-check, campaigns and inherited public OS/tools styling. Preserve conversion copy, prices, “Illustrative data,” official logo bytes/proportions, `og-home-v3`, booking embed `Rb4aqLM1NdU5kvZcqNmj`, APIs and all lead/persistence safeguards. Demo sandboxes, PostPath, Studio and admin source remain outside this change.
+- **Evidence/dependencies:** local test/build and responsive rendered evidence live alongside this entry's QA record. Hosted preview depends on the branch push's Vercel integration; production remains untouched. Rollback: revert this accent commit on the review branch. No DNS, Stripe, data, booking configuration, paid API or repo-creation changes.

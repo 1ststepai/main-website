@@ -111,10 +111,10 @@ test("homepage first screen books the call beside the command center illustratio
   const heroStart = html.indexOf('<section class="hero');
   const hero = html.slice(heroStart, html.indexOf("</section>", heroStart));
   const work = await source("work/index.html");
-  assert.match(hero, /Turn your business/);
-  assert.match(hero, /href="\/book\/"[^>]*>Book a free 30-min Bottleneck Call/);
+  assert.match(hero, /Get more from the business/);
+  assert.match(hero, /href="\/book\/"[^>]*>Free Bottleneck Call/);
   assert.match(hero, /Custom websites, automation workflows, and app solutions/);
-  assert.match(hero, /See Our Work/);
+  assert.doesNotMatch(hero, /See Our Work|Begin Your Journey/);
   assert.match(hero, /Illustrative data/);
   assert.doesNotMatch(hero, /SIMULATED|EXAMPLE/);
   assert.match(hero, /Business Command Center/);
@@ -199,7 +199,7 @@ test("the integrations row uses approved marks, pauses, and states the trademark
   const start = html.indexOf('id="works"');
   const works = html.slice(start, html.indexOf("</section>", start));
   assert.match(works, /Works with the tools/);
-  assert.match(works, /Logos are trademarks of their respective owners\. 1stStep\.ai connects with these tools and is not affiliated with or endorsed by them\./);
+  assert.match(works, /Logos are trademarks of their respective owners\. 1ststep\.ai connects with these tools and is not affiliated with or endorsed by them\./);
   assert.doesNotMatch(works, /partner/i);
   for (const name of ["Zapier", "Make", "n8n", "Calendly", "Square", "Supabase"]) {
     assert.match(works, new RegExp(`alt="${name}"`));
@@ -242,7 +242,7 @@ test("service page H1s use search language and carry basic OG", async () => {
     assert.match(html, heading);
     assert.match(html, /<link rel="canonical" href="https:\/\/www\.1ststep\.ai\//);
     assert.match(html, /property="og:image" content="https:\/\/www\.1ststep\.ai\/assets\/og-home-v2\.png"/);
-    assert.match(html, /property="og:site_name" content="1stStep\.ai"/);
+    assert.match(html, /property="og:site_name" content="1ststep\.ai"/);
     assert.match(html, /name="twitter:card" content="summary_large_image"/);
   }
 });
