@@ -1,5 +1,13 @@
 # Architecture Decision Log
 
+## 2026-11-09: Homepage redesign preview from Evan's mockup
+
+- **Status / owner:** Evan supplied a new homepage mockup and approved building it as a preview with truth corrections. Draft PR only. No merge, no production deploy, no domain or DNS change.
+- **Decision:** The homepage follows the mockup: dark hero with the H1 "Turn your business into a connected, lead-generating system.", eyebrow "Websites • Automation • Apps", Get Started (to `/book/`) and See Our Work (to `#work`), and a CSS Business Command Center laptop labeled Illustrative data with no percentages. A light band holds three pillars, Lyons Life and Universal Relocations case cards (illustrative and fictional-sample labels), a SkillSprout card, and a course banner for Practical AI for Business Beginners at a planned $297, marked coming soon with an email waitlist and no checkout. Services and starting prices, Audit/Build/Grow, the Alon Bendory video, the six Google reviews, founder, FAQ, and a booking band follow. Nav: Services menu, Work, SkillSprout, Course, Pricing, Morris Plains, NJ, and Let's Talk. Consulting is listed at $200/hr on the homepage, `/pricing/`, and `public/llms.txt`, per Evan's approved price list.
+- **Corrections vs. mockup:** "Mastering Business AI" / "THE PREMIUM COURSE" replaced by the official course name with no enrollment claim; mockup metrics (+37%, +62%, +28%, Active Leads 128 / +34%) removed; "AI" dropped from the eyebrow; SkillSprout spelling; "See It In Action (2 min)" replaced by See Our Work because no two-minute video exists.
+- **Affected systems:** `index.html`, `src/home-v3.css`, `src/home-v3.js`, `pricing/index.html`, `public/llms.txt`, homepage tests. `src/home-v2.css` and `src/home-v2.js` stay for `/work/` and `/pricing/`.
+- **Rollback:** Close the draft PR, or revert the branch commit.
+
 ## 2026-10-27: PostPath marketing site on postpath.1ststep.ai
 
 - **Status / owner:** Evan named the product URL `postpath.1ststep.ai` and asked for a conversion-focused marketing site with live demo. Implemented on `cursor/social-local-mcp-c683`. Preview/PR only until domain is attached and deploy is approved.
