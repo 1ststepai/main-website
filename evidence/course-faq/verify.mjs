@@ -21,7 +21,17 @@ for(const [name,width,height] of [['desktop',1440,1000],['mobile',390,844]]){
  for(const [label,selector] of [['answers','.faq h2'],['policies','.faq-decisions']]){await page.locator(selector).evaluate(el=>el.scrollIntoView({behavior:'instant'}));await page.screenshot({path:`evidence/course-faq/faq-${name}-${label}.png`});}
 }
 await page.goto('http://127.0.0.1:4186/course/');
-if(await page.locator('.decision-marker').count()!==7)throw Error('Missing owner decision markers');
+if(await page.locator('.decision-marker').count()!==0)throw Error('Unexpected decision markers');
+if(/Evan to decide/i.test(await page.locator('body').innerText()))throw Error('Unresolved owner decision text');
+for(const question of [
+ 'What is the refund policy?',
+ 'What if I cannot attend a session? Will there be recordings?',
+ 'How many hours should I allow each week?',
+ 'Do I need paid AI tools? Are there extra costs?',
+ 'What feedback will I receive on my work?',
+ 'What can I access after the four workshops?',
+ 'Do I have to attend every session live?',
+])if(await page.getByRole('heading',{name:question,exact:true}).count()!==1)throw Error('Missing policy question: '+question);
 await page.locator('.signup a').click();
 if(await page.locator('[name=courseUpdates]').isChecked())throw Error('Prechecked library consent');
 await page.locator('[name=email]').fill('fictional@example.com');await page.locator('form button').click();

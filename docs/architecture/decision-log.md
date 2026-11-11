@@ -532,3 +532,12 @@
 - Rationale: address supplied buyer objections without manufactured proof or customer commitments. Alternatives rejected: inventing refund/recording terms or borrowing competitor outcomes.
 - Evidence: evidence/course-faq/STATUS.md, test/build logs, browser verifier and screenshots; separate read-only copy and platform/security review roles.
 - Dependencies: Evan policy decisions and separate release/privacy/integration/accessibility gates before publication. No push/PR/merge/deploy authorized. Rollback: revert scoped local source diff; no external state changed.
+
+
+## 2026-11-11: Approved course FAQ policies
+
+- Owner: Evan. Status: approved for local unpublished draft. Authority/evidence: Evan approved the seven course policy answers in the 2026-11-11 task.
+- Decision: state the approved refund, recordings, weekly hours, tool costs, workshop feedback, post-course access and participation policies in the FAQ, including a separate live-attendance question.
+- Rationale: replace unresolved policy placeholders with clear approved terms. This supersedes the open-policy state in COURSE-FAQ-OBJECTIONS-LOCAL-2026-11-08 only.
+- Affected: course/index.html FAQ; unused marker styling and local FAQ verification updated alongside it.
+- Dependencies: local regression and responsive verification; separate publication/release approval remains required. Still unpublished, payments closed; no form, adapter or publication behavior changes.

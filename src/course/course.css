@@ -2,5 +2,5 @@
 /* Competitor-pattern local review: retain V4 palette, type and responsive composition. */
 #lesson .lesson{margin-top:0}.not-for{border-left:3px solid #82745c;padding-left:20px;margin-top:28px}.artifact{background:#e4dccb;padding:14px 20px;max-width:850px}.artifact span{display:block;font-size:13px;text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;font-weight:700}.practice{border-top:1px solid #514b3f}.practice-loop{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;list-style:none;padding:0;margin:36px 0}.practice-loop li{border-top:1px solid #70695b;padding-top:20px}.practice-loop span{color:#d4ff3a;font-size:14px}.practice-loop h3{font-size:22px;margin:12px 0}.signup .consent{max-width:750px}.consent small{display:block;color:#c6bfae;margin-top:5px;font-size:13px}.workshop{position:relative;padding:24px 0}.workshop p{max-width:850px}[hidden]{display:none!important}@media(max-width:650px){.practice-loop{grid-template-columns:1fr;gap:18px}.practice-loop h3{margin:8px 0}.artifact{padding:14px 16px}}
 
-/* Visible owner decisions stay distinct from confirmed FAQ answers. */
-.decision-marker{background:#e4dccb;padding:2px 5px;box-decoration-break:clone;-webkit-box-decoration-break:clone}.faq .faq-decisions{margin-top:56px;font-size:27px}
+/* FAQ course-policies group heading. */
+.faq .faq-decisions{margin-top:56px;font-size:27px}
