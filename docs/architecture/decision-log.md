@@ -605,3 +605,10 @@
 - **Affected systems:** public homepage/card, pricing/services, booking/confirmation, legal pages, Journey, fit-check, campaigns and inherited public OS/tools styling. Preserve conversion copy, prices, “Illustrative data,” official logo bytes/proportions, `og-home-v3`, booking embed `Rb4aqLM1NdU5kvZcqNmj`, APIs and all lead/persistence safeguards. Demo sandboxes, PostPath, Studio and admin source remain outside this change.
 - **Evidence/dependencies:** local test/build and responsive rendered evidence live alongside this entry's QA record. Hosted preview depends on the branch push's Vercel integration; production remains untouched. Rollback: revert this accent commit on the review branch. No DNS, Stripe, data, booking configuration, paid API or repo-creation changes.
 
+
+## 2026-11-11 — Course-cluster article publication styling
+
+- **Owner/authority:** Evan Pancis explicitly approved the two articles after blue-and-white restyling; implemented by Codex on `blog/course-first-articles`. Status: locally verified, publication-ready presentation; no remote release authorized.
+- **Decision:** Apply the existing course Archivo/paper/white/blue design to `/blog/how-to-start-using-ai-in-your-small-business/` and `/blog/ai-for-business-privacy-and-checking-answers/` only, with course-style home navigation, Blog label and required footer paths. Remove only byline Draft status; preserve teaching copy, fictional examples, metadata and schema.
+- **Rationale/scope:** Align beginner learning content with its course/library destinations while retaining existing styling elsewhere. A dedicated body-scoped stylesheet replaces dark chrome; shared blog CSS returns to its pre-article baseline. No course, API, integration, privacy or deployment configuration changes.
+- **Evidence/dependencies:** `evidence/blog-course-first-articles/README.md` records 237 passing tests, successful build, ten responsive checks, AA text/link contrast, five reviewed screenshots and local-only limits. Analytics/hosted/production verification remains pending. Rollback: revert this new local commit. No push, PR, merge or deployment.
