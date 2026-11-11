@@ -20,9 +20,7 @@ User-agent: ChatGPT-User
 User-agent: Claude-SearchBot
 User-agent: Claude-User
 User-agent: Perplexity-User
-User-agent: Google-Extended
 User-agent: Applebot
-User-agent: Applebot-Extended
 User-agent: Bingbot
 User-agent: DuckAssistBot
 User-agent: MistralAI-User

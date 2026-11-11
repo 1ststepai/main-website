@@ -530,6 +530,6 @@
 - Owner: Evan Pancis (approval pending); prepared by Marketing Desk.
 - Status: proposed. Local branch `ai-search-citation-pages` off `blog-and-bottleneck-rename` (PR #82). Not pushed, not merged, not deployed.
 - Change: adds /about/ facts page and five /blog/ guides (bottleneck audit, agency vs freelancer vs DIY, GoHighLevel automation cost, insurance agencies, real estate brokerages); pricing FAQ section + FAQPage JSON-LD (no price changes); explicit robots.txt groups for answer/user fetchers; llms.txt entity summary, disambiguation and guide links; sitemap, vercel rewrites and vite inputs for the new paths.
-- New pages ship with `noindex,follow` and `[EVAN TO CONFIRM]` markers; switch to `index,follow` and remove markers only after Evan approves copy.
+- New pages shipped after Evan's go-live approval on Nov 11, 2026. Unconfirmed copy blanks were omitted rather than invented. Google-Extended and Applebot-Extended were left off the named robots list (the catch-all User-agent: * is unchanged). Directory sign-ups and outreach were not started.
 - Rationale: baseline search on 2026-11-11 showed 1stStep.ai absent from 19 of 20 buyer queries and the branded query summarized as a job-search tool.
 - Evidence: `npm test` 219 pass / 1 skip; `npm run build` passes locally.
