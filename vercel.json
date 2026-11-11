@@ -16,6 +16,8 @@
     },
     { "source": "/postpath", "destination": "/postpath/index.html" },
     { "source": "/postpath/", "destination": "/postpath/index.html" },
+    { "source": "/card", "destination": "/card/index.html" },
+    { "source": "/card/", "destination": "/card/index.html" },
     { "source": "/os", "destination": "/os/index.html" },
     { "source": "/pricing", "destination": "/pricing/index.html" },
     { "source": "/work", "destination": "/work/index.html" },
