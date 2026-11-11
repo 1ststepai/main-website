@@ -517,6 +517,58 @@
 - Verification: 149 tests and production build PASS; synthetic rendered review/edit/queue/refresh/cancel path PASS; mobile reply form fits at 344 CSS pixels. Real paired bridge read succeeded against the existing newsletter pipeline (44 records, revision 11). Actual reviewed-send Gmail execution and new production queue operations remain unverified. Private receipt: .codex-qa/reviewed-replies.json.
 - Rollback: keep reply-worker-release.json disabled, restore prior five/15-minute monitor prompt as appropriate, and promote the verified prior deployment dpl_3h2AZffV7mwy9qCfch3nk7KsjMjx if a later release needs rollback. Preserve pairing credentials and pipeline data; do not reinstall the old VBS shortcut over the native window.
 
+## 2026-11-08: Unpublished local course and prompt library draft
+
+- Owner: Evan; implementation: Codex. Status: locally verified draft, unpublished. Authority: current task and V4 copy/design specs supplied with task.
+- Scope: /course and /course/library only, isolated loopback Vite config; normal production build inputs, sitemap, public navigation, deployment configuration and existing APIs unchanged. No push, PR, merge, deployment, live requests, emails or credentials.
+- Forms use a loopback-only mock adapter. Addresses are validated in memory and never persisted or sent; a single anonymous simulation record verifies persistence. Library delivery and unchecked optional course-update consent remain separate. Public host submissions fail closed.
+- Visual system follows supplied ink/cream/lime mockups with local Archivo/Instrument Serif fonts and the intact canonical logo. Full source copy governs abbreviated mockups; all six prompt entries and optional bonus are provided as selectable text and downloadable Markdown. CSS steps are a local approximation of the reference illustration.
+- Evidence: tests/course-local-adapter.test.mjs; evidence/course/verify.mjs and screenshots. Five adapter tests plus 38 selected existing static regressions passed; isolated build with cached Vite 8.3.2 passed. Standard npm build blocked by absent worktree dependencies; repository-pinned Vite 6 build remains unverified. No lint/typecheck scripts. Independent integration, build and security concerns reviewed by separate agents with disjoint ownership in this already isolated worktree; no merges.
+- Release dependencies: owner review, real delivery workflow and privacy/retention/consent policy approval, approved test accounts, repository dependency installation/build, full release/accessibility gates and separate publication authorization. This draft grants no launch authority.
+
+
+## COURSE-COMPETITOR-LOCAL-2026-11-08 — Unpublished research-pattern revision
+
+- Owner: Evan (product approval); Codex root (UI), delegated build/platform/security reviewers.
+- Status: implemented local draft for review; no release authority.
+- Authority: current user task, specs/competitor-landing-page-research.md recommended outline; V4 copy/design remain the base.
+- Decision: separate early fit, fictional Oak Street lesson, workshop artifacts, live practice loop and instructor; hide all proof until owner supplies verified video/work links/permissioned results. Retain single repeated waitlist action, ink/cream/lime and existing fonts/logo.
+- Consent: explicit separate unchecked waitlist checkbox required for local simulation; library course opt-in stays optional and separate. No email persisted or sent. Adapter stays loopback-only.
+- Rationale: explain capability, fit and teaching method without manufacturing proof or changing public commitments. New labels and consent wording are DRAFT for Evan review (markup comments and visible consent marker).
+- Affected systems: course/index.html, src/course CSS/forms/local adapter, local tests/evidence only. Production configuration, library resource content, app authority and live integrations unchanged.
+- Evidence: evidence/course-competitor/; baseline b32cbac on course/competitor-patterns-local. Current request authorizes local implementation only.
+- Dependencies: Evan review of new copy/artifacts and verified proof inputs; production/privacy/delivery/accessibility/release gates remain unapproved. No push, PR, merge or deploy. Local rollback is reverting this scoped diff; no external state changed.
+
+
+## COURSE-FAQ-OBJECTIONS-LOCAL-2026-11-08 — Honest objections and owner decisions
+
+- Owner: Evan (policy/product); Codex (local implementation). Status: unpublished local draft, no release authority.
+- Authority: current FAQ task; buyer-questions-objections-research.md Themes A/B/C/F/H/I and heytony-seo-methods-applied.md organization guidance. Baseline b4cc6f9 on course/faq-objections-local.
+- Decision: explain planned $297 as four structured live workshops on the buyer’s tasks with take-home prompts/checklists; explicitly disclaim income/ROI guarantees. Add coding and existing-ChatGPT fit answers. Keep question-first, answer-first FAQ in existing cream/divider layout.
+- Refunds, recordings/missed sessions, hours, tools/costs, feedback, post-cohort access and extra participation policies remain visible Evan-to-decide DRAFT stubs. No policy is resolved by this implementation. Existing advanced-builder exclusion remains consistent.
+- Affected systems: course HTML, narrowly scoped marker CSS, local evidence. Forms, consent, library, platform integrations, credentials, noindex and production configuration unchanged.
+- Rationale: address supplied buyer objections without manufactured proof or customer commitments. Alternatives rejected: inventing refund/recording terms or borrowing competitor outcomes.
+- Evidence: evidence/course-faq/STATUS.md, test/build logs, browser verifier and screenshots; separate read-only copy and platform/security review roles.
+- Dependencies: Evan policy decisions and separate release/privacy/integration/accessibility gates before publication. No push/PR/merge/deploy authorized. Rollback: revert scoped local source diff; no external state changed.
+
+
+## 2026-11-11: Approved course FAQ policies
+
+- Owner: Evan. Status: approved for local unpublished draft. Authority/evidence: Evan approved the seven course policy answers in the 2026-11-11 task.
+- Decision: state the approved refund, recordings, weekly hours, tool costs, workshop feedback, post-course access and participation policies in the FAQ, including a separate live-attendance question.
+- Rationale: replace unresolved policy placeholders with clear approved terms. This supersedes the open-policy state in COURSE-FAQ-OBJECTIONS-LOCAL-2026-11-08 only.
+- Affected: course/index.html FAQ; unused marker styling and local FAQ verification updated alongside it.
+- Dependencies: local regression and responsive verification; separate publication/release approval remains required. Still unpublished, payments closed; no form, adapter or publication behavior changes.
+
+## 2026-11-11: Course signup through same-origin API
+
+- Owner: Evan (product authorization); Codex (implementation). Status: implemented and committed locally; awaiting Evan push. Production Vite build not run (dependencies missing); isolated course build and mocked-API browser smoke test passed.
+- Authority: current task authorizes course email collection in GoHighLevel, publication copy cleanup and privacy disclosure. Supersedes the simulation-only implementation boundary above. Seven approved policy answers remain unchanged.
+- Decision: public hosts use `/api/course-signup`; loopback keeps offline simulation. Server validates consent, uses the isolated `course-signup` IP rate-limit scope under existing default limits, and existing best-effort in-memory idempotency with namespaced fingerprints. Upsert sends location, email and source only, followed by additive existing tags. Library requests do not opt into waitlist updates unless checked. Browser downloads begin after acceptance, without file-email promises.
+- Affected: course pages, privacy, browser adapter, API, GHL, Vite and Vercel routes. No raw email or upstream response logging; credentials stay server-side.
+- Evidence: tests/course-signup.test.mjs and evidence/course-faq/PRODUCTION-WIRING.md. No live API calls or deployment performed.
+- Dependencies: server configuration, restored project dependencies, build, responsive/browser checks, independent review and explicit release approval. Payments stay closed; dates unannounced. Rollback: revert local diff; no external state changed.
+
 ## 2026-11-10 — Static blog and Free Bottleneck Call naming
 
 - Owner: Evan (scope/copy authorization); public-site agent (implementation).
@@ -552,3 +604,4 @@
 - **Accessible button variant:** white `#FFFFFF` on `#007BF8` measures **4.047:1**, failing normal-text AA. Filled primary buttons therefore use **`#006EEC`**, the common opaque logo pixel already documented above, with white text at **4.728:1**, passing 4.5:1. Preserve that pair on hover and mobile sticky CTAs.
 - **Affected systems:** public homepage/card, pricing/services, booking/confirmation, legal pages, Journey, fit-check, campaigns and inherited public OS/tools styling. Preserve conversion copy, prices, “Illustrative data,” official logo bytes/proportions, `og-home-v3`, booking embed `Rb4aqLM1NdU5kvZcqNmj`, APIs and all lead/persistence safeguards. Demo sandboxes, PostPath, Studio and admin source remain outside this change.
 - **Evidence/dependencies:** local test/build and responsive rendered evidence live alongside this entry's QA record. Hosted preview depends on the branch push's Vercel integration; production remains untouched. Rollback: revert this accent commit on the review branch. No DNS, Stripe, data, booking configuration, paid API or repo-creation changes.
+
