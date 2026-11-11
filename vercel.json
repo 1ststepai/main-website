@@ -9,6 +9,9 @@
     }
   ],
   "rewrites": [
+    {"source": "/blog/how-to-start-using-ai-in-your-small-business", "destination": "/blog/how-to-start-using-ai-in-your-small-business/index.html"},
+    {"source": "/blog/ai-for-business-privacy-and-checking-answers", "destination": "/blog/ai-for-business-privacy-and-checking-answers/index.html"},
+
     {"source": "/blog", "destination": "/blog/index.html"},
     {"source": "/about", "destination": "/about/index.html"},
     {"source": "/blog/what-is-a-bottleneck-audit", "destination": "/blog/what-is-a-bottleneck-audit/index.html"},

@@ -39,7 +39,7 @@ const siteAnalytics = {
 };
 
 function serveExactIndexPaths(server) {
-  const routes = ["/course", "/course/", "/course/library", "/course/library/", "/card", "/card/", "/blog", "/blog/", "/about", "/about/", "/blog/what-is-a-bottleneck-audit", "/blog/what-is-a-bottleneck-audit/", "/blog/agency-vs-freelancer-vs-diy", "/blog/agency-vs-freelancer-vs-diy/", "/blog/gohighlevel-automation-cost", "/blog/gohighlevel-automation-cost/", "/blog/automation-for-insurance-agencies", "/blog/automation-for-insurance-agencies/", "/blog/automation-for-real-estate-brokerages", "/blog/automation-for-real-estate-brokerages/", "/blog/follow-up-every-lead-faster", "/blog/follow-up-every-lead-faster/", "/blog/how-to-choose-a-web-designer", "/blog/how-to-choose-a-web-designer/", "/blog/why-pay-for-an-ai-course-when-chatgpt-is-free", "/blog/why-pay-for-an-ai-course-when-chatgpt-is-free/"].concat(["/os", "/pricing", "/pricing/", "/work", "/work/", "/tools", "/tools/auto-model-router", "/tools/1ststep-os-audit", "/tools/1ststep-os", "/work/lyons-life-demo", "/work/lyons-life-demo/", "/work/universal-relocations", "/work/universal-relocations/"]);
+  const routes = ["/blog/how-to-start-using-ai-in-your-small-business","/blog/how-to-start-using-ai-in-your-small-business/","/blog/ai-for-business-privacy-and-checking-answers","/blog/ai-for-business-privacy-and-checking-answers/", "/course", "/course/", "/course/library", "/course/library/", "/card", "/card/", "/blog", "/blog/", "/about", "/about/", "/blog/what-is-a-bottleneck-audit", "/blog/what-is-a-bottleneck-audit/", "/blog/agency-vs-freelancer-vs-diy", "/blog/agency-vs-freelancer-vs-diy/", "/blog/gohighlevel-automation-cost", "/blog/gohighlevel-automation-cost/", "/blog/automation-for-insurance-agencies", "/blog/automation-for-insurance-agencies/", "/blog/automation-for-real-estate-brokerages", "/blog/automation-for-real-estate-brokerages/", "/blog/follow-up-every-lead-faster", "/blog/follow-up-every-lead-faster/", "/blog/how-to-choose-a-web-designer", "/blog/how-to-choose-a-web-designer/", "/blog/why-pay-for-an-ai-course-when-chatgpt-is-free", "/blog/why-pay-for-an-ai-course-when-chatgpt-is-free/"].concat(["/os", "/pricing", "/pricing/", "/work", "/work/", "/tools", "/tools/auto-model-router", "/tools/1ststep-os-audit", "/tools/1ststep-os", "/work/lyons-life-demo", "/work/lyons-life-demo/", "/work/universal-relocations", "/work/universal-relocations/"]);
   server.middlewares.use((request, _response, next) => {
     const url = request.url || "";
     const path = url.split("?")[0];
@@ -71,6 +71,8 @@ export default defineConfig({
         blog0: "blog/index.html",
         blog1: "blog/follow-up-every-lead-faster/index.html",
         blog2: "blog/how-to-choose-a-web-designer/index.html",
+        blog4: "blog/how-to-start-using-ai-in-your-small-business/index.html",
+        blog5: "blog/ai-for-business-privacy-and-checking-answers/index.html",
         blog3: "blog/why-pay-for-an-ai-course-when-chatgpt-is-free/index.html",
         aiSearch0: "about/index.html",
         aiSearch1: "blog/what-is-a-bottleneck-audit/index.html",
