@@ -58,7 +58,7 @@ async function deliver(submission) {
       payload: {
         ok: false,
         code: "delivery_unavailable",
-        message: "Your request could not be delivered. Please book a Website Strategy Call instead.",
+        message: "Your request could not be delivered. Please book a Free Bottleneck Call instead.",
       },
     };
   }

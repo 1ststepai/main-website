@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>https://www.1ststep.ai/card</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
     <loc>https://www.1ststep.ai/</loc>
     <lastmod>2026-09-20</lastmod>
     <changefreq>weekly</changefreq>
@@ -162,4 +167,14 @@
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
+  <url><loc>https://www.1ststep.ai/blog/</loc></url>
+  <url><loc>https://www.1ststep.ai/blog/follow-up-every-lead-faster/</loc></url>
+  <url><loc>https://www.1ststep.ai/blog/how-to-choose-a-web-designer/</loc></url>
+  <url><loc>https://www.1ststep.ai/blog/why-pay-for-an-ai-course-when-chatgpt-is-free/</loc></url>
+  <url><loc>https://www.1ststep.ai/about/</loc></url>
+  <url><loc>https://www.1ststep.ai/blog/what-is-a-bottleneck-audit/</loc></url>
+  <url><loc>https://www.1ststep.ai/blog/agency-vs-freelancer-vs-diy/</loc></url>
+  <url><loc>https://www.1ststep.ai/blog/gohighlevel-automation-cost/</loc></url>
+  <url><loc>https://www.1ststep.ai/blog/automation-for-insurance-agencies/</loc></url>
+  <url><loc>https://www.1ststep.ai/blog/automation-for-real-estate-brokerages/</loc></url>
 </urlset>

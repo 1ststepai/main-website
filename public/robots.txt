@@ -22,4 +22,20 @@ Disallow: /admin/
 Disallow: /demos/
 Disallow: /book/confirmed/
 
+# Answer and user-triggered fetchers for AI assistants (search/citation, not only training).
+# Unnamed agents already fall under "User-agent: *"; these groups make intent explicit.
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: Claude-SearchBot
+User-agent: Claude-User
+User-agent: Perplexity-User
+User-agent: Applebot
+User-agent: Bingbot
+User-agent: DuckAssistBot
+User-agent: MistralAI-User
+Allow: /
+Disallow: /admin/
+Disallow: /demos/
+Disallow: /book/confirmed/
+
 Sitemap: https://www.1ststep.ai/sitemap.xml

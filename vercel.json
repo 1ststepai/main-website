@@ -9,6 +9,17 @@
     }
   ],
   "rewrites": [
+    {"source": "/blog", "destination": "/blog/index.html"},
+    {"source": "/about", "destination": "/about/index.html"},
+    {"source": "/blog/what-is-a-bottleneck-audit", "destination": "/blog/what-is-a-bottleneck-audit/index.html"},
+    {"source": "/blog/agency-vs-freelancer-vs-diy", "destination": "/blog/agency-vs-freelancer-vs-diy/index.html"},
+    {"source": "/blog/gohighlevel-automation-cost", "destination": "/blog/gohighlevel-automation-cost/index.html"},
+    {"source": "/blog/automation-for-insurance-agencies", "destination": "/blog/automation-for-insurance-agencies/index.html"},
+    {"source": "/blog/automation-for-real-estate-brokerages", "destination": "/blog/automation-for-real-estate-brokerages/index.html"},
+    {"source": "/blog/follow-up-every-lead-faster", "destination": "/blog/follow-up-every-lead-faster/index.html"},
+    {"source": "/blog/how-to-choose-a-web-designer", "destination": "/blog/how-to-choose-a-web-designer/index.html"},
+    {"source": "/blog/why-pay-for-an-ai-course-when-chatgpt-is-free", "destination": "/blog/why-pay-for-an-ai-course-when-chatgpt-is-free/index.html"},
+
     {
       "source": "/:path*",
       "has": [{ "type": "host", "value": "postpath.1ststep.ai" }],
@@ -16,6 +27,8 @@
     },
     { "source": "/postpath", "destination": "/postpath/index.html" },
     { "source": "/postpath/", "destination": "/postpath/index.html" },
+    { "source": "/card", "destination": "/card/index.html" },
+    { "source": "/card/", "destination": "/card/index.html" },
     { "source": "/os", "destination": "/os/index.html" },
     { "source": "/pricing", "destination": "/pricing/index.html" },
     { "source": "/course", "destination": "/course/index.html" },

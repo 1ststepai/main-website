@@ -9,15 +9,14 @@ test("the homepage leads with the studio offer and keeps products distinct", asy
   const html = await source("index.html");
   const llms = await source("public/llms.txt");
   const work = await source("work/index.html");
-  assert.match(html, /Turn your business <br class="br-d">into a connected, <span class="hl"><span>lead-generating system\.<\/span><\/span>/);
+  assert.match(html, /Get more from the business <span class="hl"><span>you already have\.<\/span><\/span>/);
   assert.match(work, /Node AI/);
   assert.doesNotMatch(work, /8,000\+|4,000\+|TradingView/);
   assert.match(html, /href="\/tools\/"/);
   assert.match(html, /href="\/journey\/"/);
   assert.match(html, /firststep-logo-transparent-cleaned\.png/);
-  assert.equal((html.match(/Book a call/g) || []).length, 12);
   assert.equal((html.match(/href="\/book\/"/g) || []).length, 10);
-  assert.match(html, /Book a free 20-min call/);
+  assert.match(html, /Free Bottleneck Call/);
   assert.doesNotMatch(html, /Book a 20-min call/);
   assert.match(llms, /Get more from the business you already have/);
   assert.match(llms, /1stStep OS/);
@@ -148,10 +147,10 @@ test("homepage metadata and assets identify the systems consultancy", async () =
   const data = JSON.parse(jsonLd);
 
   assert.match(html, /<link rel="canonical" href="https:\/\/www\.1ststep\.ai\/"/);
-  assert.match(html, /og-home-v2\.png/);
+  assert.match(html, /og-home-v3\.png/);
   assert.match(html, /<meta name="description" content="Software, automation, and websites for a business that already has demand/);
   assert.deepEqual(data["@graph"].map((item) => item["@type"]), ["Organization", "WebSite", "WebPage", "CreativeWork", "SoftwareApplication"]);
-  assert.equal((await stat(new URL("public/assets/og-home-v2.png", root))).size > 5000, true);
+  assert.equal((await stat(new URL("public/assets/og-home-v3.png", root))).size > 5000, true);
 });
 
 test("the website service page keeps website visitors on website-intent paths", async () => {
@@ -200,7 +199,7 @@ test("the booking path remains and commercial intake exposes three honest paths"
   const fitCheck = await source("fit-check/index.html");
   assert.match(booking, /https:\/\/api\.leadconnectorhq\.com\/widget\/booking\/Rb4aqLM1NdU5kvZcqNmj/);
   assert.match(booking, /class="calendar-shell"/);
-  assert.match(booking, /Loading secure Website Strategy Call calendar/);
+  assert.match(booking, /Loading secure Free Bottleneck Call calendar/);
   assert.match(booking, /No pressure\./);
   assert.match(booking, /payment schedule/i);
   for (const intent of ["build_new", "finish_build", "automate_business"]) assert.match(fitCheck, new RegExp(`value="${intent}"`));
@@ -230,7 +229,7 @@ test("the homepage has one real video testimonial and shows Evan's headshot", as
   assert.match(html, /srcset="\/home-v2\/evan-pancis\.avif"/);
   assert.match(html, /srcset="\/home-v2\/evan-pancis\.webp"/);
   assert.match(html, /src="\/home-v2\/evan-pancis\.jpg"/);
-  assert.match(html, /alt="Evan Pancis, founder of 1stStep\.ai"/);
+  assert.match(html, /alt="Evan Pancis, founder of 1ststep\.ai"/);
   assert.match(html, /width="400" height="400"/);
   assert.match(html, /"image":"https:\/\/www\.1ststep\.ai\/home-v2\/evan-pancis\.jpg"/);
 });
@@ -242,7 +241,7 @@ test("the Morris County campaign is focused, transparent, and locally qualified"
   assert.match(html, /first 10 qualified Morris County businesses/i);
   assert.match(html, /Design and build fee: <strong>\$0<\/strong>/);
   assert.match(html, /other third-party services/i);
-  assert.match(html, /1stStep\.ai does not purchase or reimburse domains, hosting/i);
+  assert.match(html, /1ststep\.ai does not purchase or reimburse domains, hosting/i);
   assert.match(html, /You provide a domain you already own or purchase it directly/i);
   assert.match(html, /Submitting an application does not guarantee acceptance/i);
   assert.match(html, /name="town"/);
@@ -478,16 +477,16 @@ test("pricing publishes the approved starting ranges and books a call", async ()
     "Consulting &amp; Support",
     "$200/hr or retainers from $1,500/mo",
     "Direct time, by the hour or the month.",
-    "Every project is scoped on a free call.",
+    "Every project is scoped on a Free Bottleneck Call (30 minutes).",
   ];
   for (const line of lines) {
     const pattern = new RegExp(line.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
     assert.match(section, pattern, line);
     assert.match(page, pattern, line);
   }
-  assert.equal((section.match(/Book a call/g) || []).length, 12);
+  assert.equal((section.match(/Free Bottleneck Call/g) || []).length, 13);
   assert.equal((section.match(/href="\/book\/"/g) || []).length, 6);
-  assert.equal((page.match(/Book a call/g) || []).length, 13);
+  assert.equal((page.match(/href="\/book\/"/g) || []).length, 7);
   assert.match(home, /<nav aria-label="Primary">[\s\S]*href="\/pricing\/">Pricing<\/a>/);
   assert.match(page, /aria-current="page">Pricing<\/a>/);
   assert.match(home, /<nav aria-label="Footer"[\s\S]*href="\/pricing\/">Pricing<\/a>/);
@@ -549,9 +548,9 @@ test("the redesigned homepage keeps the mockup's truth corrections", async () =>
   assert.match(hero, /Business Command Center/);
   assert.match(hero, /Illustrative data/);
   assert.doesNotMatch(hero, /\d+%/);
-  assert.match(hero, /href="\/book\/"[^>]*>Get Started/);
-  assert.match(hero, /href="#work"[^>]*>[\s\S]*See Our Work/);
-  assert.match(html, /href="\/book\/"[^>]*>Let’s Talk/);
+  assert.match(hero, /href="\/book\/"[^>]*>Free Bottleneck Call/);
+  assert.equal((hero.match(/href="\/book\/"/g) || []).length, 1);
+  assert.match(html, /href="\/book\/"[^>]*>Free Bottleneck Call/);
   assert.match(html, /href="tel:\+19738003729"/);
   assert.match(html, /Morris Plains, NJ/);
   const copy = visible.replace(/<ul class="rv-list">[\s\S]*?<\/ul>/, "").replace(/<[^>]+>/g, " ");
@@ -561,4 +560,21 @@ test("the redesigned homepage keeps the mockup's truth corrections", async () =>
   assert.match(css, /prefers-reduced-motion:\s*reduce/);
   assert.doesNotMatch(css, /cursor:\s*none|backdrop-filter/);
   assert.match(html, /href="\/src\/home-v3\.css"/);
+});
+
+test("public conversion pages share one named offer and preserve the calendar destination", async () => {
+  const pages = ["index.html", "pricing/index.html", "book/index.html", "book/confirmed/index.html", "services/websites.html", "services/internal-tools.html", "services/mvp-builds.html", "services/app-builds.html", "services/revenue-systems.html"];
+  for (const path of pages) {
+    const html = await source(path);
+    assert.doesNotMatch(html, /20-min|Website Strategy Call|Get Started|Let’s Talk/, path);
+    const links = [...html.matchAll(/<a\b[^>]*href="\/book\/"[^>]*>([\s\S]*?)<\/a>/g)];
+    assert.ok(links.length, `${path}: booking action available`);
+    for (const link of links) assert.equal(link[1], "Free Bottleneck Call", path);
+  }
+  const book = await source("book/index.html");
+  assert.match(book, /<iframe[^>]*src="https:\/\/api.leadconnectorhq.com\/widget\/booking\/Rb4aqLM1NdU5kvZcqNmj"/);
+  assert.match(book, /30 minutes|30-minute/);
+  const home = await source("index.html");
+  assert.match(home, /href="\/card\/?"/);
+  assert.match(home, /assets\/og-home-v3.png/);
 });

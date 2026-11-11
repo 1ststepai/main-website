@@ -1,5 +1,16 @@
 # Architecture Decision Log
 
+## 2026-11-11: Public conversion polish preview
+
+- **Owner / status:** Evan authorized implementation on `site/conversion-polish`, commit/push, and a draft PR only. Locally verified; no production deployment or merge authorized.
+- **Decision:** Use the approved “Get more from the business you already have.” hero outcome with one booking action. Standardize public booking actions as “Free Bottleneck Call,” a free 30-minute conversation with Evan, at `/book/`. This explicitly supersedes the older hero/CTA and website-only calendar-label decisions for this scope; the LeadConnector URL stays exactly unchanged.
+- **Rationale:** Reduce competing first-screen actions, align the offer through pricing/services/booking, and improve contrast and mobile readability while retaining PR #81’s dark/lime Archivo direction and intact official logo.
+- **Affected systems:** Homepage, pricing, service pages, booking/confirmation, work/tools chrome, and standard public header labels. Journey, fit check, campaign and tool behavior remain unchanged. No new data handling, APIs, integrations, payments, calendar configuration, or pricing changes.
+- **Preserved authority:** Commit `05bc3a9` remains an ancestor; `/card` and `og-home-v3` assets are unchanged. PR #82 is excluded and should be rebased later. Existing course mailto waitlist and approved prices remain.
+- **Evidence / dependencies:** See `docs/qa/conversion-polish/README.md`. Preview deployment is a review artifact, not production verification. Calendar booking submission and downstream notifications are not exercised. Production release requires separate approval and release verification.
+- **Rollback:** Revert the conversion-polish commit; do not remove the preceding share-image/card commit.
+
+
 ## 2026-11-09: Homepage redesign preview from Evan's mockup
 
 - **Status / owner:** Evan supplied a new homepage mockup and approved building it as a preview with truth corrections. Draft PR only. No merge, no production deploy, no domain or DNS change.
@@ -506,7 +517,6 @@
 - Verification: 149 tests and production build PASS; synthetic rendered review/edit/queue/refresh/cancel path PASS; mobile reply form fits at 344 CSS pixels. Real paired bridge read succeeded against the existing newsletter pipeline (44 records, revision 11). Actual reviewed-send Gmail execution and new production queue operations remain unverified. Private receipt: .codex-qa/reviewed-replies.json.
 - Rollback: keep reply-worker-release.json disabled, restore prior five/15-minute monitor prompt as appropriate, and promote the verified prior deployment dpl_3h2AZffV7mwy9qCfch3nk7KsjMjx if a later release needs rollback. Preserve pairing credentials and pipeline data; do not reinstall the old VBS shortcut over the native window.
 
-
 ## 2026-11-08: Unpublished local course and prompt library draft
 
 - Owner: Evan; implementation: Codex. Status: locally verified draft, unpublished. Authority: current task and V4 copy/design specs supplied with task.
@@ -558,3 +568,40 @@
 - Affected: course pages, privacy, browser adapter, API, GHL, Vite and Vercel routes. No raw email or upstream response logging; credentials stay server-side.
 - Evidence: tests/course-signup.test.mjs and evidence/course-faq/PRODUCTION-WIRING.md. No live API calls or deployment performed.
 - Dependencies: server configuration, restored project dependencies, build, responsive/browser checks, independent review and explicit release approval. Payments stay closed; dates unannounced. Rollback: revert local diff; no external state changed.
+
+## 2026-11-10 — Static blog and Free Bottleneck Call naming
+
+- Owner: Evan (scope/copy authorization); public-site agent (implementation).
+- Status: approved in current request; local implementation, no release approval.
+- Decision: publish three supplied drafts under `/blog/` as static HTML, lead-follow-up guide first, with existing site styling, explicit Vite inputs/Vercel rewrites and sitemap discovery. Retain source drafts unchanged; remove editorial notes from public HTML. Unconfirmed course details remain “Details coming soon”; no waitlist CTA until a verified destination exists.
+- Booking decision: current user instruction supersedes prior Website Strategy Call naming with Free Bottleneck Call, 30 minutes. Preserve calendar URL/embed ID, attribution/event identifiers, and separate email-based System Audit handoff.
+- Rationale/evidence: current user request; `content/blog-drafts/`; existing multipage routing in `vite.config.js` and `vercel.json`. No CMS, dependencies, payment or data handling changes.
+- Affected systems: public blog, booking copy, navigation/footer, search metadata and discovery, public conversion tests.
+- Verification dependencies: build, relevant tests, responsive browser/SEO checks. No deployment; live behavior and third-party calendar’s internal copy remain unverified. Rollback: revert this implementation commit.
+
+## 2026-11-11 — Cache-busted homepage sharing and Evan’s digital card
+
+- Owner/approval: Evan Pancis; implementation: Codex on `site/og-card-page`, based on `3a56216`. Status: locally verified; draft PR for review, no merge or production deployment authorized in this task.
+- Decision: publish the approved navy `og-home-v2.png` bytes at `og-home-v3.png`; update homepage Open Graph/Twitter titles and image metadata. Add `image_src`, HTTPS image metadata and a structured-data primary image as crawler hints while retaining the SkillSprout case study. Preview selection/cache refresh on iMessage remains outside local verification.
+- Decision: add public, indexable `/card`, following the supplied digital reference with the intact canonical logo, existing Archivo typography, dark/lime colors, contact links and exact supplied vCard download. Add footer discovery, sitemap and explicit build/hosting routes. A save-contact button takes the optional QR position; no QR service or new dependency. Existing homepage layout/nav styling stays unchanged.
+- Waitlist finding: homepage course CTA is already a visitor-initiated `mailto:evan@1ststep.ai` with a course-waitlist subject. There is no connected submission endpoint for that CTA. Preserve the truthful email path; do not present an unverified form or claim a signup was stored. Mail delivery was not tested or sent.
+- Evidence: production build passes (existing >500 kB chunk warning); site tests 219 passed, one skipped; social-MCP tests 44 passed; no lint/typecheck scripts exist. Local built-page browser checks cover 1440, 1280, 768 and 390 widths, no overflow, logo loading, contact links, vCard download, `/card` variants, footer navigation, share metadata, retained case-study image and keyboard focus. Screenshots reviewed against the supplied reference in ignored `output/og-card/`. Chromium reports a view-transition opt-in/abort warning during cross-page navigation; navigation succeeds. No application error observed.
+- Dependencies/limits: no production or hosted-preview verification; real device contact import and iMessage recrawl await release. Rollback is a revert of this additive change; no data migration or external writes.
+
+## 2026-11-11 — AI-search citation page drafts (DRAFT, not approved)
+
+- Owner: Evan Pancis (approval pending); prepared by Marketing Desk.
+- Status: proposed. Local branch `ai-search-citation-pages` off `blog-and-bottleneck-rename` (PR #82). Not pushed, not merged, not deployed.
+- Change: adds /about/ facts page and five /blog/ guides (bottleneck audit, agency vs freelancer vs DIY, GoHighLevel automation cost, insurance agencies, real estate brokerages); pricing FAQ section + FAQPage JSON-LD (no price changes); explicit robots.txt groups for answer/user fetchers; llms.txt entity summary, disambiguation and guide links; sitemap, vercel rewrites and vite inputs for the new paths.
+- New pages shipped after Evan's go-live approval on Nov 11, 2026. Unconfirmed copy blanks were omitted rather than invented. Google-Extended and Applebot-Extended were left off the named robots list (the catch-all User-agent: * is unchanged). Directory sign-ups and outreach were not started.
+- Rationale: baseline search on 2026-11-11 showed 1stStep.ai absent from 19 of 20 buyer queries and the branded query summarized as a job-search tool.
+- Evidence: `npm test` 219 pass / 1 skip; `npm run build` passes locally.
+
+## 2026-11-11 — Replace public lime with restrained official logo blue
+
+- **Owner/approval:** Evan Pancis, explicitly approved in this session; implementation: Codex on `site/conversion-polish` for existing draft PR #84. Status: approved design decision; local verification recorded in `docs/qa/logo-blue/README.md`. No merge or production deployment authorized.
+- **Decision:** Evan dislikes lime. Supersede the earlier instruction to retain lime on buttons, eyebrows and example labels (and the digital card's dark/lime adaptation). Use exact official-logo blue `#007BF8` as the primary accent, sparingly for wordmarks, focus states and the card's thin bottom bar. Use paper `#F3F4F0`, existing cream and muted colors for labels, charts, secondary chrome and decorative effects; no blue/cyan/purple glow replacement.
+- **Accessible button variant:** white `#FFFFFF` on `#007BF8` measures **4.047:1**, failing normal-text AA. Filled primary buttons therefore use **`#006EEC`**, the common opaque logo pixel already documented above, with white text at **4.728:1**, passing 4.5:1. Preserve that pair on hover and mobile sticky CTAs.
+- **Affected systems:** public homepage/card, pricing/services, booking/confirmation, legal pages, Journey, fit-check, campaigns and inherited public OS/tools styling. Preserve conversion copy, prices, “Illustrative data,” official logo bytes/proportions, `og-home-v3`, booking embed `Rb4aqLM1NdU5kvZcqNmj`, APIs and all lead/persistence safeguards. Demo sandboxes, PostPath, Studio and admin source remain outside this change.
+- **Evidence/dependencies:** local test/build and responsive rendered evidence live alongside this entry's QA record. Hosted preview depends on the branch push's Vercel integration; production remains untouched. Rollback: revert this accent commit on the review branch. No DNS, Stripe, data, booking configuration, paid API or repo-creation changes.
+

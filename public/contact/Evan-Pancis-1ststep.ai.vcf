@@ -1,0 +1,10 @@
+BEGIN:VCARD
+VERSION:3.0
+FN:Evan Pancis
+N:Pancis;Evan;;;
+ORG:1ststep.ai
+TEL;TYPE=WORK,VOICE:+19738003729
+EMAIL;TYPE=INTERNET,WORK:evan@1ststep.ai
+URL:https://www.1ststep.ai
+ADR;TYPE=WORK:;;Morris Plains;NJ;;United States
+END:VCARD

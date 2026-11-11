@@ -1,0 +1,26 @@
+/* Public conversion pages: align existing layouts with the approved homepage. */
+:root{--accent:#007BF8;--button-blue:#006EEC;--ink:#07090A;--ink2:#0E1113;--cream:#F4F6F1;--soft:#C9CFC6;--mute:#A8B0A8;--quiet:#F3F4F0}
+body,body.v2{background:#07090A;color:#F4F6F1;font-family:Archivo,system-ui,sans-serif}
+body .nav{background:#07090A;border-bottom:1px solid rgba(244,246,241,.12)}
+body .pill,body .btn{white-space:nowrap;min-height:44px;border-radius:12px;font-weight:700}
+body .nav .pill{background:var(--button-blue);color:#FFFFFF;border-color:var(--button-blue)}
+body .wordmark i{color:#007BF8;-webkit-text-fill-color:#007BF8}
+body .logo{padding:7px}
+body .cta{background:#0E1113;border:1px solid rgba(243,244,240,.3);color:#F4F6F1}
+body .cta h2{color:#F4F6F1}
+body .cta p{color:#C9CFC6}
+body .cta .btn{background:var(--button-blue);color:#FFFFFF;margin-bottom:16px}
+body .cta .btn:hover{background:var(--button-blue);color:#FFFFFF}
+body .gradient{background:none;color:#F3F4F0;-webkit-text-fill-color:#F3F4F0}
+.pricing-intro{max-width:640px;color:#C9CFC6;margin:20px 0 36px;line-height:1.6}
+.call-offer{font-size:15px;margin-bottom:16px}
+@media(max-width:760px){body .nav{flex-direction:row;align-items:center;gap:10px;padding:0 16px}body .nav .pill{margin-left:auto;padding:0 12px;font-size:12px}body .nav .wordmark{font-size:15px}body .nav .logo img{height:32px;width:auto}body .nav .logo{padding:5px}body .nav nav{display:none}body .cta{padding:24px}body .btn{max-width:100%}}
+@media(max-width:360px){body .nav .wordmark{display:none}}
+body.v2 header.nav{background:#07090A;padding:12px 32px!important}
+body.v2 header.nav .pill{background:var(--button-blue)!important;color:#FFFFFF!important;-webkit-text-fill-color:#FFFFFF!important;border-color:var(--button-blue)!important;border-radius:12px!important}
+@media(max-width:760px){body.v2 header.nav{padding:10px 12px!important}body.v2 header.nav .pill{font-size:12px;padding:10px!important}body.v2 header.nav .logo img{height:32px}body.v2 .nav-blend{gap:8px}}
+body .calendar-loading{background:#0E1113;color:#F4F6F1}
+body .calendar-loading span{color:#C9CFC6}
+body .intro{box-shadow:none}
+body .intro::before{opacity:.35}
+body h1 .gradient{font-family:Archivo,system-ui,sans-serif;font-style:normal}
