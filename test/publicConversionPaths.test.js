@@ -484,7 +484,7 @@ test("pricing publishes the approved starting ranges and books a call", async ()
     assert.match(section, pattern, line);
     assert.match(page, pattern, line);
   }
-  assert.equal((section.match(/Free Bottleneck Call/g) || []).length, 12);
+  assert.equal((section.match(/Free Bottleneck Call/g) || []).length, 13);
   assert.equal((section.match(/href="\/book\/"/g) || []).length, 6);
   assert.equal((page.match(/href="\/book\/"/g) || []).length, 7);
   assert.match(home, /<nav aria-label="Primary">[\s\S]*href="\/pricing\/">Pricing<\/a>/);
