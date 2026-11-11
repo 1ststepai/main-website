@@ -13,10 +13,12 @@ for (const slug of slugs) {
     assert.ok(!html.includes('home-v2.css'));
     const byline = html.match(/<p class="blog-byline">([\s\S]*?)<\/p>/)[1];
     assert.doesNotMatch(byline, /\bDraft\b/i);
-    const header = html.match(/<header[^>]*>([\s\S]*?)<\/header>/)[1];
+    assert.ok(html.includes("<!--course-article-chrome:header-->"));
+    assert.ok(html.includes("<!--course-article-chrome:footer-->"));
+    const header = await source("src/partials/course-article-header.html");
+    const footer = await source("src/partials/course-article-footer.html");
     assert.match(header, /<a class="brand" href="\/"[^>]*>[\s\S]*?<img[^>]+firststep-logo-transparent-cleaned\.png[\s\S]*?class="wordmark">1ststep<i>\.ai<\/i><\/span><\/a>/);
     assert.match(header, /<a class="back-home" href="\/">Back to 1ststep\.ai<\/a>/);
-    const footer = html.match(/<footer[^>]*>([\s\S]*?)<\/footer>/)[1];
     for (const [href, label] of [["/privacy.html", "Privacy"], ["/", "Back to 1ststep.ai"], ["/course/", "Course"], ["/course/library/", "Prompt library"]]) {
       assert.ok(footer.includes(`<a href="${href}">${label}</a>`));
     }

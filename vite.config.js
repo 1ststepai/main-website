@@ -1,5 +1,28 @@
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+
+const repoRoot = dirname(fileURLToPath(import.meta.url));
+
+const courseArticleChrome = {
+  name: "course-article-chrome",
+  transformIndexHtml: {
+    order: "pre",
+    handler(html, ctx) {
+      const file = `${ctx?.path || ""} ${ctx?.filename || ""}`;
+      if (!/how-to-start-using-ai-in-your-small-business|ai-for-business-privacy-and-checking-answers/.test(file)) {
+        return html;
+      }
+      const header = readFileSync(join(repoRoot, "src/partials/course-article-header.html"), "utf8").trim();
+      const footer = readFileSync(join(repoRoot, "src/partials/course-article-footer.html"), "utf8").trim();
+      return html
+        .replace("<!--course-article-chrome:header-->", header)
+        .replace("<!--course-article-chrome:footer-->", footer);
+    },
+  },
+};
 
 const motion = {
   name: "firststep-motion",
@@ -53,7 +76,7 @@ function serveExactIndexPaths(server) {
 
 export default defineConfig({
   define: { __FOUNDRY_RD__: JSON.stringify(process.env.VERCEL_ENV !== "production") },
-  plugins: [react(), siteAnalytics, motion, {
+  plugins: [react(), courseArticleChrome, siteAnalytics, motion, {
     name: "firststep-exact-index-paths",
     configureServer: serveExactIndexPaths,
     configurePreviewServer: serveExactIndexPaths,
