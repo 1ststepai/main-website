@@ -1,5 +1,16 @@
 # Architecture Decision Log
 
+## 2026-11-11: Public conversion polish preview
+
+- **Owner / status:** Evan authorized implementation on `site/conversion-polish`, commit/push, and a draft PR only. Locally verified; no production deployment or merge authorized.
+- **Decision:** Use the approved “Get more from the business you already have.” hero outcome with one booking action. Standardize public booking actions as “Free Bottleneck Call,” a free 30-minute conversation with Evan, at `/book/`. This explicitly supersedes the older hero/CTA and website-only calendar-label decisions for this scope; the LeadConnector URL stays exactly unchanged.
+- **Rationale:** Reduce competing first-screen actions, align the offer through pricing/services/booking, and improve contrast and mobile readability while retaining PR #81’s dark/lime Archivo direction and intact official logo.
+- **Affected systems:** Homepage, pricing, service pages, booking/confirmation, work/tools chrome, and standard public header labels. Journey, fit check, campaign and tool behavior remain unchanged. No new data handling, APIs, integrations, payments, calendar configuration, or pricing changes.
+- **Preserved authority:** Commit `05bc3a9` remains an ancestor; `/card` and `og-home-v3` assets are unchanged. PR #82 is excluded and should be rebased later. Existing course mailto waitlist and approved prices remain.
+- **Evidence / dependencies:** See `docs/qa/conversion-polish/README.md`. Preview deployment is a review artifact, not production verification. Calendar booking submission and downstream notifications are not exercised. Production release requires separate approval and release verification.
+- **Rollback:** Revert the conversion-polish commit; do not remove the preceding share-image/card commit.
+
+
 ## 2026-11-09: Homepage redesign preview from Evan's mockup
 
 - **Status / owner:** Evan supplied a new homepage mockup and approved building it as a preview with truth corrections. Draft PR only. No merge, no production deploy, no domain or DNS change.

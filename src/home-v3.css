@@ -347,3 +347,16 @@ p{margin:0}
 @keyframes slide{to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 .menu-open .book-bar{display:none!important}
+
+/* Conversion polish: let the outcome and one action lead the illustration. */
+.hero-grid{grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:40px}
+.hero h1{font-size:clamp(2.7rem,4vw,3.7rem);line-height:1.04;max-width:650px}
+.hero .hl{white-space:normal;font-style:normal;padding:.02em .12em .06em}
+.hero .hl::before{transform:none;box-shadow:none}
+.hero-note{max-width:410px;line-height:1.6;color:var(--soft)}
+.hero-bg{background:radial-gradient(ellipse 52% 60% at 78% 52%,rgba(212,255,58,.07),transparent 70%)}
+.btn,.book-bar{white-space:nowrap}
+.brand img{margin:7px}
+.cc-brand img{margin:3px}
+@media(max-width:1020px){.hero-grid{grid-template-columns:1fr;gap:40px}.cc{max-width:700px}}
+@media(max-width:720px){.hero h1{font-size:clamp(2.2rem,10vw,2.9rem)}.hero-actions{margin-top:26px}.hero-note{font-size:14px}.book-bar{bottom:max(14px,env(safe-area-inset-bottom))}}

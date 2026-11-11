@@ -1,0 +1,286 @@
+[
+  {
+    "width": 1440,
+    "route": "/",
+    "overflow": false,
+    "heading": "Get more from the business you already have.",
+    "buttons": []
+  },
+  {
+    "width": 1440,
+    "route": "/pricing/",
+    "overflow": false,
+    "heading": "A clear starting point.",
+    "buttons": []
+  },
+  {
+    "width": 1440,
+    "route": "/services/websites.html",
+    "overflow": false,
+    "heading": "A business website that gets leads.",
+    "buttons": []
+  },
+  {
+    "width": 1440,
+    "route": "/services/internal-tools.html",
+    "overflow": false,
+    "heading": "Internal tools and automation.",
+    "buttons": []
+  },
+  {
+    "width": 1440,
+    "route": "/services/app-builds.html",
+    "overflow": false,
+    "heading": "Shape the iOS experience before the build gets expensive.",
+    "buttons": []
+  },
+  {
+    "width": 1440,
+    "route": "/services/mvp-builds.html",
+    "overflow": false,
+    "heading": "Build an MVP people can actually use.",
+    "buttons": []
+  },
+  {
+    "width": 1440,
+    "route": "/services/revenue-systems.html",
+    "overflow": false,
+    "heading": "Automation for lead capture and follow-up.",
+    "buttons": []
+  },
+  {
+    "width": 1440,
+    "route": "/book/",
+    "overflow": false,
+    "heading": "Let’s find what’s getting in the way.",
+    "buttons": []
+  },
+  {
+    "width": 1280,
+    "route": "/",
+    "overflow": false,
+    "heading": "Get more from the business you already have.",
+    "buttons": []
+  },
+  {
+    "width": 1280,
+    "route": "/pricing/",
+    "overflow": false,
+    "heading": "A clear starting point.",
+    "buttons": []
+  },
+  {
+    "width": 1280,
+    "route": "/services/websites.html",
+    "overflow": false,
+    "heading": "A business website that gets leads.",
+    "buttons": []
+  },
+  {
+    "width": 1280,
+    "route": "/services/internal-tools.html",
+    "overflow": false,
+    "heading": "Internal tools and automation.",
+    "buttons": []
+  },
+  {
+    "width": 1280,
+    "route": "/services/app-builds.html",
+    "overflow": false,
+    "heading": "Shape the iOS experience before the build gets expensive.",
+    "buttons": []
+  },
+  {
+    "width": 1280,
+    "route": "/services/mvp-builds.html",
+    "overflow": false,
+    "heading": "Build an MVP people can actually use.",
+    "buttons": []
+  },
+  {
+    "width": 1280,
+    "route": "/services/revenue-systems.html",
+    "overflow": false,
+    "heading": "Automation for lead capture and follow-up.",
+    "buttons": []
+  },
+  {
+    "width": 1280,
+    "route": "/book/",
+    "overflow": false,
+    "heading": "Let’s find what’s getting in the way.",
+    "buttons": []
+  },
+  {
+    "width": 768,
+    "route": "/",
+    "overflow": false,
+    "heading": "Get more from the business you already have.",
+    "buttons": []
+  },
+  {
+    "width": 768,
+    "route": "/pricing/",
+    "overflow": false,
+    "heading": "A clear starting point.",
+    "buttons": []
+  },
+  {
+    "width": 768,
+    "route": "/services/websites.html",
+    "overflow": false,
+    "heading": "A business website that gets leads.",
+    "buttons": []
+  },
+  {
+    "width": 768,
+    "route": "/services/internal-tools.html",
+    "overflow": false,
+    "heading": "Internal tools and automation.",
+    "buttons": []
+  },
+  {
+    "width": 768,
+    "route": "/services/app-builds.html",
+    "overflow": false,
+    "heading": "Shape the iOS experience before the build gets expensive.",
+    "buttons": []
+  },
+  {
+    "width": 768,
+    "route": "/services/mvp-builds.html",
+    "overflow": false,
+    "heading": "Build an MVP people can actually use.",
+    "buttons": []
+  },
+  {
+    "width": 768,
+    "route": "/services/revenue-systems.html",
+    "overflow": false,
+    "heading": "Automation for lead capture and follow-up.",
+    "buttons": []
+  },
+  {
+    "width": 768,
+    "route": "/book/",
+    "overflow": false,
+    "heading": "Let’s find what’s getting in the way.",
+    "buttons": []
+  },
+  {
+    "width": 390,
+    "route": "/",
+    "overflow": false,
+    "heading": "Get more from the business you already have.",
+    "buttons": []
+  },
+  {
+    "width": 390,
+    "route": "/pricing/",
+    "overflow": false,
+    "heading": "A clear starting point.",
+    "buttons": []
+  },
+  {
+    "width": 390,
+    "route": "/services/websites.html",
+    "overflow": false,
+    "heading": "A business website that gets leads.",
+    "buttons": []
+  },
+  {
+    "width": 390,
+    "route": "/services/internal-tools.html",
+    "overflow": false,
+    "heading": "Internal tools and automation.",
+    "buttons": []
+  },
+  {
+    "width": 390,
+    "route": "/services/app-builds.html",
+    "overflow": false,
+    "heading": "Shape the iOS experience before the build gets expensive.",
+    "buttons": []
+  },
+  {
+    "width": 390,
+    "route": "/services/mvp-builds.html",
+    "overflow": false,
+    "heading": "Build an MVP people can actually use.",
+    "buttons": []
+  },
+  {
+    "width": 390,
+    "route": "/services/revenue-systems.html",
+    "overflow": false,
+    "heading": "Automation for lead capture and follow-up.",
+    "buttons": []
+  },
+  {
+    "width": 390,
+    "route": "/book/",
+    "overflow": false,
+    "heading": "Let’s find what’s getting in the way.",
+    "buttons": []
+  },
+  {
+    "width": 320,
+    "route": "/",
+    "overflow": false,
+    "heading": "Get more from the business you already have.",
+    "buttons": []
+  },
+  {
+    "width": 320,
+    "route": "/pricing/",
+    "overflow": false,
+    "heading": "A clear starting point.",
+    "buttons": []
+  },
+  {
+    "width": 320,
+    "route": "/services/websites.html",
+    "overflow": false,
+    "heading": "A business website that gets leads.",
+    "buttons": []
+  },
+  {
+    "width": 320,
+    "route": "/services/internal-tools.html",
+    "overflow": false,
+    "heading": "Internal tools and automation.",
+    "buttons": []
+  },
+  {
+    "width": 320,
+    "route": "/services/app-builds.html",
+    "overflow": false,
+    "heading": "Shape the iOS experience before the build gets expensive.",
+    "buttons": []
+  },
+  {
+    "width": 320,
+    "route": "/services/mvp-builds.html",
+    "overflow": false,
+    "heading": "Build an MVP people can actually use.",
+    "buttons": []
+  },
+  {
+    "width": 320,
+    "route": "/services/revenue-systems.html",
+    "overflow": false,
+    "heading": "Automation for lead capture and follow-up.",
+    "buttons": []
+  },
+  {
+    "width": 320,
+    "route": "/book/",
+    "overflow": false,
+    "heading": "Let’s find what’s getting in the way.",
+    "buttons": []
+  },
+  {
+    "flow": "hero → /book/",
+    "iframe": "https://api.leadconnectorhq.com/widget/booking/Rb4aqLM1NdU5kvZcqNmj"
+  }
+]
