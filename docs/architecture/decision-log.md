@@ -524,3 +524,12 @@
 - Waitlist finding: homepage course CTA is already a visitor-initiated `mailto:evan@1ststep.ai` with a course-waitlist subject. There is no connected submission endpoint for that CTA. Preserve the truthful email path; do not present an unverified form or claim a signup was stored. Mail delivery was not tested or sent.
 - Evidence: production build passes (existing >500 kB chunk warning); site tests 219 passed, one skipped; social-MCP tests 44 passed; no lint/typecheck scripts exist. Local built-page browser checks cover 1440, 1280, 768 and 390 widths, no overflow, logo loading, contact links, vCard download, `/card` variants, footer navigation, share metadata, retained case-study image and keyboard focus. Screenshots reviewed against the supplied reference in ignored `output/og-card/`. Chromium reports a view-transition opt-in/abort warning during cross-page navigation; navigation succeeds. No application error observed.
 - Dependencies/limits: no production or hosted-preview verification; real device contact import and iMessage recrawl await release. Rollback is a revert of this additive change; no data migration or external writes.
+
+## 2026-11-11 — AI-search citation page drafts (DRAFT, not approved)
+
+- Owner: Evan Pancis (approval pending); prepared by Marketing Desk.
+- Status: proposed. Local branch `ai-search-citation-pages` off `blog-and-bottleneck-rename` (PR #82). Not pushed, not merged, not deployed.
+- Change: adds /about/ facts page and five /blog/ guides (bottleneck audit, agency vs freelancer vs DIY, GoHighLevel automation cost, insurance agencies, real estate brokerages); pricing FAQ section + FAQPage JSON-LD (no price changes); explicit robots.txt groups for answer/user fetchers; llms.txt entity summary, disambiguation and guide links; sitemap, vercel rewrites and vite inputs for the new paths.
+- New pages ship with `noindex,follow` and `[EVAN TO CONFIRM]` markers; switch to `index,follow` and remove markers only after Evan approves copy.
+- Rationale: baseline search on 2026-11-11 showed 1stStep.ai absent from 19 of 20 buyer queries and the branded query summarized as a job-search tool.
+- Evidence: `npm test` 219 pass / 1 skip; `npm run build` passes locally.

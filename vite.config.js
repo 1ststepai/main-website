@@ -39,7 +39,7 @@ const siteAnalytics = {
 };
 
 function serveExactIndexPaths(server) {
-  const routes = ["/card", "/card/", "/blog", "/blog/", "/blog/follow-up-every-lead-faster", "/blog/follow-up-every-lead-faster/", "/blog/how-to-choose-a-web-designer", "/blog/how-to-choose-a-web-designer/", "/blog/why-pay-for-an-ai-course-when-chatgpt-is-free", "/blog/why-pay-for-an-ai-course-when-chatgpt-is-free/"].concat(["/os", "/pricing", "/pricing/", "/work", "/work/", "/tools", "/tools/auto-model-router", "/tools/1ststep-os-audit", "/tools/1ststep-os", "/work/lyons-life-demo", "/work/lyons-life-demo/", "/work/universal-relocations", "/work/universal-relocations/"]);
+  const routes = ["/card", "/card/", "/blog", "/blog/", "/about", "/about/", "/blog/what-is-a-bottleneck-audit", "/blog/what-is-a-bottleneck-audit/", "/blog/agency-vs-freelancer-vs-diy", "/blog/agency-vs-freelancer-vs-diy/", "/blog/gohighlevel-automation-cost", "/blog/gohighlevel-automation-cost/", "/blog/automation-for-insurance-agencies", "/blog/automation-for-insurance-agencies/", "/blog/automation-for-real-estate-brokerages", "/blog/automation-for-real-estate-brokerages/", "/blog/follow-up-every-lead-faster", "/blog/follow-up-every-lead-faster/", "/blog/how-to-choose-a-web-designer", "/blog/how-to-choose-a-web-designer/", "/blog/why-pay-for-an-ai-course-when-chatgpt-is-free", "/blog/why-pay-for-an-ai-course-when-chatgpt-is-free/"].concat(["/os", "/pricing", "/pricing/", "/work", "/work/", "/tools", "/tools/auto-model-router", "/tools/1ststep-os-audit", "/tools/1ststep-os", "/work/lyons-life-demo", "/work/lyons-life-demo/", "/work/universal-relocations", "/work/universal-relocations/"]);
   server.middlewares.use((request, _response, next) => {
     const url = request.url || "";
     const path = url.split("?")[0];
@@ -70,6 +70,12 @@ export default defineConfig({
         blog1: "blog/follow-up-every-lead-faster/index.html",
         blog2: "blog/how-to-choose-a-web-designer/index.html",
         blog3: "blog/why-pay-for-an-ai-course-when-chatgpt-is-free/index.html",
+        aiSearch0: "about/index.html",
+        aiSearch1: "blog/what-is-a-bottleneck-audit/index.html",
+        aiSearch2: "blog/agency-vs-freelancer-vs-diy/index.html",
+        aiSearch3: "blog/gohighlevel-automation-cost/index.html",
+        aiSearch4: "blog/automation-for-insurance-agencies/index.html",
+        aiSearch5: "blog/automation-for-real-estate-brokerages/index.html",
         foundry: "foundry/index.html",
         os: "os/index.html",
         postpath: "postpath/index.html",
