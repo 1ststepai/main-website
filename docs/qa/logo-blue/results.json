@@ -1,0 +1,1330 @@
+[
+  {
+    "route": "/",
+    "width": 320,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Join the Waitlist →",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      }
+    ]
+  },
+  {
+    "route": "/",
+    "width": 390,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Join the Waitlist →",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      }
+    ]
+  },
+  {
+    "route": "/",
+    "width": 768,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Join the Waitlist →",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      }
+    ]
+  },
+  {
+    "route": "/",
+    "width": 1280,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Join the Waitlist →",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      }
+    ]
+  },
+  {
+    "route": "/",
+    "width": 1440,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Join the Waitlist →",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      }
+    ]
+  },
+  {
+    "route": "/card/",
+    "width": 320,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Save contact ↓",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      }
+    ]
+  },
+  {
+    "route": "/card/",
+    "width": 390,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Save contact ↓",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      }
+    ]
+  },
+  {
+    "route": "/card/",
+    "width": 768,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Save contact ↓",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      }
+    ]
+  },
+  {
+    "route": "/card/",
+    "width": 1280,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Save contact ↓",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      }
+    ]
+  },
+  {
+    "route": "/card/",
+    "width": 1440,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Save contact ↓",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      }
+    ]
+  },
+  {
+    "route": "/pricing/",
+    "width": 320,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      }
+    ]
+  },
+  {
+    "route": "/pricing/",
+    "width": 390,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      }
+    ]
+  },
+  {
+    "route": "/pricing/",
+    "width": 768,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      }
+    ]
+  },
+  {
+    "route": "/pricing/",
+    "width": 1280,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      }
+    ]
+  },
+  {
+    "route": "/pricing/",
+    "width": 1440,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      }
+    ]
+  },
+  {
+    "route": "/services/websites.html",
+    "width": 320,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Tell Us What You Want Built",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(241, 234, 219)",
+        "fill": "rgb(241, 234, 219)"
+      },
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Tell Us What You Want Built",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(241, 234, 219)",
+        "fill": "rgb(241, 234, 219)"
+      }
+    ]
+  },
+  {
+    "route": "/services/websites.html",
+    "width": 390,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Tell Us What You Want Built",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(241, 234, 219)",
+        "fill": "rgb(241, 234, 219)"
+      },
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Tell Us What You Want Built",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(241, 234, 219)",
+        "fill": "rgb(241, 234, 219)"
+      }
+    ]
+  },
+  {
+    "route": "/services/websites.html",
+    "width": 768,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Tell Us What You Want Built",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(241, 234, 219)",
+        "fill": "rgb(241, 234, 219)"
+      },
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Tell Us What You Want Built",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(241, 234, 219)",
+        "fill": "rgb(241, 234, 219)"
+      }
+    ]
+  },
+  {
+    "route": "/services/websites.html",
+    "width": 1280,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Tell Us What You Want Built",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(241, 234, 219)",
+        "fill": "rgb(241, 234, 219)"
+      },
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Tell Us What You Want Built",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(241, 234, 219)",
+        "fill": "rgb(241, 234, 219)"
+      }
+    ]
+  },
+  {
+    "route": "/services/websites.html",
+    "width": 1440,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Tell Us What You Want Built",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(241, 234, 219)",
+        "fill": "rgb(241, 234, 219)"
+      },
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      },
+      {
+        "label": "Tell Us What You Want Built",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(241, 234, 219)",
+        "fill": "rgb(241, 234, 219)"
+      }
+    ]
+  },
+  {
+    "route": "/book/",
+    "width": 320,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      }
+    ],
+    "iframe": "https://api.leadconnectorhq.com/widget/booking/Rb4aqLM1NdU5kvZcqNmj"
+  },
+  {
+    "route": "/book/",
+    "width": 390,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      }
+    ],
+    "iframe": "https://api.leadconnectorhq.com/widget/booking/Rb4aqLM1NdU5kvZcqNmj"
+  },
+  {
+    "route": "/book/",
+    "width": 768,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      }
+    ],
+    "iframe": "https://api.leadconnectorhq.com/widget/booking/Rb4aqLM1NdU5kvZcqNmj"
+  },
+  {
+    "route": "/book/",
+    "width": 1280,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      }
+    ],
+    "iframe": "https://api.leadconnectorhq.com/widget/booking/Rb4aqLM1NdU5kvZcqNmj"
+  },
+  {
+    "route": "/book/",
+    "width": 1440,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      }
+    ],
+    "iframe": "https://api.leadconnectorhq.com/widget/booking/Rb4aqLM1NdU5kvZcqNmj"
+  },
+  {
+    "route": "/book/confirmed/",
+    "width": 320,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      }
+    ]
+  },
+  {
+    "route": "/book/confirmed/",
+    "width": 390,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      }
+    ]
+  },
+  {
+    "route": "/book/confirmed/",
+    "width": 768,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      }
+    ]
+  },
+  {
+    "route": "/book/confirmed/",
+    "width": 1280,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      }
+    ]
+  },
+  {
+    "route": "/book/confirmed/",
+    "width": 1440,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      }
+    ]
+  },
+  {
+    "route": "/privacy.html",
+    "width": 320,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(241, 234, 219)",
+        "fill": "rgb(241, 234, 219)"
+      }
+    ]
+  },
+  {
+    "route": "/privacy.html",
+    "width": 390,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(241, 234, 219)",
+        "fill": "rgb(241, 234, 219)"
+      }
+    ]
+  },
+  {
+    "route": "/privacy.html",
+    "width": 768,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(241, 234, 219)",
+        "fill": "rgb(241, 234, 219)"
+      }
+    ]
+  },
+  {
+    "route": "/privacy.html",
+    "width": 1280,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(241, 234, 219)",
+        "fill": "rgb(241, 234, 219)"
+      }
+    ]
+  },
+  {
+    "route": "/privacy.html",
+    "width": 1440,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(241, 234, 219)",
+        "fill": "rgb(241, 234, 219)"
+      }
+    ]
+  },
+  {
+    "route": "/terms.html",
+    "width": 320,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(241, 234, 219)",
+        "fill": "rgb(241, 234, 219)"
+      }
+    ]
+  },
+  {
+    "route": "/terms.html",
+    "width": 390,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(241, 234, 219)",
+        "fill": "rgb(241, 234, 219)"
+      }
+    ]
+  },
+  {
+    "route": "/terms.html",
+    "width": 768,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(241, 234, 219)",
+        "fill": "rgb(241, 234, 219)"
+      }
+    ]
+  },
+  {
+    "route": "/terms.html",
+    "width": 1280,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(241, 234, 219)",
+        "fill": "rgb(241, 234, 219)"
+      }
+    ]
+  },
+  {
+    "route": "/terms.html",
+    "width": 1440,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(241, 234, 219)",
+        "fill": "rgb(241, 234, 219)"
+      }
+    ]
+  },
+  {
+    "route": "/journey/",
+    "width": 320,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(241, 234, 219)",
+        "fill": "rgb(241, 234, 219)"
+      },
+      {
+        "label": "Continue →",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      }
+    ]
+  },
+  {
+    "route": "/journey/",
+    "width": 390,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(241, 234, 219)",
+        "fill": "rgb(241, 234, 219)"
+      },
+      {
+        "label": "Continue →",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      }
+    ]
+  },
+  {
+    "route": "/journey/",
+    "width": 768,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(241, 234, 219)",
+        "fill": "rgb(241, 234, 219)"
+      },
+      {
+        "label": "Continue →",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      }
+    ]
+  },
+  {
+    "route": "/journey/",
+    "width": 1280,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(241, 234, 219)",
+        "fill": "rgb(241, 234, 219)"
+      },
+      {
+        "label": "Continue →",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      }
+    ]
+  },
+  {
+    "route": "/journey/",
+    "width": 1440,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(241, 234, 219)",
+        "fill": "rgb(241, 234, 219)"
+      },
+      {
+        "label": "Continue →",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      }
+    ]
+  },
+  {
+    "route": "/fit-check/",
+    "width": 320,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(241, 234, 219)",
+        "fill": "rgb(241, 234, 219)"
+      },
+      {
+        "label": "Send My Project Request →",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      }
+    ]
+  },
+  {
+    "route": "/fit-check/",
+    "width": 390,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(241, 234, 219)",
+        "fill": "rgb(241, 234, 219)"
+      },
+      {
+        "label": "Send My Project Request →",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      }
+    ]
+  },
+  {
+    "route": "/fit-check/",
+    "width": 768,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(241, 234, 219)",
+        "fill": "rgb(241, 234, 219)"
+      },
+      {
+        "label": "Send My Project Request →",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      }
+    ]
+  },
+  {
+    "route": "/fit-check/",
+    "width": 1280,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(241, 234, 219)",
+        "fill": "rgb(241, 234, 219)"
+      },
+      {
+        "label": "Send My Project Request →",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      }
+    ]
+  },
+  {
+    "route": "/fit-check/",
+    "width": 1440,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(241, 234, 219)",
+        "fill": "rgb(241, 234, 219)"
+      },
+      {
+        "label": "Send My Project Request →",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      }
+    ]
+  },
+  {
+    "route": "/campaigns/outgrown-website/",
+    "width": 320,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(241, 234, 219)",
+        "fill": "rgb(241, 234, 219)"
+      }
+    ]
+  },
+  {
+    "route": "/campaigns/outgrown-website/",
+    "width": 390,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(241, 234, 219)",
+        "fill": "rgb(241, 234, 219)"
+      }
+    ]
+  },
+  {
+    "route": "/campaigns/outgrown-website/",
+    "width": 768,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(241, 234, 219)",
+        "fill": "rgb(241, 234, 219)"
+      }
+    ]
+  },
+  {
+    "route": "/campaigns/outgrown-website/",
+    "width": 1280,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(241, 234, 219)",
+        "fill": "rgb(241, 234, 219)"
+      }
+    ]
+  },
+  {
+    "route": "/campaigns/outgrown-website/",
+    "width": 1440,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(241, 234, 219)",
+        "fill": "rgb(241, 234, 219)"
+      }
+    ]
+  },
+  {
+    "route": "/os/",
+    "width": 320,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(241, 234, 219)",
+        "fill": "rgb(241, 234, 219)"
+      },
+      {
+        "label": "Explore the System ↗",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      }
+    ]
+  },
+  {
+    "route": "/os/",
+    "width": 390,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(241, 234, 219)",
+        "fill": "rgb(241, 234, 219)"
+      },
+      {
+        "label": "Explore the System ↗",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      }
+    ]
+  },
+  {
+    "route": "/os/",
+    "width": 768,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(241, 234, 219)",
+        "fill": "rgb(241, 234, 219)"
+      },
+      {
+        "label": "Explore the System ↗",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      }
+    ]
+  },
+  {
+    "route": "/os/",
+    "width": 1280,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(241, 234, 219)",
+        "fill": "rgb(241, 234, 219)"
+      },
+      {
+        "label": "Explore the System ↗",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      }
+    ]
+  },
+  {
+    "route": "/os/",
+    "width": 1440,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(241, 234, 219)",
+        "fill": "rgb(241, 234, 219)"
+      },
+      {
+        "label": "Explore the System ↗",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      }
+    ]
+  },
+  {
+    "route": "/tools/",
+    "width": 320,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      }
+    ]
+  },
+  {
+    "route": "/tools/",
+    "width": 390,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      }
+    ]
+  },
+  {
+    "route": "/tools/",
+    "width": 768,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      }
+    ]
+  },
+  {
+    "route": "/tools/",
+    "width": 1280,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      }
+    ]
+  },
+  {
+    "route": "/tools/",
+    "width": 1440,
+    "overflow": false,
+    "buttons": [
+      {
+        "label": "Free Bottleneck Call",
+        "bg": "rgb(0, 110, 236)",
+        "color": "rgb(255, 255, 255)",
+        "fill": "rgb(255, 255, 255)"
+      }
+    ]
+  },
+  {
+    "clickDestination": "/book/",
+    "booking": "https://api.leadconnectorhq.com/widget/booking/Rb4aqLM1NdU5kvZcqNmj"
+  }
+]
