@@ -506,6 +506,16 @@
 - Verification: 149 tests and production build PASS; synthetic rendered review/edit/queue/refresh/cancel path PASS; mobile reply form fits at 344 CSS pixels. Real paired bridge read succeeded against the existing newsletter pipeline (44 records, revision 11). Actual reviewed-send Gmail execution and new production queue operations remain unverified. Private receipt: .codex-qa/reviewed-replies.json.
 - Rollback: keep reply-worker-release.json disabled, restore prior five/15-minute monitor prompt as appropriate, and promote the verified prior deployment dpl_3h2AZffV7mwy9qCfch3nk7KsjMjx if a later release needs rollback. Preserve pairing credentials and pipeline data; do not reinstall the old VBS shortcut over the native window.
 
+## 2026-11-10 — Static blog and Free Bottleneck Call naming
+
+- Owner: Evan (scope/copy authorization); public-site agent (implementation).
+- Status: approved in current request; local implementation, no release approval.
+- Decision: publish three supplied drafts under `/blog/` as static HTML, lead-follow-up guide first, with existing site styling, explicit Vite inputs/Vercel rewrites and sitemap discovery. Retain source drafts unchanged; remove editorial notes from public HTML. Unconfirmed course details remain “Details coming soon”; no waitlist CTA until a verified destination exists.
+- Booking decision: current user instruction supersedes prior Website Strategy Call naming with Free Bottleneck Call, 30 minutes. Preserve calendar URL/embed ID, attribution/event identifiers, and separate email-based System Audit handoff.
+- Rationale/evidence: current user request; `content/blog-drafts/`; existing multipage routing in `vite.config.js` and `vercel.json`. No CMS, dependencies, payment or data handling changes.
+- Affected systems: public blog, booking copy, navigation/footer, search metadata and discovery, public conversion tests.
+- Verification dependencies: build, relevant tests, responsive browser/SEO checks. No deployment; live behavior and third-party calendar’s internal copy remain unverified. Rollback: revert this implementation commit.
+
 ## 2026-11-11 — Cache-busted homepage sharing and Evan’s digital card
 
 - Owner/approval: Evan Pancis; implementation: Codex on `site/og-card-page`, based on `3a56216`. Status: locally verified; draft PR for review, no merge or production deployment authorized in this task.
@@ -514,3 +524,12 @@
 - Waitlist finding: homepage course CTA is already a visitor-initiated `mailto:evan@1ststep.ai` with a course-waitlist subject. There is no connected submission endpoint for that CTA. Preserve the truthful email path; do not present an unverified form or claim a signup was stored. Mail delivery was not tested or sent.
 - Evidence: production build passes (existing >500 kB chunk warning); site tests 219 passed, one skipped; social-MCP tests 44 passed; no lint/typecheck scripts exist. Local built-page browser checks cover 1440, 1280, 768 and 390 widths, no overflow, logo loading, contact links, vCard download, `/card` variants, footer navigation, share metadata, retained case-study image and keyboard focus. Screenshots reviewed against the supplied reference in ignored `output/og-card/`. Chromium reports a view-transition opt-in/abort warning during cross-page navigation; navigation succeeds. No application error observed.
 - Dependencies/limits: no production or hosted-preview verification; real device contact import and iMessage recrawl await release. Rollback is a revert of this additive change; no data migration or external writes.
+
+## 2026-11-11 — AI-search citation page drafts (DRAFT, not approved)
+
+- Owner: Evan Pancis (approval pending); prepared by Marketing Desk.
+- Status: proposed. Local branch `ai-search-citation-pages` off `blog-and-bottleneck-rename` (PR #82). Not pushed, not merged, not deployed.
+- Change: adds /about/ facts page and five /blog/ guides (bottleneck audit, agency vs freelancer vs DIY, GoHighLevel automation cost, insurance agencies, real estate brokerages); pricing FAQ section + FAQPage JSON-LD (no price changes); explicit robots.txt groups for answer/user fetchers; llms.txt entity summary, disambiguation and guide links; sitemap, vercel rewrites and vite inputs for the new paths.
+- New pages shipped after Evan's go-live approval on Nov 11, 2026. Unconfirmed copy blanks were omitted rather than invented. Google-Extended and Applebot-Extended were left off the named robots list (the catch-all User-agent: * is unchanged). Directory sign-ups and outreach were not started.
+- Rationale: baseline search on 2026-11-11 showed 1stStep.ai absent from 19 of 20 buyer queries and the branded query summarized as a job-search tool.
+- Evidence: `npm test` 219 pass / 1 skip; `npm run build` passes locally.

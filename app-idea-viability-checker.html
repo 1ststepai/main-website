@@ -1689,7 +1689,7 @@
       <a href="/services/websites.html">Websites</a>
       <a href="/pricing/">Pricing</a>
     </nav>
-    <a class="pill" href="/book/" data-fsai-placement="site_header">Book a 20-min call</a>
+    <a class="pill" href="/book/" data-fsai-placement="site_header">Book a free 30-min Bottleneck Call</a>
   </div>
 </header>
     <section id="aivc-root" aria-label="App Idea Viability Checker">
@@ -2430,7 +2430,7 @@
               '<p class="aivc-fine-print">By submitting, you agree that 1stStep.ai may use these details to deliver the result and follow up about this project. <a href="/privacy.html">Privacy Policy</a></p>' +
               '<div class="aivc-lead-actions">' +
                 '<button class="aivc-btn aivc-btn-primary" type="submit" id="aivc-lead-submit">Save My App Idea Report</button>' +
-                '<a class="aivc-btn aivc-btn-secondary" href="' + CONFIG.bookingUrl + '" target="_blank" rel="noopener">Book a Build Strategy Call</a>' +
+                '<a class="aivc-btn aivc-btn-secondary" href="' + CONFIG.bookingUrl + '" target="_blank" rel="noopener">Book a free 30-min Bottleneck Call</a>' +
                 '<button class="aivc-btn aivc-btn-ghost" type="button" id="aivc-start-over">Start Over</button>' +
               '</div>' +
               '<div class="aivc-success" id="aivc-success" role="status" aria-live="polite"></div>' +
@@ -2597,17 +2597,17 @@
           if (type === "success") {
             status.innerHTML =
               'Your report was received. Evan now has the idea, score, recommended path, and build context. The smartest next step is to turn this into a clear first-version build plan before you overspend on development.' +
-              '<br /><br /><strong>Ready for the next move?</strong><br /><span class="aivc-status-note">Book a free MVP strategy call and we will map what should be built first, what can wait, and what budget path makes sense.</span>' +
-              '<br /><br /><a class="aivc-btn aivc-btn-primary" href="' + CONFIG.bookingUrl + '" target="_blank" rel="noopener">Book a Build Strategy Call</a>';
+              '<br /><br /><strong>Ready for the next move?</strong><br /><span class="aivc-status-note">Book a free 30-min Bottleneck Call and we will map what should be built first, what can wait, and what budget path makes sense.</span>' +
+              '<br /><br /><a class="aivc-btn aivc-btn-primary" href="' + CONFIG.bookingUrl + '" target="_blank" rel="noopener">Book a free 30-min Bottleneck Call</a>';
           } else {
             var reference = data && data.request_id
               ? '<br /><span class="aivc-status-note">Error reference: ' + escapeHtml(data.request_id) + '</span>'
               : '';
             status.classList.add("aivc-error");
             status.innerHTML =
-              'Something went wrong saving your report. Your score is still shown above, but please book a call or try again.' +
+              'Something went wrong saving your report. Your score is still shown above, but please book a free 30-min Bottleneck Call or try again.' +
               reference +
-              '<br /><br /><a class="aivc-btn aivc-btn-primary" href="' + CONFIG.bookingUrl + '" target="_blank" rel="noopener">Book a Build Strategy Call</a>';
+              '<br /><br /><a class="aivc-btn aivc-btn-primary" href="' + CONFIG.bookingUrl + '" target="_blank" rel="noopener">Book a free 30-min Bottleneck Call</a>';
           }
           status.classList.add("aivc-visible");
           status.scrollIntoView({ behavior: "smooth", block: "nearest" });

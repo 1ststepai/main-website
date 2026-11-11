@@ -80,7 +80,7 @@ test("llms.txt names the owner offer, start paths, and canonical www host", asyn
   assert.match(llms, /intent=build_new/);
   assert.match(llms, /intent=finish_build/);
   assert.match(llms, /intent=automate_business/);
-  assert.match(llms, /Website Strategy Call: https:\/\/www\.1ststep\.ai\/book\//);
+  assert.match(llms, /Free Bottleneck Call: https:\/\/www\.1ststep\.ai\/book\//);
   assert.match(llms, /services\/mvp-builds\.html/);
   assert.match(llms, /Use https:\/\/www\.1ststep\.ai\//);
   assert.match(llms, /evan@1ststep\.ai/);
@@ -112,7 +112,7 @@ test("homepage first screen books the call beside the command center illustratio
   const hero = html.slice(heroStart, html.indexOf("</section>", heroStart));
   const work = await source("work/index.html");
   assert.match(hero, /Turn your business/);
-  assert.match(hero, /href="\/book\/"[^>]*>Get Started/);
+  assert.match(hero, /href="\/book\/"[^>]*>Book a free 30-min Bottleneck Call/);
   assert.match(hero, /Custom websites, automation workflows, and app solutions/);
   assert.match(hero, /See Our Work/);
   assert.match(hero, /Illustrative data/);

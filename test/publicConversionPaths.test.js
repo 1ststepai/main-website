@@ -15,9 +15,9 @@ test("the homepage leads with the studio offer and keeps products distinct", asy
   assert.match(html, /href="\/tools\/"/);
   assert.match(html, /href="\/journey\/"/);
   assert.match(html, /firststep-logo-transparent-cleaned\.png/);
-  assert.equal((html.match(/Book a call/g) || []).length, 12);
+  assert.equal((html.match(/Book a free 30-min Bottleneck Call/g) || []).length, 16);
   assert.equal((html.match(/href="\/book\/"/g) || []).length, 10);
-  assert.match(html, /Book a free 20-min call/);
+  assert.match(html, /Book a free 30-min Bottleneck Call/);
   assert.doesNotMatch(html, /Book a 20-min call/);
   assert.match(llms, /Get more from the business you already have/);
   assert.match(llms, /1stStep OS/);
@@ -200,7 +200,7 @@ test("the booking path remains and commercial intake exposes three honest paths"
   const fitCheck = await source("fit-check/index.html");
   assert.match(booking, /https:\/\/api\.leadconnectorhq\.com\/widget\/booking\/Rb4aqLM1NdU5kvZcqNmj/);
   assert.match(booking, /class="calendar-shell"/);
-  assert.match(booking, /Loading secure Website Strategy Call calendar/);
+  assert.match(booking, /Loading secure Free Bottleneck Call calendar/);
   assert.match(booking, /No pressure\./);
   assert.match(booking, /payment schedule/i);
   for (const intent of ["build_new", "finish_build", "automate_business"]) assert.match(fitCheck, new RegExp(`value="${intent}"`));
@@ -478,16 +478,16 @@ test("pricing publishes the approved starting ranges and books a call", async ()
     "Consulting &amp; Support",
     "$200/hr or retainers from $1,500/mo",
     "Direct time, by the hour or the month.",
-    "Every project is scoped on a free call.",
+    "Every project is scoped on a Free Bottleneck Call (30 minutes).",
   ];
   for (const line of lines) {
     const pattern = new RegExp(line.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
     assert.match(section, pattern, line);
     assert.match(page, pattern, line);
   }
-  assert.equal((section.match(/Book a call/g) || []).length, 12);
+  assert.equal((section.match(/Book a free 30-min Bottleneck Call/g) || []).length, 12);
   assert.equal((section.match(/href="\/book\/"/g) || []).length, 6);
-  assert.equal((page.match(/Book a call/g) || []).length, 13);
+  assert.equal((page.match(/Book a free 30-min Bottleneck Call/g) || []).length, 13);
   assert.match(home, /<nav aria-label="Primary">[\s\S]*href="\/pricing\/">Pricing<\/a>/);
   assert.match(page, /aria-current="page">Pricing<\/a>/);
   assert.match(home, /<nav aria-label="Footer"[\s\S]*href="\/pricing\/">Pricing<\/a>/);
@@ -549,9 +549,9 @@ test("the redesigned homepage keeps the mockup's truth corrections", async () =>
   assert.match(hero, /Business Command Center/);
   assert.match(hero, /Illustrative data/);
   assert.doesNotMatch(hero, /\d+%/);
-  assert.match(hero, /href="\/book\/"[^>]*>Get Started/);
+  assert.match(hero, /href="\/book\/"[^>]*>Book a free 30-min Bottleneck Call/);
   assert.match(hero, /href="#work"[^>]*>[\s\S]*See Our Work/);
-  assert.match(html, /href="\/book\/"[^>]*>Let’s Talk/);
+  assert.match(html, /href="\/book\/"[^>]*>Book a free 30-min Bottleneck Call/);
   assert.match(html, /href="tel:\+19738003729"/);
   assert.match(html, /Morris Plains, NJ/);
   const copy = visible.replace(/<ul class="rv-list">[\s\S]*?<\/ul>/, "").replace(/<[^>]+>/g, " ");
