@@ -1,0 +1,21 @@
+/* Digital card: supplied portrait reference, adapted for usable contact links. */
+body{min-height:100svh;border-bottom:8px solid var(--lime)}
+.digital-card{width:min(760px,100%);margin-inline:auto;padding:36px 40px 56px}
+.card-logo{display:block;width:min(430px,100%);margin:0 auto;padding:48px}
+.card-logo img{width:100%;height:auto}
+.card-intro{text-align:center;margin:44px 0 80px}
+.card-intro h1{font-size:clamp(36px,6vw,56px);font-weight:800;line-height:1.1;letter-spacing:-.045em}
+.card-intro p{margin-top:18px;color:var(--soft);font-size:clamp(17px,2.6vw,22px);line-height:1.45}
+.card-details{display:flex;align-items:center;justify-content:space-between;gap:32px}
+.card-details address{display:grid;font-style:normal;font-size:20px;line-height:1.5}
+.card-details address a,.card-details address span{display:block;padding:7px 0}
+.card-details address a{text-decoration:none}
+.card-details address a:hover{text-decoration:underline;text-decoration-color:var(--lime);text-underline-offset:5px}
+.card-details .btn{flex-shrink:0}
+@media(max-width:540px){
+  .digital-card{padding:16px 24px 36px}
+  .card-logo{width:320px;max-width:100%;padding:36px}
+  .card-intro{margin:28px 0 36px}
+  .card-details{flex-direction:column;align-items:stretch;gap:24px}
+  .card-details address{font-size:19px}
+}

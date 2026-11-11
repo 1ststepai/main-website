@@ -131,7 +131,7 @@ test("homepage first screen books the call beside the command center illustratio
   assert.doesNotMatch(html, /TODO: connect the 20-minute booking link|class="sound"/);
   assert.doesNotMatch(html, /id="how"|id="paths"/);
   assert.match(html, /<link rel="canonical" href="https:\/\/www\.1ststep\.ai\/"/);
-  assert.match(html, /property="og:image" content="https:\/\/www\.1ststep\.ai\/assets\/og-home-v2\.png"/);
+  assert.match(html, /property="og:image" content="https:\/\/www\.1ststep\.ai\/assets\/og-home-v3\.png"/);
 });
 
 test("the homepage uses the system cursor and does not hijack scroll", async () => {
