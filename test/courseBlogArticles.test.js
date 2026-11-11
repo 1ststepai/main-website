@@ -8,6 +8,18 @@ const slugs = ["how-to-start-using-ai-in-your-small-business", "ai-for-business-
 for (const slug of slugs) {
   test(`course article ${slug} has consistent metadata, visible FAQs and discovery paths`, async () => {
     const html = await source(`blog/${slug}/index.html`);
+    assert.match(html, /<body class="course-article">/);
+    assert.ok(html.includes('href="/src/blog-course-articles.css"'));
+    assert.ok(!html.includes('home-v2.css'));
+    const byline = html.match(/<p class="blog-byline">([\s\S]*?)<\/p>/)[1];
+    assert.doesNotMatch(byline, /\bDraft\b/i);
+    const header = html.match(/<header[^>]*>([\s\S]*?)<\/header>/)[1];
+    assert.match(header, /<a class="brand" href="\/"[^>]*>[\s\S]*?<img[^>]+firststep-logo-transparent-cleaned\.png[\s\S]*?class="wordmark">1ststep<i>\.ai<\/i><\/span><\/a>/);
+    assert.match(header, /<a class="back-home" href="\/">Back to 1ststep\.ai<\/a>/);
+    const footer = html.match(/<footer[^>]*>([\s\S]*?)<\/footer>/)[1];
+    for (const [href, label] of [["/privacy.html", "Privacy"], ["/", "Back to 1ststep.ai"], ["/course/", "Course"], ["/course/library/", "Prompt library"]]) {
+      assert.ok(footer.includes(`<a href="${href}">${label}</a>`));
+    }
     const url = `https://www.1ststep.ai/blog/${slug}/`;
     assert.equal((html.match(/<h1>/g) || []).length, 1);
     assert.ok(html.includes(`<link rel="canonical" href="${url}"`));

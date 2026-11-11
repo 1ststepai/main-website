@@ -2,24 +2,3 @@
 @media(max-width:600px){.blog-wrap{padding:145px 22px 56px}.blog-wrap h1{font-size:34px}.blog-wrap p,.blog-wrap li{font-size:17px}.blog-article h2{font-size:26px}.blog-article blockquote{padding:2px 16px}.nav:has(+.blog-wrap),body:has(.blog-wrap) .nav{height:auto;min-height:100px;flex-wrap:wrap;gap:12px;padding:12px 18px}body:has(.blog-wrap) .nav nav{gap:18px}body:has(.blog-wrap) .nav .pill{margin:0;font-size:12px;min-height:36px}body:has(.blog-wrap) .nav .wordmark{display:none}}
 
 @media(max-width:600px){body:has(.blog-wrap) .nav nav{display:flex;margin-left:auto}}
-
-/* Teaching examples share the blog typography and official blue accent. */
-.blog-article .blog-byline{font-size:14px;color:var(--mute)}
-.blog-table{width:100%;border-collapse:collapse;font-size:16px;line-height:1.6;margin:24px 0;table-layout:fixed}
-.blog-table caption{text-align:left;font-weight:700;margin-bottom:12px}
-.blog-table th,.blog-table td{padding:14px 10px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line);overflow-wrap:anywhere}
-.blog-table th{color:var(--cream)}
-.blog-practice-box{margin:28px 0;padding:8px 24px;border:1px solid var(--line);border-left:3px solid var(--accent)}
-.blog-practice-box h2{margin-top:24px}
-.blog-practice-code{white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px;line-height:1.8;padding:20px;border:1px solid var(--line)}
-.blog-review-loop{margin:36px 0;padding:28px;background:#FFFFFF;color:#0D0C0A;border:2px solid var(--button-blue);border-radius:12px}
-.blog-review-loop h3{margin:0 0 24px;color:#0D0C0A}
-.blog-review-loop ol{list-style:none;counter-reset:review;display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:0}
-.blog-review-loop li{counter-increment:review;margin:0;padding:18px;border:1px solid #006EEC;color:#0D0C0A;line-height:1.6}
-.blog-review-loop li::before{content:counter(review);display:block;color:#006EEC;font-size:26px;font-weight:700}
-.blog-review-loop strong{color:#0D0C0A}
-.blog-review-loop span{display:block;margin-top:8px}
-.blog-review-loop .blog-loop-return{color:#006EEC;font-weight:600}
-.blog-review-loop p,.blog-review-loop figcaption{color:#0D0C0A}
-.blog-review-loop figcaption{font-size:14px;line-height:1.6}
-@media(max-width:600px){.blog-table{font-size:14px}.blog-table th,.blog-table td{padding:12px 6px}.blog-review-loop{padding:20px}.blog-review-loop ol{grid-template-columns:1fr}.blog-practice-box{padding:4px 16px}.blog-practice-code{font-size:12px;padding:12px}}
