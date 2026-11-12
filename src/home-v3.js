@@ -71,3 +71,128 @@ const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
     bar.classList.toggle('is-hidden', entry.isIntersecting);
   }).observe(band);
 })();
+
+// Subtle desktop tilt plus depth parallax on lifted panels.
+(() => {
+  const tilt = document.querySelector(".device-tilt");
+  const hero = document.querySelector(".hero");
+  const fine = matchMedia("(hover: hover) and (pointer: fine)").matches;
+  if (!tilt || !hero || reduced || !fine) return;
+  const baseX = 6;
+  const baseY = -11;
+  let frame = 0;
+  const setTilt = (x, y, px = 0, py = 0) => {
+    tilt.style.setProperty("--tilt-x", `${x.toFixed(2)}deg`);
+    tilt.style.setProperty("--tilt-y", `${y.toFixed(2)}deg`);
+    tilt.style.setProperty("--px", px.toFixed(3));
+    tilt.style.setProperty("--py", py.toFixed(3));
+  };
+  hero.addEventListener("pointermove", (event) => {
+    if (hero.classList.contains("is-paused")) return;
+    if (frame) return;
+    frame = requestAnimationFrame(() => {
+      frame = 0;
+      const rect = tilt.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+      const px = (event.clientX - rect.left) / rect.width - 0.5;
+      const py = (event.clientY - rect.top) / rect.height - 0.5;
+      setTilt(baseX + py * -5, baseY + px * 7, px, py);
+    });
+  }, { passive: true });
+  hero.addEventListener("pointerleave", () => setTilt(baseX, baseY, 0, 0));
+})();
+
+// Lifted panels rise out of the screen, then idle; reduced motion stays composed.
+(() => {
+  const hero = document.querySelector(".hero");
+  if (!hero) return;
+  const ready = () => {
+    hero.classList.add("is-ready");
+    if (!reduced) setTimeout(() => hero.classList.add("is-settled"), 1200);
+    else hero.classList.add("is-settled");
+  };
+  if (reduced) {
+    ready();
+    return;
+  }
+  const start = () => ready();
+  if (!("IntersectionObserver" in window)) {
+    requestAnimationFrame(start);
+    return;
+  }
+  const io = new IntersectionObserver(([entry]) => {
+    if (!entry.isIntersecting) return;
+    io.disconnect();
+    requestAnimationFrame(start);
+  }, { threshold: 0.2 });
+  io.observe(hero);
+})();
+
+// Activity feed: newest item slides in at the top; the oldest leaves through a bottom fade.
+(() => {
+  const list = document.querySelector(".cc-feed-list");
+  const frame = document.querySelector(".cc-feed-window");
+  const hero = document.querySelector(".hero");
+  if (!list || reduced || list.children.length < 2) return;
+  let busy = false;
+  const rowHeight = () => {
+    const item = list.firstElementChild;
+    return item ? item.getBoundingClientRect().height : 0;
+  };
+  const tick = () => {
+    if (busy || (hero && hero.classList.contains("is-paused"))) return;
+    const last = list.lastElementChild;
+    const distance = rowHeight();
+    if (!last || !distance) return;
+    busy = true;
+    list.classList.remove("is-animating");
+    if (frame) frame.classList.add("is-fading");
+    list.insertBefore(last, list.firstElementChild);
+    list.style.transform = `translateY(${-distance}px)`;
+    void list.offsetHeight;
+    list.classList.add("is-animating");
+    list.style.transform = "translateY(0)";
+    let settled = false;
+    const settle = (event) => {
+      if (event && event.target !== list) return;
+      if (settled) return;
+      settled = true;
+      list.classList.remove("is-animating");
+      if (frame) frame.classList.remove("is-fading");
+      list.style.transform = "";
+      busy = false;
+    };
+    list.addEventListener("transitionend", settle);
+    setTimeout(() => settle(), 700);
+  };
+  setInterval(tick, 3200);
+})();
+
+// KPI counters ease up once when the hero is in view.
+(() => {
+  const metrics = [...document.querySelectorAll(".cc-metric[data-count]")];
+  const hero = document.querySelector(".hero");
+  if (!metrics.length || reduced) return;
+  const ease = (t) => 1 - (1 - t) ** 3;
+  const run = () => {
+    const start = performance.now();
+    const targets = metrics.map((el) => ({ el, end: Number(el.dataset.count) || 0 }));
+    targets.forEach(({ el }) => { el.textContent = "0"; });
+    const step = (now) => {
+      const t = Math.min(1, (now - start) / 900);
+      targets.forEach(({ el, end }) => { el.textContent = String(Math.round(end * ease(t))); });
+      if (t < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  };
+  if (!hero || !("IntersectionObserver" in window)) {
+    run();
+    return;
+  }
+  const io = new IntersectionObserver(([entry]) => {
+    if (!entry.isIntersecting) return;
+    io.disconnect();
+    run();
+  }, { threshold: 0.25 });
+  io.observe(hero);
+})();
