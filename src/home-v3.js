@@ -71,3 +71,94 @@ const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
     bar.classList.toggle('is-hidden', entry.isIntersecting);
   }).observe(band);
 })();
+
+// Subtle desktop tilt for the hero device; reduced-motion and coarse pointers stay still.
+(() => {
+  const tilt = document.querySelector(".device-tilt");
+  const hero = document.querySelector(".hero");
+  const fine = matchMedia("(hover: hover) and (pointer: fine)").matches;
+  if (!tilt || !hero || reduced || !fine) return;
+  const baseX = 8;
+  const baseY = -16;
+  let frame = 0;
+  const setTilt = (x, y) => {
+    tilt.style.setProperty("--tilt-x", `${x.toFixed(2)}deg`);
+    tilt.style.setProperty("--tilt-y", `${y.toFixed(2)}deg`);
+  };
+  hero.addEventListener("pointermove", (event) => {
+    if (hero.classList.contains("is-paused")) return;
+    if (frame) return;
+    frame = requestAnimationFrame(() => {
+      frame = 0;
+      const rect = tilt.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+      const px = (event.clientX - rect.left) / rect.width - 0.5;
+      const py = (event.clientY - rect.top) / rect.height - 0.5;
+      setTilt(baseX + py * -5, baseY + px * 7);
+    });
+  }, { passive: true });
+  hero.addEventListener("pointerleave", () => setTilt(baseX, baseY));
+})();
+
+// Activity feed: one generic item ticks in at a time. No motion when reduced or paused.
+(() => {
+  const list = document.querySelector(".cc-feed-list");
+  const hero = document.querySelector(".hero");
+  if (!list || reduced || list.children.length < 2) return;
+  let busy = false;
+  const tick = () => {
+    if (busy || (hero && hero.classList.contains("is-paused"))) return;
+    const first = list.firstElementChild;
+    if (!first) return;
+    const gap = Number.parseFloat(getComputedStyle(list).gap) || 0;
+    const distance = first.offsetHeight + gap;
+    if (!distance) return;
+    busy = true;
+    list.classList.add("is-animating");
+    list.style.transform = `translateY(${-distance}px)`;
+    const finish = () => {
+      list.classList.remove("is-animating");
+      list.style.transform = "translateY(0)";
+      list.appendChild(first);
+      busy = false;
+    };
+    let settled = false;
+    const settle = () => {
+      if (settled) return;
+      settled = true;
+      finish();
+    };
+    list.addEventListener("transitionend", settle, { once: true });
+    setTimeout(settle, 700);
+  };
+  setInterval(tick, 3200);
+})();
+
+// KPI counters ease up once when the hero is in view.
+(() => {
+  const metrics = [...document.querySelectorAll(".cc-metric[data-count]")];
+  const hero = document.querySelector(".hero");
+  if (!metrics.length || reduced) return;
+  const ease = (t) => 1 - (1 - t) ** 3;
+  const run = () => {
+    const start = performance.now();
+    const targets = metrics.map((el) => ({ el, end: Number(el.dataset.count) || 0 }));
+    targets.forEach(({ el }) => { el.textContent = "0"; });
+    const step = (now) => {
+      const t = Math.min(1, (now - start) / 900);
+      targets.forEach(({ el, end }) => { el.textContent = String(Math.round(end * ease(t))); });
+      if (t < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  };
+  if (!hero || !("IntersectionObserver" in window)) {
+    run();
+    return;
+  }
+  const io = new IntersectionObserver(([entry]) => {
+    if (!entry.isIntersecting) return;
+    io.disconnect();
+    run();
+  }, { threshold: 0.25 });
+  io.observe(hero);
+})();
