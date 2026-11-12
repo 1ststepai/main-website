@@ -78,8 +78,8 @@ const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const hero = document.querySelector(".hero");
   const fine = matchMedia("(hover: hover) and (pointer: fine)").matches;
   if (!tilt || !hero || reduced || !fine) return;
-  const baseX = 8;
-  const baseY = -16;
+  const baseX = 6;
+  const baseY = -11;
   let frame = 0;
   const setTilt = (x, y) => {
     tilt.style.setProperty("--tilt-x", `${x.toFixed(2)}deg`);
@@ -100,36 +100,42 @@ const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   hero.addEventListener("pointerleave", () => setTilt(baseX, baseY));
 })();
 
-// Activity feed: one generic item ticks in at a time. No motion when reduced or paused.
+// Activity feed: newest item slides in at the top; the oldest leaves through a bottom fade.
 (() => {
   const list = document.querySelector(".cc-feed-list");
+  const frame = document.querySelector(".cc-feed-window");
   const hero = document.querySelector(".hero");
   if (!list || reduced || list.children.length < 2) return;
   let busy = false;
+  const rowHeight = () => {
+    const item = list.firstElementChild;
+    return item ? item.getBoundingClientRect().height : 0;
+  };
   const tick = () => {
     if (busy || (hero && hero.classList.contains("is-paused"))) return;
-    const first = list.firstElementChild;
-    if (!first) return;
-    const gap = Number.parseFloat(getComputedStyle(list).gap) || 0;
-    const distance = first.offsetHeight + gap;
-    if (!distance) return;
+    const last = list.lastElementChild;
+    const distance = rowHeight();
+    if (!last || !distance) return;
     busy = true;
-    list.classList.add("is-animating");
+    list.classList.remove("is-animating");
+    if (frame) frame.classList.add("is-fading");
+    list.insertBefore(last, list.firstElementChild);
     list.style.transform = `translateY(${-distance}px)`;
-    const finish = () => {
-      list.classList.remove("is-animating");
-      list.style.transform = "translateY(0)";
-      list.appendChild(first);
-      busy = false;
-    };
+    void list.offsetHeight;
+    list.classList.add("is-animating");
+    list.style.transform = "translateY(0)";
     let settled = false;
-    const settle = () => {
+    const settle = (event) => {
+      if (event && event.target !== list) return;
       if (settled) return;
       settled = true;
-      finish();
+      list.classList.remove("is-animating");
+      if (frame) frame.classList.remove("is-fading");
+      list.style.transform = "";
+      busy = false;
     };
-    list.addEventListener("transitionend", settle, { once: true });
-    setTimeout(settle, 700);
+    list.addEventListener("transitionend", settle);
+    setTimeout(() => settle(), 700);
   };
   setInterval(tick, 3200);
 })();
