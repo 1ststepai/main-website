@@ -2,6 +2,7 @@ import { isAdminAuthenticated, isSameOriginRequest } from "../lib/admin/auth.js"
 import { isDesktopAuthenticated } from "../lib/admin/desktopDevice.js";
 import { MAX_PIPELINE_BYTES } from "../lib/admin/newsletterPipeline.js";
 import { loadNewsletterPipeline, changeNewsletterPipeline } from "../lib/admin/newsletterPipelineStore.js";
+import { rejectIfRateLimited } from "../lib/http/rateLimit.js";
 
 function respond(res, status, data) {
   res.statusCode = status;
@@ -14,6 +15,7 @@ function respond(res, status, data) {
 export function pipelineHandler(service = "newsletter") { return async function handler(req, res) {
   if (!isAdminAuthenticated(req) && !await isDesktopAuthenticated(req, "pipeline")) return respond(res, 401, { ok: false, code: "unauthorized" });
   if (!["GET", "POST"].includes(req.method)) { res.setHeader("Allow", "GET, POST"); return respond(res, 405, { ok: false, code: "method_not_allowed" }); }
+  if (rejectIfRateLimited(req, res, req.method === "GET" ? "admin-read" : "admin-write", respond)) return;
   try {
     if (req.method === "GET") return respond(res, 200, { ok: true, pipeline: await loadNewsletterPipeline(service) });
     if (!isSameOriginRequest(req)) return respond(res, 403, { ok: false, code: "origin_not_allowed" });

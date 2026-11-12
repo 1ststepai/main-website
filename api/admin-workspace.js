@@ -2,6 +2,7 @@ import { isAdminAuthenticated, isSameOriginRequest } from "../lib/admin/auth.js"
 import { isDesktopAuthenticated } from "../lib/admin/desktopDevice.js";
 import { loadAdminWorkspace, saveAdminWorkspace } from "../lib/admin/workspaceStore.js";
 import { desktopWorkspaceView } from "../lib/admin/desktopWorkspace.js";
+import { rejectIfRateLimited } from "../lib/http/rateLimit.js";
 
 const MAX_BODY_BYTES = 512 * 1024;
 
@@ -33,6 +34,8 @@ export default async function handler(req, res) {
     res.setHeader("Allow", "GET, PUT");
     return sendJson(res, 405, { ok: false, code: "method_not_allowed" });
   }
+  const workspaceScope = req.method === "GET" ? "admin-read" : "admin-write";
+  if (rejectIfRateLimited(req, res, workspaceScope, sendJson)) return;
 
   try {
     if (req.method === "GET") {

@@ -1,5 +1,6 @@
 import { isAdminAuthenticated } from "../lib/admin/auth.js";
 import { loadJobAgentOperations } from "../lib/admin/jobAgentOperations.js";
+import { rejectIfRateLimited } from "../lib/http/rateLimit.js";
 
 function sendJson(res, statusCode, payload) {
   res.statusCode = statusCode;
@@ -17,6 +18,7 @@ export default async function handler(req, res) {
     res.setHeader("Allow", "GET");
     return sendJson(res, 405, { ok: false, code: "method_not_allowed" });
   }
+  if (rejectIfRateLimited(req, res, "admin-read", sendJson)) return;
   try {
     const operations = await loadJobAgentOperations({
       secret: process.env.JOB_AGENT_OPERATOR_BRIDGE_SECRET,

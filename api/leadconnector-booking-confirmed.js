@@ -1,5 +1,6 @@
 import { createHash, timingSafeEqual } from "node:crypto";
 import { track } from "@vercel/analytics/server";
+import { rejectIfRateLimited } from "../lib/http/rateLimit.js";
 
 const WEBSITE_STRATEGY_CALENDAR_ID = "Rb4aqLM1NdU5kvZcqNmj";
 const MAX_BODY_BYTES = 32 * 1024;
@@ -109,6 +110,7 @@ export default async function handler(req, res) {
     res.setHeader("Allow", "POST");
     return sendJson(res, 405, { ok: false, code: "method_not_allowed" });
   }
+  if (rejectIfRateLimited(req, res, "booking-webhook", sendJson)) return;
 
   const secret = process.env.LEADCONNECTOR_ANALYTICS_WEBHOOK_SECRET;
   if (!secret) {

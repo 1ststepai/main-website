@@ -1,6 +1,6 @@
 import { isAdminAuthenticated, isSameOriginRequest } from "../lib/admin/auth.js";
 import { approveDesktopPair, desktopPairReview, desktopPairStatus, listDesktopDevices, parseDesktopCredential, revokeDesktopDevice, startDesktopPair } from "../lib/admin/desktopDevice.js";
-import { checkRateLimit, setRateLimitHeaders } from "../lib/http/rateLimit.js";
+import { checkRateLimit, rejectIfRateLimited, setRateLimitHeaders } from "../lib/http/rateLimit.js";
 
 function respond(res, status, data) {
   res.statusCode = status;
@@ -14,8 +14,12 @@ export default async function handler(req, res) {
   const url = new URL(req.url, "https://www.1ststep.ai");
   const action = url.searchParams.get("action");
   try {
-    if (req.method === "GET" && action === "status") return respond(res, 200, { ok: true, ...await desktopPairStatus(req) });
+    if (req.method === "GET" && action === "status") {
+      if (rejectIfRateLimited(req, res, "admin-read", respond)) return;
+      return respond(res, 200, { ok: true, ...await desktopPairStatus(req) });
+    }
     if (req.method === "GET" && ["review", "devices"].includes(action)) {
+      if (rejectIfRateLimited(req, res, "admin-read", respond)) return;
       if (!isAdminAuthenticated(req)) return respond(res, 401, { ok: false, code: "unauthorized" });
       return respond(res, 200, { ok: true, ...(action === "review" ? { pairing: await desktopPairReview(url.searchParams.get("id")) } : { devices: await listDesktopDevices() }) });
     }
