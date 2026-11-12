@@ -10,7 +10,7 @@ const token = 'fake-test-token';
 const env = {COURSE_GHL_TOKEN:token};
 let ip = 0;
 async function invoke(body=signup, extra={}, options={env:{}}) {
- const req={method:'POST',headers:{'content-type':'application/json','x-real-ip':`test-${++ip}`},body,...extra};
+ const req={method:'POST',headers:{'content-type':'application/json','x-real-ip':`198.51.100.${(++ip % 200) + 1}`},body,...extra};
  const res={headers:{},setHeader(k,v){this.headers[k]=v},getHeader(k){return this.headers[k]},end(s){this.body=s ? JSON.parse(s):null}};
  await createCourseSignupHandler(options)(req,res);return res;
 }
@@ -48,7 +48,7 @@ test('idempotent retries send once; different payload conflicts; rate limit enfo
  assert.equal((await invoke(signup,{headers},options)).statusCode,201);
  assert.equal((await invoke(signup,{headers},options)).headers['Idempotency-Replayed'],'true');assert.equal(calls,2);
  assert.equal((await invoke({...signup,courseUpdates:true},{headers},options)).statusCode,409);
- let res;for(let i=0;i<13;i++)res=await invoke(signup,{headers:{'content-type':'application/json','x-real-ip':'rate-test'}});
+ let res;for(let i=0;i<13;i++)res=await invoke(signup,{headers:{'content-type':'application/json','x-real-ip':'203.0.113.201'}});
  assert.equal(res.statusCode,429);
 });
 test('browser adapter uses same-origin JSON and rejects unsuccessful responses',async()=>{

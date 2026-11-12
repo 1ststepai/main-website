@@ -9,7 +9,7 @@ import {
   verifyAdminPassword,
   verifyAdminTotp,
 } from "../lib/admin/auth.js";
-import { checkRateLimit, setRateLimitHeaders } from "../lib/http/rateLimit.js";
+import { checkRateLimit, rejectIfRateLimited, setRateLimitHeaders } from "../lib/http/rateLimit.js";
 
 const MAX_BODY_BYTES = 2048;
 
@@ -34,6 +34,7 @@ function parseBody(req) {
 
 export default async function handler(req, res) {
   if (req.method === "GET") {
+    if (rejectIfRateLimited(req, res, "admin-read", sendJson)) return;
     try {
       return sendJson(res, 200, {
         ok: true,

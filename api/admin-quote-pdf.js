@@ -1,6 +1,7 @@
 import { isAdminAuthenticated } from "../lib/admin/auth.js";
 import { generateQuotePdf, quotePdfFilename } from "../lib/admin/quotePdf.js";
 import { loadAdminWorkspace } from "../lib/admin/workspaceStore.js";
+import { rejectIfRateLimited } from "../lib/http/rateLimit.js";
 
 function setPrivateHeaders(res) {
   res.setHeader("Cache-Control", "no-store, private, max-age=0");
@@ -36,6 +37,7 @@ export default async function handler(req, res) {
     res.setHeader("Allow", "GET");
     return sendJson(res, 405, { ok: false, code: "method_not_allowed" });
   }
+  if (rejectIfRateLimited(req, res, "admin-pdf", sendJson)) return;
 
   try {
     const quoteId = quoteIdentifier(req);

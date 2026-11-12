@@ -5,6 +5,7 @@ import {
 } from "../lib/admin/stripePayments.js";
 import { paymentScheduleForQuote } from "../lib/admin/paymentPlans.js";
 import { loadAdminWorkspace, saveAdminWorkspace } from "../lib/admin/workspaceStore.js";
+import { rejectIfRateLimited } from "../lib/http/rateLimit.js";
 
 const MAX_BODY_BYTES = 8 * 1024;
 
@@ -46,6 +47,7 @@ export default async function handler(req, res) {
     res.setHeader("Allow", "POST");
     return sendJson(res, 405, { ok: false, code: "method_not_allowed" });
   }
+  if (rejectIfRateLimited(req, res, "admin-payments", sendJson)) return;
   if (!isSameOriginRequest(req)) {
     return sendJson(res, 403, { ok: false, code: "origin_not_allowed" });
   }

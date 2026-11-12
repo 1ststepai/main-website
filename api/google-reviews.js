@@ -1,5 +1,6 @@
 import { applyCors } from "../lib/http/cors.js";
 import { fetchWithTimeout } from "../lib/http/fetchWithTimeout.js";
+import { rejectIfRateLimited } from "../lib/http/rateLimit.js";
 
 const GOOGLE_PLACE_DETAILS_URL = "https://maps.googleapis.com/maps/api/place/details/json";
 const CACHE_TTL_MS = 12 * 60 * 60 * 1000;
@@ -92,6 +93,7 @@ export default async function handler(req, res) {
   if (req.method !== "GET") {
     return sendJson(res, 405, { ok: false, error: "Method not allowed" });
   }
+  if (rejectIfRateLimited(req, res, "google-reviews", sendJson)) return;
 
   const apiKey = process.env.GOOGLE_PLACES_API_KEY;
   const placeId = process.env.GOOGLE_PLACE_ID;

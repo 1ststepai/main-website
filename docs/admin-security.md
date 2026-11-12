@@ -8,7 +8,7 @@ The production admin is designed to fail closed. A hidden URL is not treated as 
 - Mobile admin login can use the authenticator code only when MFA is configured and `FIRSTSTEP_ADMIN_MOBILE_TOTP_LOGIN` is not `false`; desktop still requires the owner password plus MFA.
 - Sessions are HMAC-signed, stored in an `HttpOnly`, `Secure`, `SameSite=Strict` cookie, and expire after two hours.
 - Admin writes require a matching browser origin and JSON content type.
-- Login attempts are rate-limited without logging a raw IP address.
+- Login attempts are rate-limited without logging a raw IP address. Public forms, admin writes, payments, webhooks, and social APIs use the same per-IP limiter, which escalates from a short 429 throttle to a temporary block. See `docs/SECURITY-RUNBOOK.md`.
 - Admin pages and API responses use `no-store`; the admin is excluded from indexing and framing.
 - A strict admin Content Security Policy allows scripts, styles, and API calls only from 1stStep.ai.
 - Client workspaces and persisted App Idea Checker submissions are encrypted with AES-256-GCM before KV receives them.
