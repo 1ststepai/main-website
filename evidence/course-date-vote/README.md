@@ -17,8 +17,8 @@ Status: locally verified on `course/date-vote-included`, based on `135d7815228ee
 
 - `hero-1440.png`: desktop hero, disclosure and linked date reminders.
 - `hero-390.png`: mobile hero, disclosure and linked date reminders.
-- `waitlist-1440-selected.png`: desktop waitlist, multiple selections and keyboard focus.
-- `waitlist-390-selected.png`: mobile waitlist, multiple selections and keyboard focus.
+- `waitlist-1440-selected.png`: desktop waitlist, date chips above the Join button, multiple selections and keyboard focus.
+- `waitlist-390-selected.png`: mobile waitlist, date chips above the Join button, multiple selections and keyboard focus.
 
 `verify.mjs` reproduces browser checks against the built preview using the existing cached Playwright install and known headless Chromium. It blocks external traffic and course API calls. No dependency changes.
 

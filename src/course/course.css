@@ -735,6 +735,12 @@ input[type=checkbox] {
 .date-vote legend { background:#F3F4F0; color:#0B0D0E; padding:4px 8px; font-weight:700; max-width:100%; }
 .date-vote p { font-size:16px; }
 .date-chips { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.signup form > input[type=email] { width:100%; margin:10px 0 0; }
+.signup form > button { margin:0 0 8px; }
+@media(max-width:650px) {
+  .signup form > button { width:100%; }
+}
+
 .date-chip {
   display:flex; align-items:center; gap:12px; min-height:64px; padding:14px;
   margin:0; border:1px solid #0059CC; border-radius:8px; background:#FFFFFF; cursor:pointer;
