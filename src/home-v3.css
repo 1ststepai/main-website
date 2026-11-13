@@ -269,6 +269,16 @@ p{margin:0}
 .svc p:not(.amt){margin-top:8px;color:var(--soft);font-size:15px;flex:1}
 .svc-link{margin-top:20px;font-weight:700;font-size:15px;text-decoration:none;color:var(--text)}
 .svc-link:hover{color:var(--quiet)}
+
+.tool-strip{padding:24px 0 88px;background:var(--bg)}
+.tool-strip .wrap{width:min(1320px,calc(100% - 64px));margin-inline:auto}
+.tool-strip h2{margin:0 0 40px;font-size:clamp(2rem,4vw,3.1rem);font-weight:800;line-height:1.05;letter-spacing:-.04em}
+.tool-logos{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:32px 24px;align-items:start}
+.tool-logos li{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:10px;min-width:0;text-align:center}
+.tool-logos img{display:block;height:28px;width:auto;max-width:100%;opacity:.92}
+.tool-name{font:600 12px/1.2 var(--disp);letter-spacing:.02em;color:var(--text);max-width:100%;overflow-wrap:anywhere}
+.tool-note{margin:28px 0 0;color:var(--mute);font-size:13px;line-height:1.5;max-width:54ch}
+
 .process{padding:50px 0 100px}
 .steps{list-style:none;margin:40px 0 0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:16px;counter-reset:s}
 .steps li{padding:28px;border-top:2px solid var(--quiet);background:linear-gradient(180deg,rgba(243,244,240,.06),transparent 70%);border-radius:0 0 var(--r) var(--r)}
@@ -594,6 +604,7 @@ p{margin:0}
   .svc .amt{grid-column:2}
   .svc-link{grid-column:2;grid-row:auto;margin-top:6px}
   .steps{grid-template-columns:1fr 1fr}
+  .tool-logos{grid-template-columns:repeat(4,minmax(0,1fr));gap:28px 16px}
   .founder-row{grid-template-columns:1fr;gap:28px}
   .founder picture img{width:min(280px,80vw)}
   .cards{grid-template-columns:1fr 1fr}
@@ -604,6 +615,10 @@ p{margin:0}
   .work-rail-list img{height:160px}
   .work-rail{padding-bottom:36px}
   .steps,.svc-grid,.cards,.rv-list{grid-template-columns:1fr}
+  .tool-logos{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .tool-logos img{height:24px}
+  .tool-name{font-size:11px}
+  .tool-strip .wrap{width:calc(100% - 40px)}
   .founder-row{text-align:left;flex-direction:column}
   .founder picture{justify-self:start}
   .founder picture img{width:min(260px,86vw);border-radius:22px}

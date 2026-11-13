@@ -1,5 +1,5 @@
 @font-face {font-family:Archivo;src:url('/fonts/archivo-latin.woff2') format('woff2');font-weight:100 900;font-display:swap}
-body.course-article {--paper:#F3F4F0;--paper2:#FFFFFF;--ink:#0B0D0E;--accent:#007BF8;--button-blue:#006EEC;--link:#0059CC;--mute:#4B5563;--line:rgba(11,13,14,.14);margin:0;background:var(--paper);color:var(--ink);font-family:Archivo,Arial,sans-serif;line-height:1.7}
+body.course-article {--paper:#0B1624;--paper2:#102033;--ink:#F6F1E8;--accent:#007BF8;--button-blue:#006EEC;--link:#007BF8;--mute:#A3988A;--line:rgba(246,241,232,.14);margin:0;background:var(--paper);color:var(--ink);font-family:Archivo,Arial,sans-serif;line-height:1.7}
 .course-article * {box-sizing:border-box}
 .course-article a {color:var(--link);text-underline-offset:5px}
 .course-article a:hover {text-decoration-thickness:2px}
