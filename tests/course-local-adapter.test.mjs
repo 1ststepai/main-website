@@ -63,3 +63,20 @@ test('unchecked waitlist consent does not write simulation state', async () => {
   });
   assert.equal(records.size, 0);
 });
+
+test('anonymous waitlist date simulation validates, dedupes and keeps email private',async()=>{
+ const {adapter,records}=fixture();
+ const base={kind:'waitlist',email:'fictional@example.com',courseUpdates:true};
+ for(const dates of [undefined,[],['dec13'],['jan3'],['jan10'],['none'],['none','jan3','jan3']]) {
+  assert.equal((await adapter.submit({...base,startDates:dates})).ok,true);
+  const record=JSON.parse(records.get(MOCK_STORAGE_KEY));
+  assert.deepEqual(record,{simulation:true,kind:'waitlist',courseUpdates:true,startDates:['dec13','jan3','jan10','none'].filter(key=>dates?.includes(key))});
+ }
+ const stored=records.get(MOCK_STORAGE_KEY);
+ for(const dates of [null,'dec13',{},[false],['other']]) {
+  assert.equal((await adapter.submit({...base,startDates:dates})).code,'invalid-request');
+  assert.equal(records.get(MOCK_STORAGE_KEY),stored);
+ }
+ await adapter.submit({...base,kind:'library',startDates:['dec13']});
+ assert.equal('startDates' in JSON.parse(records.get(MOCK_STORAGE_KEY)),false);
+});

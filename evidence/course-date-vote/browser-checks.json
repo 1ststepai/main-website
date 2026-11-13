@@ -1,0 +1,182 @@
+{
+  "checks": [
+    {
+      "viewport": 1440,
+      "width": 1440,
+      "scroll": 1440,
+      "targets": [
+        {
+          "width": 104.359375,
+          "height": 44
+        },
+        {
+          "width": 94.59375,
+          "height": 44
+        },
+        {
+          "width": 102.78125,
+          "height": 44
+        },
+        {
+          "width": 394,
+          "height": 77.5
+        },
+        {
+          "width": 394,
+          "height": 77.5
+        },
+        {
+          "width": 394,
+          "height": 77.5
+        },
+        {
+          "width": 394,
+          "height": 77.5
+        }
+      ]
+    },
+    {
+      "viewport": 1280,
+      "width": 1280,
+      "scroll": 1280,
+      "targets": [
+        {
+          "width": 104.359375,
+          "height": 44
+        },
+        {
+          "width": 94.59375,
+          "height": 44
+        },
+        {
+          "width": 102.78125,
+          "height": 44
+        },
+        {
+          "width": 394,
+          "height": 77.5
+        },
+        {
+          "width": 394,
+          "height": 77.5
+        },
+        {
+          "width": 394,
+          "height": 77.5
+        },
+        {
+          "width": 394,
+          "height": 77.5
+        }
+      ]
+    },
+    {
+      "viewport": 768,
+      "width": 768,
+      "scroll": 768,
+      "targets": [
+        {
+          "width": 104.359375,
+          "height": 44
+        },
+        {
+          "width": 94.59375,
+          "height": 44
+        },
+        {
+          "width": 102.78125,
+          "height": 44
+        },
+        {
+          "width": 321,
+          "height": 77.5
+        },
+        {
+          "width": 321,
+          "height": 77.5
+        },
+        {
+          "width": 321,
+          "height": 77.5
+        },
+        {
+          "width": 321,
+          "height": 77.5
+        }
+      ]
+    },
+    {
+      "viewport": 390,
+      "width": 390,
+      "scroll": 390,
+      "targets": [
+        {
+          "width": 104.359375,
+          "height": 44
+        },
+        {
+          "width": 94.59375,
+          "height": 44
+        },
+        {
+          "width": 102.78125,
+          "height": 44
+        },
+        {
+          "width": 304,
+          "height": 77.5
+        },
+        {
+          "width": 304,
+          "height": 77.5
+        },
+        {
+          "width": 304,
+          "height": 77.5
+        },
+        {
+          "width": 304,
+          "height": 64
+        }
+      ]
+    },
+    {
+      "viewport": 320,
+      "width": 320,
+      "scroll": 320,
+      "targets": [
+        {
+          "width": 104.359375,
+          "height": 44
+        },
+        {
+          "width": 94.59375,
+          "height": 44
+        },
+        {
+          "width": 102.78125,
+          "height": 44
+        },
+        {
+          "width": 234,
+          "height": 97
+        },
+        {
+          "width": 234,
+          "height": 97
+        },
+        {
+          "width": 234,
+          "height": 97
+        },
+        {
+          "width": 234,
+          "height": 64
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "courseApiCalls": [],
+  "results": "PASS: keyboard, exclusive-none UX, multiselect, optional empty submission, anonymous local persistence, library has no date controls"
+}

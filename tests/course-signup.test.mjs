@@ -59,7 +59,7 @@ test('browser adapter uses same-origin JSON and rejects unsuccessful responses',
 test('course pages are indexable with privacy, closed payments and build/route wiring',async()=>{
  const vite=await readFile('vite.config.js','utf8');const vercel=JSON.parse(await readFile('vercel.json','utf8'));
  for(const path of ['course','course/library']) {
- const html=await readFile(path+'/index.html','utf8');assert.doesNotMatch(html,/LOCAL DRAFT|NOT LIVE|noindex|firststep-no-site-analytics|simulation only|evidence pending|subject to approval|Evan to decide|first-article-visual-brief/i);assert.match(html,/href="\/privacy.html"/);assert.match(html,/No payment is taken/);assert.match(html,/Dates are not announced yet/);assert.ok(vite.includes(path+'/index.html'));
+ const html=await readFile(path+'/index.html','utf8');assert.doesNotMatch(html,/LOCAL DRAFT|NOT LIVE|noindex|firststep-no-site-analytics|simulation only|evidence pending|subject to approval|Evan to decide|first-article-visual-brief/i);assert.match(html,/href="\/privacy.html"/);assert.match(html,/No payment is taken/);if(path==='course/library') assert.match(html,/Dates are not announced yet/); else { assert.match(html,/start date is being chosen by a waitlist vote/); assert.match(html,/Pick every date that works/); }assert.ok(vite.includes(path+'/index.html'));
  for(const suffix of ['', '/'])assert.ok(vercel.rewrites.some(r=>r.source==='/'+path+suffix&&r.destination==='/'+path+'/index.html'));
  }
 });
@@ -67,4 +67,35 @@ test('course pages are indexable with privacy, closed payments and build/route w
 test('seven approved policy answers remain verbatim',async()=>{
  const answers=JSON.parse(await readFile('evidence/course-faq/approved-policy-answers.json','utf8'));
  assert.equal(answers.length,7);const html=await readFile('course/index.html','utf8');for(const answer of answers)assert.ok(html.includes('<p>'+answer+'</p>'));
+});
+
+test('waitlist dates canonicalize, map only allowlisted tags and reject invalid input', async()=>{
+ const base={...signup,kind:'waitlist',courseUpdates:true};
+ for(const dates of [undefined,[],['dec13'],['jan3'],['jan10'],['none'],['none','jan3','dec13','jan3']]) {
+  const normalized=normalizeCourseSignup({...base,startDates:dates});
+  const expected=['dec13','jan3','jan10','none'].filter(key=>dates?.includes(key));
+  assert.deepEqual(normalized.startDates,expected);
+  assert.deepEqual(courseTags(normalized),['course-waitlist',...expected.map(key=>'course-date-'+key)]);
+  const calls=[];
+  await deliverCourseSignup(normalized,{env,fetchImpl:async(url,options)=>{calls.push(JSON.parse(options.body));return {ok:true,json:async()=>({contact:{id:'id'}})}}});
+  assert.deepEqual(calls[1],{tags:courseTags(normalized)});
+ }
+ for(const dates of [null,'dec13',{},[1],['DEC13'],['other'],['dec13',null]]) {
+  const response=await invoke({...base,startDates:dates});
+  assert.equal(response.statusCode,400);assert.equal(response.body.code,'invalid-request');
+ }
+ for(const dates of [['dec13'],['none'],null,'bad']) {
+  const normalized=normalizeCourseSignup({...signup,courseUpdates:true,startDates:dates});
+  assert.equal('startDates' in normalized,false);
+  assert.deepEqual(courseTags(normalized),['course-prompt-library','course-waitlist']);
+ }
+});
+test('date votes participate in canonical idempotency hashing',async()=>{
+ const headers={'content-type':'application/json','idempotency-key':'course-date-vote-test'};
+ const body={...signup,kind:'waitlist',courseUpdates:true,startDates:['jan3','dec13']};
+ let calls=0;const options={env,fetchImpl:async()=>{calls++;return {ok:true,json:async()=>({contact:{id:'id'}})}}};
+ assert.equal((await invoke(body,{headers},options)).statusCode,201);
+ assert.equal((await invoke({...body,startDates:['dec13','jan3','jan3']},{headers},options)).headers['Idempotency-Replayed'],'true');
+ assert.equal((await invoke({...body,startDates:['none']},{headers},options)).statusCode,409);
+ assert.equal(calls,2);
 });
