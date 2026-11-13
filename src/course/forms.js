@@ -17,19 +17,25 @@ for (const pre of document.querySelectorAll('.resource pre')) {
 const local = ['localhost', '127.0.0.1', '::1', '[::1]'].includes(location.hostname);
 const adapter = local ? createLocalCourseAdapter() : createCourseApiAdapter();
 for (const form of document.querySelectorAll('form[data-kind]')) {
+  form.addEventListener('change', event => {
+    if (event.target.name !== 'startDates' || !event.target.checked) return;
+    for (const input of form.querySelectorAll('input[name="startDates"]')) {
+      if ((input.value === 'none') !== (event.target.value === 'none')) input.checked = false;
+    }
+  });
   form.addEventListener('submit', async event => {
     event.preventDefault();
     const status = form.querySelector('[role=status]');
     const button = form.querySelector('button');
     button.disabled = true;
     try {
-      const result = await adapter.submit({kind:form.dataset.kind,email:form.elements.email.value,courseUpdates:form.elements.courseUpdates?.checked === true});
+      const result = await adapter.submit({kind:form.dataset.kind,email:form.elements.email.value,courseUpdates:form.elements.courseUpdates?.checked === true,...(form.dataset.kind === 'waitlist' ? {startDates: [...new FormData(form).getAll('startDates')]} : {})});
       if (result.ok) {
         if (form.dataset.kind === 'library') document.querySelector('[data-library-download]')?.click();
         status.textContent = local
           ? `Local simulation saved. No real subscription created. Course-update choice: ${result.courseUpdates ? 'yes' : 'no'}.`
           : form.dataset.kind === 'waitlist'
-            ? "You're on the waitlist. We'll email course updates, including dates when they're set. This isn't enrollment and no payment was taken."
+            ? "You're on the waitlist. We'll email the chosen start date to everyone who opted in. This isn't enrollment and no payment was taken."
             : `Your download should start now. If it doesn't, use the download link.${result.courseUpdates ? " You'll also get course updates." : ''}`;
       } else {
         status.textContent = result.code === 'consent-required' ? 'Choose course updates to join the waitlist.'

@@ -708,3 +708,51 @@ input[type=checkbox] {
     font-size:13px
   }
 }
+/* Waitlist vote and course disclosure: scoped blue-and-white surfaces. */
+.course-included,.date-vote {
+  background:#F3F4F0;
+  color:#0B0D0E;
+  border:1px solid #007BF8;
+  border-top:4px solid #007BF8;
+  border-radius:12px;
+  padding:24px;
+  min-width:0;
+}
+.course-included { align-self:start; }
+.course-included h2 { font-size:24px; letter-spacing:-.3px; }
+.course-included ul { padding-left:20px; margin:0 0 24px; }
+.course-included li { margin:0 0 14px; font-size:16px; }
+.date-reminder-label { font-weight:700; margin-bottom:10px; }
+.date-reminders { display:flex; flex-wrap:wrap; gap:8px; }
+.date-reminders a {
+  display:inline-flex; align-items:center; min-height:44px;
+  padding:8px 12px; background:#FFFFFF; color:#0059CC;
+  border:1px solid #0059CC; border-radius:24px; font-size:14px; font-weight:650;
+}
+.date-reminders a:hover { background:#006EEC; color:#FFFFFF; }
+.date-years { font-size:14px; margin:12px 0 0; }
+.date-vote { margin:24px 0; }
+.date-vote legend { background:#F3F4F0; color:#0B0D0E; padding:4px 8px; font-weight:700; max-width:100%; }
+.date-vote p { font-size:16px; }
+.date-chips { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.signup form > input[type=email] { width:100%; margin:10px 0 0; }
+.signup form > button { margin:0 0 8px; }
+@media(max-width:650px) {
+  .signup form > button { width:100%; }
+}
+
+.date-chip {
+  display:flex; align-items:center; gap:12px; min-height:64px; padding:14px;
+  margin:0; border:1px solid #0059CC; border-radius:8px; background:#FFFFFF; cursor:pointer;
+}
+.date-chip input { flex-shrink:0; width:20px; height:20px; margin:0; }
+.date-chip small { display:block; font-size:13px; font-weight:400; margin-top:4px; }
+.date-chip:has(input:checked) { background:#006EEC; color:#FFFFFF; border-color:#006EEC; }
+.date-chip:has(input:focus-visible) { outline:3px solid #007BF8; outline-offset:4px; }
+@media(min-width:901px) { .hero:has(.course-included) { grid-template-columns:1.2fr 1fr; gap:40px; } }
+@media(max-width:900px) { .hero:has(.course-included) { grid-template-columns:1fr; } }
+@media(max-width:650px) {
+  .course-included { margin-top:28px; }
+  .course-included,.date-vote { padding:18px; }
+  .date-chips { grid-template-columns:1fr; }
+}
