@@ -121,6 +121,17 @@ social-mcp connect <id>         CLI fallback
 - `cancel_scheduled_post` returns a post to `draft` and clears `scheduled_at`.
 - Agents can still call `publish_due` or `publish_post` with `force=true` manually.
 
+### Publishing skill (Cursor)
+
+Skill: [`skills/postpath-publishing/SKILL.md`](./skills/postpath-publishing/SKILL.md)  
+Also in the repo at `.cursor/skills/postpath-publishing/` and `.agents/skills/firststep/postpath-publishing/`.  
+Handoff: [`docs/POSTPATH_PUBLISHING_SKILL.md`](../../docs/POSTPATH_PUBLISHING_SKILL.md).
+
+Safe local demo (no live publish):
+
+```bash
+node ./scripts/safe-publishing-demo.js
+```
 ## Security
 
 - Desk and OAuth bind to `127.0.0.1` only
