@@ -128,6 +128,7 @@ export default defineConfig({
         internalTools: "services/internal-tools.html",
         privacy: "privacy.html",
         terms: "terms.html",
+        notFound: "404.html",
       },
     },
   },

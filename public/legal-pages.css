@@ -1,12 +1,12 @@
 :root {
   color-scheme: dark;
-  --legal-bg: #0D0C0A;
-  --legal-panel: rgba(13,12,10,0.88);
+  --legal-bg: #0B1624;
+  --legal-panel: rgba(11,22,36,0.88);
   --legal-line: rgba(243,244,240,0.15);
-  --legal-text: #F1EADB;
+  --legal-text: #F6F1E8;
   --legal-muted: #A39B8C;
-  --legal-cyan: #F3F4F0;
-  --legal-violet: #F3F4F0;
+  --legal-cyan: #F6F1E8;
+  --legal-violet: #F6F1E8;
 ;--accent:#007BF8;--button-blue:#006EEC}
 
 html { scroll-behavior: smooth; }
@@ -16,7 +16,7 @@ body {
   background:
     radial-gradient(circle at 14% 4%, rgba(243,244,240,0.16), transparent 29rem),
     radial-gradient(circle at 88% 3%, rgba(243,244,240,0.18), transparent 31rem),
-    linear-gradient(180deg, #0D0C0A 0%, #0D0C0A 48%, #0D0C0A 100%) !important;
+    linear-gradient(180deg, #0B1624 0%, #0B1624 48%, #0B1624 100%) !important;
   color: var(--legal-text) !important;
   font-family:"Archivo", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
@@ -45,9 +45,9 @@ body::before {
   padding: 10px 14px;
   border: 1px solid var(--legal-line);
   border-radius: 22px;
-  background: rgba(13,12,10,0.72);
+  background: rgba(11,22,36,0.72);
   box-shadow: 0 16px 50px rgba(0, 0, 0, 0.24);
-  backdrop-filter: blur(20px);
+  
 }
 
 .brand { display: inline-flex; align-items: center; }
@@ -68,7 +68,7 @@ body::before {
   padding: 0 15px;
   border: 1px solid var(--legal-line);
   border-radius: 999px;
-  color: #F1EADB;
+  color: #F6F1E8;
   background: rgba(255, 255, 255, 0.045);
   font-size: 14px;
   font-weight: 700;
@@ -85,11 +85,11 @@ main {
   background:
     radial-gradient(circle at 92% 0%, rgba(243,244,240,0.1), transparent 32%),
     linear-gradient(145deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.018)),
-    #0D0C0A;
+    #0B1624;
   box-shadow: 0 32px 90px -40px rgba(0, 0, 0, 0.9), 0 0 72px rgba(243,244,240,0.08);
 }
 
-.kicker { color: #F3F4F0 !important; }
+.kicker { color: #F6F1E8 !important; }
 h1 { color: var(--legal-text); letter-spacing: -0.055em; }
 .updated { color: var(--legal-muted) !important; }
 

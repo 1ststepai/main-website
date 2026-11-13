@@ -6,8 +6,8 @@
 }
 :root {
   font-family:Archivo,Arial,sans-serif;
-  color:#0B0D0E;
-  background:#FFFFFF;
+  color:#F6F1E8;
+  background:#0B1624;
   font-synthesis:none;
   line-height:1.5
 }
@@ -82,13 +82,13 @@ p {
   padding-bottom:64px
 }
 .eyebrow {
-  color:#0059CC;
+  color:#007BF8;
   text-transform:uppercase
 }
 .hero .serif {
   font-family:Archivo,Arial,sans-serif;
   font-weight:600;
-  color:#0059CC;
+  color:#007BF8;
   font-size:36px;
   line-height:1.18;
   margin:24px 0
@@ -127,11 +127,11 @@ button:disabled {
   cursor:wait
 }
 .paper {
-  background:#F3F4F0;
-  color:#0B0D0E
+  background:#102033;
+  color:#F6F1E8
 }
 .paper .eyebrow {
-  color:#0059CC
+  color:#007BF8
 }
 .paper .wrap {
   padding-top:48px;
@@ -151,7 +151,7 @@ button:disabled {
 }
 .lesson-grid article {
   padding:24px;
-  background:#FFFFFF;
+  background:#0B1624;
   border-radius:14px
 }
 .lesson-grid h3 {
@@ -202,8 +202,8 @@ button:disabled {
 input[type=email] {
   width:100%;
   border:1px solid #8E978F;
-  background:#FFFFFF;
-  color:#0B0D0E;
+  background:#0B1624;
+  color:#F6F1E8;
   border-radius:6px;
   padding:15px 18px
 }
@@ -301,7 +301,7 @@ label {
   margin-top:48px
 }
 .resource pre {
-  background:#FFFFFF;
+  background:#0B1624;
   padding:24px;
   border-radius:8px;
   white-space:pre-wrap;
@@ -325,7 +325,7 @@ label {
   position:absolute;
   width:180px;
   height:120px;
-  background:#F3F4F0;
+  background:#102033;
   transform:rotateX(55deg) rotateZ(-22deg);
   box-shadow:0 18px 0 #007BF8,0 32px 22px rgba(0,123,248,.12);
   left:8%;
@@ -514,7 +514,7 @@ html {
   margin-top:28px
 }
 .artifact {
-  background:#FFFFFF;
+  background:#0B1624;
   padding:14px 20px;
   max-width:850px
 }
@@ -542,7 +542,7 @@ html {
   padding-top:20px
 }
 .practice-loop span {
-  color:#0059CC;
+  color:#007BF8;
   font-size:14px
 }
 .practice-loop h3 {
@@ -587,14 +587,14 @@ html {
 }
 /* Shared parent-site brand and navigation. */
 body {
-  background:#FFFFFF;
-  color:#0B0D0E
+  background:#0B1624;
+  color:#F6F1E8
 }
 a {
-  color:#0059CC
+  color:#007BF8
 }
 .brand {
-  color:#0B0D0E;
+  color:#F6F1E8;
   gap:12px;
   min-height:44px
 }
@@ -621,7 +621,7 @@ a {
 header.wrap {
   gap:24px;
   border-bottom:1px solid rgba(11,13,14,.1);
-  background:#FFFFFF
+  background:#0B1624
 }
 .back-home {
   display:inline-flex;
@@ -631,13 +631,13 @@ header.wrap {
   padding:10px 14px;
   border:1px solid rgba(11,13,14,.12);
   border-radius:6px;
-  color:#0B0D0E;
+  color:#F6F1E8;
   text-decoration:none;
   font-size:14px;
   font-weight:600
 }
 .back-home:hover,.brand:hover {
-  color:#0059CC
+  color:#007BF8
 }
 .button:hover,button:hover {
   background:#0059CC;
@@ -653,11 +653,11 @@ header.wrap {
   border:1px solid rgba(11,13,14,.1)
 }
 .resource pre {
-  background:#FFFFFF;
+  background:#0B1624;
   border:1px solid rgba(11,13,14,.1)
 }
 .panel {
-  background:#FFFFFF
+  background:#0B1624
 }
 .notice {
   color:#4B5563;
